@@ -1,0 +1,237 @@
+import { set } from "date-fns";
+import React, { useEffect, useState } from "react";
+import Service from "../../api/Service";
+import { AlertCircle, Loader2 } from "lucide-react";
+import DataTable from "../ui/table";
+import Button from "../fields/Button";
+import { openFileSecurely } from "../../utils/openFileSecurely";
+import AddEstimation from "../estimation/AddEstimation";
+import RFIResponseModal from "./RFIResponseModal";
+import RFIResponseDetailsModal from "./RFIResponseDetailsModal";
+
+
+const Info = ({ label, value }) => (
+  <div>
+    <h4 className="text-sm text-gray-500">{label}</h4>
+    <div className="text-gray-800 font-medium">{value}</div>
+  </div>
+);
+
+const GetRFIByID = ({ id }) => {
+  const [loading, setLoading] = useState(true);
+  const [rfi, setRfi] = useState(null);
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedResponse, setSelectedResponse] = useState(null);
+
+
+  //   
+  const fetchRfi = async () => {
+    try {
+      setLoading(true);
+      const response = await Service.GetRFIbyId(id);
+
+      const formatted = {
+        ...response.data,
+        responses: response.data.responses || response.data.rfiresponse || []
+      };
+
+      setRfi(formatted);
+    } catch (err) {
+      setError("Failed to load RFI");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  console.log(rfi);
+  useEffect(() => {
+    if (id) fetchRfi();
+  }, [id]);
+  console.log(id);
+
+
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8 text-gray-500">
+        <Loader2 className="w-5 h-5 animate-spin mr-2" />
+        Loading RFQ details...
+      </div>
+    );
+  }
+  if (error || !rfi) {
+    return (
+      <div className="flex items-center justify-center py-8 text-red-600">
+        <AlertCircle className="w-5 h-5 mr-2" />
+        {error || "RFI not found"}
+      </div>
+    );
+  }
+  const userRole = sessionStorage.getItem("userRole");
+
+  const responseColumns = [
+    {
+      accessorKey: "createdByRole",
+      header: "From",
+      cell: ({ row }) => (
+        <span className="font-medium text-sm">
+          {row.original.createdByRole === "CLIENT" ? "Client" : "WBT Team"}
+        </span>
+      )
+    },
+    {
+      accessorKey: "description",
+      header: "Message",
+      cell: ({ row }) => (
+        <p className="truncate max-w-[180px]">{row.original.description}</p>
+      ),
+    },
+    {
+      accessorKey: "files",
+      header: "Files",
+      cell: ({ row }) => {
+        const count = row.original.files?.length ?? 0;
+        return count > 0 ? (
+          <span className="text-teal-700 font-medium">{count} file(s)</span>
+        ) : (
+          <span className="text-gray-400">—</span>
+        );
+      },
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Created",
+      cell: ({ row }) => (
+        <span className="text-gray-600 text-sm">
+          {new Date(row.original.date).toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${row.original.status === "OPEN"
+            ? "bg-green-100 text-green-700"
+            : "bg-yellow-100 text-yellow-700"
+            }`}
+        >
+          {row.original.status}
+        </span>
+      ),
+    },
+  ];
+
+
+  return (
+    <>
+      <div className="p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* LEFT: RFI Details */}
+          <div className="bg-white p-6 rounded-xl shadow-md space-y-5">
+
+            {/* Header */}
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold text-teal-700">{rfi.subject}</h1>
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-semibold ${rfi.isAproovedByAdmin
+                    ? "bg-green-100 text-green-700"
+                    : "bg-yellow-100 text-yellow-700"
+                  }`}
+              >
+                {rfi.isAproovedByAdmin ? "Approved" : "Pending"}
+              </span>
+            </div>
+
+            {/* Basic Info */}
+            <Info label="Project" value={rfi.project?.name || "—"} />
+            <Info label="Fabricator" value={rfi?.fabricator?.fabName || "—"} />
+            <Info
+              label="Created At"
+              value={new Date(rfi?.date).toLocaleString()}
+            />
+
+            {/* Description */}
+            <div>
+              <h4 className="font-semibold text-gray-600 mb-1">Description</h4>
+              <p className="text-gray-800 bg-gray-50 p-3 rounded-lg border">
+                {rfi.description || "No description provided"}
+              </p>
+            </div>
+
+            {/* Files */}
+            {rfi.files?.length > 0 && (
+              <div>
+                <h4 className="font-semibold text-gray-600 mb-2">Attachments</h4>
+                <ul className="space-y-1">
+                  {rfi.files.map((file, i) => (
+                    <li key={file.id}>
+                      <span
+                        className="text-teal-700 underline cursor-pointer"
+                        onClick={() => openFileSecurely("rfi", rfi.id, file.id)}
+                      >
+                        {file.originalName || `File ${i + 1}`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* RIGHT: Responses */}
+          {/* RIGHT: Responses */}
+          <div className="bg-white p-6 rounded-xl shadow-md space-y-6">
+
+            {/* Header + Add Response Button */}
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-teal-700">Responses</h2>
+
+              {(userRole === "CLIENT" || userRole === "STAFF" || userRole === "ADMIN") && (
+                <Button onClick={() => setShowModal(true)} className="bg-teal-600 text-white">
+                  + Add Response
+                </Button>
+              )}
+            </div>
+
+            {/* Table */}
+            {rfi.responses?.length > 0 ? (
+              <DataTable
+                columns={responseColumns}
+                data={rfi.responses}
+                pageSizeOptions={[5, 10]}
+                onRowClick={(row) => setSelectedResponse(row)}
+              />
+            ) : (
+              <p className="text-gray-500 italic">No responses yet.</p>
+            )}
+          </div>
+
+          {/* Response Modal */}
+          {showModal && (
+            <RFIResponseModal
+              rfiId={id}
+              onClose={() => setShowModal(false)}
+              onSuccess={fetchRfi}
+            />
+          )}
+
+          {/* Details Modal */}
+          {selectedResponse && (
+            <RFIResponseDetailsModal
+              response={selectedResponse}
+              onClose={() => setSelectedResponse(null)}
+            />
+          )}
+
+        </div>
+      </div>
+    </>
+  );
+
+};
+
+export default GetRFIByID;

@@ -16,6 +16,15 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
+    server: {
+      proxy: {
+        '/v1': {
+          target: 'http://192.168.1.26:5156',
+          changeOrigin: true,
+          secure: false,
+        }
+      }
+    },
     plugins: [react(), tailwindcss()]
   }
 })
