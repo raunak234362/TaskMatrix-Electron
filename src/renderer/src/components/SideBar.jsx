@@ -56,7 +56,7 @@ const Sidebar = ({
       label: "Estimations",
       to: "estimation",
       icon: <Hourglass />,
-      roles: ["admin", "department-manager", "deputy-manager", "user"],
+      roles: ["admin", "department-manager", "deputy-manager", "staff"],
     },
 
     {

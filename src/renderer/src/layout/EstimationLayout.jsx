@@ -7,7 +7,7 @@ const EstimationLayout = () => {
   const [estmation, setEstimation] = useState([]);
   const fetchAllEstimation = async () => {
     try {
-      const response = await Service.AllEstimation();
+      const response = await Service.GetEstimationTaskForAssignee();
       console.log(response?.data);
       setEstimation(response?.data);
     } catch (error) {

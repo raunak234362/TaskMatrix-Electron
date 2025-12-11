@@ -7,7 +7,7 @@ import { ChatPage } from "../pages/ChatPage";
 import ChangePasswordPage from "../pages/ChangePasswordPage";
 import RFIPage from "../pages/RFIPage";
 import EstimationPage from "../pages/EstimationPage";
-
+import TaskPage from "../pages/TaskPage";
 const routes = [
   { path: "/", Component: Login },
   { path: "/change-password", Component: ChangePasswordPage },
@@ -20,6 +20,7 @@ const routes = [
         children: [
           { path: "", Component: WBTDashboard },
           { path: "profile", Component: ProfilePage },
+          { path: "tasks", Component: TaskPage },
           { path: "estimation", Component: EstimationPage },
           { path: "chats", Component: ChatPage },
           { path: "rfi", Component: RFIPage },

@@ -1,8 +1,9 @@
+import EstimationLayout from "../layout/EstimationLayout";
+
 const EstimationPage = () => {
     return (
         <div>
-            <h2>Estimation Page</h2>
-            <p>Component missing or under construction.</p>
+            <EstimationLayout/>
         </div>
     );
 };
