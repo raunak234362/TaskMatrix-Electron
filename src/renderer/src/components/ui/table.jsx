@@ -417,7 +417,7 @@ export default function DataTable({
                           className="bg-gray-50 p-0"
                         >
                           <div className=" overflow-y-auto p-4">
-                            <DetailComponent row={row.original} />
+                            <DetailComponent row={row.original} close={() => toggleRowExpand(row.id)} />
                           </div>
                         </td>
                       </tr>

@@ -8,6 +8,7 @@ import ChangePasswordPage from "../pages/ChangePasswordPage";
 import RFIPage from "../pages/RFIPage";
 import EstimationPage from "../pages/EstimationPage";
 import TaskPage from "../pages/TaskPage";
+import App from "../App";
 const routes = [
   { path: "/", Component: Login },
   { path: "/change-password", Component: ChangePasswordPage },
@@ -16,7 +17,7 @@ const routes = [
     children: [
       {
         path: "/dashboard",
-        Component: DashboardLayout,
+        Component: App,
         children: [
           { path: "", Component: WBTDashboard },
           { path: "profile", Component: ProfilePage },
