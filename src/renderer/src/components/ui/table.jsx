@@ -273,16 +273,16 @@ export default function DataTable({
               value={globalFilter ?? ""}
               onChange={(e) => setGlobalFilter(e.target.value)}
               placeholder={searchPlaceholder}
-              className="pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
+              className="pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 text-gray-800 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
             />
           </div>
 
           {showColumnToggle && (
             <div className="relative group">
-              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button className="flex items-center text-gray-800 gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                 Columns
               </button>
-              <div className="absolute right-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden group-hover:block">
+              <div className="absolute text-gray-800 right-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden group-hover:block">
                 <div className="p-2 max-h-60 overflow-auto">
                   {table.getAllColumns().map((column) => {
                     if (!column.getCanHide()) return null;

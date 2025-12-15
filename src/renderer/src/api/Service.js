@@ -579,6 +579,21 @@ static async addResponse(formData, responseId) {
     }
   }
 
+  // Get all assigned estimation task
+  static async GetAllAssignedEstimationTask() {
+    try {
+      const response = await api.get(`estimation/estimation-tasks/my/all`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(response);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   // Get Estimation Task By ID
   static async GetEstimationTaskById(id) {
     try {
@@ -639,9 +654,9 @@ static async addResponse(formData, responseId) {
   }
 
   //Estimation Task End by ID
-  static async EndEstimationTaskById(id) {
+  static async EndEstimationTaskById(id,data) {
     try {
-      const response = await api.post(`task/EST/end/${id}`, {
+      const response = await api.post(`task/EST/end/${id}`,data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -667,6 +682,21 @@ static async addResponse(formData, responseId) {
       console.log(error);
     }
   }
+
+// Line Item Group
+static async CreateLineItemGroup(data) {
+  try {
+    const response = await api.post(`estimation/line-items`, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
 
   // Add Group
   static async AddGroup(data) {

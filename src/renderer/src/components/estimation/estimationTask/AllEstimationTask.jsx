@@ -76,14 +76,6 @@ const AllEstimationTask = ({ estimations, onClose }) => {
   return (
     <div className="flex items-center justify-center">
       <div className="w-full bg-white rounded-xl p-4 shadow-lg">
-
-        {/* Add Task Button */}
-        <div className="mb-4">
-          <Button onClick={handleOpenAddTask} className="text-sm">
-            + Add Estimation Task
-          </Button>
-        </div>
-
         {/* Task Table */}
         <div className="mt-4 border rounded-lg">
           {isLoading ? (

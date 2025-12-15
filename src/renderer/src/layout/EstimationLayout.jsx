@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { AddEstimation, AllEstimation } from "../components";
 import Service from "../api/Service";
 import AllEstimationTask from "../components/estimation/estimationTask/AllEstimationTask";
+import AllAssignedTask from "../components/estimation/estimationTask/AllAssignedTask";
 
 
 const EstimationLayout = () => {
   const [activeTab, setActiveTab] = useState("allEstimation");
   const [estimation, setEstimation] = useState([]);
   const userRole = sessionStorage.getItem("userRole");
-
+    const [isLoading, setIsLoading] = useState(false);
+    const [estimations, setEstimations] = useState([]);
   const fetchAllEstimation = async () => {
     try {
       let response;
@@ -24,7 +26,9 @@ const EstimationLayout = () => {
     }
   };
 
-  console.log(estimation);
+
+
+
   
   useEffect(() => {
     fetchAllEstimation();
@@ -44,19 +48,20 @@ const EstimationLayout = () => {
                   : "md:text-base text-sm text-white font-semibold"
               }`}
             >
-              All Estimations
+              All Pending Estimation Task
             </button>
 
             <button
-              onClick={() => setActiveTab("addEstimation")}
+              onClick={() => setActiveTab("allAssignedTask")}
               className={`px-1.5 md:px-4 py-2 rounded-lg rounded-b ${
-                activeTab === "addEstimation"
+                activeTab === "allAssignedTask"
                   ? "text-base md:text-base bg-white/70 backdrop-xl text-gray-800 font-bold"
                   : "md:text-base text-sm text-white font-semibold"
               }`}
             >
-              Add Estimation
+              All Assigned Task
             </button>
+           
           </div>
         </div>
       </div>
@@ -67,11 +72,14 @@ const EstimationLayout = () => {
             {activeTab === "allEstimation" && (
               <AllEstimation estimations={estimation} />
             )}
-            {activeTab === "addEstimation" && <AddEstimation />}
+            {activeTab === "allAssignedTask" && <AddEstimation />}
           </>
         )}
-
-          <AllEstimationTask estimations={estimation} />
+ {activeTab === "allEstimation" && (
+              <AllEstimationTask estimations={estimation} />
+            )}
+            {activeTab === "allAssignedTask" && <AllAssignedTask />}
+          
  
       </div>
     </div>
