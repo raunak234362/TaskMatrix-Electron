@@ -5,66 +5,12 @@ import Button from "../fields/Button";
 import { openFileSecurely } from "../../utils/openFileSecurely";
 import AllEstimationTask from "./estimationTask/AllEstimationTask";
 
-interface Creator {
-  firstName: string;
-  lastName: string;
-  username?: string;
-  email?: string;
-}
-
-interface File {
-  id: string;
-  originalName: string;
-}
-
-interface RFQ {
-  projectName?: string;
-  projectNumber?: string;
-  bidPrice?: string | number;
-}
-
-interface Fabricator {
-  fabName: string;
-}
-
-interface EstimationTask {
-  id: string;
-  // Add other properties as needed for AllEstimationTask
-  [key: string]: any;
-}
-
-interface Estimation {
-  id: string;
-  estimationNumber: string;
-  projectName: string;
-  status: string;
-  description?: string;
-  tools?: string;
-  fabricatorName?: string;
-  fabricators?: Fabricator;
-  rfq?: RFQ;
-  estimateDate?: string;
-  startDate?: string;
-  createdAt: string;
-  updatedAt: string;
-  finalHours?: number;
-  finalWeeks?: number;
-  finalPrice?: number;
-  createdBy?: Creator;
-  files?: File[];
-  estimationTasks?: EstimationTask[]; // Assuming this exists
-}
-
-interface GetEstimationByIDProps {
-  id: string;
-}
-
-const truncateText = (text: string, max: number = 40): string =>
+const truncateText = (text, max) =>
   text.length > max ? text.substring(0, max) + "..." : text;
 
-const GetEstimationByID: React.FC<GetEstimationByIDProps> = ({ id }) => {
-  const [estimation, setEstimation] = useState<Estimation | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+const GetEstimationByID = ({ id }) => {
+  const [estimation, setEstimation] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEstimationTaskOpen, setIsEstimationTaskOpen] = useState<boolean>(false);
 
@@ -92,7 +38,7 @@ const GetEstimationByID: React.FC<GetEstimationByIDProps> = ({ id }) => {
     fetchEstimation();
   }, [id]);
 
-  const formatDateTime = (date?: string) =>
+  const formatDateTime = (date) =>
     date
       ? new Date(date).toLocaleString("en-IN", {
           dateStyle: "medium",
@@ -100,7 +46,7 @@ const GetEstimationByID: React.FC<GetEstimationByIDProps> = ({ id }) => {
         })
       : "N/A";
 
-  const formatDate = (date?: string) =>
+  const formatDate = (date) =>
     date
       ? new Date(date).toLocaleDateString("en-IN", {
           year: "numeric",
@@ -310,16 +256,10 @@ const GetEstimationByID: React.FC<GetEstimationByIDProps> = ({ id }) => {
   );
 };
 
-// Reusable Info Row
-interface InfoRowProps {
-  label: string;
-  value: React.ReactNode;
-}
-
-const InfoRow: React.FC<InfoRowProps> = ({ label, value }) => (
+const InfoRow = ({ label, value }) => (
   <div className="flex justify-between gap-3">
     <span className="font-bold text-gray-600">{label}:</span>
-    <span className="text-gray-900 text-right break-words">{value}</span>
+    <span className="text-gray-900 text-right wrap-words">{value}</span>
   </div>
 );
 
