@@ -698,6 +698,96 @@ static async CreateLineItemGroup(data) {
   }
 }
 
+//fetch Group by ID 
+static async FetchGroupById(id) {
+  try {
+    const response = await api.get(`estimation/line-items/group/${id}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+//update Group by ID
+static async UpdateGroupById(id,data) {
+  try {
+    const response = await api.put(`estimation/line-items/${id}`, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+//fetch Line item group
+static async FetchLineItemGroup(id) {
+  try {
+    const response = await api.get(`estimation/line-items/groups/${id}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+} 
+
+//fetch Line item group List
+static async FetchLineItemGroupList(id) {
+  try {
+    const response = await api.get(`estimation/line-items/Bygroup/${id}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+} 
+
+//Update Line Item By ID
+static async UpdateLineItemById(id,data) {
+  try {
+    const response = await api.put(`estimation/line-items/update/${id}`, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// add new Line Item
+static async AddLineItem(data) {
+  try {
+    const response = await api.post(`estimation/line-items/item`, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
   // Add Group
   static async AddGroup(data) {
     try {

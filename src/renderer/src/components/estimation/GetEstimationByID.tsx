@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { Loader2, AlertCircle, FileText, Link2 } from "lucide-react";
 import Service from "../../api/Service";
@@ -6,16 +5,68 @@ import Button from "../fields/Button";
 import { openFileSecurely } from "../../utils/openFileSecurely";
 import AllEstimationTask from "./estimationTask/AllEstimationTask";
 
+interface Creator {
+  firstName: string;
+  lastName: string;
+  username?: string;
+  email?: string;
+}
 
+interface File {
+  id: string;
+  originalName: string;
+}
 
-const truncateText = (text, max = 40) =>
+interface RFQ {
+  projectName?: string;
+  projectNumber?: string;
+  bidPrice?: string | number;
+}
+
+interface Fabricator {
+  fabName: string;
+}
+
+interface EstimationTask {
+  id: string;
+  // Add other properties as needed for AllEstimationTask
+  [key: string]: any;
+}
+
+interface Estimation {
+  id: string;
+  estimationNumber: string;
+  projectName: string;
+  status: string;
+  description?: string;
+  tools?: string;
+  fabricatorName?: string;
+  fabricators?: Fabricator;
+  rfq?: RFQ;
+  estimateDate?: string;
+  startDate?: string;
+  createdAt: string;
+  updatedAt: string;
+  finalHours?: number;
+  finalWeeks?: number;
+  finalPrice?: number;
+  createdBy?: Creator;
+  files?: File[];
+  estimationTasks?: EstimationTask[]; // Assuming this exists
+}
+
+interface GetEstimationByIDProps {
+  id: string;
+}
+
+const truncateText = (text: string, max: number = 40): string =>
   text.length > max ? text.substring(0, max) + "..." : text;
 
-const GetEstimationByID = ({ id }) => {
-  const [estimation, setEstimation] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isEstimationTaskOpen, setIsEstimationTaskOpen] = useState(false);
+const GetEstimationByID: React.FC<GetEstimationByIDProps> = ({ id }) => {
+  const [estimation, setEstimation] = useState<Estimation | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isEstimationTaskOpen, setIsEstimationTaskOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchEstimation = async () => {
@@ -41,19 +92,21 @@ const GetEstimationByID = ({ id }) => {
     fetchEstimation();
   }, [id]);
 
-  const formatDateTime = (date) =>
-    new Date(date).toLocaleString("en-IN", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
+  const formatDateTime = (date?: string) =>
+    date
+      ? new Date(date).toLocaleString("en-IN", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      : "N/A";
 
-  const formatDate = (date) =>
+  const formatDate = (date?: string) =>
     date
       ? new Date(date).toLocaleDateString("en-IN", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
       : "N/A";
 
   if (loading) {
@@ -98,8 +151,8 @@ const GetEstimationByID = ({ id }) => {
     status === "DRAFT"
       ? "bg-yellow-100 text-yellow-800"
       : status === "COMPLETED"
-        ? "bg-green-100 text-green-800"
-        : "bg-blue-100 text-blue-800";
+      ? "bg-green-100 text-green-800"
+      : "bg-blue-100 text-blue-800";
 
   return (
     <div className="bg-gradient-to-br from-teal-50 to-teal-50 p-6 rounded-xl shadow-inner text-sm">
@@ -231,7 +284,7 @@ const GetEstimationByID = ({ id }) => {
         </div>
       )}
 
-      {/* Action Buttons (placeholders for future edit/view actions) */}
+      {/* Action Buttons */}
       <div className="py-3 flex gap-3">
         <Button
           className="py-1 px-2 text-lg bg-red-200 text-red-700"
@@ -249,7 +302,7 @@ const GetEstimationByID = ({ id }) => {
       </div>
       {isEstimationTaskOpen && (
         <AllEstimationTask
-          estimation={estimation}
+          estimations={estimation.estimationTasks || []}
           onClose={() => setIsEstimationTaskOpen(false)}
         />
       )}
@@ -257,11 +310,13 @@ const GetEstimationByID = ({ id }) => {
   );
 };
 
-// ✅ Reusable Info Row
-const InfoRow = ({
-  label,
-  value,
-}) => (
+// Reusable Info Row
+interface InfoRowProps {
+  label: string;
+  value: React.ReactNode;
+}
+
+const InfoRow: React.FC<InfoRowProps> = ({ label, value }) => (
   <div className="flex justify-between gap-3">
     <span className="font-bold text-gray-600">{label}:</span>
     <span className="text-gray-900 text-right break-words">{value}</span>

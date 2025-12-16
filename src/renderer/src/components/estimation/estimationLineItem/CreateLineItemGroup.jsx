@@ -13,7 +13,7 @@ const schema = z.object({
     estimationId: z.string().min(1, "Estimation ID is required"),
 });
 
-const CreateLineItemGroup = ({ estimationId }) => {
+const CreateLineItemGroup = ({ estimationId, onGroupCreated }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,6 +38,7 @@ const CreateLineItemGroup = ({ estimationId }) => {
             toast.success("Line Item Group created successfully");
             reset();
             setIsExpanded(false);
+            if (onGroupCreated) onGroupCreated();
         } catch (error) {
             console.error("Error creating line item group:", error);
             toast.error("Failed to create Line Item Group");
@@ -126,6 +127,7 @@ const CreateLineItemGroup = ({ estimationId }) => {
 
 CreateLineItemGroup.propTypes = {
     estimationId: PropTypes.string.isRequired,
+    onGroupCreated: PropTypes.func,
 };
 
 export default CreateLineItemGroup;

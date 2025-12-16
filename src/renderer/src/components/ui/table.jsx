@@ -460,28 +460,28 @@ export default function DataTable({
           <Button
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
-            className="px-3 py-1 border rounded disabled:opacity-50"
+            className="bg-teal-100 text-gray-800 hover:bg-teal-200 px-3 py-1 border rounded disabled:opacity-50"
           >
             {"<<"}
           </Button>
           <Button
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="px-3 py-1 border rounded disabled:opacity-50"
+            className="bg-teal-100 text-gray-800 hover:bg-teal-200 px-3 py-1 border rounded disabled:opacity-50"
           >
             {"<"}
           </Button>
           <Button
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="px-3 py-1 border rounded disabled:opacity-50"
+            className="bg-teal-100 text-gray-800 hover:bg-teal-200 px-3 py-1 border rounded disabled:opacity-50"
           >
             {">"}
           </Button>
           <Button
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
-            className="px-3 py-1 border rounded disabled:opacity-50"
+            className="bg-teal-100 text-gray-800 hover:bg-teal-200 px-3 py-1 border rounded disabled:opacity-50"
           >
             {">>"}
           </Button>
