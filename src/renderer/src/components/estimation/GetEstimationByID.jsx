@@ -11,8 +11,8 @@ const truncateText = (text, max) =>
 const GetEstimationByID = ({ id }) => {
   const [estimation, setEstimation] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isEstimationTaskOpen, setIsEstimationTaskOpen] = useState<boolean>(false);
+  const [error, setError] = useState(null);
+  const [isEstimationTaskOpen, setIsEstimationTaskOpen] = useState(false);
 
   useEffect(() => {
     const fetchEstimation = async () => {
