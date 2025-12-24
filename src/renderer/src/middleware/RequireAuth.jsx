@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Navigate, Outlet } from "react-router-dom";
 // import { useSelector } from "react-redux";
 

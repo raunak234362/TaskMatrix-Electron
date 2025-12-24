@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/hooks/useSocketConnection.js
 import { useEffect } from "react";
 import socket from "../socket";

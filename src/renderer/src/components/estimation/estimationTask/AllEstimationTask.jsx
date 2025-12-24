@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { X } from "lucide-react";
 import { useState } from "react";
 import Button from "../../fields/Button";

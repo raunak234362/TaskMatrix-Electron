@@ -9,8 +9,6 @@ const EstimationLayout = () => {
   const [activeTab, setActiveTab] = useState("allEstimation");
   const [estimation, setEstimation] = useState([]);
   const userRole = sessionStorage.getItem("userRole");
-    const [isLoading, setIsLoading] = useState(false);
-    const [estimations, setEstimations] = useState([]);
   const fetchAllEstimation = async () => {
     try {
       let response;
@@ -29,7 +27,7 @@ const EstimationLayout = () => {
 
 
 
-  
+
   useEffect(() => {
     fetchAllEstimation();
   }, []);
@@ -42,26 +40,24 @@ const EstimationLayout = () => {
           <div className="flex flex-row w-full">
             <button
               onClick={() => setActiveTab("allEstimation")}
-              className={`px-1.5 md:px-4 py-2 rounded-lg rounded-b ${
-                activeTab === "allEstimation"
+              className={`px-1.5 md:px-4 py-2 rounded-lg rounded-b ${activeTab === "allEstimation"
                   ? "text-base md:text-base bg-white/70 backdrop-xl text-gray-800 font-bold"
                   : "md:text-base text-sm text-white font-semibold"
-              }`}
+                }`}
             >
               All Pending Estimation Task
             </button>
 
             <button
               onClick={() => setActiveTab("allAssignedTask")}
-              className={`px-1.5 md:px-4 py-2 rounded-lg rounded-b ${
-                activeTab === "allAssignedTask"
+              className={`px-1.5 md:px-4 py-2 rounded-lg rounded-b ${activeTab === "allAssignedTask"
                   ? "text-base md:text-base bg-white/70 backdrop-xl text-gray-800 font-bold"
                   : "md:text-base text-sm text-white font-semibold"
-              }`}
+                }`}
             >
               All Assigned Task
             </button>
-           
+
           </div>
         </div>
       </div>
@@ -75,12 +71,12 @@ const EstimationLayout = () => {
             {activeTab === "allAssignedTask" && <AddEstimation />}
           </>
         )}
- {activeTab === "allEstimation" && (
-              <AllEstimationTask estimations={estimation} />
-            )}
-            {activeTab === "allAssignedTask" && <AllAssignedTask />}
-          
- 
+        {activeTab === "allEstimation" && (
+          <AllEstimationTask estimations={estimation} />
+        )}
+        {activeTab === "allAssignedTask" && <AllAssignedTask />}
+
+
       </div>
     </div>
   );

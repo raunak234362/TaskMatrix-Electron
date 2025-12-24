@@ -1,0 +1,426 @@
+import React, { useEffect, useState } from 'react'
+import {
+    Loader2,
+    AlertCircle,
+    Calendar,
+    User,
+    Briefcase,
+    Tag,
+    ClipboardList,
+    Clock,
+    FileText,
+    Building2,
+    Hash,
+    Pause,
+    Play,
+    Square,
+    Timer,
+    ChevronUp,
+    ChevronDown,
+    Users,
+    Clock4
+} from 'lucide-react'
+import Service from '../../api/Service'
+import { toast } from 'react-toastify'
+
+const GetTaskByID = ({ id, onClose }) => {
+    const [task, setTask] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+    const [processing, setProcessing] = useState(false)
+    const [summary, setSummary] = useState(null)
+    const [showWorkSummary, setShowWorkSummary] = useState(true)
+
+    const fetchTask = async () => {
+        if (!id) return
+        try {
+            setLoading(true)
+            setError(null)
+            const response = await Service.GetTaskById(id)
+            setTask(response?.data || null)
+        } catch (err) {
+            console.error('Error fetching task:', err)
+            setError('Failed to load task details')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchTask()
+    }, [id])
+
+    const handleAction = async (action) => {
+        if (!task?.id) return
+        try {
+            setProcessing(true)
+            let response
+            switch (action) {
+                case 'start':
+                    response = await Service.TaskStart(task.id)
+                    toast.success('Task started')
+                    break
+                case 'pause':
+                    response = await Service.TaskPause(task.id)
+                    toast.info('Task paused')
+                    break
+                case 'resume':
+                    response = await Service.TaskResume(task.id)
+                    toast.success('Task resumed')
+                    break
+                case 'end':
+                    response = await Service.TaskEnd(task.id)
+                    toast.success('Task completed')
+                    break
+            }
+            await fetchTask()
+        } catch (error) {
+            toast.error('Action failed. Please try again.')
+        } finally {
+            setProcessing(false)
+        }
+    }
+
+    const toIST = (dateString) => {
+        if (!dateString) return '—'
+        return new Intl.DateTimeFormat('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).format(new Date(dateString))
+    }
+
+    const getStatusConfig = (status) => {
+        const configs = {
+            ASSIGNED: {
+                label: 'Assigned',
+                bg: 'bg-purple-100',
+                text: 'text-purple-700',
+                border: 'border-purple-300'
+            },
+            IN_PROGRESS: {
+                label: 'In Progress',
+                bg: 'bg-emerald-100',
+                text: 'text-emerald-700',
+                border: 'border-emerald-300'
+            },
+            BREAK: {
+                label: 'On Break',
+                bg: 'bg-orange-100',
+                text: 'text-orange-700',
+                border: 'border-orange-300'
+            },
+            COMPLETED: {
+                label: 'Completed',
+                bg: 'bg-blue-100',
+                text: 'text-blue-700',
+                border: 'border-blue-300'
+            },
+            PENDING: {
+                label: 'Pending',
+                bg: 'bg-yellow-100',
+                text: 'text-yellow-700',
+                border: 'border-yellow-300'
+            }
+        }
+        return (
+            configs[status?.toUpperCase() || ''] || {
+                label: status || 'Unknown',
+                bg: 'bg-gray-100',
+                text: 'text-gray-700',
+                border: 'border-gray-300'
+            }
+        )
+    }
+
+    const getPriorityLabel = (priority) => {
+        switch (priority) {
+            case 1:
+                return { label: 'High', color: 'text-red-600', bg: 'bg-red-50' }
+            case 2:
+                return { label: 'Medium', color: 'text-orange-500', bg: 'bg-orange-50' }
+            case 3:
+                return { label: 'Low', color: 'text-blue-500', bg: 'bg-blue-50' }
+            default:
+                return { label: 'Normal', color: 'text-gray-500', bg: 'bg-gray-50' }
+        }
+    }
+
+    if (loading) {
+        return (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-2xl shadow-2xl p-10 flex flex-col items-center">
+                    <Loader2 className="w-12 h-12 animate-spin text-teal-600" />
+                    <p className="mt-4 text-lg font-medium text-gray-700">Loading task details...</p>
+                </div>
+            </div>
+        )
+    }
+
+    if (error || !task) {
+        return (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-2xl shadow-2xl p-10 text-center max-w-md">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <FileText className="w-10 h-10 text-gray-400" />
+                    </div>
+                    <p className="text-xl font-semibold text-gray-800">Task Not Found</p>
+                    <p className="text-gray-600 mt-2">
+                        {error || 'This task may have been deleted or is inaccessible.'}
+                    </p>
+                    <button
+                        onClick={onClose}
+                        className="mt-6 px-8 py-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl transition"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
+    const statusConfig = getStatusConfig(task.status)
+    const priority = getPriorityLabel(task.priority)
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] overflow-hidden flex flex-col">
+                {/* Header */}
+                <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-8 py-5 flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-teal-100 rounded-xl">
+                            <ClipboardList className="w-7 h-7 text-teal-700" />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-bold text-gray-900">{task.name}</h2>
+                            <p className="text-sm text-gray-500">ID: #{task.id}</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-xl transition"
+                    >
+                        Close
+                    </button>
+                </div>
+
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto px-8 py-8 space-y-8">
+                    {/* Task Info Card */}
+                    <div className="bg-linear-to-br from-teal-50 to-cyan-50 rounded-2xl p-8 border border-teal-200">
+                        <h3 className="text-2xl font-bold text-teal-900 mb-6 flex items-center gap-3">
+                            <FileText className="w-7 h-7" />
+                            Task Information
+                        </h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <InfoItem icon={<Building2 />} label="Project" value={task.project?.name || '—'} />
+                            <InfoItem icon={<Hash />} label="Stage" value={task.Stage || '—'} />
+                            <InfoItem
+                                icon={<User />}
+                                label="Assigned To"
+                                value={task.user ? `${task.user.firstName} ${task.user.lastName}` : 'Unassigned'}
+                            />
+                            <InfoItem icon={<Calendar />} label="Due Date" value={toIST(task.due_date)} />
+                            <InfoItem icon={<Clock />} label="Created At" value={toIST(task.createdAt)} />
+
+                            <div className="flex items-start gap-4">
+                                <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
+                                    <div
+                                        className={`w-6 h-6 rounded-full ${priority.color.replace('text', 'bg')}`}
+                                    ></div>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-600">Priority</p>
+                                    <p className={`font-bold mt-1 ${priority.color}`}>{priority.label}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-4">
+                                <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
+                                    <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-600">Status</p>
+                                    <span
+                                        className={`inline-block mt-1 px-4 py-2 rounded-full font-semibold text-sm border-2 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
+                                    >
+                                        {statusConfig.label}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Description */}
+                        {task.description && (
+                            <div className="mt-8 p-6 bg-white/70 backdrop-blur rounded-xl border border-teal-100">
+                                <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                                    <FileText className="w-5 h-5 text-teal-600" />
+                                    Description
+                                </h4>
+                                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                    {task.description}
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="mt-8 pt-6 border-t border-teal-200">
+                            <h4 className="text-lg font-semibold text-gray-800 mb-4">Task Controls</h4>
+                            <div className="flex flex-wrap items-center gap-4">
+                                {task.status === 'ASSIGNED' && (
+                                    <ActionButton
+                                        icon={<Play />}
+                                        color="emerald"
+                                        onClick={() => handleAction('start')}
+                                        disabled={processing}
+                                    >
+                                        Start Task
+                                    </ActionButton>
+                                )}
+                                {task.status === 'IN_PROGRESS' && (
+                                    <>
+                                        <ActionButton
+                                            icon={<Pause />}
+                                            color="amber"
+                                            onClick={() => handleAction('pause')}
+                                            disabled={processing}
+                                        >
+                                            Pause
+                                        </ActionButton>
+                                        <ActionButton
+                                            icon={<Square />}
+                                            color="red"
+                                            onClick={() => handleAction('end')}
+                                            disabled={processing}
+                                        >
+                                            End Task
+                                        </ActionButton>
+                                    </>
+                                )}
+                                {task.status === 'BREAK' && (
+                                    <ActionButton
+                                        icon={<Play />}
+                                        color="teal"
+                                        onClick={() => handleAction('resume')}
+                                        disabled={processing}
+                                    >
+                                        Resume Task
+                                    </ActionButton>
+                                )}
+                                {processing && (
+                                    <div className="flex items-center gap-2 text-gray-600">
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        <span>Processing...</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Work Summary */}
+                    {task.workinghours && task.workinghours.length > 0 && (
+                        <div className="bg-linear-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-200">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-3">
+                                    <Timer className="w-6 h-6" />
+                                    Work Summary
+                                </h3>
+                                <button
+                                    onClick={() => setShowWorkSummary(!showWorkSummary)}
+                                    className="text-indigo-600 hover:text-indigo-800"
+                                >
+                                    {showWorkSummary ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                                </button>
+                            </div>
+                            {showWorkSummary && (
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <SummaryCard
+                                        icon={<Clock4 />}
+                                        label="Total Sessions"
+                                        value={task.workinghours.length}
+                                    />
+                                    <SummaryCard
+                                        icon={<Users />}
+                                        label="Last Session"
+                                        value={toIST(task.workinghours[task.workinghours.length - 1].started_at)}
+                                    />
+                                    <SummaryCard
+                                        icon={<Timer />}
+                                        label="Current Status"
+                                        value={statusConfig.label}
+                                        color={statusConfig.text}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// Helper Components
+const InfoItem = ({
+    icon,
+    label,
+    value
+}) => (
+    <div className="flex items-start gap-4">
+        <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
+            {icon && <div className="w-6 h-6 text-teal-600">{icon}</div>}
+        </div>
+        <div>
+            <p className="text-sm font-medium text-gray-600">{label}</p>
+            <p className="font-semibold text-gray-900 mt-1">{value}</p>
+        </div>
+    </div>
+)
+
+const ActionButton = ({
+    children,
+    icon,
+    color,
+    onClick,
+    disabled
+}) => {
+    const colors = {
+        emerald: 'bg-emerald-600 hover:bg-emerald-700',
+        amber: 'bg-amber-600 hover:bg-amber-700',
+        red: 'bg-red-600 hover:bg-red-700',
+        teal: 'bg-teal-600 hover:bg-teal-700'
+    }
+    return (
+        <button
+            onClick={onClick}
+            disabled={disabled}
+            className={`flex items-center gap-2 px-6 py-3 ${colors[color]} text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed`}
+        >
+            {icon}
+            {children}
+        </button>
+    )
+}
+
+const SummaryCard = ({
+    icon,
+    label,
+    value,
+    color = 'text-indigo-700'
+}) => (
+    <div className="bg-white/80 backdrop-blur flex flex-row gap-5 items-center justify-center p-2 rounded-xl border border-indigo-100 text-center">
+        <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+            {icon}
+        </div>
+        <div>
+            <p className="text-sm text-gray-600">{label}</p>
+            <p className={`text-xl font-bold mt-2 ${color}`}>{value}</p>
+        </div>
+    </div>
+)
+
+export default GetTaskByID

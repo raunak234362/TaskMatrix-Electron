@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { io } from "socket.io-client";
 
 const baseURL = 'http://192.168.1.26:5156';

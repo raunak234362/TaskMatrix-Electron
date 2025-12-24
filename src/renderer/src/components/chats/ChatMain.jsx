@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/chat/ChatMain.tsx
 import { Send } from "lucide-react";
 import Button from "../fields/Button";

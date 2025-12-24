@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { CheckCircle, Clock } from "lucide-react";
 import Button from "../../fields/Button";

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useSelector } from "react-redux";
 import { Mail, Phone, MapPin, UserCog, User, Shield, Edit2 } from "lucide-react";
