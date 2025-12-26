@@ -22,7 +22,7 @@ const AllActiveTask = () => {
             try {
                 setLoading(true);
                 const response = await Service.GetNonCompletedTasks();
-
+                console.log(response.data);
                 // Ensure tasks is an array
                 const taskData = Array.isArray(response.data)
                     ? response.data

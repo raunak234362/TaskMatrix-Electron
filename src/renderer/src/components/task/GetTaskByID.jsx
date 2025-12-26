@@ -1,46 +1,40 @@
 import React, { useEffect, useState } from 'react'
 import {
     Loader2,
-    AlertCircle,
     Calendar,
     User,
-    Briefcase,
-    Tag,
-    ClipboardList,
-    Clock,
     FileText,
+    Clock4,
+    ChevronDown,
+    ChevronUp,
     Building2,
     Hash,
+    Timer,
+    Users,
     Pause,
     Play,
     Square,
-    Timer,
-    ChevronUp,
-    ChevronDown,
-    Users,
-    Clock4
+    ClipboardList,
+    Clock
 } from 'lucide-react'
 import Service from '../../api/Service'
 import { toast } from 'react-toastify'
 
-const GetTaskByID = ({ id, onClose }) => {
+const GetTaskByID = ({ id, onClose, refresh }) => {
     const [task, setTask] = useState(null)
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
     const [processing, setProcessing] = useState(false)
-    const [summary, setSummary] = useState(null)
     const [showWorkSummary, setShowWorkSummary] = useState(true)
 
     const fetchTask = async () => {
         if (!id) return
         try {
             setLoading(true)
-            setError(null)
             const response = await Service.GetTaskById(id)
             setTask(response?.data || null)
-        } catch (err) {
-            console.error('Error fetching task:', err)
-            setError('Failed to load task details')
+        } catch (error) {
+            console.error('Error fetching task:', error)
+            toast.error('Failed to load task details')
         } finally {
             setLoading(false)
         }
@@ -50,36 +44,20 @@ const GetTaskByID = ({ id, onClose }) => {
         fetchTask()
     }, [id])
 
-    const handleAction = async (action) => {
-        if (!task?.id) return
-        try {
-            setProcessing(true)
-            let response
-            switch (action) {
-                case 'start':
-                    response = await Service.TaskStart(task.id)
-                    toast.success('Task started')
-                    break
-                case 'pause':
-                    response = await Service.TaskPause(task.id)
-                    toast.info('Task paused')
-                    break
-                case 'resume':
-                    response = await Service.TaskResume(task.id)
-                    toast.success('Task resumed')
-                    break
-                case 'end':
-                    response = await Service.TaskEnd(task.id)
-                    toast.success('Task completed')
-                    break
-            }
-            await fetchTask()
-        } catch (error) {
-            toast.error('Action failed. Please try again.')
-        } finally {
-            setProcessing(false)
-        }
+    const getActiveWorkID = () => {
+        return task?.workingHourTask?.find((wh) => wh.ended_at === null)?.id || null
     }
+
+    const activeWorkID = getActiveWorkID()
+
+    const formatSecondsToHHMM = (totalSeconds) => {
+        if (!totalSeconds || isNaN(totalSeconds)) return '00:00'
+        const hours = Math.floor(totalSeconds / 3600)
+        const minutes = Math.floor((totalSeconds % 3600) / 60)
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+    }
+
+    const totalDurationSeconds = task?.workingHourTask?.reduce((acc, wh) => acc + (Number(wh.duration_seconds) || 0), 0) || 0
 
     const toIST = (dateString) => {
         if (!dateString) return '—'
@@ -91,6 +69,38 @@ const GetTaskByID = ({ id, onClose }) => {
             hour: '2-digit',
             minute: '2-digit'
         }).format(new Date(dateString))
+    }
+
+    const handleAction = async (action) => {
+        if (!task?.id) return
+        try {
+            setProcessing(true)
+            switch (action) {
+                case 'start':
+                    await Service.TaskStart(task.id)
+                    toast.success('Task started')
+                    break
+                case 'pause':
+                    if (!activeWorkID) return toast.warning('No active session to pause')
+                    await Service.TaskPause(task.id, { whId: activeWorkID })
+                    toast.info('Task paused')
+                    break
+                case 'resume':
+                    await Service.TaskResume(task.id)
+                    toast.success('Task resumed')
+                    break
+                case 'end':
+                    await Service.TaskEnd(task.id, { whId: activeWorkID })
+                    toast.success('Task completed')
+                    break
+            }
+            await fetchTask()
+            if (refresh) refresh()
+        } catch (error) {
+            toast.error('Action failed. Please try again.')
+        } finally {
+            setProcessing(false)
+        }
     }
 
     const getStatusConfig = (status) => {
@@ -160,7 +170,7 @@ const GetTaskByID = ({ id, onClose }) => {
         )
     }
 
-    if (error || !task) {
+    if (!task) {
         return (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-2xl shadow-2xl p-10 text-center max-w-md">
@@ -168,9 +178,7 @@ const GetTaskByID = ({ id, onClose }) => {
                         <FileText className="w-10 h-10 text-gray-400" />
                     </div>
                     <p className="text-xl font-semibold text-gray-800">Task Not Found</p>
-                    <p className="text-gray-600 mt-2">
-                        {error || 'This task may have been deleted or is inaccessible.'}
-                    </p>
+                    <p className="text-gray-600 mt-2">This task may have been deleted or is inaccessible.</p>
                     <button
                         onClick={onClose}
                         className="mt-6 px-8 py-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-xl transition"
@@ -187,7 +195,7 @@ const GetTaskByID = ({ id, onClose }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[95vh] overflow-hidden flex flex-col">
                 {/* Header */}
                 <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-8 py-5 flex justify-between items-center">
                     <div className="flex items-center gap-4">
@@ -269,7 +277,7 @@ const GetTaskByID = ({ id, onClose }) => {
 
                         {/* Actions */}
                         <div className="mt-8 pt-6 border-t border-teal-200">
-                            <h4 className="text-lg font-semibold text-gray-800 mb-4">Task Controls</h4>
+                            {/* <h4 className="text-lg font-semibold text-gray-800 mb-4">Task Controls</h4> */}
                             <div className="flex flex-wrap items-center gap-4">
                                 {task.status === 'ASSIGNED' && (
                                     <ActionButton
@@ -322,7 +330,7 @@ const GetTaskByID = ({ id, onClose }) => {
                     </div>
 
                     {/* Work Summary */}
-                    {task.workinghours && task.workinghours.length > 0 && (
+                    {task.workingHourTask && task.workingHourTask.length > 0 && (
                         <div className="bg-linear-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-200">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-3">
@@ -340,13 +348,13 @@ const GetTaskByID = ({ id, onClose }) => {
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <SummaryCard
                                         icon={<Clock4 />}
-                                        label="Total Sessions"
-                                        value={task.workinghours.length}
+                                        label="Total Time"
+                                        value={formatSecondsToHHMM(totalDurationSeconds)}
                                     />
                                     <SummaryCard
                                         icon={<Users />}
-                                        label="Last Session"
-                                        value={toIST(task.workinghours[task.workinghours.length - 1].started_at)}
+                                        label="Sessions"
+                                        value={task.workingHourTask.length}
                                     />
                                     <SummaryCard
                                         icon={<Timer />}
@@ -365,11 +373,7 @@ const GetTaskByID = ({ id, onClose }) => {
 }
 
 // Helper Components
-const InfoItem = ({
-    icon,
-    label,
-    value
-}) => (
+const InfoItem = ({ icon, label, value }) => (
     <div className="flex items-start gap-4">
         <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
             {icon && <div className="w-6 h-6 text-teal-600">{icon}</div>}
@@ -381,13 +385,7 @@ const InfoItem = ({
     </div>
 )
 
-const ActionButton = ({
-    children,
-    icon,
-    color,
-    onClick,
-    disabled
-}) => {
+const ActionButton = ({ children, icon, color, onClick, disabled }) => {
     const colors = {
         emerald: 'bg-emerald-600 hover:bg-emerald-700',
         amber: 'bg-amber-600 hover:bg-amber-700',
@@ -406,12 +404,7 @@ const ActionButton = ({
     )
 }
 
-const SummaryCard = ({
-    icon,
-    label,
-    value,
-    color = 'text-indigo-700'
-}) => (
+const SummaryCard = ({ icon, label, value, color = 'text-indigo-700' }) => (
     <div className="bg-white/80 backdrop-blur flex flex-row gap-5 items-center justify-center p-2 rounded-xl border border-indigo-100 text-center">
         <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
             {icon}

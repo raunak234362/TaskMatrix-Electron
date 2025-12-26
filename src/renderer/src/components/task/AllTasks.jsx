@@ -10,6 +10,7 @@ import {
     Tag,
 } from "lucide-react";
 import DataTable from "../ui/table";
+import GetTaskByID from "./GetTaskByID";
 
 const AllTasks = () => {
     const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
@@ -240,6 +241,7 @@ const AllTasks = () => {
                     <DataTable
                         columns={columns}
                         data={tasks}
+                        detailComponent={({ row, close }) => <GetTaskByID id={row.id} onClose={close} />}
                         searchPlaceholder="Search tasks..."
                         pageSizeOptions={[10, 25, 50]}
                     />

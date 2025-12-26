@@ -1262,12 +1262,12 @@ static async GetRFIResponsebyId(rfiId) {
   //Task Start
   static async TaskStart(id) {
     try {
-      const response = await api.get(`task/start/${id}`, {
+      const response = await api.post(`task/start/${id}`, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-      console.log(" All Task fetched by ID:", response.data);
+      // console.log(" All Task fetched by ID:", response.data);
       return response.data;
     } catch (error) {
       console.error("cannot find Task", error);
@@ -1277,12 +1277,12 @@ static async GetRFIResponsebyId(rfiId) {
   //Task Resume
   static async TaskResume(id) {
     try {
-      const response = await api.get(`task/resume/${id}`, {
+      const response = await api.post(`task/resume/${id}`, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-      console.log(" All Task fetched by ID:", response.data);
+      // console.log(" All Task fetched by ID:", response.data);
       return response.data;
     } catch (error) {
       console.error("cannot find Task", error);
@@ -1290,14 +1290,14 @@ static async GetRFIResponsebyId(rfiId) {
   }
 
   //Task Pause
-  static async TaskPause(id) {
+  static async TaskPause(id,data) {
     try {
-      const response = await api.get(`task/pause/${id}`, {
+      const response = await api.patch(`task/pause/${id}`,data, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-      console.log(" All Task fetched by ID:", response.data);
+      // console.log(" All Task fetched by ID:", response.data);
       return response.data;
     } catch (error) {
       console.error("cannot find Task", error);
@@ -1306,14 +1306,14 @@ static async GetRFIResponsebyId(rfiId) {
 
 
   //Task End
-  static async TaskEnd(id) {
+  static async TaskEnd(id, data) {
     try {
-      const response = await api.get(`task/end/${id}`, {
+      const response = await api.post(`task/end/${id}`, data, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-      console.log(" All Task fetched by ID:", response.data);
+      // console.log(" All Task fetched by ID:", response.data);
       return response.data;
     } catch (error) {
       console.error("cannot find Task", error);

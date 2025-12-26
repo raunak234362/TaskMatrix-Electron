@@ -14,6 +14,10 @@ import AllEstimation from "./estimation/AllEstimation";
 // Projects
 import AllProjects from "./project/AllProjects";
 
+// Task Components
+import AllTasks from "./task/AllTasks";
+import AllActiveTask from "./task/AllActiveTask";
+
 export {
     Login,
     WBTDashboard,
@@ -21,7 +25,9 @@ export {
     AllEmployee,
     AllProjects,
     AddEstimation,
-    AllEstimation
+    AllEstimation,
+    AllTasks,
+    AllActiveTask
 
 
 }
