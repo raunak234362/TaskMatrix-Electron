@@ -83,7 +83,7 @@ const Chats = () => {
   };
 
   return (
-    <div className="flex md:h-[92.5vh] h-[93vh] overflow-y-hidden bg-gray-50 rounded-2xl">
+    <div className="flex h-full overflow-y-hidden bg-gray-50 rounded-2xl">
       {/* Desktop */}
       <div className="hidden md:flex w-full rounded-2xl">
         <div className="w-80 border-r">

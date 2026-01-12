@@ -207,7 +207,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                             <p className="text-sm text-gray-500">ID: #{task.id}</p>
                         </div>
                     </div>
-                    <button
+                    <button 
                         onClick={onClose}
                         className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-xl transition"
                     >
@@ -218,7 +218,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                 {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto px-8 py-8 space-y-8">
                     {/* Task Info Card */}
-                    <div className="bg-linear-to-br from-teal-50 to-cyan-50 rounded-2xl p-8 border border-teal-200">
+                    <div c lassName="bg-linear-to-br from-teal-50 to-cyan-50 rounded-2xl p-8 border border-teal-200">
                         <h3 className="text-2xl font-bold text-teal-900 mb-6 flex items-center gap-3">
                             <FileText className="w-7 h-7" />
                             Task Information
@@ -279,7 +279,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                         <div className="mt-8 pt-6 border-t border-teal-200">
                             {/* <h4 className="text-lg font-semibold text-gray-800 mb-4">Task Controls</h4> */}
                             <div className="flex flex-wrap items-center gap-4">
-                                {task.status === 'ASSIGNED' && (
+                                {task.status === 'ASSIGNED' ||  task.status === "REWORK" && (
                                     <ActionButton
                                         icon={<Play />}
                                         color="emerald"

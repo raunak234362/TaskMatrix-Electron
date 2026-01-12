@@ -127,7 +127,7 @@ const Select = (
                 type="text"
                 value={searchTerm}
                 onChange={handleSearch}
-                className="w-full bg-transparent outline-none"
+                className="w-full bg-transparent outline-none text-gray-900"
                 placeholder="Search..."
                 onClick={(e) => e.stopPropagation()}
               />

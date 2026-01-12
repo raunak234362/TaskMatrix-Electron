@@ -65,3 +65,14 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+input,
+textarea,
+select {
+  color: #1b1b1f !important; /* Force dark text for inputs */
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280 !important; /* Ensure placeholders are visible but distinct */
+}

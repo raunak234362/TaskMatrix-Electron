@@ -6,7 +6,8 @@ import DataTable from "../../ui/table";
 import { format } from "date-fns";
 import EstimationTaskByID from "./EstimationTaskByID";
 
-const AllEstimationTask = ({ estimations, onClose }) => {
+const AllEstimationTask = ({ estimations, estimationId, onClose }) => {
+  const userRole = sessionStorage.getItem("userRole")?.toUpperCase();
   const [addTaskModal, setAddTaskModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   console.log(estimations);
@@ -24,7 +25,7 @@ const AllEstimationTask = ({ estimations, onClose }) => {
     },
     {
       header: "Fabricator Name",
-      accessorFn: (row) => row.estimation?.fabricators?.fabName || "—",
+      accessorFn: (row) => row.estimation?.fabricators?.fabName || row.estimation?.fabricator?.fabName || row.estimation?.fabricatorName || "—",
     },
     {
       header: "Assigned To",
@@ -32,13 +33,12 @@ const AllEstimationTask = ({ estimations, onClose }) => {
         `${row.assignedTo?.firstName ?? ""} ${row.assignedTo?.middleName ?? ""
           } ${row.assignedTo?.lastName ?? ""}`.trim() || "—",
     },
-    {
-      header: "Assigned By",
-      accessorFn: (row) =>
-        `${row.assignedBy?.firstName ?? ""} ${row.assignedBy?.middleName ?? ""
-          } ${row.assignedBy?.lastName ?? ""}`.trim() || "—",
-    },
 
+    {
+      header: "Start Date",
+      accessorFn: (row) =>
+        row.startDate ? format(new Date(row.startDate), "dd MMM yyyy") : "—",
+    },
     {
       header: "End Date",
       accessorFn: (row) =>
@@ -64,6 +64,7 @@ const AllEstimationTask = ({ estimations, onClose }) => {
         );
       },
     },
+   
 
 
   ];
@@ -76,6 +77,13 @@ const AllEstimationTask = ({ estimations, onClose }) => {
     <div className="flex items-center justify-center">
       <div className="w-full bg-white rounded-xl p-4 shadow-lg">
         {/* Task Table */}
+        <div className="flex justify-between items-center px-2">
+          {(userRole === "ESTIMATION_HEAD" || userRole === "ADMIN") && (
+            <Button onClick={handleOpenAddTask} className="bg-teal-600 text-white hover:bg-teal-700">
+              Add Task
+            </Button>
+          )}
+        </div>
         <div className="mt-4 border rounded-lg">
           {isLoading ? (
             <div className="flex items-center justify-center py-12 text-gray-500">
@@ -105,10 +113,10 @@ const AllEstimationTask = ({ estimations, onClose }) => {
 
         {/* Add Task Modal */}
         {addTaskModal && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
+          <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/40">
             <div className="w-full max-w-3xl bg-white rounded-xl shadow-2xl p-6 overflow-y-auto max-h-[80vh]">
               <AddEstimationTask
-                // estimationId={estimations?.id} // estimations is an array, so this is undefined
+                estimationId={estimationId}
                 files={[]}
                 onClose={() => setAddTaskModal(false)}
 

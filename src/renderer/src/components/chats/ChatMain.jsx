@@ -134,7 +134,9 @@ const ChatMain = ({ activeChat, setActiveChat, onMessageSent }) => {
 
   // Scroll to bottom
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
   }, [messages]);
 
   // Infinite scroll
@@ -201,8 +203,8 @@ const ChatMain = ({ activeChat, setActiveChat, onMessageSent }) => {
             >
               <div
                 className={`max-w-xs md:max-w-md p-3 rounded-lg ${msg.sender === "me"
-                    ? "bg-white/80 rounded-tr-none"
-                    : "bg-teal-100/90 rounded-tl-none"
+                  ? "bg-white/80 rounded-tr-none"
+                  : "bg-teal-100/90 rounded-tl-none"
                   }`}
               >
                 {msg.sender === "other" && msg.senderName && (

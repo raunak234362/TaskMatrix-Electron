@@ -8,14 +8,14 @@ import AllAssignedTask from "../components/estimation/estimationTask/AllAssigned
 const EstimationLayout = () => {
   const [activeTab, setActiveTab] = useState("allEstimation");
   const [estimation, setEstimation] = useState([]);
-  const userRole = sessionStorage.getItem("userRole");
+  const userRole = sessionStorage.getItem("userRole")?.toUpperCase();
   const fetchAllEstimation = async () => {
     try {
       let response;
-      if (userRole !== "ESTIMATOR") {
-        response = await Service.GetEstimationTaskForAssignee();
-      } else {
+      if (userRole === "ESTIMATION_HEAD" || userRole === "ADMIN") {
         response = await Service.AllEstimation();
+      } else {
+        response = await Service.GetEstimationTaskForAssignee();
       }
       console.log(response?.data);
       setEstimation(response?.data);
@@ -41,21 +41,21 @@ const EstimationLayout = () => {
             <button
               onClick={() => setActiveTab("allEstimation")}
               className={`px-1.5 md:px-4 py-2 rounded-lg rounded-b ${activeTab === "allEstimation"
-                  ? "text-base md:text-base bg-white/70 backdrop-xl text-gray-800 font-bold"
-                  : "md:text-base text-sm text-white font-semibold"
+                ? "text-base md:text-base bg-white/70 backdrop-xl text-gray-800 font-bold"
+                : "md:text-base text-sm text-white font-semibold"
                 }`}
             >
-              All Pending Estimation Task
+              All Estimations
             </button>
 
             <button
               onClick={() => setActiveTab("allAssignedTask")}
               className={`px-1.5 md:px-4 py-2 rounded-lg rounded-b ${activeTab === "allAssignedTask"
-                  ? "text-base md:text-base bg-white/70 backdrop-xl text-gray-800 font-bold"
-                  : "md:text-base text-sm text-white font-semibold"
+                ? "text-base md:text-base bg-white/70 backdrop-xl text-gray-800 font-bold"
+                : "md:text-base text-sm text-white font-semibold"
                 }`}
             >
-              All Assigned Task
+              {userRole === "ESTIMATION_HEAD" || userRole === "ADMIN" ? "Add Estimation" : "All Assigned Task"}
             </button>
 
           </div>
@@ -63,20 +63,14 @@ const EstimationLayout = () => {
       </div>
 
       <div className="flex-1 min-h-0 bg-white p-2 rounded-b-2xl overflow-y-auto">
-        {userRole === "ESTIMATION_HEAD" && (
-          <>
-            {activeTab === "allEstimation" && (
-              <AllEstimation estimations={estimation} />
-            )}
-            {activeTab === "allAssignedTask" && <AddEstimation />}
-          </>
-        )}
         {activeTab === "allEstimation" && (
-          <AllEstimationTask estimations={estimation} />
+          userRole === "ESTIMATION_HEAD" || userRole === "ADMIN" ?
+            <AllEstimation estimations={estimation} /> :
+            <AllEstimationTask estimations={estimation} />
         )}
-        {activeTab === "allAssignedTask" && <AllAssignedTask />}
-
-
+        {activeTab === "allAssignedTask" && (
+          userRole === "ESTIMATION_HEAD" || userRole === "ADMIN" ? <AddEstimation /> : <AllAssignedTask />
+        )}
       </div>
     </div>
   );

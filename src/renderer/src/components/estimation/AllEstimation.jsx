@@ -15,10 +15,13 @@ const AllEstimation = ({ estimations }) => {
   const columns = [
     { accessorKey: "estimationNumber", header: "Est. Number" },
     { accessorKey: "projectName", header: "Project Name" },
-    { accessorKey: "fabricator.fabName", header: "Fabricator" }, // Assuming fabricator is populated
+    {
+      header: "Fabricator",
+      accessorFn: (row) => row.fabricators?.fabName || row.fabricator?.fabName || row.fabricatorName || "—"
+    },
     { accessorKey: "status", header: "Status" },
-    { 
-      accessorKey: "estimateDate", 
+    {
+      accessorKey: "estimateDate",
       header: "Date",
       cell: ({ row }) => row.original.estimateDate ? new Date(row.original.estimateDate).toLocaleDateString() : "-"
     }
@@ -30,7 +33,7 @@ const AllEstimation = ({ estimations }) => {
         columns={columns}
         data={estimations || []}
         onRowClick={handleRowClick}
-           detailComponent={({ row }) => {
+        detailComponent={({ row }) => {
           const estimationUniqueId =
             row.id ?? row.fabId ?? "";
           return <GetEstimationByID id={estimationUniqueId} />;
