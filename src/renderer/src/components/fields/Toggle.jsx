@@ -2,17 +2,6 @@
 
 import React, { useId, useState, forwardRef } from "react";
 
-/* ---------------------------------------------------
-   TYPE DEFINITIONS
---------------------------------------------------- */
-
-// This is the type react-hook-form expects when calling onChange
-
-
-/* ---------------------------------------------------
-   COMPONENT
---------------------------------------------------- */
-
 const Toggle = forwardRef(
   ({ label, className = "", name, onChange, ...props }, ref) => {
     const id = useId();

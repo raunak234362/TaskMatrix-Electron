@@ -1,3 +1,4 @@
+
 // components/DataTable.tsx
 "use client";
 
@@ -63,13 +64,13 @@ function TextFilter({ column }) {
         value={value ?? ""}
         onChange={(e) => column.setFilterValue(e.target.value || undefined)}
         placeholder={`Filter...`}
-        className="w-full pl-8 pr-7 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-teal-500 outline-none"
+        className="w-full pl-8 pr-7 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-green-500 outline-none"
       />
       <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
       {value && (
         <Button
           onClick={() => column.setFilterValue(undefined)}
-          className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
         >
           <X className="w-4 h-4" />
         </Button>
@@ -102,7 +103,7 @@ function MultiSelectFilter({
   column,
   options,
 }) {
-  const value = (column.getFilterValue()) ?? [];
+  const value = column.getFilterValue() ?? [];
 
   const toggle = (val) => {
     const newVal = value.includes(val)
@@ -122,7 +123,7 @@ function MultiSelectFilter({
             type="checkbox"
             checked={value.includes(opt.value)}
             onChange={() => toggle(opt.value)}
-            className="w-3 h-3 text-teal-600 rounded"
+            className="w-3 h-3 text-green-600 rounded"
           />
           {opt.label}
         </label>
@@ -136,6 +137,11 @@ function MultiSelectFilter({
 // ---------------------------------------------------------------
 
 
+// ---------------------------------------------------------------
+// 3. Main Table Component
+// ---------------------------------------------------------------
+
+
 export default function DataTable({
   columns: userColumns,
   data,
@@ -145,9 +151,25 @@ export default function DataTable({
   searchPlaceholder = "Search...",
   pageSizeOptions = [10, 25, 50, 100],
   showColumnToggle = true,
+  initialSorting,
 }) {
   const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState([]);
+  const [sorting, setSorting] = useState(() => {
+    if (initialSorting) return initialSorting;
+
+    // Default to sorting by the first available column (excluding selection)
+    const firstSortableColumn = userColumns.find(
+      (col) => col.id !== "select" && col.accessorKey
+    );
+
+    if (firstSortableColumn) {
+      const id =
+        firstSortableColumn.id || firstSortableColumn.accessorKey;
+      return [{ id, desc: false }];
+    }
+
+    return [];
+  });
   const [columnFilters, setColumnFilters] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState({});
@@ -166,7 +188,7 @@ export default function DataTable({
             !table.getIsAllPageRowsSelected()
           }
           onChange={(e) => table.toggleAllPageRowsSelected(e.target.checked)}
-          className="w-4 h-4 text-teal-600 rounded border-gray-300 focus:ring-teal-500"
+          className="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500"
           ariaLabel="Select all rows on page"
           title="Select all rows on page"
         />
@@ -176,7 +198,7 @@ export default function DataTable({
           type="checkbox"
           checked={row.getIsSelected()}
           onChange={(e) => row.toggleSelected(e.target.checked)}
-          className="w-4 h-4 text-teal-600 rounded border-gray-300 focus:ring-teal-500"
+          className="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500"
           aria-label="Select row"
           title="Select row"
         />
@@ -272,16 +294,16 @@ export default function DataTable({
               value={globalFilter ?? ""}
               onChange={(e) => setGlobalFilter(e.target.value)}
               placeholder={searchPlaceholder}
-              className="pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 text-gray-800 rounded-lg focus:ring-2 focus:ring-teal-500 outline-none"
+              className="pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
             />
           </div>
 
           {showColumnToggle && (
             <div className="relative group">
-              <button className="flex items-center text-gray-800 gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                Columns
+              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                Fields
               </button>
-              <div className="absolute text-gray-800 right-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden group-hover:block">
+              <div className="absolute right-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden group-hover:block">
                 <div className="p-2 max-h-60 overflow-auto">
                   {table.getAllColumns().map((column) => {
                     if (!column.getCanHide()) return null;
@@ -294,7 +316,7 @@ export default function DataTable({
                           type="checkbox"
                           checked={column.getIsVisible()}
                           onChange={() => column.toggleVisibility()}
-                          className="w-4 h-4 text-teal-600 rounded focus:ring-teal-500"
+                          className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
                         />
                         <span>{column.columnDef.header?.toString()}</span>
                       </label>
@@ -308,7 +330,7 @@ export default function DataTable({
 
         {selectedCount > 0 && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-gray-700">
               {selectedCount} selected
             </span>
             <Button
@@ -331,7 +353,7 @@ export default function DataTable({
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-md font-medium text-gray-700 uppercase tracking-wider"
                   >
                     {/* Header + sort */}
                     <div
@@ -366,7 +388,7 @@ export default function DataTable({
               <tr>
                 <td
                   colSpan={table.getVisibleFlatColumns().length}
-                  className="px-6 py-12 text-center text-gray-500"
+                  className="px-6 py-12 text-center text-gray-700"
                 >
                   No data available
                 </td>
@@ -377,7 +399,7 @@ export default function DataTable({
                 return (
                   <React.Fragment key={row.id}>
                     <tr
-                      className={`hover:bg-teal-50 transition-colors ${onRowClick ? "cursor-pointer" : ""
+                      className={`hover:bg-green-50 transition-colors ${onRowClick ? "cursor-pointer" : ""
                         }`}
                       onClick={() => {
                         onRowClick?.(row.original);
@@ -387,7 +409,7 @@ export default function DataTable({
                       {row.getVisibleCells().map((cell) => (
                         <td
                           key={cell.id}
-                          className="text-left px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                          className="text-left px-6 py-4 text-md text-gray-700"
                         >
                           {flexRender(
                             cell.column.columnDef.cell,
@@ -416,7 +438,10 @@ export default function DataTable({
                           className="bg-gray-50 p-0"
                         >
                           <div className=" overflow-y-auto p-4">
-                            <DetailComponent row={row.original} close={() => toggleRowExpand(row.id)} />
+                            <DetailComponent
+                              row={row.original}
+                              close={() => toggleRowExpand(row.id)}
+                            />
                           </div>
                         </td>
                       </tr>
@@ -459,28 +484,28 @@ export default function DataTable({
           <Button
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
-            className="bg-teal-100 text-gray-800 hover:bg-teal-200 px-3 py-1 border rounded disabled:opacity-50"
+            className="bg-green-100 text-gray-700 hover:bg-green-200 px-3 py-1 border rounded disabled:opacity-50"
           >
             {"<<"}
           </Button>
           <Button
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="bg-teal-100 text-gray-800 hover:bg-teal-200 px-3 py-1 border rounded disabled:opacity-50"
+            className="bg-green-100 text-gray-700 hover:bg-green-200 px-3 py-1 border rounded disabled:opacity-50"
           >
             {"<"}
           </Button>
           <Button
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="bg-teal-100 text-gray-800 hover:bg-teal-200 px-3 py-1 border rounded disabled:opacity-50"
+            className="bg-green-100 text-gray-700 hover:bg-green-200 px-3 py-1 border rounded disabled:opacity-50"
           >
             {">"}
           </Button>
           <Button
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
-            className="bg-teal-100 text-gray-800 hover:bg-teal-200 px-3 py-1 border rounded disabled:opacity-50"
+            className="bg-green-100 text-gray-700 hover:bg-green-200 px-3 py-1 border rounded disabled:opacity-50"
           >
             {">>"}
           </Button>
@@ -494,7 +519,7 @@ export default function DataTable({
             <h3 className="text-lg font-semibold mb-2">
               Delete {selectedCount} {selectedCount === 1 ? "Item" : "Items"}?
             </h3>
-            <p className="text-sm text-gray-600 mb-6">
+            <p className="text-sm text-gray-700 mb-6">
               This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">

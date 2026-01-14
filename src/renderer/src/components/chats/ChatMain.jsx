@@ -204,7 +204,7 @@ const ChatMain = ({ activeChat, setActiveChat, onMessageSent }) => {
               <div
                 className={`max-w-xs md:max-w-md p-3 rounded-lg ${msg.sender === "me"
                   ? "bg-white/80 rounded-tr-none"
-                  : "bg-teal-100/90 rounded-tl-none"
+                  : "bg-[#eef7e9]/90 rounded-tl-none"
                   }`}
               >
                 {msg.sender === "other" && msg.senderName && (
@@ -234,9 +234,9 @@ const ChatMain = ({ activeChat, setActiveChat, onMessageSent }) => {
               }
             }}
             placeholder="Type a message..."
-            className="flex-1 resize-none border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="flex-1 resize-none border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6bbd45]"
           />
-          <Button onClick={sendMessage} className="bg-teal-600 text-white">
+          <Button onClick={sendMessage} className="bg-[#6bbd45] text-white">
             <Send size={20} />
           </Button>
         </div>

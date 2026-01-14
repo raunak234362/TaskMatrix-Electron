@@ -155,7 +155,7 @@ const AddEstimationTask = ({
           <textarea
             {...register("notes")}
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6bbd45] focus:border-[#6bbd45] resize-none"
             placeholder="Add notes..."
           />
         </div>

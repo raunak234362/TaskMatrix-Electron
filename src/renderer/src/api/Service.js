@@ -1,21 +1,21 @@
-import { toast } from "react-toastify";
-import api from "./api";
-const token = sessionStorage.getItem("token");
+import { toast } from 'react-toastify'
+import api from './api'
+const token = sessionStorage.getItem('token')
 class Service {
   //Get Logged-In User Detail
   static async GetUserByToken() {
     try {
       const response = await api.get(`user/me`, {
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log("Signed In User detail-", response);
-      return response.data;
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log('Signed In User detail-', response)
+      return response.data
     } catch (error) {
       //alert(error);
-      console.log("Error while fetching logged-in user Detail", error);
+      console.log('Error while fetching logged-in user Detail', error)
     }
   }
 
@@ -24,15 +24,15 @@ class Service {
     try {
       const response = await api.post(`employee`, employeeData, {
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(response);
-      return response?.data;
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log(response)
+      return response?.data
     } catch (error) {
       //alert(error);
-      console.log("Error while adding New User", error);
+      console.log('Error while adding New User', error)
     }
   }
 
@@ -41,16 +41,16 @@ class Service {
     try {
       const response = await api.get(`employee`, {
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
       //alert(error);
-      console.log("Error fetching all Employee", error);
-      console.log("Error fetching all Employee", error);
+      console.log('Error fetching all Employee', error)
+      console.log('Error fetching all Employee', error)
     }
   }
   //Fetch Employee by ROLE
@@ -58,15 +58,15 @@ class Service {
     try {
       const response = await api.get(`employee/role/${role}`, {
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
       // //alert(error);
-      console.log("Error fetching all Employee", error);
+      console.log('Error fetching all Employee', error)
     }
   }
 
@@ -75,16 +75,16 @@ class Service {
     try {
       const response = await api.get(`employee/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
       //alert(error);
-      console.log("Error fetching Employee by ID", error);
-      console.log("Error fetching Employee by ID", error);
+      console.log('Error fetching Employee by ID', error)
+      console.log('Error fetching Employee by ID', error)
     }
   }
 
@@ -93,15 +93,15 @@ class Service {
     try {
       const response = await api.put(`employee/update/${id}`, data, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
       //alert(error);
-      console.log("Error fetching Employee by ID", error);
-      console.log("Error fetching Employee by ID", error);
+      console.log('Error fetching Employee by ID', error)
+      console.log('Error fetching Employee by ID', error)
     }
   }
 
@@ -110,14 +110,14 @@ class Service {
     try {
       const response = await api.post(`department`, departmentData, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response?.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response?.data
     } catch (error) {
       //alert(error);
-      console.log("Error while adding New User", error);
+      console.log('Error while adding New User', error)
     }
   }
   //All Departments
@@ -125,15 +125,15 @@ class Service {
     try {
       const response = await api.get(`department`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
       //alert(error);
-      console.log("Error fetching all Employee", error);
-      console.log("Error fetching all Employee", error);
+      console.log('Error fetching all Employee', error)
+      console.log('Error fetching all Employee', error)
     }
   }
 
@@ -142,15 +142,15 @@ class Service {
     try {
       const response = await api.get(`department/department/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
       //alert(error);
-      console.log("Error fetching Employee by ID", error);
-      console.log("Error fetching Employee by ID", error);
+      console.log('Error fetching Employee by ID', error)
+      console.log('Error fetching Employee by ID', error)
     }
   }
 
@@ -158,38 +158,38 @@ class Service {
   static async AddTeam(teamDataPayload) {
     try {
       const response = await api.post(`team`, teamDataPayload, {
-        headers: { "Content-Type": "application/json" },
-      });
-      console.log(response?.data);
-      toast.success("Successfully added Team");
+        headers: { 'Content-Type': 'application/json' }
+      })
+      console.log(response?.data)
+      toast.success('Successfully added Team')
     } catch (error) {
       //alert(error);
-      console.log("Error adding team", error);
+      console.log('Error adding team', error)
     }
   }
 
   // Fetch All Team
   static async AllTeam() {
     try {
-      const response = await api.get(`team`);
-      console.log(response?.data);
-      return response?.data;
+      const response = await api.get(`team`)
+      console.log(response?.data)
+      return response?.data
     } catch (error) {
       //alert(error);
-      console.log("Error Fetching All Team", error);
-      console.log("Error Fetching All Team", error);
+      console.log('Error Fetching All Team', error)
+      console.log('Error Fetching All Team', error)
     }
   }
 
   //Fetch team by Id
   static async GetTeamByID(id) {
     try {
-      const response = await api.get(`team/${id}`);
-      console.log(response?.data);
-      return response?.data;
+      const response = await api.get(`team/${id}`)
+      console.log(response?.data)
+      return response?.data
     } catch (error) {
       //alert(error);
-      console.log("Error Fetching All Team", error);
+      console.log('Error Fetching All Team', error)
     }
   }
 
@@ -198,13 +198,13 @@ class Service {
     try {
       const response = await api.post(`team/addMembers/${role}`, data, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response?.data);
-      return response?.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response?.data)
+      return response?.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -213,14 +213,14 @@ class Service {
     try {
       const response = await api.put(`team/updateRole/${teamId}`, MemberData, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response?.data);
-      return response?.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response?.data)
+      return response?.data
     } catch (error) {
-      console.log(error);
-      console.log("Error Fetching All Team", error);
+      console.log(error)
+      console.log('Error Fetching All Team', error)
     }
   }
 
@@ -228,13 +228,13 @@ class Service {
   static async AddFabricator(fabricatorData) {
     try {
       const response = await api.post(`fabricator`, fabricatorData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      console.log(" Fabricator API Response:", response);
-      return response.data;
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      console.log(' Fabricator API Response:', response)
+      return response.data
     } catch (error) {
-      console.error(" Error while adding New Fabricator:", error);
-      throw error;
+      console.error(' Error while adding New Fabricator:', error)
+      throw error
     }
   }
 
@@ -242,13 +242,13 @@ class Service {
     try {
       const response = await api.get(`fabricator/all`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" All Fabricators fetched:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All Fabricators fetched:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find fabricators", error);
+      console.error('cannot find fabricators', error)
     }
   }
 
@@ -257,13 +257,13 @@ class Service {
     try {
       const response = await api.get(`fabricator/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" Fabricator fetched by ID:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Fabricator fetched by ID:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find fabricators", error);
+      console.error('cannot find fabricators', error)
     }
   }
 
@@ -271,12 +271,12 @@ class Service {
   static async EditFabricatorByID(id, data) {
     try {
       const response = await api.put(`fabricator/update/${id}`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      console.log("Fabricators Edited:", response.data);
-      return response.data;
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      console.log('Fabricators Edited:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find fabricators", error);
+      console.error('cannot find fabricators', error)
     }
   }
 
@@ -285,13 +285,13 @@ class Service {
     try {
       const response = await api.post(`fabricator/branch`, data, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" All Fabricators fetched:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All Fabricators fetched:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find fabricators", error);
+      console.error('cannot find fabricators', error)
     }
   }
 
@@ -300,13 +300,13 @@ class Service {
     try {
       const response = await api.post(`client/${fabricatorId}`, data, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" Client added by Fabricator ID:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Client added by Fabricator ID:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find fabricators", error);
+      console.error('cannot find fabricators', error)
     }
   }
 
@@ -315,13 +315,13 @@ class Service {
     try {
       const response = await api.get(`client/byFabricator/${fabricatorId}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" All Clients fetched by Fabricator ID:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All Clients fetched by Fabricator ID:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find clients", error);
+      console.error('cannot find clients', error)
     }
   }
 
@@ -330,41 +330,41 @@ class Service {
     try {
       const response = await api.get(`client/byFabricator/${clientID}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" All Clients fetched by Fabricator ID:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All Clients fetched by Fabricator ID:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find clients", error);
+      console.error('cannot find clients', error)
     }
   }
 
   //Add new RFQ
   static async addRFQ(formData) {
-    const token = sessionStorage.getItem("token");
+    const token = sessionStorage.getItem('token')
 
     const response = await api.post(`rfq`, formData, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    });
+        'Content-Type': 'multipart/form-data'
+      }
+    })
 
-    return response.data;
+    return response.data
   }
   //Fetch all the RFQ
   static async FetchAllRFQ(rfqId) {
     try {
       const response = await api.get(`rfq/${rfqId}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" All Data fetched by RFQ id:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All Data fetched by RFQ id:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find rfqs", error);
+      console.error('cannot find rfqs', error)
     }
   }
 
@@ -373,13 +373,13 @@ class Service {
     try {
       const response = await api.get(`rfq/sents`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" RFQ sents:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' RFQ sents:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find rfqs", error);
+      console.error('cannot find rfqs', error)
     }
   }
 
@@ -389,76 +389,76 @@ class Service {
       const response = await api.get(`rfq/received`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+          'Content-Type': 'application/json'
+        }
+      })
 
-      console.log("  RFQ received:", response.data);
-      return response.data;
+      console.log('  RFQ received:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find rfqs", error);
+      console.error('cannot find rfqs', error)
     }
   }
   //getting rfqbyID
 
   static async GetRFQbyId(rfqId) {
-      try {
-        const response = await api.get(`rfq/getById/${rfqId}`, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        console.log(" All rfq fetched by rfq ID:", response.data);
-        return response.data;
-      } catch (error) {
-        console.error("cannot find rfq", error);
-      }
+    try {
+      const response = await api.get(`rfq/getById/${rfqId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All rfq fetched by rfq ID:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find rfq', error)
     }
-  
+  }
+
   // Update RFQ by ID
   static async UpdateRFQById(rfqId, data) {
     try {
       const response = await api.put(`rfq/update/${rfqId}`, data, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log("RFQ updated:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('RFQ updated:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot update rfq", error);
+      console.error('cannot update rfq', error)
     }
-  } 
-    //RESPONSES
-  //response post request 
+  }
+  //RESPONSES
+  //response post request
 
-static async addResponse(formData, responseId) {
-  const token = sessionStorage.getItem("token");
+  static async addResponse(formData, responseId) {
+    const token = sessionStorage.getItem('token')
 
-  const response = await api.post(`rfq/${responseId}/responses`, formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "multipart/form-data",
-    },
-  });
+    const response = await api.post(`rfq/${responseId}/responses`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
 
-    return response.data;
+    return response.data
   }
 
   //Add Connection Designer
   static async AddConnectionDesigner(data) {
-    console.log(data);
+    console.log(data)
 
     try {
       const response = await api.post(`connectionDesign`, data, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -467,13 +467,13 @@ static async addResponse(formData, responseId) {
     try {
       const response = await api.get(`connectionDesign/all`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
   // Fetch Connection Designer By ID
@@ -481,13 +481,13 @@ static async addResponse(formData, responseId) {
     try {
       const response = await api.get(`connectionDesign/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
   // Update Connection Designer By ID
@@ -495,42 +495,42 @@ static async addResponse(formData, responseId) {
     try {
       const response = await api.put(`connectionDesign/update/${id}`, data, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
-  // Add Estimation 
+  // Add Estimation
   static async AddEstimation(formData) {
     try {
       const response = await api.post(`estimation/estimations`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
-  // Add Estimation 
+  // Add Estimation
   static async AllEstimation() {
     try {
       const response = await api.get(`estimation/estimations`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
   // Get Estimation By ID
@@ -538,13 +538,13 @@ static async addResponse(formData, responseId) {
     try {
       const response = await api.get(`estimation/estimations/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -553,13 +553,13 @@ static async addResponse(formData, responseId) {
     try {
       const response = await api.post(`estimation/estimation-tasks`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -568,13 +568,13 @@ static async addResponse(formData, responseId) {
     try {
       const response = await api.get(`estimation/estimation-tasks/my`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -583,13 +583,13 @@ static async addResponse(formData, responseId) {
     try {
       const response = await api.get(`estimation/estimation-tasks/my/all`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -598,12 +598,12 @@ static async addResponse(formData, responseId) {
     try {
       const response = await api.get(`estimation/estimation-tasks/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -612,28 +612,28 @@ static async addResponse(formData, responseId) {
     try {
       const response = await api.post(`task/EST/start/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
   //Estimation Task Pause By ID
-  static async PauseEstimationTaskById(id,data) {
+  static async PauseEstimationTaskById(id, data) {
     try {
-      const response = await api.patch(`task/EST/pause/${id}`,data, {
+      const response = await api.patch(`task/EST/pause/${id}`, data, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -642,28 +642,28 @@ static async addResponse(formData, responseId) {
     try {
       const response = await api.post(`task/EST/resume/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
   //Estimation Task End by ID
-  static async EndEstimationTaskById(id,data) {
+  static async EndEstimationTaskById(id, data) {
     try {
-      const response = await api.post(`task/EST/end/${id}`,data, {
+      const response = await api.post(`task/EST/end/${id}`, data, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -672,150 +672,150 @@ static async addResponse(formData, responseId) {
     try {
       const response = await api.get(`task/EST/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
-// Line Item Group
-static async CreateLineItemGroup(data) {
-  try {
-    const response = await api.post(`estimation/line-items`, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.log(error);
+  // Line Item Group
+  static async CreateLineItemGroup(data) {
+    try {
+      const response = await api.post(`estimation/line-items`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
   }
-}
 
-//fetch Group by ID 
-static async FetchGroupById(id) {
-  try {
-    const response = await api.get(`estimation/line-items/group/${id}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.log(error);
+  //fetch Group by ID
+  static async FetchGroupById(id) {
+    try {
+      const response = await api.get(`estimation/line-items/group/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
   }
-}
 
-//update Group by ID
-static async UpdateGroupById(id,data) {
-  try {
-    const response = await api.put(`estimation/line-items/${id}`, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.log(error);
+  //update Group by ID
+  static async UpdateGroupById(id, data) {
+    try {
+      const response = await api.put(`estimation/line-items/${id}`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
   }
-}
 
-//fetch Line item group
-static async FetchLineItemGroup(id) {
-  try {
-    const response = await api.get(`estimation/line-items/groups/${id}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.log(error);
+  //fetch Line item group
+  static async FetchLineItemGroup(id) {
+    try {
+      const response = await api.get(`estimation/line-items/groups/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
   }
-} 
 
-//fetch Line item group List
-static async FetchLineItemGroupList(id) {
-  try {
-    const response = await api.get(`estimation/line-items/Bygroup/${id}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.log(error);
+  //fetch Line item group List
+  static async FetchLineItemGroupList(id) {
+    try {
+      const response = await api.get(`estimation/line-items/Bygroup/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
   }
-} 
 
-//Update Line Item By ID
-static async UpdateLineItemById(id,data) {
-  try {
-    const response = await api.put(`estimation/line-items/update/${id}`, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.log(error);
+  //Update Line Item By ID
+  static async UpdateLineItemById(id, data) {
+    try {
+      const response = await api.put(`estimation/line-items/update/${id}`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
   }
-}
 
-// add new Line Item
-static async AddLineItem(data) {
-  try {
-    const response = await api.post(`estimation/line-items/item`, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.log(error);
+  // add new Line Item
+  static async AddLineItem(data) {
+    try {
+      const response = await api.post(`estimation/line-items/item`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
   }
-}
 
   // Add Group
   static async AddGroup(data) {
     try {
       const response = await api.post(`chat/group/`, data, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" Group added", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Group added', response.data)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
   // Add Project
   static async AddProject(formData) {
-    const token = sessionStorage.getItem("token");
+    const token = sessionStorage.getItem('token')
     try {
       const response = await api.post(`project/projects`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -824,13 +824,13 @@ static async AddLineItem(data) {
     try {
       const response = await api.get(`project/projects`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -839,24 +839,39 @@ static async AddLineItem(data) {
     try {
       const response = await api.get(`project/projects/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
+    }
+  }
+
+  // Get Project Overall Dashboard
+  static async GetProjectOverallDashboard(id, stage) {
+    try {
+      const response = await api.get(`project/${id}/dashboard/${stage}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
     }
   }
 
   // Edit Project By ID
   static async EditProjectById(id, data) {
     try {
-      const response = await api.put(`project/projects/${id}`, data);
-      console.log(response);
-      return response.data;
+      const response = await api.put(`project/projects/${id}`, data)
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -865,13 +880,13 @@ static async AddLineItem(data) {
     try {
       const response = await api.post(`mileStone/`, data, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -880,29 +895,137 @@ static async AddLineItem(data) {
     try {
       const response = await api.get(`mileStone/project/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
+    }
+  }
+
+  //Get mileston by ID
+  static async GetMilestoneById(id) {
+    try {
+      const response = await api.get(`mileStone/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  //Fetch WBS-Template
+  static async GetWBSTemplate() {
+    try {
+      const response = await api.get(`project/wbs/bundles`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // fetch bundle by ProjectID
+  static async GetBundleByProjectId(projectId) {
+    try {
+      const response = await api.get(`project/projects/${projectId}/bundles`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  //fetch the line item from the wbsID
+  static async GetWBSLineItem(wbsId) {
+    try {
+      const response = await api.get(`project/project-wbs/${wbsId}/line-items`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // patch the LineItem
+  static async UpdateLineItem(id, data) {
+    try {
+      const response = await api.patch(`project/line-items/${id}/`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  //Add WBS Template
+  static async AddWBSTemplate(data) {
+    try {
+      const response = await api.post(`project/wbs-templates`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  //add wbs from wbs template by project id
+  static async AddWBSFromTemplate(projectId, wbsData) {
+    try {
+      const response = await api.post(`project/projects/${projectId}/wbs/expand`, wbsData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
     }
   }
 
   // Add WBS in Project
   static async AddWBSInProject(projectId) {
     try {
-      const response = await api.post(`project/projects/${projectId}/wbs
-`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+      const response = await api.post(
+        `project/projects/${projectId}/wbs
+`,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -911,13 +1034,13 @@ static async AddLineItem(data) {
     try {
       const response = await api.get(`project/projects/${projectId}/wbs`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -926,28 +1049,50 @@ static async AddLineItem(data) {
     try {
       const response = await api.get(`project/wbs/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
+    }
+  }
+
+  // Get WBS By ID
+  static async GetWBSLineItemById(projectId, id, stage) {
+    try {
+      const response = await api.get(
+        `project/projects/${projectId}/stages/${stage}/wbs/${id}/line-items`,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
     }
   }
 
   // Update WBS line-item by ProjectId, wbsId and line-item ID
   static async UpdateWBSLineItem(projectId, wbsId, lineItemId, data) {
     try {
-      const response = await api.put(`project/projects/${projectId}/work-break-downs/${wbsId}/line-items/${lineItemId}`, data, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(response);
-      return response.data;
+      const response = await api.put(
+        `project/projects/${projectId}/work-break-downs/${wbsId}/line-items/${lineItemId}`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -956,29 +1101,28 @@ static async AddLineItem(data) {
     try {
       const response = await api.get(`chat/recent`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" All Fabricators fetched:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All Fabricators fetched:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find fabricators", error);
+      console.error('cannot find fabricators', error)
     }
   }
 
-
   // Add Group Members
-  static async AddGroupMembers(data) { 
+  static async AddGroupMembers(data) {
     try {
       const response = await api.post(`chat/group/members`, data, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" Group members added", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Group members added', response.data)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -987,30 +1131,28 @@ static async AddLineItem(data) {
     try {
       const response = await api.get(`chat/group/${groupId}/members`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" Group members fetched", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Group members fetched', response.data)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
-
-    
 
   // Delete Group Member
   static async DeleteGroupMember(groupId, memberId) {
     try {
       const response = await api.delete(`chat/group/${groupId}/member/${memberId}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" Group member deleted", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Group member deleted', response.data)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -1019,99 +1161,97 @@ static async AddLineItem(data) {
     try {
       const response = await api.get(`project/projects/${projectId}/notes`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" Project notes fetched", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Project notes fetched', response.data)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
   // Create Project Note
   static async CreateProjectNote(projectId, data) {
-    const token = sessionStorage.getItem("token");
+    const token = sessionStorage.getItem('token')
     try {
       const response = await api.post(`project/projects/${projectId}/notes`, data, {
         headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(" Project note created", response.data);
-      return response.data;
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log(' Project note created', response.data)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
-
-  
 
   // Delete Group
   static async DeleteGroup(groupId) {
     try {
       const response = await api.delete(`chat/group/${groupId}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log("Group deleted", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Group deleted', response.data)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
   // Fetch Chats by Group ID
   static async ChatByGroupID(groupId, lastId) {
-    console.log(lastId);
-    
+    console.log(lastId)
+
     try {
       // lastId is optional so handle it properly
       // const url = lastId
       //   ? `chat/group/${groupId}/history/${lastId}`
       //   : `chat/group/${groupId}/history`;
-      const url = `chat/group/${groupId}/history/${lastId}`;
+      const url = `chat/group/${groupId}/history/${lastId}`
 
       const response = await api.get(url, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log("Chats by Group ID fetched:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Chats by Group ID fetched:', response.data)
+      return response.data
     } catch (error) {
-      console.error("Cannot find chats by group ID", error);
-      throw error;
+      console.error('Cannot find chats by group ID', error)
+      throw error
     }
   }
 
-  //RFI components 
- //Add new RFI
- static async addRFI(formData) {
-  const token = sessionStorage.getItem("token");
+  //RFI components
+  //Add new RFI
+  static async addRFI(formData) {
+    const token = sessionStorage.getItem('token')
 
-  const response = await api.post(`rfi`, formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "multipart/form-data",
-    },
-  });
+    const response = await api.post(`rfi`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
 
-  return response.data;
-}
+    return response.data
+  }
   static async RfiSent() {
     try {
       const response = await api.get(`rfi/sents`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" RFI sents:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' RFI sents:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find rfIs", error);
+      console.error('cannot find rfIs', error)
     }
   }
 
@@ -1119,84 +1259,83 @@ static async AddLineItem(data) {
     try {
       const response = await api.get(`rfi/received`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
+          'Content-Type': 'application/json'
+        }
+      })
 
-      console.log("  RFI received:", response.data);
-      return response.data;
+      console.log('  RFI received:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find rfi's", error);
-    }                                                                                                                                                                                                                     
+      console.error("cannot find rfi's", error)
+    }
   }
   static async GetRFIbyId(rfiId) {
     try {
       const response = await api.get(`rfi/getById/${rfiId}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" All rfi fetched by rfi ID:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All rfi fetched by rfi ID:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find rfi", error);
+      console.error('cannot find rfi', error)
     }
   }
   static async EditRFIByID(id, data) {
     try {
       const response = await api.put(`rfi/${id}`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      console.log("RFI Edited:", response.data);
-      return response.data;
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      console.log('RFI Edited:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find RFI", error);
+      console.error('cannot find RFI', error)
     }
-  } 
-//RFI responses
-static async addRFIResponse(formData, responseId) {
-  const token = sessionStorage.getItem("token");
+  }
+  //RFI responses
+  static async addRFIResponse(formData, responseId) {
+    const token = sessionStorage.getItem('token')
 
-  const response = await api.post(`rfi/${responseId}/responses`, formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "multipart/form-data",
-    },
-  });
+    const response = await api.post(`rfi/${responseId}/responses`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
 
-    return response.data;
+    return response.data
   }
 
-
-static async GetRFIResponsebyId(rfiId) {
-      try {
-        const response = await api.get(`rfi/responses/${rfiId}`, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        console.log(" All rfq fetched by rfq ID:", response.data);
-        return response.data;
-      } catch (error) {
-        console.error("cannot find rfq", error);
-      }
+  static async GetRFIResponsebyId(rfiId) {
+    try {
+      const response = await api.get(`rfi/responses/${rfiId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All rfq fetched by rfq ID:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find rfq', error)
     }
+  }
 
-      //Add Task
+  //Add Task
   static async AddTask(data) {
-    console.log(data);
-    const token = sessionStorage.getItem("token");
+    console.log(data)
+    const token = sessionStorage.getItem('token')
     try {
       const response = await api.post(`task/`, data, {
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(response);
-      return response.data;
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log(response)
+      return response.data
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
@@ -1205,13 +1344,13 @@ static async GetRFIResponsebyId(rfiId) {
     try {
       const response = await api.get(`task/getAllTasks`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" All Task fetched:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All Task fetched:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find Task", error);
+      console.error('cannot find Task', error)
     }
   }
   //Get All Task
@@ -1219,13 +1358,13 @@ static async GetRFIResponsebyId(rfiId) {
     try {
       const response = await api.get(`task/user/tasks`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" All Task fetched:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All Task fetched:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find Task", error);
+      console.error('cannot find Task', error)
     }
   }
 
@@ -1234,13 +1373,13 @@ static async GetRFIResponsebyId(rfiId) {
     try {
       const response = await api.get(`task/user/non-completed-tasks`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" All Task fetched:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All Task fetched:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find Task", error);
+      console.error('cannot find Task', error)
     }
   }
 
@@ -1249,13 +1388,13 @@ static async GetRFIResponsebyId(rfiId) {
     try {
       const response = await api.get(`task/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" All Task fetched by ID:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All Task fetched by ID:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find Task", error);
+      console.error('cannot find Task', error)
     }
   }
 
@@ -1264,13 +1403,13 @@ static async GetRFIResponsebyId(rfiId) {
     try {
       const response = await api.post(`task/start/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
+          'Content-Type': 'application/json'
+        }
+      })
       // console.log(" All Task fetched by ID:", response.data);
-      return response.data;
+      return response.data
     } catch (error) {
-      console.error("cannot find Task", error);
+      console.error('cannot find Task', error)
     }
   }
 
@@ -1279,45 +1418,44 @@ static async GetRFIResponsebyId(rfiId) {
     try {
       const response = await api.post(`task/resume/${id}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
+          'Content-Type': 'application/json'
+        }
+      })
       // console.log(" All Task fetched by ID:", response.data);
-      return response.data;
+      return response.data
     } catch (error) {
-      console.error("cannot find Task", error);
+      console.error('cannot find Task', error)
     }
   }
 
   //Task Pause
-  static async TaskPause(id,data) {
+  static async TaskPause(id, data) {
     try {
-      const response = await api.patch(`task/pause/${id}`,data, {
+      const response = await api.patch(`task/pause/${id}`, data, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
+          'Content-Type': 'application/json'
+        }
+      })
       // console.log(" All Task fetched by ID:", response.data);
-      return response.data;
+      return response.data
     } catch (error) {
-      console.error("cannot find Task", error);
+      console.error('cannot find Task', error)
     }
   }
-
 
   //Task End
   static async TaskEnd(id, data) {
     try {
       const response = await api.post(`task/end/${id}`, data, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
+          'Content-Type': 'application/json'
+        }
+      })
       // console.log(" All Task fetched by ID:", response.data);
-      return response.data;
+      return response.data
     } catch (error) {
-      console.error("cannot find Task", error);
+      console.error('cannot find Task', error)
     }
   }
 }
-export default Service;
+export default Service

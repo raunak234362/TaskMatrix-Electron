@@ -35,7 +35,7 @@ const EstimationLayout = () => {
   return (
     <div className="w-full overflow-y-hidden overflow-x-hidden">
       <div className="flex flex-col w-full h-full">
-        <div className="px-3 flex flex-col justify-between items-start backdrop-blur-2xl bg-linear-to-t from-emerald-200/60 to-teal-600/50 border-b rounded-t-2xl">
+        <div className="px-3 flex flex-col justify-between items-start backdrop-blur-2xl bg-[#6bbd45] border-b rounded-t-2xl">
           <h1 className="text-2xl py-2 font-bold text-white">Estimation Detail</h1>
           <div className="flex flex-row w-full">
             <button

@@ -120,8 +120,8 @@ const GroupDetail = ({ group, onClose }) => {
         <div className="flex border-b">
           <button
             className={`flex-1 py-3 text-sm font-medium transition ${activeTab === "members"
-                ? "text-teal-600 border-b-2 border-teal-600 bg-teal-50"
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              ? "text-teal-600 border-b-2 border-teal-600 bg-teal-50"
+              : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               }`}
             onClick={() => setActiveTab("members")}
           >
@@ -129,8 +129,8 @@ const GroupDetail = ({ group, onClose }) => {
           </button>
           <button
             className={`flex-1 py-3 text-sm font-medium transition ${activeTab === "add"
-                ? "text-teal-600 border-b-2 border-teal-600 bg-teal-50"
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              ? "text-teal-600 border-b-2 border-teal-600 bg-teal-50"
+              : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               }`}
             onClick={() => setActiveTab("add")}
           >
@@ -153,7 +153,7 @@ const GroupDetail = ({ group, onClose }) => {
                     className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50 justify-between"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 font-bold text-xs">
+                      <div className="w-8 h-8 rounded-full bg-[#eef7e9] flex items-center justify-center text-[#6bbd45] font-bold text-xs">
                         {member.firstName?.[0]}
                         {member.lastName?.[0]}
                       </div>
@@ -190,7 +190,7 @@ const GroupDetail = ({ group, onClose }) => {
                   placeholder="Search employees..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#6bbd45]"
                 />
               </div>
 
@@ -200,14 +200,14 @@ const GroupDetail = ({ group, onClose }) => {
                     key={user.id}
                     onClick={() => toggleUserSelection(user.id)}
                     className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition border ${selectedUsers.includes(user.id)
-                        ? "bg-teal-50 border-teal-200"
-                        : "hover:bg-gray-50 border-transparent"
+                      ? "bg-[#f7fbf3] border-[#d4e9c8]"
+                      : "hover:bg-gray-50 border-transparent"
                       }`}
                   >
                     <div
                       className={`w-5 h-5 rounded border flex items-center justify-center ${selectedUsers.includes(user.id)
-                          ? "bg-teal-500 border-teal-500"
-                          : "border-gray-300"
+                        ? "bg-[#6bbd45] border-[#6bbd45]"
+                        : "border-gray-300"
                         }`}
                     >
                       {selectedUsers.includes(user.id) && (
@@ -248,7 +248,7 @@ const GroupDetail = ({ group, onClose }) => {
               <Button
                 onClick={handleAddMembers}
                 disabled={selectedUsers.length === 0 || loading}
-                className="bg-teal-600 text-white flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-[#6bbd45] text-white flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   "Adding..."

@@ -27,7 +27,7 @@ const Layout = () => {
   };
 
   return (
-    <div className="flex px-1 h-screen w-screen overflow-hidden bg-linear-to-tr from-emerald-200 to-teal-950">
+    <div className="flex px-1 h-screen w-screen overflow-hidden bg-[#f7fbf3]">
       {/* Sidebar for Desktop */}
       <div className="hidden md:flex">
         <Sidebar
@@ -39,16 +39,14 @@ const Layout = () => {
 
       {/* Sidebar Overlay for Mobile */}
       <div
-        className={`fixed inset-0 bg-black/40 z-40 md:hidden transition-opacity duration-300 ${
-          isMobileOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
+        className={`fixed inset-0 bg-black/40 z-40 md:hidden transition-opacity duration-300 ${isMobileOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
         onClick={() => setIsMobileOpen(false)}
       ></div>
 
       <div
-        className={`fixed top-0 left-0 h-full bg-white z-50 transform transition-transform duration-300 lg:hidden ${
-          isMobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 left-0 h-full bg-white z-50 transform transition-transform duration-300 lg:hidden ${isMobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <Sidebar
           isMinimized={false}

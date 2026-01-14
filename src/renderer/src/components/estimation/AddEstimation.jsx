@@ -195,7 +195,7 @@ const AddEstimation = ({ initialRfqId, onSuccess }) => {
         <textarea
           {...register("description")}
           rows={4}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6bbd45] focus:border-[#6bbd45] resize-none"
           placeholder="Project scope, special requirements..."
           disabled={!!selectedRfqId}
         />
@@ -235,7 +235,7 @@ const AddEstimation = ({ initialRfqId, onSuccess }) => {
         )}
 
         <div className="flex justify-end gap-4 pt-8 border-t border-gray-200">
-          <Button type="button"  onClick={() => { reset(); setFiles([]); }}>
+          <Button type="button" onClick={() => { reset(); setFiles([]); }}>
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>

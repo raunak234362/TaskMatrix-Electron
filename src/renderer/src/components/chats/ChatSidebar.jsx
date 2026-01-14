@@ -91,7 +91,7 @@ const ChatSidebar = ({
             <div
               key={chat.id}
               onClick={() => selectChat(chat)}
-              className={`p-3 rounded-lg cursor-pointer transition ${isActive ? "bg-teal-100" : "hover:bg-gray-100"
+              className={`p-3 rounded-lg cursor-pointer transition ${isActive ? "bg-[#eef7e9]" : "hover:bg-gray-100"
                 }`}
             >
               <div className="flex justify-between items-center">

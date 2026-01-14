@@ -1,4 +1,10 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+@theme {
+  --color-primary: #6bbd45;
+  --color-primary-foreground: #ffffff;
+  --color-ring: #6bbd45;
+}
 @import './base.css';
 body {
   display: flex;

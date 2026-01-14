@@ -13,6 +13,7 @@ import {
   Group,
   LucideComponent,
   FactoryIcon,
+  FileText,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import Button from "./fields/Button";
@@ -57,7 +58,7 @@ const Sidebar = ({
       label: "Estimations",
       to: "estimation",
       icon: <Hourglass />,
-      roles: ["admin","estimation_head", "department-manager", "deputy-manager", "staff"],
+      roles: ["admin", "estimation_head", "department-manager", "deputy-manager", "staff"],
     },
 
     {
@@ -103,6 +104,42 @@ const Sidebar = ({
         "deputy-manager",
         "user",
         "human-resource",
+      ],
+    },
+    {
+      label: "Projects",
+      to: "projects",
+      icon: <FolderOpenDot />,
+      roles: [
+        "admin",
+        "staff",
+        "department-manager",
+        "deputy-manager",
+        "project-manager",
+        "client",
+        "estimation_head",
+        "system-admin",
+        "user",
+        "estimator",
+        "sales",
+      ],
+    },
+    {
+      label: "Notes",
+      to: "notes",
+      icon: <FileText />,
+      roles: [
+        "admin",
+        "staff",
+        "department-manager",
+        "deputy-manager",
+        "project-manager",
+        "client",
+        "estimation_head",
+        "system-admin",
+        "user",
+        "estimator",
+        "sales",
       ],
     },
     {
@@ -178,20 +215,20 @@ const Sidebar = ({
                     onClick={isMobile ? toggleSidebar : undefined}
                     className={({ isActive }) =>
                       isActive
-                        ? `flex items-center font-semibold text-white bg-linear-to-r from-emerald-200 to-teal-500 py-2 px-3 rounded-md w-full ${isMinimized ? "justify-center" : "justify-start"
+                        ? `flex items-center font-semibold text-white bg-[#6bbd45] py-2 px-3 rounded-md w-full ${isMinimized ? "justify-center" : "justify-start"
                         }`
-                        : `text-teal-600 font-semibold hover:text-white hover:bg-linear-to-r hover:from-emerald-100 hover:to-teal-500 py-2 px-3 rounded-md flex items-center w-full ${isMinimized ? "justify-center" : "justify-start"
+                        : `text-[#6bbd45] font-semibold hover:text-white hover:bg-[#6bbd45] py-2 px-3 rounded-md flex items-center w-full ${isMinimized ? "justify-center" : "justify-start"
                         }`
                     }
                   >
-                    <div className="text-teal-700">{icon}</div>
+                    <div className="text-[#6bbd45] group-hover:text-white transition-colors">{icon}</div>
                     {!isMinimized && <span className="ml-3">{label}</span>}
                   </NavLink>
 
                   {/* Tooltip for minimized sidebar */}
                   {isMinimized && (
                     <div className="absolute z-30 -translate-0.5  hidden group-hover:flex">
-                      <span className="bg-teal-900 text-white text-[10px] font-medium py-1 px-1 rounded-md shadow-lg whitespace-nowrap">
+                      <span className="bg-[#6bbd45] text-white text-[10px] font-medium py-1 px-1 rounded-md shadow-lg whitespace-nowrap">
                         {label}
                       </span>
                     </div>

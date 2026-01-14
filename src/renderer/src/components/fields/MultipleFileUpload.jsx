@@ -2,13 +2,6 @@
 
 import React, { useState } from "react";
 
-// Define the props interface for type safety
-
-
-/**
- * A reusable component for uploading multiple files.
- * It displays a list of selected files and allows removing individual files.
- */
 function MultipleFileUpload({
   onFilesChange,
   initialFiles = [],
@@ -64,12 +57,12 @@ function MultipleFileUpload({
         type="file"
         multiple
         onChange={handleFileChange}
-        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+        className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
       />
 
       {files.length > 0 && (
         <div className="mt-4">
-          <p className="text-sm font-medium text-gray-600 mb-2">
+          <p className="text-sm font-medium text-gray-700 mb-2">
             Selected Files:
           </p>
           <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
@@ -80,12 +73,12 @@ function MultipleFileUpload({
               >
                 <div className="flex-1 min-w-0">
                   <span
-                    className="text-sm text-gray-800 font-medium block truncate"
+                    className="text-sm text-gray-700 font-medium block truncate"
                     title={file.name}
                   >
                     {file.name}
                   </span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-700">
                     {formatFileSize(file.size)}
                   </span>
                 </div>

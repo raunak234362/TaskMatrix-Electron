@@ -1,44 +1,24 @@
+
 import { useEffect, useState } from "react";
 import DataTable from "../ui/table";
+
 import GetRFIByID from "./GetRFIByID";
 import { Loader2, Inbox } from "lucide-react";
+
+
 
 const AllRFI = ({ rfiData = [] }) => {
   const [rfis, setRFIs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRfiID, setSelectedRfiID] = useState(null);
+  // const [selectedRfiID, setSelectedRfiID] = useState<string | null>(null);
+  console.log(rfiData);
 
   const userRole = sessionStorage.getItem("userRole");
 
-  // const fetchRFI = async () => {
-  //   try {
-  //     setLoading(true);
-  //     let result;
-
-  //     if (userRole === "CLIENT") {
-  //       result = await Service.RfiSent();
-  //     } else {
-  //       result = await Service.RfiRecieved();
-  //     }
-
-  //     const arrayData = Array.isArray(result) ? result : result?.data || [];
-  //     const normalized = arrayData.map((item: any) => ({
-  //       ...item,
-  //       createdAt: item.createdAt || item.date || null,
-  //     }));
-
-  //     setRFIs(normalized);
-  //   } catch (error) {
-  //     console.error("Error fetching RFI:", error);
-  //     setRFIs([]); // fallback to empty
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   useEffect(() => {
     if (rfiData && rfiData.length > 0) {
-      // ✅ Use passed RFI data
+
       const normalized = rfiData.map((item) => ({
         ...item,
         createdAt: item.createdAt || item.date || null,
@@ -46,14 +26,13 @@ const AllRFI = ({ rfiData = [] }) => {
       setRFIs(normalized);
       setLoading(false);
     } else {
-      // ✅ Fetch from API if prop empty
-      // fetchRFI();
+
     }
   }, [rfiData]);
 
-  const handleRowClick = (row) => {
-    setSelectedRfiID(row.id);
-  };
+  // const handleRowClick = (row: RFIItem) => {
+  //   // setSelectedRfiID(row.id);
+  // };
 
   // ✅ Define columns
   const columns = [
@@ -72,13 +51,7 @@ const AllRFI = ({ rfiData = [] }) => {
     },
   ];
 
-  if (userRole !== "CLIENT") {
-    columns.push({
-      accessorKey: "fabricator",
-      header: "Fabricator",
-      cell: ({ row }) => row.original.fabricator?.fabName || "—",
-    });
-  }
+
 
   columns.push(
     {
@@ -112,7 +85,7 @@ const AllRFI = ({ rfiData = [] }) => {
   // ✅ Loading state
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+      <div className="flex flex-col items-center justify-center py-12 text-gray-700">
         <Loader2 className="w-6 h-6 animate-spin mb-2" />
         Loading RFIs...
       </div>
@@ -122,7 +95,7 @@ const AllRFI = ({ rfiData = [] }) => {
   // ✅ Empty state
   if (!loading && (!rfis || rfis.length === 0)) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+      <div className="flex flex-col items-center justify-center py-16 text-gray-700">
         <Inbox className="w-10 h-10 mb-3 text-gray-400" />
         <p className="text-lg font-medium">No RFIs Available</p>
         <p className="text-sm text-gray-400">
@@ -140,19 +113,12 @@ const AllRFI = ({ rfiData = [] }) => {
       <DataTable
         columns={columns}
         data={rfis}
-        onRowClick={handleRowClick}
+
         detailComponent={({ row }) => <GetRFIByID id={row.id} />}
         searchPlaceholder="Search RFIs..."
         pageSizeOptions={[5, 10, 25]}
       />
 
-      {/* Optional overlay detail modal */}
-      {/* {selectedRfiID && (
-        <GetRFIByID
-          id={selectedRfiID}
-          onClose={() => setSelectedRfiID(null)}
-        />
-      )} */}
     </div>
   );
 };

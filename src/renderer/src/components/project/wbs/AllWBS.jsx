@@ -1,26 +1,37 @@
+
 import { useEffect, useState } from "react";
 
-import { format } from "date-fns";
 import { Loader2, AlertCircle } from "lucide-react";
 import DataTable from "../../ui/table";
 import Service from "../../../api/Service";
 import GetWBSByID from "./GetWBSByID";
-import Button from "../../fields/Button";
+import { Button } from "../../ui/button";
+import FetchWBSTemplate from "./FetchWBSTemplate";
 
-const AllWBS = ({ id }) => {
-  const [wbsList, setWbsList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+import { useDispatch } from "react-redux";
+import { setWBSForProject } from "../../../store/wbsSlice";
+
+const AllWBS = ({ id, stage }) => {
+  const dispatch = useDispatch();
+  const [wbsBundles, setWbsBundles] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [selectedWBS, setSelectedWBS] = useState(null);
+  const [showFetchTemplate, setShowFetchTemplate] = useState(false);
+  const projectId = id;
 
   // ✅ Fetch all WBS items
   const fetchAllWBS = async () => {
+    console.log("fetchAllWBS called for project:", projectId, "stage:", stage);
     try {
       setLoading(true);
       setError(null);
-      const response = await Service.GetWBSByProjectId(id);
-      console.log("Fetched WBS:", response);
-      setWbsList(response || []);
+
+      const wbsBundlesResponse = await Service.GetBundleByProjectId(projectId);
+      setWbsBundles(wbsBundlesResponse.data);
+      console.log("Fetched WBS Bundle:", wbsBundlesResponse.data);
+      dispatch(
+        setWBSForProject({ projectId, wbs: wbsBundlesResponse.data || [] })
+      );
     } catch (err) {
       console.error("Error fetching WBS:", err);
       setError("Failed to load WBS data");
@@ -31,23 +42,19 @@ const AllWBS = ({ id }) => {
 
   useEffect(() => {
     fetchAllWBS();
-  }, []);
+  }, [id, stage]);
 
-  // ✅ Define table columns
+  // ✅ Define table columns for bundles
   const columns = [
     {
-      accessorKey: "name",
-      header: "WBS Name",
+      accessorKey: "bundleKey",
+      header: "Bundle Name",
       cell: ({ row }) => (
-        <span className="font-medium text-gray-800">{row.original.name}</span>
-      ),
-    },
-    {
-      accessorKey: "type",
-      header: "Type",
-      cell: ({ row }) => (
-        <span className="text-sm text-teal-700 font-semibold">
-          {row.original.type}
+        <span className="font-medium text-gray-700">
+          {row.original.name ||
+            row.original.bundle?.name ||
+            row.original.bundleKey ||
+            "—"}
         </span>
       ),
     },
@@ -59,38 +66,37 @@ const AllWBS = ({ id }) => {
       ),
     },
     {
+      accessorKey: "totalQtyNo",
+      header: "Total Quantity",
+      cell: ({ row }) => (
+        <span className="text-gray-700">{row.original.totalQtyNo || 0}</span>
+      ),
+    },
+    {
       accessorKey: "totalExecHr",
       header: "Total Exec Hrs",
       cell: ({ row }) => (
-        <span className="text-gray-700">{row.original.totalExecHr || "—"}</span>
+        <span className="text-gray-700">{row.original.totalExecHr || 0}</span>
       ),
     },
     {
       accessorKey: "totalCheckHr",
       header: "Total Check Hrs",
       cell: ({ row }) => (
-        <span className="text-gray-700">{row.original.totalCheckHr || "—"}</span>
+        <span className="text-gray-700">{row.original.totalCheckHr || 0}</span>
       ),
-    },
-
-    {
-      accessorKey: "createdAt",
-      header: "Created On",
-      cell: ({ row }) =>
-        format(new Date(row.original.createdAt), "dd MMM yyyy, HH:mm"),
     },
   ];
 
   // ✅ Handle row click — open details
   const handleRowClick = (row) => {
-    const wbsId = row.id ?? row.fabId ?? "";
-    if (wbsId) setSelectedWBS(wbsId);
+    setSelectedWBS(row);
   };
 
   // ✅ Render loading/error states
   if (loading)
     return (
-      <div className="flex justify-center items-center py-10 text-gray-500">
+      <div className="flex justify-center items-center py-10 text-gray-700">
         <Loader2 className="w-5 h-5 animate-spin mr-2" />
         Loading WBS data...
       </div>
@@ -107,31 +113,70 @@ const AllWBS = ({ id }) => {
   return (
     <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
       <div className="flex justify-between items-center mb-4">
-
         <div>
-
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">
+          <h2 className="text-lg font-semibold text-gray-700 mb-3">
             Work Breakdown Structure (WBS)
           </h2>
-          <p className="text-sm text-gray-500 mb-4">
-            Total Items:{" "}
-            <span className="font-semibold text-gray-700">{wbsList.length}</span>
+          <p className="text-sm text-gray-700 mb-4">
+            Total Bundles:{" "}
+            <span className="font-semibold text-gray-700">
+              {wbsBundles?.length || 0}
+            </span>
           </p>
         </div>
-        <div><Button>Add New Line Item</Button></div>
+        <div>
+          <Button onClick={() => setShowFetchTemplate(true)}>
+            Add New Bundle
+          </Button>
+        </div>
       </div>
 
       <DataTable
         columns={columns}
-        data={wbsList}
+        data={wbsBundles || []}
         onRowClick={handleRowClick}
-        searchPlaceholder="Search WBS by name or type..."
+        detailComponent={({ row, close }) => (
+          <GetWBSByID
+            projectId={projectId}
+            id={row.id || row.fabId || ""}
+            stage={row.stage || ""}
+            onClose={close}
+            initialData={row}
+          />
+        )}
+        searchPlaceholder="Search bundles by name..."
         pageSizeOptions={[10, 25, 50, 100]}
+        initialSorting={[
+          { id: "totalQtyNo", desc: true },
+          { id: "bundleKey", desc: false },
+        ]}
       />
 
       {/* ✅ Modal for WBS Details */}
       {selectedWBS && (
-        <GetWBSByID id={selectedWBS} onClose={() => setSelectedWBS(null)} />
+        <GetWBSByID
+          projectId={projectId}
+          id={selectedWBS.id || selectedWBS.fabId || ""}
+          stage={selectedWBS.stage || ""}
+          initialData={selectedWBS}
+          onClose={() => setSelectedWBS(null)}
+        />
+      )}
+
+      {/* ✅ Modal for Fetching WBS Templates */}
+      {showFetchTemplate && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <FetchWBSTemplate
+              id={id}
+              onClose={() => setShowFetchTemplate(false)}
+              onSelect={() => {
+                setShowFetchTemplate(false);
+                fetchAllWBS(); // Refresh the list after selection
+              }}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

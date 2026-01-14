@@ -4,15 +4,14 @@ import MultipleFileUpload from "../fields/MultipleFileUpload";
 import Service from "../../api/Service";
 import { X } from "lucide-react";
 import Button from "../fields/Button";
-
+import RichTextEditor from "../fields/RichTextEditor";
 
 const RFIResponseModal = ({
   rfiId,
   onClose,
   onSuccess,
 }) => {
-
-  const { register, handleSubmit, control, reset } = useForm();
+  const { handleSubmit, control, reset } = useForm();
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +25,6 @@ const RFIResponseModal = ({
         ...data,
         rfiId,
         parentResponseId: data.parentResponseId || "",
-
       };
       console.log(payload);
       const formData = new FormData();
@@ -45,7 +43,6 @@ const RFIResponseModal = ({
       setFiles([]);
       onSuccess();
       onClose();
-
     } catch (err) {
       console.error("Error submitting RFI response:", err);
     } finally {
@@ -56,20 +53,25 @@ const RFIResponseModal = ({
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40">
       <div className="bg-white w-full max-w-lg p-6 rounded-xl shadow-lg relative">
-
         <button onClick={onClose} className="absolute top-3 right-3">
-          <X className="text-gray-600 hover:text-red-500" size={18} />
+          <X className="text-gray-700 hover:text-red-500" size={18} />
         </button>
 
-        <h2 className="text-xl font-semibold text-teal-700">Add Response</h2>
+        <h2 className="text-xl font-semibold text-green-700">Add Response</h2>
 
         <form className="space-y-4 mt-4" onSubmit={handleSubmit(onSubmit)}>
           {/* Message */}
-          <textarea
-            {...register("reason", { required: true })}
-            placeholder="Write your response..."
-            className="w-full border rounded-md p-3"
-            rows={4}
+          <Controller
+            name="reason"
+            control={control}
+            rules={{ required: "Message is required" }}
+            render={({ field }) => (
+              <RichTextEditor
+                value={field.value || ""}
+                onChange={field.onChange}
+                placeholder="Write your response..."
+              />
+            )}
           />
 
           {/* File uploader */}
@@ -83,7 +85,11 @@ const RFIResponseModal = ({
 
           <div className="flex justify-end gap-3">
             <Button onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={loading} className="bg-teal-600 text-white">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="bg-green-600 text-white"
+            >
               {loading ? "Submitting..." : "Submit Response"}
             </Button>
           </div>

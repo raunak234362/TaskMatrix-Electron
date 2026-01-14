@@ -8,6 +8,7 @@ import { ToastContainer, toast } from "react-toastify";
 import socket, { connectSocket } from "./socket";
 import { loadFabricator } from "./store/fabricatorSlice";
 import { setRFQData } from "./store/rfqSlice";
+import { setProjectData } from "./store/projectSlice";
 
 const AppContent = () => {
   const dispatch = useDispatch();
@@ -87,9 +88,21 @@ const AppContent = () => {
       }
     };
 
+    const fetchAllProjects = async () => {
+      try {
+        const response = await Service.GetAllProjects();
+        const data = response.data || [];
+        dispatch(setProjectData(data));
+      } catch (err) {
+        console.error("Failed to fetch projects:", err);
+        toast.error("Failed to load projects");
+      }
+    };
+
     fetchAllFabricator();
     fetchAllEmployee();
     fetchInboxRFQ();
+    fetchAllProjects();
 
     return () => {
       if (socket.connected) {
@@ -110,7 +123,7 @@ const AppContent = () => {
       <div className="fixed bottom-6 right-6 flex flex-col items-center z-50">
         <button
           onClick={ipcHandle}
-          className="bg-gradient-to-r from-teal-600 to-blue-500 hover:from-blue-600 hover:to-teal-500 text-white font-semibold rounded-2xl shadow-lg px-5 py-2 transition-transform hover:scale-105"
+          className="bg-[#6bbd45] hover:bg-[#5aa33a] text-white font-semibold rounded-2xl shadow-lg px-5 py-2 transition-transform hover:scale-105"
         >
           Send IPC
         </button>

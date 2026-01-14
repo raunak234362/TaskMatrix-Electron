@@ -1,33 +1,32 @@
-import Login from "./auth/Login";
-import WBTDashboard from "./dashboard/WBTDashboard";
+import Login from './auth/Login'
+import WBTDashboard from './dashboard/WBTDashboard'
 
-import Profile from "./profile/Profile";
+import Profile from './profile/Profile'
 
 //Employees Components-
-import AllEmployee from "./manageTeam/employee/AllEmployee";    
-
+import AllEmployee from './manageTeam/employee/AllEmployee'
 
 //Estimation Components-
-import AddEstimation from "./estimation/AddEstimation";
-import AllEstimation from "./estimation/AllEstimation";
+import AddEstimation from './estimation/AddEstimation'
+import AllEstimation from './estimation/AllEstimation'
 
 // Projects
-import AllProjects from "./project/AllProjects";
+import AllProjects from './project/AllProjects'
+import AllNotes from './project/notes/AllNotes'
 
 // Task Components
-import AllTasks from "./task/AllTasks";
-import AllActiveTask from "./task/AllActiveTask";
+import AllTasks from './task/AllTasks'
+import AllActiveTask from './task/AllActiveTask'
 
 export {
-    Login,
-    WBTDashboard,
-    Profile,
-    AllEmployee,
-    AllProjects,
-    AddEstimation,
-    AllEstimation,
-    AllTasks,
-    AllActiveTask
-
-
+  Login,
+  WBTDashboard,
+  Profile,
+  AllEmployee,
+  AllProjects,
+  AllNotes,
+  AddEstimation,
+  AllEstimation,
+  AllTasks,
+  AllActiveTask
 }

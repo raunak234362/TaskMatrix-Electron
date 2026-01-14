@@ -30,7 +30,7 @@ const AddChatGroup = ({ onClose, onCreated }) => {
         {/* Header */}
         <div className="px-6 py-4 border-b bg-white flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-teal-50 rounded-lg text-teal-600">
+            <div className="p-2 bg-[#f7fbf3] rounded-lg text-[#6bbd45]">
               <Users size={20} />
             </div>
             <h2 className="text-lg font-bold text-gray-800">Create New Group</h2>
@@ -73,7 +73,7 @@ const AddChatGroup = ({ onClose, onCreated }) => {
               </Button>
               <Button
                 type="submit"
-                className="flex-1 bg-teal-600 text-white hover:bg-teal-700"
+                className="flex-1 bg-[#6bbd45] text-white hover:bg-[#5aa33a]"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Creating..." : "Create Group"}

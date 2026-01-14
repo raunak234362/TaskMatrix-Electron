@@ -14,7 +14,7 @@ const ChatHead = ({ contact, onBack }) => {
         {onBack && (
           <button
             onClick={onBack}
-            className="md:hidden text-teal-600 font-medium"
+            className="md:hidden text-[#6bbd45] font-medium"
           >
             Back
           </button>
@@ -29,7 +29,7 @@ const ChatHead = ({ contact, onBack }) => {
 
       <Button
         onClick={() => setDetailOpen(true)}
-        className="rounded-full bg-teal-500 text-white"
+        className="rounded-full bg-[#6bbd45] text-white"
       >
         <MoreVertical size={20} />
       </Button>

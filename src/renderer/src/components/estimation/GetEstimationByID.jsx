@@ -101,11 +101,11 @@ const GetEstimationByID = ({ id }) => {
         : "bg-blue-100 text-blue-800";
 
   return (
-    <div className="bg-gradient-to-br from-teal-50 to-teal-50 p-6 rounded-xl shadow-inner text-sm">
+    <div className="bg-[#f7fbf3] p-6 rounded-xl shadow-inner text-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-xl font-bold text-teal-800">
+          <h3 className="text-xl font-bold text-[#2d501d]">
             Estimation #{estimationNumber}
           </h3>
           <p className="text-gray-700 font-medium">Project: {projectName}</p>
@@ -206,8 +206,8 @@ const GetEstimationByID = ({ id }) => {
 
       {/* Files Section */}
       {Array.isArray(files) && files.length > 0 && (
-        <div className="mt-6 pt-5 border-t border-teal-200">
-          <h4 className="font-semibold text-teal-700 mb-2 flex items-center gap-1">
+        <div className="mt-6 pt-5 border-t border-[#d4e9c8]">
+          <h4 className="font-semibold text-[#6bbd45] mb-2 flex items-center gap-1">
             <FileText className="w-4 h-4" /> Files
           </h4>
           <ul className="text-gray-700 space-y-1">
@@ -219,7 +219,7 @@ const GetEstimationByID = ({ id }) => {
                 <span>{file.originalName}</span>
                 <button
                   type="button"
-                  className="text-teal-600 text-sm flex items-center gap-1 hover:underline cursor-pointer"
+                  className="text-[#6bbd45] text-sm flex items-center gap-1 hover:underline cursor-pointer"
                   onClick={() => openFileSecurely("estimation", id, file.id)}
                 >
                   <Link2 className="w-3 h-3" /> Open

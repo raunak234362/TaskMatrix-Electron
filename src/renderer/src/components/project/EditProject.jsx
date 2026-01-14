@@ -1,7 +1,8 @@
+
 import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
 import {
   Building2,
@@ -11,6 +12,7 @@ import {
   Layers,
   X,
   Save,
+  Users,
 } from "lucide-react";
 
 import Input from "../fields/input";
@@ -19,12 +21,17 @@ import SectionTitle from "../ui/SectionTitle";
 import Service from "../../api/Service";
 import ToggleField from "../fields/Toggle";
 
+import { updateProject } from "../../store/projectSlice";
+import { showDepartment, showTeam, showStaff } from "../../store/userSlice";
+
+
 
 const EditProject = ({
   projectId,
   onCancel,
   onSuccess,
 }) => {
+  const dispatch = useDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [connectionDesigners, setConnectionDesigners] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,12 +42,10 @@ const EditProject = ({
   const departmentDatas = useSelector(
     (state) => state.userInfo?.departmentData || []
   );
-  const teamDatas = useSelector(
-    (state) => state.userInfo?.teamData || []
-  );
+  const teamDatas = useSelector((state) => state.userInfo?.teamData || []);
   const users = useSelector((state) => state.userInfo?.staffData || []);
 
-  const { register, handleSubmit, control, setValue } =
+  const { register, handleSubmit, control, setValue, watch } =
     useForm({
       defaultValues: {
         tools: "TEKLA",
@@ -56,12 +61,23 @@ const EditProject = ({
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [cdRes, projectRes] = await Promise.all([
-          Service.FetchAllConnectionDesigner(),
-          Service.GetProjectById(projectId),
-        ]);
+        const [cdRes, projectRes, deptRes, teamRes, staffRes] =
+          await Promise.all([
+            Service.FetchAllConnectionDesigner(),
+            Service.GetProjectById(projectId),
+            departmentDatas.length === 0
+              ? Service.AllDepartments()
+              : Promise.resolve(null),
+            teamDatas.length === 0 ? Service.AllTeam() : Promise.resolve(null),
+            users.length === 0
+              ? Service.FetchAllEmployee()
+              : Promise.resolve(null),
+          ]);
 
         setConnectionDesigners(cdRes?.data || []);
+        if (deptRes) dispatch(showDepartment(deptRes.data || deptRes));
+        if (teamRes) dispatch(showTeam(teamRes.data || teamRes));
+        if (staffRes) dispatch(showStaff(staffRes.data || staffRes));
 
         const project = projectRes?.data;
         if (project) {
@@ -71,6 +87,7 @@ const EditProject = ({
           setValue("fabricatorID", project.fabricatorID);
           setValue("managerID", project.managerID);
           setValue("departmentID", project.department?.id);
+          setValue("teamID", project.team?.id);
           setValue("tools", project.tools);
           setValue("stage", project.stage);
           setValue("estimatedHours", project.estimatedHours);
@@ -104,19 +121,23 @@ const EditProject = ({
   }, [projectId, setValue]);
 
   const options = {
-    fabricators: fabricators.map((f) => ({
-      label: f.fabName,
-      value: String(f.id),
-    })),
-    departments: departmentDatas.map((d) => ({
-      label: d.name,
-      value: String(d.id),
-    })),
-    managers: users.map((u) => ({
+    fabricators: (Array.isArray(fabricators) ? fabricators : []).map(
+      (f) => ({
+        label: f.fabName,
+        value: String(f.id),
+      })
+    ),
+    departments: (Array.isArray(departmentDatas) ? departmentDatas : []).map(
+      (d) => ({
+        label: d.name,
+        value: String(d.id),
+      })
+    ),
+    managers: (Array.isArray(users) ? users : []).map((u) => ({
       label: `${u.firstName} ${u.lastName}`,
       value: String(u.id),
     })),
-    teams: teamDatas.map((t) => ({
+    teams: (Array.isArray(teamDatas) ? teamDatas : []).map((t) => ({
       label: t.name,
       value: String(t.id),
     })),
@@ -128,6 +149,11 @@ const EditProject = ({
       { label: "TEKLA", value: "TEKLA" },
       { label: "SDS2", value: "SDS2" },
       { label: "Both (TEKLA + SDS2)", value: "BOTH" },
+    ],
+    stage: [
+      { label: "IFA - (Issue for Approval)", value: "IFA" },
+      { label: "IFC - (Issue for Construction)", value: "IFC" },
+      { label: "CO# - (Change Order)", value: "CO#" },
     ],
   };
 
@@ -147,13 +173,14 @@ const EditProject = ({
         }
       });
 
-      await Service.EditProjectById(projectId, formData);
+      const res = await Service.EditProjectById(projectId, formData);
+      if (res?.data) {
+        dispatch(updateProject(res.data));
+      }
       toast.success("Project updated successfully!");
       onSuccess();
     } catch (error) {
-      toast.error(
-        error?.response?.data?.message || "Failed to update project"
-      );
+      toast.error(error?.response?.data?.message || "Failed to update project");
     } finally {
       setIsSubmitting(false);
     }
@@ -181,10 +208,10 @@ const EditProject = ({
         {/* Scrollable Content */}
         <div className="overflow-y-auto p-6">
           <div className="flex justify-between items-center mb-6 border-b pb-4 sticky top-0 bg-white z-10">
-            <h2 className="text-2xl font-bold text-gray-800">Edit Project</h2>
+            <h2 className="text-2xl font-bold text-gray-700">Edit Project</h2>
             <button
               onClick={onCancel}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-700 hover:text-gray-700"
             >
               <X className="w-6 h-6" />
             </button>
@@ -195,20 +222,20 @@ const EditProject = ({
             <SectionTitle title="Project Details" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Input
-                label="Project Number *"
+                label="Project Number"
                 placeholder="PROJ-2025-089"
-                {...register("projectNumber", { required: "Required" })}
+                {...register("projectNumber")}
               />
               <Input
-                label="Project Name *"
+                label="Project Name"
                 placeholder="Empire State Tower - Phase II"
-                {...register("name", { required: "Required" })}
+                {...register("name")}
               />
               <div className="md:col-span-2">
                 <Input
-                  label="Description *"
+                  label="Description"
                   placeholder="Full structural steel detailing for 40-story commercial building..."
-                  {...register("description", { required: "Required" })}
+                  {...register("description")}
                 />
               </div>
             </div>
@@ -218,12 +245,11 @@ const EditProject = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
-                  <Building2 className="w-4 h-4 text-blue-600" /> Fabricator *
+                  <Building2 className="w-4 h-4 text-blue-600" /> Fabricator
                 </label>
                 <Controller
                   name="fabricatorID"
                   control={control}
-                  rules={{ required: true }}
                   render={({ field }) => (
                     <Select
                       options={options.fabricators}
@@ -239,13 +265,11 @@ const EditProject = ({
               </div>
               <div>
                 <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
-                  <HardHat className="w-4 h-4 text-amber-600" /> Project
-                  Manager *
+                  <HardHat className="w-4 h-4 text-amber-600" /> Project Manager
                 </label>
                 <Controller
                   name="managerID"
                   control={control}
-                  rules={{ required: true }}
                   render={({ field }) => (
                     <Select
                       options={options.managers}
@@ -261,12 +285,11 @@ const EditProject = ({
               </div>
               <div>
                 <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
-                  <UserCheck className="w-4 h-4 text-green-600" /> Department *
+                  <UserCheck className="w-4 h-4 text-green-600" /> Department
                 </label>
                 <Controller
                   name="departmentID"
                   control={control}
-                  rules={{ required: true }}
                   render={({ field }) => (
                     <Select
                       options={options.departments}
@@ -277,6 +300,42 @@ const EditProject = ({
                       placeholder="Select dept"
                     />
                   )}
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
+                  <Users className="w-4 h-4 text-purple-600" /> Team
+                </label>
+                <Controller
+                  name="teamID"
+                  control={control}
+                  render={({ field }) => {
+                    const selectedDeptId = watch("departmentID");
+                    const filteredTeams = (Array.isArray(teamDatas) ? teamDatas : [])
+                      .filter(
+                        (t) =>
+                          !selectedDeptId ||
+                          String(t.departmentID) === String(selectedDeptId)
+                      )
+                      .map((t) => ({
+                        label: t.name,
+                        value: String(t.id),
+                      }));
+
+                    return (
+                      <Select
+                        options={filteredTeams}
+                        value={filteredTeams.find(
+                          (o) => o.value === field.value
+                        )}
+                        onChange={(o) => field.onChange(o?.value || "")}
+                        placeholder="Select team"
+                        isSearchable
+                        isClearable
+                        isDisabled={!selectedDeptId}
+                      />
+                    );
+                  }}
                 />
               </div>
             </div>
@@ -363,12 +422,24 @@ const EditProject = ({
                   render={({ field }) => (
                     <Select
                       options={options.tools}
-                      value={options.tools.find(
-                        (o) => o.value === field.value
-                      )}
-                      onChange={(o) =>
-                        field.onChange(o?.value || "TEKLA")
-                      }
+                      value={options.tools.find((o) => o.value === field.value)}
+                      onChange={(o) => field.onChange(o?.value || "TEKLA")}
+                    />
+                  )}
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
+                  <Layers className="w-4 h-4 text-cyan-600" /> Stage
+                </label>
+                <Controller
+                  name="stage"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      options={options.stage}
+                      value={options.stage.find((o) => o.value === field.value)}
+                      onChange={(o) => field.onChange(o?.value || "IFA")}
                     />
                   )}
                 />
@@ -380,9 +451,9 @@ const EditProject = ({
                 {...register("estimatedHours")}
               />
               <Input
-                label="Start Date *"
+                label="Start Date"
                 type="date"
-                {...register("startDate", { required: "Required" })}
+                {...register("startDate")}
               />
               <Input
                 label="Target End Date"

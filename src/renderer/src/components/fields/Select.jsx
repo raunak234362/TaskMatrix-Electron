@@ -4,25 +4,21 @@ import React, {
   useState,
   useRef,
   useEffect,
-  forwardRef,
+  forwardRef
 } from "react";
+import { Search } from "lucide-react";
 
-
-
-
-
-const Select = (
-  {
-    options = [],
-    label,
-    name = "",
-    className = "",
-    onChange,
-    placeholder,
-    value,
-  },
-  // ref: ForwardedRef<HTMLDivElement>   // Removed ref, as it is unused
-) => {
+const Select = ({
+  options = [],
+  label,
+  name = "",
+  className = "",
+  onChange,
+  placeholder,
+  value,
+}) =>
+// ref: ForwardedRef<HTMLDivElement>   // Removed ref, as it is unused
+{
   // const id = useId();                  // Removed id, as it is unused
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(
@@ -59,7 +55,8 @@ const Select = (
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Handle search input
@@ -77,13 +74,16 @@ const Select = (
     setSelectedOption(option);
     setSearchTerm("");
     setIsOpen(false);
-    if (onChange && name) {
+    if (onChange) {
       onChange(name, String(option.value));
     }
   };
 
   // Highlight matching text in options
-  const highlightMatch = (text, highlight) => {
+  const highlightMatch = (
+    text,
+    highlight
+  ) => {
     if (!highlight.trim()) {
       return text;
     }
@@ -94,7 +94,7 @@ const Select = (
       <>
         {parts.map((part, i) =>
           regex.test(part) ? (
-            <mark key={i} className="bg-yellow-200 text-black">
+            <mark key={i} className="bg-yellow-200 text-gray-700">
               {part}
             </mark>
           ) : (
@@ -115,8 +115,8 @@ const Select = (
             searchRef.current?.focus();
           }, 100);
         }}
-        className={`flex items-center justify-between p-2 text-sm border rounded-md bg-white cursor-pointer transition-all ${isOpen ? "border-blue-500 ring-2 ring-blue-100" : "border-gray-300"
-          } ${className}`}
+        className={`flex items - center justify - between p - 2 text - sm border rounded - md bg - white cursor - pointer transition - all ${isOpen ? "border-blue-500 ring-2 ring-blue-100" : "border-gray-300"
+          } ${className} `}
       >
         <div className="flex-1">
           {isOpen ? (
@@ -127,14 +127,14 @@ const Select = (
                 type="text"
                 value={searchTerm}
                 onChange={handleSearch}
-                className="w-full bg-transparent outline-none text-gray-900"
+                className="w-full bg-transparent outline-none"
                 placeholder="Search..."
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
           ) : (
             <span
-              className={selectedOption ? "text-gray-900" : "text-gray-500"}
+              className={selectedOption ? "text-gray-700" : "text-gray-700"}
             >
               {selectedOption
                 ? selectedOption.label
@@ -143,8 +143,8 @@ const Select = (
           )}
         </div>
         <svg
-          className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? "transform rotate-180" : ""
-            }`}
+          className={`w - 4 h - 4 text - gray - 400 transition - transform ${isOpen ? "transform rotate-180" : ""
+            } `}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -172,7 +172,7 @@ const Select = (
               </div>
             ))
           ) : (
-            <div className="px-4 py-1 text-gray-500">No options found</div>
+            <div className="px-4 py-1 text-gray-700">No options found</div>
           )}
         </div>
       )}

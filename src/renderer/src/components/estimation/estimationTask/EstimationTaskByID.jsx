@@ -182,7 +182,7 @@ const EstimationTaskByID = ({ id, onClose, refresh }) => {
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
           {/* Task Info Card */}
-          <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-8 border border-teal-200">
+          <div className="bg-[#f7fbf3] rounded-2xl p-8 border border-[#d4e9c8]">
             <h3 className="text-2xl font-bold text-teal-900 mb-6 flex items-center gap-3">
               <FileText className="w-7 h-7" />
               Task Information
@@ -254,7 +254,7 @@ const EstimationTaskByID = ({ id, onClose, refresh }) => {
 
           {/* Work Summary */}
           {summary && (
-            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-200">
+            <div className="bg-[#f5f3ff] rounded-2xl p-6 border border-[#ddd6fe]">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-3">
                   <Timer className="w-6 h-6" />
@@ -284,8 +284,8 @@ const EstimationTaskByID = ({ id, onClose, refresh }) => {
             </div>
             <div className="flex flex-col gap-6">
 
-            <CreateLineItemGroup estimationId={task?.estimationId} onGroupCreated={() => setRefreshGroups(prev => prev + 1)} />
-            <LineItemGroup estimationId={task?.estimationId} refreshTrigger={refreshGroups} />
+              <CreateLineItemGroup estimationId={task?.estimationId} onGroupCreated={() => setRefreshGroups(prev => prev + 1)} />
+              <LineItemGroup estimationId={task?.estimationId} refreshTrigger={refreshGroups} />
             </div>
           </div>
         </div>
@@ -298,7 +298,7 @@ const EstimationTaskByID = ({ id, onClose, refresh }) => {
 const InfoItem = ({ icon, label, value }) => (
   <div className="flex items-start gap-4">
     <div className="p-3 bg-white rounded-xl shadow-sm flex-shrink-0">
-      {icon && <div className="w-6 h-6 text-teal-600">{icon}</div>}
+      {icon && <div className="w-6 h-6 text-[#6bbd45]">{icon}</div>}
     </div>
     <div>
       <p className="text-sm font-medium text-gray-600">{label}</p>
@@ -312,7 +312,7 @@ const ActionButton = ({ children, icon, color, onClick, disabled }) => {
     emerald: "bg-emerald-600 hover:bg-emerald-700",
     amber: "bg-amber-600 hover:bg-amber-700",
     red: "bg-red-600 hover:bg-red-700",
-    teal: "bg-teal-600 hover:bg-teal-700",
+    teal: "bg-[#6bbd45] hover:bg-[#5aa33a]",
   };
   return (
     <button
@@ -333,8 +333,8 @@ const SummaryCard = ({ icon, label, value, color = "text-indigo-700" }) => (
     </div>
     <div>
 
-    <p className="text-sm text-gray-600">{label}</p>
-    <p className={`text-xl font-bold mt-2 ${color}`}>{value}</p>
+      <p className="text-sm text-gray-600">{label}</p>
+      <p className={`text-xl font-bold mt-2 ${color}`}>{value}</p>
     </div>
   </div>
 );

@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 import { X, CheckCircle } from "lucide-react";
 import Service from "../../../api/Service";
@@ -6,11 +6,18 @@ import Input from "../../fields/input";
 import Button from "../../fields/Button";
 import Select from "react-select";
 
+import RichTextEditor from "../../fields/RichTextEditor";
 
-const AddMileStone = ({ projectId, fabricatorId, onClose, onSuccess }) => {
+const AddMileStone = ({
+  projectId,
+  fabricatorId,
+  onClose,
+  onSuccess,
+}) => {
   const {
     register,
     handleSubmit,
+    control,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm({
@@ -34,7 +41,9 @@ const AddMileStone = ({ projectId, fabricatorId, onClose, onSuccess }) => {
         ...data,
         status: "ACTIVE",
         date: data.date ? new Date(data.date).toISOString() : undefined,
-        approvalDate: data.approvalDate ? new Date(data.approvalDate).toISOString() : undefined,
+        approvalDate: data.approvalDate
+          ? new Date(data.approvalDate).toISOString()
+          : undefined,
       };
       await Service.AddProjectMilestone(payload);
       toast.success("Milestone added successfully!");
@@ -50,13 +59,13 @@ const AddMileStone = ({ projectId, fabricatorId, onClose, onSuccess }) => {
       <div className="bg-white rounded-2xl shadow-2xl w-full w-full overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
         <div className="flex justify-between items-center p-5 border-b bg-gray-50">
-          <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <CheckCircle className="w-6 h-6 text-teal-600" />
+          <h3 className="text-xl font-bold text-gray-700 flex items-center gap-2">
+            <CheckCircle className="w-6 h-6 text-green-600" />
             Add New Milestone
           </h3>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-200 text-gray-500 transition-colors"
+            className="p-2 rounded-full hover:bg-gray-200 text-gray-700 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -70,20 +79,31 @@ const AddMileStone = ({ projectId, fabricatorId, onClose, onSuccess }) => {
             {...register("subject", { required: "Required" })}
           />
           {errors.subject && (
-            <p className="text-red-500 text-xs mt-1">{errors.subject.message}</p>
+            <p className="text-red-500 text-xs mt-1">
+              {errors.subject.message}
+            </p>
           )}
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Description *
             </label>
-            <textarea
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all resize-none h-24"
-              placeholder="Describe the milestone deliverables..."
-              {...register("description", { required: "Required" })}
-            ></textarea>
+            <Controller
+              name="description"
+              control={control}
+              rules={{ required: "Required" }}
+              render={({ field }) => (
+                <RichTextEditor
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                  placeholder="Describe the milestone deliverables..."
+                />
+              )}
+            />
             {errors.description && (
-              <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
+              <p className="text-red-500 text-xs mt-1">
+                {errors.description.message}
+              </p>
             )}
           </div>
 
@@ -115,7 +135,11 @@ const AddMileStone = ({ projectId, fabricatorId, onClose, onSuccess }) => {
               onChange={(opt) => setValue("status", opt?.value || "PENDING")}
               className="text-sm"
               styles={{
-                control: (base) => ({ ...base, borderRadius: "0.5rem", padding: "2px" }),
+                control: (base) => ({
+                  ...base,
+                  borderRadius: "0.5rem",
+                  padding: "2px",
+                }),
               }}
             />
           </div>
@@ -132,7 +156,7 @@ const AddMileStone = ({ projectId, fabricatorId, onClose, onSuccess }) => {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-teal-600 hover:bg-teal-700 text-white px-6"
+              className="bg-green-600 hover:bg-green-700 text-white px-6"
             >
               {isSubmitting ? "Adding..." : "Add Milestone"}
             </Button>

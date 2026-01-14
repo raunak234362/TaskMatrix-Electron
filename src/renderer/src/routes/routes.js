@@ -7,6 +7,8 @@ import ChangePasswordPage from '../pages/ChangePasswordPage'
 import RFIPage from '../pages/RFIPage'
 import EstimationPage from '../pages/EstimationPage'
 import TaskPage from '../pages/TaskPage'
+import ProjectPage from '../pages/ProjectPage'
+import NotesPage from '../pages/NotesPage'
 import App from '../App'
 const routes = [
   { path: '/', Component: Login },
@@ -23,7 +25,9 @@ const routes = [
           { path: 'tasks', Component: TaskPage },
           { path: 'estimation', Component: EstimationPage },
           { path: 'chats', Component: ChatPage },
-          { path: 'rfi', Component: RFIPage }
+          { path: 'rfi', Component: RFIPage },
+          { path: 'projects', Component: ProjectPage },
+          { path: 'notes', Component: NotesPage }
         ]
       }
     ]

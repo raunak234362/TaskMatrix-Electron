@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
 import {
   Loader2,
@@ -6,38 +7,68 @@ import {
   ListChecks,
   Clock,
   X,
-  Pencil,
-  Check,
-  XCircle,
 } from "lucide-react";
 import Service from "../../../api/Service";
+import { Button } from "../../ui/button";
+import DataTable from "../../ui/table";
+import GetWBSLineItem from "./GetWBSLineItem";
 
+const GetWBSByID = ({
+  id,
+  projectId,
+  stage,
+  onClose,
+  initialData,
+}) => {
+  console.log(initialData);
 
-const GetWBSByID = ({ id, onClose }) => {
-  const [wbs, setWbs] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const wbsData = initialData || null;
+  const [wbs, setWbs] = useState(wbsData);
+  const [lineItems, setLineItems] = useState(
+    initialData?.wbs ||
+    initialData?.bundle?.wbsTemplates ||
+    initialData?.wbsTemplates ||
+    []
+  );
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [editingId, setEditingId] = useState(null);
-  const [editValues, setEditValues] = useState({
-    QtyNo: 0,
-    unitTime: 0,
-    CheckUnitTime: 0,
-  });
-
-  const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
-  const canEditTime =
-    userRole === "admin" || userRole === "deputy_manager";
+  const [selectedWbsId, setSelectedWbsId] = useState(null);
 
   useEffect(() => {
-    if (id) fetchWBSById(id);
-  }, [id]);
+    if (initialData) {
+      setWbs(initialData);
+      setLineItems(
+        initialData?.wbs ||
+        initialData?.bundle?.wbsTemplates ||
+        initialData?.wbsTemplates ||
+        []
+      );
+    }
+  }, [initialData]);
+
+  useEffect(() => {
+    // Only fetch if we don't have templates in initialData
+    if (!lineItems || lineItems.length === 0) {
+      if (id) fetchWBSById(id);
+    }
+  }, [id, projectId, stage]);
 
   const fetchWBSById = async (id) => {
     try {
       setLoading(true);
-      const response = await Service.GetWBSById(id);
-      console.log(response);
-      setWbs(response || null);
+      setError(null);
+      const response = await Service.GetWBSLineItemById(projectId, id, stage);
+      console.log("WBS Detail Response:", response);
+      // Handle potential different response structures from the new endpoint
+      if (response && response.data) {
+        setLineItems(response.data || []);
+      } else if (response && Array.isArray(response.data)) {
+        // If it returns { lineItems: [...] } but no wbs metadata, we might need to handle it
+        // For now assume it has the metadata or it's the old structure
+        setWbs(response);
+      } else {
+        setWbs(response || null);
+      }
     } catch (err) {
       console.error("Error fetching WBS:", err);
       setError("Failed to load WBS details");
@@ -46,46 +77,63 @@ const GetWBSByID = ({ id, onClose }) => {
     }
   };
 
-  const handleEditClick = (item) => {
-    setEditingId(item.id);
-    setEditValues({
-      QtyNo: item.QtyNo || 0,
-      unitTime: item.unitTime || 0,
-      CheckUnitTime: item.CheckUnitTime || 0,
-    });
-  };
-
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setEditValues({ QtyNo: 0, unitTime: 0, CheckUnitTime: 0 });
-  };
-
-  const handleSaveLineItem = async (lineItemId) => {
-    if (!wbs) return;
-    const item = wbs.LineItems?.find((i) => i.id === lineItemId);
-    if (!item) return;
-
-    const { QtyNo, unitTime, CheckUnitTime } = editValues;
-    const checkHr = CheckUnitTime * QtyNo;
-    const execHr = unitTime * QtyNo;
-
-    try {
-      await Service.UpdateWBSLineItem(wbs.projectId, wbs.id, lineItemId, {
-        QtyNo,
-        unitTime,
-        CheckUnitTime,
-        checkHr,
-        execHr,
-      });
-      // Refresh data
-      const response = await Service.GetWBSById(wbs.id);
-      setWbs(response || null);
-      setEditingId(null);
-    } catch (err) {
-      console.error("Error updating line item:", err);
-      // You might want to show a toast error here
-    }
-  };
+  const columns = [
+    {
+      accessorKey: "description",
+      header: "Description",
+      cell: ({ row }) => (
+        <p className="text-sm font-semibold text-gray-700 line-clamp-2">
+          {row.original.name ||
+            row.original.wbsTemplate?.name ||
+            row.original.description ||
+            row.original.wbsTemplateKey ||
+            "—"}
+        </p>
+      ),
+      enableColumnFilter: true,
+    },
+    {
+      accessorKey: "discipline",
+      header: "Discipline",
+      cell: ({ row }) => (
+        <span className="text-xs font-medium text-gray-500 uppercase">
+          {row.original.discipline || "—"}
+        </span>
+      ),
+      enableSorting: true,
+    },
+    {
+      id: "qtyNo",
+      accessorFn: (row) => row.qtyNo ?? row.totalQtyNo ?? 0,
+      header: "Qty",
+      cell: ({ row }) => (
+        <span className="text-sm font-bold text-green-700 bg-green-50 px-2 py-1 rounded-md">
+          {row.getValue("qtyNo")}
+        </span>
+      ),
+      enableSorting: true,
+    },
+    {
+      accessorKey: "execHr",
+      header: "Exec Total",
+      cell: ({ row }) => (
+        <span className="text-sm font-bold text-gray-700">
+          {(row.original.execHr ?? row.original.totalExecHr ?? 0).toFixed(1)}h
+        </span>
+      ),
+      enableSorting: true,
+    },
+    {
+      accessorKey: "checkHr",
+      header: "Check Total",
+      cell: ({ row }) => (
+        <span className="text-sm font-bold text-gray-700">
+          {(row.original.checkHr ?? row.original.totalCheckHr ?? 0).toFixed(1)}h
+        </span>
+      ),
+      enableSorting: true,
+    },
+  ];
 
   const formatDate = (date) =>
     date
@@ -95,259 +143,272 @@ const GetWBSByID = ({ id, onClose }) => {
       })
       : "—";
 
-  if (loading)
+  if (loading && !wbs)
     return (
-      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl p-6 shadow-md flex items-center gap-2">
-          <Loader2 className="w-5 h-5 animate-spin text-teal-600" />
-          <p>Loading WBS details...</p>
+      <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50">
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 border border-white/20">
+          <div className="relative">
+            <div className="w-12 h-12 border-4 border-green-100 border-t-green-600 rounded-full animate-spin"></div>
+            <Loader2 className="w-6 h-6 text-green-600 absolute inset-0 m-auto animate-pulse" />
+          </div>
+          <p className="text-green-900 font-medium animate-pulse">
+            Fetching WBS details...
+          </p>
         </div>
       </div>
     );
 
   if (error || !wbs)
     return (
-      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl p-6 shadow-md flex items-center gap-2 text-red-600">
-          <AlertCircle className="w-5 h-5" />
-          {error || "WBS not found"}
-          <button
+      <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 max-w-md text-center border border-red-100">
+          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center">
+            <AlertCircle className="w-8 h-8 text-red-600" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-700">Oops!</h3>
+          <p className="text-gray-700">{error || "WBS data not found"}</p>
+          <Button
             onClick={onClose}
-            className="ml-4 px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+            className="mt-2 bg-gray-900 text-white hover:bg-gray-800 shadow-lg shadow-gray-200"
           >
-            Close
-          </button>
+            Close Window
+          </Button>
         </div>
       </div>
     );
 
   return (
     <div
-      className="fixed inset-0 bg-black/20 backdrop-blur-sm flex justify-center items-center z-50"
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white w-11/12 md:w-8/12 max-h-[90vh] overflow-y-auto rounded-xl shadow-lg p-6 border border-gray-100 relative"
-        onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside modal
+        className="bg-white w-full max-w-6xl max-h-[90vh] overflow-hidden rounded-3xl shadow-2xl border border-gray-100 flex flex-col animate-in fade-in zoom-in duration-300"
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex justify-between items-center border-b pb-3 mb-5">
-          <div>
-            <h2 className="text-2xl font-semibold text-teal-700 flex items-center gap-2">
-              <Layers className="w-5 h-5 text-teal-600" /> {wbs.name}
-            </h2>
-            <p className="text-sm text-gray-500">
-              WBS ID: <span className="text-gray-800">{wbs.id}</span>
-            </p>
-          </div>
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full hover:bg-gray-100 text-gray-600"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          )}
-        </div>
-
-        {/* Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm mb-6">
-          <InfoRow label="Type" value={wbs.type} />
-          <InfoRow label="Stage" value={wbs.stage} />
-          <InfoRow label="Template Key" value={wbs.templateKey} />
-          <InfoRow label="Project ID" value={wbs.projectId} />
-          <InfoRow label="Created On" value={formatDate(wbs.createdAt)} />
-          <InfoRow label="Updated On" value={formatDate(wbs.updatedAt)} />
-        </div>
-
-        {/* Totals */}
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-          <h4 className="text-teal-700 font-semibold mb-3 flex items-center gap-2">
-            <Clock className="w-4 h-4" /> Total Hours Overview
-          </h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-            <Stat label="Total Check Hours" value={wbs.totalCheckHr} />
-            <Stat label="Check Hours with Rework" value={wbs.checkHrWithRework} />
-            <Stat label="Total Exec Hours" value={wbs.totalExecHr} />
-            <Stat label="Exec Hours with Rework" value={wbs.execHrWithRework} />
-            <Stat label="Total Quantity No" value={wbs.totalQtyNo} />
-          </div>
-        </div>
-
-        {/* Line Items */}
-        <div className="border-t pt-4">
-          <h3 className="text-lg font-semibold text-teal-700 flex items-center gap-2 mb-2">
-            <ListChecks className="w-5 h-5" /> Line Items (
-            {wbs.LineItems?.length || 0})
-          </h3>
-
-          {wbs.LineItems && wbs.LineItems.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full border border-gray-200 rounded-lg text-sm">
-                <thead className="bg-gray-100 text-gray-700 text-left">
-                  <tr>
-                    <th className="p-3 border-b">#</th>
-                    <th className="p-3 border-b">Description</th>
-                    <th className="p-3 border-b text-center">Quantity</th>
-                    {canEditTime && (
-                      <>
-                        <th className="p-3 border-b text-center">UnitTime</th>
-                        <th className="p-3 border-b text-center">
-                          Checking UnitTime
-                        </th>
-                      </>
-                    )}
-                    <th className="p-3 border-b text-center">
-                      Total Exec Hours
-                    </th>
-                    <th className="p-3 border-b text-center">
-                      Total Check Hours
-                    </th>
-                    <th className="p-3 border-b">Updated At</th>
-                    <th className="p-3 border-b text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {wbs.LineItems.map((item, index) => (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="p-3 border-b">{index + 1}</td>
-                      <td className="p-3 border-b text-gray-800">
-                        {item.description}
-                      </td>
-                      <td className="p-3 border-b text-center text-teal-700 font-medium">
-                        {editingId === item.id ? (
-                          <input
-                            type="number"
-                            value={editValues.QtyNo}
-                            onChange={(e) =>
-                              setEditValues({
-                                ...editValues,
-                                QtyNo: Number(e.target.value),
-                              })
-                            }
-                            className="w-20 p-1 border rounded text-center"
-                            autoFocus
-                          />
-                        ) : (
-                          item.QtyNo ?? 0
-                        )}
-                      </td>
-                      {canEditTime && (
-                        <>
-                          <td className="p-3 border-b text-center text-teal-700 font-medium">
-                            {editingId === item.id ? (
-                              <input
-                                type="number"
-                                value={editValues.unitTime}
-                                onChange={(e) =>
-                                  setEditValues({
-                                    ...editValues,
-                                    unitTime: Number(e.target.value),
-                                  })
-                                }
-                                className="w-20 p-1 border rounded text-center"
-                              />
-                            ) : (
-                              item.unitTime ?? 0
-                            )}
-                          </td>
-                          <td className="p-3 border-b text-center text-teal-700 font-medium">
-                            {editingId === item.id ? (
-                              <input
-                                type="number"
-                                value={editValues.CheckUnitTime}
-                                onChange={(e) =>
-                                  setEditValues({
-                                    ...editValues,
-                                    CheckUnitTime: Number(e.target.value),
-                                  })
-                                }
-                                className="w-20 p-1 border rounded text-center"
-                              />
-                            ) : (
-                              item.CheckUnitTime ?? 0
-                            )}
-                          </td>
-                        </>
-                      )}
-                      <td className="p-3 border-b text-center text-teal-700 font-medium">
-                        {item.execHr ?? 0}
-                      </td>
-                      <td className="p-3 border-b text-center text-teal-700 font-medium">
-                        {item.checkHr ?? 0}
-                      </td>
-                      <td className="p-3 border-b text-gray-600">
-                        {item.updatedAt ? formatDate(item.updatedAt) : "—"}
-                      </td>
-                      <td className="p-3 border-b text-center">
-                        {editingId === item.id ? (
-                          <div className="flex justify-center gap-2">
-                            <button
-                              onClick={() => handleSaveLineItem(item.id)}
-                              className="text-green-600 hover:text-green-800"
-                              title="Save"
-                            >
-                              <Check className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="text-red-600 hover:text-red-800"
-                              title="Cancel"
-                            >
-                              <XCircle className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => handleEditClick(item)}
-                            className="text-gray-500 hover:text-teal-600"
-                            title="Edit"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* Header Section */}
+        <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-green-50">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center shadow-lg shadow-green-100">
+              <Layers className="w-6 h-6 text-white" />
             </div>
-          ) : (
-            <p className="text-gray-500 italic text-center py-3">
-              No line items found for this WBS.
-            </p>
-          )}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-700 tracking-tight">
+                {wbsData?.bundle?.bundleKey ||
+                  wbsData?.bundleKey ||
+                  "Bundle Details"}
+              </h2>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded-md tracking-wider">
+                  {wbsData?.stage || "—"}
+                </span>
+                <span className="text-gray-400 text-xs">•</span>
+                <span className="text-gray-600 text-xs">Project Bundle</span>
+              </div>
+            </div>
+          </div>
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            size="icon"
+            className="text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+          >
+            <X className="w-6 h-6" />
+          </Button>
         </div>
 
-        {/* Footer */}
-        <div className="mt-6 pt-4 border-t flex justify-end gap-3">
-          <button className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-700">
+        <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+          {/* Summary Grid */}
+
+          <div className="bg-gray-900 rounded-2xl p-2 text-white shadow-xl shadow-gray-200 flex flex-col justify-between">
+            <div>
+              <DetailCard
+                label="Stage"
+                value={wbsData.stage}
+                icon={<Layers className="w-4 h-4" />}
+              />
+              <p className="text-gray-400 text-xs font-medium uppercase tracking-widest mb-1">
+                Total Quantity
+              </p>
+              <h3 className="text-2xl font-bold text-white">
+                {wbsData?.totalQtyNo || 0}
+              </h3>
+            </div>
+            <div className="pt-4 border-t border-gray-800 mt-4 flex justify-between items-end">
+              <div>
+                <p className="text-gray-700 text-[10px] uppercase font-bold">
+                  Last Updated
+                </p>
+                <p className="text-xs text-gray-300">
+                  {formatDate(wbsData?.updatedAt)}
+                </p>
+              </div>
+              <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+                <Clock className="w-4 h-4 text-green-400" />
+              </div>
+            </div>
+          </div>
+
+          {/* Hours Overview */}
+          <section>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-1 h-6 bg-green-600 rounded-full"></div>
+              <h3 className="text-lg font-bold text-gray-700">
+                Hours Overview
+              </h3>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatCard
+                label="Execution Hours"
+                value={wbsData?.totalExecHr || 0}
+                subValue={wbsData?.execHrWithRework}
+                subLabel="w/ Rework"
+                color="green"
+              />
+              <StatCard
+                label="Checking Hours"
+                value={wbsData?.totalCheckHr || 0}
+                subValue={wbsData?.checkHrWithRework}
+                subLabel="w/ Rework"
+                color="indigo"
+              />
+              <StatCard
+                label="Total Hours"
+                value={
+                  (wbsData?.totalExecHr || 0) + (wbsData?.totalCheckHr || 0)
+                }
+                color="gray"
+              />
+              <StatCard
+                label="Rework Total"
+                value={
+                  (wbsData?.execHrWithRework || 0) +
+                  (wbsData?.checkHrWithRework || 0)
+                }
+                color="red"
+              />
+            </div>
+          </section>
+
+          {/* Line Items Table */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-1 h-6 bg-green-600 rounded-full"></div>
+                <h3 className="text-lg font-bold text-gray-700">WBS Items</h3>
+                <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-700 text-[10px] font-bold rounded-full">
+                  {lineItems?.length || 0} Items
+                </span>
+                {loading && (
+                  <Loader2 className="w-4 h-4 text-green-600 animate-spin ml-2" />
+                )}
+              </div>
+            </div>
+
+            {lineItems && lineItems.length > 0 ? (
+              <div className="space-y-6">
+                <DataTable
+                  columns={columns}
+                  data={lineItems}
+                  onRowClick={(row) => setSelectedWbsId(row.id)}
+                  searchPlaceholder="Search WBS items..."
+                  initialSorting={[
+                    { id: "qtyNo", desc: true },
+                    { id: "description", desc: false },
+                  ]}
+                />
+
+                {selectedWbsId && (
+                  <div className="mt-8 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <GetWBSLineItem
+                      wbsId={selectedWbsId}
+                      onClose={() => setSelectedWbsId(null)}
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="py-12 flex flex-col items-center justify-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-4">
+                  <ListChecks className="w-8 h-8 text-gray-300" />
+                </div>
+                <p className="text-gray-700 font-medium">
+                  No line items found for this WBS.
+                </p>
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* Footer Section */}
+        <div className="px-8 py-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-4">
+          <Button
+            variant="outline"
+            className="bg-white text-gray-700 border-gray-200 hover:bg-gray-50 shadow-sm"
+          >
+            Download Report
+          </Button>
+          <Button className="text-white shadow-lg shadow-green-100">
             Add Quantity
-          </button>
-          <button className="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm hover:bg-red-200">
-            Delete
-          </button>
+          </Button>
         </div>
       </div>
     </div>
   );
 };
 
-const InfoRow = ({ label, value }) => (
-  <div className="flex justify-between items-center border-b border-gray-100 pb-1">
-    <span className="font-medium text-gray-600">{label}:</span>
-    <span className="text-gray-900">{value || "—"}</span>
+const DetailCard = ({
+  label,
+  value,
+  icon,
+}) => (
+  <div className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
+    <div className="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400">
+      {icon}
+    </div>
+    <div>
+      <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">
+        {label}
+      </p>
+      <p className="text-sm font-semibold text-gray-700">{value || "—"}</p>
+    </div>
   </div>
 );
 
-const Stat = ({ label, value }) => (
-  <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
-    <p className="text-xs text-gray-500">{label}</p>
-    <p className="text-sm font-semibold text-teal-700">{value ?? 0}</p>
-  </div>
-);
+const StatCard = ({
+  label,
+  value,
+  subValue,
+  subLabel,
+  color,
+}) => {
+  const colors = {
+    green: "bg-green-50 text-green-700 border-green-100",
+    indigo: "bg-indigo-50 text-indigo-700 border-indigo-100",
+    gray: "bg-gray-50 text-gray-700 border-gray-100",
+    red: "bg-red-50 text-red-700 border-red-100",
+  };
+
+  return (
+    <div
+      className={`p-5 rounded-2xl border ${colors[color]} flex flex-col justify-between h-full`}
+    >
+      <div>
+        <p className="text-[10px] uppercase font-bold opacity-70 tracking-wider mb-2">
+          {label}
+        </p>
+        <p className="text-2xl font-black tracking-tight">{value ?? 0}h</p>
+      </div>
+      {subValue !== undefined && (
+        <div className="mt-3 pt-3 border-t border-current/10 flex items-center justify-between">
+          <span className="text-[9px] uppercase font-bold opacity-60">
+            {subLabel}
+          </span>
+          <span className="text-xs font-bold">{subValue}h</span>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default GetWBSByID;
