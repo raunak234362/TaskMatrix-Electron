@@ -1,10 +1,13 @@
 import axios from 'axios'
 
-const instance = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL
-})
+const baseURL =
+  import.meta.env.VITE_BASE_URL || 'https://project-station.whiteboardtec.com:5160/v1/'
 
-console.log('API base URL:', instance.defaults.baseURL)
+console.log('API Base URL:', baseURL)
+
+const instance = axios.create({
+  baseURL: baseURL
+})
 instance.interceptors.request.use((config) => {
   // Ensure headers exists
   config.headers = config.headers ?? {}
