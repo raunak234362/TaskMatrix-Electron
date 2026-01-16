@@ -19,9 +19,9 @@ export default defineConfig({
     server: {
       proxy: {
         '/v1': {
-          target: 'http://192.168.1.26:5156',
+          target: 'https://project-station.whiteboardtec.com:5160',
           changeOrigin: true,
-          secure: false,
+          secure: false
         }
       }
     },

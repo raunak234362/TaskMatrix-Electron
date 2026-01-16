@@ -1,49 +1,49 @@
-import { io } from "socket.io-client";
+import { io } from 'socket.io-client'
 
-const baseURL = 'http://192.168.1.26:5156';
-console.log("Socket Base URL:", baseURL);
+const baseURL = import.meta.env.VITE_SOCKET_URL || 'http://192.168.1.26:5156'
+console.log('Socket Base URL:', baseURL)
 
 const socket = io(baseURL, {
-  transports: [ "websocket"],
-  autoConnect: false,
+  transports: ['websocket'],
+  autoConnect: false
   // reconnectionAttempts: 5,
-});
+})
 
 // Connect socket with userId
 export function connectSocket(userId) {
   if (!userId) {
-    console.warn("User ID missing — socket not connected");
-    return;
+    console.warn('User ID missing — socket not connected')
+    return
   }
 
-  console.log("User ID Passing", userId);
-  
+  console.log('User ID Passing', userId)
+
   // Update auth before connecting
-  socket.auth = { userId };
-  console.log(socket);
-  
+  socket.auth = { userId }
+  console.log(socket)
+
   // Avoid multiple connects
   if (!socket.connected) {
-    socket.connect();
+    socket.connect()
   }
 
   // Log socket events (optional but very helpful)
-  socket.on("connect", () => {
-    console.log("✅ Socket connected:", socket.id);
-    if (typeof socket.id === "string") {
-      sessionStorage.setItem("socketId", socket.id);
+  socket.on('connect', () => {
+    console.log('✅ Socket connected:', socket.id)
+    if (typeof socket.id === 'string') {
+      sessionStorage.setItem('socketId', socket.id)
     } else {
-      console.warn("Socket ID is undefined, could not store socketId in sessionStorage.");
+      console.warn('Socket ID is undefined, could not store socketId in sessionStorage.')
     }
-  });
+  })
 
-  socket.on("disconnect", (reason) => {
-    console.log("❌ Socket disconnected:", reason);
-  });
+  socket.on('disconnect', (reason) => {
+    console.log('❌ Socket disconnected:', reason)
+  })
 
-  socket.on("connect_error", (err) => {
-    console.error("⚠️ Socket connection error:", err.message);
-  });
+  socket.on('connect_error', (err) => {
+    console.error('⚠️ Socket connection error:', err.message)
+  })
 }
 
-export default socket;
+export default socket

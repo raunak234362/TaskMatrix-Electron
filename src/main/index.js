@@ -95,7 +95,7 @@ app.whenReady().then(() => {
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const cspValue = is.dev
       ? "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';"
-      : "default-src 'self'; script-src 'self'; connect-src 'self' http://192.168.1.26:5156 ws://192.168.1.26:5156 https://your-api-domain.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline';"
+      : "default-src 'self'; script-src 'self'; connect-src 'self' https://project-station.whiteboardtec.com:5160 wss://project-station.whiteboardtec.com:5160; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline';"
 
     callback({
       responseHeaders: {
