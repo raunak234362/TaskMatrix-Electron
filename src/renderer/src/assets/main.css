@@ -4,6 +4,7 @@
   --color-primary: #6bbd45;
   --color-primary-foreground: #ffffff;
   --color-ring: #6bbd45;
+  --color-background: #6bbd45;
 }
 @import './base.css';
 body {
@@ -11,9 +12,45 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background-image: url('./wavy-lines.svg');
-  background-size: cover;
+  background-color: #6bbd45;
   user-select: none;
+  tracking-wider: 0.025em;
+}
+
+/* Custom Green Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #6bbd45;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #559e35;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f0fdf4;
 }
 
 code {

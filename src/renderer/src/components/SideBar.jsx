@@ -77,20 +77,6 @@ const Sidebar = ({
         "human-resource",
       ],
     },
-
-    {
-      label: "Manage Team",
-      to: "manage-team",
-      icon: <Group />,
-      roles: [
-        "admin",
-        "department-manager",
-        "project-manager",
-        "deputy-manager",
-        "user",
-        "human-resource",
-      ],
-    },
     {
       label: "Chats",
       to: "chats",
@@ -177,34 +163,35 @@ const Sidebar = ({
 
   return (
     <aside
-      className={`h-full rounded-2xl m-auto border-white/25 shadow-xl bg-white border-r backdrop-blur-3xl text-black transition-all duration-300 flex flex-col ${isMinimized ? "w-16" : "w-64"
+      className={`h-full transition-all duration-300 flex flex-col ${isMinimized ? "w-24" : "w-72"
+        } ${isMobile ? "shadow-2xl bg-white" : "relative"
         }`}
-      style={{ overflow: "visible" }} // ✅ allows tooltip overflow
     >
       {/* Header */}
       <div
-        className={`flex items-center py-1.5 px-4 ${isMobile ? "justify-between" : "justify-center"
+        className={`flex items-center pt-6 pb-2 px-6 ${isMobile ? "justify-between" : isMinimized ? "justify-center" : "justify-start"
           }`}
       >
-        {!isMinimized ? (
-          <img src={LOGO} alt="Logo" className="w-40" />
-        ) : (
-          <img src={LOGO} alt="Logo" className="w-24" />
-        )}
+        <div className="flex items-center w-full justify-center">
+          {!isMinimized ? (
+            <img src={LOGO} alt="Logo" className="bg-white w-56 object-contain rounded-3xl drop-shadow-sm" />
+          ) : (
+            <img src={LOGO} alt="Logo" className="bg-white w-16 object-contain p-1 rounded-3xl drop-shadow-sm" />
+          )}
+        </div>
 
         {isMobile && (
           <Button
             onClick={toggleSidebar}
-            className="p-1 bg-gray-100 rounded-md hover:bg-gray-200"
+            className="p-2 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors"
           >
-            <X size={18} />
+            <X size={22} />
           </Button>
         )}
       </div>
 
-      {/* Navigation */}
-      <div className="flex-1 overflow-y-auto py-4">
-        <ul className="flex flex-col gap-2 px-2 relative">
+      <div className="flex-1 py-2 flex flex-col">
+        <ul className="flex flex-col gap-0.5 w-full pl-4">
           {navItems.map(
             ({ label, to, roles, icon }) =>
               canView(roles) && (
@@ -214,21 +201,34 @@ const Sidebar = ({
                     end={to === "/dashboard"}
                     onClick={isMobile ? toggleSidebar : undefined}
                     className={({ isActive }) =>
-                      isActive
-                        ? `flex items-center font-semibold text-white bg-[#6bbd45] py-2 px-3 rounded-md w-full ${isMinimized ? "justify-center" : "justify-start"
-                        }`
-                        : `text-[#6bbd45] font-semibold hover:text-white hover:bg-[#6bbd45] py-2 px-3 rounded-md flex items-center w-full ${isMinimized ? "justify-center" : "justify-start"
-                        }`
+                      `flex items-center gap-4 py-2.5 transition-all duration-200 font-bold text-md tracking-wide relative 
+                      ${isActive
+                        ? "bg-gray-50 text-[#6bbd45] rounded-l-[30px] shadow-sm ml-0 pl-6 z-20"
+                        : "text-white/80 hover:text-white hover:bg-white/20 rounded-l-[30px] pl-6 ml-0"
+                      } ${isMinimized ? "justify-center px-0 w-14 h-14 mx-auto rounded-xl! ml-0! pl-0!" : ""}`
                     }
                   >
-                    <div className="text-[#6bbd45] group-hover:text-white transition-colors">{icon}</div>
-                    {!isMinimized && <span className="ml-3">{label}</span>}
+                    {({ isActive }) => (
+                      <>
+                        {/* Inverted Corners for Active State Effect - Desktop Only */}
+                        {!isMinimized && isActive && (
+                          <>
+                            {/* Top Curve */}
+                            <div className="absolute right-0 -top-5 w-5 h-5 bg-transparent rounded-br-3xl shadow-[5px_5px_0_5px_#f9fafb] z-10 pointer-events-none"></div>
+                            {/* Bottom Curve */}
+                            <div className="absolute right-0 -bottom-5 w-5 h-5 bg-transparent rounded-tr-[20px] shadow-[5px_-5px_0_5px_#f9fafb] z-10 pointer-events-none"></div>
+                          </>
+                        )}
+                        <div className={`${isMinimized ? "" : ""} relative z-20`}>{icon}</div>
+                        {!isMinimized && <span className="relative z-20">{label}</span>}
+                      </>
+                    )}
                   </NavLink>
 
                   {/* Tooltip for minimized sidebar */}
                   {isMinimized && (
-                    <div className="absolute z-30 -translate-0.5  hidden group-hover:flex">
-                      <span className="bg-[#6bbd45] text-white text-[10px] font-medium py-1 px-1 rounded-md shadow-lg whitespace-nowrap">
+                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 z-50 hidden group-hover:flex">
+                      <span className="bg-gray-800 text-white text-sm font-bold py-2 px-4 rounded-xl shadow-xl whitespace-nowrap">
                         {label}
                       </span>
                     </div>
@@ -240,27 +240,33 @@ const Sidebar = ({
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-6 mt-auto">
         {!isMinimized && (
-          <div className="mb-2">
-            <p className="text-sm font-semibold truncate">
-              {userData
-                ? `${userData.firstName ?? ""} ${userData.lastName ?? ""
-                  }`.trim()
-                : "User"}
-            </p>
-            <p className="text-xs text-gray-500">
-              {userData?.role?.toUpperCase() || userRole.toUpperCase()}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Version - 2.0.0</p>
+          <div className="flex items-center gap-4 mb-4 bg-white/10 p-3 rounded-2xl border border-white/10 backdrop-blur-sm">
+            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#6bbd45] font-extrabold text-lg shadow-sm">
+              {sessionStorage.getItem("username")?.[0] || "U"}
+            </div>
+            <div className="overflow-hidden text-white">
+              <p className="text-sm font-bold truncate">
+                {sessionStorage.getItem("username")}
+              </p>
+              <p className="text-[10px] font-bold uppercase tracking-wider truncate opacity-80">
+                {userData?.role || userRole}
+              </p>
+            </div>
           </div>
         )}
 
-        <div className="flex flex-col justify-center">
-          <Button className="" onClick={fetchLogout}>
-            {isMinimized ? <LogOut size={18} /> : "Logout"}
-          </Button>
-        </div>
+        <Button
+          className={`w-full flex items-center gap-3 py-3 rounded-xl transition-all ${isMinimized
+            ? "justify-center bg-white/10 text-white hover:bg-white/20"
+            : "justify-start px-6 bg-white/10 text-white hover:bg-white/20"
+            }`}
+          onClick={fetchLogout}
+        >
+          <LogOut size={20} />
+          {!isMinimized && <span className="font-bold text-sm">Logout</span>}
+        </Button>
       </div>
     </aside>
   );

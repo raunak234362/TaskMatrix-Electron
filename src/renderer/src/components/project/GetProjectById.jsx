@@ -18,14 +18,11 @@ import AllDocument from "./projectDocument/AllDocument";
 import WBS from "./wbs/WBS";
 
 import AllRFI from "../rfi/AllRfi";
-import AddRFI from "../rfi/AddRFI";
 import AllSubmittals from "../submittals/AllSubmittals";
 import AllNotes from "./notes/AllNotes";
 import EditProject from "./EditProject";
-import AddSubmittal from "../submittals/AddSubmittals";
 import RenderFiles from "../ui/RenderFiles";
 import AllCO from "../co/AllCO";
-import AddCO from "../co/AddCO";
 import CoTable from "../co/CoTable";
 
 const GetProjectById = ({ id }) => {
@@ -33,8 +30,6 @@ const GetProjectById = ({ id }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("details");
-  const [rfiView, setRfiView] = useState("list");
-  const [submittalView, setSubmittalView] = useState("list");
   const [editModel, setEditModel] = useState(null);
   const [changeOrderView, setChangeOrderView] = useState("list");
   const [selectedCoId, setSelectedCoId] = useState(null);
@@ -43,9 +38,7 @@ const GetProjectById = ({ id }) => {
     return project?.rfi || [];
   }, [project]);
 
-  const changeOrderData = useMemo(() => {
-    return project?.changeOrders || [];
-  }, [project]);
+  const [changeOrderData, setChangeOrderData] = useState([]);
   const fetchProject = async () => {
     try {
       setLoading(true);
@@ -57,6 +50,15 @@ const GetProjectById = ({ id }) => {
       console.error("Error fetching project:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchChangeOrders = async () => {
+    try {
+      const response = await Service.GetChangeOrder(id);
+      setChangeOrderData(response?.data || []);
+    } catch (err) {
+      console.error("Error fetching change orders:", err);
     }
   };
 
@@ -86,7 +88,10 @@ const GetProjectById = ({ id }) => {
   // };
 
   useEffect(() => {
-    if (id) fetchProject();
+    if (id) {
+      fetchProject();
+      fetchChangeOrders();
+    }
   }, [id]);
 
   const handleCoSuccess = (createdCO) => {
@@ -363,127 +368,21 @@ const GetProjectById = ({ id }) => {
           )}
           {activeTab === "rfi" && (
             <div className="space-y-4">
-              {/* Sub-tabs for RFI */}
-              <div className="flex justify-start border-b border-gray-200 mb-4">
-                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                  <button
-                    onClick={() => setRfiView("list")}
-                    className={`
-                      whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
-                      ${rfiView === "list"
-                        ? "border-green-500 text-green-600"
-                        : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
-                      }
-                    `}
-                  >
-                    All RFIs
-                  </button>
-                  {userRole !== "client" && (
-                    <button
-                      onClick={() => setRfiView("add")}
-                      className={`
-                        whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
-                        ${rfiView === "add"
-                          ? "border-green-500 text-green-600"
-                          : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
-                        }
-                    `}
-                    >
-                      Create RFI
-                    </button>
-                  )}
-                </nav>
-              </div>
-
               {/* RFI Content */}
-              {rfiView === "list" ? (
-                <AllRFI rfiData={rfiData} />
-              ) : (
-                <AddRFI project={project} />
-              )}
+              <AllRFI rfiData={rfiData} />
             </div>
           )}
           {activeTab === "submittals" && (
             <div className="space-y-4">
-              {/* Sub-tabs for RFI */}
-              <div className="flex justify-start border-b border-gray-200 mb-4">
-                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                  <button
-                    onClick={() => setSubmittalView("list")}
-                    className={`
-                      whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
-                      ${submittalView === "list"
-                        ? "border-green-500 text-green-600"
-                        : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
-                      }
-                    `}
-                  >
-                    All Submittals
-                  </button>
-                  {userRole !== "client" && (
-                    <button
-                      onClick={() => setSubmittalView("add")}
-                      className={`
-                        whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
-                        ${submittalView === "add"
-                          ? "border-green-500 text-green-600"
-                          : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
-                        }
-                    `}
-                    >
-                      Create Submittal
-                    </button>
-                  )}
-                </nav>
-              </div>
-
               {/* Submittal Content */}
-              {submittalView === "list" ? (
-                <AllSubmittals submittalData={submittalData} />
-              ) : (
-                <AddSubmittal project={project} />
-              )}
+              <AllSubmittals submittalData={submittalData} />
             </div>
           )}
           {activeTab === "changeOrder" && (
             <div className="space-y-4">
-              {/* Sub-tabs for RFI */}
-              <div className="flex justify-start border-b border-gray-200 mb-4">
-                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                  <button
-                    onClick={() => setChangeOrderView("list")}
-                    className={`
-                      whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
-                      ${changeOrderView === "list"
-                        ? "border-green-500 text-green-600"
-                        : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
-                      }
-                    `}
-                  >
-                    All Change Order
-                  </button>
-                  {userRole !== "client" && (
-                    <button
-                      onClick={() => setChangeOrderView("add")}
-                      className={`
-                        whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
-                        ${changeOrderView === "add"
-                          ? "border-green-500 text-green-600"
-                          : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
-                        }
-                    `}
-                    >
-                      Raise Change Order
-                    </button>
-                  )}
-                </nav>
-              </div>
-
               {/* Change Order Content */}
               {changeOrderView === "list" ? (
                 <AllCO changeOrderData={changeOrderData} />
-              ) : changeOrderView === "add" ? (
-                <AddCO project={project} onSuccess={handleCoSuccess} />
               ) : (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">

@@ -1241,6 +1241,21 @@ class Service {
 
     return response.data
   }
+
+  //pending RFIs
+  static async pendingRFIs() {
+    try {
+      const response = await api.get(`rfi/pendingRFIs`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('pending RFIs:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find pending RFIs', error)
+    }
+  }
   static async RfiSent() {
     try {
       const response = await api.get(`rfi/sents`, {
@@ -1318,6 +1333,206 @@ class Service {
       return response.data
     } catch (error) {
       console.error('cannot find rfq', error)
+    }
+  }
+
+  //submitals route ----------------------------------------------
+  static async AddSubmittal(formData) {
+    const token = sessionStorage.getItem('token')
+    try {
+      const response = await api.post(`submittal/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  //pending submittals
+  static async PendingSubmittal() {
+    try {
+      const response = await api.get(`submittal/pendingSubmittal`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Pending submittals:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find submittals', error)
+    }
+  }
+
+  //All Submitals
+  static async SubmittalSent() {
+    try {
+      const response = await api.get(`submittal/sent`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Submittals sents:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find submittals', error)
+    }
+  }
+
+  static async SubmittalRecieved() {
+    try {
+      const response = await api.get(`submittal/received`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      console.log('  Submittal received:', response.data)
+      return response.data
+    } catch (error) {
+      console.error("cannot find submittal's", error)
+    }
+  }
+  static async GetSubmittalbyId(Id) {
+    try {
+      const response = await api.get(`submittal/${Id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All submittal fetched by submittalID:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find submittal', error)
+    }
+  }
+  //submittal responses
+  static async addSubmittalResponse(formData, SubId) {
+    const token = sessionStorage.getItem('token')
+
+    const response = await api.post(`submittal/${SubId}/responses`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+
+    return response.data
+  }
+  static async GetSubmittalResponsebyId(subId) {
+    try {
+      const response = await api.get(`submittal/responses/${subId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All submittals fetched by sub ID:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find sub', error)
+    }
+  }
+
+  //change Order ---------------------------------------------
+  static async ChangeOrder(formData) {
+    const token = sessionStorage.getItem('token')
+    try {
+      const response = await api.post(`changeOrder/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // pending Co
+  static async PendingCo() {
+    try {
+      const response = await api.get(`changeOrder/pendingCOs`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Pending Co:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find Co', error)
+    }
+  }
+
+  static async GetChangeOrder(projectId) {
+    try {
+      const response = await api.get(`changeOrder/project/${projectId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All Co fetched by projectID:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find CO', error)
+    }
+  }
+  //update Co
+  static async EditCoById(id, data) {
+    try {
+      const response = await api.put(`changeOrder/${id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      console.log('co Edited:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find CO', error)
+    }
+  }
+  //response routes
+  static async addCOResponse(formData, responseId) {
+    const token = sessionStorage.getItem('token')
+
+    const response = await api.post(`changeOrder/${responseId}/responses`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+
+    return response.data
+  }
+
+  // Change Order Table Methods
+  static async GetAllCOTableRows(coId) {
+    try {
+      const response = await api.get(`changeOrder/table/${coId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching CO table rows:', error)
+    }
+  }
+
+  static async addCOTable(data, coId) {
+    try {
+      const response = await api.post(`changeOrder/table/${coId}`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error saving CO table:', error)
+      throw error
     }
   }
 

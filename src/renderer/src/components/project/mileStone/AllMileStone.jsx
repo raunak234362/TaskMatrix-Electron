@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { Clock } from "lucide-react";
 import Button from "../../fields/Button";
-import AddMileStone from "./AddMileStone";
 import Service from "../../../api/Service";
 import DataTable from "../../ui/table";
 import GetMilestoneByID from "./GetMilestoneByID";
@@ -11,7 +10,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { setMilestonesForProject } from "../../../store/milestoneSlice";
 
 const AllMileStone = ({ project, onUpdate }) => {
-  const [addMileStoneModal, setAddMileStoneModal] = useState(false);
   const dispatch = useDispatch();
   const milestonesByProject = useSelector(
     (state) => state.milestoneInfo?.milestonesByProject || {}
@@ -40,8 +38,6 @@ const AllMileStone = ({ project, onUpdate }) => {
     }
   }, [project.id, milestonesByProject, dispatch]);
 
-  const handleOpenAddMileStone = () => setAddMileStoneModal(true);
-  const handleCloseAddMileStone = () => setAddMileStoneModal(false);
 
   const handleSuccess = () => {
     fetchMileStone();
@@ -61,14 +57,6 @@ const AllMileStone = ({ project, onUpdate }) => {
 
   return (
     <div className="p-2">
-      <div className="flex justify-between items-center mb-4">
-        <Button
-          onClick={handleOpenAddMileStone}
-          className="text-sm py-1 px-3 bg-green-600 text-white"
-        >
-          + Add Milestone
-        </Button>
-      </div>
       {milestones && milestones.length > 0 ? (
         <DataTable
           columns={columns}
@@ -85,14 +73,6 @@ const AllMileStone = ({ project, onUpdate }) => {
         </div>
       )}
 
-      {addMileStoneModal && (
-        <AddMileStone
-          projectId={project.id}
-          fabricatorId={project.fabricator?.id || ""}
-          onClose={handleCloseAddMileStone}
-          onSuccess={handleSuccess}
-        />
-      )}
     </div>
   );
 };
