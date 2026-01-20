@@ -1,55 +1,67 @@
-import { useEffect, useState } from "react";
+/* eslint-disable react/prop-types */
+import React, { useEffect, useState } from "react";
 import Service from "../../../api/Service";
 import DataTable from "../../ui/table";
 import LineItemList from "./LineItemList";
 
-const LineItemGroup = ({ estimationId }) => {
-  const [lineItem, setLineItem] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const fetchGroups = async () => {
-    const response = await Service.FetchLineItemGroup(estimationId);
-    setLineItem(response.data);
-    console.log(groupData);
-  }
+const LineItemGroup = ({ estimationId, refreshTrigger }) => {
+    const [lineItem, setLineItem] = useState([]);
+    // eslint-disable-next-line no-unused-vars
+    const [, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchGroups();
-  }, []);
+    const fetchGroups = async () => {
+        try {
+            setLoading(true);
+            const response = await Service.FetchLineItemGroup(estimationId);
+            setLineItem(response.data);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    }
 
-  const columns = [
+    useEffect(() => {
+        if (estimationId) {
+            fetchGroups();
+        }
+    }, [estimationId, refreshTrigger]);
 
-    {
-      header: "Group Name",
-      accessorKey: "name"
-    },
-    {
-      header: "Group Description",
-      accessorKey: "description"
-    },
+    const columns = [
 
-  ];
-  const handleRowClick = (row) => {
-    // setSelectedEstimationId(row.id); // Assuming id exists in payload or response
-    console.log("Clicked row:", row);
-  };
+        {
+            header: "Group Name",
+            accessorKey: "name"
+        },
+        {
+            header: "Group Description",
+            accessorKey: "description"
+        },
 
-  return (
-    <div>
-      <DataTable
-        columns={columns}
-        data={lineItem}
-        onRowClick={handleRowClick}
-        detailComponent={({ row, close }) => {
-          console.log("Detail Component Row:", row);
-          const groupUniqueId =
-            row.id ?? row.estimationId ?? "";
-          return <LineItemList id={groupUniqueId} onClose={close} refresh={fetchGroups} />;
-        }}
-        searchPlaceholder="Search tasks..."
-        pageSizeOptions={[5, 10, 25]}
-      />
-    </div>
-  );
+    ];
+    const [selectedGroupId, setSelectedGroupId] = useState(null);
+
+    const handleRowClick = (row) => {
+        setSelectedGroupId(row.id);
+    };
+
+    return (
+        <div>
+            <DataTable
+                columns={columns}
+                data={lineItem}
+                onRowClick={handleRowClick}
+                searchPlaceholder="Search groups..."
+                pageSizeOptions={[5, 10, 25]}
+            />
+            {selectedGroupId && (
+                <LineItemList
+                    id={selectedGroupId}
+                    onClose={() => setSelectedGroupId(null)}
+                />
+            )}
+        </div>
+    );
 };
 
 export default LineItemGroup;

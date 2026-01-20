@@ -1,12 +1,16 @@
-import { useEffect, useState } from "react";
+/* eslint-disable react/prop-types */
+import React, { useEffect, useState } from "react";
 import Service from "../../../api/Service";
 import DataTable from "../../ui/table";
 import { X, Clock, Layers, AlignLeft, Edit2, Save, Calculator } from "lucide-react";
+import RichTextEditor from "../../fields/RichTextEditor";
 
 const LineItemList = ({ id, onClose }) => {
     const [lineItem, setLineItem] = useState([]);
-    const [groupData, setGroupData] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [groupData, setGroupData] = useState(null);
+    // eslint-disable-next-line no-unused-vars
+    const [, setLoading] = useState(false);
+
     const groupId = groupData?.group?.id
 
     const fetchGroupById = async () => {
@@ -16,6 +20,7 @@ const LineItemList = ({ id, onClose }) => {
         setGroupData(response.data);
     }
     const fetchLineItem = async () => {
+        if (!groupId) return;
         setLoading(true);
         try {
             const response = await Service.FetchLineItemGroupList(groupId);
@@ -71,7 +76,7 @@ const LineItemList = ({ id, onClose }) => {
             await Service.UpdateGroupById(id, payload);
 
             // Real-time update of local state
-            setGroupData(prev => ({
+            setGroupData(prev => prev ? ({
                 ...prev,
                 group: {
                     ...prev.group,
@@ -80,7 +85,7 @@ const LineItemList = ({ id, onClose }) => {
                     divisor: payload.divisor
                 },
                 totalHours: payload.totalHours
-            }));
+            }) : null);
 
             setIsEditingGroup(false);
             // fetchGroupById(); // Optional: still fetch to ensure sync, but local update handles immediate UI
@@ -89,7 +94,11 @@ const LineItemList = ({ id, onClose }) => {
         }
     };
 
-    const handleGroupInputChange = (e, field) => {
+    const handleGroupInputChange = (value, field) => {
+        setGroupFormData({ ...groupFormData, [field]: value });
+    };
+
+    const handleGroupInputRawChange = (e, field) => {
         setGroupFormData({ ...groupFormData, [field]: e.target.value });
     };
 
@@ -125,13 +134,18 @@ const LineItemList = ({ id, onClose }) => {
         }
     };
 
-    const handleInputChange = (e, field) => {
+    const handleInputChange = (value, field) => {
+        const newData = { ...editFormData, [field]: value };
+        setEditFormData(newData);
+    };
+
+    const handleInputRawChange = (e, field) => {
         const value = e.target.value;
         const newData = { ...editFormData, [field]: value };
 
         if (field === "quantity" || field === "hoursPerQty") {
-            const qty = parseFloat(field === "quantity" ? value : newData.quantity) || 0;
-            const hours = parseFloat(field === "hoursPerQty" ? value : newData.hoursPerQty) || 0;
+            const qty = parseFloat(field === "quantity" ? value : String(newData.quantity || 0)) || 0;
+            const hours = parseFloat(field === "hoursPerQty" ? value : String(newData.hoursPerQty || 0)) || 0;
             newData.totalHours = qty * hours;
         }
 
@@ -154,13 +168,16 @@ const LineItemList = ({ id, onClose }) => {
             cell: ({ row }) => {
                 const isEditing = editingRowId === row.original.id;
                 return isEditing ? (
-                    <textarea
-                        value={editFormData.scopeOfWork}
-                        onChange={(e) => handleInputChange(e, "scopeOfWork")}
-                        className="w-full border rounded p-1"
+                    <RichTextEditor
+                        value={editFormData.scopeOfWork || ""}
+                        onChange={(val) => handleInputChange(val, "scopeOfWork")}
+                        placeholder="Enter scope of work"
                     />
                 ) : (
-                    row.original.scopeOfWork
+                    <div
+                        className="prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ __html: row.original.scopeOfWork }}
+                    />
                 );
             },
         },
@@ -172,8 +189,8 @@ const LineItemList = ({ id, onClose }) => {
                 return isEditing ? (
                     <input
                         type="number"
-                        value={editFormData.quantity}
-                        onChange={(e) => handleInputChange(e, "quantity")}
+                        value={editFormData.quantity || 0}
+                        onChange={(e) => handleInputRawChange(e, "quantity")}
                         className="w-full border rounded p-1"
                     />
                 ) : (
@@ -189,8 +206,8 @@ const LineItemList = ({ id, onClose }) => {
                 return isEditing ? (
                     <input
                         type="number"
-                        value={editFormData.hoursPerQty}
-                        onChange={(e) => handleInputChange(e, "hoursPerQty")}
+                        value={editFormData.hoursPerQty || 0}
+                        onChange={(e) => handleInputRawChange(e, "hoursPerQty")}
                         className="w-full border rounded p-1"
                     />
                 ) : (
@@ -206,8 +223,8 @@ const LineItemList = ({ id, onClose }) => {
                 return isEditing ? (
                     <input
                         type="number"
-                        value={editFormData.totalHours}
-                        onChange={(e) => handleInputChange(e, "totalHours")}
+                        value={editFormData.totalHours || 0}
+                        onChange={(e) => handleInputRawChange(e, "totalHours")}
                         className="w-full border rounded p-1"
                     />
                 ) : (
@@ -256,10 +273,10 @@ const LineItemList = ({ id, onClose }) => {
 
         >
                 <div className="flex justify-between items-center mb-6 border-b pb-4 sticky top-0 bg-white z-10">
-                    <h2 className="text-2xl font-bold text-gray-800">Line Items</h2>
+                    <h2 className="text-2xl font-bold text-gray-700">Line Items</h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-500 hover:text-gray-700"
+                        className="text-gray-700 hover:text-gray-700"
                     >
                         <X className="w-6 h-6" />
                     </button>
@@ -268,7 +285,7 @@ const LineItemList = ({ id, onClose }) => {
                     {!isEditingGroup && (
                         <button
                             onClick={handleGroupEditClick}
-                            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-teal-600 hover:bg-white rounded-full transition-all opacity-0 group-hover:opacity-100"
+                            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-green-600 hover:bg-white rounded-full transition-all opacity-0 group-hover:opacity-100"
                             title="Edit Group Details"
                         >
                             <Edit2 className="w-4 h-4" />
@@ -280,37 +297,36 @@ const LineItemList = ({ id, onClose }) => {
                             {isEditingGroup ? (
                                 <div className="space-y-3">
                                     <div>
-                                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">Group Name</label>
+                                        <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1 block">Group Name</label>
                                         <input
                                             type="text"
                                             value={groupFormData.name}
-                                            onChange={(e) => handleGroupInputChange(e, "name")}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                            onChange={(e) => handleGroupInputRawChange(e, "name")}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                                             placeholder="Group Name"
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">Description</label>
-                                        <textarea
+                                        <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1 block">Description</label>
+                                        <RichTextEditor
                                             value={groupFormData.description}
-                                            onChange={(e) => handleGroupInputChange(e, "description")}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                            onChange={(val) => handleGroupInputChange(val, "description")}
                                             placeholder="Description"
-                                            rows="2"
                                         />
                                     </div>
                                 </div>
                             ) : (
                                 <>
-                                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2 mb-2">
-                                        <Layers className="w-5 h-5 text-teal-600" />
+                                    <h3 className="text-lg font-bold text-gray-700 flex items-center gap-2 mb-2">
+                                        <Layers className="w-5 h-5 text-green-600" />
                                         {groupData?.group?.name || "Unnamed Group"}
                                     </h3>
-                                    <div className="flex items-start gap-2 text-gray-600">
+                                    <div className="flex items-start gap-2 text-gray-700">
                                         <AlignLeft className="w-4 h-4 mt-1 shrink-0 text-gray-400" />
-                                        <p className="text-sm leading-relaxed">
-                                            {groupData?.group?.description || "No description available."}
-                                        </p>
+                                        <div
+                                            className="text-sm leading-relaxed prose prose-sm max-w-none"
+                                            dangerouslySetInnerHTML={{ __html: groupData?.group?.description || "No description available." }}
+                                        />
                                     </div>
                                 </>
                             )}
@@ -323,24 +339,24 @@ const LineItemList = ({ id, onClose }) => {
                                         <Calculator className="w-5 h-5 text-purple-600" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Weeks</p>
+                                        <p className="text-xs text-gray-700 font-medium uppercase tracking-wide">Weeks</p>
                                         {isEditingGroup ? (
                                             <div className="flex items-center gap-2">
                                                 <input
                                                     type="number"
                                                     value={groupFormData.divisor}
-                                                    onChange={(e) => handleGroupInputChange(e, "divisor")}
-                                                    className="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-teal-500 outline-none text-right font-bold text-gray-800"
+                                                    onChange={(e) => handleGroupInputRawChange(e, "divisor")}
+                                                    className="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 outline-none text-right font-bold text-gray-700"
                                                     placeholder="Div"
                                                 />
                                                 <span className="text-gray-400 text-sm">=</span>
-                                                <span className="text-sm font-bold text-gray-600">
+                                                <span className="text-sm font-bold text-gray-700">
                                                     {groupFormData.divisor > 0 ? (groupFormData.totalHours / groupFormData.divisor).toFixed(2) : "0.00"}
                                                 </span>
                                             </div>
                                         ) : (
                                             <div className="flex flex-col items-end">
-                                                <span className="text-lg font-bold text-gray-800">
+                                                <span className="text-lg font-bold text-gray-700">
                                                     {groupData?.group?.divisor ? (groupData?.totalHours / groupData?.group?.divisor).toFixed(2) : "0.00"}
                                                 </span>
                                                 <span className="text-[10px] text-gray-400">
@@ -356,16 +372,16 @@ const LineItemList = ({ id, onClose }) => {
                                         <Clock className="w-5 h-5 text-orange-600" />
                                     </div>
                                     <div>
-                                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Total Hours</p>
+                                        <p className="text-xs text-gray-700 font-medium uppercase tracking-wide">Total Hours</p>
                                         {isEditingGroup ? (
                                             <input
                                                 type="number"
                                                 value={groupFormData.totalHours}
-                                                onChange={(e) => handleGroupInputChange(e, "totalHours")}
-                                                className="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-teal-500 outline-none text-right font-bold text-gray-800"
+                                                onChange={(e) => handleGroupInputRawChange(e, "totalHours")}
+                                                className="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 outline-none text-right font-bold text-gray-700"
                                             />
                                         ) : (
-                                            <span className="text-lg font-bold text-gray-800">
+                                            <span className="text-lg font-bold text-gray-700">
                                                 {formatDecimalHours(groupData?.totalHours)}
                                             </span>
                                         )}
@@ -377,14 +393,14 @@ const LineItemList = ({ id, onClose }) => {
                                 <div className="flex gap-2 mt-2">
                                     <button
                                         onClick={handleGroupSaveClick}
-                                        className="flex items-center gap-1 px-3 py-1.5 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 transition-colors"
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
                                     >
                                         <Save className="w-3 h-3" />
                                         Save
                                     </button>
                                     <button
                                         onClick={handleGroupCancelClick}
-                                        className="px-3 py-1.5 bg-gray-100 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                                        className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
                                     >
                                         Cancel
                                     </button>

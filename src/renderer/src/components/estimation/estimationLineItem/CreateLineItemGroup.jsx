@@ -1,29 +1,25 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+/* eslint-disable react/prop-types */
+import React, { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import Service from "../../../api/Service";
 import { toast } from "react-toastify";
 import { Loader2, Plus } from "lucide-react";
-import PropTypes from "prop-types";
+import RichTextEditor from "../../fields/RichTextEditor";
 
-const schema = z.object({
-    name: z.string().min(1, "Name is required"),
-    description: z.string().optional(),
-    estimationId: z.string().min(1, "Estimation ID is required"),
-});
-
-const CreateLineItemGroup = ({ estimationId, onGroupCreated }) => {
+const CreateLineItemGroup = ({
+    estimationId,
+    onGroupCreated,
+}) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const {
         register,
+        control,
         handleSubmit,
         reset,
         formState: { errors },
     } = useForm({
-        resolver: zodResolver(schema),
         defaultValues: {
             name: "",
             description: "",
@@ -57,10 +53,10 @@ const CreateLineItemGroup = ({ estimationId, onGroupCreated }) => {
                 className="p-4 bg-gray-50 flex justify-between items-center cursor-pointer hover:bg-gray-100 transition-colors"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                <h3 className="text-lg font-semibold text-gray-800">Line Item Groups</h3>
-                <button
-                    className="flex items-center gap-2 text-teal-600 font-medium hover:text-teal-700"
-                >
+                <h3 className="text-lg font-semibold text-gray-700">
+                    Line Item Groups
+                </h3>
+                <button className="flex items-center gap-2 text-green-600 font-medium hover:text-green-700">
                     <Plus size={18} />
                     {isExpanded ? "Cancel" : "Create New Group"}
                 </button>
@@ -69,7 +65,11 @@ const CreateLineItemGroup = ({ estimationId, onGroupCreated }) => {
             {isExpanded && (
                 <div className="p-6 border-t border-gray-200">
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                        <input type="hidden" {...register("estimationId")} value={estimationId} />
+                        <input
+                            type="hidden"
+                            {...register("estimationId")}
+                            value={estimationId}
+                        />
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -77,13 +77,15 @@ const CreateLineItemGroup = ({ estimationId, onGroupCreated }) => {
                             </label>
                             <input
                                 type="text"
-                                {...register("name")}
-                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all ${errors.name ? "border-red-500" : "border-gray-300"
+                                {...register("name", { required: "Group name is required" })}
+                                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all ${errors.name ? "border-red-500" : "border-gray-300"
                                     }`}
                                 placeholder="Enter group name"
                             />
                             {errors.name && (
-                                <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.name.message}
+                                </p>
                             )}
                         </div>
 
@@ -91,14 +93,21 @@ const CreateLineItemGroup = ({ estimationId, onGroupCreated }) => {
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Description
                             </label>
-                            <textarea
-                                {...register("description")}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all"
-                                rows="3"
-                                placeholder="Enter description (optional)"
-                            ></textarea>
+                            <Controller
+                                name="description"
+                                control={control}
+                                render={({ field }) => (
+                                    <RichTextEditor
+                                        value={field.value || ""}
+                                        onChange={field.onChange}
+                                        placeholder="Enter description (optional)"
+                                    />
+                                )}
+                            />
                             {errors.description && (
-                                <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.description.message}
+                                </p>
                             )}
                         </div>
 
@@ -106,7 +115,7 @@ const CreateLineItemGroup = ({ estimationId, onGroupCreated }) => {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="flex items-center gap-2 px-6 py-2 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors shadow-sm"
+                                className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors shadow-sm"
                             >
                                 {isSubmitting ? (
                                     <>
@@ -123,11 +132,6 @@ const CreateLineItemGroup = ({ estimationId, onGroupCreated }) => {
             )}
         </div>
     );
-};
-
-CreateLineItemGroup.propTypes = {
-    estimationId: PropTypes.string.isRequired,
-    onGroupCreated: PropTypes.func,
 };
 
 export default CreateLineItemGroup;
