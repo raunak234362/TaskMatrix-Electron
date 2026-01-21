@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from 'react'
 import {
   Loader2,
   Calendar,
@@ -9,86 +9,84 @@ import {
   ClipboardList,
   User,
   Tag,
-  X,
-} from "lucide-react";
-import Service from "../../../api/Service";
-import { toast } from "react-toastify";
-import { Button } from "../../ui/button";
+  X
+} from 'lucide-react'
+import Service from '../../../api/Service'
+import { toast } from 'react-toastify'
+import { Button } from '../../ui/button'
 
 const GetMilestoneByID = ({ row, close }) => {
-  const [milestone, setMilestone] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const id = row?.id;
+  const [milestone, setMilestone] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const id = row?.id
 
   const fetchMilestone = async () => {
-    if (!id) return;
+    if (!id) return
     try {
-      setLoading(true);
-      const response = await Service.GetMilestoneById(id.toString());
-      setMilestone(response?.data || null);
+      setLoading(true)
+      const response = await Service.GetMilestoneById(id.toString())
+      setMilestone(response?.data || null)
     } catch (error) {
-      console.error("Error fetching milestone:", error);
-      toast.error("Failed to load milestone details");
+      console.error('Error fetching milestone:', error)
+      toast.error('Failed to load milestone details')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchMilestone();
-  }, [id]);
+    fetchMilestone()
+  }, [id])
 
   const formatDate = (dateString) => {
-    if (!dateString) return "—";
-    return new Intl.DateTimeFormat("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(new Date(dateString));
-  };
+    if (!dateString) return '—'
+    return new Intl.DateTimeFormat('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }).format(new Date(dateString))
+  }
 
   const getStatusConfig = (status) => {
     const configs = {
       APPROVED: {
-        label: "Approved",
-        bg: "bg-emerald-100",
-        text: "text-emerald-700",
-        border: "border-emerald-300",
+        label: 'Approved',
+        bg: 'bg-emerald-100',
+        text: 'text-emerald-700',
+        border: 'border-emerald-300'
       },
       PENDING: {
-        label: "Pending",
-        bg: "bg-yellow-100",
-        text: "text-yellow-700",
-        border: "border-yellow-300",
+        label: 'Pending',
+        bg: 'bg-yellow-100',
+        text: 'text-yellow-700',
+        border: 'border-yellow-300'
       },
       REJECTED: {
-        label: "Rejected",
-        bg: "bg-red-100",
-        text: "text-red-700",
-        border: "border-red-300",
-      },
-    };
-    return (
-      configs[status?.toUpperCase() || ""] || {
-        label: status || "Unknown",
-        bg: "bg-gray-100",
-        text: "text-gray-700",
-        border: "border-gray-300",
+        label: 'Rejected',
+        bg: 'bg-red-100',
+        text: 'text-red-700',
+        border: 'border-red-300'
       }
-    );
-  };
+    }
+    return (
+      configs[status?.toUpperCase() || ''] || {
+        label: status || 'Unknown',
+        bg: 'bg-gray-100',
+        text: 'text-gray-700',
+        border: 'border-gray-300'
+      }
+    )
+  }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex flex-col items-center">
           <Loader2 className="w-10 h-10 animate-spin text-green-600" />
-          <p className="mt-4 text-sm font-medium text-gray-700">
-            Loading milestone details...
-          </p>
+          <p className="mt-4 text-sm font-medium text-gray-700">Loading milestone details...</p>
         </div>
       </div>
-    );
+    )
   }
 
   if (!milestone) {
@@ -97,12 +95,8 @@ const GetMilestoneByID = ({ row, close }) => {
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
           <AlertCircle className="w-8 h-8 text-gray-400" />
         </div>
-        <p className="text-lg font-semibold text-gray-700">
-          Milestone Not Found
-        </p>
-        <p className="text-gray-700 mt-1">
-          This milestone may have been removed.
-        </p>
+        <p className="text-lg font-semibold text-gray-700">Milestone Not Found</p>
+        <p className="text-gray-700 mt-1">This milestone may have been removed.</p>
         <Button
           onClick={close}
           className="mt-6 px-6 py-2 bg-green-600 text-white hover:bg-green-700 transition"
@@ -110,10 +104,10 @@ const GetMilestoneByID = ({ row, close }) => {
           Go Back
         </Button>
       </div>
-    );
+    )
   }
 
-  const statusConfig = getStatusConfig(milestone.status);
+  const statusConfig = getStatusConfig(milestone.status)
 
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
@@ -124,12 +118,8 @@ const GetMilestoneByID = ({ row, close }) => {
             <CheckCircle2 className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white leading-tight">
-              {milestone.subject}
-            </h2>
-            <p className="text-green-50 text-xs font-medium">
-              ID: #{milestone.id}
-            </p>
+            <h2 className="text-xl font-bold text-white leading-tight">{milestone.subject}</h2>
+            <p className="text-green-50 text-xs font-medium">ID: #{milestone.id}</p>
           </div>
         </div>
         <Button
@@ -172,7 +162,7 @@ const GetMilestoneByID = ({ row, close }) => {
           <InfoCard
             icon={<Tag className="w-5 h-5" />}
             label="Project"
-            value={milestone.project?.name || "—"}
+            value={milestone.project?.name || '—'}
             color="text-green-600"
             bg="bg-green-50"
           />
@@ -187,9 +177,7 @@ const GetMilestoneByID = ({ row, close }) => {
           <div
             className="text-gray-700 text-sm leading-relaxed prose prose-sm max-w-none"
             dangerouslySetInnerHTML={{
-              __html:
-                milestone.description ||
-                "No description provided for this milestone.",
+              __html: milestone.description || 'No description provided for this milestone.'
             }}
           />
         </div>
@@ -212,15 +200,13 @@ const GetMilestoneByID = ({ row, close }) => {
                       <ClipboardList className="w-4 h-4 text-green-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-gray-700">
-                        {task.name}
-                      </p>
+                      <p className="text-sm font-semibold text-gray-700">{task.name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <User className="w-3 h-3 text-gray-400" />
                         <span className="text-xs text-gray-700">
                           {task.user
                             ? `${task.user.firstName} ${task.user.lastName}`
-                            : "Unassigned"}
+                            : 'Unassigned'}
                         </span>
                       </div>
                     </div>
@@ -235,25 +221,17 @@ const GetMilestoneByID = ({ row, close }) => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-const InfoCard = ({
-  icon,
-  label,
-  value,
-  color,
-  bg,
-}) => (
+const InfoCard = ({ icon, label, value, color, bg }) => (
   <div className="flex flex-col gap-1">
-    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-      {label}
-    </span>
+    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{label}</span>
     <div className="flex items-center gap-2 mt-1">
       <div className={`p-1.5 ${bg} ${color} rounded-lg`}>{icon}</div>
       <span className="text-sm font-bold text-gray-700">{value}</span>
     </div>
   </div>
-);
+)
 
-export default GetMilestoneByID;
+export default GetMilestoneByID

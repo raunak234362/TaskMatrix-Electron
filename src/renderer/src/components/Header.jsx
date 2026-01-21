@@ -1,8 +1,5 @@
-import React from "react";
-import { Menu, ChevronLeft, Bell } from "lucide-react";
-import Button from "./fields/Button";
-
-
+import { Menu, ChevronLeft, Bell } from 'lucide-react'
+import Button from './fields/Button'
 
 const Header = ({ isMinimized, toggleSidebar }) => {
   return (
@@ -32,7 +29,7 @@ const Header = ({ isMinimized, toggleSidebar }) => {
           <span className="text-md font-extrabold text-gray-800 tracking-tight">
             Welcome Back,
             <span className="ml-1 text-md font-bold text-[#6bbd45] tracking-wide uppercase">
-              {sessionStorage.getItem("username") || "User"}
+              {sessionStorage.getItem('username') || 'User'}
             </span>
           </span>
         </div>
@@ -46,7 +43,7 @@ const Header = ({ isMinimized, toggleSidebar }) => {
         </button>
       </div>
     </header>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

@@ -1,50 +1,47 @@
-import { X, Paperclip, CalendarDays } from "lucide-react";
-import { useState } from "react";
-import Button from "../fields/Button";
-import { openFileSecurely } from "../../utils/openFileSecurely";
-import Service from "../../api/Service";
-import RichTextEditor from "../fields/RichTextEditor";
+import { X, Paperclip, CalendarDays } from 'lucide-react'
+import { useState } from 'react'
+import Button from '../fields/Button'
+import { openFileSecurely } from '../../utils/openFileSecurely'
+import Service from '../../api/Service'
+import RichTextEditor from '../fields/RichTextEditor'
 
 // Status options for submittal
 const STATUS_OPTIONS = [
-  { label: "Not Approved", value: "NOT_APPROVED" },
-  { label: "Approved", value: "APPROVED" },
-  { label: "Rejected", value: "REJECTED" },
-];
+  { label: 'Not Approved', value: 'NOT_APPROVED' },
+  { label: 'Approved', value: 'APPROVED' },
+  { label: 'Rejected', value: 'REJECTED' }
+]
 
-const SubmittalResponseDetailsModal = ({
-  response,
-  onClose,
-}) => {
-  const [replyMode, setReplyMode] = useState(false);
-  const [replyMessage, setReplyMessage] = useState("");
-  const [replyFiles, setReplyFiles] = useState([]);
-  const [replyStatus, setReplyStatus] = useState("NOT_APPROVED");
+const SubmittalResponseDetailsModal = ({ response, onClose }) => {
+  const [replyMode, setReplyMode] = useState(false)
+  const [replyMessage, setReplyMessage] = useState('')
+  const [replyFiles, setReplyFiles] = useState([])
+  const [replyStatus, setReplyStatus] = useState('NOT_APPROVED')
 
-  const userRole = sessionStorage.getItem("userRole")?.toUpperCase() || "";
-  const userId = sessionStorage.getItem("userId") || "";
+  const userRole = sessionStorage.getItem('userRole')?.toUpperCase() || ''
+  const userId = sessionStorage.getItem('userId') || ''
 
-  const canReply = ["ADMIN", "STAFF", "MANAGER"].includes(userRole);
+  const canReply = ['ADMIN', 'STAFF', 'MANAGER'].includes(userRole)
 
   const handleReplySubmit = async () => {
-    if (!replyMessage.trim()) return;
+    if (!replyMessage.trim()) return
 
-    const formData = new FormData();
-    formData.append("reason", replyMessage);
-    formData.append("submittalsId", response.submittalsId);
-    formData.append("parentResponseId", response.id);
-    formData.append("userId", userId);
-    formData.append("status", replyStatus);
+    const formData = new FormData()
+    formData.append('reason', replyMessage)
+    formData.append('submittalsId', response.submittalsId)
+    formData.append('parentResponseId', response.id)
+    formData.append('userId', userId)
+    formData.append('status', replyStatus)
 
-    replyFiles.forEach((file) => formData.append("files", file));
+    replyFiles.forEach((file) => formData.append('files', file))
 
     try {
-      await Service.addSubmittalResponse(formData, response.submittalsId);
-      onClose(); // close to refresh parent
+      await Service.addSubmittalResponse(formData, response.submittalsId)
+      onClose() // close to refresh parent
     } catch (err) {
-      console.error("Failed to send submittal reply:", err);
+      console.error('Failed to send submittal reply:', err)
     }
-  };
+  }
 
   return (
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
@@ -64,7 +61,7 @@ const SubmittalResponseDetailsModal = ({
         <div
           className="bg-gray-100 p-3 rounded-md border prose prose-sm max-w-none"
           dangerouslySetInnerHTML={{
-            __html: response.reason || response.description,
+            __html: response.reason || response.description
           }}
         />
 
@@ -76,9 +73,7 @@ const SubmittalResponseDetailsModal = ({
               <p
                 key={file.id}
                 className="cursor-pointer text-green-600 underline text-sm"
-                onClick={() =>
-                  openFileSecurely("submittal/response", response.id, file.id)
-                }
+                onClick={() => openFileSecurely('submittal/response', response.id, file.id)}
               >
                 <Paperclip size={14} className="inline-block mr-2" />
                 {file.originalName}
@@ -99,14 +94,11 @@ const SubmittalResponseDetailsModal = ({
             <h4 className="text-sm font-semibold text-gray-700">History</h4>
 
             {response.childResponses.map((child) => (
-              <div
-                key={child.id}
-                className="bg-gray-50 p-3 rounded border text-sm"
-              >
+              <div key={child.id} className="bg-gray-50 p-3 rounded border text-sm">
                 <div className="flex justify-between text-xs text-gray-700 mb-1">
                   <span className="font-medium text-gray-700">
-                    {child.user?.firstName || "User"}{" "}
-                    {child.user?.lastName || ""} ({child.user?.role || "N/A"})
+                    {child.user?.firstName || 'User'} {child.user?.lastName || ''} (
+                    {child.user?.role || 'N/A'})
                   </span>
                   <span>{new Date(child.createdAt).toLocaleString()}</span>
                 </div>
@@ -114,7 +106,7 @@ const SubmittalResponseDetailsModal = ({
                 <div
                   className="text-gray-700 mb-2 prose prose-sm max-w-none"
                   dangerouslySetInnerHTML={{
-                    __html: child.reason || child.description,
+                    __html: child.reason || child.description
                   }}
                 />
 
@@ -125,13 +117,7 @@ const SubmittalResponseDetailsModal = ({
                       <p
                         key={file.id}
                         className="cursor-pointer text-green-600 underline text-xs"
-                        onClick={() =>
-                          openFileSecurely(
-                            "submittal/response",
-                            child.id,
-                            file.id
-                          )
-                        }
+                        onClick={() => openFileSecurely('submittal/response', child.id, file.id)}
                       >
                         <Paperclip size={12} className="inline-block mr-1" />
                         {file.originalName}
@@ -146,10 +132,7 @@ const SubmittalResponseDetailsModal = ({
 
         {/* Reply Button */}
         {canReply && !replyMode && (
-          <Button
-            className="bg-blue-600 text-white mt-4"
-            onClick={() => setReplyMode(true)}
-          >
+          <Button className="bg-blue-600 text-white mt-4" onClick={() => setReplyMode(true)}>
             Reply
           </Button>
         )}
@@ -159,9 +142,7 @@ const SubmittalResponseDetailsModal = ({
           <div className="pt-4 space-y-4 border-t">
             {/* Message */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">
-                Your Reply
-              </label>
+              <label className="text-sm font-medium text-gray-700">Your Reply</label>
               <RichTextEditor
                 value={replyMessage}
                 onChange={setReplyMessage}
@@ -186,18 +167,13 @@ const SubmittalResponseDetailsModal = ({
             <input
               type="file"
               multiple
-              onChange={(e) =>
-                setReplyFiles(e.target.files ? Array.from(e.target.files) : [])
-              }
+              onChange={(e) => setReplyFiles(e.target.files ? Array.from(e.target.files) : [])}
             />
 
             {/* Actions */}
             <div className="flex justify-end gap-3">
               <Button onClick={() => setReplyMode(false)}>Cancel</Button>
-              <Button
-                className="bg-green-600 text-white"
-                onClick={handleReplySubmit}
-              >
+              <Button className="bg-green-600 text-white" onClick={handleReplySubmit}>
                 Send Reply
               </Button>
             </div>
@@ -205,7 +181,7 @@ const SubmittalResponseDetailsModal = ({
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SubmittalResponseDetailsModal;
+export default SubmittalResponseDetailsModal

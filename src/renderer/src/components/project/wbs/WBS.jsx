@@ -1,13 +1,13 @@
-import AllWBS from "./AllWBS";
+import AllWBS from './AllWBS'
 
 const WBS = ({ id, stage }) => {
-  console.log(id);
+  console.log(id)
 
   return (
     <>
       <AllWBS id={id} stage={stage} />
     </>
-  );
-};
+  )
+}
 
-export default WBS;
+export default WBS

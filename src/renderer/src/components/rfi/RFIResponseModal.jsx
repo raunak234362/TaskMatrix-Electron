@@ -1,54 +1,50 @@
-import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import MultipleFileUpload from "../fields/MultipleFileUpload";
-import Service from "../../api/Service";
-import { X } from "lucide-react";
-import Button from "../fields/Button";
-import RichTextEditor from "../fields/RichTextEditor";
+import { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import MultipleFileUpload from '../fields/MultipleFileUpload'
+import Service from '../../api/Service'
+import { X } from 'lucide-react'
+import Button from '../fields/Button'
+import RichTextEditor from '../fields/RichTextEditor'
 
-const RFIResponseModal = ({
-  rfiId,
-  onClose,
-  onSuccess,
-}) => {
-  const { handleSubmit, control, reset } = useForm();
-  const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(false);
+const RFIResponseModal = ({ rfiId, onClose, onSuccess }) => {
+  const { handleSubmit, control, reset } = useForm()
+  const [files, setFiles] = useState([])
+  const [loading, setLoading] = useState(false)
 
   const onSubmit = async (data) => {
     try {
-      setLoading(true);
+      setLoading(true)
 
-      const userId = sessionStorage.getItem("userId") || "";
-      const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+      const userId = sessionStorage.getItem('userId') || ''
+      const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
       const payload = {
         ...data,
         rfiId,
-        parentResponseId: data.parentResponseId || "",
-      };
-      console.log(payload);
-      const formData = new FormData();
-      formData.append("rfiId", rfiId);
-      formData.append("reason", data.reason);
+        parentResponseId: data.parentResponseId || ''
+      }
+      console.log(payload)
+      const formData = new FormData()
+      formData.append('rfiId', rfiId)
+      formData.append('reason', data.reason)
 
       //   formData.append("responseState", data.responseState ? "true" : "false");
-      formData.append("userRole", userRole);
-      formData.append("userId", userId);
+      formData.append('userRole', userRole)
+      formData.append('userId', userId)
 
-      files.forEach((file) => formData.append("files", file));
+      files.forEach((file) => formData.append('files', file))
 
-      await Service.addRFIResponse(formData, rfiId);
+      await Service.addRFIResponse(formData, rfiId)
 
-      reset();
-      setFiles([]);
-      onSuccess();
-      onClose();
+      reset()
+      setFiles([])
+      onSuccess()
+      onClose()
     } catch (err) {
-      console.error("Error submitting RFI response:", err);
+      console.error('Error submitting RFI response:', err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40">
@@ -64,10 +60,10 @@ const RFIResponseModal = ({
           <Controller
             name="reason"
             control={control}
-            rules={{ required: "Message is required" }}
+            rules={{ required: 'Message is required' }}
             render={({ field }) => (
               <RichTextEditor
-                value={field.value || ""}
+                value={field.value || ''}
                 onChange={field.onChange}
                 placeholder="Write your response..."
               />
@@ -78,25 +74,19 @@ const RFIResponseModal = ({
           <Controller
             name="files"
             control={control}
-            render={() => (
-              <MultipleFileUpload onFilesChange={(f) => setFiles(f)} />
-            )}
+            render={() => <MultipleFileUpload onFilesChange={(f) => setFiles(f)} />}
           />
 
           <div className="flex justify-end gap-3">
             <Button onClick={onClose}>Cancel</Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="bg-green-600 text-white"
-            >
-              {loading ? "Submitting..." : "Submit Response"}
+            <Button type="submit" disabled={loading} className="bg-green-600 text-white">
+              {loading ? 'Submitting...' : 'Submit Response'}
             </Button>
           </div>
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default RFIResponseModal;
+export default RFIResponseModal

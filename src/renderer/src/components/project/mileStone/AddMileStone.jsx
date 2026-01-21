@@ -1,58 +1,51 @@
-import { useForm, Controller } from "react-hook-form";
-import { toast } from "react-toastify";
-import { X, CheckCircle } from "lucide-react";
-import Service from "../../../api/Service";
-import Input from "../../fields/input";
-import Button from "../../fields/Button";
-import Select from "react-select";
+import { useForm, Controller } from 'react-hook-form'
+import { toast } from 'react-toastify'
+import { X, CheckCircle } from 'lucide-react'
+import Service from '../../../api/Service'
+import Input from '../../fields/input'
+import Button from '../../fields/Button'
+import Select from 'react-select'
 
-import RichTextEditor from "../../fields/RichTextEditor";
+import RichTextEditor from '../../fields/RichTextEditor'
 
-const AddMileStone = ({
-  projectId,
-  fabricatorId,
-  onClose,
-  onSuccess,
-}) => {
+const AddMileStone = ({ projectId, fabricatorId, onClose, onSuccess }) => {
   const {
     register,
     handleSubmit,
     control,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting }
   } = useForm({
     defaultValues: {
       project_id: projectId,
       fabricator_id: fabricatorId,
-      status: "PENDING",
-    },
-  });
+      status: 'PENDING'
+    }
+  })
 
   const statusOptions = [
-    { label: "Pending", value: "PENDING" },
-    { label: "In Progress", value: "IN_PROGRESS" },
-    { label: "Completed", value: "COMPLETED" },
-    { label: "Approved", value: "APPROVED" },
-  ];
+    { label: 'Pending', value: 'PENDING' },
+    { label: 'In Progress', value: 'IN_PROGRESS' },
+    { label: 'Completed', value: 'COMPLETED' },
+    { label: 'Approved', value: 'APPROVED' }
+  ]
 
   const onSubmit = async (data) => {
     try {
       const payload = {
         ...data,
-        status: "ACTIVE",
+        status: 'ACTIVE',
         date: data.date ? new Date(data.date).toISOString() : undefined,
-        approvalDate: data.approvalDate
-          ? new Date(data.approvalDate).toISOString()
-          : undefined,
-      };
-      await Service.AddProjectMilestone(payload);
-      toast.success("Milestone added successfully!");
-      if (onSuccess) onSuccess();
+        approvalDate: data.approvalDate ? new Date(data.approvalDate).toISOString() : undefined
+      }
+      await Service.AddProjectMilestone(payload)
+      toast.success('Milestone added successfully!')
+      if (onSuccess) onSuccess()
       //   onClose();
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to add milestone");
+      toast.error(error?.response?.data?.message || 'Failed to add milestone')
     }
-  };
+  }
 
   return (
     <div className="flex items-center justify-center p-4">
@@ -76,34 +69,26 @@ const AddMileStone = ({
           <Input
             label="Subject *"
             placeholder="e.g. 50% Submission"
-            {...register("subject", { required: "Required" })}
+            {...register('subject', { required: 'Required' })}
           />
-          {errors.subject && (
-            <p className="text-red-500 text-xs mt-1">
-              {errors.subject.message}
-            </p>
-          )}
+          {errors.subject && <p className="text-red-500 text-xs mt-1">{errors.subject.message}</p>}
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Description *
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Description *</label>
             <Controller
               name="description"
               control={control}
-              rules={{ required: "Required" }}
+              rules={{ required: 'Required' }}
               render={({ field }) => (
                 <RichTextEditor
-                  value={field.value || ""}
+                  value={field.value || ''}
                   onChange={field.onChange}
                   placeholder="Describe the milestone deliverables..."
                 />
               )}
             />
             {errors.description && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.description.message}
-              </p>
+              <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
             )}
           </div>
 
@@ -118,28 +103,22 @@ const AddMileStone = ({
                 <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>
               )}
             </div> */}
-            <Input
-              label="Approval Date"
-              type="date"
-              {...register("approvalDate")}
-            />
+            <Input label="Approval Date" type="date" {...register('approvalDate')} />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Status
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Status</label>
             <Select
               options={statusOptions}
               defaultValue={statusOptions[0]}
-              onChange={(opt) => setValue("status", opt?.value || "PENDING")}
+              onChange={(opt) => setValue('status', opt?.value || 'PENDING')}
               className="text-sm"
               styles={{
                 control: (base) => ({
                   ...base,
-                  borderRadius: "0.5rem",
-                  padding: "2px",
-                }),
+                  borderRadius: '0.5rem',
+                  padding: '2px'
+                })
               }}
             />
           </div>
@@ -158,13 +137,13 @@ const AddMileStone = ({
               disabled={isSubmitting}
               className="bg-green-600 hover:bg-green-700 text-white px-6"
             >
-              {isSubmitting ? "Adding..." : "Add Milestone"}
+              {isSubmitting ? 'Adding...' : 'Add Milestone'}
             </Button>
           </div>
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AddMileStone;
+export default AddMileStone

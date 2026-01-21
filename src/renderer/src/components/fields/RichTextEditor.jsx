@@ -1,49 +1,44 @@
-import React, { useMemo, useRef } from "react";
-import JoditEditor from "jodit-react";
+import { useMemo, useRef } from 'react'
+import JoditEditor from 'jodit-react'
 
-const RichTextEditor = ({
-  value,
-  onChange,
-  placeholder,
-  className = "",
-}) => {
-  const editor = useRef(null);
+const RichTextEditor = ({ value, onChange, placeholder, className = '' }) => {
+  const editor = useRef(null)
 
   const config = useMemo(
     () => ({
       readonly: false,
-      placeholder: placeholder || "Start typing...",
+      placeholder: placeholder || 'Start typing...',
       toolbarAdaptive: false,
       buttons: [
-        "bold",
-        "italic",
-        "underline",
-        "strikethrough",
-        "|",
-        "ul",
-        "ol",
-        "|",
-        "font",
-        "fontsize",
-        "brush",
-        "paragraph",
-        "|",
-        "image",
-        "table",
-        "link",
-        "|",
-        "align",
-        "undo",
-        "redo",
-        "|",
-        "hr",
-        "eraser",
-        "fullsize",
+        'bold',
+        'italic',
+        'underline',
+        'strikethrough',
+        '|',
+        'ul',
+        'ol',
+        '|',
+        'font',
+        'fontsize',
+        'brush',
+        'paragraph',
+        '|',
+        'image',
+        'table',
+        'link',
+        '|',
+        'align',
+        'undo',
+        'redo',
+        '|',
+        'hr',
+        'eraser',
+        'fullsize'
       ],
-      height: 300,
+      height: 300
     }),
     [placeholder]
-  );
+  )
 
   return (
     <div className={`rich-text-editor ${className}`}>
@@ -52,10 +47,10 @@ const RichTextEditor = ({
         value={value}
         config={config}
         onBlur={(newContent) => onChange(newContent)}
-        onChange={() => { }}
+        onChange={() => {}}
       />
     </div>
-  );
-};
+  )
+}
 
-export default RichTextEditor;
+export default RichTextEditor

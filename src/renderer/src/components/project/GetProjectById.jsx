@@ -1,5 +1,4 @@
-
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from 'react'
 import {
   Loader2,
   AlertCircle,
@@ -8,68 +7,68 @@ import {
   FolderOpenDot,
   Users,
   Clock,
-  ClipboardList,
-} from "lucide-react";
-import Service from "../../api/Service";
-import Button from "../fields/Button";
-import AllMileStone from "./mileStone/AllMileStone";
-import AllDocument from "./projectDocument/AllDocument";
+  ClipboardList
+} from 'lucide-react'
+import Service from '../../api/Service'
+import Button from '../fields/Button'
+import AllMileStone from './mileStone/AllMileStone'
+import AllDocument from './projectDocument/AllDocument'
 
-import WBS from "./wbs/WBS";
+import WBS from './wbs/WBS'
 
-import AllRFI from "../rfi/AllRfi";
-import AllSubmittals from "../submittals/AllSubmittals";
-import AllNotes from "./notes/AllNotes";
-import EditProject from "./EditProject";
-import RenderFiles from "../ui/RenderFiles";
-import AllCO from "../co/AllCO";
-import CoTable from "../co/CoTable";
+import AllRFI from '../rfi/AllRfi'
+import AllSubmittals from '../submittals/AllSubmittals'
+import AllNotes from './notes/AllNotes'
+import EditProject from './EditProject'
+import RenderFiles from '../ui/RenderFiles'
+import AllCO from '../co/AllCO'
+import CoTable from '../co/CoTable'
 
 const GetProjectById = ({ id }) => {
-  const [project, setProject] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("details");
-  const [editModel, setEditModel] = useState(null);
-  const [changeOrderView, setChangeOrderView] = useState("list");
-  const [selectedCoId, setSelectedCoId] = useState(null);
-  const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+  const [project, setProject] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [activeTab, setActiveTab] = useState('details')
+  const [editModel, setEditModel] = useState(null)
+  const [changeOrderView, setChangeOrderView] = useState('list')
+  const [selectedCoId, setSelectedCoId] = useState(null)
+  const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
   const rfiData = useMemo(() => {
-    return project?.rfi || [];
-  }, [project]);
+    return project?.rfi || []
+  }, [project])
 
-  const [changeOrderData, setChangeOrderData] = useState([]);
+  const [changeOrderData, setChangeOrderData] = useState([])
   const fetchProject = async () => {
     try {
-      setLoading(true);
-      setError(null);
-      const response = await Service.GetProjectById(id);
-      setProject(response?.data || null);
+      setLoading(true)
+      setError(null)
+      const response = await Service.GetProjectById(id)
+      setProject(response?.data || null)
     } catch (err) {
-      setError("Failed to load project details");
-      console.error("Error fetching project:", err);
+      setError('Failed to load project details')
+      console.error('Error fetching project:', err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const fetchChangeOrders = async () => {
     try {
-      const response = await Service.GetChangeOrder(id);
-      setChangeOrderData(response?.data || []);
+      const response = await Service.GetChangeOrder(id)
+      setChangeOrderData(response?.data || [])
     } catch (err) {
-      console.error("Error fetching change orders:", err);
+      console.error('Error fetching change orders:', err)
     }
-  };
+  }
 
   const handleEditModel = (project) => {
-    console.log(project);
-    setEditModel(project);
-  };
+    console.log(project)
+    setEditModel(project)
+  }
 
   const submittalData = useMemo(() => {
-    return project?.submittals || [];
-  }, [project]);
+    return project?.submittals || []
+  }, [project])
 
   // const FetchWBSbyProjectId = async () => {
   //   try {
@@ -89,27 +88,27 @@ const GetProjectById = ({ id }) => {
 
   useEffect(() => {
     if (id) {
-      fetchProject();
-      fetchChangeOrders();
+      fetchProject()
+      fetchChangeOrders()
     }
-  }, [id]);
+  }, [id])
 
   const handleCoSuccess = (createdCO) => {
-    const coId = createdCO?.id || createdCO?._id;
+    const coId = createdCO?.id || createdCO?._id
     if (coId) {
-      setSelectedCoId(coId);
-      setChangeOrderView("table");
-      fetchProject(); // Refresh project to get updated CO list
+      setSelectedCoId(coId)
+      setChangeOrderView('table')
+      fetchProject() // Refresh project to get updated CO list
     }
-  };
+  }
 
   const formatDate = (date) =>
     date
-      ? new Date(date).toLocaleString("en-IN", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      })
-      : "—";
+      ? new Date(date).toLocaleString('en-IN', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        })
+      : '—'
 
   if (loading)
     return (
@@ -117,15 +116,15 @@ const GetProjectById = ({ id }) => {
         <Loader2 className="w-5 h-5 animate-spin mr-2" />
         Loading project details...
       </div>
-    );
+    )
 
   if (error || !project)
     return (
       <div className="flex items-center justify-center py-8 text-red-600">
         <AlertCircle className="w-5 h-5 mr-2" />
-        {error || "Project not found"}
+        {error || 'Project not found'}
       </div>
-    );
+    )
 
   return (
     <>
@@ -133,19 +132,16 @@ const GetProjectById = ({ id }) => {
         {/* Header */}
         <div className="flex justify-between items-center border-b pb-3 mb-3">
           <div>
-            <h2 className="text-xl md:text-2xl font-semibold text-green-700">
-              {project.name}
-            </h2>
-            <p className="text-gray-700 text-sm">
-              Project No: {project.projectNumber}
-            </p>
+            <h2 className="text-xl md:text-2xl font-semibold text-green-700">{project.name}</h2>
+            <p className="text-gray-700 text-sm">Project No: {project.projectNumber}</p>
           </div>
           <div className="flex items-center gap-2">
             <span
-              className={`px-3 py-1 rounded-full text-xs font-medium ${project.status === "ACTIVE"
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-700"
-                }`}
+              className={`px-3 py-1 rounded-full text-xs font-medium ${
+                project.status === 'ACTIVE'
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-700'
+              }`}
             >
               {project.status}
             </span>
@@ -168,16 +164,16 @@ const GetProjectById = ({ id }) => {
               className="w-full p-2 border border-gray-300 rounded-md bg-primary text-white focus:outline-none focus:ring-2 focus:ring-green-500"
             >
               {[
-                { key: "details", label: "Details" },
-                { key: "files", label: "Files" },
-                { key: "wbs", label: "WBS" },
-                { key: "milestones", label: "Milestones" },
-                { key: "team", label: "Team" },
-                { key: "timeline", label: "Timeline" },
-                { key: "notes", label: "Notes" },
-                { key: "rfi", label: "RFI" },
-                { key: "submittals", label: "Submittals" },
-                { key: "changeOrder", label: "Change Order" },
+                { key: 'details', label: 'Details' },
+                { key: 'files', label: 'Files' },
+                { key: 'wbs', label: 'WBS' },
+                { key: 'milestones', label: 'Milestones' },
+                { key: 'team', label: 'Team' },
+                { key: 'timeline', label: 'Timeline' },
+                { key: 'notes', label: 'Notes' },
+                { key: 'rfi', label: 'RFI' },
+                { key: 'submittals', label: 'Submittals' },
+                { key: 'changeOrder', label: 'Change Order' }
               ].map((tab) => (
                 <option key={tab.key} value={tab.key}>
                   {tab.label}
@@ -189,26 +185,27 @@ const GetProjectById = ({ id }) => {
           {/* Desktop Tabs */}
           <div className="hidden md:flex gap-2 overflow-x-auto">
             {[
-              { key: "details", label: "Details", icon: ClipboardList },
-              { key: "files", label: "Files", icon: FileText },
-              { key: "wbs", label: "WBS", icon: FileText },
-              { key: "milestones", label: "Milestones", icon: FileText },
-              { key: "notes", label: "Notes", icon: FolderOpenDot },
-              { key: "rfi", label: "RFI", icon: FolderOpenDot },
-              { key: "submittals", label: "Submittals", icon: FolderOpenDot },
+              { key: 'details', label: 'Details', icon: ClipboardList },
+              { key: 'files', label: 'Files', icon: FileText },
+              { key: 'wbs', label: 'WBS', icon: FileText },
+              { key: 'milestones', label: 'Milestones', icon: FileText },
+              { key: 'notes', label: 'Notes', icon: FolderOpenDot },
+              { key: 'rfi', label: 'RFI', icon: FolderOpenDot },
+              { key: 'submittals', label: 'Submittals', icon: FolderOpenDot },
               {
-                key: "changeOrder",
-                label: "Change Order",
-                icon: FolderOpenDot,
-              },
+                key: 'changeOrder',
+                label: 'Change Order',
+                icon: FolderOpenDot
+              }
             ].map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 onClick={() => setActiveTab(key)}
-                className={`flex items-center gap-2 bg-primary text-gray-800 px-4 py-2 text-sm rounded-md font-medium transition-colors whitespace-nowrap ${activeTab === key
-                  ? "bg-green-600 text-white font-bold"
-                  : "text-gray-700 hover:text-green-700 font-semibold hover:bg-gray-50"
-                  }`}
+                className={`flex items-center gap-2 bg-primary text-gray-800 px-4 py-2 text-sm rounded-md font-medium transition-colors whitespace-nowrap ${
+                  activeTab === key
+                    ? 'bg-green-600 text-white font-bold'
+                    : 'text-gray-700 hover:text-green-700 font-semibold hover:bg-gray-50'
+                }`}
               >
                 <Icon className="w-4 h-4" />
                 {label}
@@ -220,7 +217,7 @@ const GetProjectById = ({ id }) => {
         {/* Tab Content */}
         <div className="p-2">
           {/* ✅ Details */}
-          {activeTab === "details" && (
+          {activeTab === 'details' && (
             <div className="grid max-sm:grid-cols-1 md:grid-cols-2 gap-6 text-sm">
               <div className="md:col-span-2 mt-6">
                 <h4 className="font-semibold text-green-700 mb-2 flex items-center gap-1">
@@ -228,48 +225,30 @@ const GetProjectById = ({ id }) => {
                   Project Description
                 </h4>
                 <p className="text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">
-                  {project.description || "No description available."}
+                  {project.description || 'No description available.'}
                 </p>
               </div>
               <div className="space-y-3">
-                <InfoRow
-                  label="Estimated Hours"
-                  value={project.estimatedHours || 0}
-                />
-                <InfoRow
-                  label="Department"
-                  value={project.department?.name || "—"}
-                />
-                <InfoRow label="Team" value={project.team?.name || "—"} />
+                <InfoRow label="Estimated Hours" value={project.estimatedHours || 0} />
+                <InfoRow label="Department" value={project.department?.name || '—'} />
+                <InfoRow label="Team" value={project.team?.name || '—'} />
                 <InfoRow
                   label="Manager"
                   value={
                     project.manager
                       ? `${project.manager.firstName} ${project.manager.lastName} (${project.manager.username})`
-                      : "—"
+                      : '—'
                   }
                 />
-                <InfoRow
-                  label="Fabricator"
-                  value={project.fabricator?.fabName || "—"}
-                />
-                <InfoRow label="Tools" value={project.tools || "—"} />
+                <InfoRow label="Fabricator" value={project.fabricator?.fabName || '—'} />
+                <InfoRow label="Tools" value={project.tools || '—'} />
               </div>
 
               <div className="space-y-3">
-                <InfoRow label="Stage" value={project.stage || "—"} />
-                <InfoRow
-                  label="Start Date"
-                  value={formatDate(project.startDate)}
-                />
-                <InfoRow
-                  label="Approval Date"
-                  value={formatDate(project.approvalDate)}
-                />
-                <InfoRow
-                  label="Fabrication Date"
-                  value={formatDate(project.fabricationDate)}
-                />
+                <InfoRow label="Stage" value={project.stage || '—'} />
+                <InfoRow label="Start Date" value={formatDate(project.startDate)} />
+                <InfoRow label="Approval Date" value={formatDate(project.approvalDate)} />
+                <InfoRow label="Fabrication Date" value={formatDate(project.fabricationDate)} />
                 <InfoRow label="End Date" value={formatDate(project.endDate)} />
                 {/* <InfoRow label="RFQ ID" value={project.rfqId || "—"} /> */}
               </div>
@@ -279,15 +258,9 @@ const GetProjectById = ({ id }) => {
                   <Settings className="w-5 h-5" /> Connection Design Scope
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <ScopeTag
-                    label="Connection Design"
-                    active={project.connectionDesign}
-                  />
+                  <ScopeTag label="Connection Design" active={project.connectionDesign} />
                   <ScopeTag label="Misc Design" active={project.miscDesign} />
-                  <ScopeTag
-                    label="Customer Design"
-                    active={project.customerDesign}
-                  />
+                  <ScopeTag label="Customer Design" active={project.customerDesign} />
                 </div>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg border text-sm">
@@ -295,14 +268,8 @@ const GetProjectById = ({ id }) => {
                   <Settings className="w-5 h-5" /> Detailing Scope
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <ScopeTag
-                    label="Detailing Main"
-                    active={project.detailingMain}
-                  />
-                  <ScopeTag
-                    label="Detailing Misc"
-                    active={project.detailingMisc}
-                  />
+                  <ScopeTag label="Detailing Main" active={project.detailingMain} />
+                  <ScopeTag label="Detailing Misc" active={project.detailingMisc} />
                 </div>
               </div>
 
@@ -319,7 +286,7 @@ const GetProjectById = ({ id }) => {
           )}
 
           {/* ✅ Files */}
-          {activeTab === "files" && (
+          {activeTab === 'files' && (
             <div className="space-y-4">
               <RenderFiles
                 files={project.files || []}
@@ -330,28 +297,26 @@ const GetProjectById = ({ id }) => {
               <AllDocument />
             </div>
           )}
-          {activeTab === "milestones" && (
-            <AllMileStone project={project} onUpdate={fetchProject} />
-          )}
+          {activeTab === 'milestones' && <AllMileStone project={project} onUpdate={fetchProject} />}
 
           {/* ✅ Team */}
-          {activeTab === "team" && (
+          {activeTab === 'team' && (
             <div className="text-gray-700 text-sm">
               <h4 className="font-semibold text-green-700 mb-2 flex items-center gap-1">
                 <Users className="w-4 h-4" /> Assigned Team
               </h4>
-              <p>Team: {project.team?.name || "No team assigned."}</p>
+              <p>Team: {project.team?.name || 'No team assigned.'}</p>
               <p>
-                Manager:{" "}
+                Manager:{' '}
                 {project.manager
                   ? `${project.manager.firstName} ${project.manager.lastName} (${project.manager.username})`
-                  : "Not assigned."}
+                  : 'Not assigned.'}
               </p>
             </div>
           )}
 
           {/* ✅ Timeline */}
-          {activeTab === "timeline" && (
+          {activeTab === 'timeline' && (
             <div className="text-gray-700 italic text-center py-10">
               <Clock className="w-6 h-6 mx-auto mb-2 text-gray-400" />
               Timeline view will be integrated soon.
@@ -359,38 +324,36 @@ const GetProjectById = ({ id }) => {
           )}
 
           {/* ✅ Notes */}
-          {activeTab === "notes" && <AllNotes projectId={id} />}
-          {activeTab === "wbs" && (
+          {activeTab === 'notes' && <AllNotes projectId={id} />}
+          {activeTab === 'wbs' && (
             <div className="text-gray-700 italic text-center">
               {/* <FolderOpenDot className="w-6 h-6 mx-auto mb-2 text-gray-400" /> */}
-              <WBS id={id} stage={project.stage || ""} />
+              <WBS id={id} stage={project.stage || ''} />
             </div>
           )}
-          {activeTab === "rfi" && (
+          {activeTab === 'rfi' && (
             <div className="space-y-4">
               {/* RFI Content */}
               <AllRFI rfiData={rfiData} />
             </div>
           )}
-          {activeTab === "submittals" && (
+          {activeTab === 'submittals' && (
             <div className="space-y-4">
               {/* Submittal Content */}
               <AllSubmittals submittalData={submittalData} />
             </div>
           )}
-          {activeTab === "changeOrder" && (
+          {activeTab === 'changeOrder' && (
             <div className="space-y-4">
               {/* Change Order Content */}
-              {changeOrderView === "list" ? (
+              {changeOrderView === 'list' ? (
                 <AllCO changeOrderData={changeOrderData} />
               ) : (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <h4 className="text-lg font-semibold text-green-700">
-                      Change Order Table
-                    </h4>
+                    <h4 className="text-lg font-semibold text-green-700">Change Order Table</h4>
                     <button
-                      onClick={() => setChangeOrderView("list")}
+                      onClick={() => setChangeOrderView('list')}
                       className="text-sm text-green-600 hover:text-green-700 font-medium"
                     >
                       &larr; Back to List
@@ -408,36 +371,34 @@ const GetProjectById = ({ id }) => {
           projectId={id}
           onCancel={() => setEditModel(null)}
           onSuccess={() => {
-            setEditModel(null);
-            fetchProject();
+            setEditModel(null)
+            fetchProject()
           }}
         />
       )}
     </>
-  );
-};
+  )
+}
 
 // ✅ InfoRow Component
-const InfoRow = ({
-  label,
-  value,
-}) => (
+const InfoRow = ({ label, value }) => (
   <div className="flex justify-between border-b border-gray-100 pb-1">
     <span className="font-medium text-gray-700">{label}:</span>
     <span className="text-gray-700">{value}</span>
   </div>
-);
+)
 
 // ✅ ScopeTag Component
 const ScopeTag = ({ label, active }) => (
   <span
-    className={`px-3 py-1 text-xs font-medium rounded-full ${active
-      ? "bg-green-100 text-green-800 border border-green-300"
-      : "bg-gray-100 text-gray-700 border border-gray-200"
-      }`}
+    className={`px-3 py-1 text-xs font-medium rounded-full ${
+      active
+        ? 'bg-green-100 text-green-800 border border-green-300'
+        : 'bg-gray-100 text-gray-700 border border-gray-200'
+    }`}
   >
     {label}
   </span>
-);
+)
 
-export default GetProjectById;
+export default GetProjectById

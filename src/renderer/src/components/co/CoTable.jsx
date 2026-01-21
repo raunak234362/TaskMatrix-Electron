@@ -1,36 +1,36 @@
-import { useState, useEffect } from "react";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
-import Button from "../fields/Button";
-import Input from "../fields/input";
-import Service from "../../api/Service";
-import { toast } from "react-toastify";
+import { useState, useEffect } from 'react'
+import { useForm, useFieldArray, Controller } from 'react-hook-form'
+import Button from '../fields/Button'
+import Input from '../fields/input'
+import Service from '../../api/Service'
+import { toast } from 'react-toastify'
 
 const CoTable = ({ coId }) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true)
   const { control, handleSubmit, watch } = useForm({
     defaultValues: {
       rows: [
         {
-          description: "",
-          referenceDoc: "",
-          elements: "",
-          QtyNo: "0",
-          hours: "0",
-          cost: "0",
-          remarks: "",
-        },
-      ],
-    },
-  });
+          description: '',
+          referenceDoc: '',
+          elements: '',
+          QtyNo: '0',
+          hours: '0',
+          cost: '0',
+          remarks: ''
+        }
+      ]
+    }
+  })
 
-  const { fields, append, replace } = useFieldArray({ control, name: "rows" });
+  const { fields, append, replace } = useFieldArray({ control, name: 'rows' })
 
   const fetchTableRows = async () => {
-    if (!coId) return;
+    if (!coId) return
     try {
-      setLoading(true);
-      const response = await Service.GetAllCOTableRows(coId);
-      const rows = response?.data || [];
+      setLoading(true)
+      const response = await Service.GetAllCOTableRows(coId)
+      const rows = response?.data || []
       if (rows.length > 0) {
         replace(
           rows.map((r) => ({
@@ -40,20 +40,20 @@ const CoTable = ({ coId }) => {
             QtyNo: String(r.QtyNo),
             hours: String(r.hours),
             cost: String(r.cost),
-            remarks: r.remarks,
+            remarks: r.remarks
           }))
-        );
+        )
       }
     } catch (err) {
-      console.error("Fetch error:", err);
+      console.error('Fetch error:', err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchTableRows();
-  }, [coId]);
+    fetchTableRows()
+  }, [coId])
 
   const onSubmit = async (data) => {
     try {
@@ -62,27 +62,25 @@ const CoTable = ({ coId }) => {
         ...row,
         QtyNo: Number(row.QtyNo),
         hours: Number(row.hours),
-        cost: Number(row.cost),
-      }));
+        cost: Number(row.cost)
+      }))
 
-      await Service.addCOTable(formattedRows, coId);
-      toast.success("Table saved successfully!");
-      fetchTableRows();
+      await Service.addCOTable(formattedRows, coId)
+      toast.success('Table saved successfully!')
+      fetchTableRows()
     } catch (err) {
-      toast.error("Failed to save table data");
+      toast.error('Failed to save table data')
     }
-  };
+  }
 
-  const rows = watch("rows") || [];
-  const totalHours = rows.reduce((sum, r) => sum + (Number(r.hours) || 0), 0);
-  const totalCost = rows.reduce((sum, r) => sum + (Number(r.cost) || 0), 0);
+  const rows = watch('rows') || []
+  const totalHours = rows.reduce((sum, r) => sum + (Number(r.hours) || 0), 0)
+  const totalCost = rows.reduce((sum, r) => sum + (Number(r.cost) || 0), 0)
 
   if (loading)
     return (
-      <div className="p-10 text-center animate-pulse text-green-600">
-        Loading Table Data...
-      </div>
-    );
+      <div className="p-10 text-center animate-pulse text-green-600">Loading Table Data...</div>
+    )
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
@@ -161,9 +159,7 @@ const CoTable = ({ coId }) => {
                   Total
                 </td>
                 <td className="p-3 text-green-900">{totalHours}</td>
-                <td className="p-3 text-green-900">
-                  ${totalCost.toLocaleString()}
-                </td>
+                <td className="p-3 text-green-900">${totalCost.toLocaleString()}</td>
                 <td />
               </tr>
             </tbody>
@@ -175,29 +171,26 @@ const CoTable = ({ coId }) => {
             type="button"
             onClick={() =>
               append({
-                description: "",
-                referenceDoc: "",
-                elements: "",
-                QtyNo: "0",
-                hours: "0",
-                cost: "0",
-                remarks: "",
+                description: '',
+                referenceDoc: '',
+                elements: '',
+                QtyNo: '0',
+                hours: '0',
+                cost: '0',
+                remarks: ''
               })
             }
             className="bg-blue-500 hover:bg-blue-600 text-white"
           >
             + Add Row
           </Button>
-          <Button
-            type="submit"
-            className="bg-green-600 hover:bg-green-700 text-white shadow-md"
-          >
+          <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white shadow-md">
             Finalize & Save Table
           </Button>
         </div>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default CoTable;
+export default CoTable

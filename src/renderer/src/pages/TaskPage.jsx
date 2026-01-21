@@ -1,11 +1,11 @@
-import TaskLayout from "../layout/TaskLayout";
+import TaskLayout from '../layout/TaskLayout'
 
 const TaskPage = () => {
-    return (
-        <div>
-            <TaskLayout />
-        </div>
-    );
-};
+  return (
+    <div>
+      <TaskLayout />
+    </div>
+  )
+}
 
-export default TaskPage;
+export default TaskPage

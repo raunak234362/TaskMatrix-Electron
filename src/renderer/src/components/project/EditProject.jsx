@@ -1,190 +1,156 @@
+import { useEffect, useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { toast } from 'react-toastify'
+import { useDispatch, useSelector } from 'react-redux'
+import Select from 'react-select'
+import { Building2, UserCheck, HardHat, Wrench, Layers, X, Save, Users } from 'lucide-react'
 
-import React, { useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { toast } from "react-toastify";
-import { useDispatch, useSelector } from "react-redux";
-import Select from "react-select";
-import {
-  Building2,
-  UserCheck,
-  HardHat,
-  Wrench,
-  Layers,
-  X,
-  Save,
-  Users,
-} from "lucide-react";
+import Input from '../fields/input'
+import Button from '../fields/Button'
+import SectionTitle from '../ui/SectionTitle'
+import Service from '../../api/Service'
+import ToggleField from '../fields/Toggle'
 
-import Input from "../fields/input";
-import Button from "../fields/Button";
-import SectionTitle from "../ui/SectionTitle";
-import Service from "../../api/Service";
-import ToggleField from "../fields/Toggle";
+import { updateProject } from '../../store/projectSlice'
+import { showDepartment, showTeam, showStaff } from '../../store/userSlice'
 
-import { updateProject } from "../../store/projectSlice";
-import { showDepartment, showTeam, showStaff } from "../../store/userSlice";
+const EditProject = ({ projectId, onCancel, onSuccess }) => {
+  const dispatch = useDispatch()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [connectionDesigners, setConnectionDesigners] = useState([])
+  const [loading, setLoading] = useState(true)
 
+  const fabricators = useSelector((state) => state.fabricatorInfo?.fabricatorData || [])
+  const departmentDatas = useSelector((state) => state.userInfo?.departmentData || [])
+  const teamDatas = useSelector((state) => state.userInfo?.teamData || [])
+  const users = useSelector((state) => state.userInfo?.staffData || [])
 
-
-const EditProject = ({
-  projectId,
-  onCancel,
-  onSuccess,
-}) => {
-  const dispatch = useDispatch();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [connectionDesigners, setConnectionDesigners] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const fabricators = useSelector(
-    (state) => state.fabricatorInfo?.fabricatorData || []
-  );
-  const departmentDatas = useSelector(
-    (state) => state.userInfo?.departmentData || []
-  );
-  const teamDatas = useSelector((state) => state.userInfo?.teamData || []);
-  const users = useSelector((state) => state.userInfo?.staffData || []);
-
-  const { register, handleSubmit, control, setValue, watch } =
-    useForm({
-      defaultValues: {
-        tools: "TEKLA",
-        connectionDesign: false,
-        miscDesign: false,
-        customerDesign: false,
-        detailingMain: false,
-        detailingMisc: false,
-      },
-    });
+  const { register, handleSubmit, control, setValue, watch } = useForm({
+    defaultValues: {
+      tools: 'TEKLA',
+      connectionDesign: false,
+      miscDesign: false,
+      customerDesign: false,
+      detailingMain: false,
+      detailingMisc: false
+    }
+  })
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
-        const [cdRes, projectRes, deptRes, teamRes, staffRes] =
-          await Promise.all([
-            Service.FetchAllConnectionDesigner(),
-            Service.GetProjectById(projectId),
-            departmentDatas.length === 0
-              ? Service.AllDepartments()
-              : Promise.resolve(null),
-            teamDatas.length === 0 ? Service.AllTeam() : Promise.resolve(null),
-            users.length === 0
-              ? Service.FetchAllEmployee()
-              : Promise.resolve(null),
-          ]);
+        setLoading(true)
+        const [cdRes, projectRes, deptRes, teamRes, staffRes] = await Promise.all([
+          Service.FetchAllConnectionDesigner(),
+          Service.GetProjectById(projectId),
+          departmentDatas.length === 0 ? Service.AllDepartments() : Promise.resolve(null),
+          teamDatas.length === 0 ? Service.AllTeam() : Promise.resolve(null),
+          users.length === 0 ? Service.FetchAllEmployee() : Promise.resolve(null)
+        ])
 
-        setConnectionDesigners(cdRes?.data || []);
-        if (deptRes) dispatch(showDepartment(deptRes.data || deptRes));
-        if (teamRes) dispatch(showTeam(teamRes.data || teamRes));
-        if (staffRes) dispatch(showStaff(staffRes.data || staffRes));
+        setConnectionDesigners(cdRes?.data || [])
+        if (deptRes) dispatch(showDepartment(deptRes.data || deptRes))
+        if (teamRes) dispatch(showTeam(teamRes.data || teamRes))
+        if (staffRes) dispatch(showStaff(staffRes.data || staffRes))
 
-        const project = projectRes?.data;
+        const project = projectRes?.data
         if (project) {
-          setValue("name", project.name);
-          setValue("projectNumber", project.projectNumber);
-          setValue("description", project.description);
-          setValue("fabricatorID", project.fabricatorID);
-          setValue("managerID", project.managerID);
-          setValue("departmentID", project.department?.id);
-          setValue("teamID", project.team?.id);
-          setValue("tools", project.tools);
-          setValue("stage", project.stage);
-          setValue("estimatedHours", project.estimatedHours);
+          setValue('name', project.name)
+          setValue('projectNumber', project.projectNumber)
+          setValue('description', project.description)
+          setValue('fabricatorID', project.fabricatorID)
+          setValue('managerID', project.managerID)
+          setValue('departmentID', project.department?.id)
+          setValue('teamID', project.team?.id)
+          setValue('tools', project.tools)
+          setValue('stage', project.stage)
+          setValue('estimatedHours', project.estimatedHours)
           setValue(
-            "startDate",
-            project.startDate
-              ? new Date(project.startDate).toISOString().split("T")[0]
-              : ""
-          );
+            'startDate',
+            project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : ''
+          )
           setValue(
-            "endDate",
-            project.endDate
-              ? new Date(project.endDate).toISOString().split("T")[0]
-              : ""
-          );
+            'endDate',
+            project.endDate ? new Date(project.endDate).toISOString().split('T')[0] : ''
+          )
 
-          setValue("connectionDesign", project.connectionDesign);
-          setValue("miscDesign", project.miscDesign);
-          setValue("customerDesign", project.customerDesign);
-          setValue("detailingMain", project.detailingMain);
-          setValue("detailingMisc", project.detailingMisc);
+          setValue('connectionDesign', project.connectionDesign)
+          setValue('miscDesign', project.miscDesign)
+          setValue('customerDesign', project.customerDesign)
+          setValue('detailingMain', project.detailingMain)
+          setValue('detailingMisc', project.detailingMisc)
         }
       } catch (error) {
-        console.error("Failed to load data", error);
-        toast.error("Failed to load project details");
+        console.error('Failed to load data', error)
+        toast.error('Failed to load project details')
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
-    fetchData();
-  }, [projectId, setValue]);
+    }
+    fetchData()
+  }, [projectId, setValue])
 
   const options = {
-    fabricators: (Array.isArray(fabricators) ? fabricators : []).map(
-      (f) => ({
-        label: f.fabName,
-        value: String(f.id),
-      })
-    ),
-    departments: (Array.isArray(departmentDatas) ? departmentDatas : []).map(
-      (d) => ({
-        label: d.name,
-        value: String(d.id),
-      })
-    ),
+    fabricators: (Array.isArray(fabricators) ? fabricators : []).map((f) => ({
+      label: f.fabName,
+      value: String(f.id)
+    })),
+    departments: (Array.isArray(departmentDatas) ? departmentDatas : []).map((d) => ({
+      label: d.name,
+      value: String(d.id)
+    })),
     managers: (Array.isArray(users) ? users : []).map((u) => ({
       label: `${u.firstName} ${u.lastName}`,
-      value: String(u.id),
+      value: String(u.id)
     })),
     teams: (Array.isArray(teamDatas) ? teamDatas : []).map((t) => ({
       label: t.name,
-      value: String(t.id),
+      value: String(t.id)
     })),
     connectionDesigners: connectionDesigners.map((c) => ({
       label: c.connectionDesignerName || c.name,
-      value: String(c.id),
+      value: String(c.id)
     })),
     tools: [
-      { label: "TEKLA", value: "TEKLA" },
-      { label: "SDS2", value: "SDS2" },
-      { label: "Both (TEKLA + SDS2)", value: "BOTH" },
+      { label: 'TEKLA', value: 'TEKLA' },
+      { label: 'SDS2', value: 'SDS2' },
+      { label: 'Both (TEKLA + SDS2)', value: 'BOTH' }
     ],
     stage: [
-      { label: "IFA - (Issue for Approval)", value: "IFA" },
-      { label: "IFC - (Issue for Construction)", value: "IFC" },
-      { label: "CO# - (Change Order)", value: "CO#" },
-    ],
-  };
+      { label: 'IFA - (Issue for Approval)', value: 'IFA' },
+      { label: 'IFC - (Issue for Construction)', value: 'IFC' },
+      { label: 'CO# - (Change Order)', value: 'CO#' }
+    ]
+  }
 
   const onSubmit = async (data) => {
     try {
-      setIsSubmitting(true);
-      const formData = new FormData();
+      setIsSubmitting(true)
+      const formData = new FormData()
 
       Object.entries(data).forEach(([key, value]) => {
-        if (value === null || value === undefined) return;
-        if (key === "files") return;
+        if (value === null || value === undefined) return
+        if (key === 'files') return
 
-        if (typeof value === "boolean") {
-          formData.append(key, value ? "true" : "false");
+        if (typeof value === 'boolean') {
+          formData.append(key, value ? 'true' : 'false')
         } else {
-          formData.append(key, String(value));
+          formData.append(key, String(value))
         }
-      });
+      })
 
-      const res = await Service.EditProjectById(projectId, formData);
+      const res = await Service.EditProjectById(projectId, formData)
       if (res?.data) {
-        dispatch(updateProject(res.data));
+        dispatch(updateProject(res.data))
       }
-      toast.success("Project updated successfully!");
-      onSuccess();
+      toast.success('Project updated successfully!')
+      onSuccess()
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to update project");
+      toast.error(error?.response?.data?.message || 'Failed to update project')
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   if (loading) {
     return (
@@ -193,7 +159,7 @@ const EditProject = ({
           <div className="text-center">Loading project data...</div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -209,10 +175,7 @@ const EditProject = ({
         <div className="overflow-y-auto p-6">
           <div className="flex justify-between items-center mb-6 border-b pb-4 sticky top-0 bg-white z-10">
             <h2 className="text-2xl font-bold text-gray-700">Edit Project</h2>
-            <button
-              onClick={onCancel}
-              className="text-gray-700 hover:text-gray-700"
-            >
+            <button onClick={onCancel} className="text-gray-700 hover:text-gray-700">
               <X className="w-6 h-6" />
             </button>
           </div>
@@ -224,18 +187,18 @@ const EditProject = ({
               <Input
                 label="Project Number"
                 placeholder="PROJ-2025-089"
-                {...register("projectNumber")}
+                {...register('projectNumber')}
               />
               <Input
                 label="Project Name"
                 placeholder="Empire State Tower - Phase II"
-                {...register("name")}
+                {...register('name')}
               />
               <div className="md:col-span-2">
                 <Input
                   label="Description"
                   placeholder="Full structural steel detailing for 40-story commercial building..."
-                  {...register("description")}
+                  {...register('description')}
                 />
               </div>
             </div>
@@ -253,10 +216,8 @@ const EditProject = ({
                   render={({ field }) => (
                     <Select
                       options={options.fabricators}
-                      value={options.fabricators.find(
-                        (o) => o.value === field.value
-                      )}
-                      onChange={(o) => field.onChange(o?.value || "")}
+                      value={options.fabricators.find((o) => o.value === field.value)}
+                      onChange={(o) => field.onChange(o?.value || '')}
                       placeholder="Select..."
                       isSearchable
                     />
@@ -273,10 +234,8 @@ const EditProject = ({
                   render={({ field }) => (
                     <Select
                       options={options.managers}
-                      value={options.managers.find(
-                        (o) => o.value === field.value
-                      )}
-                      onChange={(o) => field.onChange(o?.value || "")}
+                      value={options.managers.find((o) => o.value === field.value)}
+                      onChange={(o) => field.onChange(o?.value || '')}
                       placeholder="Assign manager"
                       isSearchable
                     />
@@ -293,10 +252,8 @@ const EditProject = ({
                   render={({ field }) => (
                     <Select
                       options={options.departments}
-                      value={options.departments.find(
-                        (o) => o.value === field.value
-                      )}
-                      onChange={(o) => field.onChange(o?.value || "")}
+                      value={options.departments.find((o) => o.value === field.value)}
+                      onChange={(o) => field.onChange(o?.value || '')}
                       placeholder="Select dept"
                     />
                   )}
@@ -310,31 +267,27 @@ const EditProject = ({
                   name="teamID"
                   control={control}
                   render={({ field }) => {
-                    const selectedDeptId = watch("departmentID");
+                    const selectedDeptId = watch('departmentID')
                     const filteredTeams = (Array.isArray(teamDatas) ? teamDatas : [])
                       .filter(
-                        (t) =>
-                          !selectedDeptId ||
-                          String(t.departmentID) === String(selectedDeptId)
+                        (t) => !selectedDeptId || String(t.departmentID) === String(selectedDeptId)
                       )
                       .map((t) => ({
                         label: t.name,
-                        value: String(t.id),
-                      }));
+                        value: String(t.id)
+                      }))
 
                     return (
                       <Select
                         options={filteredTeams}
-                        value={filteredTeams.find(
-                          (o) => o.value === field.value
-                        )}
-                        onChange={(o) => field.onChange(o?.value || "")}
+                        value={filteredTeams.find((o) => o.value === field.value)}
+                        onChange={(o) => field.onChange(o?.value || '')}
                         placeholder="Select team"
                         isSearchable
                         isClearable
                         isDisabled={!selectedDeptId}
                       />
-                    );
+                    )
                   }}
                 />
               </div>
@@ -344,17 +297,15 @@ const EditProject = ({
             <div className="bg-cyan-50/50 rounded-xl p-4 border border-cyan-100">
               <div className="flex items-center gap-2 mb-4">
                 <Layers className="w-5 h-5 text-cyan-600" />
-                <h3 className="text-lg font-bold text-cyan-900">
-                  Connection Design Scope
-                </h3>
+                <h3 className="text-lg font-bold text-cyan-900">Connection Design Scope</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
-                  "connectionDesign::Main Connection Design",
-                  "miscDesign::Misc Design",
-                  "customerDesign::Customer Design",
+                  'connectionDesign::Main Connection Design',
+                  'miscDesign::Misc Design',
+                  'customerDesign::Customer Design'
                 ].map((item) => {
-                  const [key, label] = item.split("::");
+                  const [key, label] = item.split('::')
                   return (
                     <Controller
                       key={key}
@@ -370,7 +321,7 @@ const EditProject = ({
                         </div>
                       )}
                     />
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -379,16 +330,11 @@ const EditProject = ({
             <div className="bg-amber-50/50 rounded-xl p-4 border border-amber-100">
               <div className="flex items-center gap-2 mb-4">
                 <Wrench className="w-5 h-5 text-amber-600" />
-                <h3 className="text-lg font-bold text-amber-900">
-                  Detailing Scope
-                </h3>
+                <h3 className="text-lg font-bold text-amber-900">Detailing Scope</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  "detailingMain::Detailing Main",
-                  "detailingMisc::Detailing Misc",
-                ].map((item) => {
-                  const [key, label] = item.split("::");
+                {['detailingMain::Detailing Main', 'detailingMisc::Detailing Misc'].map((item) => {
+                  const [key, label] = item.split('::')
                   return (
                     <Controller
                       key={key}
@@ -404,7 +350,7 @@ const EditProject = ({
                         </div>
                       )}
                     />
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -423,7 +369,7 @@ const EditProject = ({
                     <Select
                       options={options.tools}
                       value={options.tools.find((o) => o.value === field.value)}
-                      onChange={(o) => field.onChange(o?.value || "TEKLA")}
+                      onChange={(o) => field.onChange(o?.value || 'TEKLA')}
                     />
                   )}
                 />
@@ -439,7 +385,7 @@ const EditProject = ({
                     <Select
                       options={options.stage}
                       value={options.stage.find((o) => o.value === field.value)}
-                      onChange={(o) => field.onChange(o?.value || "IFA")}
+                      onChange={(o) => field.onChange(o?.value || 'IFA')}
                     />
                   )}
                 />
@@ -448,34 +394,18 @@ const EditProject = ({
                 label="Estimated Hours"
                 type="number"
                 placeholder="1200"
-                {...register("estimatedHours")}
+                {...register('estimatedHours')}
               />
-              <Input
-                label="Start Date"
-                type="date"
-                {...register("startDate")}
-              />
-              <Input
-                label="Target End Date"
-                type="date"
-                {...register("endDate")}
-              />
+              <Input label="Start Date" type="date" {...register('startDate')} />
+              <Input label="Target End Date" type="date" {...register('endDate')} />
             </div>
 
             {/* Submit */}
             <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
-              <Button
-                className="bg-gray-500 hover:bg-gray-600"
-                onClick={onCancel}
-                type="button"
-              >
+              <Button className="bg-gray-500 hover:bg-gray-600" onClick={onCancel} type="button">
                 Cancel
               </Button>
-              <Button
-                className="flex items-center gap-2"
-                type="submit"
-                disabled={isSubmitting}
-              >
+              <Button className="flex items-center gap-2" type="submit" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>Saving...</>
                 ) : (
@@ -490,7 +420,7 @@ const EditProject = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default EditProject;
+export default EditProject

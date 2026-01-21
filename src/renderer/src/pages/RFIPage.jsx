@@ -1,12 +1,11 @@
-import RfiLayout from "../layout/RfiLayout";
-
+import RfiLayout from '../layout/RfiLayout'
 
 const RFIPage = () => {
   return (
     <div>
       <RfiLayout />
     </div>
-  );
-};
+  )
+}
 
-export default RFIPage;
+export default RFIPage

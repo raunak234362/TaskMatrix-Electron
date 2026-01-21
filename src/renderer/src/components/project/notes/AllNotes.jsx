@@ -1,53 +1,43 @@
-import { useEffect, useState } from "react";
-import {
-  Loader2,
-  Plus,
-  FileText,
-  Calendar,
-  User,
-  Paperclip,
-} from "lucide-react";
-import Service from "../../../api/Service";
+import { useEffect, useState } from 'react'
+import { Loader2, Plus, FileText, Calendar, User, Paperclip } from 'lucide-react'
+import Service from '../../../api/Service'
 
-import Button from "../../fields/Button";
-import AddNotes from "./AddNotes";
-import { openFileSecurely } from "../../../utils/openFileSecurely";
+import Button from '../../fields/Button'
+import AddNotes from './AddNotes'
+import { openFileSecurely } from '../../../utils/openFileSecurely'
 
 const AllNotes = ({ projectId }) => {
-  const [notes, setNotes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [notes, setNotes] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showAddModal, setShowAddModal] = useState(false)
 
   useEffect(() => {
-    if (projectId) fetchNotes();
-  }, [projectId]);
+    if (projectId) fetchNotes()
+  }, [projectId])
 
   const fetchNotes = async () => {
     try {
-      setLoading(true);
-      const response = await Service.GetProjectNotes(projectId);
-      setNotes(response || []);
+      setLoading(true)
+      const response = await Service.GetProjectNotes(projectId)
+      setNotes(response || [])
     } catch (error) {
-      console.error("Error fetching notes:", error);
+      console.error('Error fetching notes:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString("en-IN", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-  };
+    return new Date(dateString).toLocaleString('en-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    })
+  }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <Button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2"
-        >
+        <Button onClick={() => setShowAddModal(true)} className="flex items-center gap-2">
           <Plus className="w-4 h-4" /> Add Note
         </Button>
       </div>
@@ -71,12 +61,11 @@ const AllNotes = ({ projectId }) => {
                     {note.stage}
                   </span>
                   <span className="text-xs text-gray-700 flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />{" "}
-                    {formatDate(note.createdAt)}
+                    <Calendar className="w-3 h-3" /> {formatDate(note.createdAt)}
                   </span>
                 </div>
                 <div className="text-xs text-gray-700 flex items-center gap-1">
-                  <User className="w-3 h-3" /> {note.createdBy?.firstName}{" "}
+                  <User className="w-3 h-3" /> {note.createdBy?.firstName}{' '}
                   {note.createdBy?.lastName}
                 </div>
               </div>
@@ -84,7 +73,10 @@ const AllNotes = ({ projectId }) => {
               {note.tags && (
                 <div className="flex flex-wrap gap-1 mb-2">
                   {note.tags.split(',').map((tag, i) => (
-                    <span key={i} className="px-2 py-0.5 bg-green-50 text-green-600 text-[10px] font-bold rounded-full border border-green-100 uppercase tracking-wider">
+                    <span
+                      key={i}
+                      className="px-2 py-0.5 bg-green-50 text-green-600 text-[10px] font-bold rounded-full border border-green-100 uppercase tracking-wider"
+                    >
                       {tag.trim()}
                     </span>
                   ))}
@@ -101,9 +93,7 @@ const AllNotes = ({ projectId }) => {
                   {note.files.map((file) => (
                     <button
                       key={file.id}
-                      onClick={() =>
-                        openFileSecurely("project", projectId, file.id)
-                      }
+                      onClick={() => openFileSecurely('project', projectId, file.id)}
                       className="flex items-center gap-1 text-xs bg-green-50 text-green-700 px-2 py-1 rounded hover:bg-green-100 transition-colors"
                     >
                       <Paperclip className="w-3 h-3" /> {file.originalName}
@@ -135,7 +125,7 @@ const AllNotes = ({ projectId }) => {
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default AllNotes;
+export default AllNotes

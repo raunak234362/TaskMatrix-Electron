@@ -1,57 +1,50 @@
-import React, { useMemo } from "react";
-import { Briefcase, Info, AlertCircle } from "lucide-react";
-import { motion } from "framer-motion";
-import { motion } from "framer-motion";
+import { useMemo } from 'react'
+import { Briefcase, Info, AlertCircle } from 'lucide-react'
+import { motion } from 'framer-motion'
 
-const MonthlyProjectStats = ({
-  tasks,
-  projects,
-  selectedMonth,
-  selectedYear,
-}) => {
+const MonthlyProjectStats = ({ tasks, projects, selectedMonth, selectedYear }) => {
   const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ]
 
   const workloadData = useMemo(() => {
-    if (selectedMonth === null || selectedYear === null)
-      return { projects: [], count: 0 };
+    if (selectedMonth === null || selectedYear === null) return { projects: [], count: 0 }
 
-    const startOfMonth = new Date(selectedYear, selectedMonth, 1);
-    const endOfMonth = new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59);
+    const startOfMonth = new Date(selectedYear, selectedMonth, 1)
+    const endOfMonth = new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59)
 
-    const activeProjectIds = new Set();
+    const activeProjectIds = new Set()
 
     tasks.forEach((task) => {
-      if (!task.start_date || !task.due_date || !task.project_id) return;
+      if (!task.start_date || !task.due_date || !task.project_id) return
 
-      const taskStart = new Date(task.start_date);
-      const taskEnd = new Date(task.due_date);
+      const taskStart = new Date(task.start_date)
+      const taskEnd = new Date(task.due_date)
 
       // Overlap check: task starts before month end AND task ends after month start
       if (taskStart <= endOfMonth && taskEnd >= startOfMonth) {
-        activeProjectIds.add(task.project_id);
+        activeProjectIds.add(task.project_id)
       }
-    });
+    })
 
-    const activeProjects = projects.filter((p) => activeProjectIds.has(p.id));
+    const activeProjects = projects.filter((p) => activeProjectIds.has(p.id))
 
     return {
       projects: activeProjects,
-      count: activeProjects.length,
-    };
-  }, [tasks, projects, selectedMonth, selectedYear]);
+      count: activeProjects.length
+    }
+  }, [tasks, projects, selectedMonth, selectedYear])
 
   if (selectedMonth === null || selectedYear === null) {
     return (
@@ -60,16 +53,13 @@ const MonthlyProjectStats = ({
           <Info className="w-6 h-6 text-blue-500" />
         </div>
         <div>
-          <h3 className="text-sm font-bold text-gray-700">
-            Monthly Workload Insight
-          </h3>
+          <h3 className="text-sm font-bold text-gray-700">Monthly Workload Insight</h3>
           <p className="text-xs text-gray-700">
-            Select a specific month to see projects with active tasks during
-            that period.
+            Select a specific month to see projects with active tasks during that period.
           </p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -96,9 +86,7 @@ const MonthlyProjectStats = ({
           <span className="text-2xl font-black text-green-600 leading-none">
             {workloadData.count}
           </span>
-          <span className="text-[10px] font-bold text-gray-400 uppercase">
-            Active Projects
-          </span>
+          <span className="text-[10px] font-bold text-gray-400 uppercase">Active Projects</span>
         </div>
       </div>
 
@@ -132,7 +120,7 @@ const MonthlyProjectStats = ({
         </div>
       )}
     </motion.div>
-  );
-};
+  )
+}
 
-export default MonthlyProjectStats;
+export default MonthlyProjectStats

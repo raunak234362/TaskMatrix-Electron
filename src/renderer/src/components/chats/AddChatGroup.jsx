@@ -1,28 +1,26 @@
-import { useForm } from "react-hook-form";
-import { X, Users } from "lucide-react";
-import Input from "../fields/input";
-import Button from "../fields/Button";
-import Service from "../../api/Service";
-
-
+import { useForm } from 'react-hook-form'
+import { X, Users } from 'lucide-react'
+import Input from '../fields/input'
+import Button from '../fields/Button'
+import Service from '../../api/Service'
 
 const AddChatGroup = ({ onClose, onCreated }) => {
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting, errors },
-  } = useForm();
+    formState: { isSubmitting, errors }
+  } = useForm()
 
   const onSubmit = async (data) => {
     try {
-      const response = await Service.AddGroup(data);
-      console.log(response);
-      onCreated?.();
-      onClose();
+      const response = await Service.AddGroup(data)
+      console.log(response)
+      onCreated?.()
+      onClose()
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
-  };
+  }
 
   return (
     <div className="flex flex-col h-full bg-gray-50 items-center justify-center p-4">
@@ -53,7 +51,7 @@ const AddChatGroup = ({ onClose, onCreated }) => {
               <Input
                 label="Group Name"
                 type="text"
-                {...register("name", { required: "Group name is required" })}
+                {...register('name', { required: 'Group name is required' })}
                 placeholder="e.g. Marketing Team, Project Alpha"
                 className="w-full"
               />
@@ -76,14 +74,14 @@ const AddChatGroup = ({ onClose, onCreated }) => {
                 className="flex-1 bg-[#6bbd45] text-white hover:bg-[#5aa33a]"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Creating..." : "Create Group"}
+                {isSubmitting ? 'Creating...' : 'Create Group'}
               </Button>
             </div>
           </form>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AddChatGroup;
+export default AddChatGroup
