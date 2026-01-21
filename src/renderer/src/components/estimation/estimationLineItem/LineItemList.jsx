@@ -86,7 +86,6 @@ const LineItemList = ({ id, onClose, refresh }) => {
                 },
                 totalHours: payload.totalHours
             }) : null);
-            }) : null);
 
             setIsEditingGroup(false);
             if (refresh) refresh();
@@ -185,16 +184,8 @@ const LineItemList = ({ id, onClose, refresh }) => {
                         value={editFormData.scopeOfWork || ""}
                         onChange={(val) => handleInputChange(val, "scopeOfWork")}
                         placeholder="Enter scope of work"
-                    <RichTextEditor
-                        value={editFormData.scopeOfWork || ""}
-                        onChange={(val) => handleInputChange(val, "scopeOfWork")}
-                        placeholder="Enter scope of work"
                     />
                 ) : (
-                    <div
-                        className="prose prose-sm max-w-none"
-                        dangerouslySetInnerHTML={{ __html: row.original.scopeOfWork }}
-                    />
                     <div
                         className="prose prose-sm max-w-none"
                         dangerouslySetInnerHTML={{ __html: row.original.scopeOfWork }}
@@ -448,4 +439,4 @@ const LineItemList = ({ id, onClose, refresh }) => {
     );
 };
 
-export default LineItemList;
+export default LineItemList
