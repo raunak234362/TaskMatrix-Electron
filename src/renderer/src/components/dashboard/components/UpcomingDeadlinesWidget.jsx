@@ -7,7 +7,7 @@ const UpcomingDeadlinesWidget = ({ tasks = [] }) => {
     // Filter for pending tasks and sort by due date
     const upcoming = tasks
         .filter(t => t.status !== 'COMPLETED' && t.status !== 'IN_PROGRESS') // Assuming In Progress is shown separately
-        .sort((a, b) => new Date(a.endDate) - new Date(b.endDate))
+        .sort((a, b) => new Date(a.due_date || a.endDate) - new Date(b.due_date || b.endDate))
         .slice(0, 5); // Show top 5
 
     const getUrgencyColor = (date) => {
@@ -32,18 +32,19 @@ const UpcomingDeadlinesWidget = ({ tasks = [] }) => {
             <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
                 {upcoming.length > 0 ? (
                     upcoming.map(task => {
-                        const urgency = getUrgencyColor(task.endDate);
+                        const dueDate = task.due_date || task.endDate;
+                        const urgency = getUrgencyColor(dueDate);
                         return (
                             <div key={task.id} className="flex items-center p-3 rounded-xl border border-gray-100 hover:border-indigo-100 hover:bg-indigo-50/30 transition-all group">
                                 <div className={`p-2 rounded-lg ${urgency} mr-3`}>
                                     <AlertCircle size={18} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <h4 className="text-sm font-semibold text-gray-800 truncate" title={task.estimation?.projectName}>
-                                        {task.estimation?.projectName || "Untitled"}
+                                    <h4 className="text-sm font-semibold text-gray-800 truncate" title={task.project?.name || task.estimation?.projectName}>
+                                        {task.project?.name || task.estimation?.projectName || "Untitled"}
                                     </h4>
                                     <p className="text-xs text-gray-500 mt-0.5">
-                                        Due {format(new Date(task.endDate), "MMM dd, yyyy")}
+                                        Due {format(new Date(dueDate), "MMM dd, yyyy")}
                                     </p>
                                 </div>
                                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">

@@ -49,9 +49,11 @@ const CurrentTaskWidget = ({ task, onTaskUpdate }) => {
                             <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
                             In Progress
                         </span>
-                        <h3 className="text-2xl font-bold mt-3 leading-tight">{task.estimation?.projectName || "Untitled Project"}</h3>
+                        <h3 className="text-2xl font-bold mt-3 leading-tight">{task.project?.name || "Untitled Project"}</h3>
                         <p className="text-indigo-100 mt-1 flex items-center gap-2">
-                            <span className="opacity-80">Estimation #{task.estimation?.estimationNumber}</span>
+                            <span className="opacity-80">
+                                {task.name || "Untitled Task"}
+                            </span>
                         </p>
                     </div>
                 </div>
@@ -60,7 +62,7 @@ const CurrentTaskWidget = ({ task, onTaskUpdate }) => {
                     <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2">
                             <Calendar size={16} className="text-indigo-200" />
-                            <span className="text-indigo-100">Due: {new Date(task.endDate).toLocaleDateString()}</span>
+                            <span className="text-indigo-100">Due: {new Date(task.due_date || task.endDate).toLocaleDateString()}</span>
                         </div>
                     </div>
                 </div>
