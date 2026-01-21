@@ -2,7 +2,8 @@
 export const openFileSecurely = async (
   type,
   id,
-  fileId
+  fileId,
+  fileName = "download"
 ) => {
   try {
     const baseURL = import.meta.env.VITE_BASE_URL;
@@ -22,7 +23,6 @@ export const openFileSecurely = async (
         Authorization: `Bearer ${token}`,
       },
     });
-console.log(response);
 
     if (!response.ok) {
       throw new Error("Failed to fetch file");
@@ -31,7 +31,16 @@ console.log(response);
     const blob = await response.blob();
     const fileURL = window.URL.createObjectURL(blob);
 
-    window.open(fileURL, "_blank", "noopener,noreferrer");
+    // Create a temporary anchor element to trigger the download
+    const a = document.createElement("a");
+    a.href = fileURL;
+    a.download = fileName; // Set the filename for the download
+    document.body.appendChild(a);
+    a.click();
+
+    // Clean up
+    window.URL.revokeObjectURL(fileURL);
+    document.body.removeChild(a);
   } catch (err) {
     console.error("File open failed:", err);
     alert("Unable to open file");

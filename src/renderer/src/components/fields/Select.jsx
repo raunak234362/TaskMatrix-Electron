@@ -17,9 +17,8 @@ const Select = ({
   placeholder,
   value,
 }) =>
-// ref: ForwardedRef<HTMLDivElement>   // Removed ref, as it is unused
+// ref: ForwardedRef<HTMLDivElement>
 {
-  // const id = useId();                  // Removed id, as it is unused
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(
     null
@@ -94,7 +93,7 @@ const Select = ({
       <>
         {parts.map((part, i) =>
           regex.test(part) ? (
-            <mark key={i} className="bg-yellow-200 text-gray-700">
+            <mark key={i} className="bg-yellow-200 text-black">
               {part}
             </mark>
           ) : (
@@ -115,7 +114,7 @@ const Select = ({
             searchRef.current?.focus();
           }, 100);
         }}
-        className={`flex items - center justify - between p - 2 text - sm border rounded - md bg - white cursor - pointer transition - all ${isOpen ? "border-blue-500 ring-2 ring-blue-100" : "border-gray-300"
+        className={`flex items-center justify-between p-2 text-sm border rounded-md bg-white cursor-pointer transition-all ${isOpen ? "border-blue-500 ring-2 ring-blue-100" : "border-gray-300"
           } ${className} `}
       >
         <div className="flex-1">
@@ -127,14 +126,14 @@ const Select = ({
                 type="text"
                 value={searchTerm}
                 onChange={handleSearch}
-                className="w-full bg-transparent outline-none"
+                className="w-full bg-transparent text-black outline-none"
                 placeholder="Search..."
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
           ) : (
             <span
-              className={selectedOption ? "text-gray-700" : "text-gray-700"}
+              className={selectedOption ? "text-black" : "text-gray-500"}
             >
               {selectedOption
                 ? selectedOption.label
@@ -143,7 +142,7 @@ const Select = ({
           )}
         </div>
         <svg
-          className={`w - 4 h - 4 text - gray - 400 transition - transform ${isOpen ? "transform rotate-180" : ""
+          className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? "transform rotate-180" : ""
             } `}
           fill="none"
           stroke="currentColor"
@@ -160,19 +159,19 @@ const Select = ({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute bottom-0 h-auto overflow-y-auto z-10 w-full mt-1 text-sm bg-white border border-gray-700 rounded-md shadow-lg max-h-60 overflow-auto">
+        <div className="absolute top-full z-10 w-full mt-1 text-sm bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
           {filteredOptions.length > 0 ? (
             filteredOptions.map((option) => (
               <div
                 key={option.value}
-                className="px-4 py-1 cursor-pointer hover:bg-gray-100"
+                className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-black"
                 onClick={() => handleSelect(option)}
               >
                 {highlightMatch(option.label, searchTerm)}
               </div>
             ))
           ) : (
-            <div className="px-4 py-1 text-gray-700">No options found</div>
+            <div className="px-4 py-2 text-gray-500">No options found</div>
           )}
         </div>
       )}
@@ -181,3 +180,4 @@ const Select = ({
 };
 
 export default forwardRef(Select);
+
