@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Service from "../../../api/Service";
 import { toast } from "react-toastify";
 import { Loader2, Plus } from "lucide-react";
 import PropTypes from "prop-types";
+import RichTextEditor from "../../fields/RichTextEditor";
 
 const schema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -20,6 +21,7 @@ const CreateLineItemGroup = ({ estimationId, onGroupCreated }) => {
     const {
         register,
         handleSubmit,
+        control,
         reset,
         formState: { errors },
     } = useForm({
@@ -91,12 +93,17 @@ const CreateLineItemGroup = ({ estimationId, onGroupCreated }) => {
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Description
                             </label>
-                            <textarea
-                                {...register("description")}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition-all"
-                                rows="3"
-                                placeholder="Enter description (optional)"
-                            ></textarea>
+                            <Controller
+                                name="description"
+                                control={control}
+                                render={({ field }) => (
+                                    <RichTextEditor
+                                        value={field.value || ""}
+                                        onChange={field.onChange}
+                                        placeholder="Enter description (optional)"
+                                    />
+                                )}
+                            />
                             {errors.description && (
                                 <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
                             )}

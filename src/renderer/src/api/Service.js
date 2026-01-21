@@ -490,6 +490,21 @@ class Service {
       console.log(error)
     }
   }
+
+  // Fetch Connection Designer By ID
+  static async FetchConnectionQuotationByDesignerID(id) {
+    try {
+      const response = await api.get(`connectionDesignerQuota/designer/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
   // Update Connection Designer By ID
   static async UpdateConnectionDesignerByID(id, data) {
     try {
@@ -545,6 +560,22 @@ class Service {
       return response.data
     } catch (error) {
       console.log(error)
+    }
+  }
+
+  // Update Estimation By ID
+  static async UpdateEstimationById(id, formData) {
+    try {
+      const response = await api.put(`estimation/estimations/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+      throw error
     }
   }
 
