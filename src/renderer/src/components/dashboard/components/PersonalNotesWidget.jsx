@@ -1,79 +1,66 @@
-import { useState, useEffect } from 'react'
-import { PenTool, Save, Trash2, Plus } from 'lucide-react'
+/* eslint-disable react/prop-types */
+import { MessageSquare, Calendar, User } from 'lucide-react'
 
-const PersonalNotesWidget = () => {
-  const [notes, setNotes] = useState(() => {
-    const saved = localStorage.getItem('user_dashboard_notes')
-    return saved
-      ? JSON.parse(saved)
-      : [{ id: 1, text: 'Check emails for new RFQs', color: 'bg-yellow-50' }]
-  })
-  const [newNote, setNewNote] = useState('')
-
-  useEffect(() => {
-    localStorage.setItem('user_dashboard_notes', JSON.stringify(notes))
-  }, [notes])
-
-  const addNote = (e) => {
-    e.preventDefault()
-    if (!newNote.trim()) return
-    setNotes([{ id: Date.now(), text: newNote, color: 'bg-white' }, ...notes])
-    setNewNote('')
-  }
-
-  const deleteNote = (id) => {
-    setNotes(notes.filter((n) => n.id !== id))
+const PersonalNotesWidget = ({ projectNotes = [] }) => {
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short'
+    })
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-gray-800 flex items-center gap-2">
-          <PenTool className="w-5 h-5 text-pink-500" />
-          My Notes
+    <div className="bg-white rounded-3xl shadow-sm border border-slate-100 h-full flex flex-col overflow-hidden group">
+      <div className="p-4 border-b border-slate-100 bg-pink-50/30">
+        <h3 className="text-sm font-bold text-pink-600 flex items-center justify-between">
+          Project Updates
+          {projectNotes.length > 0 && (
+            <span className="w-5 h-5 bg-pink-500 text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white">
+              {projectNotes.length}
+            </span>
+          )}
         </h3>
       </div>
 
-      <form onSubmit={addNote} className="flex gap-2 mb-4">
-        <input
-          type="text"
-          value={newNote}
-          onChange={(e) => setNewNote(e.target.value)}
-          placeholder="Add a quick note..."
-          className="flex-1 bg-gray-50 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pink-100 focus:bg-white transition-all outline-none"
-        />
-        <button
-          type="submit"
-          disabled={!newNote.trim()}
-          className="p-2 bg-pink-500 text-white rounded-xl hover:bg-pink-600 disabled:opacity-50 transition-colors"
-        >
-          <Plus size={20} />
-        </button>
-      </form>
-
-      <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-        {notes.length > 0 ? (
-          notes.map((note) => (
-            <div
-              key={note.id}
-              className="group p-3 rounded-xl border border-gray-100 hover:shadow-sm transition-all bg-yellow-50/50 flex justify-between items-start gap-2"
-            >
-              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                {note.text}
-              </p>
-              <button
-                onClick={() => deleteNote(note.id)}
-                className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1"
+      <div className="p-6 flex-1 flex flex-col min-h-0">
+        <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+          {projectNotes.length > 0 ? (
+            projectNotes.map((note) => (
+              <div
+                key={note.id}
+                className="p-4 rounded-2xl border border-slate-50 bg-pink-50/20 hover:bg-pink-50/40 transition-all"
               >
-                <Trash2 size={14} />
-              </button>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="px-2 py-1 bg-pink-100 text-pink-700 text-[10px] font-bold rounded-lg uppercase tracking-wider">
+                    {note.stage || 'Update'}
+                  </span>
+                  <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold">
+                    <Calendar size={10} />
+                    {formatDate(note.createdAt)}
+                  </div>
+                </div>
+                <div
+                  className="text-sm text-slate-700 font-medium prose prose-sm max-w-none line-clamp-3"
+                  dangerouslySetInnerHTML={{ __html: note.content }}
+                />
+                <div className="mt-3 pt-3 border-t border-pink-100/50 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-semibold">
+                    <User size={10} />
+                    {note.createdBy?.firstName} {note.createdBy?.lastName}
+                  </div>
+                  <button className="text-[10px] text-pink-600 font-bold hover:underline">
+                    View Full Update
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center text-slate-300 space-y-3">
+              <MessageSquare size={40} strokeWidth={1.5} />
+              <p className="text-sm font-medium">No project updates found</p>
             </div>
-          ))
-        ) : (
-          <div className="h-full flex items-center justify-center text-gray-400 text-sm italic">
-            No notes yet.
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   )

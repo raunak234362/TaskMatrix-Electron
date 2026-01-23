@@ -93,7 +93,7 @@ const AllNotes = ({ projectId }) => {
                   {note.files.map((file) => (
                     <button
                       key={file.id}
-                      onClick={() => openFileSecurely('project', projectId, file.id)}
+                      onClick={() => openFileSecurely('notes', projectId, file.id)}
                       className="flex items-center gap-1 text-xs bg-green-50 text-green-700 px-2 py-1 rounded hover:bg-green-100 transition-colors"
                     >
                       <Paperclip className="w-3 h-3" /> {file.originalName}

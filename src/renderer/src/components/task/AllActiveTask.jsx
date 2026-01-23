@@ -3,6 +3,7 @@ import Service from '../../api/Service'
 import { Loader2, AlertCircle, ClipboardList, Calendar, User, Briefcase, Tag } from 'lucide-react'
 import DataTable from '../ui/table'
 import GetTaskByID from './GetTaskByID'
+import { Button } from '../ui/button'
 
 const AllActiveTask = () => {
   const [tasks, setTasks] = useState([])
@@ -35,10 +36,10 @@ const AllActiveTask = () => {
   const formatDate = (date) =>
     date
       ? new Date(date).toLocaleDateString('en-IN', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric'
-        })
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      })
       : '—'
 
   const getStatusColor = (status) => {
@@ -59,15 +60,58 @@ const AllActiveTask = () => {
   const getPriorityLabel = (priority) => {
     switch (priority) {
       case 1:
-        return { label: 'High', color: 'text-red-600' }
+        return { label: 'LOW', color: 'text-blue-500' }
       case 2:
         return { label: 'Medium', color: 'text-orange-500' }
       case 3:
-        return { label: 'Low', color: 'text-blue-500' }
+        return { label: 'High', color: 'text-red-600' }
+      case 4:
+        return { label: 'Critical', color: 'text-purple-600' }
       default:
         return { label: 'Normal', color: 'text-gray-500' }
     }
   }
+
+  // Priority logic from user request
+  const unlockableStatuses = ['ASSIGNED', 'IN_PROGRESS', 'BREAK', 'REWORK']
+
+  const highestPriorityTask = useMemo(() => {
+    return tasks
+      .filter((task) => unlockableStatuses.includes(task.status?.toUpperCase()))
+      .sort((a, b) => {
+        if (b.priority !== a.priority) {
+          return b.priority - a.priority // Higher priority first
+        }
+        if (new Date(a.due_date).getTime() !== new Date(b.due_date).getTime()) {
+          return new Date(a.due_date) - new Date(b.due_date) // Earlier due date first
+        }
+        return new Date(a.created_on) - new Date(b.created_on) // Earlier created_on first
+      })[0]
+  }, [tasks])
+
+  const unlockableTaskId = highestPriorityTask?.id
+
+  const sortedTasks = useMemo(() => {
+    return [...tasks].sort((a, b) => {
+      const aViewable = a.status?.toUpperCase() === 'IN_REVIEW' || a.id === unlockableTaskId
+      const bViewable = b.status?.toUpperCase() === 'IN_REVIEW' || b.id === unlockableTaskId
+
+      if (aViewable && !bViewable) return -1
+      if (!aViewable && bViewable) return 1
+
+      // Secondary sort: Priority (desc)
+      if (b.priority !== a.priority) {
+        return (b.priority || 0) - (a.priority || 0)
+      }
+
+      // Tertiary sort: Due Date (asc)
+      if (a.due_date && b.due_date) {
+        return new Date(a.due_date) - new Date(b.due_date)
+      }
+
+      return 0
+    })
+  }, [tasks, unlockableTaskId])
 
   const columns = useMemo(
     () => [
@@ -76,7 +120,7 @@ const AllActiveTask = () => {
         header: 'Task Details',
         cell: ({ row }) => (
           <div className="flex flex-col">
-            <span className="font-semibold text-gray-800">{row.original.name}</span>
+            <span className="font-semibold text-black">{row.original.name}</span>
             <span className="text-xs text-gray-400 mt-1 line-clamp-1">
               {row.original.description || 'No description'}
             </span>
@@ -88,7 +132,7 @@ const AllActiveTask = () => {
         header: 'Project & Stage',
         cell: ({ row }) => (
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 text-sm text-gray-700">
+            <div className="flex items-center gap-2 text-sm text-black">
               <Briefcase className="w-3.5 h-3.5 text-gray-400" />
               <span className="font-medium">{row.original.project?.name || 'N/A'}</span>
             </div>
@@ -108,7 +152,7 @@ const AllActiveTask = () => {
               {row.original.user?.firstName?.charAt(0) || <User className="w-4 h-4" />}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-black">
                 {row.original.user
                   ? `${row.original.user.firstName} ${row.original.user.lastName}`
                   : 'Unassigned'}
@@ -157,9 +201,29 @@ const AllActiveTask = () => {
             {formatDate(row.original.due_date)}
           </div>
         )
+      },
+      {
+        id: 'view',
+        header: 'Action',
+        cell: ({ row }) => {
+          const task = row.original
+          const canView = task.status?.toUpperCase() === 'IN_REVIEW' || task.id === unlockableTaskId
+          return (
+            <Button
+              disabled={!canView}
+              className={
+                canView
+                  ? 'bg-[#6bbd45] text-white font-semibold hover:bg-[#5aa33a]'
+                  : 'bg-red-500 text-white font-semibold opacity-50 cursor-not-allowed'
+              }
+            >
+              View Task
+            </Button>
+          )
+        }
       }
     ],
-    []
+    [unlockableTaskId]
   )
 
   if (loading) {
@@ -195,7 +259,7 @@ const AllActiveTask = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div className="flex items-center gap-2 bg-[#f7fbf3] px-4 py-2 rounded-full border border-[#eef7e9]">
           <span className="w-2 h-2 bg-[#6bbd45] rounded-full animate-pulse"></span>
-          <span className="text-sm font-semibold text-[#2d501d]">{tasks.length} Active Tasks</span>
+          <span className="text-sm font-semibold text-black">{tasks.length} Active Tasks</span>
         </div>
       </div>
 
@@ -211,8 +275,9 @@ const AllActiveTask = () => {
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-4">
           <DataTable
             columns={columns}
-            data={tasks}
+            data={sortedTasks}
             detailComponent={({ row, close }) => <GetTaskByID id={row.id} onClose={close} />}
+            canExpand={(row) => row.status?.toUpperCase() === 'IN_REVIEW' || row.id === unlockableTaskId}
             searchPlaceholder="Search active tasks..."
             pageSizeOptions={[10, 25, 50]}
           />

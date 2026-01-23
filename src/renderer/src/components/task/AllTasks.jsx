@@ -3,6 +3,7 @@ import Service from '../../api/Service'
 import { Loader2, AlertCircle, ClipboardList, Calendar, User, Briefcase, Tag } from 'lucide-react'
 import DataTable from '../ui/table'
 import GetTaskByID from './GetTaskByID'
+import FetchTaskByID from './FetchTaskByID'
 
 const AllTasks = () => {
   const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
@@ -216,7 +217,7 @@ const AllTasks = () => {
           <DataTable
             columns={columns}
             data={tasks}
-            detailComponent={({ row, close }) => <GetTaskByID id={row.id} onClose={close} />}
+            detailComponent={({ row, close }) => <FetchTaskByID id={row.id} onClose={close} />}
             searchPlaceholder="Search tasks..."
             pageSizeOptions={[10, 25, 50]}
           />

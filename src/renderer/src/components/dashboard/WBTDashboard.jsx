@@ -1,8 +1,9 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState, Suspense, lazy } from 'react'
+import { useEffect, useState, Suspense, lazy, useMemo } from 'react'
 import Service from '../../api/Service'
 import { useSelector } from 'react-redux'
-import { format, subMonths, isSameMonth } from 'date-fns'
+import { format, subMonths, isSameMonth, startOfMonth, endOfMonth } from 'date-fns'
+import { Loader2, Calendar, LayoutDashboard, Clock, CheckCircle2, Briefcase, TrendingUp } from 'lucide-react'
 
 // Lazy load components
 const UserStatsWidget = lazy(() => import('./components/UserStatsWidget'))
@@ -10,18 +11,25 @@ const CurrentTaskWidget = lazy(() => import('./components/CurrentTaskWidget'))
 const UpcomingDeadlinesWidget = lazy(() => import('./components/UpcomingDeadlinesWidget'))
 const PersonalNotesWidget = lazy(() => import('./components/PersonalNotesWidget'))
 const EfficiencyChart = lazy(() => import('./components/EfficiencyChart'))
+const GetTaskByID = lazy(() => import('../task/GetTaskByID'))
 
 const DashboardSkeleton = () => (
-  <div className="animate-pulse space-y-8 p-6">
-    <div className="h-10 w-1/3 bg-gray-200 rounded-lg"></div>
+  <div className="animate-pulse space-y-8 p-6 bg-white min-h-screen">
+    <div className="flex justify-between items-center">
+      <div className="h-10 w-1/3 bg-gray-100 rounded-lg"></div>
+      <div className="h-10 w-24 bg-gray-100 rounded-lg"></div>
+    </div>
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="h-32 bg-gray-200 rounded-2xl"></div>
+        <div key={i} className="h-32 bg-gray-100 rounded-2xl"></div>
       ))}
     </div>
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-      <div className="h-96 bg-gray-200 rounded-2xl xl:col-span-2"></div>
-      <div className="h-96 bg-gray-200 rounded-2xl"></div>
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      <div className="xl:col-span-2 space-y-8">
+        <div className="h-64 bg-gray-100 rounded-2xl"></div>
+        <div className="h-96 bg-gray-100 rounded-2xl"></div>
+      </div>
+      <div className="h-full bg-gray-100 rounded-2xl"></div>
     </div>
   </div>
 )
@@ -30,91 +38,130 @@ const WBTDashboard = () => {
   const user = useSelector((state) => state.userInfo?.userDetail)
   const [loading, setLoading] = useState(true)
   const [tasks, setTasks] = useState([])
+  const [projectNotes, setProjectNotes] = useState([])
   const [detailTaskId, setDetailTaskId] = useState(null)
   const [efficiencyData, setEfficiencyData] = useState([])
 
-  // User Stats State
   const [userStats, setUserStats] = useState({
     totalTasks: 0,
     completedTasks: 0,
     pendingTasks: 0,
-    totalHours: 0,
+    allocatedHours: 0,
+    workedHours: 0,
     projectsCount: 0,
     efficiency: 100
   })
 
+  const parseDurationToHours = (duration) => {
+    if (!duration) return 0
+    // Handle formats like "10:30", "10h 30m", "10"
+    const parts = duration.split(/[:\s]+/)
+    let hours = 0
+    let minutes = 0
+
+    if (parts.length >= 1) {
+      hours = parseFloat(parts[0].replace(/[^\d.]/g, '')) || 0
+    }
+    if (parts.length >= 2) {
+      minutes = parseFloat(parts[1].replace(/[^\d.]/g, '')) || 0
+    }
+
+    return hours + minutes / 60
+  }
+
+  const calculateHours = (task) => {
+    const allocated = parseDurationToHours(task.duration)
+    const worked = (task.workingHourTask || []).reduce(
+      (acc, wh) => acc + (Number(wh.duration_seconds) || 0),
+      0
+    ) / 3600
+    return { allocated, worked }
+  }
+
   const calculateEfficiencyTrend = (tasks) => {
-    // Generate last 6 months buckets
     const months = []
     for (let i = 5; i >= 0; i--) {
       months.push(subMonths(new Date(), i))
     }
 
-    const data = months.map((date) => {
+    return months.map((date) => {
       const monthTasks = tasks.filter((t) => {
-        // Use due_date or endDate, fall back to createdAt
         const taskDate = new Date(t.due_date || t.endDate || t.createdAt)
-        console.log(taskDate, date)
-
         return isSameMonth(taskDate, date)
       })
 
-      const completed = monthTasks.filter((t) => t.status === 'COMPLETED').length
-      const total = monthTasks.length
-      const efficiency = total > 0 ? Math.round((completed / total) * 100) : 0
+      let totalAllocated = 0
+      let totalWorked = 0
+
+      monthTasks.forEach((t) => {
+        const { allocated, worked } = calculateHours(t)
+        totalAllocated += allocated
+        totalWorked += worked
+      })
+
+      // Efficiency = (Allocated / Worked) * 100
+      // If worked is 0 but allocated > 0, efficiency is 0
+      // If both are 0, efficiency is 100 (neutral)
+      let efficiency = 100
+      if (totalWorked > 0) {
+        efficiency = Math.round((totalAllocated / totalWorked) * 100)
+      } else if (totalAllocated > 0) {
+        efficiency = 0
+      }
 
       return {
         month: format(date, 'MMM'),
-        efficiency,
-        completed
+        efficiency: Math.min(efficiency, 150), // Cap at 150% for visualization
+        allocated: totalAllocated,
+        worked: totalWorked
       }
     })
-
-    return data
   }
 
   const fetchData = async () => {
-    if (tasks.length === 0) setLoading(true)
-
+    setLoading(true)
     try {
       const userRole = sessionStorage.getItem('userRole')?.toLowerCase()
-      // Use generic Task service instead of EstimationTask
       const response = userRole === 'admin' ? await Service.GetAllTask() : await Service.GetMyTask()
 
       if (response?.data) {
-        // Handle potential object response (some APIs return {0: task, 1: task} or array)
         const fetchedTasks = Array.isArray(response.data)
           ? response.data
           : Object.values(response.data || {})
 
         setTasks(fetchedTasks)
 
+        // Calculate Stats
+        let totalAllocated = 0
+        let totalWorked = 0
         const completed = fetchedTasks.filter((t) => t.status === 'COMPLETED').length
+        const projectIds = new Set()
 
-        // Count unique projects based on generic task 'project' field
-        const uniqueProjects = new Set(
-          fetchedTasks
-            .filter((t) => t.project?.id || t.projectId)
-            .map((t) => t.project?.id || t.projectId)
-        ).size
-
-        // Calculate hours if available (check if 'totalHours' or similar exists in generic task)
-        // If not available, might need to sum worklogs or default to 0
-        const hours = fetchedTasks.reduce((acc, t) => acc + (Number(t.totalHours) || 0), 0)
+        fetchedTasks.forEach((t) => {
+          const { allocated, worked } = calculateHours(t)
+          totalAllocated += allocated
+          totalWorked += worked
+          if (t.project?.id) projectIds.add(t.project.id)
+        })
 
         setUserStats({
           totalTasks: fetchedTasks.length,
           completedTasks: completed,
           pendingTasks: fetchedTasks.length - completed,
-          totalHours: hours,
-          projectsCount: uniqueProjects,
-          efficiency:
-            fetchedTasks.length > 0 ? Math.round((completed / fetchedTasks.length) * 100) : 100
+          allocatedHours: totalAllocated,
+          workedHours: totalWorked,
+          projectsCount: projectIds.size,
+          efficiency: totalWorked > 0 ? Math.round((totalAllocated / totalWorked) * 100) : 100
         })
 
-        // Calculate efficiency trend
-        const trendData = calculateEfficiencyTrend(fetchedTasks)
-        setEfficiencyData(trendData)
+        // Fetch Notes for unique projects
+        const notesPromises = Array.from(projectIds).map((id) => Service.GetProjectNotes(id))
+        const allNotesResponses = await Promise.all(notesPromises)
+        const flattenedNotes = allNotesResponses.flat().filter(Boolean)
+        setProjectNotes(flattenedNotes)
+
+        // Efficiency Trend
+        setEfficiencyData(calculateEfficiencyTrend(fetchedTasks))
       }
     } catch (error) {
       console.error('Failed to fetch dashboard data', error)
@@ -127,10 +174,8 @@ const WBTDashboard = () => {
     fetchData()
   }, [])
 
-  // Derived state for widgets
-  const currentTask = tasks.find((t) => t.status === 'IN_PROGRESS')
+  const currentTask = useMemo(() => tasks.find((t) => t.status === 'IN_PROGRESS'), [tasks])
 
-  // Greeting logic
   const getGreeting = () => {
     const hour = new Date().getHours()
     if (hour < 12) return 'Good Morning'
@@ -139,74 +184,88 @@ const WBTDashboard = () => {
   }
 
   return (
-    <div className="h-full p-6 space-y-8 bg-gray-50/50 overflow-y-auto custom-scrollbar">
+    <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8 overflow-y-auto custom-scrollbar">
       <Suspense fallback={<DashboardSkeleton />}>
         {/* Header Section */}
-        <div className="flex justify-between items-end">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">
-              {getGreeting()}, {user?.name?.split(' ')[0] || 'User'}
-            </h1>
-            <p className="text-gray-500 mt-1">Here's what's happening with your projects today.</p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-200">
+              <LayoutDashboard className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                {getGreeting()}, {user?.firstName || 'User'}
+              </h1>
+              <p className="text-slate-500 font-medium mt-1 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                You have {userStats.pendingTasks} tasks pending.
+              </p>
+            </div>
           </div>
 
-          <div className="text-right hidden sm:block">
-            <p className="text-sm font-medium text-gray-400">
-              {new Date().toLocaleDateString('en-US', {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </p>
+          <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-slate-200">
+            <Calendar className="w-5 h-5 text-indigo-500" />
+            <span className="text-slate-700 font-bold">
+              {format(new Date(), 'EEEE, MMMM do')}
+            </span>
           </div>
         </div>
+        <div className='flex flex-col gap-5'>
 
-        {/* 1. Stats Overview Row */}
-        <UserStatsWidget stats={userStats} loading={loading} />
+          {/* Stats Overview */}
+          <UserStatsWidget stats={userStats} loading={loading} />
 
-        {/* 2. Main Content Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Left Column: Chart & Tasks (2/3 width on large screens) */}
-          <div className="xl:col-span-2 space-y-8">
-            {/* Current Active Task and Efficiency Chart Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Current Focus */}
-              <div className="w-full">
-                <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                  Current Focus
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+            {/* Left Column */}
+            <div className="xl:col-span-2 space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Current Focus */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 px-1">
+                    <Clock className="w-5 h-5 text-indigo-500" />
+                    Current Focus
+                  </h2>
+                  <CurrentTaskWidget
+                    task={currentTask}
+                    onTaskUpdate={() => setDetailTaskId(currentTask?.id)}
+                  />
+                </div>
+
+                {/* Efficiency Chart */}
+                {/* <div className="space-y-4">
+                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 px-1">
+                  <TrendingUp className="w-5 h-5 text-emerald-500" />
+                  Efficiency Trends
                 </h2>
-                <CurrentTaskWidget
-                  task={currentTask}
-                  onTaskUpdate={() => setDetailTaskId(currentTask?.id)}
-                />
-              </div>
-
-              {/* Efficiency Chart */}
-              <div className="w-full pt-10">
-                {' '}
-                {/* Added padding top to align with Current Focus tile roughly if needed, or just standard */}
                 <EfficiencyChart data={efficiencyData} />
+              </div> */}
+                {/* Upcoming Tasks */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 px-1">
+                    <CheckCircle2 className="w-5 h-5 text-blue-500" />
+                    Upcoming Deadlines
+                  </h2>
+                  <UpcomingDeadlinesWidget tasks={tasks} onTaskClick={(id) => setDetailTaskId(id)} />
+                </div>
               </div>
+
             </div>
 
-            {/* Recent/Upcoming Tasks List */}
-            <div className="h-[400px]">
-              <UpcomingDeadlinesWidget tasks={tasks} />
-            </div>
-          </div>
-
-          {/* Right Column: Sidebar (1/3 width) - Notes */}
-          <div className="xl:col-span-1 space-y-8 h-full">
-            <div className="h-full min-h-[500px]">
-              <PersonalNotesWidget />
+            {/* Right Column - Notes */}
+            <div className="space-y-4 h-full">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 px-1">
+                <Briefcase className="w-5 h-5 text-pink-500" />
+                Notes & Updates
+              </h2>
+              <PersonalNotesWidget projectNotes={projectNotes} />
             </div>
           </div>
         </div>
 
         {/* Task Detail Modal */}
         {detailTaskId && (
-          <EstimationTaskByID
+          <GetTaskByID
             id={detailTaskId}
             onClose={() => setDetailTaskId(null)}
             refresh={fetchData}

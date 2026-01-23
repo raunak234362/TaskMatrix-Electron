@@ -35,7 +35,11 @@ const RichTextEditor = ({ value, onChange, placeholder, className = '' }) => {
         'eraser',
         'fullsize'
       ],
-      height: 300
+      height: 300,
+      style: {
+        color: '#000000',
+        backgroundColor: '#ffffff'
+      }
     }),
     [placeholder]
   )
@@ -47,7 +51,7 @@ const RichTextEditor = ({ value, onChange, placeholder, className = '' }) => {
         value={value}
         config={config}
         onBlur={(newContent) => onChange(newContent)}
-        onChange={() => {}}
+        onChange={() => { }}
       />
     </div>
   )

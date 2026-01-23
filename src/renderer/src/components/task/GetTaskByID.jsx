@@ -50,10 +50,20 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
 
   const activeWorkID = getActiveWorkID()
 
-  const formatSecondsToHHMM = (totalSeconds) => {
-    if (!totalSeconds || isNaN(totalSeconds)) return '00:00'
-    const hours = Math.floor(totalSeconds / 3600)
-    const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const parseDurationToHours = (duration) => {
+    if (!duration) return 0
+    const parts = duration.split(/[:\s]+/)
+    let hours = 0
+    let minutes = 0
+    if (parts.length >= 1) hours = parseFloat(parts[0].replace(/[^\d.]/g, '')) || 0
+    if (parts.length >= 2) minutes = parseFloat(parts[1].replace(/[^\d.]/g, '')) || 0
+    return hours + minutes / 60
+  }
+
+  const formatHours = (decimalHours) => {
+    const totalMinutes = Math.round(decimalHours * 60)
+    const hours = Math.floor(totalMinutes / 60)
+    const minutes = totalMinutes % 60
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
   }
 
@@ -204,8 +214,8 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
               <ClipboardList className="w-7 h-7 text-[#6bbd45]" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{task.name}</h2>
-              <p className="text-sm text-gray-500">ID: #{task.id}</p>
+              <h2 className="text-2xl font-bold text-black">{task.name}</h2>
+              <p className="text-sm text-black">ID: #{task.id}</p>
             </div>
           </div>
           <button
@@ -234,7 +244,12 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                 value={task.user ? `${task.user.firstName} ${task.user.lastName}` : 'Unassigned'}
               />
               <InfoItem icon={<Calendar />} label="Due Date" value={toIST(task.due_date)} />
-              <InfoItem icon={<Clock />} label="Created At" value={toIST(task.createdAt)} />
+              <InfoItem icon={<Clock />} label="Created At" value={toIST(task.created_on)} />
+              <InfoItem
+                icon={<Timer />}
+                label="Allocated Time"
+                value={formatHours(parseDurationToHours(task.duration))}
+              />
 
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
@@ -243,7 +258,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                   ></div>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Priority</p>
+                  <p className="text-sm font-medium text-black">Priority</p>
                   <p className={`font-bold mt-1 ${priority.color}`}>{priority.label}</p>
                 </div>
               </div>
@@ -253,7 +268,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                   <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Status</p>
+                  <p className="text-sm font-medium text-black">Status</p>
                   <span
                     className={`inline-block mt-1 px-4 py-2 rounded-full font-semibold text-sm border-2 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
                   >
@@ -266,11 +281,11 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
             {/* Description */}
             {task.description && (
               <div className="mt-8 p-6 bg-white/70 backdrop-blur rounded-xl border border-[#eef7e9]">
-                <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <h4 className="font-semibold text-black mb-3 flex items-center gap-2">
                   <FileText className="w-5 h-5 text-[#6bbd45]" />
                   Description
                 </h4>
-                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                <p className="text-black whitespace-pre-wrap leading-relaxed">
                   {task.description}
                 </p>
               </div>
@@ -278,7 +293,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
 
             {/* Actions */}
             <div className="mt-8 pt-6 border-t border-[#d4e9c8]">
-              {/* <h4 className="text-lg font-semibold text-gray-800 mb-4">Task Controls</h4> */}
+              <h4 className="text-lg font-semibold text-gray-800 mb-4">Task Controls</h4>
               <div className="flex flex-wrap items-center gap-4">
                 {task.status === 'ASSIGNED' ||
                   (task.status === 'REWORK' && (
@@ -351,7 +366,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                   <SummaryCard
                     icon={<Clock4 />}
                     label="Total Time"
-                    value={formatSecondsToHHMM(totalDurationSeconds)}
+                    value={formatHours(totalDurationSeconds / 3600)}
                   />
                   <SummaryCard
                     icon={<Users />}
@@ -381,8 +396,8 @@ const InfoItem = ({ icon, label, value }) => (
       {icon && <div className="w-6 h-6 text-[#6bbd45]">{icon}</div>}
     </div>
     <div>
-      <p className="text-sm font-medium text-gray-600">{label}</p>
-      <p className="font-semibold text-gray-900 mt-1">{value}</p>
+      <p className="text-sm font-medium text-black">{label}</p>
+      <p className="font-semibold text-black mt-1">{value}</p>
     </div>
   </div>
 )
@@ -412,7 +427,7 @@ const SummaryCard = ({ icon, label, value, color = 'text-indigo-700' }) => (
       {icon}
     </div>
     <div>
-      <p className="text-sm text-gray-600">{label}</p>
+      <p className="text-sm text-black">{label}</p>
       <p className={`text-xl font-bold mt-2 ${color}`}>{value}</p>
     </div>
   </div>
