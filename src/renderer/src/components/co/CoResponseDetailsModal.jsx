@@ -1,39 +1,39 @@
-import { useState } from "react";
-import Button from "../fields/Button";
-import Service from "../../api/Service";
-import { X, Paperclip } from "lucide-react";
-import { openFileSecurely } from "../../utils/openFileSecurely";
+import { useState } from 'react'
+import Button from '../fields/Button'
+import Service from '../../api/Service'
+import { X, Paperclip } from 'lucide-react'
+import { openFileSecurely } from '../../utils/openFileSecurely'
 
-const STATUS_OPTIONS = ["PENDING", "APPROVED", "REJECTED"];
+const STATUS_OPTIONS = ['PENDING', 'APPROVED', 'REJECTED']
 
 const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
-  const [replyMessage, setReplyMessage] = useState("");
-  const [replyFiles, setReplyFiles] = useState([]);
-  const [replyStatus, setReplyStatus] = useState("PENDING");
-  const userId = sessionStorage.getItem("userId") || "";
-  const userRole = sessionStorage.getItem("userRole") || "";
-  console.log(response);
+  const [replyMessage, setReplyMessage] = useState('')
+  const [replyFiles, setReplyFiles] = useState([])
+  const [replyStatus, setReplyStatus] = useState('PENDING')
+  const userId = sessionStorage.getItem('userId') || ''
+  const userRole = sessionStorage.getItem('userRole') || ''
+  console.log(response)
 
   const handleReply = async () => {
-    if (!replyMessage.trim()) return;
+    if (!replyMessage.trim()) return
 
-    const formData = new FormData();
-    formData.append("CoId", response.CoId);
-    formData.append("description", replyMessage);
-    formData.append("status", replyStatus);
-    formData.append("userId", userId);
-    formData.append("userRole", userRole);
+    const formData = new FormData()
+    formData.append('CoId', response.CoId)
+    formData.append('description', replyMessage)
+    formData.append('status', replyStatus)
+    formData.append('userId', userId)
+    formData.append('userRole', userRole)
 
     // ✅ IMPORTANT — reply points to parent response
-    formData.append("parentResponseId", response.id);
+    formData.append('parentResponseId', response.id)
 
-    replyFiles.forEach((f) => formData.append("files", f));
+    replyFiles.forEach((f) => formData.append('files', f))
 
-    await Service.addCOResponse(formData, response.id);
+    await Service.addCOResponse(formData, response.id)
 
-    onSuccess();
-    onClose();
-  };
+    onSuccess()
+    onClose()
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
@@ -42,9 +42,7 @@ const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
           <X size={18} />
         </button>
 
-        <h2 className="text-xl font-semibold text-green-700">
-          Response Details
-        </h2>
+        <h2 className="text-xl font-semibold text-green-700">Response Details</h2>
 
         <p className="bg-gray-100 p-3 rounded border">{response.description}</p>
 
@@ -54,9 +52,7 @@ const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
               <p
                 key={file.id}
                 className="text-green-600 underline cursor-pointer"
-                onClick={() =>
-                  openFileSecurely("changeOrder/response", response.id, file.id)
-                }
+                onClick={() => openFileSecurely('changeOrder/response', response.id, file.id)}
               >
                 <Paperclip size={14} className="inline mr-1" />
                 {file.originalName}
@@ -89,9 +85,7 @@ const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
         <input
           type="file"
           multiple
-          onChange={(e) =>
-            setReplyFiles(e.target.files ? Array.from(e.target.files) : [])
-          }
+          onChange={(e) => setReplyFiles(e.target.files ? Array.from(e.target.files) : [])}
         />
 
         <div className="flex justify-end gap-3">
@@ -102,7 +96,7 @@ const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default COResponseDetailsModal;
+export default COResponseDetailsModal

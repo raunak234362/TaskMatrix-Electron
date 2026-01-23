@@ -1,8 +1,7 @@
-import React from "react";
-import { Button as UiButton } from "../ui/button";
+import { Button as UiButton } from '../ui/button'
 
 const Button = (props) => {
-  return <UiButton {...props} />;
-};
+  return <UiButton {...props} />
+}
 
-export default Button;
+export default Button

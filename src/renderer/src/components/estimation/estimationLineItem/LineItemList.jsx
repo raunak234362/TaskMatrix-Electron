@@ -4,78 +4,78 @@ import Service from "../../../api/Service";
 import DataTable from "../../ui/table";
 import { X, Clock, Layers, AlignLeft, Edit2, Save, Calculator } from "lucide-react";
 import RichTextEditor from "../../fields/RichTextEditor";
-import RichTextEditor from "../../fields/RichTextEditor";
 
-const LineItemList = ({ id, onClose, refresh }) => {
+const LineItemList = ({ id, onClose }) => {
     const [lineItem, setLineItem] = useState([]);
     const [groupData, setGroupData] = useState(null);
-    const [loading, setLoading] = useState(false);
+    // eslint-disable-next-line no-unused-vars
+    const [, setLoading] = useState(false);
+
     const groupId = groupData?.group?.id
 
     const fetchGroupById = async () => {
-        try {
-            const response = await Service.FetchGroupById(id);
-            setGroupData(response.data);
-        } catch (error) {
-            console.error("Error fetching group:", error);
-        }
+        const response = await Service.FetchGroupById(id);
+        console.log(response.data);
+
+        setGroupData(response.data);
     }
     const fetchLineItem = async () => {
-        if (!groupId) return;
         if (!groupId) return;
         setLoading(true);
         try {
             const response = await Service.FetchLineItemGroupList(groupId);
+            console.log(response.data);
             setLineItem(response.data);
         } catch (error) {
-            console.error("Error fetching line items:", error);
+            console.log(error);
         } finally {
             setLoading(false);
         }
     }
 
-    useEffect(() => {
-        fetchGroupById();
-    }, [id]);
+  useEffect(() => {
+    fetchGroupById()
+  }, [id])
 
-    useEffect(() => {
-        if (groupId) {
-            fetchLineItem();
-        }
-    }, [groupId]);
+  useEffect(() => {
+    if (groupId) {
+      fetchLineItem()
+    }
+  }, [groupId])
 
-    const [editingRowId, setEditingRowId] = useState(null);
-    const [editFormData, setEditFormData] = useState({});
+  const [editingRowId, setEditingRowId] = useState(null)
+  const [editFormData, setEditFormData] = useState({})
 
-    // Group Editing State
-    const [isEditingGroup, setIsEditingGroup] = useState(false);
-    const [groupFormData, setGroupFormData] = useState({});
+  // Group Editing State
+  const [isEditingGroup, setIsEditingGroup] = useState(false)
+  const [groupFormData, setGroupFormData] = useState({})
 
-    const handleGroupEditClick = () => {
-        setIsEditingGroup(true);
-        setGroupFormData({
-            name: groupData?.group?.name || "",
-            description: groupData?.group?.description || "",
-            totalHours: groupData?.totalHours || 0,
-            divisor: groupData?.group?.divisor || 0,
-        });
-    };
+  const handleGroupEditClick = () => {
+    setIsEditingGroup(true)
+    setGroupFormData({
+      name: groupData?.group?.name || '',
+      description: groupData?.group?.description || '',
+      totalHours: groupData?.totalHours || 0,
+      divisor: groupData?.group?.divisor || 0
+    })
+  }
 
-    const handleGroupCancelClick = () => {
-        setIsEditingGroup(false);
-        setGroupFormData({});
-    };
+  const handleGroupCancelClick = () => {
+    setIsEditingGroup(false)
+    setGroupFormData({})
+  }
 
-    const handleGroupSaveClick = async () => {
-        try {
-            const payload = {
-                name: groupFormData.name,
-                description: groupFormData.description,
-                totalHours: Number(groupFormData.totalHours),
-                divisor: Number(groupFormData.divisor)
-            };
-            await Service.UpdateGroupById(id, payload);
+  const handleGroupSaveClick = async () => {
+    try {
+      const payload = {
+        name: groupFormData.name,
+        description: groupFormData.description,
+        totalHours: Number(groupFormData.totalHours),
+        divisor: Number(groupFormData.divisor)
+      }
+      await Service.UpdateGroupById(id, payload)
 
+            // Real-time update of local state
             setGroupData(prev => prev ? ({
                 ...prev,
                 group: {
@@ -88,7 +88,7 @@ const LineItemList = ({ id, onClose, refresh }) => {
             }) : null);
 
             setIsEditingGroup(false);
-            if (refresh) refresh();
+            // fetchGroupById(); // Optional: still fetch to ensure sync, but local update handles immediate UI
         } catch (error) {
             console.error("Error updating group:", error);
         }
@@ -98,29 +98,24 @@ const LineItemList = ({ id, onClose, refresh }) => {
         setGroupFormData({ ...groupFormData, [field]: value });
     };
 
-    const handleGroupInputRawChange = (e, field) => {
-    const handleGroupInputChange = (value, field) => {
-        setGroupFormData({ ...groupFormData, [field]: value });
-    };
+  const handleGroupInputRawChange = (e, field) => {
+    setGroupFormData({ ...groupFormData, [field]: e.target.value })
+  }
 
-    const handleGroupInputRawChange = (e, field) => {
-        setGroupFormData({ ...groupFormData, [field]: e.target.value });
-    };
+  const handleEditClick = (row) => {
+    setEditingRowId(row.id)
+    setEditFormData({
+      scopeOfWork: row.scopeOfWork,
+      quantity: row.quantity,
+      hoursPerQty: row.hoursPerQty,
+      totalHours: row.totalHours
+    })
+  }
 
-    const handleEditClick = (row) => {
-        setEditingRowId(row.id);
-        setEditFormData({
-            scopeOfWork: row.scopeOfWork,
-            quantity: row.quantity,
-            hoursPerQty: row.hoursPerQty,
-            totalHours: row.totalHours,
-        });
-    };
-
-    const handleCancelClick = () => {
-        setEditingRowId(null);
-        setEditFormData({});
-    };
+  const handleCancelClick = () => {
+    setEditingRowId(null)
+    setEditFormData({})
+  }
 
     const handleSaveClick = async (rowId) => {
         try {
@@ -134,7 +129,6 @@ const LineItemList = ({ id, onClose, refresh }) => {
             setEditingRowId(null);
             fetchLineItem();
             fetchGroupById();
-            if (refresh) refresh();
         } catch (error) {
             console.error("Error updating line item:", error);
         }
@@ -146,32 +140,25 @@ const LineItemList = ({ id, onClose, refresh }) => {
     };
 
     const handleInputRawChange = (e, field) => {
-    const handleInputChange = (value, field) => {
-        const newData = { ...editFormData, [field]: value };
-        setEditFormData(newData);
-    };
-
-    const handleInputRawChange = (e, field) => {
         const value = e.target.value;
         const newData = { ...editFormData, [field]: value };
 
         if (field === "quantity" || field === "hoursPerQty") {
-            const qty = parseFloat(field === "quantity" ? value : (newData.quantity || 0)) || 0;
-            const hours = parseFloat(field === "hoursPerQty" ? value : (newData.hoursPerQty || 0)) || 0;
+            const qty = parseFloat(field === "quantity" ? value : String(newData.quantity || 0)) || 0;
+            const hours = parseFloat(field === "hoursPerQty" ? value : String(newData.hoursPerQty || 0)) || 0;
             newData.totalHours = qty * hours;
         }
 
-        setEditFormData(newData);
-    };
+    setEditFormData(newData)
+  }
 
-
-    const formatDecimalHours = (decimalHours) => {
-        const num = Number(decimalHours);
-        if (isNaN(num)) return "0h 0m";
-        const hours = Math.floor(num);
-        const minutes = Math.round((num - hours) * 60);
-        return `${hours}h ${minutes}m`;
-    };
+  const formatDecimalHours = (decimalHours) => {
+    const num = Number(decimalHours)
+    if (isNaN(num)) return '0h 0m'
+    const hours = Math.floor(num)
+    const minutes = Math.round((num - hours) * 60)
+    return `${hours}h ${minutes}m`
+  }
 
     const columns = [
         {
@@ -203,8 +190,6 @@ const LineItemList = ({ id, onClose, refresh }) => {
                         type="number"
                         value={editFormData.quantity || 0}
                         onChange={(e) => handleInputRawChange(e, "quantity")}
-                        value={editFormData.quantity || 0}
-                        onChange={(e) => handleInputRawChange(e, "quantity")}
                         className="w-full border rounded p-1"
                     />
                 ) : (
@@ -222,8 +207,6 @@ const LineItemList = ({ id, onClose, refresh }) => {
                         type="number"
                         value={editFormData.hoursPerQty || 0}
                         onChange={(e) => handleInputRawChange(e, "hoursPerQty")}
-                        value={editFormData.hoursPerQty || 0}
-                        onChange={(e) => handleInputRawChange(e, "hoursPerQty")}
                         className="w-full border rounded p-1"
                     />
                 ) : (
@@ -239,8 +222,6 @@ const LineItemList = ({ id, onClose, refresh }) => {
                 return isEditing ? (
                     <input
                         type="number"
-                        value={editFormData.totalHours || 0}
-                        onChange={(e) => handleInputRawChange(e, "totalHours")}
                         value={editFormData.totalHours || 0}
                         onChange={(e) => handleInputRawChange(e, "totalHours")}
                         className="w-full border rounded p-1"
@@ -273,7 +254,7 @@ const LineItemList = ({ id, onClose, refresh }) => {
                 ) : (
                     <button
                         onClick={() => handleEditClick(row.original)}
-                        className="text-teal-600 hover:text-teal-800 font-medium"
+                        className="text-blue-600 hover:text-blue-800 font-medium"
                     >
                         Edit
                     </button>
@@ -283,8 +264,13 @@ const LineItemList = ({ id, onClose, refresh }) => {
     ];
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="bg-white w-full max-w-5xl rounded-xl shadow-2xl overflow-hidden p-5 max-h-[90vh] flex flex-col">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+
+        >  <div
+            className="bg-white w-full max-w-5xl rounded-xl shadow-2xl overflow-hidden p-5 max-h-[90vh] flex flex-col"
+
+        >
                 <div className="flex justify-between items-center mb-6 border-b pb-4 sticky top-0 bg-white z-10">
                     <h2 className="text-2xl font-bold text-gray-700">Line Items</h2>
                     <button
@@ -315,15 +301,14 @@ const LineItemList = ({ id, onClose, refresh }) => {
                                             type="text"
                                             value={groupFormData.name}
                                             onChange={(e) => handleGroupInputRawChange(e, "name")}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                                             placeholder="Group Name"
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">Description</label>
+                                        <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1 block">Description</label>
                                         <RichTextEditor
                                             value={groupFormData.description}
-                                            onChange={(val) => handleGroupInputChange(val, "description")}
                                             onChange={(val) => handleGroupInputChange(val, "description")}
                                             placeholder="Description"
                                         />
@@ -335,12 +320,8 @@ const LineItemList = ({ id, onClose, refresh }) => {
                                         <Layers className="w-5 h-5 text-green-600" />
                                         {groupData?.group?.name || "Unnamed Group"}
                                     </h3>
-                                    <div className="flex items-start gap-2 text-gray-800">
+                                    <div className="flex items-start gap-2 text-gray-700">
                                         <AlignLeft className="w-4 h-4 mt-1 shrink-0 text-gray-400" />
-                                        <div
-                                            className="text-sm leading-relaxed prose prose-sm max-w-none"
-                                            dangerouslySetInnerHTML={{ __html: groupData?.group?.description || "No description available." }}
-                                        />
                                         <div
                                             className="text-sm leading-relaxed prose prose-sm max-w-none"
                                             dangerouslySetInnerHTML={{ __html: groupData?.group?.description || "No description available." }}
@@ -364,7 +345,7 @@ const LineItemList = ({ id, onClose, refresh }) => {
                                                     type="number"
                                                     value={groupFormData.divisor}
                                                     onChange={(e) => handleGroupInputRawChange(e, "divisor")}
-                                                    className="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-teal-500 outline-none text-right font-bold text-gray-800"
+                                                    className="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 outline-none text-right font-bold text-gray-700"
                                                     placeholder="Div"
                                                 />
                                                 <span className="text-gray-400 text-sm">=</span>
@@ -396,7 +377,7 @@ const LineItemList = ({ id, onClose, refresh }) => {
                                                 type="number"
                                                 value={groupFormData.totalHours}
                                                 onChange={(e) => handleGroupInputRawChange(e, "totalHours")}
-                                                className="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-teal-500 outline-none text-right font-bold text-gray-800"
+                                                className="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 outline-none text-right font-bold text-gray-700"
                                             />
                                         ) : (
                                             <span className="text-lg font-bold text-gray-700">
@@ -430,7 +411,6 @@ const LineItemList = ({ id, onClose, refresh }) => {
                 <DataTable
                     columns={columns}
                     data={lineItem}
-                    loading={loading}
                     searchPlaceholder="Search line items..."
                     pageSizeOptions={[10, 20, 40]}
                 />

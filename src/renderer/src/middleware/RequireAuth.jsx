@@ -1,10 +1,8 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet } from 'react-router-dom'
 // import { useSelector } from "react-redux";
 
-
-
 const RequireAuth = () => {
-  const token = sessionStorage.getItem("token");
+  const token = sessionStorage.getItem('token')
   //   const userInfo = useSelector((state: RootState) => state.userData.userData);
   //   const navigate = useNavigate();
 
@@ -16,10 +14,10 @@ const RequireAuth = () => {
   // }, [token, userInfo, navigate]);
 
   if (!token) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/" replace />
   }
 
-  return <Outlet />;
-};
+  return <Outlet />
+}
 
-export default RequireAuth;
+export default RequireAuth

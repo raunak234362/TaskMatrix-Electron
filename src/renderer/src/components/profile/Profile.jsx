@@ -1,19 +1,18 @@
-
-import { useSelector } from "react-redux";
-import { Mail, Phone, MapPin, UserCog, User, Shield, Edit2 } from "lucide-react";
-import { FiPhoneCall } from "react-icons/fi";
-import Button from "../fields/Button";
+import { useSelector } from 'react-redux'
+import { Mail, Phone, MapPin, UserCog, User, Shield, Edit2 } from 'lucide-react'
+import { FiPhoneCall } from 'react-icons/fi'
+import Button from '../fields/Button'
 
 const Profile = () => {
   // Get user data from Redux
-  const user = useSelector((state) => state.userInfo.userDetail);
+  const user = useSelector((state) => state.userInfo.userDetail)
 
   if (!user) {
     return (
       <div className="flex justify-center items-center h-screen text-gray-600">
         Loading user details...
       </div>
-    );
+    )
   }
 
   return (
@@ -22,14 +21,14 @@ const Profile = () => {
         {/* Header Section */}
         <div className="flex items-center gap-4 mb-6">
           <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center text-3xl font-semibold text-green-600">
-            {user.firstName?.[0] || "U"}
+            {user.firstName?.[0] || 'U'}
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
               {user.firstName} {user.lastName}
             </h2>
             <p className="text-gray-500 flex items-center gap-1">
-              <UserCog className="w-4 h-4" /> {user.designation || "—"}
+              <UserCog className="w-4 h-4" /> {user.designation || '—'}
             </p>
           </div>
         </div>
@@ -53,14 +52,14 @@ const Profile = () => {
             <p className="text-gray-500 text-sm">Phone</p>
             <p className="flex items-center gap-2 text-gray-800 font-medium">
               <Phone className="w-4 h-4 text-green-500" />
-              {user.phone || "N/A"}
+              {user.phone || 'N/A'}
             </p>
           </div>
           <div>
             <p className="text-gray-500 text-sm">Landline</p>
             <p className="flex items-center gap-2 text-gray-800 font-medium">
               <FiPhoneCall className="w-4 h-4 text-green-500" />
-              {user.phone || "N/A"}
+              {user.phone || 'N/A'}
             </p>
           </div>
 
@@ -81,11 +80,10 @@ const Profile = () => {
           <p className="text-gray-700 leading-relaxed">
             {user.address ? (
               <>
-                {user.address}, {user.city}, {user.state}, {user.zipCode},{" "}
-                {user.country}
+                {user.address}, {user.city}, {user.state}, {user.zipCode}, {user.country}
               </>
             ) : (
-              "No address information"
+              'No address information'
             )}
           </p>
         </div>
@@ -99,12 +97,11 @@ const Profile = () => {
             <div>
               <p className="text-gray-500 text-sm">Account Status</p>
               <span
-                className={`px-3 py-1 text-sm font-semibold rounded-full ${user.isActive
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-                  }`}
+                className={`px-3 py-1 text-sm font-semibold rounded-full ${
+                  user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                }`}
               >
-                {user.isActive ? "Active" : "Inactive"}
+                {user.isActive ? 'Active' : 'Inactive'}
               </span>
             </div>
 
@@ -130,7 +127,7 @@ const Profile = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Profile;
+export default Profile

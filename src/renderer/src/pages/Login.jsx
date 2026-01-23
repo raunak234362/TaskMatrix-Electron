@@ -1,6 +1,6 @@
-import Background from "../assets/background-image.jpg";
+import Background from '../assets/background-image.jpg'
 
-import { Login as LoginTemp } from "../components/index";
+import { Login as LoginTemp } from '../components/index'
 const Login = () => {
   return (
     <div className="w-screen h-screen relative">
@@ -12,7 +12,7 @@ const Login = () => {
 
       {<LoginTemp />}
     </div>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

@@ -1,34 +1,29 @@
+import { useEffect, useState } from 'react'
+import DataTable from '../ui/table'
 
-import { useEffect, useState } from "react";
-import DataTable from "../ui/table";
-
-import GetRFIByID from "./GetRFIByID";
-import { Loader2, Inbox } from "lucide-react";
-
-
+import GetRFIByID from './GetRFIByID'
+import { Loader2, Inbox } from 'lucide-react'
 
 const AllRFI = ({ rfiData = [] }) => {
-  const [rfis, setRFIs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [rfis, setRFIs] = useState([])
+  const [loading, setLoading] = useState(true)
   // const [selectedRfiID, setSelectedRfiID] = useState<string | null>(null);
-  console.log(rfiData);
+  console.log(rfiData)
 
-  const userRole = sessionStorage.getItem("userRole");
-
+  const userRole = sessionStorage.getItem('userRole')
 
   useEffect(() => {
     if (rfiData && rfiData.length > 0) {
-
       const normalized = rfiData.map((item) => ({
         ...item,
-        createdAt: item.createdAt || item.date || null,
-      }));
-      setRFIs(normalized);
-      setLoading(false);
+        createdAt: item.createdAt || item.date || null
+      }))
+      setRFIs(normalized)
+      setLoading(false)
     } else {
-
+      setLoading(false)
     }
-  }, [rfiData]);
+  }, [rfiData])
 
   // const handleRowClick = (row: RFIItem) => {
   //   // setSelectedRfiID(row.id);
@@ -36,51 +31,50 @@ const AllRFI = ({ rfiData = [] }) => {
 
   // ✅ Define columns
   const columns = [
-    { accessorKey: "subject", header: "Subject" },
+    { accessorKey: 'subject', header: 'Subject' },
     {
-      accessorKey: "sender",
-      header: "Sender",
+      accessorKey: 'sender',
+      header: 'Sender',
       cell: ({ row }) => {
-        const s = row.original.sender;
+        const s = row.original.sender
         return s
-          ? `${s.firstName ?? ""} ${s.middleName ?? ""} ${s.lastName ?? ""}`.trim() ||
-          s.username ||
-          "—"
-          : "—";
-      },
-    },
-  ];
-
-
+          ? `${s.firstName ?? ''} ${s.middleName ?? ''} ${s.lastName ?? ''}`.trim() ||
+              s.username ||
+              '—'
+          : '—'
+      }
+    }
+  ]
 
   columns.push(
     {
-      accessorKey: "status",
-      header: "Status",
+      accessorKey: 'status',
+      header: 'Status',
       cell: ({ row }) => (
         <span
-          className={`px-2 py-1 text-xs rounded-full ${row.original.status === true
-              ? "bg-yellow-100 text-yellow-700"
-              : "bg-green-100 text-green-700"
-            }`}
+          className={`px-2 py-1 text-xs rounded-full ${
+            row.original.status === true
+              ? 'bg-yellow-100 text-yellow-700'
+              : 'bg-green-100 text-green-700'
+          }`}
         >
-          {row.original.status ? "PENDING" : "RESPONDED"}
+          {row.original.status ? 'PENDING' : 'RESPONDED'}
         </span>
-      ),
+      )
     },
     {
-      accessorKey: "createdAt",
-      header: "Created On",
+      accessorKey: 'createdAt',
+      header: 'Created On',
       cell: ({ row }) =>
         row.original.createdAt
-          ? new Date(row.original.createdAt).toLocaleDateString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          })
-          : "—",
+          ? new Date(row.original.createdAt).toLocaleDateString('en-IN', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric'
+            })
+          : '—'
     }
-  );
+  )
 
   // ✅ Loading state
   if (loading) {
@@ -89,7 +83,7 @@ const AllRFI = ({ rfiData = [] }) => {
         <Loader2 className="w-6 h-6 animate-spin mb-2" />
         Loading RFIs...
       </div>
-    );
+    )
   }
 
   // ✅ Empty state
@@ -99,12 +93,12 @@ const AllRFI = ({ rfiData = [] }) => {
         <Inbox className="w-10 h-10 mb-3 text-gray-400" />
         <p className="text-lg font-medium">No RFIs Available</p>
         <p className="text-sm text-gray-400">
-          {userRole === "CLIENT"
-            ? "You haven’t sent any RFIs yet."
-            : "No RFIs have been received yet."}
+          {userRole === 'CLIENT'
+            ? 'You haven’t sent any RFIs yet.'
+            : 'No RFIs have been received yet.'}
         </p>
       </div>
-    );
+    )
   }
 
   // ✅ Render DataTable
@@ -113,14 +107,12 @@ const AllRFI = ({ rfiData = [] }) => {
       <DataTable
         columns={columns}
         data={rfis}
-
         detailComponent={({ row }) => <GetRFIByID id={row.id} />}
         searchPlaceholder="Search RFIs..."
         pageSizeOptions={[5, 10, 25]}
       />
-
     </div>
-  );
-};
+  )
+}
 
-export default AllRFI;
+export default AllRFI

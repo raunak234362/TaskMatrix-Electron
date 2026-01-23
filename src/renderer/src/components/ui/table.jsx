@@ -1,47 +1,31 @@
-
 // components/DataTable.tsx
-"use client";
+'use client'
 
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, Fragment } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  flexRender,
-} from "@tanstack/react-table";
-import {
-  Search,
-  ChevronDown,
-  ChevronUp,
-  Trash2,
-  ChevronRight,
-  X,
-} from "lucide-react";
-import { Button } from "./button";
-import Select from "../fields/Select";
+  flexRender
+} from '@tanstack/react-table'
+import { Search, ChevronDown, ChevronUp, Trash2, ChevronRight, X } from 'lucide-react'
+import { Button } from './button'
+import Select from '../fields/Select'
 
 // ---------------------------------------------------------------
 // 1. Filter UI Components
 // ---------------------------------------------------------------
 
-
 // Indeterminate checkbox component for header select-all
-function IndeterminateCheckbox({
-  checked,
-  indeterminate,
-  onChange,
-  className,
-  title,
-  ariaLabel,
-}) {
-  const ref = useRef(null);
+function IndeterminateCheckbox({ checked, indeterminate, onChange, className, title, ariaLabel }) {
+  const ref = useRef(null)
   useEffect(() => {
     if (ref.current) {
-      ref.current.indeterminate = indeterminate;
+      ref.current.indeterminate = indeterminate
     }
-  }, [indeterminate]);
+  }, [indeterminate])
   return (
     <input
       ref={ref}
@@ -52,16 +36,16 @@ function IndeterminateCheckbox({
       aria-label={ariaLabel}
       title={title}
     />
-  );
+  )
 }
 
 function TextFilter({ column }) {
-  const value = column.getFilterValue();
+  const value = column.getFilterValue()
   return (
     <div className="relative mt-1">
       <input
         type="text"
-        value={value ?? ""}
+        value={value ?? ''}
         onChange={(e) => column.setFilterValue(e.target.value || undefined)}
         placeholder={`Filter...`}
         className="w-full pl-8 pr-7 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-green-500 outline-none"
@@ -76,14 +60,11 @@ function TextFilter({ column }) {
         </Button>
       )}
     </div>
-  );
+  )
 }
 
-function SelectFilter({
-  column,
-  options,
-}) {
-  const value = column.getFilterValue();
+function SelectFilter({ column, options }) {
+  const value = column.getFilterValue()
 
   return (
     <div className="mt-1">
@@ -96,21 +77,16 @@ function SelectFilter({
         className="text-xs"
       />
     </div>
-  );
+  )
 }
 
-function MultiSelectFilter({
-  column,
-  options,
-}) {
-  const value = column.getFilterValue() ?? [];
+function MultiSelectFilter({ column, options }) {
+  const value = column.getFilterValue() ?? []
 
   const toggle = (val) => {
-    const newVal = value.includes(val)
-      ? value.filter((v) => v !== val)
-      : [...value, val];
-    column.setFilterValue(newVal.length ? newVal : undefined);
-  };
+    const newVal = value.includes(val) ? value.filter((v) => v !== val) : [...value, val]
+    column.setFilterValue(newVal.length ? newVal : undefined)
+  }
 
   return (
     <div className="mt-1 max-h-40 overflow-auto border border-gray-300 rounded bg-white">
@@ -129,18 +105,16 @@ function MultiSelectFilter({
         </label>
       ))}
     </div>
-  );
+  )
 }
 
 // ---------------------------------------------------------------
 // 2. Column Definition Extensions
 // ---------------------------------------------------------------
 
-
 // ---------------------------------------------------------------
 // 3. Main Table Component
 // ---------------------------------------------------------------
-
 
 export default function DataTable({
   columns: userColumns,
@@ -148,45 +122,39 @@ export default function DataTable({
   onRowClick,
   detailComponent: DetailComponent,
   onDelete,
-  searchPlaceholder = "Search...",
+  searchPlaceholder = 'Search...',
   pageSizeOptions = [10, 25, 50, 100],
   showColumnToggle = true,
-  initialSorting,
+  initialSorting
 }) {
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [globalFilter, setGlobalFilter] = useState('')
   const [sorting, setSorting] = useState(() => {
-    if (initialSorting) return initialSorting;
+    if (initialSorting) return initialSorting
 
     // Default to sorting by the first available column (excluding selection)
-    const firstSortableColumn = userColumns.find(
-      (col) => col.id !== "select" && col.accessorKey
-    );
+    const firstSortableColumn = userColumns.find((col) => col.id !== 'select' && col.accessorKey)
 
     if (firstSortableColumn) {
-      const id =
-        firstSortableColumn.id || firstSortableColumn.accessorKey;
-      return [{ id, desc: false }];
+      const id = firstSortableColumn.id || firstSortableColumn.accessorKey
+      return [{ id, desc: false }]
     }
 
-    return [];
-  });
-  const [columnFilters, setColumnFilters] = useState([]);
-  const [rowSelection, setRowSelection] = useState({});
-  const [columnVisibility, setColumnVisibility] = useState({});
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [expandedRowId, setExpandedRowId] = useState(null);
+    return []
+  })
+  const [columnFilters, setColumnFilters] = useState([])
+  const [rowSelection, setRowSelection] = useState({})
+  const [columnVisibility, setColumnVisibility] = useState({})
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [expandedRowId, setExpandedRowId] = useState(null)
 
   // Add selection column
   const columns = useMemo(() => {
     const selectionColumn = {
-      id: "select",
+      id: 'select',
       header: ({ table }) => (
         <IndeterminateCheckbox
           checked={table.getIsAllPageRowsSelected()}
-          indeterminate={
-            table.getIsSomePageRowsSelected() &&
-            !table.getIsAllPageRowsSelected()
-          }
+          indeterminate={table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected()}
           onChange={(e) => table.toggleAllPageRowsSelected(e.target.checked)}
           className="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500"
           ariaLabel="Select all rows on page"
@@ -206,11 +174,11 @@ export default function DataTable({
       enableSorting: false,
       enableHiding: false,
       enableColumnFilter: false,
-      size: 50,
-    };
+      size: 50
+    }
 
-    return [selectionColumn, ...userColumns];
-  }, [userColumns]);
+    return [selectionColumn, ...userColumns]
+  }, [userColumns])
 
   const table = useReactTable({
     data,
@@ -220,7 +188,7 @@ export default function DataTable({
       sorting,
       columnFilters,
       rowSelection,
-      columnVisibility,
+      columnVisibility
     },
     onGlobalFilterChange: setGlobalFilter,
     onSortingChange: setSorting,
@@ -230,58 +198,49 @@ export default function DataTable({
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-  });
+    getPaginationRowModel: getPaginationRowModel()
+  })
 
-  const selectedCount = Object.keys(rowSelection).length;
-  const selectedRows = table
-    .getSelectedRowModel()
-    .flatRows.map((r) => r.original);
+  const selectedCount = Object.keys(rowSelection).length
+  const selectedRows = table.getSelectedRowModel().flatRows.map((r) => r.original)
 
   const handleDelete = () => {
-    onDelete?.(selectedRows);
-    setRowSelection({});
-    setShowDeleteModal(false);
-  };
+    onDelete?.(selectedRows)
+    setRowSelection({})
+    setShowDeleteModal(false)
+  }
 
   const toggleRowExpand = (rowId) => {
-    setExpandedRowId((prev) => (prev === rowId ? null : rowId));
-  };
+    setExpandedRowId((prev) => (prev === rowId ? null : rowId))
+  }
 
   // Render filter based on column config
   const renderFilter = (column) => {
-    const def = column.columnDef;
+    const def = column.columnDef
 
     // 1. Explicitly disabled → no filter
-    if (def.enableColumnFilter === false) return null;
+    if (def.enableColumnFilter === false) return null
 
     // 2. No filterType AND enableColumnFilter not true → no filter
-    if (!def.filterType && def.enableColumnFilter !== true) return null;
+    if (!def.filterType && def.enableColumnFilter !== true) return null
 
     // 3. Custom component
     if (def.filterComponent) {
-      const Comp = def.filterComponent;
-      return <Comp column={column} />;
+      const Comp = def.filterComponent
+      return <Comp column={column} />
     }
 
     // 4. Built-in filters
     switch (def.filterType) {
-      case "select":
-        return (
-          <SelectFilter column={column} options={def.filterOptions ?? []} />
-        );
-      case "multiselect":
-        return (
-          <MultiSelectFilter
-            column={column}
-            options={def.filterOptions ?? []}
-          />
-        );
+      case 'select':
+        return <SelectFilter column={column} options={def.filterOptions ?? []} />
+      case 'multiselect':
+        return <MultiSelectFilter column={column} options={def.filterOptions ?? []} />
       default:
         // text filter (default when enableColumnFilter: true)
-        return <TextFilter column={column} />;
+        return <TextFilter column={column} />
     }
-  };
+  }
 
   return (
     <>
@@ -291,7 +250,7 @@ export default function DataTable({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
-              value={globalFilter ?? ""}
+              value={globalFilter ?? ''}
               onChange={(e) => setGlobalFilter(e.target.value)}
               placeholder={searchPlaceholder}
               className="pl-10 pr-4 py-2 w-full md:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
@@ -306,7 +265,7 @@ export default function DataTable({
               <div className="absolute right-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden group-hover:block">
                 <div className="p-2 max-h-60 overflow-auto">
                   {table.getAllColumns().map((column) => {
-                    if (!column.getCanHide()) return null;
+                    if (!column.getCanHide()) return null
                     return (
                       <label
                         key={column.id}
@@ -320,7 +279,7 @@ export default function DataTable({
                         />
                         <span>{column.columnDef.header?.toString()}</span>
                       </label>
-                    );
+                    )
                   })}
                 </div>
               </div>
@@ -330,9 +289,7 @@ export default function DataTable({
 
         {selectedCount > 0 && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700">
-              {selectedCount} selected
-            </span>
+            <span className="text-sm text-gray-700">{selectedCount} selected</span>
             <Button
               onClick={() => setShowDeleteModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
@@ -359,18 +316,15 @@ export default function DataTable({
                     <div
                       className={
                         header.column.getCanSort()
-                          ? "cursor-pointer select-none flex items-center gap-1"
-                          : ""
+                          ? 'cursor-pointer select-none flex items-center gap-1'
+                          : ''
                       }
                       onClick={header.column.getToggleSortingHandler()}
                     >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                      {header.column.getIsSorted() === "desc" ? (
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.column.getIsSorted() === 'desc' ? (
                         <ChevronDown className="w-4 h-4" />
-                      ) : header.column.getIsSorted() === "asc" ? (
+                      ) : header.column.getIsSorted() === 'asc' ? (
                         <ChevronUp className="w-4 h-4" />
                       ) : null}
                     </div>
@@ -395,34 +349,30 @@ export default function DataTable({
               </tr>
             ) : (
               table.getRowModel().rows.map((row) => {
-                const isExpanded = expandedRowId === row.id;
+                const isExpanded = expandedRowId === row.id
                 return (
-                  <React.Fragment key={row.id}>
+                  <Fragment key={row.id}>
                     <tr
-                      className={`hover:bg-green-50 transition-colors ${onRowClick ? "cursor-pointer" : ""
-                        }`}
+                      className={`hover:bg-green-50 transition-colors ${
+                        onRowClick ? 'cursor-pointer' : ''
+                      }`}
                       onClick={() => {
-                        onRowClick?.(row.original);
-                        if (DetailComponent) toggleRowExpand(row.id);
+                        onRowClick?.(row.original)
+                        if (DetailComponent) toggleRowExpand(row.id)
                       }}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <td
-                          key={cell.id}
-                          className="text-left px-6 py-4 text-md text-gray-700"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
+                        <td key={cell.id} className="text-left px-6 py-4 text-md text-gray-700">
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </td>
                       ))}
 
                       {DetailComponent && (
                         <td className="px-2 py-4">
                           <ChevronRight
-                            className={`w-5 h-5 transition-transform ${isExpanded ? "rotate-90" : ""
-                              }`}
+                            className={`w-5 h-5 transition-transform ${
+                              isExpanded ? 'rotate-90' : ''
+                            }`}
                           />
                         </td>
                       )}
@@ -431,10 +381,7 @@ export default function DataTable({
                     {DetailComponent && isExpanded && (
                       <tr>
                         <td
-                          colSpan={
-                            table.getVisibleFlatColumns().length +
-                            (DetailComponent ? 1 : 0)
-                          }
+                          colSpan={table.getVisibleFlatColumns().length + (DetailComponent ? 1 : 0)}
                           className="bg-gray-50 p-0"
                         >
                           <div className=" overflow-y-auto p-4">
@@ -446,8 +393,8 @@ export default function DataTable({
                         </td>
                       </tr>
                     )}
-                  </React.Fragment>
-                );
+                  </Fragment>
+                )
               })
             )}
           </tbody>
@@ -458,7 +405,7 @@ export default function DataTable({
       <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-4">
         <div className="flex items-center gap-2 text-sm text-gray-700">
           <span>
-            Page <strong>{table.getState().pagination.pageIndex + 1}</strong> of{" "}
+            Page <strong>{table.getState().pagination.pageIndex + 1}</strong> of{' '}
             <strong>{table.getPageCount()}</strong>
           </span>
           <span>|</span>
@@ -486,28 +433,28 @@ export default function DataTable({
             disabled={!table.getCanPreviousPage()}
             className="bg-green-100 text-gray-700 hover:bg-green-200 px-3 py-1 border rounded disabled:opacity-50"
           >
-            {"<<"}
+            {'<<'}
           </Button>
           <Button
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
             className="bg-green-100 text-gray-700 hover:bg-green-200 px-3 py-1 border rounded disabled:opacity-50"
           >
-            {"<"}
+            {'<'}
           </Button>
           <Button
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
             className="bg-green-100 text-gray-700 hover:bg-green-200 px-3 py-1 border rounded disabled:opacity-50"
           >
-            {">"}
+            {'>'}
           </Button>
           <Button
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
             className="bg-green-100 text-gray-700 hover:bg-green-200 px-3 py-1 border rounded disabled:opacity-50"
           >
-            {">>"}
+            {'>>'}
           </Button>
         </div>
       </div>
@@ -517,11 +464,9 @@ export default function DataTable({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-lg font-semibold mb-2">
-              Delete {selectedCount} {selectedCount === 1 ? "Item" : "Items"}?
+              Delete {selectedCount} {selectedCount === 1 ? 'Item' : 'Items'}?
             </h3>
-            <p className="text-sm text-gray-700 mb-6">
-              This action cannot be undone.
-            </p>
+            <p className="text-sm text-gray-700 mb-6">This action cannot be undone.</p>
             <div className="flex justify-end gap-3">
               <Button
                 onClick={() => setShowDeleteModal(false)}
@@ -540,5 +485,5 @@ export default function DataTable({
         </div>
       )}
     </>
-  );
+  )
 }

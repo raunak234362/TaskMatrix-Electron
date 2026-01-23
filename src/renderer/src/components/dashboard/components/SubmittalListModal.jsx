@@ -1,53 +1,49 @@
-import React from "react";
-import { X as CloseIcon } from "lucide-react";
-import DataTable from "../../ui/table";
+import { X as CloseIcon } from 'lucide-react'
+import DataTable from '../../ui/table'
 
 const SubmittalListModal = ({ isOpen, onClose, data }) => {
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   const columns = [
     {
-      accessorKey: "subject",
-      header: "Subject",
-      cell: ({ row }) => (
-        <span className="font-medium text-gray-700">{row.original.subject}</span>
-      ),
+      accessorKey: 'subject',
+      header: 'Subject',
+      cell: ({ row }) => <span className="font-medium text-gray-700">{row.original.subject}</span>
     },
     {
-      accessorKey: "project.name",
-      header: "Project",
+      accessorKey: 'project.name',
+      header: 'Project',
       cell: ({ row }) => (
-        <span className="text-gray-700">
-          {row.original.project?.name || "N/A"}
-        </span>
-      ),
+        <span className="text-gray-700">{row.original.project?.name || 'N/A'}</span>
+      )
     },
     {
-      accessorKey: "status",
-      header: "Status",
+      accessorKey: 'status',
+      header: 'Status',
       cell: ({ row }) => (
         <span
-          className={`px-3 py-1 rounded-full text-xs font-bold ${row.original.status === "PENDING"
-              ? "bg-amber-100 text-amber-700"
-              : "bg-green-100 text-green-700"
-            }`}
+          className={`px-3 py-1 rounded-full text-xs font-bold ${
+            row.original.status === 'PENDING'
+              ? 'bg-amber-100 text-amber-700'
+              : 'bg-green-100 text-green-700'
+          }`}
         >
           {row.original.status}
         </span>
-      ),
+      )
     },
     {
-      accessorKey: "approvalDate",
-      header: "Due Date",
+      accessorKey: 'approvalDate',
+      header: 'Due Date',
       cell: ({ row }) => (
         <span className="text-gray-700">
           {row.original.approvalDate
             ? new Date(row.original.approvalDate).toLocaleDateString()
-            : "N/A"}
+            : 'N/A'}
         </span>
-      ),
-    },
-  ];
+      )
+    }
+  ]
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -55,12 +51,8 @@ const SubmittalListModal = ({ isOpen, onClose, data }) => {
         {/* Modal Header */}
         <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div>
-            <h3 className="text-xl font-bold text-gray-700">
-              Pending Submittals
-            </h3>
-            <p className="text-sm text-gray-700 mt-1">
-              Showing {data.length} pending submittals
-            </p>
+            <h3 className="text-xl font-bold text-gray-700">Pending Submittals</h3>
+            <p className="text-sm text-gray-700 mt-1">Showing {data.length} pending submittals</p>
           </div>
           <button
             onClick={onClose}
@@ -91,7 +83,7 @@ const SubmittalListModal = ({ isOpen, onClose, data }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SubmittalListModal;
+export default SubmittalListModal

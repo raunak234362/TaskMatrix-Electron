@@ -1,21 +1,21 @@
 // src/hooks/useSocketConnection.js
-import { useEffect } from "react";
-import socket from "../socket";
+import { useEffect } from 'react'
+import socket from '../socket'
 
 const useSocketConnection = (userId) => {
-  console.log(userId);
-  
+  console.log(userId)
+
   useEffect(() => {
-    if (!userId) return;
-    socket.connect();
+    if (!userId) return
+    socket.connect()
     // socket.emit("joinRoom", userId);
-    console.log("😁😁😁👍👍👍👍 Socket connected and joined room:", userId);
+    console.log('😁😁😁👍👍👍👍 Socket connected and joined room:', userId)
 
     return () => {
-      socket.disconnect();
-      console.log("Socket disconnected");
-    };
-  }, [userId]);
-};
+      socket.disconnect()
+      console.log('Socket disconnected')
+    }
+  }, [userId])
+}
 
-export default useSocketConnection;
+export default useSocketConnection

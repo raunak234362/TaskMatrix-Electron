@@ -1,11 +1,10 @@
-import { useState } from "react";
-import { AllActiveTask, AllTasks } from "../components";
+import { useState } from 'react'
+import { AllActiveTask, AllTasks } from '../components'
 
 // import GetRFQByID from "../components/rfq/GetRFQByID";
 
-
 const TaskLayout = () => {
-  const [activeTab, setActiveTab] = useState("activeTask");
+  const [activeTab, setActiveTab] = useState('activeTask')
 
   return (
     <div className="w-full overflow-y-hidden overflow-x-hidden">
@@ -14,20 +13,22 @@ const TaskLayout = () => {
           <h1 className="text-2xl py-2 font-bold text-white">Task Detail</h1>
           <div className="flex flex-row w-full">
             <button
-              onClick={() => setActiveTab("activeTask")}
-              className={`px-1.5 md:px-4 py-2 rounded-lg rounded-b ${activeTab === "activeTask"
-                  ? "text-base md:text-base bg-white/70 backdrop-xl text-gray-800 font-bold"
-                  : "md:text-base text-sm text-white font-semibold"
-                }`}
+              onClick={() => setActiveTab('activeTask')}
+              className={`px-1.5 md:px-4 py-2 rounded-lg rounded-b ${
+                activeTab === 'activeTask'
+                  ? 'text-base md:text-base bg-white/70 backdrop-xl text-gray-800 font-bold'
+                  : 'md:text-base text-sm text-white font-semibold'
+              }`}
             >
               Active Tasks
             </button>
             <button
-              onClick={() => setActiveTab("allTask")}
-              className={`px-1.5 md:px-4 py-2 rounded-lg rounded-b ${activeTab === "allTask"
-                  ? "text-base md:text-base bg-white/70 backdrop-xl text-gray-800 font-bold"
-                  : "md:text-base text-sm text-white font-semibold"
-                }`}
+              onClick={() => setActiveTab('allTask')}
+              className={`px-1.5 md:px-4 py-2 rounded-lg rounded-b ${
+                activeTab === 'allTask'
+                  ? 'text-base md:text-base bg-white/70 backdrop-xl text-gray-800 font-bold'
+                  : 'md:text-base text-sm text-white font-semibold'
+              }`}
             >
               All Tasks
             </button>
@@ -46,7 +47,7 @@ const TaskLayout = () => {
         </div>
       </div>
       <div className="flex-1 min-h-0 bg-white p-2 rounded-b-2xl overflow-y-auto">
-        {activeTab === "allTask" && (
+        {activeTab === 'allTask' && (
           <div>
             <AllTasks />
           </div>
@@ -56,14 +57,14 @@ const TaskLayout = () => {
             <AddTask/>
           </div>
         )} */}
-        {activeTab === "activeTask" && (
+        {activeTab === 'activeTask' && (
           <div>
             <AllActiveTask />
           </div>
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
 export default TaskLayout

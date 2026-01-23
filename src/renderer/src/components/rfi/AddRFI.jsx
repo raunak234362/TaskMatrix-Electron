@@ -1,59 +1,54 @@
-import { useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
-import Input from "../fields/input";
-import Button from "../fields/Button";
-import MultipleFileUpload from "../fields/MultipleFileUpload";
-import Service from "../../api/Service";
+import { useEffect, useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { useSelector } from 'react-redux'
+import { toast } from 'react-toastify'
+import Input from '../fields/input'
+import Button from '../fields/Button'
+import MultipleFileUpload from '../fields/MultipleFileUpload'
+import Service from '../../api/Service'
 
-import SectionTitle from "../ui/SectionTitle";
-import Select from "react-select";
-import RichTextEditor from "../fields/RichTextEditor";
+import SectionTitle from '../ui/SectionTitle'
+import Select from 'react-select'
+import RichTextEditor from '../fields/RichTextEditor'
 
 const AddRFI = ({ project }) => {
-  console.log(project);
+  console.log(project)
 
-  const userDetail = useSelector((state) => state.userInfo.userDetail);
-  const userRole = userDetail?.role; // CLIENT | ADMIN | STAFF etc.
-  const fabricators = useSelector(
-    (state) => state.fabricatorInfo.fabricatorData
-  );
-  const staff = useSelector((state) => state.userInfo.staffData);
-  const project_id = project?.id;
-  const fabricatorID = project?.fabricatorID;
-  console.log("Fabricators from Redux:", fabricators);
+  const userDetail = useSelector((state) => state.userInfo.userDetail)
+  const userRole = userDetail?.role // CLIENT | ADMIN | STAFF etc.
+  const fabricators = useSelector((state) => state.fabricatorInfo.fabricatorData)
+  const staff = useSelector((state) => state.userInfo.staffData)
+  const project_id = project?.id
+  const fabricatorID = project?.fabricatorID
+  console.log('Fabricators from Redux:', fabricators)
 
-  const { register, setValue, handleSubmit, control, reset } =
-    useForm();
-  const [description, setDescription] = useState("");
-  const [files, setFiles] = useState([]);
+  const { register, setValue, handleSubmit, control, reset } = useForm()
+  const [description, setDescription] = useState('')
+  const [files, setFiles] = useState([])
 
   // Match selected fabricator
-  const selectedFabricator = fabricators?.find(
-    (f) => String(f.id) === String(fabricatorID)
-  );
+  const selectedFabricator = fabricators?.find((f) => String(f.id) === String(fabricatorID))
   // Correct POC mapping
   const pocOptions =
     selectedFabricator?.pointOfContact?.map((p) => ({
-      label: `${p.firstName} ${p.middleName ?? ""} ${p.lastName}`,
+      label: `${p.firstName} ${p.middleName ?? ''} ${p.lastName}`,
 
-      value: String(p.id),
-    })) ?? [];
+      value: String(p.id)
+    })) ?? []
 
   const projectOptions =
     selectedFabricator?.project?.map((p) => ({
       label: p.projectName || p.name,
-      value: String(p.id),
-    })) ?? [];
+      value: String(p.id)
+    })) ?? []
 
   const recipientOptions =
     staff
-      ?.filter((s) => ["ADMIN", "SALES"].includes(s.role))
+      ?.filter((s) => ['ADMIN', 'SALES'].includes(s.role))
       .map((s) => ({
         label: `${s.firstName} ${s.lastName}`,
-        value: String(s.id),
-      })) ?? [];
+        value: String(s.id)
+      })) ?? []
 
   const onSubmit = async (data) => {
     try {
@@ -64,54 +59,54 @@ const AddRFI = ({ project }) => {
         recepient_id: data.recepient_id,
         sender_id: userDetail?.id, // always user
         status: true,
-        isAproovedByAdmin: "PENDING",
+        isAproovedByAdmin: 'PENDING',
         description,
-        files,
-      };
+        files
+      }
 
-      const formData = new FormData();
+      const formData = new FormData()
       Object.entries(payload).forEach(([key, value]) => {
-        if (key === "files" && Array.isArray(files)) {
-          files.forEach((f) => formData.append("files", f));
+        if (key === 'files' && Array.isArray(files)) {
+          files.forEach((f) => formData.append('files', f))
         } else {
-          formData.append(key, value);
+          formData.append(key, value)
         }
-      });
+      })
 
-      await Service.addRFI(formData);
-      toast.success("RFI Submitted");
-      reset();
-      setDescription("");
-      setFiles([]);
+      await Service.addRFI(formData)
+      toast.success('RFI Submitted')
+      reset()
+      setDescription('')
+      setFiles([])
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to create RFI");
+      console.error(err)
+      toast.error('Failed to create RFI')
     }
-  };
+  }
 
   useEffect(() => {
-    if (userRole === "CLIENT") {
-      setValue("sender_id", String(userDetail?.id)); // auto-select logged-in client
+    if (userRole === 'CLIENT') {
+      setValue('sender_id', String(userDetail?.id)) // auto-select logged-in client
     }
-  }, [userRole]);
+  }, [userRole])
   useEffect(() => {
-    if (userRole === "CLIENT" && selectedFabricator) {
-      setValue("fabricator_id", String(selectedFabricator.id));
-      setValue("sender_id", String(userDetail?.id));
+    if (userRole === 'CLIENT' && selectedFabricator) {
+      setValue('fabricator_id', String(selectedFabricator.id))
+      setValue('sender_id', String(userDetail?.id))
     }
-  }, [userRole, selectedFabricator]);
+  }, [userRole, selectedFabricator])
   useEffect(() => {
-    if (userRole === "CLIENT" && projectOptions.length > 0) {
-      setValue("project_id", String(projectOptions[0].value));
+    if (userRole === 'CLIENT' && projectOptions.length > 0) {
+      setValue('project_id', String(projectOptions[0].value))
     }
-  }, [userRole, projectOptions]);
+  }, [userRole, projectOptions])
 
   return (
     <div className="w-full mx-auto bg-white p-2 rounded-xl shadow">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <SectionTitle title="Fabrication & Routing" />
 
-        {userRole !== "CLIENT" && (
+        {userRole !== 'CLIENT' && (
           <>
             {/* CLIENT CONTACT */}
             <Controller
@@ -121,12 +116,8 @@ const AddRFI = ({ project }) => {
                 <Select
                   placeholder="Fabricator Contact"
                   options={pocOptions}
-                  value={
-                    pocOptions.find((o) => o.value === field.value) ?? null
-                  }
-                  onChange={(option) =>
-                    field.onChange(option ? option.value : null)
-                  }
+                  value={pocOptions.find((o) => o.value === field.value) ?? null}
+                  onChange={(option) => field.onChange(option ? option.value : null)}
                 />
               )}
             />
@@ -137,17 +128,13 @@ const AddRFI = ({ project }) => {
         <Controller
           name="recepient_id"
           control={control}
-          rules={{ required: "Recipient required" }}
+          rules={{ required: 'Recipient required' }}
           render={({ field }) => (
             <Select
               placeholder="WBT Contact *"
               options={recipientOptions}
-              value={
-                recipientOptions.find((o) => o.value === field.value) ?? null
-              }
-              onChange={(option) =>
-                field.onChange(option ? option.value : null)
-              }
+              value={recipientOptions.find((o) => o.value === field.value) ?? null}
+              onChange={(option) => field.onChange(option ? option.value : null)}
             />
           )}
         />
@@ -157,13 +144,11 @@ const AddRFI = ({ project }) => {
         <Input
           label="Subject"
           placeholder="Enter subject"
-          {...register("subject", { required: true })}
+          {...register('subject', { required: true })}
         />
 
         <div className="space-y-1">
-          <label className="text-sm font-medium text-gray-700">
-            Description
-          </label>
+          <label className="text-sm font-medium text-gray-700">Description</label>
           <RichTextEditor
             value={description}
             onChange={setDescription}
@@ -180,7 +165,7 @@ const AddRFI = ({ project }) => {
         </div>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default AddRFI;
+export default AddRFI

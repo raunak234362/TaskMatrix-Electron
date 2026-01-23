@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://project-station.whiteboardtec.com:5160/v1/';
+const BASE_URL =
+  import.meta.env.VITE_BASE_URL || 'https://project-station.whiteboardtec.com:5160/v1/'
 
 console.log('API Base URL:', BASE_URL)
 

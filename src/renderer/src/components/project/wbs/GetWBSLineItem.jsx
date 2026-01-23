@@ -1,104 +1,100 @@
+import { useEffect, useState } from 'react'
+import { Loader2, AlertCircle, X, ListChecks } from 'lucide-react'
+import Service from '../../../api/Service'
+import { Button } from '../../ui/button'
+import DataTable from '../../ui/table'
+import UpdateLineItem from './UpdateLineItem'
 
-import { useEffect, useState } from "react";
-import { Loader2, AlertCircle, X, ListChecks } from "lucide-react";
-import Service from "../../../api/Service";
-import { Button } from "../../ui/button";
-import DataTable from "../../ui/table";
-import UpdateLineItem from "./UpdateLineItem";
-
-const GetWBSLineItem = ({
-  wbsId,
-  onClose,
-}) => {
-  const [lineItems, setLineItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedLineItem, setSelectedLineItem] = useState(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+const GetWBSLineItem = ({ wbsId, onClose }) => {
+  const [lineItems, setLineItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [selectedLineItem, setSelectedLineItem] = useState(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   const fetchLineItems = async () => {
     try {
-      setLoading(true);
-      setError(null);
-      const response = await Service.GetWBSLineItem(wbsId);
-      console.log("Line Items Response:", response);
-      setLineItems(response?.data || response || []);
+      setLoading(true)
+      setError(null)
+      const response = await Service.GetWBSLineItem(wbsId)
+      console.log('Line Items Response:', response)
+      setLineItems(response?.data || response || [])
     } catch (err) {
-      console.error("Error fetching line items:", err);
-      setError("Failed to load line items");
+      console.error('Error fetching line items:', err)
+      setError('Failed to load line items')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
     if (wbsId) {
-      fetchLineItems();
+      fetchLineItems()
     }
-  }, [wbsId]);
+  }, [wbsId])
 
   const handleRowClick = (item) => {
-    setSelectedLineItem(item);
-    setIsEditModalOpen(true);
-  };
+    setSelectedLineItem(item)
+    setIsEditModalOpen(true)
+  }
 
   const columns = [
     {
-      accessorKey: "description",
-      header: "Description",
+      accessorKey: 'description',
+      header: 'Description',
       cell: ({ row }) => (
         <p className="text-sm font-semibold text-gray-700">
           {row.original.name ||
             row.original.wbsTemplate?.name ||
             row.original.description ||
             row.original.wbsTemplateKey ||
-            "—"}
+            '—'}
         </p>
       ),
-      enableColumnFilter: true,
+      enableColumnFilter: true
     },
     {
-      accessorKey: "discipline",
-      header: "Discipline",
+      accessorKey: 'discipline',
+      header: 'Discipline',
       cell: ({ row }) => (
         <span className="text-xs font-medium text-gray-500 uppercase">
-          {row.original.discipline || "—"}
+          {row.original.discipline || '—'}
         </span>
       ),
-      enableSorting: true,
+      enableSorting: true
     },
     {
-      id: "qtyNo",
+      id: 'qtyNo',
       accessorFn: (row) => row.qtyNo ?? row.totalQtyNo ?? 0,
-      header: "Qty",
+      header: 'Qty',
       cell: ({ row }) => (
         <span className="text-sm font-bold text-green-700 bg-green-50 px-2 py-1 rounded-md">
-          {row.getValue("qtyNo")}
+          {row.getValue('qtyNo')}
         </span>
       ),
-      enableSorting: true,
+      enableSorting: true
     },
     {
-      accessorKey: "execHr",
-      header: "Exec Hr",
+      accessorKey: 'execHr',
+      header: 'Exec Hr',
       cell: ({ row }) => (
         <span className="text-sm text-gray-700">
           {(row.original.execHr ?? row.original.totalExecHr ?? 0).toFixed(1)}h
         </span>
       ),
-      enableSorting: true,
+      enableSorting: true
     },
     {
-      accessorKey: "checkHr",
-      header: "Check Hr",
+      accessorKey: 'checkHr',
+      header: 'Check Hr',
       cell: ({ row }) => (
         <span className="text-sm text-gray-700">
           {(row.original.checkHr ?? row.original.totalCheckHr ?? 0).toFixed(1)}h
         </span>
       ),
-      enableSorting: true,
-    },
-  ];
+      enableSorting: true
+    }
+  ]
 
   if (loading) {
     return (
@@ -106,7 +102,7 @@ const GetWBSLineItem = ({
         <Loader2 className="w-8 h-8 text-green-600 animate-spin" />
         <p className="text-gray-600 font-medium">Loading line items...</p>
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -118,7 +114,7 @@ const GetWBSLineItem = ({
           Close
         </Button>
       </div>
-    );
+    )
   }
 
   return (
@@ -149,28 +145,26 @@ const GetWBSLineItem = ({
             onRowClick={handleRowClick}
             searchPlaceholder="Search line items..."
             initialSorting={[
-              { id: "qtyNo", desc: true },
-              { id: "description", desc: false },
+              { id: 'qtyNo', desc: true },
+              { id: 'description', desc: false }
             ]}
           />
         ) : (
-          <div className="py-12 text-center text-gray-500 italic">
-            No line items found.
-          </div>
+          <div className="py-12 text-center text-gray-500 italic">No line items found.</div>
         )}
       </div>
 
       <UpdateLineItem
         isOpen={isEditModalOpen}
         onClose={() => {
-          setIsEditModalOpen(false);
-          setSelectedLineItem(null);
+          setIsEditModalOpen(false)
+          setSelectedLineItem(null)
         }}
         lineItem={selectedLineItem}
         onUpdate={fetchLineItems}
       />
     </div>
-  );
-};
+  )
+}
 
-export default GetWBSLineItem;
+export default GetWBSLineItem

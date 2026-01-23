@@ -1,45 +1,45 @@
-import { useState } from "react";
-import Button from "../fields/Button";
-import Service from "../../api/Service";
-import RichTextEditor from "../fields/RichTextEditor";
+import { useState } from 'react'
+import Button from '../fields/Button'
+import Service from '../../api/Service'
+import RichTextEditor from '../fields/RichTextEditor'
 
 const SubmittalResponseModal = ({
   submittalId,
   onClose,
 
-  parentResponseId = null,
+  parentResponseId = null
 }) => {
-  console.log(submittalId);
+  console.log(submittalId)
 
-  const [reason, setReason] = useState("");
-  const [description, setDescription] = useState("");
+  const [reason, setReason] = useState('')
+  const [description, setDescription] = useState('')
 
   // ENUMS
 
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState([])
 
   const handleSubmit = async () => {
-    const formData = new FormData();
+    const formData = new FormData()
 
-    if (reason) formData.append("reason", reason);
-    if (description) formData.append("description", description);
+    if (reason) formData.append('reason', reason)
+    if (description) formData.append('description', description)
 
-    formData.append("submittalsId", submittalId);
+    formData.append('submittalsId', submittalId)
     // formData.append("status", status);
     // formData.append("wbtStatus", wbtStatus);
 
     if (parentResponseId) {
-      formData.append("parentResponseId", parentResponseId);
+      formData.append('parentResponseId', parentResponseId)
     }
 
-    files.forEach((file) => formData.append("files", file));
+    files.forEach((file) => formData.append('files', file))
 
     try {
-      await Service.addSubmittalResponse(formData, submittalId);
+      await Service.addSubmittalResponse(formData, submittalId)
     } catch (err) {
-      console.error("Submittal response failed:", err);
+      console.error('Submittal response failed:', err)
     }
-  };
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
@@ -49,9 +49,7 @@ const SubmittalResponseModal = ({
           <X size={18} />
         </button> */}
 
-        <h2 className="text-xl font-semibold text-green-700">
-          Add Submittal Response
-        </h2>
+        <h2 className="text-xl font-semibold text-green-700">Add Submittal Response</h2>
 
         {/* REASON */}
         <div>
@@ -111,7 +109,7 @@ const SubmittalResponseModal = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SubmittalResponseModal;
+export default SubmittalResponseModal

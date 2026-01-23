@@ -1,13 +1,10 @@
 // src/components/FileUpload/MultipleFileUpload.tsx
 
-import React, { useState } from "react";
+import { useState } from 'react'
 
-function MultipleFileUpload({
-  onFilesChange,
-  initialFiles = [],
-}) {
+function MultipleFileUpload({ onFilesChange, initialFiles = [] }) {
   // State to hold the list of File objects
-  const [files, setFiles] = useState(initialFiles);
+  const [files, setFiles] = useState(initialFiles)
 
   /**
    * Handles the file input change event.
@@ -15,44 +12,42 @@ function MultipleFileUpload({
    */
   const handleFileChange = (event) => {
     if (!event.target.files) {
-      return; // Exit if no files are selected
+      return // Exit if no files are selected
     }
 
-    const selectedFiles = Array.from(event.target.files);
-    const updatedFiles = [...files, ...selectedFiles];
+    const selectedFiles = Array.from(event.target.files)
+    const updatedFiles = [...files, ...selectedFiles]
 
-    setFiles(updatedFiles);
-    onFilesChange(updatedFiles);
+    setFiles(updatedFiles)
+    onFilesChange(updatedFiles)
 
     // Clear the input value to allow selecting the same file(s) again
-    event.target.value = "";
-  };
+    event.target.value = ''
+  }
 
   /**
    * Removes a file from the list based on its index.
    */
   const removeFile = (indexToRemove) => {
-    const updatedFiles = files.filter((_, index) => index !== indexToRemove);
-    setFiles(updatedFiles);
-    onFilesChange(updatedFiles);
-  };
+    const updatedFiles = files.filter((_, index) => index !== indexToRemove)
+    setFiles(updatedFiles)
+    onFilesChange(updatedFiles)
+  }
 
   /**
    * Formats file size for display.
    */
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
-  };
+    if (bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
+  }
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-md border border-gray-200">
-      <label className="block text-gray-700 text-sm font-medium mb-2">
-        Upload Files
-      </label>
+      <label className="block text-gray-700 text-sm font-medium mb-2">Upload Files</label>
       <input
         type="file"
         multiple
@@ -62,9 +57,7 @@ function MultipleFileUpload({
 
       {files.length > 0 && (
         <div className="mt-4">
-          <p className="text-sm font-medium text-gray-700 mb-2">
-            Selected Files:
-          </p>
+          <p className="text-sm font-medium text-gray-700 mb-2">Selected Files:</p>
           <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
             {files.map((file, index) => (
               <li
@@ -78,9 +71,7 @@ function MultipleFileUpload({
                   >
                     {file.name}
                   </span>
-                  <span className="text-xs text-gray-700">
-                    {formatFileSize(file.size)}
-                  </span>
+                  <span className="text-xs text-gray-700">{formatFileSize(file.size)}</span>
                 </div>
                 <button
                   type="button" // Prevents form submission
@@ -95,7 +86,7 @@ function MultipleFileUpload({
         </div>
       )}
     </div>
-  );
+  )
 }
 
-export default MultipleFileUpload;
+export default MultipleFileUpload

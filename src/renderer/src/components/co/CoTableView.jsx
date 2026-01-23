@@ -28,28 +28,20 @@ const CoTableView = ({ rows }) => {
                 <td className="px-4 py-3">{r.referenceDoc}</td>
                 <td className="px-4 py-3">{r.elements}</td>
 
-                <td className="px-4 py-3 text-center font-medium">
-                  {r.QtyNo}
-                </td>
+                <td className="px-4 py-3 text-center font-medium">{r.QtyNo}</td>
 
-                <td className="px-4 py-3 text-center">
-                  {r.hours}
-                </td>
+                <td className="px-4 py-3 text-center">{r.hours}</td>
 
-                <td className="px-4 py-3 text-right font-semibold">
-                  ${r.cost}
-                </td>
+                <td className="px-4 py-3 text-right font-semibold">${r.cost}</td>
 
-                <td className="px-4 py-3 max-w-xs text-gray-700">
-                  {r.remarks || "—"}
-                </td>
+                <td className="px-4 py-3 max-w-xs text-gray-700">{r.remarks || '—'}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CoTableView;
+export default CoTableView

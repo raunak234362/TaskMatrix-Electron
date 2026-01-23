@@ -1,9 +1,8 @@
-import React from "react";
-import { X as CloseIcon } from "lucide-react";
-import GetProjectById from "../../project/GetProjectById";
+import { X as CloseIcon } from 'lucide-react'
+import GetProjectById from '../../project/GetProjectById'
 
 const ProjectDetailsModal = ({ project, onClose }) => {
-  if (!project) return null;
+  if (!project) return null
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -25,7 +24,7 @@ const ProjectDetailsModal = ({ project, onClose }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ProjectDetailsModal;
+export default ProjectDetailsModal

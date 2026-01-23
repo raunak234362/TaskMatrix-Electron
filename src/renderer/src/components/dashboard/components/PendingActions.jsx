@@ -1,72 +1,62 @@
-import React from "react";
-import {
-  ClipboardList,
-  FileText,
-  RefreshCw,
-  Activity,
-  Search,
-} from "lucide-react";
+import { ClipboardList, FileText, RefreshCw, Activity, Search } from 'lucide-react'
 
-const PendingActions = ({
-  dashboardStats,
-  onActionClick,
-}) => {
+const PendingActions = ({ dashboardStats, onActionClick }) => {
   const actions = [
     {
-      title: "Pending RFI",
+      title: 'Pending RFI',
       count: dashboardStats?.pendingRFI || 0,
-      subtitle: "New RFI",
+      subtitle: 'New RFI',
       subcount: dashboardStats?.newRFI || 0,
       icon: FileText,
-      color: "amber",
+      color: 'amber'
     },
     {
-      title: "Pending Submittals",
+      title: 'Pending Submittals',
       count: dashboardStats?.pendingSubmittals || 0,
-      subtitle: "Response Pending",
+      subtitle: 'Response Pending',
       icon: RefreshCw,
-      color: "purple",
+      color: 'purple'
     },
     {
-      title: "Change Orders",
+      title: 'Change Orders',
       count: dashboardStats?.pendingChangeOrders || 0,
-      subtitle: "New Change Orders",
+      subtitle: 'New Change Orders',
       subcount: dashboardStats?.newChangeOrders || 0,
       icon: Activity,
-      color: "rose",
+      color: 'rose'
     },
     {
-      title: "Pending RFQ",
+      title: 'Pending RFQ',
       count: dashboardStats?.pendingRFQ || 0,
       subcount: dashboardStats?.newRFQ || 0,
-      subtitle: "New RFQ",
+      subtitle: 'New RFQ',
       icon: Search,
-      color: "cyan",
-    },
-  ];
+      color: 'cyan'
+    }
+  ]
 
   const colorClasses = {
     amber: {
-      bg: "bg-amber-50",
-      hoverBg: "bg-amber-100",
-      text: "text-amber-600",
+      bg: 'bg-amber-50',
+      hoverBg: 'bg-amber-100',
+      text: 'text-amber-600'
     },
     purple: {
-      bg: "bg-purple-50",
-      hoverBg: "bg-purple-100",
-      text: "text-purple-600",
+      bg: 'bg-purple-50',
+      hoverBg: 'bg-purple-100',
+      text: 'text-purple-600'
     },
     rose: {
-      bg: "bg-rose-50",
-      hoverBg: "bg-rose-100",
-      text: "text-rose-600",
+      bg: 'bg-rose-50',
+      hoverBg: 'bg-rose-100',
+      text: 'text-rose-600'
     },
     cyan: {
-      bg: "bg-cyan-50",
-      hoverBg: "bg-cyan-100",
-      text: "text-cyan-600",
-    },
-  };
+      bg: 'bg-cyan-50',
+      hoverBg: 'bg-cyan-100',
+      text: 'text-cyan-600'
+    }
+  }
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -77,14 +67,14 @@ const PendingActions = ({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
         {actions.map((action) => {
-          const colors = colorClasses[action.color];
+          const colors = colorClasses[action.color]
 
           return (
             <div
               key={action.title}
               onClick={() => {
-                if (action.title === "Pending Submittals" && onActionClick) {
-                  onActionClick("PENDING_SUBMITTALS");
+                if (action.title === 'Pending Submittals' && onActionClick) {
+                  onActionClick('PENDING_SUBMITTALS')
                 }
               }}
               className="flex flex-row items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 cursor-pointer group"
@@ -96,12 +86,10 @@ const PendingActions = ({
               </div>
 
               <div className="flex flex-col">
-                <span className="font-semibold text-gray-700">
-                  {action.title}
-                </span>
+                <span className="font-semibold text-gray-700">{action.title}</span>
                 <span
                   className="text-2xl font-bold mt-1"
-                  style={{ color: colors.text.replace("text-", "#") }}
+                  style={{ color: colors.text.replace('text-', '#') }}
                 >
                   {action.count}
                 </span>
@@ -110,11 +98,11 @@ const PendingActions = ({
                 </span>
               </div>
             </div>
-          );
+          )
         })}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PendingActions;
+export default PendingActions

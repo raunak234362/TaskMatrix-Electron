@@ -1,11 +1,11 @@
-import EstimationLayout from "../layout/EstimationLayout";
+import EstimationLayout from '../layout/EstimationLayout'
 
 const EstimationPage = () => {
-    return (
-        <div>
-            <EstimationLayout/>
-        </div>
-    );
-};
+  return (
+    <div>
+      <EstimationLayout />
+    </div>
+  )
+}
 
-export default EstimationPage;
+export default EstimationPage

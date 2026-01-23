@@ -1,116 +1,116 @@
-import { Provider, useDispatch } from "react-redux";
-import store from "./store/store";
-import Layout from "./layout/DashboardLayout";
-import Service from "./api/Service";
-import { setUserData, showStaff } from "./store/userSlice";
-import { useEffect } from "react";
-import { ToastContainer, toast } from "react-toastify";
-import socket, { connectSocket } from "./socket";
-import { loadFabricator } from "./store/fabricatorSlice";
-import { setRFQData } from "./store/rfqSlice";
-import { setProjectData } from "./store/projectSlice";
+import { Provider, useDispatch } from 'react-redux'
+import store from './store/store'
+import Layout from './layout/DashboardLayout'
+import Service from './api/Service'
+import { setUserData, showStaff } from './store/userSlice'
+import { useEffect } from 'react'
+import { ToastContainer, toast } from 'react-toastify'
+import socket, { connectSocket } from './socket'
+import { loadFabricator } from './store/fabricatorSlice'
+import { setRFQData } from './store/rfqSlice'
+import { setProjectData } from './store/projectSlice'
 
 const AppContent = () => {
-  const dispatch = useDispatch();
-  const userType = sessionStorage.getItem("userRole");
+  const dispatch = useDispatch()
+  const userType = sessionStorage.getItem('userRole')
 
   // Electron IPC test handler
   const ipcHandle = () => {
     if (window?.electron?.ipcRenderer) {
-      window.electron.ipcRenderer.send("ping");
-      toast.info("📡 Sent IPC Ping to main process");
+      window.electron.ipcRenderer.send('ping')
+      toast.info('📡 Sent IPC Ping to main process')
     } else {
-      toast.warn("Electron IPC not available");
+      toast.warn('Electron IPC not available')
     }
-  };
+  }
 
   // Fetch current user
   const fetchSignedinUser = async () => {
     try {
-      const response = await Service.GetUserByToken();
-      const userDetail = response?.data?.user;
-      if (!userDetail?.id) throw new Error("Invalid user");
+      const response = await Service.GetUserByToken()
+      const userDetail = response?.data?.user
+      if (!userDetail?.id) throw new Error('Invalid user')
 
-      sessionStorage.setItem("userId", userDetail.id);
-      sessionStorage.setItem("username", userDetail.username);
-      dispatch(setUserData(userDetail));
+      sessionStorage.setItem('userId', userDetail.id)
+      sessionStorage.setItem('username', userDetail.username)
+      dispatch(setUserData(userDetail))
 
       // Connect socket after user is set
-      connectSocket(userDetail.id);
+      connectSocket(userDetail.id)
     } catch (err) {
-      console.error("User fetch failed:", err);
-      toast.error("Failed to load user");
+      console.error('User fetch failed:', err)
+      toast.error('Failed to load user')
     }
-  };
+  }
 
   useEffect(() => {
     // Fetch user once on mount
-    fetchSignedinUser();
+    fetchSignedinUser()
 
     // Request notification permission
-    if ("Notification" in window) {
-      Notification.requestPermission();
+    if ('Notification' in window) {
+      Notification.requestPermission()
     }
 
     const fetchAllEmployee = async () => {
       try {
-        const response = await Service.FetchAllEmployee();
-        const data = response?.data?.employees || [];
-        dispatch(showStaff(data));
+        const response = await Service.FetchAllEmployee()
+        const data = response?.data?.employees || []
+        dispatch(showStaff(data))
       } catch (err) {
-        console.error("Failed to fetch employees:", err);
-        toast.error("Failed to load employees");
+        console.error('Failed to fetch employees:', err)
+        toast.error('Failed to load employees')
       }
-    };
+    }
 
     const fetchAllFabricator = async () => {
       try {
-        const response = await Service.GetAllFabricators();
-        const data = response.data || [];
-        dispatch(loadFabricator(data));
+        const response = await Service.GetAllFabricators()
+        const data = response.data || []
+        dispatch(loadFabricator(data))
       } catch (err) {
-        console.error("Failed to fetch fabricators:", err);
-        toast.error("Failed to load fabricators");
+        console.error('Failed to fetch fabricators:', err)
+        toast.error('Failed to load fabricators')
       }
-    };
+    }
 
     const fetchInboxRFQ = async () => {
       try {
-        let rfqDetail;
-        if (userType === "CLIENT") {
-          rfqDetail = await Service.RfqSent();
+        let rfqDetail
+        if (userType === 'CLIENT') {
+          rfqDetail = await Service.RfqSent()
         } else {
-          rfqDetail = await Service.RFQRecieved();
+          rfqDetail = await Service.RFQRecieved()
         }
-        dispatch(setRFQData(rfqDetail.data));
+        dispatch(setRFQData(rfqDetail.data))
       } catch (error) {
-        console.error("Error fetching RFQ:", error);
+        console.error('Error fetching RFQ:', error)
       }
-    };
+    }
 
     const fetchAllProjects = async () => {
       try {
-        const response = await Service.GetAllProjects();
-        const data = response.data || [];
-        dispatch(setProjectData(data));
+        const response = await Service.GetAllProjects()
+        const data = response.data || []
+        dispatch(setProjectData(data))
       } catch (err) {
-        console.error("Failed to fetch projects:", err);
-        toast.error("Failed to load projects");
+        console.error('Failed to fetch projects:', err)
+        toast.error('Failed to load projects')
       }
-    };
+    }
 
-    fetchAllFabricator();
-    fetchAllEmployee();
-    fetchInboxRFQ();
-    fetchAllProjects();
+    fetchAllFabricator()
+    fetchAllEmployee()
+    fetchInboxRFQ()
+    fetchAllProjects()
 
     return () => {
       if (socket.connected) {
-        socket.disconnect();
-        console.log("🧹 Socket disconnected on unmount");
+        socket.disconnect()
+        console.log('🧹 Socket disconnected on unmount')
       }
-    };
-  }, [dispatch]);
+    }
+  }, [dispatch])
 
   return (
     <>
@@ -129,13 +129,13 @@ const AppContent = () => {
         </button>
       </div>
     </>
-  );
-};
+  )
+}
 
 const App = () => (
   <Provider store={store}>
     <AppContent />
   </Provider>
-);
+)
 
-export default App;
+export default App
