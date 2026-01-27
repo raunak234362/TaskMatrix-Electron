@@ -9,6 +9,13 @@ import log from 'electron-log'
 // Disable SSL certificate errors
 app.commandLine.appendSwitch('ignore-certificate-errors')
 
+// Disable hardware acceleration on all platforms for better compatibility
+app.disableHardwareAcceleration()
+
+// Additional flags for better Linux support
+app.commandLine.appendSwitch('no-sandbox')
+app.commandLine.appendSwitch('disable-dev-shm-usage')
+
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({

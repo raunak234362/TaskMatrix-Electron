@@ -32,6 +32,7 @@ const ChatMain = ({
   const [oldestId, setOldestId] = useState(null);
   const scrollRef = useRef(null);
   const bottomRef = useRef(null);
+  const isInitialLoad = useRef(true);
 
   const groupId = activeChat?.group?.id ?? null;
 
@@ -124,6 +125,7 @@ const ChatMain = ({
     setMessages([]);
     setOldestId(null);
     setHasMore(true);
+    isInitialLoad.current = true;
     fetchMessages();
   }, [groupId, fetchMessages]);
 
@@ -173,7 +175,16 @@ const ChatMain = ({
 
   // Scroll to bottom
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!bottomRef.current) return;
+    
+    // On initial load, scroll to bottom immediately without animation
+    if (isInitialLoad.current && messages.length > 0) {
+      bottomRef.current?.scrollIntoView({ behavior: "auto" });
+      isInitialLoad.current = false;
+    } else if (!isInitialLoad.current) {
+      // For new incoming messages, scroll smoothly
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
   // Infinite scroll
