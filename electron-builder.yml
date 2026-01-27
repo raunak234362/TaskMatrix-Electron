@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: com.electron.app.wbt
 productName: TaskMatrix - WBT
 directories:
   buildResources: build
