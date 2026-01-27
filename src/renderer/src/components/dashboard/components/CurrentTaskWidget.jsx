@@ -1,28 +1,8 @@
 /* eslint-disable react/prop-types */
 
-import { Play, Pause, Square, Clock, Calendar, ArrowRight } from 'lucide-react'
-import Service from '../../../api/Service'
-import { toast } from 'react-toastify'
+import { Clock, Calendar, ArrowRight } from 'lucide-react'
 
 const CurrentTaskWidget = ({ task, onTaskUpdate }) => {
-  const handleAction = async (action) => {
-    if (!task?.id) return
-    try {
-      if (action === 'start') {
-        await Service.StartEstimationTaskById(task.id)
-        toast.success('Task Started')
-      } else if (action === 'pause') {
-        // Pause requires a working hour ID, usually the last active one
-        // Logic might need to be passed down or handled here if we had the WH ID
-        // For simplicity, assuming the parent handles specific complex logic or we just show available states
-        // But here, we might need more data.
-        // Let's assume onTaskUpdate handles the actual API call or refresh.
-      }
-      onTaskUpdate?.()
-    } catch (error) {
-      console.error(error)
-    }
-  }
 
   if (!task) {
     return (
@@ -37,7 +17,7 @@ const CurrentTaskWidget = ({ task, onTaskUpdate }) => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+    <div className="bg-[#6bbd45] text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
       {/* Background Decorative Circles */}
       <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 bg-white opacity-5 rounded-full blur-3xl"></div>

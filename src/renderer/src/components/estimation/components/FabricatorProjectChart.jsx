@@ -1,5 +1,3 @@
-/* eslint-disable react/prop-types */
-import { useMemo } from 'react'
 import {
   BarChart,
   Bar,

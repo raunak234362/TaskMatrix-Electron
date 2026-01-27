@@ -8,7 +8,7 @@ import {
   XAxis,
   YAxis
 } from 'recharts'
-import { TrendingUp, Zap } from 'lucide-react'
+import { Zap } from 'lucide-react'
 
 const CustomTooltip = ({ active, payload, label }) => {
   const formatHours = (decimalHours) => {

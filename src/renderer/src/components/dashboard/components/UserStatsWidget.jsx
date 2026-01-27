@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { CheckCircle2, Briefcase, Clock, TrendingUp, CalendarCheck, Hourglass } from 'lucide-react'
+import { Briefcase, Clock, TrendingUp, CalendarCheck, Hourglass } from 'lucide-react'
 
 const StatCard = ({
   title,
@@ -70,8 +70,6 @@ const UserStatsWidget = ({ stats, loading }) => {
 
   const {
     totalTasks = 0,
-    completedTasks = 0,
-    pendingTasks = 0,
     allocatedHours = 0,
     workedHours = 0,
     projectsCount = 0,
@@ -86,7 +84,8 @@ const UserStatsWidget = ({ stats, loading }) => {
         value={projectsCount}
         subtext={`${totalTasks} Total Tasks`}
         icon={Briefcase}
-        colorClass="bg-gradient-to-br from-green-400 via-green-600 to-green-700"
+        // colorClass="bg-[#6bbd45]"
+        colorClass="bg-[#6bbd45]"
         trend="Active"
       />
 
@@ -96,7 +95,7 @@ const UserStatsWidget = ({ stats, loading }) => {
         value={formatHours(allocatedHours)}
         subtext="Total Estimated Time"
         icon={Hourglass}
-        colorClass="bg-gradient-to-br from-green-400 via-green-600 to-green-700"
+        colorClass="bg-[#6bbd45]"
         trend="Planned"
       />
 
@@ -106,7 +105,7 @@ const UserStatsWidget = ({ stats, loading }) => {
         value={formatHours(workedHours)}
         subtext={`${formatHours(Math.max(0, allocatedHours - workedHours))} Remaining`}
         icon={Clock}
-        colorClass="bg-gradient-to-br from-green-400 via-green-500 to-green-600"
+        colorClass="bg-[#6bbd45]"
         trend={workedHours > allocatedHours ? 'Overtime' : 'On Track'}
         trendColor={workedHours > allocatedHours ? 'bg-red-500/40' : 'bg-white/20'}
       />
@@ -118,7 +117,7 @@ const UserStatsWidget = ({ stats, loading }) => {
           value={`${efficiency}%`}
           subtext="Performance Score"
           icon={CalendarCheck}
-          colorClass="bg-gradient-to-br from-green-400 via-green-500 to-green-600"
+          colorClass="bg-[#6bbd45]"
           trend={efficiency >= 100 ? 'Optimal' : 'Improving'}
         />
       ) : (
@@ -127,7 +126,7 @@ const UserStatsWidget = ({ stats, loading }) => {
             <CalendarCheck className="w-6 h-6 text-gray-400 group-hover:text-indigo-500" />
           </div>
           <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-relaxed max-w-[150px]">
-            YOU'RE NOT ASSIGNED WITH ANY TASK TILL NOW
+            YOU&apos;RE NOT ASSIGNED WITH ANY TASK TILL NOW
           </p>
         </div>
       )}

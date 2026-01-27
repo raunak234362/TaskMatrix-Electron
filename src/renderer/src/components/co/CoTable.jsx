@@ -68,7 +68,7 @@ const CoTable = ({ coId }) => {
       await Service.addCOTable(formattedRows, coId)
       toast.success('Table saved successfully!')
       fetchTableRows()
-    } catch (err) {
+    } catch {
       toast.error('Failed to save table data')
     }
   }

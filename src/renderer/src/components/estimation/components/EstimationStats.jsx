@@ -1,5 +1,3 @@
-/* eslint-disable react/prop-types */
-import { useMemo } from 'react'
 import { CopyPlus, Trophy, Clock } from 'lucide-react'
 
 const EstimationStats = ({ stats }) => {

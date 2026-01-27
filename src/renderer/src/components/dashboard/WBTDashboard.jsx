@@ -2,15 +2,13 @@
 import { useEffect, useState, Suspense, lazy, useMemo } from 'react'
 import Service from '../../api/Service'
 import { useSelector } from 'react-redux'
-import { format, subMonths, isSameMonth, startOfMonth, endOfMonth } from 'date-fns'
+import { format } from 'date-fns'
 import {
-  Loader2,
   Calendar,
   LayoutDashboard,
   Clock,
   CheckCircle2,
-  Briefcase,
-  TrendingUp
+  Briefcase
 } from 'lucide-react'
 
 // Lazy load components
@@ -18,7 +16,7 @@ const UserStatsWidget = lazy(() => import('./components/UserStatsWidget'))
 const CurrentTaskWidget = lazy(() => import('./components/CurrentTaskWidget'))
 const UpcomingDeadlinesWidget = lazy(() => import('./components/UpcomingDeadlinesWidget'))
 const PersonalNotesWidget = lazy(() => import('./components/PersonalNotesWidget'))
-const EfficiencyChart = lazy(() => import('./components/EfficiencyChart'))
+// const EfficiencyLineChart = lazy(() => import('./components/EfficiencyLineChart'))
 const GetTaskByID = lazy(() => import('../task/GetTaskByID'))
 
 const DashboardSkeleton = () => (
@@ -48,7 +46,6 @@ const WBTDashboard = () => {
   const [tasks, setTasks] = useState([])
   const [projectNotes, setProjectNotes] = useState([])
   const [detailTaskId, setDetailTaskId] = useState(null)
-  const [efficiencyData, setEfficiencyData] = useState([])
 
   const [userStats, setUserStats] = useState({
     totalTasks: 0,
@@ -87,46 +84,6 @@ const WBTDashboard = () => {
     return { allocated, worked }
   }
 
-  const calculateEfficiencyTrend = (tasks) => {
-    const months = []
-    for (let i = 5; i >= 0; i--) {
-      months.push(subMonths(new Date(), i))
-    }
-
-    return months.map((date) => {
-      const monthTasks = tasks.filter((t) => {
-        const taskDate = new Date(t.due_date || t.endDate || t.createdAt)
-        return isSameMonth(taskDate, date)
-      })
-
-      let totalAllocated = 0
-      let totalWorked = 0
-
-      monthTasks.forEach((t) => {
-        const { allocated, worked } = calculateHours(t)
-        totalAllocated += allocated
-        totalWorked += worked
-      })
-
-      // Efficiency = (Allocated / Worked) * 100
-      // If worked is 0 but allocated > 0, efficiency is 0
-      // If both are 0, efficiency is 100 (neutral)
-      let efficiency = 0
-      if (totalWorked > 0) {
-        efficiency = Math.round((totalAllocated / totalWorked) * 100)
-      } else if (totalAllocated > 0) {
-        efficiency = 0
-      }
-
-      return {
-        month: format(date, 'MMM'),
-        efficiency: Math.min(efficiency, 150), // Cap at 150% for visualization
-        allocated: totalAllocated,
-        worked: totalWorked
-      }
-    })
-  }
-
   const fetchData = async () => {
     setLoading(true)
     try {
@@ -160,7 +117,7 @@ const WBTDashboard = () => {
           allocatedHours: totalAllocated,
           workedHours: totalWorked,
           projectsCount: projectIds.size,
-          efficiency: totalWorked > 0 ? Math.round((totalAllocated / totalWorked) * 100) : 100
+          efficiency: totalWorked > 0 ? Math.round((totalAllocated / totalWorked) * 100) : 0
         })
 
         // Fetch Notes for unique projects
@@ -169,8 +126,6 @@ const WBTDashboard = () => {
         const flattenedNotes = allNotesResponses.flat().filter(Boolean)
         setProjectNotes(flattenedNotes)
 
-        // Efficiency Trend
-        setEfficiencyData(calculateEfficiencyTrend(fetchedTasks))
       }
     } catch (error) {
       console.error('Failed to fetch dashboard data', error)
@@ -219,49 +174,38 @@ const WBTDashboard = () => {
         </div>
         <div className="flex flex-col gap-5">
           {/* Stats Overview */}
-          <UserStatsWidget stats={userStats} loading={loading} />
+          <div>
+
+            <UserStatsWidget stats={userStats} loading={loading} />
+          </div>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-            {/* Left Column */}
-            <div className="xl:col-span-2 space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Current Focus */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 px-1">
-                    <Clock className="w-5 h-5 text-indigo-500" />
-                    Current Focus
-                  </h2>
-                  <CurrentTaskWidget
-                    task={currentTask}
-                    onTaskUpdate={() => setDetailTaskId(currentTask?.id)}
-                  />
-                </div>
-
-                {/* Efficiency Chart */}
-                {/* <div className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 px-1">
-                  <TrendingUp className="w-5 h-5 text-emerald-500" />
-                  Efficiency Trends
-                </h2>
-                <EfficiencyChart data={efficiencyData} />
-              </div> */}
-                {/* Upcoming Tasks */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 px-1">
-                    <CheckCircle2 className="w-5 h-5 text-blue-500" />
-                    Upcoming Deadlines
-                  </h2>
-                  <UpcomingDeadlinesWidget
-                    tasks={tasks}
-                    onTaskClick={(id) => setDetailTaskId(id)}
-                  />
-                </div>
-              </div>
+          <div className="grid grid-cols-1 xl:grid-cols-3 my-5 z-50 gap-5">
+            {/* Left Column (Focus & Deadlines) */}
+            {/* Current Focus */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 px-1">
+                <Clock className="w-5 h-5 text-indigo-500" />
+                Current Focus
+              </h2>
+              <CurrentTaskWidget
+                task={currentTask}
+                onTaskUpdate={() => setDetailTaskId(currentTask?.id)}
+              />
             </div>
 
-            {/* Right Column - Notes */}
-            <div className="space-y-4 h-full">
+            {/* Upcoming Tasks */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 px-1">
+                <CheckCircle2 className="w-5 h-5 text-blue-500" />
+                Upcoming Deadlines
+              </h2>
+              <UpcomingDeadlinesWidget
+                tasks={tasks}
+                onTaskClick={(id) => setDetailTaskId(id)}
+              />
+            </div>
+            <div className="">
               <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 px-1">
                 <Briefcase className="w-5 h-5 text-pink-500" />
                 Notes & Updates
@@ -269,8 +213,11 @@ const WBTDashboard = () => {
               <PersonalNotesWidget projectNotes={projectNotes} />
             </div>
           </div>
-        </div>
 
+        </div>
+        {/* <div className="mt-8">
+          <EfficiencyLineChart tasks={tasks} />
+        </div> */}
         {/* Task Detail Modal */}
         {detailTaskId && (
           <GetTaskByID

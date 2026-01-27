@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
@@ -19,7 +19,7 @@ const EstimationStatusOptions = [
   { label: 'Approved', value: 'APPROVED' }
 ]
 
-const AddEstimation = ({ initialRfqId = null, onSuccess = () => {} }) => {
+const AddEstimation = ({ initialRfqId = null, onSuccess = () => { } }) => {
   const dispatch = useDispatch()
   const [files, setFiles] = useState([])
 

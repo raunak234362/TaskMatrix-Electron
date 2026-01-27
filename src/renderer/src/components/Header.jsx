@@ -1,7 +1,22 @@
 import { Menu, ChevronLeft, Bell } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
+import { navItems } from '../constants/navigation'
 import Button from './fields/Button'
 
 const Header = ({ isMinimized, toggleSidebar }) => {
+  const location = useLocation()
+
+  const getPageTitle = () => {
+    const currentPath = location.pathname
+    const activeItem = navItems.find((item) => {
+      if (item.to === '/dashboard') {
+        return currentPath === '/dashboard'
+      }
+      return currentPath.includes(item.to)
+    })
+    return activeItem ? activeItem.label : 'Whiteboard Technologies'
+  }
+
   return (
     <header className="sticky top-0 z-40 flex items-center justify-between w-full py-2 px-6 bg-white rounded-xl shadow-[0_4px_15px_rgb(0,0,0,0.03)] mb-2">
       {/* Left: Sidebar Toggle & Title */}
@@ -18,7 +33,7 @@ const Header = ({ isMinimized, toggleSidebar }) => {
         </Button>
         <div className="flex flex-col">
           <h1 className="text-xl font-black text-[#6bbd45] uppercase tracking-tight leading-none drop-shadow-sm">
-            Whiteboard Technologies
+            {getPageTitle()}
           </h1>
         </div>
       </div>

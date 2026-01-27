@@ -1,5 +1,4 @@
-/* eslint-disable react/prop-types */
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Loader2, AlertCircle } from 'lucide-react'
 import Service from '../../api/Service'
 import Button from '../fields/Button'
@@ -50,18 +49,18 @@ const GetEstimationByID = ({ id, onRefresh }) => {
   const formatDateTime = (date) =>
     date
       ? new Date(date).toLocaleString('en-IN', {
-          dateStyle: 'medium',
-          timeStyle: 'short'
-        })
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      })
       : 'N/A'
 
   const formatDate = (date) =>
     date
       ? new Date(date).toLocaleDateString('en-IN', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
-        })
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })
       : 'N/A'
 
   const formatHours = (hours) => {
