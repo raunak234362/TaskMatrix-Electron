@@ -117,7 +117,7 @@ const ProjectLayout = () => {
               </button>
             )}
 
-            {["connection_designer_engineer", "estimation_head"].includes(
+            {["connection_designer_engineer", "estimation_head", "project_manager_officer", "operation_executive", "project_manager", "deputy_manager", "admin"].includes(
               sessionStorage.getItem("userRole")?.toLowerCase() || "",
             ) && (
               <button
