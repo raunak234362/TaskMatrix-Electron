@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo } from 'react'
 import Service from '../../api/Service'
 import { Loader2, AlertCircle, ClipboardList, Calendar, User, Briefcase, Tag } from 'lucide-react'
 import DataTable from '../ui/table'
-import GetTaskByID from './GetTaskByID'
 import FetchTaskByID from './FetchTaskByID'
 
 const AllTasks = () => {
@@ -38,10 +37,10 @@ const AllTasks = () => {
   const formatDate = (date) =>
     date
       ? new Date(date).toLocaleDateString('en-IN', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric'
-        })
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      })
       : '—'
 
   const getStatusColor = (status) => {

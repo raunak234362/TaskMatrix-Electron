@@ -1,28 +1,28 @@
 /* eslint-disable react/prop-types */
-import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import Service from "../../../api/Service";
-import { toast } from "react-toastify";
-import { Loader2, Plus } from "lucide-react";
-import RichTextEditor from "../../fields/RichTextEditor";
+import { useState } from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import Service from '../../../api/Service'
+import { toast } from 'react-toastify'
+import { Loader2, Plus } from 'lucide-react'
+import RichTextEditor from '../../fields/RichTextEditor'
 
 const CreateLineItemGroup = ({ estimationId, onGroupCreated }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const {
-        register,
-        control,
-        handleSubmit,
-        reset,
-        formState: { errors },
-    } = useForm({
-        defaultValues: {
-            name: "",
-            description: "",
-            estimationId: estimationId || "",
-        },
-    });
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors }
+  } = useForm({
+    defaultValues: {
+      name: '',
+      description: '',
+      estimationId: estimationId || ''
+    }
+  })
 
   const onSubmit = async (data) => {
     setIsSubmitting(true)
@@ -69,9 +69,8 @@ const CreateLineItemGroup = ({ estimationId, onGroupCreated }) => {
               <input
                 type="text"
                 {...register('name', { required: 'Group name is required' })}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all ${errors.name ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="Enter group name"
               />
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}

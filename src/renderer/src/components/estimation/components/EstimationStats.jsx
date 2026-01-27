@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
-import React from "react";
-import { CopyPlus, Trophy, Clock } from "lucide-react";
+import { useMemo } from 'react'
+import { CopyPlus, Trophy, Clock } from 'lucide-react'
 
 const EstimationStats = ({ stats }) => {
   const cards = [
@@ -62,20 +62,16 @@ const EstimationStats = ({ stats }) => {
                 <card.icon size={24} />
               </div>
 
-                            <div className="flex flex-col">
-                                <span className="text-sm font-medium text-gray-600">
-                                    {card.label}
-                                </span>
-                                <span className={`text-2xl font-bold mt-1 ${colors.text}`}>
-                                    {card.value}
-                                </span>
-                            </div>
-                        </div>
-                    );
-                })}
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-600">{card.label}</span>
+                <span className={`text-2xl font-bold mt-1 ${colors.text}`}>{card.value}</span>
+              </div>
             </div>
-        </div>
-    );
-};
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 export default EstimationStats

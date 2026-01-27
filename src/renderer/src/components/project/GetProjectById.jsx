@@ -22,7 +22,6 @@ import AllNotes from './notes/AllNotes'
 import EditProject from './EditProject'
 import RenderFiles from '../ui/RenderFiles'
 import AllCO from '../co/AllCO'
-import CoTable from '../co/CoTable'
 
 const GetProjectById = ({ id }) => {
   const [project, setProject] = useState(null)
@@ -31,8 +30,6 @@ const GetProjectById = ({ id }) => {
   const [activeTab, setActiveTab] = useState('details')
   const [editModel, setEditModel] = useState(null)
   const [changeOrderView, setChangeOrderView] = useState('list')
-  const [selectedCoId, setSelectedCoId] = useState(null)
-  const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
   const rfiData = useMemo(() => {
     return project?.rfi || []
   }, [project])
@@ -93,21 +90,13 @@ const GetProjectById = ({ id }) => {
     }
   }, [id])
 
-  const handleCoSuccess = (createdCO) => {
-    const coId = createdCO?.id || createdCO?._id
-    if (coId) {
-      setSelectedCoId(coId)
-      setChangeOrderView('table')
-      fetchProject() // Refresh project to get updated CO list
-    }
-  }
 
   const formatDate = (date) =>
     date
       ? new Date(date).toLocaleString('en-IN', {
-          dateStyle: 'medium',
-          timeStyle: 'short'
-        })
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      })
       : '—'
 
   if (loading)
@@ -137,11 +126,10 @@ const GetProjectById = ({ id }) => {
           </div>
           <div className="flex items-center gap-2">
             <span
-              className={`px-3 py-1 rounded-full text-xs font-medium ${
-                project.status === 'ACTIVE'
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-red-100 text-red-700'
-              }`}
+              className={`px-3 py-1 rounded-full text-xs font-medium ${project.status === 'ACTIVE'
+                ? 'bg-green-100 text-green-800'
+                : 'bg-red-100 text-red-700'
+                }`}
             >
               {project.status}
             </span>
@@ -201,11 +189,10 @@ const GetProjectById = ({ id }) => {
               <button
                 key={key}
                 onClick={() => setActiveTab(key)}
-                className={`flex items-center gap-2 bg-primary text-gray-800 px-4 py-2 text-sm rounded-md font-medium transition-colors whitespace-nowrap ${
-                  activeTab === key
-                    ? 'bg-green-600 text-white font-bold'
-                    : 'text-gray-700 hover:text-green-700 font-semibold hover:bg-gray-50'
-                }`}
+                className={`flex items-center gap-2 bg-primary text-gray-800 px-4 py-2 text-sm rounded-md font-medium transition-colors whitespace-nowrap ${activeTab === key
+                  ? 'bg-green-600 text-white font-bold'
+                  : 'text-gray-700 hover:text-green-700 font-semibold hover:bg-gray-50'
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 {label}
@@ -359,7 +346,7 @@ const GetProjectById = ({ id }) => {
                       &larr; Back to List
                     </button>
                   </div>
-                  {selectedCoId && <CoTable coId={selectedCoId} />}
+                  {/* {selectedCoId && <CoTable coId={selectedCoId} />} */}
                 </div>
               )}
             </div>
@@ -391,11 +378,10 @@ const InfoRow = ({ label, value }) => (
 // ✅ ScopeTag Component
 const ScopeTag = ({ label, active }) => (
   <span
-    className={`px-3 py-1 text-xs font-medium rounded-full ${
-      active
-        ? 'bg-green-100 text-green-800 border border-green-300'
-        : 'bg-gray-100 text-gray-700 border border-gray-200'
-    }`}
+    className={`px-3 py-1 text-xs font-medium rounded-full ${active
+      ? 'bg-green-100 text-green-800 border border-green-300'
+      : 'bg-gray-100 text-gray-700 border border-gray-200'
+      }`}
   >
     {label}
   </span>

@@ -51,7 +51,7 @@ const RichTextEditor = ({ value, onChange, placeholder, className = '' }) => {
         value={value}
         config={config}
         onBlur={(newContent) => onChange(newContent)}
-        onChange={() => { }}
+        onChange={() => {}}
       />
     </div>
   )

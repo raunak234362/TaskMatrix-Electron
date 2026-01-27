@@ -39,4 +39,4 @@ appImage:
 npmRebuild: false
 publish:
   provider: generic
-   url: https://project-station.whiteboardtec.com:5160/auto-updates/
+  url: https://project-station.whiteboardtec.com:5160/auto-updates/

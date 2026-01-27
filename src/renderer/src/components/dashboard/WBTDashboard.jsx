@@ -3,7 +3,15 @@ import { useEffect, useState, Suspense, lazy, useMemo } from 'react'
 import Service from '../../api/Service'
 import { useSelector } from 'react-redux'
 import { format, subMonths, isSameMonth, startOfMonth, endOfMonth } from 'date-fns'
-import { Loader2, Calendar, LayoutDashboard, Clock, CheckCircle2, Briefcase, TrendingUp } from 'lucide-react'
+import {
+  Loader2,
+  Calendar,
+  LayoutDashboard,
+  Clock,
+  CheckCircle2,
+  Briefcase,
+  TrendingUp
+} from 'lucide-react'
 
 // Lazy load components
 const UserStatsWidget = lazy(() => import('./components/UserStatsWidget'))
@@ -71,10 +79,11 @@ const WBTDashboard = () => {
 
   const calculateHours = (task) => {
     const allocated = parseDurationToHours(task.duration)
-    const worked = (task.workingHourTask || []).reduce(
-      (acc, wh) => acc + (Number(wh.duration_seconds) || 0),
-      0
-    ) / 3600
+    const worked =
+      (task.workingHourTask || []).reduce(
+        (acc, wh) => acc + (Number(wh.duration_seconds) || 0),
+        0
+      ) / 3600
     return { allocated, worked }
   }
 
@@ -205,13 +214,10 @@ const WBTDashboard = () => {
 
           <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-slate-200">
             <Calendar className="w-5 h-5 text-indigo-500" />
-            <span className="text-slate-700 font-bold">
-              {format(new Date(), 'EEEE, MMMM do')}
-            </span>
+            <span className="text-slate-700 font-bold">{format(new Date(), 'EEEE, MMMM do')}</span>
           </div>
         </div>
-        <div className='flex flex-col gap-5'>
-
+        <div className="flex flex-col gap-5">
           {/* Stats Overview */}
           <UserStatsWidget stats={userStats} loading={loading} />
 
@@ -246,10 +252,12 @@ const WBTDashboard = () => {
                     <CheckCircle2 className="w-5 h-5 text-blue-500" />
                     Upcoming Deadlines
                   </h2>
-                  <UpcomingDeadlinesWidget tasks={tasks} onTaskClick={(id) => setDetailTaskId(id)} />
+                  <UpcomingDeadlinesWidget
+                    tasks={tasks}
+                    onTaskClick={(id) => setDetailTaskId(id)}
+                  />
                 </div>
               </div>
-
             </div>
 
             {/* Right Column - Notes */}

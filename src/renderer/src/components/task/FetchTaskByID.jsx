@@ -244,9 +244,7 @@ const FetchTaskByID = ({ id, onClose }) => {
                   <FileText className="w-5 h-5 text-[#6bbd45]" />
                   Description
                 </h4>
-                <p className="text-black whitespace-pre-wrap leading-relaxed">
-                  {task.description}
-                </p>
+                <p className="text-black whitespace-pre-wrap leading-relaxed">{task.description}</p>
               </div>
             )}
           </div>

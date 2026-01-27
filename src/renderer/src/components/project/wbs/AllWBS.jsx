@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-
 import { Loader2, AlertCircle } from 'lucide-react'
 import DataTable from '../../ui/table'
 import Service from '../../../api/Service'
@@ -16,6 +15,7 @@ const AllWBS = ({ id, stage }) => {
   const [loading, setLoading] = useState(false)
   const [selectedWBS, setSelectedWBS] = useState(null)
   const [showFetchTemplate, setShowFetchTemplate] = useState(false)
+  const [error, setError] = useState(null)
   const projectId = id
 
   // ✅ Fetch all WBS items

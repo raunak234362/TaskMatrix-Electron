@@ -2,7 +2,7 @@
 
 import { useId, useState, forwardRef } from 'react'
 
-const Toggle = forwardRef(({ label, className = '', name, onChange, ...props }, ref) => {
+const Toggle = forwardRef(({ label, name, onChange, ...props }, ref) => {
   const id = useId()
   const [checked, setChecked] = useState(false)
 
@@ -18,9 +18,8 @@ const Toggle = forwardRef(({ label, className = '', name, onChange, ...props }, 
       {label && (
         <label
           htmlFor={id}
-          className={`block mb-1 w-fit min-w-28 font-normal text-sm text-gray-700 ${
-            checked ? 'font-semibold' : ''
-          }`}
+          className={`block mb-1 w-fit min-w-28 font-normal text-sm text-gray-700 ${checked ? 'font-semibold' : ''
+            }`}
         >
           {label}
         </label>
@@ -35,4 +34,5 @@ const Toggle = forwardRef(({ label, className = '', name, onChange, ...props }, 
   )
 })
 
+Toggle.displayName = 'Toggle'
 export default Toggle

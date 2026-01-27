@@ -1,7 +1,15 @@
 /* eslint-disable react/prop-types */
 import { CheckCircle2, Briefcase, Clock, TrendingUp, CalendarCheck, Hourglass } from 'lucide-react'
 
-const StatCard = ({ title, value, subtext, icon: Icon, colorClass, trend, trendColor = 'bg-white/20' }) => (
+const StatCard = ({
+  title,
+  value,
+  subtext,
+  icon: Icon,
+  colorClass,
+  trend,
+  trendColor = 'bg-white/20'
+}) => (
   <div
     className={`p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500 group relative overflow-hidden ${colorClass} text-white`}
   >
@@ -15,7 +23,9 @@ const StatCard = ({ title, value, subtext, icon: Icon, colorClass, trend, trendC
           <Icon className="w-6 h-6 text-white" />
         </div>
         {trend && (
-          <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${trendColor} text-white backdrop-blur-md flex items-center gap-1 border border-white/20 uppercase tracking-wider`}>
+          <span
+            className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${trendColor} text-white backdrop-blur-md flex items-center gap-1 border border-white/20 uppercase tracking-wider`}
+          >
             <TrendingUp size={12} />
             {trend}
           </span>
@@ -24,7 +34,9 @@ const StatCard = ({ title, value, subtext, icon: Icon, colorClass, trend, trendC
 
       <div>
         <p className="text-xs font-bold text-white/70 uppercase tracking-widest">{title}</p>
-        <h3 className="text-4xl font-black text-white mt-2 tracking-tight group-hover:translate-x-1 transition-transform duration-500">{value}</h3>
+        <h3 className="text-4xl font-black text-white mt-2 tracking-tight group-hover:translate-x-1 transition-transform duration-500">
+          {value}
+        </h3>
         {subtext && (
           <div className="mt-4 pt-4 border-t border-white/10">
             <p className="text-[11px] text-white/80 font-semibold flex items-center gap-1.5">

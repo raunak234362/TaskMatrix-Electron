@@ -1,55 +1,54 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
+'use client'
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  flexRender,
-} from "@tanstack/react-table";
-import { Search, ChevronDown, ChevronUp, X } from "lucide-react";
-import { Button } from "./button";
-import Select from "../fields/Select";
+  flexRender
+} from '@tanstack/react-table'
+import { Search, ChevronDown, ChevronUp, X } from 'lucide-react'
+import { Button } from './button'
+import Select from '../fields/Select'
 
 /* -------------------- screen hook -------------------- */
 function useScreen() {
-  const [width, setWidth] = useState(0);
+  const [width, setWidth] = useState(0)
 
   useEffect(() => {
-    const handler = () => setWidth(window.innerWidth);
-    handler();
-    window.addEventListener("resize", handler);
-    return () => window.removeEventListener("resize", handler);
-  }, []);
+    const handler = () => setWidth(window.innerWidth)
+    handler()
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
 
   return {
     isMobile: width < 640,
     isTablet: width >= 640 && width < 1024,
-    isDesktop: width >= 1024,
-  };
+    isDesktop: width >= 1024
+  }
 }
 
 /* -------------------- filters -------------------- */
 function TextFilter({ column }) {
   return (
     <input
-      value={column.getFilterValue() ?? ""}
+      value={column.getFilterValue() ?? ''}
       onChange={(e) => column.setFilterValue(e.target.value || undefined)}
       className="w-full mt-1 border px-2 py-1 rounded text-xs focus:ring-1 focus:ring-blue-500 outline-none"
       placeholder="Filter..."
     />
-  );
+  )
 }
 
 /* -------------------- column filter -------------------- */
 function ColumnFilter({ column }) {
-  const columnDef = column.columnDef;
-  const { filterType, filterOptions, header } = columnDef;
+  const columnDef = column.columnDef
+  const { filterType, filterOptions, header } = columnDef
 
-  if (filterType === "select") {
+  if (filterType === 'select') {
     return (
       <Select
         options={filterOptions}
@@ -58,30 +57,30 @@ function ColumnFilter({ column }) {
         placeholder={`All ${header}`}
         className="py-1! text-xs!"
       />
-    );
+    )
   }
 
   return (
     <div className="relative">
       <Search className="absolute left-2 top-1.5 w-3.5 h-3.5 text-gray-400" />
       <input
-        value={column.getFilterValue() ?? ""}
+        value={column.getFilterValue() ?? ''}
         onChange={(e) => column.setFilterValue(e.target.value || undefined)}
         className="pl-8 pr-2 py-1.5 w-full border rounded-md text-xs focus:ring-1 focus:ring-blue-500 outline-none transition-all"
         placeholder={`Search ${header}...`}
       />
     </div>
-  );
+  )
 }
 
 /* -------------------- mobile card view -------------------- */
 function MobileCardView({ table, DetailComponent, onRowClick }) {
-  const [open, setOpen] = useState(null);
+  const [open, setOpen] = useState(null)
 
   return (
     <div className="space-y-3">
       {table.getPaginationRowModel().rows.map((row) => {
-        const isOpen = open === row.id;
+        const isOpen = open === row.id
         return (
           <div
             key={row.id}
@@ -90,9 +89,7 @@ function MobileCardView({ table, DetailComponent, onRowClick }) {
           >
             {row.getVisibleCells().map((cell) => (
               <div key={cell.id} className="flex justify-between py-1 text-sm">
-                <span className="text-gray-500">
-                  {cell.column.columnDef.header}
-                </span>
+                <span className="text-gray-500">{cell.column.columnDef.header}</span>
                 <span className="font-medium text-gray-800">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </span>
@@ -103,32 +100,26 @@ function MobileCardView({ table, DetailComponent, onRowClick }) {
               <>
                 <button
                   onClick={(e) => {
-                    e.stopPropagation();
-                    setOpen(isOpen ? null : row.id);
+                    e.stopPropagation()
+                    setOpen(isOpen ? null : row.id)
                   }}
                   className="mt-2 text-green-600 text-sm"
                 >
-                  {isOpen ? "Hide details" : "View details"}
+                  {isOpen ? 'Hide details' : 'View details'}
                 </button>
 
                 {isOpen && (
-                  <div
-                    className="mt-2 bg-gray-50 p-2 rounded"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <DetailComponent
-                      row={row.original}
-                      close={() => setOpen(null)}
-                    />
+                  <div className="mt-2 bg-gray-50 p-2 rounded" onClick={(e) => e.stopPropagation()}>
+                    <DetailComponent row={row.original} close={() => setOpen(null)} />
                   </div>
                 )}
               </>
             )}
           </div>
-        );
+        )
       })}
     </div>
-  );
+  )
 }
 
 /* -------------------- main table -------------------- */
@@ -137,35 +128,32 @@ export default function DataTable({
   data,
   onRowClick,
   detailComponent: DetailComponent,
-  searchPlaceholder = "Search...",
   pageSizeOptions = [5, 10, 25, 50],
   showColumnFiltersInHeader = false,
   initialSorting = [],
-  canExpand = () => true,
+  canExpand = () => true
 }) {
-  const { isMobile } = useScreen();
+  const { isMobile } = useScreen()
 
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState(initialSorting);
-  const [columnFilters, setColumnFilters] = useState([]);
-  const [expandedRowId, setExpandedRowId] = useState(null);
+  const [globalFilter, setGlobalFilter] = useState('')
+  const [sorting, setSorting] = useState(initialSorting)
+  const [columnFilters, setColumnFilters] = useState([])
+  const [expandedRowId, setExpandedRowId] = useState(null)
 
   const columns = useMemo(() => {
     const sNoCol = {
-      id: "sNo",
-      header: "S.No",
+      id: 'sNo',
+      header: 'S.No',
       cell: ({ row, table }) => {
-        const { pageIndex, pageSize } = table.getState().pagination;
-        const index = table
-          .getPaginationRowModel()
-          .rows.findIndex((r) => r.id === row.id);
-        return <span>{pageIndex * pageSize + index + 1}</span>;
+        const { pageIndex, pageSize } = table.getState().pagination
+        const index = table.getPaginationRowModel().rows.findIndex((r) => r.id === row.id)
+        return <span>{pageIndex * pageSize + index + 1}</span>
       },
       enableSorting: false,
-      enableColumnFilter: false,
-    };
-    return [sNoCol, ...userColumns];
-  }, [userColumns]);
+      enableColumnFilter: false
+    }
+    return [sNoCol, ...userColumns]
+  }, [userColumns])
 
   const table = useReactTable({
     data,
@@ -173,12 +161,12 @@ export default function DataTable({
     state: {
       globalFilter,
       sorting,
-      columnFilters,
+      columnFilters
     },
     initialState: {
       pagination: {
-        pageSize: pageSizeOptions[0] || 10,
-      },
+        pageSize: pageSizeOptions[0] || 10
+      }
     },
     onGlobalFilterChange: setGlobalFilter,
     onSortingChange: setSorting,
@@ -186,8 +174,8 @@ export default function DataTable({
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-  });
+    getPaginationRowModel: getPaginationRowModel()
+  })
 
   return (
     <>
@@ -211,10 +199,7 @@ export default function DataTable({
             .getAllColumns()
             .filter((c) => c.columnDef.enableColumnFilter)
             .map((column) => (
-              <div
-                key={column.id}
-                className="flex flex-col gap-1.5 min-w-[180px]"
-              >
+              <div key={column.id} className="flex flex-col gap-1.5 min-w-[180px]">
                 <label className="text-[10px] font-bold text-black uppercase tracking-widest ml-1">
                   {column.columnDef.header}
                 </label>
@@ -232,11 +217,7 @@ export default function DataTable({
 
       {/* responsive body */}
       {isMobile ? (
-        <MobileCardView
-          table={table}
-          DetailComponent={DetailComponent}
-          onRowClick={onRowClick}
-        />
+        <MobileCardView table={table} DetailComponent={DetailComponent} onRowClick={onRowClick} />
       ) : (
         <div className="w-full border border-gray-100 rounded-lg overflow-hidden">
           <div className="max-h-[600px] overflow-y-auto overflow-x-auto">
@@ -251,22 +232,18 @@ export default function DataTable({
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         <div className="flex items-center gap-1 cursor-pointer">
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                          {header.column.getIsSorted() === "asc" && (
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {header.column.getIsSorted() === 'asc' && (
                             <ChevronUp className="w-4 h-4" />
                           )}
-                          {header.column.getIsSorted() === "desc" && (
+                          {header.column.getIsSorted() === 'desc' && (
                             <ChevronDown className="w-4 h-4" />
                           )}
                         </div>
 
-                        {showColumnFiltersInHeader &&
-                          header.column.getCanFilter() && (
-                            <TextFilter column={header.column} />
-                          )}
+                        {showColumnFiltersInHeader && header.column.getCanFilter() && (
+                          <TextFilter column={header.column} />
+                        )}
                       </th>
                     ))}
                   </tr>
@@ -277,23 +254,18 @@ export default function DataTable({
                 {table.getPaginationRowModel().rows.map((row) => (
                   <React.Fragment key={row.id}>
                     <tr
-                      className={`hover:bg-gray-50 cursor-pointer transition-colors ${expandedRowId === row.id ? "bg-gray-50" : ""
+                      className={`hover:bg-gray-50 cursor-pointer transition-colors ${expandedRowId === row.id ? 'bg-gray-50' : ''
                         }`}
                       onClick={() => {
-                        onRowClick?.(row.original);
+                        onRowClick?.(row.original)
                         if (DetailComponent && canExpand(row.original)) {
-                          setExpandedRowId(
-                            expandedRowId === row.id ? null : row.id,
-                          );
+                          setExpandedRowId(expandedRowId === row.id ? null : row.id)
                         }
                       }}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <td key={cell.id} className="px-4 py-3 text-sm text-black">
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </td>
                       ))}
                     </tr>
@@ -321,8 +293,7 @@ export default function DataTable({
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm p-4 border-t border-gray-50">
         <div className="flex items-center gap-4">
           <span className="text-black">
-            Page {table.getState().pagination.pageIndex + 1} of{" "}
-            {table.getPageCount()}
+            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
           </span>
           <div className="flex items-center gap-2 min-w-[120px]">
             <span className="text-black">Rows per page:</span>
@@ -331,7 +302,7 @@ export default function DataTable({
                 showSearch={false}
                 options={pageSizeOptions.map((size) => ({
                   value: size,
-                  label: String(size),
+                  label: String(size)
                 }))}
                 value={String(table.getState().pagination.pageSize)}
                 onChange={(_, val) => table.setPageSize(Number(val))}
@@ -346,17 +317,17 @@ export default function DataTable({
             onClick={() => table.previousPage()}
             className="px-3 py-1 border rounded disabled:opacity-50"
           >
-            {"<"}
+            {'<'}
           </Button>
           <Button
             disabled={!table.getCanNextPage()}
             onClick={() => table.nextPage()}
             className="px-3 py-1 border rounded disabled:opacity-50"
           >
-            {">"}
+            {'>'}
           </Button>
         </div>
       </div>
     </>
-  );
+  )
 }

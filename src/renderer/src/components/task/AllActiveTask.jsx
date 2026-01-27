@@ -36,10 +36,10 @@ const AllActiveTask = () => {
   const formatDate = (date) =>
     date
       ? new Date(date).toLocaleDateString('en-IN', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      })
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        })
       : '—'
 
   const getStatusColor = (status) => {
@@ -277,7 +277,9 @@ const AllActiveTask = () => {
             columns={columns}
             data={sortedTasks}
             detailComponent={({ row, close }) => <GetTaskByID id={row.id} onClose={close} />}
-            canExpand={(row) => row.status?.toUpperCase() === 'IN_REVIEW' || row.id === unlockableTaskId}
+            canExpand={(row) =>
+              row.status?.toUpperCase() === 'IN_REVIEW' || row.id === unlockableTaskId
+            }
             searchPlaceholder="Search active tasks..."
             pageSizeOptions={[10, 25, 50]}
           />
