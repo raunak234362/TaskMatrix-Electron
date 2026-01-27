@@ -79,9 +79,6 @@ const AllEstimationTask = ({
         <>
             {/* Header with Close button (used when opened from Estimation details) */}
             <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold text-gray-700">
-                    Estimation Tasks
-                </h2>
                 <div className="flex gap-2">
                     {estimationId && (
                         <button

@@ -49,7 +49,7 @@ const WBTDashboard = () => {
     allocatedHours: 0,
     workedHours: 0,
     projectsCount: 0,
-    efficiency: 100
+    efficiency: 0
   })
 
   const parseDurationToHours = (duration) => {
@@ -102,7 +102,7 @@ const WBTDashboard = () => {
       // Efficiency = (Allocated / Worked) * 100
       // If worked is 0 but allocated > 0, efficiency is 0
       // If both are 0, efficiency is 100 (neutral)
-      let efficiency = 100
+      let efficiency = 0
       if (totalWorked > 0) {
         efficiency = Math.round((totalAllocated / totalWorked) * 100)
       } else if (totalAllocated > 0) {

@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: taskmatrix
+productName: TaskMatrix - WBT
 directories:
   buildResources: build
 files:
@@ -11,7 +11,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: taskmatrix
+  executableName: taskmatrix-wbt
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -39,4 +39,4 @@ appImage:
 npmRebuild: false
 publish:
   provider: generic
-  url: https://example.com/auto-updates
+   url: https://project-station.whiteboardtec.com:5160/auto-updates/

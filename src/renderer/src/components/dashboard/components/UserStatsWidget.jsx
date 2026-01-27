@@ -16,7 +16,7 @@ const StatCard = ({ title, value, subtext, icon: Icon, colorClass, trend, trendC
         </div>
         {trend && (
           <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${trendColor} text-white backdrop-blur-md flex items-center gap-1 border border-white/20 uppercase tracking-wider`}>
-            <TrendingUp size={10} />
+            <TrendingUp size={12} />
             {trend}
           </span>
         )}
@@ -74,7 +74,7 @@ const UserStatsWidget = ({ stats, loading }) => {
         value={projectsCount}
         subtext={`${totalTasks} Total Tasks`}
         icon={Briefcase}
-        colorClass="bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-700"
+        colorClass="bg-gradient-to-br from-green-400 via-green-600 to-green-700"
         trend="Active"
       />
 
@@ -84,7 +84,7 @@ const UserStatsWidget = ({ stats, loading }) => {
         value={formatHours(allocatedHours)}
         subtext="Total Estimated Time"
         icon={Hourglass}
-        colorClass="bg-gradient-to-br from-violet-500 via-purple-600 to-fuchsia-700"
+        colorClass="bg-gradient-to-br from-green-400 via-green-600 to-green-700"
         trend="Planned"
       />
 
@@ -94,20 +94,31 @@ const UserStatsWidget = ({ stats, loading }) => {
         value={formatHours(workedHours)}
         subtext={`${formatHours(Math.max(0, allocatedHours - workedHours))} Remaining`}
         icon={Clock}
-        colorClass="bg-gradient-to-br from-amber-400 via-orange-500 to-rose-600"
+        colorClass="bg-gradient-to-br from-green-400 via-green-500 to-green-600"
         trend={workedHours > allocatedHours ? 'Overtime' : 'On Track'}
         trendColor={workedHours > allocatedHours ? 'bg-red-500/40' : 'bg-white/20'}
       />
 
       {/* Efficiency */}
-      <StatCard
-        title="Efficiency"
-        value={`${efficiency}%`}
-        subtext="Performance Score"
-        icon={CalendarCheck}
-        colorClass="bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600"
-        trend={efficiency >= 100 ? 'Optimal' : 'Improving'}
-      />
+      {totalTasks > 0 ? (
+        <StatCard
+          title="Efficiency"
+          value={`${efficiency}%`}
+          subtext="Performance Score"
+          icon={CalendarCheck}
+          colorClass="bg-gradient-to-br from-green-400 via-green-500 to-green-600"
+          trend={efficiency >= 100 ? 'Optimal' : 'Improving'}
+        />
+      ) : (
+        <div className="p-6 rounded-3xl shadow-sm border border-dashed border-gray-300 bg-gray-50/50 flex flex-col items-center justify-center text-center gap-3 group hover:border-indigo-300 transition-colors duration-500">
+          <div className="p-3 bg-gray-100 rounded-2xl group-hover:bg-indigo-50 transition-colors">
+            <CalendarCheck className="w-6 h-6 text-gray-400 group-hover:text-indigo-500" />
+          </div>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-relaxed max-w-[150px]">
+            YOU'RE NOT ASSIGNED WITH ANY TASK TILL NOW
+          </p>
+        </div>
+      )}
     </div>
   )
 }
