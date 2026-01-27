@@ -1,77 +1,81 @@
-import { useEffect, useState } from 'react'
-import Service from '../../../api/Service'
-import { Check, Loader2, Search } from 'lucide-react'
-import { Button } from '../../ui/button'
+import { useEffect, useState } from "react";
+import Service from "../../../api/Service";
+import { Check, Loader2, Search } from "lucide-react";
+import { Button } from "../../ui/button";
+
+
 
 const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
-  const [templates, setTemplates] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [selectedIds, setSelectedIds] = useState(new Set())
-  const [searchQuery, setSearchQuery] = useState('')
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchWbsTemplate = async () => {
       try {
-        setLoading(true)
-        const response = await Service.GetWBSTemplate()
+        setLoading(true);
+        const response = await Service.GetWBSTemplate();
         // Assuming response.data contains the array based on user's provided JSON structure
-        setTemplates(response.data || [])
+        setTemplates(response.data || []);
       } catch (error) {
-        console.error('Error fetching WBS templates:', error)
+        console.error("Error fetching WBS templates:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchWbsTemplate()
-  }, [])
+    };
+    fetchWbsTemplate();
+  }, []);
 
   const toggleSelection = (id) => {
-    const newSelectedIds = new Set(selectedIds)
+    const newSelectedIds = new Set(selectedIds);
     if (newSelectedIds.has(id)) {
-      newSelectedIds.delete(id)
+      newSelectedIds.delete(id);
     } else {
-      newSelectedIds.add(id)
+      newSelectedIds.add(id);
     }
-    setSelectedIds(newSelectedIds)
-  }
+    setSelectedIds(newSelectedIds);
+  };
 
   const handleSelectAll = () => {
     if (selectedIds.size === filteredTemplates.length) {
-      setSelectedIds(new Set())
+      setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(filteredTemplates.map((t) => t.id)))
+      setSelectedIds(new Set(filteredTemplates.map((t) => t.id)));
     }
-  }
+  };
 
   const handleSubmit = async () => {
     if (!id) {
-      console.error('Project ID is missing')
-      return
+      console.error("Project ID is missing");
+      return;
     }
-    const selectedTemplates = templates.filter((t) => selectedIds.has(t.id))
-    const bundleKeys = selectedTemplates.map((t) => t.bundleKey)
+    const selectedTemplates = templates.filter((t) => selectedIds.has(t.id));
+    const bundleKeys = selectedTemplates.map((t) => t.bundleKey);
 
     if (onSelect) {
-      onSelect(bundleKeys.join(','))
+      onSelect(bundleKeys.join(","));
     }
-    const response = await Service.AddWBSFromTemplate(id, { bundleKeys })
-    console.log('Selected Bundle Keys:', bundleKeys)
-    console.log('Response:', response)
-  }
+    const response = await Service.AddWBSFromTemplate(id, { bundleKeys });
+    console.log("Selected Bundle Keys:", bundleKeys);
+    console.log("Response:", response);
+  };
 
   const filteredTemplates = templates.filter(
     (template) =>
       template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.category.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  );
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-12 space-y-4">
         <Loader2 className="w-8 h-8 text-green-600 animate-spin" />
-        <p className="text-gray-700 font-medium animate-pulse">Fetching WBS Templates...</p>
+        <p className="text-gray-700 font-medium animate-pulse">
+          Fetching WBS Templates...
+        </p>
       </div>
-    )
+    );
   }
 
   return (
@@ -94,7 +98,9 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
             onClick={handleSelectAll}
             className="text-sm font-semibold text-green-600 hover:text-green-700 transition-colors px-4 py-2 hover:bg-green-50"
           >
-            {selectedIds.size === filteredTemplates.length ? 'Deselect All' : 'Select All'}
+            {selectedIds.size === filteredTemplates.length
+              ? "Deselect All"
+              : "Select All"}
           </Button>
         </div>
 
@@ -105,27 +111,28 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
               <div
                 key={template.id}
                 onClick={() => toggleSelection(template.id)}
-                className={`group relative flex items-center p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
-                  selectedIds.has(template.id)
-                    ? 'border-green-500 bg-green-50/50 shadow-sm'
-                    : 'border-gray-100 hover:border-green-200 hover:bg-gray-50'
-                }`}
+                className={`group relative flex items-center p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${selectedIds.has(template.id)
+                    ? "border-green-500 bg-green-50/50 shadow-sm"
+                    : "border-gray-100 hover:border-green-200 hover:bg-gray-50"
+                  }`}
               >
                 <div
-                  className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
-                    selectedIds.has(template.id)
-                      ? 'bg-green-500 border-green-500'
-                      : 'border-gray-300 group-hover:border-green-400'
-                  }`}
+                  className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${selectedIds.has(template.id)
+                      ? "bg-green-500 border-green-500"
+                      : "border-gray-300 group-hover:border-green-400"
+                    }`}
                 >
-                  {selectedIds.has(template.id) && <Check className="w-4 h-4 text-white" />}
+                  {selectedIds.has(template.id) && (
+                    <Check className="w-4 h-4 text-white" />
+                  )}
                 </div>
 
                 <div className="ml-4 grow">
                   <h3
-                    className={`font-bold transition-colors ${
-                      selectedIds.has(template.id) ? 'text-green-900' : 'text-gray-700'
-                    }`}
+                    className={`font-bold transition-colors ${selectedIds.has(template.id)
+                        ? "text-green-900"
+                        : "text-gray-700"
+                      }`}
                   >
                     {template.name}
                   </h3>
@@ -140,7 +147,7 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
                           key={index}
                           className="text-sm text-gray-700 border-l-2 border-green-200 pl-2"
                         >
-                          {item.name || item.title || 'Unnamed Item'}
+                          {item.name || item.title || "Unnamed Item"}
                         </li>
                       ))}
                     </ul>
@@ -164,7 +171,9 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
             ))
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-400 italic">No templates found matching your search.</p>
+              <p className="text-gray-400 italic">
+                No templates found matching your search.
+              </p>
             </div>
           )}
         </div>
@@ -172,7 +181,8 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
         {/* Footer Actions */}
         <div className="pt-4 flex items-center justify-between border-t border-gray-100">
           <p className="text-sm text-gray-700">
-            <span className="font-bold text-green-600">{selectedIds.size}</span> templates selected
+            <span className="font-bold text-green-600">{selectedIds.size}</span>{" "}
+            templates selected
           </p>
           <div className="flex space-x-3">
             {onClose && (
@@ -186,11 +196,10 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
             <Button
               onClick={handleSubmit}
               disabled={selectedIds.size === 0}
-              className={`px-8 py-2.5 font-bold transition-all ${
-                selectedIds.size > 0
-                  ? 'bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-200'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
+              className={`px-8 py-2.5 font-bold transition-all ${selectedIds.size > 0
+                  ? "bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-200"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                }`}
             >
               Add Selected Templates
             </Button>
@@ -215,7 +224,7 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
         }
       `}</style>
     </div>
-  )
-}
+  );
+};
 
-export default FetchWBSTemplate
+export default FetchWBSTemplate;

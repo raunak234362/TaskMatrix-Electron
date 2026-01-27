@@ -34,7 +34,7 @@ const CurrentTaskWidget = ({ task, onTaskUpdate }) => {
             </h3>
             <p className="text-indigo-100 mt-1 flex items-center gap-2">
               <span className="opacity-80">
-                {task.name ||
+                {task.name || []
                   (task.estimation?.estimationNumber
                     ? `Estimation #${task.estimation.estimationNumber}`
                     : 'Untitled Task')}
@@ -54,7 +54,7 @@ const CurrentTaskWidget = ({ task, onTaskUpdate }) => {
           </div>
         </div>
 
-        {/* Note: Actions could be added here if we want direct control */}
+        {/* Note could be added here if we want direct control */}
         <button
           onClick={() => onTaskUpdate?.()} // Just linking to detail view for now
           className="w-full py-3 bg-white text-indigo-700 font-semibold rounded-xl hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2 group shadow-lg shadow-black/10"

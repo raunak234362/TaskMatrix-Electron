@@ -1,128 +1,148 @@
-/* eslint-disable no-unused-vars */
-import { useEffect, useState } from 'react'
-import { Loader2, AlertCircle, Layers, ListChecks, Clock, X } from 'lucide-react'
-import Service from '../../../api/Service'
-import { Button } from '../../ui/button'
-import DataTable from '../../ui/table'
-import GetWBSLineItem from './GetWBSLineItem'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from "react";
+import {
+  Loader2,
+  AlertCircle,
+  Layers,
+  ListChecks,
+  Clock,
+  X,
+} from "lucide-react";
+import Service from "../../../api/Service";
 
-const GetWBSByID = ({ id, projectId, stage, onClose, initialData }) => {
-  console.log(initialData)
+import { Button } from "../../ui/button";
+import DataTable from "../../ui/table";
+import GetWBSLineItem from "./GetWBSLineItem";
 
-  const wbsData = initialData || null
-  const [wbs, setWbs] = useState(wbsData)
+const GetWBSByID = ({
+  id,
+  projectId,
+  stage,
+  onClose,
+  initialData,
+}) => {
+  console.log(initialData);
+
+  const wbsData = initialData || null;
+  const [wbs, setWbs] = useState(wbsData);
   const [lineItems, setLineItems] = useState(
-    initialData?.wbs || initialData?.bundle?.wbsTemplates || initialData?.wbsTemplates || []
-  )
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [selectedWbsId, setSelectedWbsId] = useState(null)
+    initialData?.wbs ||
+    initialData?.bundle?.wbsTemplates ||
+    initialData?.wbsTemplates ||
+    []
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedWbsId, setSelectedWbsId] = useState(null);
 
   useEffect(() => {
     if (initialData) {
-      setWbs(initialData)
+      setWbs(initialData);
       setLineItems(
-        initialData?.wbs || initialData?.bundle?.wbsTemplates || initialData?.wbsTemplates || []
-      )
+        initialData?.wbs ||
+        initialData?.bundle?.wbsTemplates ||
+        initialData?.wbsTemplates ||
+        []
+      );
     }
-  }, [initialData])
+  }, [initialData]);
 
   useEffect(() => {
     // Only fetch if we don't have templates in initialData
     if (!lineItems || lineItems.length === 0) {
-      if (id) fetchWBSById(id)
+      if (id) fetchWBSById(id);
     }
-  }, [id, projectId, stage])
+  }, [id, projectId, stage]);
 
   const fetchWBSById = async (id) => {
     try {
-      setLoading(true)
-      setError(null)
-      const response = await Service.GetWBSLineItemById(projectId, id, stage)
-      console.log('WBS Detail Response:', response)
+      setLoading(true);
+      setError(null);
+      const response = await Service.GetWBSLineItemById(projectId, id, stage);
+      console.log("WBS Detail Response:", response);
       // Handle potential different response structures from the new endpoint
       if (response && response.data) {
-        setLineItems(response.data || [])
+        setLineItems(response.data || []);
       } else if (response && Array.isArray(response.data)) {
         // If it returns { lineItems: [...] } but no wbs metadata, we might need to handle it
         // For now assume it has the metadata or it's the old structure
-        setWbs(response)
+        setWbs(response);
       } else {
-        setWbs(response || null)
+        setWbs(response || null);
       }
     } catch (err) {
-      console.error('Error fetching WBS:', err)
-      setError('Failed to load WBS details')
+      console.error("Error fetching WBS:", err);
+      setError("Failed to load WBS details");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const columns = [
     {
-      accessorKey: 'description',
-      header: 'Description',
+      accessorKey: "description",
+      header: "Description",
       cell: ({ row }) => (
         <p className="text-sm font-semibold text-gray-700 line-clamp-2">
           {row.original.name ||
             row.original.wbsTemplate?.name ||
             row.original.description ||
             row.original.wbsTemplateKey ||
-            '—'}
+            "—"}
         </p>
       ),
-      enableColumnFilter: true
+      enableColumnFilter: true,
     },
     {
-      accessorKey: 'discipline',
-      header: 'Discipline',
+      accessorKey: "discipline",
+      header: "Discipline",
       cell: ({ row }) => (
         <span className="text-xs font-medium text-gray-500 uppercase">
-          {row.original.discipline || '—'}
+          {row.original.discipline || "—"}
         </span>
       ),
-      enableSorting: true
+      enableSorting: true,
     },
     {
-      id: 'qtyNo',
+      id: "qtyNo",
       accessorFn: (row) => row.qtyNo ?? row.totalQtyNo ?? 0,
-      header: 'Qty',
+      header: "Qty",
       cell: ({ row }) => (
         <span className="text-sm font-bold text-green-700 bg-green-50 px-2 py-1 rounded-md">
-          {row.getValue('qtyNo')}
+          {row.getValue("qtyNo")}
         </span>
       ),
-      enableSorting: true
+      enableSorting: true,
     },
     {
-      accessorKey: 'execHr',
-      header: 'Exec Total',
+      accessorKey: "execHr",
+      header: "Exec Total",
       cell: ({ row }) => (
         <span className="text-sm font-bold text-gray-700">
           {(row.original.execHr ?? row.original.totalExecHr ?? 0).toFixed(1)}h
         </span>
       ),
-      enableSorting: true
+      enableSorting: true,
     },
     {
-      accessorKey: 'checkHr',
-      header: 'Check Total',
+      accessorKey: "checkHr",
+      header: "Check Total",
       cell: ({ row }) => (
         <span className="text-sm font-bold text-gray-700">
           {(row.original.checkHr ?? row.original.totalCheckHr ?? 0).toFixed(1)}h
         </span>
       ),
-      enableSorting: true
-    }
-  ]
+      enableSorting: true,
+    },
+  ];
 
   const formatDate = (date) =>
     date
-      ? new Date(date).toLocaleString('en-IN', {
-          dateStyle: 'medium',
-          timeStyle: 'short'
-        })
-      : '—'
+      ? new Date(date).toLocaleString("en-IN", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+      : "—";
 
   if (loading && !wbs)
     return (
@@ -132,10 +152,12 @@ const GetWBSByID = ({ id, projectId, stage, onClose, initialData }) => {
             <div className="w-12 h-12 border-4 border-green-100 border-t-green-600 rounded-full animate-spin"></div>
             <Loader2 className="w-6 h-6 text-green-600 absolute inset-0 m-auto animate-pulse" />
           </div>
-          <p className="text-green-900 font-medium animate-pulse">Fetching WBS details...</p>
+          <p className="text-green-900 font-medium animate-pulse">
+            Fetching WBS details...
+          </p>
         </div>
       </div>
-    )
+    );
 
   if (error || !wbs)
     return (
@@ -145,7 +167,7 @@ const GetWBSByID = ({ id, projectId, stage, onClose, initialData }) => {
             <AlertCircle className="w-8 h-8 text-red-600" />
           </div>
           <h3 className="text-xl font-bold text-gray-700">Oops!</h3>
-          <p className="text-gray-700">{error || 'WBS data not found'}</p>
+          <p className="text-gray-700">{error || "WBS data not found"}</p>
           <Button
             onClick={onClose}
             className="mt-2 bg-gray-900 text-white hover:bg-gray-800 shadow-lg shadow-gray-200"
@@ -154,7 +176,7 @@ const GetWBSByID = ({ id, projectId, stage, onClose, initialData }) => {
           </Button>
         </div>
       </div>
-    )
+    );
 
   return (
     <div
@@ -173,11 +195,13 @@ const GetWBSByID = ({ id, projectId, stage, onClose, initialData }) => {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-gray-700 tracking-tight">
-                {wbsData?.bundle?.bundleKey || wbsData?.bundleKey || 'Bundle Details'}
+                {wbsData?.bundle?.bundleKey ||
+                  wbsData?.bundleKey ||
+                  "Bundle Details"}
               </h2>
               <div className="flex items-center gap-2 mt-1">
                 <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded-md tracking-wider">
-                  {wbsData?.stage || '—'}
+                  {wbsData?.stage || "—"}
                 </span>
                 <span className="text-gray-400 text-xs">•</span>
                 <span className="text-gray-600 text-xs">Project Bundle</span>
@@ -207,12 +231,18 @@ const GetWBSByID = ({ id, projectId, stage, onClose, initialData }) => {
               <p className="text-gray-400 text-xs font-medium uppercase tracking-widest mb-1">
                 Total Quantity
               </p>
-              <h3 className="text-2xl font-bold text-white">{wbsData?.totalQtyNo || 0}</h3>
+              <h3 className="text-2xl font-bold text-white">
+                {wbsData?.totalQtyNo || 0}
+              </h3>
             </div>
             <div className="pt-4 border-t border-gray-800 mt-4 flex justify-between items-end">
               <div>
-                <p className="text-gray-700 text-[10px] uppercase font-bold">Last Updated</p>
-                <p className="text-xs text-gray-300">{formatDate(wbsData?.updatedAt)}</p>
+                <p className="text-gray-700 text-[10px] uppercase font-bold">
+                  Last Updated
+                </p>
+                <p className="text-xs text-gray-300">
+                  {formatDate(wbsData?.updatedAt)}
+                </p>
               </div>
               <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
                 <Clock className="w-4 h-4 text-green-400" />
@@ -224,7 +254,9 @@ const GetWBSByID = ({ id, projectId, stage, onClose, initialData }) => {
           <section>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-1 h-6 bg-green-600 rounded-full"></div>
-              <h3 className="text-lg font-bold text-gray-700">Hours Overview</h3>
+              <h3 className="text-lg font-bold text-gray-700">
+                Hours Overview
+              </h3>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatCard
@@ -243,12 +275,17 @@ const GetWBSByID = ({ id, projectId, stage, onClose, initialData }) => {
               />
               <StatCard
                 label="Total Hours"
-                value={(wbsData?.totalExecHr || 0) + (wbsData?.totalCheckHr || 0)}
+                value={
+                  (wbsData?.totalExecHr || 0) + (wbsData?.totalCheckHr || 0)
+                }
                 color="gray"
               />
               <StatCard
                 label="Rework Total"
-                value={(wbsData?.execHrWithRework || 0) + (wbsData?.checkHrWithRework || 0)}
+                value={
+                  (wbsData?.execHrWithRework || 0) +
+                  (wbsData?.checkHrWithRework || 0)
+                }
                 color="red"
               />
             </div>
@@ -263,7 +300,9 @@ const GetWBSByID = ({ id, projectId, stage, onClose, initialData }) => {
                 <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-700 text-[10px] font-bold rounded-full">
                   {lineItems?.length || 0} Items
                 </span>
-                {loading && <Loader2 className="w-4 h-4 text-green-600 animate-spin ml-2" />}
+                {loading && (
+                  <Loader2 className="w-4 h-4 text-green-600 animate-spin ml-2" />
+                )}
               </div>
             </div>
 
@@ -273,16 +312,18 @@ const GetWBSByID = ({ id, projectId, stage, onClose, initialData }) => {
                   columns={columns}
                   data={lineItems}
                   onRowClick={(row) => setSelectedWbsId(row.id)}
-                  searchPlaceholder="Search WBS items..."
                   initialSorting={[
-                    { id: 'qtyNo', desc: true },
-                    { id: 'description', desc: false }
+                    { id: "qtyNo", desc: true },
+                    { id: "description", desc: false },
                   ]}
                 />
 
                 {selectedWbsId && (
                   <div className="mt-8 animate-in fade-in slide-in-from-top-4 duration-300">
-                    <GetWBSLineItem wbsId={selectedWbsId} onClose={() => setSelectedWbsId(null)} />
+                    <GetWBSLineItem
+                      wbsId={selectedWbsId}
+                      onClose={() => setSelectedWbsId(null)}
+                    />
                   </div>
                 )}
               </div>
@@ -291,7 +332,9 @@ const GetWBSByID = ({ id, projectId, stage, onClose, initialData }) => {
                 <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-4">
                   <ListChecks className="w-8 h-8 text-gray-300" />
                 </div>
-                <p className="text-gray-700 font-medium">No line items found for this WBS.</p>
+                <p className="text-gray-700 font-medium">
+                  No line items found for this WBS.
+                </p>
               </div>
             )}
           </section>
@@ -305,47 +348,67 @@ const GetWBSByID = ({ id, projectId, stage, onClose, initialData }) => {
           >
             Download Report
           </Button>
-          <Button className="text-white shadow-lg shadow-green-100">Add Quantity</Button>
+          <Button className="text-white shadow-lg shadow-green-100">
+            Add Quantity
+          </Button>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-const DetailCard = ({ label, value, icon }) => (
+const DetailCard = ({
+  label,
+  value,
+  icon,
+}) => (
   <div className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-3">
     <div className="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400">
       {icon}
     </div>
     <div>
-      <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">{label}</p>
-      <p className="text-sm font-semibold text-gray-700">{value || '—'}</p>
+      <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">
+        {label}
+      </p>
+      <p className="text-sm font-semibold text-gray-700">{value || "—"}</p>
     </div>
   </div>
-)
+);
 
-const StatCard = ({ label, value, subValue, subLabel, color }) => {
+const StatCard = ({
+  label,
+  value,
+  subValue,
+  subLabel,
+  color,
+}) => {
   const colors = {
-    green: 'bg-green-50 text-green-700 border-green-100',
-    indigo: 'bg-indigo-50 text-indigo-700 border-indigo-100',
-    gray: 'bg-gray-50 text-gray-700 border-gray-100',
-    red: 'bg-red-50 text-red-700 border-red-100'
-  }
+    green: "bg-green-50 text-green-700 border-green-100",
+    indigo: "bg-indigo-50 text-indigo-700 border-indigo-100",
+    gray: "bg-gray-50 text-gray-700 border-gray-100",
+    red: "bg-red-50 text-red-700 border-red-100",
+  };
 
   return (
-    <div className={`p-5 rounded-2xl border ${colors[color]} flex flex-col justify-between h-full`}>
+    <div
+      className={`p-5 rounded-2xl border ${colors[color]} flex flex-col justify-between h-full`}
+    >
       <div>
-        <p className="text-[10px] uppercase font-bold opacity-70 tracking-wider mb-2">{label}</p>
+        <p className="text-[10px] uppercase font-bold opacity-70 tracking-wider mb-2">
+          {label}
+        </p>
         <p className="text-2xl font-black tracking-tight">{value ?? 0}h</p>
       </div>
       {subValue !== undefined && (
         <div className="mt-3 pt-3 border-t border-current/10 flex items-center justify-between">
-          <span className="text-[9px] uppercase font-bold opacity-60">{subLabel}</span>
+          <span className="text-[9px] uppercase font-bold opacity-60">
+            {subLabel}
+          </span>
           <span className="text-xs font-bold">{subValue}h</span>
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default GetWBSByID
+export default GetWBSByID;

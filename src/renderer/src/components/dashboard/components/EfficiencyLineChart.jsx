@@ -73,10 +73,10 @@ const EfficiencyLineChart = ({ tasks }) => {
     }
 
     const chartData = useMemo(() => {
-        if (!tasks) return []
+        if (!tasks) return 
 
         const now = new Date()
-        let intervals = []
+        let intervals = 
         let formatStr = 'MMM dd'
         let compareFn = isSameDay
 
@@ -135,7 +135,7 @@ const EfficiencyLineChart = ({ tasks }) => {
 
             return {
                 label: format(date, formatStr),
-                Efficiency: Math.min(efficiency, 200), // Cap for visualization
+                Efficiency.min(efficiency, 200), // Cap for visualization
                 'Assigned Tasks': periodTasks.length,
                 'Worked Hours': totalWorked,
                 'Assigned Projects': projects.size

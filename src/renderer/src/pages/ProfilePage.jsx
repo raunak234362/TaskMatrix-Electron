@@ -1,10 +1,8 @@
-import { Profile } from '../components'
+import { Profile } from "../components"
 
 const ProfilePage = () => {
   return (
-    <div>
-      <Profile />
-    </div>
+    <div className="h-full w-full overflow-y-auto"><Profile/></div>
   )
 }
 

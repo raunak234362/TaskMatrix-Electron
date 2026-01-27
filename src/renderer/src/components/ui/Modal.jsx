@@ -1,4 +1,4 @@
-import { X as CloseIcon } from 'lucide-react'
+import { X  } from 'lucide-react'
 
 const Modal = ({ isOpen, onClose, title, children, width = 'max-w-4xl' }) => {
   if (!isOpen) return null

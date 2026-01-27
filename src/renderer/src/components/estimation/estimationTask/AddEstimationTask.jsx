@@ -78,7 +78,7 @@ const AddEstimationTask = ({ estimationId, onClose, onSuccess }) => {
       onSuccess?.()
       onClose()
       reset()
-      setFiles([])
+      setFiles()
     } catch (error) {
       console.error('Error creating task:', error)
       toast.error(error?.response?.data?.message || 'Failed to create task')
@@ -103,7 +103,7 @@ const AddEstimationTask = ({ estimationId, onClose, onSuccess }) => {
                   <Select
                     placeholder="Assigned To *"
                     options={staffOptions}
-                    value={staffOptions.find((opt) => opt.value === field.value) || null}
+                    value={staffOptions.find((opt) => opt.value === field.value)}
                     onChange={(option) => field.onChange(option?.value)}
                     menuPortalTarget={document.body}
                     styles={{

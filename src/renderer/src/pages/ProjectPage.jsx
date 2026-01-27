@@ -1,11 +1,10 @@
-import { AllProjects } from '../components'
+import ProjectLayout from "../layout/ProjectLayout"
+
 
 const ProjectPage = () => {
+  
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Projects</h1>
-      <AllProjects />
-    </div>
+    <div className="h-full w-full overflow-y-auto"><ProjectLayout/></div>
   )
 }
 

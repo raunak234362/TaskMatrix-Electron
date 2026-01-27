@@ -1,4 +1,5 @@
 const AddNewWBSItem = () => {
-  return null
-}
-export default AddNewWBSItem
+    return null;
+};
+export default AddNewWBSItem;
+

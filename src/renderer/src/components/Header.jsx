@@ -19,7 +19,7 @@ const Header = ({ isMinimized, toggleSidebar }) => {
 
   return (
     <header className="sticky top-0 z-40 flex items-center justify-between w-full py-2 px-6 bg-white rounded-xl shadow-[0_4px_15px_rgb(0,0,0,0.03)] mb-2">
-      {/* Left: Sidebar Toggle & Title */}
+      {/* Left Toggle & Title */}
       <div className="flex items-center gap-4">
         <Button
           onClick={toggleSidebar}
@@ -38,7 +38,7 @@ const Header = ({ isMinimized, toggleSidebar }) => {
         </div>
       </div>
 
-      {/* Right: Greeting & Notifications */}
+      {/* Right & Notifications */}
       <div className="flex items-center gap-3">
         <div className="flex-col items-end hidden sm:flex">
           <span className="text-md font-extrabold text-gray-800 tracking-tight">

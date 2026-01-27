@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { ClipboardList, AlertCircle } from 'lucide-react'
 
-const UpcomingSubmittals = ({ pendingSubmittals, invoices = [] }) => {
+const UpcomingSubmittals = ({ pendingSubmittals, invoices =  }) => {
   const [activeTab, setActiveTab] = React.useState('submittals')
 
   const isOverdue = (dateString) => {
@@ -17,7 +17,7 @@ const UpcomingSubmittals = ({ pendingSubmittals, invoices = [] }) => {
     pendingSubmittals.forEach((submittal) => {
       const projectName = submittal.project?.name || submittal.name || 'Other Projects'
       if (!groups[projectName]) {
-        groups[projectName] = []
+        groups[projectName] = 
       }
       groups[projectName].push(submittal)
     })

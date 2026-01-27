@@ -27,7 +27,7 @@ const FabricatorProjectChart = ({ data, fabricators }) => {
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-bold text-gray-800">Fabricator Projects Overview</h3>
-        {/* Optional: Add time filter dropdown here if needed later */}
+        {/* Optional time filter dropdown here if needed later */}
       </div>
 
       <div className="h-[350px] w-full">

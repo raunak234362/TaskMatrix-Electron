@@ -1,53 +1,53 @@
-import { X, Paperclip, CalendarDays } from 'lucide-react'
-import { useState } from 'react'
-import Button from '../fields/Button'
-import { openFileSecurely } from '../../utils/openFileSecurely'
-import Service from '../../api/Service'
-import RichTextEditor from '../fields/RichTextEditor'
+import { X, Paperclip, CalendarDays } from "lucide-react";
+import { useState } from "react";
+import Button from "../fields/Button";
+import { openFileSecurely } from "../../utils/openFileSecurely";
+import Service from "../../api/Service";
+import RichTextEditor from "../fields/RichTextEditor";
 
 // Status dropdown options
 const STATUS_OPTIONS = [
-  { label: 'Partial', value: 'PARTIAL' },
-  { label: 'Complete', value: 'COMPLETE' },
-  { label: 'Open', value: 'OPEN' }
-]
+  { label: "Partial", value: "PARTIAL" },
+  { label: "Complete", value: "COMPLETE" },
+  { label: "Open", value: "OPEN" },
+];
 
 const RFIResponseDetailsModal = ({ response, onClose }) => {
-  const [replyMode, setReplyMode] = useState(false)
-  const [replyMessage, setReplyMessage] = useState('')
-  const [replyFiles, setReplyFiles] = useState([])
-  const [replyStatus, setReplyStatus] = useState(response.wbtStatus)
+  const [replyMode, setReplyMode] = useState(false);
+  const [replyMessage, setReplyMessage] = useState("");
+  const [replyFiles, setReplyFiles] = useState([]);
+  const [replyStatus, setReplyStatus] = useState(response.wbtStatus);
 
-  const userRole = sessionStorage.getItem('userRole')?.toUpperCase() || ''
-  const userId = sessionStorage.getItem('userId') || ''
-  console.log(response)
+  const userRole = sessionStorage.getItem("userRole")?.toUpperCase() || "";
+  const userId = sessionStorage.getItem("userId") || "";
+  console.log(response);
 
   // 🔒 Only Admin/Team can reply (not client)
-  const canReply = ['ADMIN', 'STAFF', 'MANAGER'].includes(userRole)
+  const canReply = ["ADMIN", "STAFF", "MANAGER"].includes(userRole);
 
   const handleReplySubmit = async () => {
-    if (!replyMessage.trim()) return
+    if (!replyMessage.trim()) return;
 
-    const formData = new FormData()
-    formData.append('reason', replyMessage)
-    formData.append('rfiId', response.rfiId)
-    formData.append('parentResponseId', response.id)
-    formData.append('userId', userId)
-    formData.append('wbtStatus', replyStatus) // 👈 send selected status
+    const formData = new FormData();
+    formData.append("reason", replyMessage);
+    formData.append("rfiId", response.rfiId);
+    formData.append("parentResponseId", response.id);
+    formData.append("userId", userId);
+    formData.append("wbtStatus", replyStatus); // 👈 send selected status
 
-    replyFiles.forEach((file) => formData.append('files', file))
+    replyFiles.forEach((file) => formData.append("files", file));
 
-    await Service.addRFIResponse(formData, response.rfiId)
+    await Service.addRFIResponse(formData, response.rfiId);
 
     // Reset Form UI
-    setReplyMode(false)
-    setReplyMessage('')
-    setReplyFiles([])
-    setReplyStatus(response.wbtStatus)
+    setReplyMode(false);
+    setReplyMessage("");
+    setReplyFiles([]);
+    setReplyStatus(response.wbtStatus);
 
     // Close to refresh parent UI
-    onClose()
-  }
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
@@ -73,7 +73,9 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
               <p
                 key={file.id}
                 className="cursor-pointer text-green-600 underline"
-                onClick={() => openFileSecurely('rfi/response', response.id, file.id)}
+                onClick={() =>
+                  openFileSecurely("rfi/response", response.id, file.id)
+                }
               >
                 <Paperclip size={16} className="inline-block mr-2" />
                 {file.originalName}
@@ -93,10 +95,13 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
           <div className="mt-4 space-y-4 border-t pt-4 max-h-60 overflow-y-auto">
             <h4 className="text-sm font-semibold text-gray-700">History</h4>
             {response.childResponses.map((child) => (
-              <div key={child.id} className="bg-gray-50 p-3 rounded border text-sm">
+              <div
+                key={child.id}
+                className="bg-gray-50 p-3 rounded border text-sm"
+              >
                 <div className="flex justify-between text-xs text-gray-700 mb-1">
                   <span className="font-medium text-gray-700">
-                    {child.user?.name || 'User'} ({child.user?.role || 'N/A'})
+                    {child.user?.name || "User"} ({child.user?.role || "N/A"})
                   </span>
                   <span>{new Date(child.createdAt).toLocaleString()}</span>
                 </div>
@@ -112,7 +117,9 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
                       <p
                         key={file.id}
                         className="cursor-pointer text-green-600 underline text-xs"
-                        onClick={() => openFileSecurely('rfi/response', child.id, file.id)}
+                        onClick={() =>
+                          openFileSecurely("rfi/response", child.id, file.id)
+                        }
                       >
                         <Paperclip size={12} className="inline-block mr-1" />
                         {file.originalName}
@@ -127,7 +134,10 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
 
         {/* Reply Button — only internal side */}
         {canReply && !replyMode && (
-          <Button className="bg-blue-600 text-white mt-4" onClick={() => setReplyMode(true)}>
+          <Button
+            className="bg-blue-600 text-white mt-4"
+            onClick={() => setReplyMode(true)}
+          >
             Reply
           </Button>
         )}
@@ -137,7 +147,9 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
           <div className="pt-4 space-y-4 border-t">
             {/* Message */}
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Your Reply</label>
+              <label className="text-sm font-medium text-gray-700">
+                Your Reply
+              </label>
               <RichTextEditor
                 value={replyMessage}
                 onChange={setReplyMessage}
@@ -167,13 +179,18 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
             <input
               type="file"
               multiple
-              onChange={(e) => setReplyFiles(e.target.files ? Array.from(e.target.files) : [])}
+              onChange={(e) =>
+                setReplyFiles(e.target.files ? Array.from(e.target.files) : [])
+              }
             />
 
             {/* Action Buttons */}
             <div className="flex justify-end gap-3">
               <Button onClick={() => setReplyMode(false)}>Cancel</Button>
-              <Button className="bg-green-600 text-white" onClick={handleReplySubmit}>
+              <Button
+                className="bg-green-600 text-white"
+                onClick={handleReplySubmit}
+              >
                 Send Reply
               </Button>
             </div>
@@ -181,7 +198,7 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default RFIResponseDetailsModal
+export default RFIResponseDetailsModal;

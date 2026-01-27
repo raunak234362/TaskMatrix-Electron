@@ -1,4 +1,4 @@
-import { X as CloseIcon } from 'lucide-react'
+import { X  } from 'lucide-react'
 import GetProjectById from '../../project/GetProjectById'
 
 const ProjectDetailsModal = ({ project, onClose }) => {

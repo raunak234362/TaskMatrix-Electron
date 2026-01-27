@@ -9,9 +9,11 @@ import socket, { connectSocket } from './socket'
 import { loadFabricator } from './store/fabricatorSlice'
 import { setRFQData } from './store/rfqSlice'
 import { setProjectData } from './store/projectSlice'
+import useNotifications from './hooks/useNotifications'
 
 const AppContent = () => {
   const dispatch = useDispatch()
+  useNotifications()
   const userType = sessionStorage.getItem('userRole')
 
   /*

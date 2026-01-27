@@ -42,7 +42,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
           reset({
             estimationNumber: d.estimationNumber,
             projectName: d.projectName,
-            fabricatorId: String(d.fabricatorId || ''),
+            fabricatorId: d.fabricatorId || '',
             description: d.description,
             estimateDate: d.estimateDate ? String(d.estimateDate).split('T')[0] : '',
             tools: d.tools,
@@ -62,7 +62,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
 
   const fabricatorOptions = fabricators.map((f) => ({
     label: f.fabName,
-    value: String(f.id)
+    value: f.id
   }))
 
   const onSubmit = async (data) => {
@@ -122,7 +122,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
         {/* BODY */}
         <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-gray-50/30 font-sans">
           <form id="edit-estimation-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Card 1: Details */}
+            {/* Card 1 */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
               <SectionTitle title="Estimation Details" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -163,7 +163,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
               </div>
             </div>
 
-            {/* Card 2: Description */}
+            {/* Card 2 */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-4">
               <SectionTitle title="Description" />
               <Controller
@@ -179,7 +179,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
               />
             </div>
 
-            {/* Card 3: Timeline & Tools */}
+            {/* Card 3 & Tools */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
               <SectionTitle title="Timeline & Tools" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -196,7 +196,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
               </div>
             </div>
 
-            {/* Card 4: Status */}
+            {/* Card 4 */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-4">
               <SectionTitle title="Status" />
 

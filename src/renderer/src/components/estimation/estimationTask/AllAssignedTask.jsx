@@ -23,7 +23,7 @@ const AllAssignedTask = () => {
 
   useEffect(() => {
     fetchEstimations()
-  }, [])
+  }, )
   const columns = [
     {
       header: 'Project Name',

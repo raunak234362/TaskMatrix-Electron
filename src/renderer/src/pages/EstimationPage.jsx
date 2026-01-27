@@ -1,11 +1,11 @@
-import EstimationLayout from '../layout/EstimationLayout'
+import EstimationLayout from "../layout/EstimationLayout";
 
 const EstimationPage = () => {
   return (
-    <div>
+    <div className="h-full w-full overflow-y-auto">
       <EstimationLayout />
     </div>
-  )
-}
+  );
+};
 
-export default EstimationPage
+export default EstimationPage;

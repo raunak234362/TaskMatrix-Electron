@@ -31,7 +31,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
     try {
       setLoading(true)
       const response = await Service.GetTaskById(id)
-      setTask(response?.data || null)
+      setTask(response?.data)
     } catch (error) {
       console.error('Error fetching task:', error)
       toast.error('Failed to load task details')
@@ -293,17 +293,16 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
             <div className="mt-8 pt-6 border-t border-[#d4e9c8]">
               <h4 className="text-lg font-semibold text-gray-800 mb-4">Task Controls</h4>
               <div className="flex flex-wrap items-center gap-4">
-                {task.status === 'ASSIGNED' ||
-                  (task.status === 'REWORK' && (
-                    <ActionButton
-                      icon={<Play />}
-                      color="emerald"
-                      onClick={() => handleAction('start')}
-                      disabled={processing}
-                    >
-                      Start Task
-                    </ActionButton>
-                  ))}
+                {(task.status === 'ASSIGNED' || task.status === 'REWORK') && (
+                  <ActionButton
+                    icon={<Play />}
+                    color="emerald"
+                    onClick={() => handleAction('start')}
+                    disabled={processing}
+                  >
+                    Start Task
+                  </ActionButton>
+                )}
                 {task.status === 'IN_PROGRESS' && (
                   <>
                     <ActionButton

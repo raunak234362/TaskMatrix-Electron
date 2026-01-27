@@ -1,58 +1,57 @@
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { Loader2, Upload, X } from 'lucide-react'
-import Service from '../../../api/Service'
-import Button from '../../fields/Button'
-import { toast } from 'react-toastify'
-import { Controller } from 'react-hook-form'
-import RichTextEditor from '../../fields/RichTextEditor'
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Loader2, Upload, X } from "lucide-react";
+import Service from "../../../api/Service";
+import Button from "../../fields/Button";
+import { toast } from "react-toastify";
+import { Controller } from "react-hook-form";
+import RichTextEditor from "../../fields/RichTextEditor";
+
+
 
 const AddNotes = ({ projectId, onNoteAdded, onClose }) => {
-  const [loading, setLoading] = useState(false)
-  const [selectedFiles, setSelectedFiles] = useState([])
+  const [loading, setLoading] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors }
-  } = useForm()
+    formState: { errors },
+  } = useForm();
 
   const handleFileChange = (e) => {
     if (e.target.files) {
-      setSelectedFiles(Array.from(e.target.files))
+      setSelectedFiles(Array.from(e.target.files));
     }
-  }
+  };
 
   const removeFile = (index) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
-  }
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const onSubmit = async (data) => {
     try {
-      setLoading(true)
-      const formData = new FormData()
-      formData.append('content', data.content)
-      formData.append('stage', data.stage)
-      formData.append('projectId', projectId)
-      if (data.tags) {
-        formData.append('tags', data.tags)
-      }
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("content", data.content);
+      formData.append("stage", data.stage);
+      formData.append("projectId", projectId);
 
       selectedFiles.forEach((file) => {
-        formData.append('files', file)
-      })
+        formData.append("files", file);
+      });
 
-      await Service.CreateProjectNote(projectId, formData)
-      toast.success('Note added successfully')
-      onNoteAdded()
-      onClose()
+      await Service.CreateProjectNote(projectId, formData);
+      toast.success("Note added successfully");
+      onNoteAdded();
+      onClose();
     } catch (error) {
-      console.error('Error adding note:', error)
-      toast.error('Failed to add note')
+      console.error("Error adding note:", error);
+      toast.error("Failed to add note");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div
@@ -64,17 +63,24 @@ const AddNotes = ({ projectId, onNoteAdded, onClose }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center border-b pb-3 mb-4">
-          <h2 className="text-xl font-semibold text-gray-700">Add Project Note</h2>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 text-gray-700">
+          <h2 className="text-xl font-semibold text-gray-700">
+            Add Project Note
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-gray-100 text-gray-700"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Stage</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Stage
+            </label>
             <select
-              {...register('stage', { required: 'Stage is required' })}
+              {...register("stage", { required: "Stage is required" })}
               className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
               <option value="">Select Stage</option>
@@ -86,41 +92,40 @@ const AddNotes = ({ projectId, onNoteAdded, onClose }) => {
               <option value="SUBMITTAL">Submittal</option>
               <option value="OTHER">Other</option>
             </select>
-            {errors.stage && <p className="text-red-500 text-xs mt-1">{errors.stage.message}</p>}
+            {errors.stage && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.stage.message}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Content
+            </label>
             <Controller
               name="content"
               control={control}
-              rules={{ required: 'Content is required' }}
+              rules={{ required: "Content is required" }}
               render={({ field }) => (
                 <RichTextEditor
-                  value={field.value || ''}
+                  value={field.value || ""}
                   onChange={field.onChange}
                   placeholder="Enter note details..."
                 />
               )}
             />
             {errors.content && (
-              <p className="text-red-500 text-xs mt-1">{errors.content.message}</p>
+              <p className="text-red-500 text-xs mt-1">
+                {errors.content.message}
+              </p>
             )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tags (comma separated)
+              Attachments
             </label>
-            <input
-              {...register('tags')}
-              placeholder="e.g. important, review, site-visit"
-              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Attachments</label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-gray-50 transition-colors relative">
               <input
                 type="file"
@@ -129,7 +134,9 @@ const AddNotes = ({ projectId, onNoteAdded, onClose }) => {
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
               <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-700">Click or drag files to upload</p>
+              <p className="text-sm text-gray-700">
+                Click or drag files to upload
+              </p>
             </div>
 
             {selectedFiles.length > 0 && (
@@ -153,25 +160,29 @@ const AddNotes = ({ projectId, onNoteAdded, onClose }) => {
             )}
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button type="button" onClick={onClose}>
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
+            <Button
+              type="button"
+              onClick={onClose}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full">
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   Saving...
                 </>
               ) : (
-                'Save Note'
+                "Save Note"
               )}
             </Button>
           </div>
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AddNotes
+export default AddNotes;

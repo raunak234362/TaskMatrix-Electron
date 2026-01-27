@@ -1703,5 +1703,227 @@ class Service {
       console.error('cannot find Task', error)
     }
   }
+
+  // Get User Stats
+  static async getUsersStats(userId) {
+    try {
+      const response = await api.get(`task/user/stats/${userId}`)
+      return response.data
+    } catch (error) {
+      console.error(`Error fetching stats for user ${userId}:`, error)
+      throw error
+    }
+  }
+
+  // Add Bank Account
+  static async AddBankAccount(data) {
+    try {
+      const response = await api.post(`invoice/account`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Bank account added:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error adding bank account:', error)
+      throw error
+    }
+  }
+
+  // Add Invoice
+  static async AddInvoice(data) {
+    try {
+      const response = await api.post(`invoice/create`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Invoice added:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error adding invoice:', error)
+      throw error
+    }
+  }
+
+  // Get Invoice
+  static async GetInvoiceById(id) {
+    try {
+      const response = await api.get(`invoice/byId/${id}`)
+      console.log('Invoice fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching invoice:', error)
+      throw error
+    }
+  }
+
+  // all Invoice
+  static async GetAllInvoice() {
+    try {
+      const response = await api.get(`invoice/AllInvoices`)
+      console.log('Invoice fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching invoice:', error)
+      throw error
+    }
+  }
+
+  //get bank accounts
+  static async GetBankAccounts() {
+    try {
+      const response = await api.get(`invoice/accounts/all`)
+      // console.log("Bank accounts fetched:", response.data);
+      return response.data
+    } catch (error) {
+      console.error('Error fetching bank accounts:', error)
+      throw error
+    }
+  }
+
+  //get bank account by ID
+  static async GetBankAccountById(id) {
+    try {
+      const response = await api.get(`invoice/account/${id}`)
+      console.log('Bank account fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching bank account:', error)
+      throw error
+    }
+  }
+
+  //Dashboard Data
+  static async GetDashboardData() {
+    try {
+      const response = await api.get(`dashBoardData/`)
+      console.log('Dashboard data fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+      throw error
+    }
+  }
+
+  // upcomping submittal
+  static async GetPendingSubmittal() {
+    try {
+      const response = await api.get(`mileStone/pendingSubmittals`)
+      console.log('Upcoming submittal fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching upcoming submittal:', error)
+      throw error
+    }
+  }
+
+  // Create Share Link
+  static async createShareLink(table, parentId, fileId) {
+    try {
+      const response = await api.post(`share/${table}/${parentId}/${fileId}`)
+      return response.data
+    } catch (error) {
+      console.error('Error creating share link:', error)
+      throw error
+    }
+  }
+
+  // ===========================================================
+  // DESIGN DRAWINGS SERVICES
+  // ===========================================================
+
+  // Create new Design Drawing
+  static async CreateDesignDrawing(data) {
+    try {
+      const response = await api.post(`design-drawings`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error creating design drawing:', error)
+      throw error
+    }
+  }
+
+  // Update stage / description of a Design Drawing
+  static async UpdateDesignDrawing(id, data) {
+    try {
+      const response = await api.put(`design-drawings/${id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error updating design drawing:', error)
+      throw error
+    }
+  }
+
+  // Get all Design Drawings (Admin)
+  static async GetAllDesignDrawings() {
+    try {
+      const response = await api.get(`design-drawings`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching all design drawings:', error)
+      throw error
+    }
+  }
+
+  // Get Design Drawings by Project ID
+  static async GetDesignDrawingsByProjectId(projectId) {
+    try {
+      const response = await api.get(`design-drawings/project/${projectId}`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching design drawings by project ID:', error)
+      throw error
+    }
+  }
+
+  // Get a single Design Drawing by ID
+  static async GetDesignDrawingById(id) {
+    try {
+      const response = await api.get(`design-drawings/${id}`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching design drawing by ID:', error)
+      throw error
+    }
+  }
+
+  // Delete a Design Drawing
+  static async DeleteDesignDrawing(id) {
+    try {
+      const response = await api.delete(`design-drawings/${id}`)
+      return response.data
+    } catch (error) {
+      console.error('Error deleting design drawing:', error)
+      throw error
+    }
+  }
+
+  // Get file metadata (from Design Drawing)
+  static async GetDesignDrawingFileMetadata(designId, fileId) {
+    try {
+      const response = await api.get(`design-drawings/${designId}/files/${fileId}`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching design drawing file metadata:', error)
+      throw error
+    }
+  }
+
+  // Stream file (from Design Drawing)
+  static async ViewDesignDrawingFile(designId, fileId) {
+    try {
+      const response = await api.get(`design-drawings/viewFile/${designId}/${fileId}`)
+      return response.data
+    } catch (error) {
+      console.error('Error viewing design drawing file:', error)
+      throw error
+    }
+  }
 }
 export default Service

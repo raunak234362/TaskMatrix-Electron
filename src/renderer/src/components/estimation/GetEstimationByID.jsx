@@ -33,7 +33,7 @@ const GetEstimationByID = ({ id, onRefresh }) => {
       setLoading(true)
       setError(null)
       const response = await Service.GetEstimationById(id)
-      setEstimation(response?.data || null)
+      setEstimation(response?.data)
     } catch (err) {
       console.error('Error fetching estimation:', err)
       setError('Failed to load estimation details')

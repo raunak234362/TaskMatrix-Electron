@@ -1,11 +1,11 @@
-import TaskLayout from '../layout/TaskLayout'
+import TaskLayout from "../layout/TaskLayout";
 
 const TaskPage = () => {
   return (
-    <div>
+    <div className="h-full w-full overflow-y-auto">
       <TaskLayout />
     </div>
-  )
-}
+  );
+};
 
-export default TaskPage
+export default TaskPage;

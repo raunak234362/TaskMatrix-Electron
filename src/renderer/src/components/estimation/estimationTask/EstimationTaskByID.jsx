@@ -98,7 +98,7 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
   }, [id])
 
   const getActiveWorkID = () => {
-    return task?.workinghours?.find((wh) => wh.ended_at === null)?.id || null
+    return task?.workinghours?.find((wh) => wh.ended_at === null)?.id
   }
 
   const formatDecimalHours = (decimalHours) => {

@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import DataTable from '../../ui/table'
 import { format } from 'date-fns'
-import { X as CloseIcon } from 'lucide-react'
+import { X  } from 'lucide-react'
 import EstimationTaskByID from './EstimationTaskByID'
 import AddEstimationTask from './AddEstimationTask'
 

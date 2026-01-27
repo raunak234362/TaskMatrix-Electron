@@ -1,4 +1,4 @@
-import { X as CloseIcon } from 'lucide-react'
+import { X  } from 'lucide-react'
 import DataTable from '../../ui/table'
 
 const SubmittalListModal = ({ isOpen, onClose, data }) => {

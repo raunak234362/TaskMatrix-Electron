@@ -14,7 +14,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
       title: 'Pending Submittals',
       count: dashboardStats?.pendingSubmittals || 0,
       subtitle: 'Response Pending',
-      icon: RefreshCw,
+      icon: ClipboardList,
       color: 'purple'
     },
     {
@@ -22,7 +22,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
       count: dashboardStats?.pendingChangeOrders || 0,
       subtitle: 'New Change Orders',
       subcount: dashboardStats?.newChangeOrders || 0,
-      icon: Activity,
+      icon: RefreshCw,
       color: 'rose'
     },
     {

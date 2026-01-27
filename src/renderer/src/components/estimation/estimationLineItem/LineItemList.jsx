@@ -70,8 +70,8 @@ const LineItemList = ({ id, onClose }) => {
       const payload = {
         name: groupFormData.name,
         description: groupFormData.description,
-        totalHours: Number(groupFormData.totalHours),
-        divisor: Number(groupFormData.divisor)
+        totalHours: groupFormData.totalHours,
+        divisor: groupFormData.divisor
       }
       await Service.UpdateGroupById(id, payload)
 
@@ -125,9 +125,9 @@ const LineItemList = ({ id, onClose }) => {
     try {
       const payload = {
         ...editFormData,
-        quantity: Number(editFormData.quantity),
-        hoursPerQty: Number(editFormData.hoursPerQty),
-        totalHours: Number(editFormData.totalHours)
+        quantity: editFormData.quantity,
+        hoursPerQty: editFormData.hoursPerQty,
+        totalHours: editFormData.totalHours
       }
       await Service.UpdateLineItemById(rowId, payload)
       setEditingRowId(null)
@@ -148,9 +148,9 @@ const LineItemList = ({ id, onClose }) => {
     const newData = { ...editFormData, [field]: value }
 
     if (field === 'quantity' || field === 'hoursPerQty') {
-      const qty = parseFloat(field === 'quantity' ? value : String(newData.quantity || 0)) || 0
+      const qty = parseFloat(field === 'quantity' ? value : (newData.quantity || 0)) || 0
       const hours =
-        parseFloat(field === 'hoursPerQty' ? value : String(newData.hoursPerQty || 0)) || 0
+        parseFloat(field === 'hoursPerQty' ? value : (newData.hoursPerQty || 0)) || 0
       newData.totalHours = qty * hours
     }
 

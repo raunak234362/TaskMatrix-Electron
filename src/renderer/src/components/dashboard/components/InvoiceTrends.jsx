@@ -37,7 +37,7 @@ const InvoiceTrends = ({ invoices }) => {
     } else {
       // Monthly view - Daily grouping
       const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate()
-      const dailyData = []
+      const dailyData = 
       for (let i = 1; i <= daysInMonth; i++) {
         const dailyInvoices = invoices.filter((inv) => {
           const date = new Date(inv.invoiceDate)
@@ -71,7 +71,7 @@ const InvoiceTrends = ({ invoices }) => {
   const years = useMemo(() => {
     const currentYear = new Date().getFullYear()
     return Array.from({ length: 5 }, (_, i) => currentYear - i)
-  }, [])
+  }, )
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">

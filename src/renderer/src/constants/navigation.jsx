@@ -1,10 +1,18 @@
 import {
-    ChartCandlestick,
-    Home,
-    MessageSquare,
-    User2,
-    Hourglass,
-    FolderOpenDot,
+    LayoutDashboard,
+    Hammer,
+    PenTool,
+    FileQuestion,
+    Calculator,
+    Briefcase,
+    Receipt,
+    Landmark,
+    CheckSquare,
+    Users,
+    MessageCircle,
+    UserCircle,
+    DollarSign,
+    Factory,
     FileText
 } from 'lucide-react'
 
@@ -12,17 +20,64 @@ export const navItems = [
     {
         label: 'Dashboard',
         to: '/dashboard',
-        icon: <Home />,
+        icon: <LayoutDashboard />,
         roles: [
             'admin',
             'staff',
-            'department-manager',
-            'deputy-manager',
-            'project-manager',
+            'project_manager_officer',
+            'connection_designer_engineer',
+            'operation_executive',
+            'deputy_manager',
+            'department_manager',
+            'project_manager',
             'client',
-            'estimation_head',
-            'system-admin',
+            'client_admin',
+            'system_admin',
             'user',
+            'estimator'
+        ]
+    },
+    {
+        label: 'Fabricator',
+        to: 'fabricator',
+        icon: <Hammer />,
+        roles: [
+            'admin',
+            'department_manager',
+            'deputy_manager',
+            'operation_executive',
+            'project_manager_officer',
+            'project_manager',
+            'system_admin',
+            'user',
+            'estimator',
+            'sales_manager',
+            'sales'
+        ]
+    },
+    {
+        label: 'Connection Designer',
+        to: 'connection-designer',
+        icon: <PenTool />,
+        roles: ['admin', 'operation_executive', 'department-manager', 'deputy_manager']
+    },
+    {
+        label: 'Sales',
+        to: 'sales',
+        icon: <DollarSign />,
+        roles: ['admin', 'sales', 'sales_manager', 'system-admin']
+    },
+    {
+        label: 'RFQ',
+        to: 'rfq',
+        icon: <FileQuestion />,
+        roles: [
+            'admin',
+            'sales_manager',
+            'operation_executive',
+            'deputy_manager',
+            'client_admin',
+            'client',
             'estimator',
             'sales'
         ]
@@ -30,56 +85,103 @@ export const navItems = [
     {
         label: 'Estimations',
         to: 'estimation',
-        icon: <Hourglass />,
-        roles: ['admin', 'estimation_head', 'department-manager', 'deputy-manager', 'staff']
-    },
-    {
-        label: 'Tasks',
-        to: 'tasks',
-        icon: <ChartCandlestick />,
+        icon: <Calculator />,
         roles: [
             'admin',
-            'staff',
-            'department-manager',
-            'deputy-manager',
-            'project-manager',
+            'sales_manager',
             'estimation_head',
-            'user',
-            'system-admin',
-            'human-resource'
-        ]
-    },
-    {
-        label: 'Chats',
-        to: 'chats',
-        icon: <MessageSquare />,
-        roles: [
-            'admin',
-            'staff',
+            'operation_executive',
             'department-manager',
-            'project-manager',
-            'estimation_head',
-            'deputy-manager',
-            'user',
-            'human-resource'
+            'deputy_manager',
+            'user'
         ]
     },
     {
         label: 'Projects',
         to: 'projects',
-        icon: <FolderOpenDot />,
+        icon: <Briefcase />,
+        roles: [
+            'admin',
+            'dept_manager',
+            'deputy_manager',
+            'estimation_head',
+            'operation_executive',
+            'project_manager_officer',
+            'team_lead',
+            'staff',
+            'sales_manager',
+            'client_admin',
+            'connection_designer_engineer',
+            'client',
+            'project_manager',
+            'user',
+            'human-resource'
+        ]
+    },
+    {
+        label: 'Invoices',
+        to: 'invoices',
+        icon: <Receipt />,
+        roles: ['admin', 'project_manager_officer', 'client_admin', 'pmo', 'client']
+    },
+    {
+        label: 'Accounts',
+        to: 'accounts',
+        icon: <Landmark />,
+        roles: ['admin', 'project_manager_officer', 'pmo']
+    },
+    {
+        label: 'Tasks',
+        to: 'tasks',
+        icon: <CheckSquare />,
         roles: [
             'admin',
             'staff',
+            'operation_executive',
             'department-manager',
-            'deputy-manager',
+            'deputy_manager',
             'project-manager',
-            'client',
-            'estimation_head',
-            'system-admin',
             'user',
-            'estimator',
-            'sales'
+            'system-admin',
+            'human-resource'
+        ]
+    },
+    {
+        label: 'Manage Team',
+        to: 'manage-team',
+        icon: <Users />,
+        roles: [
+            'admin',
+            'human_resource',
+            'department-manager',
+            'project-manager',
+            'operation_executive',
+            'deputy_manager',
+            'user',
+            'human-resource'
+        ]
+    },
+    {
+        label: 'Vendor',
+        to: 'vendor',
+        icon: <Factory />,
+        roles: ['admin', 'operation_executive', 'department-manager', 'deputy_manager']
+    },
+    {
+        label: 'Chats',
+        to: 'chats',
+        icon: <MessageCircle />,
+        roles: [
+            'admin',
+            'staff',
+            'department_manager',
+            'operation_executive',
+            'project_manager_officer',
+            'project_manager',
+            'estimation_head',
+            'deputy_manager',
+            'user',
+            'human-resource'
         ]
     },
     {
@@ -90,7 +192,7 @@ export const navItems = [
             'admin',
             'staff',
             'department-manager',
-            'deputy-manager',
+            'deputy_manager',
             'project-manager',
             'client',
             'estimation_head',
@@ -103,17 +205,22 @@ export const navItems = [
     {
         label: 'Profile',
         to: 'profile',
-        icon: <User2 />,
+        icon: <UserCircle />,
         roles: [
             'admin',
+            'project_manager_officer',
             'user',
+            'estimation_head',
+            'operation_executive',
             'staff',
             'client',
             'connection_designer_engineer',
             'estimator',
-            'estimation_head',
             'sales',
+            'sales_manager',
             'dept_manager',
+            'client_admin',
+            'deputy_manager',
             'project_manager',
             'system_admin',
             'human_resource'

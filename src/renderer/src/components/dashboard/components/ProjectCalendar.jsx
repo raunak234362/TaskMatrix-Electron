@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar  } from 'lucide-react'
 
 const ProjectCalendar = ({ projects, tasks }) => {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -85,7 +85,7 @@ const ProjectCalendar = ({ projects, tasks }) => {
           </div>
         ))}
         {[...padding, ...days].map((day, idx) => {
-          const dayProjects = day ? getProjectsForDay(day) : []
+          const dayProjects = day ? getProjectsForDay(day) : 
           return (
             <div
               key={idx}

@@ -20,7 +20,7 @@ const EstimationDashboard = () => {
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, )
 
   const fetchData = async () => {
     try {
@@ -102,7 +102,7 @@ const EstimationDashboard = () => {
       if (!monthlyData[sortKey][fabName]) {
         monthlyData[sortKey][fabName] = 0
       }
-      monthlyData[sortKey][fabName] += 1 // Logic: Count projects. User asked for "which fabricator has done the more projects" in bar graph
+      monthlyData[sortKey][fabName] += 1 // Logic projects. User asked for "which fabricator has done the more projects" in bar graph
     })
 
     // Convert to Array and Sort

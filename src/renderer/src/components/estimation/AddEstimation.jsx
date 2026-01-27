@@ -95,12 +95,12 @@ const AddEstimation = ({ initialRfqId = null, onSuccess = () => { } }) => {
     .filter((rfq) => rfq.wbtStatus === 'RECEIVED')
     .map((rfq) => ({
       label: `${rfq.projectName} - ${rfq.sender?.fabricator?.fabName || 'N/A'}`,
-      value: String(rfq.id)
+      value: rfq.id
     }))
 
   const fabricatorOptions = fabricators.map((fab) => ({
     label: fab.fabName,
-    value: String(fab.id)
+    value: fab.id
   }))
 
   const onSubmit = async (data) => {
@@ -125,7 +125,7 @@ const AddEstimation = ({ initialRfqId = null, onSuccess = () => { } }) => {
       toast.success('Estimation created successfully!')
       onSuccess?.()
       reset()
-      setFiles([])
+      setFiles()
     } catch (error) {
       toast.error(error?.message || 'Failed to create estimation')
     }
@@ -247,7 +247,7 @@ const AddEstimation = ({ initialRfqId = null, onSuccess = () => { } }) => {
             type="button"
             onClick={() => {
               reset()
-              setFiles([])
+              setFiles()
             }}
           >
             Cancel
