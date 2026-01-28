@@ -35,7 +35,7 @@ const FetchTaskByID = ({
   const [processing, setProcessing] = useState(false);
   const [showWorkSummary, setShowWorkSummary] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+  const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const fetchTask = async () => {
     if (!id) return;
     try {
@@ -237,15 +237,19 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" || userRole === "deputy_manager" && (
-              <Button
-                onClick={() => setIsEditing(true)}
-                variant="outline"
-                className="flex items-center gap-2 px-6 py-3 font-medium transition border-indigo-200 text-white hover:bg-indigo-50"
-              >
-                <Edit className="w-4 h-4" /> Edit Taskdsdsad
-              </Button>
-            )}
+            {(userRole === "admin" ||
+              userRole === "operation_executive" ||
+              userRole === "project_manager" ||
+              userRole === "department_manager" ||
+              userRole === "deputy_manager") && (
+                <Button
+                  onClick={() => setIsEditing(true)}
+                  variant="outline"
+                  className="flex items-center gap-2 px-6 py-3 font-medium transition border-indigo-200 text-background hover:bg-indigo-50"
+                >
+                  <Edit className="w-4 h-4" /> Edit Task
+                </Button>
+              )}
             <Button
               onClick={onClose}
               variant="secondary"

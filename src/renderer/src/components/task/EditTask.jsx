@@ -18,7 +18,7 @@ import Button from "../fields/Button";
 import Select from "../fields/Select";
 import SectionTitle from "../ui/SectionTitle";
 import RichTextEditor from "../fields/RichTextEditor";
-import { log } from "electron-builder";
+
 
 
 
@@ -77,10 +77,8 @@ const EditTask = ({ id, onClose, refresh }) => {
   }, [id, reset]);
 
   const onSubmit = async (data) => {
-    console.log(data);
-    
     try {
-      // setIsSubmitting(true);
+      setIsSubmitting(true);
       const payload = {
         ...data,
         priority: data.priority,

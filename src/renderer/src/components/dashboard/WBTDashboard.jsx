@@ -88,7 +88,7 @@ const WBTDashboard = () => {
     setLoading(true)
     try {
       const userRole = sessionStorage.getItem('userRole')?.toLowerCase()
-      const response = userRole === 'admin' ? await Service.GetAllTask() : await Service.GetMyTask()
+      const response = await Service.GetMyTask()
 
       if (response?.data) {
         const fetchedTasks = Array.isArray(response.data)
@@ -175,7 +175,6 @@ const WBTDashboard = () => {
         <div className="flex flex-col gap-5">
           {/* Stats Overview */}
           <div>
-
             <UserStatsWidget stats={userStats} loading={loading} />
           </div>
 
