@@ -29,15 +29,13 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
 
   return (
     <aside
-      className={`h-full transition-all duration-300 flex flex-col ${
-        isMinimized ? 'w-24' : 'w-72'
-      } ${isMobile ? 'shadow-2xl bg-white' : 'relative'}`}
+      className={`h-full transition-all duration-300 flex flex-col ${isMinimized ? 'w-24' : 'w-72'
+        } ${isMobile ? 'shadow-2xl bg-white' : 'relative'}`}
     >
       {/* Header */}
       <div
-        className={`flex items-center pt-6 pb-2 px-6 ${
-          isMobile ? 'justify-between' : isMinimized ? 'justify-center' : 'justify-start'
-        }`}
+        className={`flex items-center pt-6 pb-2 px-6 ${isMobile ? 'justify-between' : isMinimized ? 'justify-center' : 'justify-start'
+          }`}
       >
         <div className="flex items-center w-full justify-center">
           {!isMinimized ? (
@@ -65,7 +63,7 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
         )}
       </div>
 
-      <div className="flex-1 py-2 flex flex-col">
+      <div className="flex-1 py-2 flex flex-col overflow-y-auto">
         <ul className="flex flex-col gap-0.5 w-full pl-4">
           {navItems.map(
             ({ label, to, roles, icon }) =>
@@ -77,10 +75,9 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
                     onClick={isMobile ? toggleSidebar : undefined}
                     className={({ isActive }) =>
                       `flex items-center rounded-2xl gap-4 py-2.5 transition-all duration-200 font-bold text-md tracking-wide relative 
-                      ${
-                        isActive
-                          ? 'bg-gray-50 text-[#6bbd45] shadow-sm ml-0 pl-6 z-20'
-                          : 'text-white/80 hover:text-white hover:bg-white/20 pl-6 ml-0'
+                      ${isActive
+                        ? 'bg-gray-50 text-[#6bbd45] shadow-sm ml-0 pl-6 z-20'
+                        : 'text-white/80 hover:text-white hover:bg-white/20 pl-6 ml-0'
                       } ${isMinimized ? 'justify-center px-0 w-14 h-14 mx-auto rounded-xl! ml-0! pl-0!' : ''}`
                     }
                   >
@@ -133,11 +130,10 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
           )}
           <div className="space-y-2 flex flex-col gap-2">
             <Button
-              className={`w-full flex items-center gap-3 py-3 rounded-xl transition-all mb-2 ${
-                isMinimized
+              className={`w-full flex items-center gap-3 py-3 rounded-xl transition-all mb-2 ${isMinimized
                   ? 'justify-center bg-white/10 text-white hover:bg-white/20'
                   : 'justify-start px-6 bg-white/10 text-white hover:bg-white/20'
-              }`}
+                }`}
               onClick={handleRefresh}
             >
               <RefreshCw size={20} />
@@ -145,11 +141,10 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
             </Button>
 
             <Button
-              className={`w-full flex items-center gap-3 py-3 rounded-xl transition-all ${
-                isMinimized
+              className={`w-full flex items-center gap-3 py-3 rounded-xl transition-all ${isMinimized
                   ? 'justify-center bg-white/10 text-white hover:bg-white/20'
                   : 'justify-start px-6 bg-white/10 text-white hover:bg-white/20'
-              }`}
+                }`}
               onClick={fetchLogout}
             >
               <LogOut size={20} />

@@ -47,7 +47,6 @@ export const navItems = [
             'deputy_manager',
             'operation_executive',
             'project_manager_officer',
-            'project_manager',
             'system_admin',
             'user',
             'estimator',

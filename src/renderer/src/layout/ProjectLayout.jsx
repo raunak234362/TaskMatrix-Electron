@@ -7,7 +7,7 @@ import { showDepartment, showTeam } from "../store/userSlice";
 const ProjectLayout = () => {
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const [activeTab, setActiveTab] = useState(
-    userRole === "connection_designer_engineer" || userRole === "estimation_head"
+    userRole === "connection_designer_engineer" || userRole === "estimation_head" || userRole === "project_manager"
       ? "allProject"
       : "projectDashboard",
   );
@@ -100,7 +100,6 @@ const ProjectLayout = () => {
               "admin",
               "project_manager_officer",
               "operation_executive",
-              "project_manager",
               "deputy_manager",
             ].includes(
               sessionStorage.getItem("userRole")?.toLowerCase() || "",
@@ -137,7 +136,6 @@ const ProjectLayout = () => {
               "project_manager_officer",
               "operation_executive",
               "estimation_head",
-              "project_manager",
               "deputy_manager",
             ].includes(
               sessionStorage.getItem("userRole")?.toLowerCase() || "",
