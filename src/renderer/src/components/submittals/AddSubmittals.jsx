@@ -122,7 +122,7 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
 
         {/* Sender (Fabricator POC) */}
         <Controller
-          name="sender_id"
+          name="recepient_id"
           control={control}
           render={({ field }) => (
             <Select
@@ -136,7 +136,7 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
 
         {/* Recipient (WBT Team) */}
         <Controller
-          name="recepient_id"
+          name="sender_id"
           control={control}
           rules={{ required: "Recipient required" }}
           render={({ field }) => (

@@ -3,11 +3,10 @@ import AllDesignDrawings from "../designDrawings/AllDesignDrawings";
 import AddDesignDrawing from "../designDrawings/AddDesignDrawing";
 import { useParams } from "react-router-dom";
 
-const AllDocument = () => {
-  const { id } = useParams();
+const AllDocument = ({ projectId }) => {
   const [view, setView] = useState("list");
 
-  if (!id) return null;
+  if (!projectId) return null;
 
   return (
     <div className="space-y-4 mt-6">
@@ -36,9 +35,9 @@ const AllDocument = () => {
       </div>
 
       {view === "list" ? (
-        <AllDesignDrawings projectId={id} />
+        <AllDesignDrawings projectId={projectId} />
       ) : (
-        <AddDesignDrawing projectId={id} onSuccess={() => setView("list")} />
+        <AddDesignDrawing projectId={projectId} onSuccess={() => setView("list")} />
       )}
     </div>
   );

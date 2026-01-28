@@ -124,7 +124,7 @@ const GetProjectById = ({ id }) => {
 
   return (
     <>
-      <div className="w-full bg-white h-auto p-3 md:p-6 rounded-lg shadow-sm border relative">
+      <div className="w-full bg-white h-auto p-3 md:p-6 rounded-lg shadow-sm border border-gray-200 relative">
         {/* Header */}
         <div className="flex justify-between items-center border-b pb-3 mb-3">
           <div>
@@ -222,9 +222,12 @@ const GetProjectById = ({ id }) => {
                   <FolderOpenDot className="w-4 h-4" />
                   Project Description
                 </h4>
-                <p className="text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">
-                  {project.description || "No description available."}
-                </p>
+                <div
+                  className="text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{
+                    __html: project.description || "No description available."
+                  }}
+                />
               </div>
               <div className="space-y-3">
                 <InfoRow
@@ -302,20 +305,21 @@ const GetProjectById = ({ id }) => {
               </div>
 
               {/* Footer Buttons */}
-              <div className="pt-2 flex flex-wrap gap-3">
+              {/* <div className="pt-2 flex flex-wrap gap-3">
                 <Button
                   className="py-1 px-3 text-sm bg-green-600 text-white"
                   onClick={() => handleEditModel(project)}
                 >
                   Edit Project
                 </Button>
-              </div>
+              </div> */}
             </div>
           )}
 
           {/* ✅ Files */}
           {activeTab === "files" && (
             <div className="space-y-4">
+              <AllDocument projectId={id} />
               <RenderFiles
                 files={project.files || []}
                 table="project"

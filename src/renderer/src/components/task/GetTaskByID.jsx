@@ -15,16 +15,21 @@ import {
   Play,
   Square,
   ClipboardList,
-  Clock
+  Clock,
+  Edit
 } from 'lucide-react'
 import Service from '../../api/Service'
 import { toast } from 'react-toastify'
+import { Button } from '../ui/button'
+import EditTask from './EditTask'
 
 const GetTaskByID = ({ id, onClose, refresh }) => {
+  const userRole = sessionStorage.getItem("userRole")?.toLowerCase();
   const [task, setTask] = useState(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [showWorkSummary, setShowWorkSummary] = useState(true)
+  const [isEditing, setIsEditing] = useState(false)
 
   const fetchTask = async () => {
     if (!id) return
@@ -218,79 +223,108 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
               <p className="text-sm text-black">ID: #{task.id}</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-xl transition"
-          >
-            Close
-          </button>
+          <div className="flex items-center gap-3">
+            {(userRole === "admin" ||
+              userRole === "operation_executive" ||
+              userRole === "project_manager" ||
+              userRole === "department_manager" ||
+              userRole === "deputy_manager") && (
+                <Button
+                  onClick={() => setIsEditing(true)}
+                  variant="outline"
+                  className="flex items-center gap-2 px-6 py-3 font-medium transition border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                >
+                  <Edit className="w-4 h-4" /> Edit Task
+                </Button>
+              )}
+            <button
+              onClick={onClose}
+              className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-xl transition"
+            >
+              Close
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto px-8 py-8 space-y-8">
-          {/* Task Info Card */}
-          <div className="bg-[#f7fbf3] rounded-2xl p-8 border border-[#d4e9c8]">
-            <h3 className="text-2xl font-bold text-[#2d501d] mb-6 flex items-center gap-3">
-              <FileText className="w-7 h-7" />
-              Task Information
-            </h3>
+          {isEditing ? (
+            <EditTask
+              id={task.id}
+              onClose={() => setIsEditing(false)}
+              refresh={() => {
+                fetchTask();
+                if (refresh) refresh();
+              }}
+            />
+          ) : (
+            <>
+              {/* Task Info Card */}
+              <div className="bg-[#f7fbf3] rounded-2xl p-8 border border-[#d4e9c8]">
+                <h3 className="text-2xl font-bold text-[#2d501d] mb-6 flex items-center gap-3">
+                  <FileText className="w-7 h-7" />
+                  Task Information
+                </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <InfoItem icon={<Building2 />} label="Project" value={task.project?.name || '—'} />
-              <InfoItem icon={<Hash />} label="Stage" value={task.Stage || '—'} />
-              <InfoItem
-                icon={<User />}
-                label="Assigned To"
-                value={task.user ? `${task.user.firstName} ${task.user.lastName}` : 'Unassigned'}
-              />
-              <InfoItem icon={<Calendar />} label="Due Date" value={toIST(task.due_date)} />
-              <InfoItem icon={<Clock />} label="Created At" value={toIST(task.created_on)} />
-              <InfoItem
-                icon={<Timer />}
-                label="Allocated Time"
-                value={formatHours(parseDurationToHours(task.duration))}
-              />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <InfoItem icon={<Building2 />} label="Project" value={task.project?.name || '—'} />
+                  <InfoItem icon={<Hash />} label="Stage" value={task.Stage || '—'} />
+                  <InfoItem
+                    icon={<User />}
+                    label="Assigned To"
+                    value={task.user ? `${task.user.firstName} ${task.user.lastName}` : 'Unassigned'}
+                  />
+                  <InfoItem icon={<Calendar />} label="Due Date" value={toIST(task.due_date)} />
+                  <InfoItem icon={<Clock />} label="Created At" value={toIST(task.created_on)} />
+                  <InfoItem
+                    icon={<Timer />}
+                    label="Allocated Time"
+                    value={formatHours(parseDurationToHours(task?.allocationLog?.allocatedHours))}
+                  />
 
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
-                  <div
-                    className={`w-6 h-6 rounded-full ${priority.color.replace('text', 'bg')}`}
-                  ></div>
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
+                      <div
+                        className={`w-6 h-6 rounded-full ${priority.color.replace('text', 'bg')}`}
+                      ></div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-black">Priority</p>
+                      <p className={`font-bold mt-1 ${priority.color}`}>{priority.label}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
+                      <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-black">Status</p>
+                      <span
+                        className={`inline-block mt-1 px-4 py-2 rounded-full font-semibold text-sm border-2 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
+                      >
+                        {statusConfig.label}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-black">Priority</p>
-                  <p className={`font-bold mt-1 ${priority.color}`}>{priority.label}</p>
-                </div>
-              </div>
 
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
-                  <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-black">Status</p>
-                  <span
-                    className={`inline-block mt-1 px-4 py-2 rounded-full font-semibold text-sm border-2 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
-                  >
-                    {statusConfig.label}
-                  </span>
-                </div>
-              </div>
-            </div>
+                {/* Description */}
+                {task.description && (
+                  <div className="mt-8 p-6 bg-white/70 backdrop-blur rounded-xl border border-[#eef7e9]">
+                    <h4 className="font-semibold text-black mb-3 flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-[#6bbd45]" />
+                      Description
+                    </h4>
+                    <div
+                      className="text-black leading-relaxed prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: task.description }}
+                    />
+                  </div>
+                )}
 
-            {/* Description */}
-            {task.description && (
-              <div className="mt-8 p-6 bg-white/70 backdrop-blur rounded-xl border border-[#eef7e9]">
-                <h4 className="font-semibold text-black mb-3 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-[#6bbd45]" />
-                  Description
-                </h4>
-                <p className="text-black whitespace-pre-wrap leading-relaxed">{task.description}</p>
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="mt-8 pt-6 border-t border-[#d4e9c8]">
+                {/* Actions */}
+                {/* <div className="mt-8 pt-6 border-t border-[#d4e9c8]">
               <h4 className="text-lg font-semibold text-gray-800 mb-4">Task Controls</h4>
               <div className="flex flex-wrap items-center gap-4">
                 {(task.status === 'ASSIGNED' || task.status === 'REWORK') && (
@@ -340,45 +374,47 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-
-          {/* Work Summary */}
-          {task.workingHourTask && task.workingHourTask.length > 0 && (
-            <div className="bg-[#f5f3ff] rounded-2xl p-6 border border-[#ddd6fe]">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-3">
-                  <Timer className="w-6 h-6" />
-                  Work Summary
-                </h3>
-                <button
-                  onClick={() => setShowWorkSummary(!showWorkSummary)}
-                  className="text-indigo-600 hover:text-indigo-800"
-                >
-                  {showWorkSummary ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
-                </button>
+            </div> */}
               </div>
-              {showWorkSummary && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <SummaryCard
-                    icon={<Clock4 />}
-                    label="Total Time"
-                    value={formatHours(totalDurationSeconds / 3600)}
-                  />
-                  <SummaryCard
-                    icon={<Users />}
-                    label="Sessions"
-                    value={task.workingHourTask.length}
-                  />
-                  <SummaryCard
-                    icon={<Timer />}
-                    label="Current Status"
-                    value={statusConfig.label}
-                    color={statusConfig.text}
-                  />
+
+              {/* Work Summary */}
+              {task.workingHourTask && task.workingHourTask.length > 0 && (
+                <div className="bg-[#f5f3ff] rounded-2xl p-6 border border-[#ddd6fe]">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-3">
+                      <Timer className="w-6 h-6" />
+                      Work Summary
+                    </h3>
+                    <button
+                      onClick={() => setShowWorkSummary(!showWorkSummary)}
+                      className="text-indigo-600 hover:text-indigo-800"
+                    >
+                      {showWorkSummary ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                    </button>
+                  </div>
+                  {showWorkSummary && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <SummaryCard
+                        icon={<Clock4 />}
+                        label="Total Time"
+                        value={formatHours(totalDurationSeconds / 3600)}
+                      />
+                      <SummaryCard
+                        icon={<Users />}
+                        label="Sessions"
+                        value={task.workingHourTask.length}
+                      />
+                      <SummaryCard
+                        icon={<Timer />}
+                        label="Current Status"
+                        value={statusConfig.label}
+                        color={statusConfig.text}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>
