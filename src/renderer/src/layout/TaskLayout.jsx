@@ -7,7 +7,12 @@ import AllActiveTask from "../components/task/AllActiveTask";
 // import GetRFQByID from "../components/rfq/GetRFQByID";
 
 const TaskLayout = () => {
-  const [activeTab, setActiveTab] = useState("allTask");
+    const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+  const [activeTab, setActiveTab] = useState(
+    userRole === "connection_designer_engineer" || userRole === "estimation_head" || userRole === "project_manager"
+      ? "allTask"
+      : "activeTask",
+  );
   //   const task = useSelector((state) => state.RFQInfos.RFQData);
   return (
     <div className="w-full overflow-y-hidden overflow-x-hidden">
@@ -33,7 +38,7 @@ const TaskLayout = () => {
           >
             All Task
           </button>
-
+            {userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" ? (
           <button
             onClick={() => setActiveTab("addTask")}
             className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-[1.25rem] text-sm md:text-base font-semibold transition-all ${
@@ -44,6 +49,7 @@ const TaskLayout = () => {
           >
             Add Task
           </button>
+            ) : null}
         </div>
       </div>
       <div className="flex-1 min-h-0 bg-white p-2 rounded-b-2xl overflow-y-auto">
