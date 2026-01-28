@@ -15,11 +15,25 @@ import RichTextEditor from "../fields/RichTextEditor";
 const AddCO = ({ project, onSuccess }) => {
   const userDetail = useSelector((state) => state.userInfo.userDetail);
   const staff = useSelector((state) => state.userInfo.staffData);
+  const fabricators = useSelector(
+    (state) => state.fabricatorInfo.fabricatorData,
+  );
 
   const { register, handleSubmit, control, reset } =
     useForm();
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
+
+  const fabricatorId = project?.fabricatorID;
+  const selectedFabricator = fabricators?.find(
+    (f) => String(f.id) === String(fabricatorId),
+  );
+
+  const pocOptions =
+    selectedFabricator?.pointOfContact?.map((p) => ({
+      label: `${p.firstName} ${p.middleName ?? ""} ${p.lastName}`,
+      value: p.id,
+    })) ?? [];
 
   const recipientOptions =
     staff
@@ -69,6 +83,22 @@ const AddCO = ({ project, onSuccess }) => {
     <div className="w-full bg-white p-6 rounded-xl shadow-lg border border-gray-100">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <SectionTitle title="Fabrication & Routing" />
+
+        {/* Fabricator Contact */}
+        <Controller
+          name="recepient_id"
+          control={control}
+          render={({ field }) => (
+            <Select
+              placeholder="Fabricator Contact"
+              options={pocOptions}
+              value={pocOptions.find((o) => o.value === field.value) ?? null}
+              onChange={(option) => field.onChange(option?.value || "")}
+            />
+          )}
+        />
+
+        {/* WBT Recipient */}
         <Controller
           name="recipients"
           control={control}

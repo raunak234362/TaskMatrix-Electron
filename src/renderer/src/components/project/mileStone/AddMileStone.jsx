@@ -36,6 +36,11 @@ const AddMileStone = ({
     { label: "Approved", value: "APPROVED" },
   ];
 
+  const stageOptions = [
+    { label: "IFA", value: "IFA" },
+    { label: "IFC", value: "IFC" },
+    { label: "CO", value: "CO" },
+  ];
   const onSubmit = async (data) => {
     try {
       const payload = {
@@ -56,8 +61,8 @@ const AddMileStone = ({
   };
 
   return (
-    <div className="flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div className="flex flex-col items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
         <div className="flex justify-between items-center p-5 border-b bg-gray-50">
           <h3 className="text-xl font-bold text-gray-700 flex items-center gap-2">
@@ -73,7 +78,7 @@ const AddMileStone = ({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5 overflow-y-auto">
           <Input
             label="Subject *"
             placeholder="e.g. 50% Submission"
@@ -135,7 +140,31 @@ const AddMileStone = ({
               defaultValue={statusOptions[0]}
               onChange={(opt) => setValue("status", opt?.value || "PENDING")}
               className="text-sm"
+              menuPortalTarget={document.body}
+              menuPosition="fixed"
               styles={{
+                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                control: (base) => ({
+                  ...base,
+                  borderRadius: "0.5rem",
+                  padding: "2px",
+                }),
+              }}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Stage
+            </label>
+            <Select
+              options={stageOptions}
+              defaultValue={stageOptions[0]}
+              onChange={(opt) => setValue("stage", opt?.value || "PENDING")}
+              className="text-sm"
+              menuPortalTarget={document.body}
+              menuPosition="fixed"
+              styles={{
+                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                 control: (base) => ({
                   ...base,
                   borderRadius: "0.5rem",
@@ -147,13 +176,13 @@ const AddMileStone = ({
 
           {/* Footer */}
           <div className="flex flex-col sm:flex-row justify-center gap-3 pt-4 border-t mt-2">
-            <Button
+            {/* <Button
               type="button"
               onClick={onClose}
               className="w-full sm:w-auto px-5 bg-gray-100 text-gray-700 hover:bg-gray-200"
             >
               Cancel
-            </Button>
+            </Button> */}
             <Button
               type="submit"
               disabled={isSubmitting}
