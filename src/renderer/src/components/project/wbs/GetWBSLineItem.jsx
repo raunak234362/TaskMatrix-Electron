@@ -6,6 +6,14 @@ import { Button } from "../../ui/button";
 import DataTable from "../../ui/table";
 import UpdateLineItem from "./UpdateLineItem";
 
+// Helper function to convert decimal hours to hh:mm format
+const formatDecimalHoursToTime = (decimalHours) => {
+  if (!decimalHours || decimalHours === 0) return "00:00";
+  const hours = Math.floor(decimalHours);
+  const minutes = Math.round((decimalHours - hours) * 60);
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+};
+
 const GetWBSLineItem = ({
   wbsId,
   onClose,
@@ -83,7 +91,7 @@ const GetWBSLineItem = ({
       header: "Exec Hr",
       cell: ({ row }) => (
         <span className="text-sm text-gray-700">
-          {(row.original.execHr ?? row.original.totalExecHr ?? 0).toFixed(1)}h
+          {formatDecimalHoursToTime(row.original.execHr ?? row.original.totalExecHr ?? 0)}
         </span>
       ),
       enableSorting: true,
@@ -93,7 +101,7 @@ const GetWBSLineItem = ({
       header: "Check Hr",
       cell: ({ row }) => (
         <span className="text-sm text-gray-700">
-          {(row.original.checkHr ?? row.original.totalCheckHr ?? 0).toFixed(1)}h
+          {formatDecimalHoursToTime(row.original.checkHr ?? row.original.totalCheckHr ?? 0)}
         </span>
       ),
       enableSorting: true,
@@ -140,7 +148,6 @@ const GetWBSLineItem = ({
           <X className="w-5 h-5" />
         </Button>
       </div>
-
       <div className="p-6">
         {lineItems.length > 0 ? (
           <DataTable

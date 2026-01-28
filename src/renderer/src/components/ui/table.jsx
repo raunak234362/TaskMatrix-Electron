@@ -195,17 +195,17 @@ export default function DataTable({
   return (
     <>
       {/* toolbar */}
-      {/* <div className="flex flex-col md:flex-row justify-between gap-3 mb-4 px-4 pt-4">
+      <div className="flex flex-col md:flex-row justify-between gap-3 mb-4 px-4 pt-4">
         <div className="relative w-full md:w-64">
           <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
           <input
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            placeholder={searchPlaceholder}
-            className="pl-9 pr-3 py-2 w-full border rounded-lg text-sm"
+            placeholder="Search..."
+            className="pl-9 pr-3 py-2 w-full border rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none"
           />
         </div>
-      </div> */}
+      </div>
 
       {/* Filter Bar */}
       {table

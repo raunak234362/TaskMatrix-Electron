@@ -12,9 +12,10 @@ import {
 
 import DataTable from "../ui/table";
 import FetchTaskByID from "./FetchTaskByID";
+import GetTaskByID from "./GetTaskByID";
 
 const TaskDetailWrapper = ({ row, close }) => {
-  return <FetchTaskByID id={row.id} onClose={close} />;
+  return <GetTaskByID id={row.id} onClose={close} />;
 };
 
 const AllTasks = () => {
@@ -28,7 +29,7 @@ const AllTasks = () => {
       try {
         setLoading(true);
         const response =
-          userRole === "admin"
+          userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" || userRole === "deputy_manager"
             ? await Service.GetAllTask()
             : await Service.GetMyTask();
 

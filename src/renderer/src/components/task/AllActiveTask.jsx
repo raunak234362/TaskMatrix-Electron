@@ -8,15 +8,18 @@ import {
   User,
   Briefcase,
   Tag,
+  Eye,
 } from "lucide-react";
 
 import DataTable from "../ui/table";
-// import GetTaskByID from "./GetTaskByID";
+import FetchTaskByID from "./FetchTaskByID";
 
 const AllActiveTask = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [specificTask, setSpecificTask] = useState("");
+  const [displayTask, setDisplayTask] = useState(false);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -67,15 +70,51 @@ const AllActiveTask = () => {
 
   const getPriorityLabel = (priority) => {
     switch (priority) {
+      case 0:
+        return { label: "Low", color: "text-green-600" };
       case 1:
-        return { label: "High", color: "text-red-600" };
+        return { label: "Medium", color: "text-yellow-600" };
       case 2:
-        return { label: "Medium", color: "text-orange-500" };
+        return { label: "High", color: "text-purple-600" };
       case 3:
-        return { label: "Low", color: "text-blue-500" };
+        return { label: "Critical", color: "text-red-600" };
       default:
         return { label: "Normal", color: "text-gray-700" };
     }
+  };
+
+  // Filter out tasks with status "VALIDATE_COMPLETE", "COMPLETE_OTHER", "USER_FAULT"
+  const filteredTasks = useMemo(() => {
+    return tasks.filter(
+      (task) =>
+        task.status !== "VALIDATE_COMPLETE" &&
+        task.status !== "COMPLETE_OTHER" &&
+        task.status !== "USER_FAULT"
+    );
+  }, [tasks]);
+
+  // Find the highest-priority unlockable task from ASSIGNED, IN_PROGRESS, BREAK, or REWORK
+  const unlockableStatuses = ["ASSIGNED", "IN_PROGRESS", "BREAK", "REWORK"];
+
+  const highestPriorityTask = useMemo(() => {
+    return filteredTasks
+      .filter((task) => unlockableStatuses.includes(task.status))
+      .sort((a, b) => {
+        if (b.priority !== a.priority) {
+          return b.priority - a.priority; // Higher priority first
+        }
+        if (new Date(a.due_date).getTime() !== new Date(b.due_date).getTime()) {
+          return new Date(a.due_date) - new Date(b.due_date); // Earlier due date first
+        }
+        return new Date(a.created_on) - new Date(b.created_on); // Earlier created_on first
+      })[0];
+  }, [filteredTasks]);
+
+  const unlockableTaskId = highestPriorityTask?.id;
+
+  const handleTaskView = (taskId) => {
+    setSpecificTask(taskId);
+    setDisplayTask(true);
   };
 
   const columns = useMemo(
@@ -181,8 +220,30 @@ const AllActiveTask = () => {
           </div>
         ),
       },
+      {
+        accessorKey: "id",
+        header: "View",
+        cell: ({ row }) => {
+          const task = row.original;
+          const canView =
+            task.status === "IN_REVIEW" || task.id === unlockableTaskId;
+          return (
+            <button
+              onClick={() => handleTaskView(task.id)}
+              disabled={!canView}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${canView
+                ? "bg-teal-500 text-white hover:bg-teal-600 hover:shadow-md"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-50"
+                }`}
+            >
+              <Eye className="w-4 h-4" />
+              View
+            </button>
+          );
+        },
+      },
     ],
-    []
+    [unlockableTaskId]
   );
 
   if (loading) {
@@ -240,13 +301,33 @@ const AllActiveTask = () => {
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-4">
           <DataTable
             columns={columns}
-            data={tasks}
-            // detailComponent={({ row, close }) => (
-            //   <GetTaskByID id={row.id} onClose={close} />
-            // )}
+            data={filteredTasks}
             pageSizeOptions={[10, 25, 50]}
           />
         </div>
+      )}
+
+      {displayTask && (
+        <FetchTaskByID
+          id={specificTask}
+          onClose={() => setDisplayTask(false)}
+          refresh={async () => {
+            try {
+              setLoading(true);
+              const response = await Service.GetNonCompletedTasks();
+              const taskData = Array.isArray(response.data)
+                ? response.data
+                : response.data
+                  ? Object.values(response.data)
+                  : [];
+              setTasks(taskData);
+              setLoading(false);
+            } catch (err) {
+              setError(err);
+              setLoading(false);
+            }
+          }}
+        />
       )}
     </div>
   );
