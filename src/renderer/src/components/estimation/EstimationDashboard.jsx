@@ -20,7 +20,7 @@ const EstimationDashboard = () => {
 
   useEffect(() => {
     fetchData()
-  }, )
+  }, [])
 
   const fetchData = async () => {
     try {
