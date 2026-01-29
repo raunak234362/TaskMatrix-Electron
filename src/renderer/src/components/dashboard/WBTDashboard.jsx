@@ -59,7 +59,7 @@ const WBTDashboard = () => {
 
   // Role Based Logic
   const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
-  const isAdminRole = ['admin', 'operation_executive', 'project_manager', 'department_manager'].includes(userRole)
+  const isAdminRole = ['admin', 'operation_executive', 'project_manager', 'department_manager', 'project_manager_officer'].includes(userRole)
 
   const [userStats, setUserStats] = useState({
     totalTasks: 0,
@@ -318,7 +318,9 @@ const WBTDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <InvoiceTrends invoices={adminData.invoices} />
+              {userRole === 'project_manager_officer' && (
+                <InvoiceTrends invoices={adminData.invoices} />
+              )}
               <UpcomingSubmittals
                 pendingSubmittals={adminData.submittals}
                 invoices={adminData.invoices}

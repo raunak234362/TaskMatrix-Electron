@@ -3,7 +3,7 @@ import { ClipboardList, AlertCircle } from 'lucide-react'
 
 const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
   const [activeTab, setActiveTab] = React.useState('submittals')
-
+const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
   const isOverdue = (dateString) => {
     if (!dateString) return false
     const today = new Date()
@@ -33,6 +33,7 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
+          
           <button
             onClick={() => setActiveTab('submittals')}
             className={`text-md font-semibold transition-all ${activeTab === 'submittals'
@@ -42,6 +43,7 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
           >
             Upcoming Submittals
           </button>
+          {userRole === 'project_manager_officer' && (
           <button
             onClick={() => setActiveTab('invoices')}
             className={`text-md font-semibold transition-all ${activeTab === 'invoices'
@@ -51,6 +53,7 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
           >
             Invoice Need Raise
           </button>
+          )}
         </div>
         <span className="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full">
           {activeTab === 'submittals'

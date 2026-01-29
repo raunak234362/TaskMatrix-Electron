@@ -246,10 +246,12 @@ const GetProjectById = ({ id }) => {
                 />
               </div>
               <div className="space-y-3">
-                <InfoRow
-                  label="Estimated Hours"
-                  value={project.estimatedHours || 0}
-                />
+                {userRole !== 'staff' || userRole !== 'project_manager' || userRole !== 'department_manager' && (
+                  <InfoRow
+                    label="Estimated Hours"
+                    value={project.estimatedHours || 0}
+                  />
+                )}
                 <InfoRow
                   label="Department"
                   value={project.department?.name || "—"}
