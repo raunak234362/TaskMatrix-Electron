@@ -14,8 +14,10 @@ import { setWBSForProject } from "../../../store/wbsSlice";
 const AllWBS = ({ id, stage }) => {
   const dispatch = useDispatch();
 
-  const userRole = sessionStorage.getItem("role"); // ✅ fixed
+  const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const projectId = id;
+  const canViewDetails = ["admin", "operation_executive", "deputy_manager", "estimation_head"].includes(userRole);
+  console.log(userRole);
 
   const [wbsBundles, setWbsBundles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -155,27 +157,19 @@ const AllWBS = ({ id, stage }) => {
           </p>
         </div>
 
-        {/* ✅ Role-based button visibility */}
-        {userRole !== "staff" && userRole !== "project_manager" && (
-          <Button onClick={() => setShowFetchTemplate(true)}>
-            Add New Bundle
-          </Button>
-        )}
+        {(userRole === "admin" ||
+          userRole === "operation_executive" ||
+          userRole === "estimation_head") && (
+            <Button onClick={() => setShowFetchTemplate(true)}>
+              Add New Bundle
+            </Button>
+          )}
       </div>
 
       <DataTable
         columns={columns}
         data={wbsBundles}
-        onRowClick={handleRowClick}
-        detailComponent={({ row, close }) => (
-          <GetWBSByID
-            projectId={projectId}
-            id={row.id || row.fabId || ""}
-            stage={row.stage || ""}
-            onClose={close}
-            initialData={row}
-          />
-        )}
+        onRowClick={canViewDetails ? handleRowClick : undefined}
         pageSizeOptions={[10, 25, 50, 100]}
         initialSorting={[
           { id: "totalQtyNo", desc: true },

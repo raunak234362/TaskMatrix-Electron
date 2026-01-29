@@ -11,7 +11,7 @@ import {
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-const InvoiceTrends = ({ invoices }) => {
+const InvoiceTrends = ({ invoices = [] }) => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(null)
 
@@ -19,12 +19,12 @@ const InvoiceTrends = ({ invoices }) => {
     if (selectedMonth === null) {
       // Yearly view - Monthly grouping
       return months.map((month, index) => {
-        const monthlyInvoices = invoices.filter((inv) => {
+        const monthlyInvoices = invoices?.filter((inv) => {
           const date = new Date(inv.invoiceDate)
           return date.getFullYear() === selectedYear && date.getMonth() === index
         })
 
-        const totalAmount = monthlyInvoices.reduce(
+        const totalAmount = monthlyInvoices?.reduce(
           (sum, inv) => sum + (inv.totalInvoiceValue || 0),
           0
         )
@@ -37,7 +37,7 @@ const InvoiceTrends = ({ invoices }) => {
     } else {
       // Monthly view - Daily grouping
       const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate()
-      const dailyData = 
+      const dailyData = []
       for (let i = 1; i <= daysInMonth; i++) {
         const dailyInvoices = invoices.filter((inv) => {
           const date = new Date(inv.invoiceDate)
@@ -71,7 +71,7 @@ const InvoiceTrends = ({ invoices }) => {
   const years = useMemo(() => {
     const currentYear = new Date().getFullYear()
     return Array.from({ length: 5 }, (_, i) => currentYear - i)
-  }, )
+  },)
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -108,11 +108,10 @@ const InvoiceTrends = ({ invoices }) => {
       <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 no-scrollbar">
         <button
           onClick={() => setSelectedMonth(null)}
-          className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${
-            selectedMonth === null
+          className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${selectedMonth === null
               ? 'bg-green-600 text-white shadow-md shadow-green-100'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
+            }`}
         >
           All Months
         </button>
@@ -120,11 +119,10 @@ const InvoiceTrends = ({ invoices }) => {
           <button
             key={month}
             onClick={() => setSelectedMonth(index)}
-            className={`px-3 py-1 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${
-              selectedMonth === index
+            className={`px-3 py-1 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${selectedMonth === index
                 ? 'bg-green-600 text-white shadow-md shadow-green-100'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+              }`}
           >
             {month}
           </button>

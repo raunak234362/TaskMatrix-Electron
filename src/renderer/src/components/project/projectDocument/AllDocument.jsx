@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 
 const AllDocument = ({ projectId }) => {
   const [view, setView] = useState("list");
-
+const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   if (!projectId) return null;
 
   return (
@@ -22,6 +22,7 @@ const AllDocument = ({ projectId }) => {
           >
             All Drawings
           </button>
+          {userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" ? (
           <button
             onClick={() => setView("add")}
             className={`px-3 py-1 text-sm font-medium rounded-md ${view === "add"
@@ -31,6 +32,7 @@ const AllDocument = ({ projectId }) => {
           >
             Add Drawing
           </button>
+          ) : null}
         </div>
       </div>
 

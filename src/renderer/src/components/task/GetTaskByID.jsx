@@ -22,6 +22,7 @@ import Service from '../../api/Service'
 import { toast } from 'react-toastify'
 import { Button } from '../ui/button'
 import EditTask from './EditTask'
+import Comment from "./comments/Comment";
 
 const GetTaskByID = ({ id, onClose, refresh }) => {
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase();
@@ -30,6 +31,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
   const [processing, setProcessing] = useState(false)
   const [showWorkSummary, setShowWorkSummary] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
+  const [staffData, setStaffData] = useState([]);
 
   const fetchTask = async () => {
     if (!id) return
@@ -47,7 +49,47 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
 
   useEffect(() => {
     fetchTask()
+    const fetchStaff = async () => {
+      try {
+        const data = await Service.FetchAllEmployee();
+        setStaffData(data || []);
+      } catch (err) {
+        console.error("Failed to fetch staff", err);
+      }
+    };
+    fetchStaff();
   }, [id])
+
+  const handleAddComment = async (data) => {
+    try {
+      const user_id = sessionStorage.getItem("userId");
+      const payload = {
+        task_id: task.id,
+        user_id: Number(user_id),
+        data: data.comment,
+      };
+      await Service.AddTaskComment(payload);
+      toast.success("Comment added successfully");
+      fetchTask();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add comment");
+    }
+  };
+
+  const handleAcknowledgeComment = async (commentId, data) => {
+    try {
+      const payload = {
+        ...data,
+      };
+      await Service.AddTaskCommentAcknowledged(commentId, payload);
+      toast.success("Comment acknowledged");
+      fetchTask();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to acknowledge comment");
+    }
+  };
 
   const getActiveWorkID = () => {
     return task?.workingHourTask?.find((wh) => wh.ended_at === null)?.id || null
@@ -220,7 +262,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-black">{task.name}</h2>
-              <p className="text-sm text-black">ID: #{task.id}</p>
+              {/* <p className="text-sm text-black">ID: #{task.id}</p> */}
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -232,7 +274,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                 <Button
                   onClick={() => setIsEditing(true)}
                   variant="outline"
-                  className="flex items-center gap-2 px-6 py-3 font-medium transition border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                  className="flex items-center gap-2 px-6 py-3 font-medium transition border-indigo-200 text-white bg-[#6bbd45] hover:bg-[#5aa33a]"
                 >
                   <Edit className="w-4 h-4" /> Edit Task
                 </Button>
@@ -414,6 +456,15 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                   )}
                 </div>
               )}
+              {/* Comments Section */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-6">
+                <Comment
+                  comments={task.taskcomment}
+                  onAddComment={handleAddComment}
+                  staffData={staffData}
+                  onAcknowledge={handleAcknowledgeComment}
+                />
+              </div>
             </>
           )}
         </div>

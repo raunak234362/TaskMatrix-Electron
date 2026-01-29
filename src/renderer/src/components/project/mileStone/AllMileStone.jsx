@@ -13,6 +13,7 @@ import { setMilestonesForProject } from "../../../store/milestoneSlice";
 
 
 const AllMileStone = ({ project, onUpdate }) => {
+  const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const [addMileStoneModal, setAddMileStoneModal] = useState(false);
   const dispatch = useDispatch();
   const milestonesByProject = useSelector(
@@ -64,12 +65,15 @@ const AllMileStone = ({ project, onUpdate }) => {
   return (
     <div className="p-2">
       <div className="flex justify-between items-center mb-4">
-        <Button
-          onClick={handleOpenAddMileStone}
-          className="text-sm py-1 px-3 bg-green-600 text-white"
-        >
-          + Add Milestone
-        </Button>
+
+        {!(userRole === "staff" || userRole === "client" || userRole === "vendor") && (
+          <Button
+            onClick={handleOpenAddMileStone}
+            className="text-sm py-1 px-3 bg-green-600 text-white"
+          >
+            + Add Milestone
+          </Button>
+        )}
       </div>
       {milestones && milestones.length > 0 ? (
         <DataTable

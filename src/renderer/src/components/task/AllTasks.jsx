@@ -87,6 +87,38 @@ const AllTasks = () => {
     }
   };
 
+  /* -------------------- Filters Options -------------------- */
+  const { projectOptions, stageOptions, statusOptions, userOptions } =
+    useMemo(() => {
+      const projects = new Set();
+      const stages = new Set();
+      const statuses = new Set();
+      const users = new Set();
+
+      tasks.forEach((task) => {
+        if (task.project?.name) projects.add(task.project.name);
+        if (task.Stage) stages.add(task.Stage);
+        if (task.status) statuses.add(task.status);
+        const userName = task.user
+          ? `${task.user.firstName} ${task.user.lastName}`
+          : "Unassigned";
+        users.add(userName);
+      });
+
+      return {
+        projectOptions: Array.from(projects).map((p) => ({
+          label: p,
+          value: p,
+        })),
+        stageOptions: Array.from(stages).map((s) => ({ label: s, value: s })),
+        statusOptions: Array.from(statuses).map((s) => ({
+          label: s,
+          value: s,
+        })),
+        userOptions: Array.from(users).map((u) => ({ label: u, value: u })),
+      };
+    }, [tasks]);
+
   const columns = useMemo(
     () => [
       {
@@ -108,25 +140,42 @@ const AllTasks = () => {
       },
       {
         accessorKey: "project.name",
-        header: "Project & Stage",
+        header: "Project",
+        enableColumnFilter: true,
+        filterType: "select",
+        filterOptions: projectOptions,
         cell: ({ row }) => (
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <Briefcase className="w-3.5 h-3.5 text-gray-400" />
-              <span className="font-medium">
-                {row.original.project?.name || "N/A"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-gray-700">
-              <Tag className="w-3.5 h-3.5 text-gray-400" />
-              <span>Stage: {row.original.Stage || "N/A"}</span>
-            </div>
+          <div className="flex items-center gap-2 text-sm text-gray-700">
+            <Briefcase className="w-3.5 h-3.5 text-gray-400" />
+            <span className="font-medium">
+              {row.original.project?.name || "N/A"}
+            </span>
           </div>
         ),
       },
       {
-        accessorKey: "user.firstName",
+        accessorKey: "Stage",
+        header: "Stage",
+        enableColumnFilter: true,
+        filterType: "select",
+        filterOptions: stageOptions,
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2 text-xs text-gray-700">
+            <Tag className="w-3.5 h-3.5 text-gray-400" />
+            <span>{row.original.Stage || "N/A"}</span>
+          </div>
+        ),
+      },
+      {
+        accessorFn: (row) =>
+          row.user
+            ? `${row.user.firstName} ${row.user.lastName}`
+            : "Unassigned",
+        id: "assignedTo",
         header: "Assigned To",
+        enableColumnFilter: userRole !== "staff",
+        filterType: "select",
+        filterOptions: userOptions,
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-linear-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
@@ -150,6 +199,9 @@ const AllTasks = () => {
       {
         accessorKey: "status",
         header: "Status",
+        enableColumnFilter: true,
+        filterType: "select",
+        filterOptions: statusOptions,
         cell: ({ row }) => (
           <span
             className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(
@@ -191,7 +243,7 @@ const AllTasks = () => {
         ),
       },
     ],
-    []
+    [projectOptions, stageOptions, statusOptions, userOptions, userRole]
   );
 
   if (loading) {

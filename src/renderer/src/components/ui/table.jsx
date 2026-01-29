@@ -196,22 +196,23 @@ export default function DataTable({
     <>
       {/* toolbar */}
       <div className="flex flex-col md:flex-row justify-between gap-3 mb-4 px-4 pt-4">
-        <div className="relative w-full md:w-64">
-          <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
-          <input
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            placeholder="Search..."
-            className="pl-9 pr-3 py-2 w-full border rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none"
-          />
-        </div>
+
       </div>
 
       {/* Filter Bar */}
       {table
         .getAllColumns()
         .some((c) => c.columnDef.enableColumnFilter) && (
-          <div className="flex flex-wrap items-end gap-4 mb-6 p-4 bg-gray-50/50 rounded-xl border border-gray-100">
+          <div className="flex flex-wrap items-end gap-2 mb-6 p-4 bg-gray-50/50 rounded-xl border border-gray-100">
+            <div className="relative w-full md:w-64">
+              <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+              <input
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                placeholder="Search..."
+                className="pl-9 pr-2 py-1 w-full border rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none"
+              />
+            </div>
             {table
               .getAllColumns()
               .filter((c) => c.columnDef.enableColumnFilter)
@@ -226,9 +227,10 @@ export default function DataTable({
                   <ColumnFilter column={column} />
                 </div>
               ))}
+
             <Button
               onClick={() => table.resetColumnFilters()}
-              className="text-xs text-gray-500 hover:text-red-600 transition-colors h-9 px-2"
+              className="text-xs text-white transition-colors h-9 px-2"
             >
               <X className="w-3 h-3 mr-1" /> Clear
             </Button>

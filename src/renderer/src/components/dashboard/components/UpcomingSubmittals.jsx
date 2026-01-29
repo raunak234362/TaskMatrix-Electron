@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { ClipboardList, AlertCircle } from 'lucide-react'
 
-const UpcomingSubmittals = ({ pendingSubmittals, invoices =  }) => {
+const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
   const [activeTab, setActiveTab] = React.useState('submittals')
 
   const isOverdue = (dateString) => {
@@ -17,7 +17,7 @@ const UpcomingSubmittals = ({ pendingSubmittals, invoices =  }) => {
     pendingSubmittals.forEach((submittal) => {
       const projectName = submittal.project?.name || submittal.name || 'Other Projects'
       if (!groups[projectName]) {
-        groups[projectName] = 
+        groups[projectName] = []
       }
       groups[projectName].push(submittal)
     })
@@ -35,21 +35,19 @@ const UpcomingSubmittals = ({ pendingSubmittals, invoices =  }) => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => setActiveTab('submittals')}
-            className={`text-md font-semibold transition-all ${
-              activeTab === 'submittals'
+            className={`text-md font-semibold transition-all ${activeTab === 'submittals'
                 ? 'text-green-600 border-b-2 border-green-600'
                 : 'text-gray-400 hover:text-gray-700'
-            }`}
+              }`}
           >
             Upcoming Submittals
           </button>
           <button
             onClick={() => setActiveTab('invoices')}
-            className={`text-md font-semibold transition-all ${
-              activeTab === 'invoices'
+            className={`text-md font-semibold transition-all ${activeTab === 'invoices'
                 ? 'text-green-600 border-b-2 border-green-600'
                 : 'text-gray-400 hover:text-gray-700'
-            }`}
+              }`}
           >
             Invoice Need Raise
           </button>
@@ -81,29 +79,26 @@ const UpcomingSubmittals = ({ pendingSubmittals, invoices =  }) => {
                     return (
                       <div
                         key={submittal.id || index}
-                        className={`p-4 rounded-xl border transition-all group ${
-                          overdue
+                        className={`p-4 rounded-xl border transition-all group ${overdue
                             ? 'bg-red-50 border-red-100 hover:bg-red-100/50 hover:border-red-200 shadow-sm shadow-red-50'
                             : 'bg-gray-50/50 border-gray-50 hover:bg-white hover:border-green-100 hover:shadow-md hover:shadow-green-50/50'
-                        }`}
+                          }`}
                       >
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center gap-2">
                             {overdue && <AlertCircle size={14} className="text-red-500" />}
                             <h4
-                              className={`font-bold text-sm transition-colors ${
-                                overdue
+                              className={`font-bold text-sm transition-colors ${overdue
                                   ? 'text-red-700'
                                   : 'text-gray-700 group-hover:text-green-700'
-                              }`}
+                                }`}
                             >
                               {submittal.subject || 'No Subject'}
                             </h4>
                           </div>
                           <span
-                            className={`text-[10px] font-bold uppercase tracking-wider ${
-                              overdue ? 'text-red-500' : 'text-gray-400'
-                            }`}
+                            className={`text-[10px] font-bold uppercase tracking-wider ${overdue ? 'text-red-500' : 'text-gray-400'
+                              }`}
                           >
                             {submittal.approvalDate
                               ? new Date(submittal.approvalDate).toLocaleDateString()
@@ -113,16 +108,14 @@ const UpcomingSubmittals = ({ pendingSubmittals, invoices =  }) => {
                         <div className="grid grid-cols-1 gap-2">
                           <div className="flex flex-col">
                             <span
-                              className={`text-[10px] uppercase font-medium ${
-                                overdue ? 'text-red-400' : 'text-gray-400'
-                              }`}
+                              className={`text-[10px] uppercase font-medium ${overdue ? 'text-red-400' : 'text-gray-400'
+                                }`}
                             >
                               Fabricator
                             </span>
                             <span
-                              className={`text-xs font-semibold truncate ${
-                                overdue ? 'text-red-600' : 'text-gray-700'
-                              }`}
+                              className={`text-xs font-semibold truncate ${overdue ? 'text-red-600' : 'text-gray-700'
+                                }`}
                             >
                               {submittal.fabricator?.fabName || submittal.fabName || 'N/A'}
                             </span>

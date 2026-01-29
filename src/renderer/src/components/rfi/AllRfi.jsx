@@ -18,7 +18,6 @@ const AllRFI = ({ rfiData = [] }) => {
 
   useEffect(() => {
     if (rfiData && rfiData.length > 0) {
-
       const normalized = rfiData.map((item) => ({
         ...item,
         createdAt: item.createdAt || item.date || null,
@@ -26,7 +25,8 @@ const AllRFI = ({ rfiData = [] }) => {
       setRFIs(normalized);
       setLoading(false);
     } else {
-
+      setRFIs([]);
+      setLoading(false);
     }
   }, [rfiData]);
 
@@ -60,8 +60,8 @@ const AllRFI = ({ rfiData = [] }) => {
       cell: ({ row }) => (
         <span
           className={`px-2 py-1 text-xs rounded-full ${row.original.status === true
-              ? "bg-yellow-100 text-yellow-700"
-              : "bg-green-100 text-green-700"
+            ? "bg-yellow-100 text-yellow-700"
+            : "bg-green-100 text-green-700"
             }`}
         >
           {row.original.status ? "PENDING" : "RESPONDED"}

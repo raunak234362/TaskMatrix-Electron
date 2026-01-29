@@ -1202,6 +1202,21 @@ class Service {
     }
   }
 
+  // Get Project Note By ID
+  static async GetProjectNoteById(projectId, noteId) {
+    try {
+      const response = await api.get(`project/projects/${projectId}/notes/${noteId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Project note fetched', response.data)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   // Create Project Note
   static async CreateProjectNote(projectId, data) {
     const token = sessionStorage.getItem('token')
@@ -1703,6 +1718,38 @@ class Service {
       console.error('cannot find Task', error)
     }
   }
+
+// Task Comments
+static async AddTaskComment(data) {
+  try {
+    const response = await api.post(`comment`, data, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    console.log('Task comment added:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('Error adding task comment:', error)
+    throw error
+  }
+}
+
+// Add Acknowledged by comment ID
+static async AddTaskCommentAcknowledged(id,data) {
+  try {
+    const response = await api.patch(`comment/acknowledge/${id}`, data, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    console.log('Task comment acknowledged:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('Error acknowledging task comment:', error)
+    throw error
+  }
+}
 
   // Get User Stats
   static async getUsersStats(userId) {

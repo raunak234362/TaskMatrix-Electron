@@ -61,8 +61,8 @@ const AddMileStone = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
         <div className="flex justify-between items-center p-5 border-b bg-gray-50">
           <h3 className="text-xl font-bold text-gray-700 flex items-center gap-2">
@@ -90,7 +90,7 @@ const AddMileStone = ({
             </p>
           )}
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Description *
             </label>
@@ -111,7 +111,7 @@ const AddMileStone = ({
                 {errors.description.message}
               </p>
             )}
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-2 gap-4">
             {/* <div>

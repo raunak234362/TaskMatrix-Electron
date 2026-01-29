@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 
 const Profile = () => {
   const dispatch = useDispatch();
+  const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
 
@@ -166,8 +167,12 @@ const Profile = () => {
         </div>
         <div className="border-t border-gray-200 pt-6">
           <div className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <Edit2 className="w-5 h-5 text-green-600" /> Update Detail{" "}
-            <Button onClick={() => setIsEditModalOpen(true)}>Update </Button>
+            {userRole === "admin" || userRole === "human_resource" && (
+              <>
+                <Edit2 className="w-5 h-5 text-green-600" /> Update Detail{" "}
+                <Button onClick={() => setIsEditModalOpen(true)}>Update </Button>
+              </>
+            )}
             <Button onClick={() => setIsChangePasswordModalOpen(true)}>Change Password </Button>
           </div>
         </div>

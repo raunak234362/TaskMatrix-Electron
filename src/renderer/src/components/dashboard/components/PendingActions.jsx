@@ -73,8 +73,14 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
             <div
               key={action.title}
               onClick={() => {
-                if (action.title === 'Pending Submittals' && onActionClick) {
-                  onActionClick('PENDING_SUBMITTALS')
+                if (onActionClick) {
+                  const typeMap = {
+                    'Pending RFI': 'PENDING_RFI',
+                    'Pending Submittals': 'PENDING_SUBMITTALS',
+                    'Change Orders': 'CHANGE_ORDERS',
+                    'Pending RFQ': 'PENDING_RFQ'
+                  }
+                  onActionClick(typeMap[action.title])
                 }
               }}
               className="flex flex-row items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 cursor-pointer group"

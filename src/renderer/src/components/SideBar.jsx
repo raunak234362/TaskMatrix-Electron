@@ -8,10 +8,12 @@ import Button from './fields/Button'
 
 const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
   const userData = useSelector((state) => state?.userdata?.userDetail)
-
+  console.log(userData,"=========");
+  
   const navigate = useNavigate()
   const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
-
+  const designation = sessionStorage.getItem('designation')?.toLowerCase() || ''
+  
   const canView = (roles) => roles.includes(userRole.toLowerCase())
 
   const handleRefresh = () => {
@@ -123,7 +125,7 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
               <div className="overflow-hidden text-white">
                 <p className="text-sm font-bold truncate">{sessionStorage.getItem('username')}</p>
                 <p className="text-[10px] font-bold uppercase tracking-wider truncate opacity-80">
-                  {userData?.role || userRole}
+                  {userData?.role || designation}
                 </p>
               </div>
             </div>

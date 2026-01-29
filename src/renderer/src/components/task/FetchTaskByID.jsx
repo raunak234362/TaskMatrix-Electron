@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 import { Button } from "../ui/button";
 import EditTask from "./EditTask";
 import { Edit } from "lucide-react";
+import Comment from "./comments/Comment";
 
 
 
@@ -35,6 +36,7 @@ const FetchTaskByID = ({
   const [processing, setProcessing] = useState(false);
   const [showWorkSummary, setShowWorkSummary] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [staffData, setStaffData] = useState([]);
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const fetchTask = async () => {
     if (!id) return;
@@ -52,7 +54,47 @@ const FetchTaskByID = ({
 
   useEffect(() => {
     fetchTask();
+    const fetchStaff = async () => {
+      try {
+        const data = await Service.FetchAllEmployee();
+        setStaffData(data || []);
+      } catch (err) {
+        console.error("Failed to fetch staff", err);
+      }
+    };
+    fetchStaff();
   }, [id]);
+
+  const handleAddComment = async (data) => {
+    try {
+      const user_id = sessionStorage.getItem("userId");
+      const payload = {
+        task_id: task.id,
+        user_id: Number(user_id),
+        data: data.comment,
+      };
+      await Service.AddTaskComment(payload);
+      toast.success("Comment added successfully");
+      fetchTask();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to add comment");
+    }
+  };
+
+  const handleAcknowledgeComment = async (commentId, data) => {
+    try {
+      const payload = {
+        ...data,
+      };
+      await Service.AddTaskCommentAcknowledged(commentId, payload);
+      toast.success("Comment acknowledged");
+      fetchTask();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to acknowledge comment");
+    }
+  };
 
   const getActiveWorkID = () => {
     return (
@@ -455,6 +497,16 @@ const FetchTaskByID = ({
                   )}
                 </div>
               )}
+
+              {/* Comments Section */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-6">
+                <Comment
+                  comments={task.taskcomment}
+                  onAddComment={handleAddComment}
+                  staffData={staffData}
+                  onAcknowledge={handleAcknowledgeComment}
+                />
+              </div>
             </>
           )}
         </div>

@@ -148,15 +148,15 @@ const GetWBSByIDsHours = ({
 
             {/* Footer Section */}
             <div className="px-8 py-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-4">
-                <Button
+                {/* <Button
                     variant="outline"
                     className="bg-white text-gray-700 border-gray-200 hover:bg-gray-50 shadow-sm"
                 >
                     Download Report
-                </Button>
-                <Button className="text-white shadow-lg shadow-green-100">
+                </Button> */}
+                {/* <Button className="text-white shadow-lg shadow-green-100">
                     Add Quantity
-                </Button>
+                </Button> */}
             </div>
         </>
     );

@@ -154,13 +154,13 @@ const GetProjectById = ({ id }) => {
         </div>
 
         {/* Tabs */}
-        <div className="mb-4 border-b">
+        <div className="mb-4">
           {/* Mobile Dropdown */}
           <div className="block md:hidden mb-2">
             <select
               value={activeTab}
               onChange={(e) => setActiveTab(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md bg-primary text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full p-2 rounded-md bg-primary text-white font-bold focus:outline-none focus:ring-2 focus:ring-green-500"
             >
               {[
                 { key: "details", label: "Details" },
@@ -173,11 +173,19 @@ const GetProjectById = ({ id }) => {
                 { key: "rfi", label: "RFI" },
                 { key: "submittals", label: "Submittals" },
                 { key: "changeOrder", label: "Change Order" },
-              ].map((tab) => (
-                <option key={tab.key} value={tab.key}>
-                  {tab.label}
-                </option>
-              ))}
+              ]
+                .filter(
+                  (tab) =>
+                    !(
+                      userRole === "staff" &&
+                      ["wbs", "rfi", "submittals", "changeOrder"].includes(tab.key)
+                    )
+                )
+                .map((tab) => (
+                  <option key={tab.key} value={tab.key}>
+                    {tab.label}
+                  </option>
+                ))}
             </select>
           </div>
 
@@ -196,19 +204,27 @@ const GetProjectById = ({ id }) => {
                 label: "Change Order",
                 icon: Settings,
               },
-            ].map(({ key, label, icon: TabIcon }) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={`flex items-center gap-2 bg-primary text-gray-800 px-4 py-2 text-md rounded-md font-medium transition-colors whitespace-nowrap ${activeTab === key
-                  ? "bg-green-600 text-white font-bold"
-                  : "text-gray-700 hover:text-green-700 font-semibold hover:bg-gray-50"
-                  }`}
-              >
-                <TabIcon className="w-4 h-4" />
-                {label}
-              </button>
-            ))}
+            ]
+            .filter(
+                (tab) =>
+            !(
+            userRole === "staff" &&
+            ["wbs", "rfi", "submittals", "changeOrder", "milestones"].includes(tab.key)
+            )
+            )
+            .map(({key, label, icon: TabIcon }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`flex items-center gap-2 bg-primary text-gray-800 px-4 py-2 text-md rounded-md font-medium transition-colors whitespace-nowrap ${activeTab === key
+                ? "bg-green-600 text-white font-bold"
+                : "text-gray-700 hover:text-green-700 font-semibold hover:bg-gray-50"
+                }`}
+            >
+              <TabIcon className="w-4 h-4" />
+              {label}
+            </button>
+              ))}
           </div>
         </div>
 
@@ -359,13 +375,13 @@ const GetProjectById = ({ id }) => {
 
           {/* ✅ Notes */}
           {activeTab === "notes" && <AllNotes projectId={id} />}
-          {activeTab === "wbs" && (
+          {activeTab === "wbs" && userRole !== "staff" && (
             <div className="text-gray-700 italic text-center">
               {/* <FolderOpenDot className="w-6 h-6 mx-auto mb-2 text-gray-400" /> */}
               <WBS id={id} stage={project.stage || ""} />
             </div>
           )}
-          {activeTab === "rfi" && (
+          {activeTab === "rfi" && userRole !== "staff" && (
             <div className="space-y-4">
               {/* Sub-tabs for RFI */}
               <div className="flex justify-start border-b border-gray-200 mb-4">
@@ -413,7 +429,7 @@ const GetProjectById = ({ id }) => {
               )}
             </div>
           )}
-          {activeTab === "submittals" && (
+          {activeTab === "submittals" && userRole !== "staff" && (
             <div className="space-y-4">
               {/* Sub-tabs for RFI */}
               <div className="flex justify-start border-b border-gray-200 mb-4">
@@ -461,7 +477,7 @@ const GetProjectById = ({ id }) => {
               )}
             </div>
           )}
-          {activeTab === "changeOrder" && (
+          {activeTab === "changeOrder" && userRole !== "staff" && (
             <div className="space-y-4">
               {/* Sub-tabs for RFI */}
               <div className="flex justify-start border-b border-gray-200 mb-4">

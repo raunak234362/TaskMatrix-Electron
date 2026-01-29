@@ -11,12 +11,14 @@ import Service from "../../../api/Service";
 
 import Button from "../../fields/Button";
 import AddNotes from "./AddNotes";
+import GetNoteByID from "./GetNoteByID";
 import { openFileSecurely } from "../../../utils/openFileSecurely";
 
 const AllNotes = ({ projectId }) => {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedNoteId, setSelectedNoteId] = useState(null);
 
   useEffect(() => {
     if (projectId) fetchNotes();
@@ -79,6 +81,12 @@ const AllNotes = ({ projectId }) => {
                   <User className="w-3 h-3" /> {note.createdBy?.firstName}{" "}
                   {note.createdBy?.lastName}
                 </div>
+                <button
+                  onClick={() => setSelectedNoteId(note.id)}
+                  className="text-xs text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+                >
+                  <FileText className="w-3 h-3" /> View
+                </button>
               </div>
 
               <div
@@ -92,7 +100,7 @@ const AllNotes = ({ projectId }) => {
                     <button
                       key={file.id}
                       onClick={() =>
-                        openFileSecurely("project", projectId, file.id)
+                        openFileSecurely("project/notes", note.id, file.id)
                       }
                       className="flex items-center gap-1 text-xs bg-green-50 text-green-700 px-2 py-1 rounded hover:bg-green-100 transition-colors"
                     >
@@ -122,6 +130,14 @@ const AllNotes = ({ projectId }) => {
           projectId={projectId}
           onNoteAdded={fetchNotes}
           onClose={() => setShowAddModal(false)}
+        />
+      )}
+
+      {selectedNoteId && (
+        <GetNoteByID
+          projectId={projectId}
+          noteId={selectedNoteId}
+          onClose={() => setSelectedNoteId(null)}
         />
       )}
     </div>
