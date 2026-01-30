@@ -256,7 +256,7 @@ const AddTask = () => {
 
         const payload = {
           name: data.name,
-          description: data.description,
+          description: data.name,
           status: isRework ? "REWORK" : "ASSIGNED",
           isRework: isRework,
           priority: data.priority,
