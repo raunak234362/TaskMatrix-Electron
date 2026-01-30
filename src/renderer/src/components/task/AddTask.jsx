@@ -23,7 +23,13 @@ import RichTextEditor from "../fields/RichTextEditor";
 import { setProjectData, updateProject } from "../../store/projectSlice";
 import { setMilestonesForProject } from "../../store/milestoneSlice";
 
-
+const formatMinutesToHHMM = (minutes) => {
+  if (isNaN(minutes) || minutes === null) return "0:00";
+  const roundedMinutes = Math.round(minutes);
+  const h = Math.floor(roundedMinutes / 60);
+  const m = roundedMinutes % 60;
+  return `${h}:${String(m).padStart(2, "0")}`;
+};
 
 const AddTask = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -195,7 +201,7 @@ const AddTask = () => {
         (sum, t) => sum + Number(t.hours || 0),
         0,
       );
-      setExistingWbsHours(total);
+      setExistingWbsHours(total / 60);
     } else {
       setExistingWbsHours(0);
     }
@@ -211,6 +217,7 @@ const AddTask = () => {
 
     const typeOk =
       !selectedWbsType ||
+      selectedWbsType === "other" ||
       (isCheckingType
         ? (w.totalCheckHr || 0) > 0 && category === baseType
         : category === selectedWbsType.toLowerCase());
@@ -228,9 +235,9 @@ const AddTask = () => {
     return sum + (isNaN(h) ? 0 : h);
   }, 0);
   const totalWbsHours = selectedWbs
-    ? selectedWbsType?.toLowerCase().includes("checking")
+    ? (selectedWbsType?.toLowerCase().includes("checking")
       ? selectedWbs.totalCheckHr || 0
-      : selectedWbs.totalExecHr || 0
+      : selectedWbs.totalExecHr || 0) / 60
     : 0;
   const availableHours = Math.max(0, totalWbsHours - existingWbsHours);
   const remainingHours = Math.max(0, availableHours - totalAssignedHours);
@@ -262,7 +269,7 @@ const AddTask = () => {
           priority: data.priority,
           due_date: data.due_date,
           duration: assignment.duration,
-          hours: parseFloat(assignment.duration) || 0,
+          hours: (parseFloat(assignment.duration) || 0) * 60,
           project_id: data.project_id,
           user_id: assignment.employeeId,
           mileStone_id: data.mileStone_id,
@@ -302,10 +309,11 @@ const AddTask = () => {
     { label: "Detail Checking", value: "detailing_checking" },
     { label: "Erection", value: "erection" },
     { label: "Erection Checking", value: "erection_checking" },
+    { label: "Other", value: "other" },
   ];
 
   const wbsOptions = filteredWbsItems.map((w) => {
-    const total = selectedWbsType?.toLowerCase().includes("checking")
+    const totalMinutes = selectedWbsType?.toLowerCase().includes("checking")
       ? w.totalCheckHr || 0
       : w.totalExecHr || 0;
 
@@ -313,23 +321,22 @@ const AddTask = () => {
     const filtered = allTasks.filter((t) => {
       const taskId = t.project_bundle_id || t.wbs_id;
       const typeMatch =
-        !selectedWbsType || []
-      String(t.wbsType).toLowerCase() ===
+        !selectedWbsType ||
+        String(t.wbsType).toLowerCase() ===
         String(selectedWbsType).toLowerCase();
       return (
         String(taskId) === String(w.id || w._id || (w.wbs && w.wbs[0]?.id)) &&
         typeMatch
       );
     });
-    const existing = filtered.reduce(
+    const existingMinutes = filtered.reduce(
       (sum, t) => sum + Number(t.hours || 0),
       0,
     );
-    const remaining = Math.max(0, total - existing);
+    const remainingMinutes = Math.max(0, totalMinutes - existingMinutes);
 
     return {
-      label: `${w.name || w.bundle?.name || "Unnamed Bundle"
-        } (${remaining}h remaining)`,
+      label: `${w.name || w.bundle?.name || "Unnamed Bundle"} (${formatMinutesToHHMM(remainingMinutes)} remaining)`,
       value: w.id || w._id || (w.wbs && w.wbs[0]?.id),
     };
   });
@@ -504,7 +511,7 @@ const AddTask = () => {
                             Execution Hours
                           </p>
                           <p className="text-xl font-black text-slate-900">
-                            {selectedWbs.totalExecHr || 0}h
+                            {formatMinutesToHHMM(selectedWbs.totalExecHr || 0)}
                           </p>
                         </div>
                       </div>
@@ -517,7 +524,7 @@ const AddTask = () => {
                             Checking Hours
                           </p>
                           <p className="text-xl font-black text-slate-900">
-                            {selectedWbs.totalCheckHr || 0}h
+                            {formatMinutesToHHMM(selectedWbs.totalCheckHr || 0)}
                           </p>
                         </div>
                       </div>
@@ -530,7 +537,7 @@ const AddTask = () => {
                             Total Bundle Hours
                           </p>
                           <p className="text-xl font-black text-slate-900">
-                            {totalWbsHours}h
+                            {formatMinutesToHHMM(totalWbsHours * 60)}
                           </p>
                         </div>
                       </div>
@@ -544,7 +551,7 @@ const AddTask = () => {
                             Remaining Hours
                           </p>
                           <p className="text-xl font-black text-slate-900">
-                            {remainingHours}h
+                            {formatMinutesToHHMM(remainingHours * 60)}
                           </p>
                         </div>
                       </div>
@@ -613,11 +620,11 @@ const AddTask = () => {
                         </p>
                       )}
                     </div>
-                    <Input
+                    {/* <Input
                       label="Duration (e.g., 2w, 3d)"
                       placeholder="2w"
                       {...register("duration")}
-                    />
+                    /> */}
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                         <Flag className="w-4 h-4 text-indigo-500" /> Priority
@@ -654,11 +661,11 @@ const AddTask = () => {
                       </span>
                       <span
                         className={`text-sm font-bold ${totalAssignedHours > remainingHours
-                            ? "text-red-600"
-                            : "text-indigo-600"
+                          ? "text-red-600"
+                          : "text-indigo-600"
                           }`}
                       >
-                        {totalAssignedHours}h / {availableHours}h
+                        {formatMinutesToHHMM(totalAssignedHours * 60)} / {formatMinutesToHHMM(availableHours * 60)}
                       </span>
                     </div>
                   </div>
@@ -780,7 +787,7 @@ const AddTask = () => {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95 disabled:opacity-50"
+                    className="w-full py-3 bg-primary hover:bg-primary/80 text-white font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95 disabled:opacity-50"
                   >
                     {isSubmitting ? "Assigning..." : "Confirm & Assign Tasks"}
                   </Button>
