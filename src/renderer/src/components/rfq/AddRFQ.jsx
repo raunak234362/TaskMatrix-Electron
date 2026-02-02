@@ -62,7 +62,7 @@ const AddRFQ = ({ onSuccess }) => {
   const recipientOption =
     staffData
       ?.filter(
-        (u) => u.role === "SALES" || u.role === "ADMIN",
+        (u) => u.role === "SALES_MANAGER" || u.role === "ADMIN",
       )
       .map(
         (u) => ({
