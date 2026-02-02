@@ -30,8 +30,8 @@ const AddMileStone = ({
   });
 
   const statusOptions = [
-    { label: "Pending", value: "PENDING" },
-    { label: "In Progress", value: "IN_PROGRESS" },
+    { label: "On Hold", value: "ONHOLD" },
+    { label: "In Progress", value: "ACTIVE" },
     { label: "Completed", value: "COMPLETED" },
     { label: "Approved", value: "APPROVED" },
   ];
@@ -45,12 +45,14 @@ const AddMileStone = ({
     try {
       const payload = {
         ...data,
-        status: "ACTIVE",
         date: data.date ? new Date(data.date).toISOString() : undefined,
+        description: data.description || "",
+        stage: data.stage || "IFA",
         approvalDate: data.approvalDate
           ? new Date(data.approvalDate).toISOString()
           : undefined,
       };
+      console.log(payload);
       await Service.AddProjectMilestone(payload);
       toast.success("Milestone added successfully!");
       if (onSuccess) onSuccess();
@@ -159,7 +161,7 @@ const AddMileStone = ({
             <Select
               options={stageOptions}
               defaultValue={stageOptions[0]}
-              onChange={(opt) => setValue("stage", opt?.value || "PENDING")}
+              onChange={(opt) => setValue("stage", opt?.value || "IFA")}
               className="text-sm"
               menuPortalTarget={document.body}
               menuPosition="fixed"

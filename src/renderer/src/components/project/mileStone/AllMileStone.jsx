@@ -54,6 +54,7 @@ const AllMileStone = ({ project, onUpdate }) => {
   const columns = [
     { accessorKey: "subject", header: "Subject" },
     { accessorKey: "description", header: "Description" },
+    { accessorKey: "date", header: "Target Date" },
     { accessorKey: "approvalDate", header: "Approval Date" },
     { accessorKey: "status", header: "Status" },
   ];

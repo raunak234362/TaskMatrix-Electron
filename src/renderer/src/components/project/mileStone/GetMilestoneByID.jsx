@@ -150,6 +150,13 @@ const GetMilestoneByID = ({ row, close }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <InfoCard
             icon={<Calendar className="w-5 h-5" />}
+            label="Target Date"
+            value={formatDate(milestone.date)}
+            color="text-green-600"
+            bg="bg-green-50"
+          />
+          <InfoCard
+            icon={<Calendar className="w-5 h-5" />}
             label="Approval Date"
             value={formatDate(milestone.approvalDate)}
             color="text-blue-600"
