@@ -76,7 +76,7 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
                     end={to === '/dashboard'}
                     onClick={isMobile ? toggleSidebar : undefined}
                     className={({ isActive }) =>
-                      `flex items-center rounded-2xl gap-4 py-2.5 transition-all duration-200 font-bold text-md tracking-wide relative 
+                      `flex items-center rounded-md gap-4 py-2.5 transition-all duration-200 font-bold text-md tracking-wide relative 
                       ${isActive
                         ? 'bg-gray-50 text-[#6bbd45] shadow-sm ml-0 pl-6 z-20'
                         : 'text-white/80 hover:text-white hover:bg-white/20 pl-6 ml-0'
