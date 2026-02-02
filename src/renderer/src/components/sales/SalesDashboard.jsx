@@ -22,46 +22,50 @@ const SalesDashboard = () => {
         totalClients: 0,
     });
 
+    const [chartData, setChartData] = useState([]);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
                 const [projectsRes, rfqRes, clientsRes] = await Promise.all([
                     Service.GetAllProjects(),
-                    Service.RFQRecieved(), // Or RfqSent depending on role, assuming Recieved for internal sales
+                    Service.RFQRecieved(),
                     Service.GetAllFabricators(),
                 ]);
 
-                const projects = projectsRes?.data || []
-                const rfqs = rfqRes?.data || []
-                const clients = clientsRes || []
+                const projects = (projectsRes?.data || projectsRes || []).filter(p => !p.isDeleted);
+                const rfqs = (rfqRes?.data || rfqRes || []).filter(r => !r.isDeleted);
+                const clients = clientsRes?.data || clientsRes || [];
 
                 // Calculation Logic
                 const totalRfqs = rfqs.length;
-                const awardedProjects = projects.filter((p) => p.status === "ACTIVE" || p.status === "COMPLETED" || p.status === "AWARDED").length;
+                const awardedProjects = projects.filter((p) =>
+                    ["ACTIVE", "COMPLETED", "AWARDED"].includes(p.status)
+                ).length;
 
-                // Win Rate (Projects / RFQs * 100) - naive calculation
+                // Win Rate (Awarded Projects / Total RFQs * 100)
                 const winRate = totalRfqs > 0 ? Math.round((awardedProjects / totalRfqs) * 100) : 0;
 
-                // Sales Value (Sum of project values? Field might not exist, using bidPrice from RFQ or estimating)
-                // Assuming 'bidPrice' or similar on Project/RFQ. Project interface shows 'estimatedHours' etc.
-                // Let's use a mock multiplier for now or check if project has price.
-                // Checking ProjectData interface: has estimatedHours. No explicit price.
-                // Checking RFQ interface: has bidPrice.
-                // Let's sum bidPrice of awarded RFQs (projects usually linked to RFQs)
-
-                let totalSalesValue = 0;
-                // Approximation bidPrice from RFQs linked to these projects or all projects
-                // Since I don't have direct linkage easily without iterating, I'll use 0 for now or a mock until confirmed.
-                // Actually, let's use a placeholder.
-                totalSalesValue = 542000; // Placeholder
+                // Total Sales Value (Sum of bidPrice from RFQs that are awarded/turned into projects)
+                // We'll sum bidPrice for all RFQs that have an associated project or are in a state that implies sale
+                // Since linking might be tricky, let's sum bidPrice of all RFQs as "Pipeline Value" 
+                // and maybe only AWARDED ones for "Total Sales Value".
+                // For now, let's sum bidPrice of all projects if they have it, or RFQs with status 'AWARDED'.
+                const totalSalesValue = rfqs.reduce((sum, rfq) => {
+                    const price = parseFloat(rfq.bidPrice) || 0;
+                    return sum + price;
+                }, 0);
 
                 const activeProjects = projects.filter((p) => p.status === "ACTIVE").length;
-                const completed = projects.filter((p) => p.status === "COMPLETED").length;
+                const completedCount = projects.filter((p) => p.status === "COMPLETED").length;
                 const onHold = projects.filter((p) => p.status === "ON_HOLD").length;
-                const delayed = 0; // No status for delayed yet
 
-                const conversionRate = 14;
+                // Check for delayed projects (e.g. status is delayed or end date passed)
+                const delayed = projects.filter((p) => p.status === "DELAYED" || (p.endDate && new Date(p.endDate) < new Date() && p.status !== "COMPLETED")).length;
+
+                // Conversion Rate: Awarded / RFQs
+                const conversionRate = totalRfqs > 0 ? Math.round((awardedProjects / totalRfqs) * 100) : 0;
                 const totalClients = clients.length;
 
                 setStats({
@@ -70,12 +74,34 @@ const SalesDashboard = () => {
                     winRate,
                     totalSalesValue,
                     activeProjects,
-                    completed,
+                    completed: completedCount,
                     onHold,
                     delayed,
                     conversionRate,
                     totalClients,
                 });
+
+                // Prepare Monthly Performance Data
+                const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                const monthlyData = months.map((month, index) => {
+                    const monthRfqs = rfqs.filter(r => new Date(r.createdAt).getMonth() === index).length;
+                    const monthAwarded = projects.filter(p =>
+                        new Date(p.createdAt).getMonth() === index &&
+                        ["ACTIVE", "COMPLETED", "AWARDED"].includes(p.status)
+                    ).length;
+                    const monthCompleted = projects.filter(p =>
+                        new Date(p.updatedAt).getMonth() === index &&
+                        p.status === "COMPLETED"
+                    ).length;
+
+                    return {
+                        name: month,
+                        RFQs: monthRfqs,
+                        Awarded: monthAwarded,
+                        Completed: monthCompleted
+                    };
+                });
+                setChartData(monthlyData);
 
                 setLoading(false);
             } catch (error) {
@@ -132,7 +158,7 @@ const SalesDashboard = () => {
 
             {/* Charts & Details Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-1 gap-8 pt-4">
-                <SalesPerformanceChart />
+                <SalesPerformanceChart data={chartData} />
             </div>
         </div>
     );

@@ -12,26 +12,21 @@ const SalesStatsCards = ({ stats }) => {
         {
             title: "Total RFQs Received",
             value: stats.totalRfqs,
-            change: "+12% from last period",
             icon: FileText,
-            // Keeping distinct icons but unifying color feel
         },
         {
             title: "Projects Awarded",
             value: stats.projectsAwarded,
-            change: "+8% from last period",
             icon: Trophy,
         },
         {
             title: "Win Rate",
             value: `${stats.winRate}%`,
-            change: "+2.3% from last period",
             icon: Target,
         },
         {
             title: "Total Sales Value",
             value: `$${stats.totalSalesValue.toLocaleString()}`,
-            change: "+15% from last period",
             icon: DollarSign,
         },
     ];
@@ -48,7 +43,7 @@ const SalesStatsCards = ({ stats }) => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="bg-white p-6 rounded-[2rem] border border-green-100/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(22,163,74,0.1)] transition-all duration-300 relative overflow-hidden group"
+                        className="bg-white p-6 rounded-4xl border border-green-100/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(22,163,74,0.1)] transition-all duration-300 relative overflow-hidden group"
                     >
                         {/* Decorative Background Blob */}
                         <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-50 rounded-full opacity-50 group-hover:scale-110 transition-transform duration-500" />
@@ -63,14 +58,14 @@ const SalesStatsCards = ({ stats }) => {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2 relative z-10">
+                        {/* <div className="flex items-center gap-2 relative z-10">
                             <div className="flex items-center gap-1 bg-green-100/80 px-2.5 py-1 rounded-full">
                                 <span className="text-green-700 text-xs font-bold">
-                                    {card.change.split(' ')[0]}
+                                    {card.change?.split(' ')[0] || "Live"}
                                 </span>
                             </div>
                             <span className="text-gray-400 text-xs font-medium">from last period</span>
-                        </div>
+                        </div> */}
                     </motion.div>
                 );
             })}

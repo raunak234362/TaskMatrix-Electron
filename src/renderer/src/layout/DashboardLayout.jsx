@@ -62,7 +62,7 @@ const Layout = () => {
 
       {/* Main Content Area - White Card effect */}
       <div className="flex flex-col flex-1 min-h-0 bg-background p-0 md:p-2 pl-0">
-        <div className="flex-1 bg-gray-50 md:rounded-xl shadow-2xl overflow-hidden flex flex-col relative transition-all">
+        <div className="flex-1 bg-gray-50 rounded-md shadow-2xl overflow-hidden flex flex-col relative transition-all">
 
           {/* Optional Header is needed globally, it goes here inside the white card */}
           <div className="px-2 pt-2">

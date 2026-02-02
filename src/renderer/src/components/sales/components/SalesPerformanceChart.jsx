@@ -9,24 +9,9 @@ import {
     Legend
 } from "recharts";
 
-const data = [
-    { name: "Jan", RFQs: 40, Awarded: 24, Completed: 24 },
-    { name: "Feb", RFQs: 30, Awarded: 13, Completed: 22 },
-    { name: "Mar", RFQs: 20, Awarded: 58, Completed: 22 },
-    { name: "Apr", RFQs: 27, Awarded: 39, Completed: 20 },
-    { name: "May", RFQs: 18, Awarded: 48, Completed: 21 },
-    { name: "Jun", RFQs: 23, Awarded: 38, Completed: 25 },
-    { name: "Jul", RFQs: 34, Awarded: 43, Completed: 21 },
-    { name: "Aug", RFQs: 40, Awarded: 24, Completed: 24 },
-    { name: "Sep", RFQs: 30, Awarded: 13, Completed: 22 },
-    { name: "Oct", RFQs: 20, Awarded: 58, Completed: 22 },
-    { name: "Nov", RFQs: 27, Awarded: 39, Completed: 20 },
-    { name: "Dec", RFQs: 18, Awarded: 48, Completed: 21 },
-];
-
-const SalesPerformanceChart = () => {
+const SalesPerformanceChart = ({ data }) => {
     return (
-        <div className="bg-white p-8 rounded-[2rem] border border-green-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-[400px] w-full">
+        <div className="bg-white p-8 rounded-4xl border border-green-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-[400px] w-full">
             <div className="flex justify-between items-center mb-8">
                 <h3 className="text-xl font-bold text-gray-800 tracking-tight">Monthly Performance</h3>
                 <div className="flex gap-2">

@@ -263,50 +263,8 @@ const WBTDashboard = () => {
               <div className="p-3 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-200">
                 <LayoutDashboard className="w-8 h-8 text-white" />
               </div>
-            )}
-            {isAdminRole && (
-              <div className="p-2 bg-green-500 rounded-lg shadow-md">
-                <LayoutDashboard className="w-5 h-5 text-white" />
-              </div>
-            )}
-            <div>
-              {isAdminRole ? (
-                <h1 className="text-xl font-bold text-green-600 tracking-wide uppercase">
-                  Dashboard
-                </h1>
-              ) : (
-                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                  {getGreeting()}, {user?.firstName || 'User'}
-                </h1>
-              )}
-
-              {!isAdminRole && (
-                <p className="text-slate-500 font-medium mt-1 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                  You have {userStats.pendingTasks} tasks pending.
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {isAdminRole && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-gray-700">
-                  Welcome Back, <span className="text-green-600 uppercase">{userRole}</span>
-                </span>
-                <button className="p-2 bg-green-50 text-green-600 rounded-full hover:bg-green-100 transition-colors">
-                  <Bell className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-            {!isAdminRole && (
-              <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-slate-200">
-                <Calendar className="w-5 h-5 text-indigo-500" />
-                <span className="text-slate-700 font-bold">{format(new Date(), 'EEEE, MMMM do')}</span>
-              </div>
-            )}
-          </div>
+            )}           
+          </div>        
         </div>
 
         {isAdminRole ? (

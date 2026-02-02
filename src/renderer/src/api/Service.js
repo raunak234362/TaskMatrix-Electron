@@ -1972,5 +1972,50 @@ static async AddTaskCommentAcknowledged(id,data) {
       throw error
     }
   }
+
+  // Client Communication Followup Add
+  static async AddClientCommunicationFollowup(data) {
+    try {
+      const response = await api.post(`communications`, data)
+      return response.data
+    } catch (error) {
+      console.error('Error adding client communication followup:', error)
+      throw error
+    }
+  }
+
+  // Client Communication Followup List
+  static async GetClientCommunicationFollowupList() {
+    try {
+      const response = await api.get(`communications`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching client communication followup list:', error)
+      throw error
+    }
+  }
+
+  // Client Communication Followup Update
+  static async UpdateClientCommunicationFollowup(id, data) {
+    try {
+      const response = await api.patch(`communications/${id}`, data)
+      return response.data
+    } catch (error) {
+      console.error('Error updating client communication followup:', error)
+      throw error
+    }
+  }
+
+  // Client Communication mark as completed
+  static async MarkClientCommunicationAsCompleted(id) {
+    try {
+      const response = await api.patch(`communications/complete/${id}`)
+      return response.data
+    } catch (error) {
+      console.error('Error marking client communication as completed:', error)
+      throw error
+    }
+  }
+
 }
 export default Service
