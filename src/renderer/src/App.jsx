@@ -82,13 +82,32 @@ const AppContent = () => {
 
     const fetchInboxRFQ = async () => {
       try {
-        let rfqDetail
+        let rfqs = []
         if (userType === 'CLIENT') {
-          rfqDetail = await Service.RfqSent()
+          const res = await Service.RfqSent()
+          rfqs = (res?.data || []).map((r) => ({ ...r, rfqType: 'Sent' }))
         } else {
-          rfqDetail = await Service.RFQRecieved()
+          // Fetch both Received and All RFQs
+          const [receivedRes, allRes] = await Promise.all([
+            Service.RFQRecieved(),
+            Service.FetchAllRFQ()
+          ])
+
+          const receivedData = (receivedRes?.data || []).map((r) => ({ ...r, rfqType: 'Received' }))
+          const allData = (allRes?.data || []).map((r) => ({ ...r, rfqType: 'All' }))
+
+          // Combine with differentiation: prioritize 'Received' status
+          const combined = [...receivedData]
+          const receivedIds = new Set(combined.map((r) => r.id))
+
+          allData.forEach((item) => {
+            if (!receivedIds.has(item.id)) {
+              combined.push(item)
+            }
+          })
+          rfqs = combined
         }
-        dispatch(setRFQData(rfqDetail.data))
+        dispatch(setRFQData(rfqs))
       } catch (error) {
         console.error('Error fetching RFQ:', error)
       }

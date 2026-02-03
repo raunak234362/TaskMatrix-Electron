@@ -354,14 +354,14 @@ class Service {
     return response.data
   }
   //Fetch all the RFQ
-  static async FetchAllRFQ(rfqId) {
+  static async FetchAllRFQ() {
     try {
-      const response = await api.get(`rfq/${rfqId}`, {
+      const response = await api.get(`rfq/all`, {
         headers: {
           'Content-Type': 'application/json'
         }
       })
-      console.log(' All Data fetched by RFQ id:', response.data)
+      console.log(' All Data fetched:', response.data)
       return response.data
     } catch (error) {
       console.error('cannot find rfqs', error)

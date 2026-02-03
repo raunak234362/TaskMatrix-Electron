@@ -22,6 +22,7 @@ import Service from '../../api/Service'
 import { toast } from 'react-toastify'
 import { Button } from '../ui/button'
 import EditTask from './EditTask'
+import UpdateStatusModal from './components/UpdateStatusModal'
 import Comment from "./comments/Comment";
 
 const GetTaskByID = ({ id, onClose, refresh }) => {
@@ -31,6 +32,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
   const [processing, setProcessing] = useState(false)
   const [showWorkSummary, setShowWorkSummary] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
   const [staffData, setStaffData] = useState([]);
 
   const fetchTask = async () => {
@@ -214,6 +216,8 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
         return { label: 'High', color: 'text-red-500', bg: 'bg-red-50' }
       case 4:
         return { label: 'Critical', color: 'text-gray-700', bg: 'bg-gray-50' }
+      default:
+        return { label: 'Normal', color: 'text-gray-500', bg: 'bg-gray-50' }
     }
   }
 
@@ -266,6 +270,13 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button
+              onClick={() => setIsUpdatingStatus(true)}
+              variant="outline"
+              className="flex items-center gap-2 px-6 py-3 font-medium transition border-orange-200 text-orange-700 hover:bg-orange-50"
+            >
+              <Timer className="w-4 h-4" /> Update Status
+            </Button>
             {(userRole === "admin" ||
               userRole === "operation_executive" ||
               userRole === "project_manager" ||
@@ -454,6 +465,42 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                       />
                     </div>
                   )}
+                  {showWorkSummary && ["admin", "human_resource", "operation_executive"].includes(userRole) && (
+                    <div className="mt-6 bg-white/50 rounded-xl border border-indigo-100 overflow-hidden">
+                      <table className="w-full text-left text-sm">
+                        <thead>
+                          <tr className="bg-indigo-50/50 text-indigo-700 font-bold border-b border-indigo-100">
+                            <th className="px-4 py-3">Activity</th>
+                            <th className="px-4 py-3">Start Time</th>
+                            <th className="px-4 py-3">End Time</th>
+                            <th className="px-4 py-3 text-right">Duration</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-indigo-100">
+                          {[...task.workingHourTask].reverse().map((session, idx) => (
+                            <tr key={session.id || idx} className="hover:bg-indigo-50/30 transition-colors">
+                              <td className="px-4 py-3 font-semibold text-indigo-900 capitalize">
+                                {session.type?.toLowerCase() || 'Work'}
+                              </td>
+                              <td className="px-4 py-3 text-gray-600">{toIST(session.started_at)}</td>
+                              <td className="px-4 py-3 text-gray-600">
+                                {session.ended_at ? toIST(session.ended_at) : (
+                                  <span className="text-emerald-600 font-bold animate-pulse flex items-center gap-1">
+                                    <Play className="w-3 h-3 fill-current" /> Running...
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-right font-mono font-bold text-indigo-700">
+                                {session.duration_seconds
+                                  ? formatHours(session.duration_seconds / 3600)
+                                  : '—'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               )}
               {/* Comments Section */}
@@ -469,6 +516,17 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
           )}
         </div>
       </div>
+      {isUpdatingStatus && (
+        <UpdateStatusModal
+          taskId={task.id}
+          currentStatus={task.status}
+          onClose={() => setIsUpdatingStatus(false)}
+          refresh={() => {
+            fetchTask()
+            if (refresh) refresh()
+          }}
+        />
+      )}
     </div>
   )
 }

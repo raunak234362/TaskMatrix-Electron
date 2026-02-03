@@ -70,16 +70,16 @@ const AllActiveTask = () => {
 
   const getPriorityLabel = (priority) => {
     switch (priority) {
-      case 0:
-        return { label: "Low", color: "text-green-600" };
       case 1:
-        return { label: "Medium", color: "text-yellow-600" };
+        return { label: "Low", color: "text-green-600" };
       case 2:
-        return { label: "High", color: "text-purple-600" };
+        return { label: "Medium", color: "text-yellow-600" };
       case 3:
+        return { label: "High", color: "text-orange-600" };
+      case 4:
         return { label: "Critical", color: "text-red-600" };
       default:
-        return { label: "Normal", color: "text-gray-700" };
+        return { label: "Normal", color: "text-gray-600" };
     }
   };
 

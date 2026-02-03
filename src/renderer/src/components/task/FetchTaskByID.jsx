@@ -223,6 +223,8 @@ const FetchTaskByID = ({
         return { label: "High", color: "text-red-500", bg: "bg-red-50" };
       case 4:
         return { label: "Critical", color: "text-gray-700", bg: "bg-gray-50" };
+      default:
+        return { label: "Normal", color: "text-gray-500", bg: "bg-gray-50" };
     }
   };
 
@@ -406,7 +408,7 @@ const FetchTaskByID = ({
                 {/* Actions */}
                 <div className="mt-8 pt-6 border-t border-green-200">
                   <div className="flex flex-wrap items-center gap-4">
-                    {task.status === "ASSIGNED" || task.status === "REWORK" && (
+                    {(task.status === "ASSIGNED" || task.status === "REWORK") && (
                       <ActionButton
                         icon={<Play />}
                         color="emerald"
@@ -457,46 +459,83 @@ const FetchTaskByID = ({
               </div>
 
               {/* Work Summary */}
-              {task.workingHourTask && task.workingHourTask.length > 0 && (
-                <div className="bg-green-50 rounded-2xl p-6 border border-green-200">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-3">
-                      <Timer className="w-6 h-6" />
-                      Work Summary
-                    </h3>
-                    <button
-                      onClick={() => setShowWorkSummary(!showWorkSummary)}
-                      className="text-indigo-600 hover:text-indigo-800"
-                    >
-                      {showWorkSummary ? (
-                        <ChevronUp size={24} />
-                      ) : (
-                        <ChevronDown size={24} />
-                      )}
-                    </button>
-                  </div>
-                  {showWorkSummary && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <SummaryCard
-                        icon={<Clock4 />}
-                        label="Total Time"
-                        value={formatSecondsToHHMM(totalDurationSeconds)}
-                      />
-                      <SummaryCard
-                        icon={<Users />}
-                        label="Sessions"
-                        value={task.workingHourTask.length}
-                      />
-                      <SummaryCard
-                        icon={<Timer />}
-                        label="Current Status"
-                        value={statusConfig.label}
-                        color={statusConfig.text}
-                      />
+              {task.workingHourTask && task.workingHourTask.length > 0 &&
+                ["admin", "deputy_manager", "human_resource", "operation_executive", "staff", "project_manager", "department_manager"].includes(userRole) && (
+                  <div className="bg-green-50 rounded-2xl p-6 border border-green-200">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-3">
+                        <Timer className="w-6 h-6" />
+                        Work Summary
+                      </h3>
+                      <button
+                        onClick={() => setShowWorkSummary(!showWorkSummary)}
+                        className="text-indigo-600 hover:text-indigo-800"
+                      >
+                        {showWorkSummary ? (
+                          <ChevronUp size={24} />
+                        ) : (
+                          <ChevronDown size={24} />
+                        )}
+                      </button>
                     </div>
-                  )}
-                </div>
-              )}
+                    {showWorkSummary && (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <SummaryCard
+                          icon={<Clock4 />}
+                          label="Total Time"
+                          value={formatSecondsToHHMM(totalDurationSeconds)}
+                        />
+                        <SummaryCard
+                          icon={<Users />}
+                          label="Sessions"
+                          value={task.workingHourTask.length}
+                        />
+                        <SummaryCard
+                          icon={<Timer />}
+                          label="Current Status"
+                          value={statusConfig.label}
+                          color={statusConfig.text}
+                        />
+                      </div>
+                    )}
+                    {showWorkSummary && ["admin", "human_resource", "operation_executive"].includes(userRole) && (
+                      <div className="mt-6 bg-white/50 rounded-xl border border-indigo-100 overflow-hidden">
+                        <table className="w-full text-left text-sm">
+                          <thead>
+                            <tr className="bg-indigo-50/50 text-indigo-700 font-bold border-b border-indigo-100">
+                              <th className="px-4 py-3">Activity</th>
+                              <th className="px-4 py-3">Start Time</th>
+                              <th className="px-4 py-3">End Time</th>
+                              <th className="px-4 py-3 text-right">Duration</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-indigo-100">
+                            {[...task.workingHourTask].reverse().map((session, idx) => (
+                              <tr key={session.id || idx} className="hover:bg-indigo-50/30 transition-colors">
+                                <td className="px-4 py-3 font-semibold text-indigo-900 capitalize">
+                                  {session.type?.toLowerCase() || 'Work'}
+                                </td>
+                                <td className="px-4 py-3 text-gray-700">{toIST(session.started_at)}</td>
+                                <td className="px-4 py-3 text-gray-700">
+                                  {session.ended_at ? toIST(session.ended_at) : (
+                                    <span className="text-emerald-600 font-bold animate-pulse flex items-center gap-1">
+                                      <Play className="w-3 h-3 fill-current" /> Running...
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="px-4 py-3 text-right font-mono font-bold text-indigo-700">
+                                  {session.duration_seconds
+                                    ? formatSecondsToHHMM(session.duration_seconds)
+                                    : '—'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
 
               {/* Comments Section */}
               <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-6">
