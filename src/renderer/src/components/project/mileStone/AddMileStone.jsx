@@ -25,7 +25,7 @@ const AddMileStone = ({
     defaultValues: {
       project_id: projectId,
       fabricator_id: fabricatorId,
-      status: "PENDING",
+      status: "ACTIVE",
     },
   });
 
@@ -48,6 +48,7 @@ const AddMileStone = ({
         date: data.date ? new Date(data.date).toISOString() : undefined,
         description: data.description || "",
         stage: data.stage || "IFA",
+        status: data.status || "ACTIVE",
         approvalDate: data.approvalDate
           ? new Date(data.approvalDate).toISOString()
           : undefined,
