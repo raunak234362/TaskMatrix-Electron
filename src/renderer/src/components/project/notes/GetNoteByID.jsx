@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Service from "../../../api/Service";
-import { Loader2, X, Calendar, User, Paperclip, Tag } from "lucide-react";
-import { openFileSecurely } from "../../../utils/openFileSecurely";
+import { Loader2, X, Calendar, User, Tag } from "lucide-react";
+import RenderFiles from "../../common/RenderFiles";
 
 const GetNoteByID = ({ projectId, noteId, onClose }) => {
     const [note, setNote] = useState(null);
@@ -92,31 +92,11 @@ const GetNoteByID = ({ projectId, noteId, onClose }) => {
                             </div>
 
                             {/* Attachments */}
-                            {note.files && note.files.length > 0 && (
-                                <div>
-                                    <h3 className="text-sm font-semibold text-gray-800 mb-3 uppercase tracking-wide flex items-center gap-2">
-                                        <Paperclip className="w-4 h-4" /> Attachments
-                                    </h3>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                        {note.files.map((file) => (
-                                            <button
-                                                key={file.id}
-                                                onClick={() => openFileSecurely("project/notes", note.id, file.id)}
-                                                className="group flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:border-green-300 hover:shadow-sm transition-all text-left"
-                                            >
-                                                <div className="flex items-center gap-2 overflow-hidden">
-                                                    <div className="w-8 h-8 rounded bg-green-50 flex items-center justify-center shrink-0 text-green-600 group-hover:bg-green-100 transition-colors">
-                                                        <FileTextIcon filename={file.originalName} />
-                                                    </div>
-                                                    <span className="text-sm text-gray-700 font-medium truncate group-hover:text-green-700 transition-colors">
-                                                        {file.originalName}
-                                                    </span>
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+                            <RenderFiles
+                                files={note.files}
+                                table="projectNotes"
+                                parentId={note.id}
+                            />
                         </div>
                     ) : (
                         <div className="text-center py-10 text-gray-500">
@@ -130,10 +110,4 @@ const GetNoteByID = ({ projectId, noteId, onClose }) => {
 };
 
 // Helper for file icon based on extension
-const FileTextIcon = ({ filename }) => {
-    const ext = filename?.split('.').pop()?.toLowerCase();
-    // Simply return generic icon for now, or could map extensions
-    return <span className="text-xs font-bold uppercase">{ext || 'FILE'}</span>;
-};
-
 export default GetNoteByID;

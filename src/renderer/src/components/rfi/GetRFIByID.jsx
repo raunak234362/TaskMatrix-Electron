@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Service from "../../api/Service";
-
 import { AlertCircle, Loader2 } from "lucide-react";
-
 import DataTable from "../ui/table";
 import Button from "../fields/Button";
-import { openFileSecurely } from "../../utils/openFileSecurely";
+import RenderFiles from "../common/RenderFiles";
 import RFIResponseModal from "./RFIResponseModal";
 import RFIResponseDetailsModal from "./RFIResponseDetailsModal";
 
@@ -120,8 +118,8 @@ const GetRFIByID = ({ id }) => {
       cell: ({ row }) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-medium ${row.original.status === "OPEN"
-              ? "bg-green-100 text-green-700"
-              : "bg-yellow-100 text-yellow-700"
+            ? "bg-green-100 text-green-700"
+            : "bg-yellow-100 text-yellow-700"
             }`}
         >
           {row.original.status}
@@ -143,8 +141,8 @@ const GetRFIByID = ({ id }) => {
               </h1>
               <span
                 className={`px-3 py-1 rounded-full text-xs font-semibold ${rfi.isAproovedByAdmin
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-yellow-100 text-yellow-700"
                   }`}
               >
                 {rfi.isAproovedByAdmin ? "Approved" : "Pending"}
@@ -171,25 +169,11 @@ const GetRFIByID = ({ id }) => {
             </div>
 
             {/* Files */}
-            {rfi.files?.length > 0 && (
-              <div>
-                <h4 className="font-semibold text-gray-700 mb-2">
-                  Attachments
-                </h4>
-                <ul className="space-y-1">
-                  {rfi.files.map((file, i) => (
-                    <li key={file.id}>
-                      <span
-                        className="text-green-700 underline cursor-pointer"
-                        onClick={() => openFileSecurely("rfi", rfi.id, file.id)}
-                      >
-                        {file.originalName || `File ${i + 1}`}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <RenderFiles
+              files={rfi.files}
+              table="rFI"
+              parentId={rfi.id}
+            />
           </div>
 
           {/* RIGHT */}

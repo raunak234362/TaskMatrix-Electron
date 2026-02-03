@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Service from "../../api/Service";
 import { Loader2, AlertCircle } from "lucide-react";
-import { openFileSecurely } from "../../utils/openFileSecurely";
 import Button from "../fields/Button";
 import DataTable from "../ui/table";
+import RenderFiles from "../common/RenderFiles";
 
 import SubmittalResponseModal from "./SubmittalResponseModal";
 import SubmittalResponseDetailsModal from "./SubmittalResponseDetailsModal";
@@ -110,31 +110,18 @@ const GetSubmittalByID = ({ id }) => {
               <h4 className="font-semibold text-gray-700">Description</h4>
               <div
                 className="p-3 bg-gray-50 border rounded-lg prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: submittal.description }}
+                dangerouslySetInnerHTML={{
+                  __html: submittal.description || submittal.currentVersion?.description || "—",
+                }}
               />
             </div>
 
-            {submittal.files?.length > 0 && (
-              <div>
-                <h4 className="font-semibold text-gray-700 mb-2">
-                  Attachments
-                </h4>
-                <ul className="space-y-1">
-                  {submittal.files.map((file) => (
-                    <li key={file.id}>
-                      <span
-                        className="text-green-600 underline cursor-pointer"
-                        onClick={() =>
-                          openFileSecurely("submittal", submittal.id, file.id)
-                        }
-                      >
-                        {file.originalName}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {/* Versioned Attachments */}
+            <RenderFiles
+              files={submittal.versions || (submittal.files ? [{ files: submittal.files, description: "Attachments" }] : [])}
+              table="submittals"
+              parentId={submittal.id}
+            />
           </div>
 
           {/* RIGHT PANEL */}

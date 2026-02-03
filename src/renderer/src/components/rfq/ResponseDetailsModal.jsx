@@ -1,9 +1,9 @@
-import { X, Paperclip, CalendarDays } from "lucide-react";
+import { X, CalendarDays } from "lucide-react";
 import { useState } from "react";
 import Service from "../../api/Service";
 import Button from "../fields/Button";
-import { openFileSecurely } from "../../utils/openFileSecurely";
 import RichTextEditor from "../fields/RichTextEditor";
+import RenderFiles from "../common/RenderFiles";
 
 
 const ResponseDetailsModal = ({
@@ -116,29 +116,11 @@ const ResponseDetailsModal = ({
         </div>
 
         {/* Attachments */}
-        {response.files?.length > 0 && (
-          <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">
-              Attachments
-            </p>
-            <ul className="space-y-2">
-              {response.files.map((file) => (
-                <li key={file.id} className="flex items-center gap-2">
-                  <Paperclip size={16} className="text-green-600" />
-
-                  <span
-                    className="text-sm text-green-700 underline cursor-pointer hover:text-green-900"
-                    onClick={() =>
-                      openFileSecurely("rfq/response", response.id, file.id)
-                    }
-                  >
-                    {file.originalName}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <RenderFiles
+          files={response.files}
+          table="rfqResponse"
+          parentId={response.id}
+        />
 
         {/* Created At */}
         <div className="flex items-center gap-2 text-sm text-gray-700">
