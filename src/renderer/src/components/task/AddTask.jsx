@@ -24,17 +24,19 @@ import { setProjectData, updateProject } from "../../store/projectSlice";
 import { setMilestonesForProject } from "../../store/milestoneSlice";
 
 const formatMinutesToHHMM = (minutes) => {
-  if (isNaN(minutes) || minutes === null) return "0:00";
-  const roundedMinutes = Math.round(minutes);
-  const h = Math.floor(roundedMinutes / 60);
-  const m = roundedMinutes % 60;
-  return `${h}:${String(m).padStart(2, "0")}`;
+  if (isNaN(minutes) || minutes === null) return "00:00";
+  const isNegative = minutes < 0;
+  const absMinutes = Math.abs(Math.round(minutes));
+  const h = Math.floor(absMinutes / 60);
+  const m = absMinutes % 60;
+  return `${isNegative ? "-" : ""}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 };
 
 const AddTask = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedWbs, setSelectedWbs] = useState(null);
-  const [allTasks, setAllTasks] = useState([]);
+  const [projectTasks, setProjectTasks] = useState([]);
+  const [isLoadingTasks, setIsLoadingTasks] = useState(false);
   const [existingWbsHours, setExistingWbsHours] = useState(0);
   const [bundles, setBundles] = useState([]);
 
@@ -69,7 +71,7 @@ const AddTask = () => {
     defaultValues: {
       priority: 2,
       Stage: "IFA",
-      assignments: [{ employeeId: "", duration: "" }],
+      assignments: [{ employeeId: "", hours: "", minutes: "" }],
     },
   });
 
@@ -137,6 +139,31 @@ const AddTask = () => {
     setValue,
   ]);
 
+  // Fetch tasks for the selected project to calculate remaining hours
+  useEffect(() => {
+    const fetchProjectTasks = async () => {
+      if (!selectedProjectId) {
+        setProjectTasks([]);
+        return;
+      }
+      try {
+        setIsLoadingTasks(true);
+        const res = await Service.GetTasksByProjectId(selectedProjectId);
+        const taskData = Array.isArray(res?.data)
+          ? res.data
+          : res?.data?.data || [];
+        setProjectTasks(taskData);
+      } catch (error) {
+        console.error("Error fetching project tasks:", error);
+        // Fallback to empty if project-specific call fails
+        setProjectTasks([]);
+      } finally {
+        setIsLoadingTasks(false);
+      }
+    };
+    fetchProjectTasks();
+  }, [selectedProjectId]);
+
   // Auto-populate department from project team
   useEffect(() => {
     const deptId =
@@ -157,55 +184,82 @@ const AddTask = () => {
     }
   }, [selectedMilestoneId, setValue]);
 
-  // Update selected WBS data
+  // Update selected WBS data and fetch details from API
   useEffect(() => {
-    if (selectedWbsId) {
-      const wbs = bundles.find((w) => {
-        const bundleId = w.id || w._id || (w.wbs && w.wbs[0]?.id);
-        return String(bundleId) === String(selectedWbsId);
-      });
-      setSelectedWbs(wbs || null);
-    } else {
-      setSelectedWbs(null);
-    }
-  }, [selectedWbsId, bundles]);
+    const fetchWbsDetail = async () => {
+      if (selectedWbsId) {
+        // Find locally first for immediate feedback
+        const localWbs = bundles.find((w) => {
+          const bundleId = w.id || w._id || (w.wbs && w.wbs[0]?.id);
+          return String(bundleId) === String(selectedWbsId);
+        });
+        setSelectedWbs(localWbs || null);
 
-  // Fetch all tasks to calculate remaining hours
-  useEffect(() => {
-    const fetchAllTasks = async () => {
-      try {
-        const res = await Service.GetAllTask();
-        const taskData = Array.isArray(res?.data)
-          ? res.data
-          : res?.data?.data || [];
-        setAllTasks(taskData);
-      } catch (error) {
-        console.error("Error fetching all tasks:", error);
+        try {
+          // Fetch full/updated info from API
+          const res = await Service.GetWBSById(selectedWbsId);
+          if (res?.data) {
+            setSelectedWbs(res.data);
+          }
+        } catch (error) {
+          console.error("Error fetching WBS details:", error);
+        }
+      } else {
+        setSelectedWbs(null);
       }
     };
-    fetchAllTasks();
-  }, []);
+    fetchWbsDetail();
+  }, [selectedWbsId, bundles]);
 
-  // Calculate existing hours for the selected WBS and Type
+
+
+  // Calculate existing hours for the selected WBS item and Type
   useEffect(() => {
-    if (selectedWbsId && allTasks.length > 0) {
-      const filtered = allTasks.filter((t) => {
-        const taskId = t.project_bundle_id || t.wbs_id;
-        const typeMatch =
-          !selectedWbsType ||
-          String(t.wbsType).toLowerCase() ===
-          String(selectedWbsType).toLowerCase();
-        return String(taskId) === String(selectedWbsId) && typeMatch;
-      });
-      const total = filtered.reduce(
-        (sum, t) => sum + Number(t.hours || 0),
-        0,
-      );
-      setExistingWbsHours(total / 60);
+    if (selectedWbsId && selectedWbsType) {
+      const isChecking = selectedWbsType.toLowerCase().includes("checking");
+
+      // Use tasks from the bundle object if available
+      const bundleTasks = selectedWbs?.tasks || [];
+
+      if (bundleTasks.length > 0) {
+        const filtered = bundleTasks.filter((t) => {
+          const taskWbsType = (t.wbsType || "").toLowerCase();
+          if (isChecking) {
+            return taskWbsType === selectedWbsType.toLowerCase();
+          } else {
+            // Match specific type OR match empty string (legacy/default) if not checking
+            return (
+              taskWbsType === selectedWbsType.toLowerCase() ||
+              taskWbsType === ""
+            );
+          }
+        });
+        const total = filtered.reduce(
+          (sum, t) => sum + (parseFloat(t.allocationLog?.allocatedHours) || 0),
+          0,
+        );
+        setExistingWbsHours(total);
+      } else if (projectTasks.length > 0) {
+        // Fallback to projectTasks (where hours are in minutes)
+        const filtered = projectTasks.filter((t) => {
+          const taskId = t.project_bundle_id || t.wbs_id;
+          const typeMatch =
+            String(t.wbsType).toLowerCase() ===
+            String(selectedWbsType).toLowerCase();
+          return String(taskId) === String(selectedWbsId) && typeMatch;
+        });
+        const totalMinutes = filtered.reduce(
+          (sum, t) => sum + Number(t.hours || 0),
+          0,
+        );
+        setExistingWbsHours(totalMinutes / 60);
+      } else {
+        setExistingWbsHours(0);
+      }
     } else {
       setExistingWbsHours(0);
     }
-  }, [selectedWbsId, allTasks, selectedWbsType]);
+  }, [selectedWbsId, selectedWbs, projectTasks, selectedWbsType]);
 
   const filteredWbsItems = bundles.filter((w) => {
     const category = (w.bundle?.category || w.type || "").toLowerCase();
@@ -230,17 +284,17 @@ const AddTask = () => {
   const assignments = watch("assignments") || [];
 
   const totalAssignedHours = assignments.reduce((sum, a) => {
-    // Try to parse duration as hours if it's a number string
-    const h = parseFloat(a.duration);
-    return sum + (isNaN(h) ? 0 : h);
+    const h = parseFloat(a.hours) || 0;
+    const m = parseFloat(a.minutes) || 0;
+    return sum + h + (m / 60);
   }, 0);
   const totalWbsHours = selectedWbs
     ? (selectedWbsType?.toLowerCase().includes("checking")
       ? selectedWbs.totalCheckHr || 0
       : selectedWbs.totalExecHr || 0) / 60
     : 0;
-  const availableHours = Math.max(0, totalWbsHours - existingWbsHours);
-  const remainingHours = Math.max(0, availableHours - totalAssignedHours);
+  const availableHours = totalWbsHours - existingWbsHours;
+  const remainingHours = availableHours - totalAssignedHours;
 
   const onSubmit = async (data) => {
     console.log("Form Data Submitted:", data);
@@ -252,7 +306,7 @@ const AddTask = () => {
 
       // Create a task for each assignment
       const promises = data.assignments.map((assignment) => {
-        const isDuplicateUser = allTasks.some(
+        const isDuplicateUser = projectTasks.some(
           (t) =>
             String(t.project_bundle_id || t.wbs_id) ===
             String(data.project_bundle_id) &&
@@ -261,6 +315,14 @@ const AddTask = () => {
 
         const isRework = isOverLimit || isDuplicateUser;
 
+        const h = parseInt(assignment.hours) || 0;
+        const m = parseInt(assignment.minutes) || 0;
+        const totalMinutes = h * 60 + m;
+        const durationStr = `${String(h).padStart(2, "0")}:${String(m).padStart(
+          2,
+          "0",
+        )}`;
+
         const payload = {
           name: data.name,
           description: data.name,
@@ -268,8 +330,8 @@ const AddTask = () => {
           isRework: isRework,
           priority: data.priority,
           due_date: data.due_date,
-          duration: assignment.duration,
-          hours: (parseFloat(assignment.duration) || 0) * 60,
+          duration: durationStr,
+          hours: totalMinutes,
           project_id: data.project_id,
           user_id: assignment.employeeId,
           mileStone_id: data.mileStone_id,
@@ -317,23 +379,44 @@ const AddTask = () => {
       ? w.totalCheckHr || 0
       : w.totalExecHr || 0;
 
+    const isChecking = selectedWbsType?.toLowerCase().includes("checking");
+
     // Calculate existing hours for this specific bundle and type
-    const filtered = allTasks.filter((t) => {
-      const taskId = t.project_bundle_id || t.wbs_id;
-      const typeMatch =
-        !selectedWbsType ||
-        String(t.wbsType).toLowerCase() ===
-        String(selectedWbsType).toLowerCase();
-      return (
-        String(taskId) === String(w.id || w._id || (w.wbs && w.wbs[0]?.id)) &&
-        typeMatch
+    let existingHours = 0;
+    if (w.tasks && w.tasks.length > 0) {
+      const filtered = w.tasks.filter((t) => {
+        const taskWbsType = (t.wbsType || "").toLowerCase();
+        if (isChecking) {
+          return taskWbsType === selectedWbsType.toLowerCase();
+        } else {
+          return (
+            taskWbsType === (selectedWbsType?.toLowerCase() || "") ||
+            taskWbsType === ""
+          );
+        }
+      });
+      existingHours = filtered.reduce(
+        (sum, t) => sum + (parseFloat(t.allocationLog?.allocatedHours) || 0),
+        0,
       );
-    });
-    const existingMinutes = filtered.reduce(
-      (sum, t) => sum + Number(t.hours || 0),
-      0,
-    );
-    const remainingMinutes = Math.max(0, totalMinutes - existingMinutes);
+    } else {
+      // Fallback to projectTasks
+      const filtered = projectTasks.filter((t) => {
+        const taskId = t.project_bundle_id || t.wbs_id;
+        const typeMatch =
+          !selectedWbsType ||
+          String(t.wbsType).toLowerCase() ===
+          String(selectedWbsType).toLowerCase();
+        return (
+          String(taskId) === String(w.id || w._id || (w.wbs && w.wbs[0]?.id)) &&
+          typeMatch
+        );
+      });
+      existingHours =
+        filtered.reduce((sum, t) => sum + Number(t.hours || 0), 0) / 60;
+    }
+
+    const remainingMinutes = totalMinutes - existingHours * 60;
 
     return {
       label: `${w.name || w.bundle?.name || "Unnamed Bundle"} (${formatMinutesToHHMM(remainingMinutes)} remaining)`,
@@ -694,7 +777,7 @@ const AddTask = () => {
                                   placeholder="Select Employee"
                                 />
                                 {(() => {
-                                  const isDuplicate = allTasks.some(
+                                  const isDuplicate = projectTasks.some(
                                     (t) =>
                                       String(
                                         t.project_bundle_id || t.wbs_id,
@@ -728,26 +811,40 @@ const AddTask = () => {
                             )}
                           />
                         </div>
-                        <div className="w-32 space-y-2">
+                        <div className="w-56 space-y-2">
                           <label className="text-xs font-bold text-slate-500 uppercase">
-                            Duration
+                            Duration (HH:MM)
                           </label>
-                          <div className="space-y-1">
-                            <Input
-                              placeholder="e.g. 4h"
-                              {...register(
-                                `assignments.${index}.duration`,
-                                {
-                                  required: "Duration is required",
-                                },
-                              )}
-                            />
-                            {errors.assignments?.[index]?.duration && (
-                              <p className="text-xs text-red-500">
-                                {errors.assignments[index]?.duration?.message}
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 space-y-1">
+                              <Input
+                                type="number"
+                                placeholder="HH"
+                                {...register(`assignments.${index}.hours`, {
+                                  required: "HH required",
+                                })}
+                              />
+                            </div>
+                            <span className="font-bold text-slate-400">:</span>
+                            <div className="flex-1 space-y-1">
+                              <Input
+                                type="number"
+                                placeholder="MM"
+                                {...register(`assignments.${index}.minutes`, {
+                                  required: "MM required",
+                                  min: { value: 0, message: "Min 0" },
+                                  max: { value: 59, message: "Max 59" },
+                                })}
+                              />
+                            </div>
+                          </div>
+                          {(errors.assignments?.[index]?.hours ||
+                            errors.assignments?.[index]?.minutes) && (
+                              <p className="text-[10px] text-red-500">
+                                {errors.assignments[index]?.hours?.message ||
+                                  errors.assignments[index]?.minutes?.message}
                               </p>
                             )}
-                          </div>
                         </div>
                         {fields.length > 1 && (
                           <button
@@ -763,7 +860,9 @@ const AddTask = () => {
 
                     <button
                       type="button"
-                      onClick={() => append({ employeeId: "", duration: "" })}
+                      onClick={() =>
+                        append({ employeeId: "", hours: "", minutes: "" })
+                      }
                       className="w-full py-4 border-2 border-dashed border-slate-200 rounded-md text-slate-500 font-medium hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all flex items-center justify-center gap-2"
                     >
                       <Plus className="w-5 h-5" />

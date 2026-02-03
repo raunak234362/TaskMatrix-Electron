@@ -207,13 +207,13 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
   const getPriorityLabel = (priority) => {
     switch (priority) {
       case 1:
-        return { label: 'High', color: 'text-red-600', bg: 'bg-red-50' }
+        return { label: 'Low', color: 'text-green-600', bg: 'bg-green-50' }
       case 2:
         return { label: 'Medium', color: 'text-orange-500', bg: 'bg-orange-50' }
       case 3:
-        return { label: 'Low', color: 'text-blue-500', bg: 'bg-blue-50' }
-      default:
-        return { label: 'Normal', color: 'text-gray-500', bg: 'bg-gray-50' }
+        return { label: 'High', color: 'text-red-500', bg: 'bg-red-50' }
+      case 4:
+        return { label: 'Critical', color: 'text-gray-700', bg: 'bg-gray-50' }
     }
   }
 

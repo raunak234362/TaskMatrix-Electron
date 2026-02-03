@@ -212,7 +212,7 @@ const FetchTaskByID = ({
   const getPriorityLabel = (priority) => {
     switch (priority) {
       case 1:
-        return { label: "High", color: "text-red-600", bg: "bg-red-50" };
+        return { label: "Low", color: "text-green-600", bg: "bg-green-50" };
       case 2:
         return {
           label: "Medium",
@@ -220,9 +220,9 @@ const FetchTaskByID = ({
           bg: "bg-orange-50",
         };
       case 3:
-        return { label: "Low", color: "text-blue-500", bg: "bg-blue-50" };
-      default:
-        return { label: "Normal", color: "text-gray-700", bg: "bg-gray-50" };
+        return { label: "High", color: "text-red-500", bg: "bg-red-50" };
+      case 4:
+        return { label: "Critical", color: "text-gray-700", bg: "bg-gray-50" };
     }
   };
 
@@ -275,7 +275,7 @@ const FetchTaskByID = ({
             </div>
             <div>
               <h2 className="text-2xl font-bold text-gray-700">{task.name}</h2>
-              <p className="text-sm text-gray-700">ID: #{task.id}</p>
+              {/* <p className="text-sm text-gray-700">ID: #{task.id}</p> */}
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -349,8 +349,8 @@ const FetchTaskByID = ({
                   />
                   <InfoItem
                     icon={<Clock />}
-                    label="Created At"
-                    value={toIST(task.createdAt)}
+                    label="Assigned Hrs"
+                    value={task.allocationLog?.allocatedHours}
                   />
 
                   <div className="flex items-start gap-4">
@@ -406,7 +406,7 @@ const FetchTaskByID = ({
                 {/* Actions */}
                 <div className="mt-8 pt-6 border-t border-green-200">
                   <div className="flex flex-wrap items-center gap-4">
-                    {task.status === "ASSIGNED" && (
+                    {task.status === "ASSIGNED" || task.status === "REWORK" && (
                       <ActionButton
                         icon={<Play />}
                         color="emerald"

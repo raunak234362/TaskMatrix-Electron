@@ -1614,6 +1614,22 @@ class Service {
       console.error('cannot find Task', error)
     }
   }
+
+  // Get Tasks By Project ID
+  static async GetTasksByProjectId(projectId) {
+    try {
+      const response = await api.get(`task/project/${projectId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Tasks for project fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching tasks by project ID:', error)
+      throw error
+    }
+  }
   //Get All Task
   static async GetMyTask() {
     try {
@@ -1656,6 +1672,21 @@ class Service {
       return response.data
     } catch (error) {
       console.error('cannot find Task', error)
+    }
+  }
+
+  // Update Task by ID
+  static async UpdateTaskById(id, data) {
+    try {
+      const response = await api.put(`task/${id}`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Task updated by ID:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot update Task', error)
     }
   }
 

@@ -57,7 +57,12 @@ const EditTask = ({ id, onClose, refresh }) => {
             due_date: task.due_date
               ? new Date(task.due_date).toISOString().slice(0, 16)
               : "",
-            duration: task.duration || "",
+            hours: task.duration && task.duration.includes(":")
+              ? task.duration.split(":")[0]
+              : task.hours && !isNaN(task.hours) ? Math.floor(task.hours / 60) : "",
+            minutes: task.duration && task.duration.includes(":")
+              ? task.duration.split(":")[1]
+              : task.hours && !isNaN(task.hours) ? task.hours % 60 : "",
             status: task.status || "ASSIGNED",
             Stage: task.Stage || "IFA",
             user_id: task.user_id || task.user?.id || "",
@@ -79,8 +84,16 @@ const EditTask = ({ id, onClose, refresh }) => {
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
+      const hh = parseInt(data.hours) || 0;
+      const mm = parseInt(data.minutes) || 0;
+      const durationStr = `${String(hh).padStart(2, "0")}:${String(mm).padStart(
+        2,
+        "0",
+      )}`;
       const payload = {
         ...data,
+        duration: durationStr,
+        hours: hh * 60 + mm,
         priority: data.priority,
       };
       await Service.UpdateTaskById(id.toString(), payload);
@@ -144,13 +157,10 @@ const EditTask = ({ id, onClose, refresh }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2 space-y-1">
               <Input
-                label="Task Name *"
+                label="Task Name"
                 placeholder="e.g., Prepare GA Drawings"
-                {...register("name", { required: "Name is required" })}
+                {...register("name")}
               />
-              {errors.name && (
-                <p className="text-xs text-red-500">{errors.name.message}</p>
-              )}
             </div>
 
             <div className="md:col-span-2">
@@ -241,35 +251,48 @@ const EditTask = ({ id, onClose, refresh }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1">
               <Input
-                label="Start Date *"
+                label="Start Date"
                 type="datetime-local"
-                {...register("start_date", {
-                  required: "Start date is required",
-                })}
+                {...register("start_date")}
               />
-              {errors.start_date && (
-                <p className="text-xs text-red-500">
-                  {errors.start_date.message}
-                </p>
-              )}
             </div>
             <div className="space-y-1">
               <Input
-                label="Due Date *"
+                label="Due Date"
                 type="datetime-local"
-                {...register("due_date", { required: "Due date is required" })}
+                {...register("due_date")}
               />
-              {errors.due_date && (
-                <p className="text-xs text-red-500">
-                  {errors.due_date.message}
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-slate-700">
+                Duration (HH:MM)
+              </label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 space-y-1">
+                  <Input
+                    type="number"
+                    placeholder="HH"
+                    {...register("hours")}
+                  />
+                </div>
+                <span className="font-bold text-slate-400">:</span>
+                <div className="flex-1 space-y-1">
+                  <Input
+                    type="number"
+                    placeholder="MM"
+                    {...register("minutes", {
+                      min: { value: 0, message: "Min 0" },
+                      max: { value: 59, message: "Max 59" },
+                    })}
+                  />
+                </div>
+              </div>
+              {errors.minutes && (
+                <p className="text-[10px] text-red-500">
+                  {errors.minutes?.message}
                 </p>
               )}
             </div>
-            <Input
-              label="Duration (e.g., 2w, 3d)"
-              placeholder="2w"
-              {...register("duration")}
-            />
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                 <Flag className="w-4 h-4 text-indigo-500" /> Priority
