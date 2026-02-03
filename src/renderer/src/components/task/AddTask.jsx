@@ -33,6 +33,7 @@ const formatMinutesToHHMM = (minutes) => {
 };
 
 const AddTask = () => {
+  const [taskCategory, setTaskCategory] = useState("MILESTONE");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedWbs, setSelectedWbs] = useState(null);
   const [projectTasks, setProjectTasks] = useState([]);
@@ -288,18 +289,23 @@ const AddTask = () => {
     const m = parseFloat(a.minutes) || 0;
     return sum + h + (m / 60);
   }, 0);
-  const totalWbsHours = selectedWbs
+
+  const isOtherWbs = selectedWbsType === "other";
+
+  const totalWbsHours = selectedWbs && !isOtherWbs
     ? (selectedWbsType?.toLowerCase().includes("checking")
       ? selectedWbs.totalCheckHr || 0
       : selectedWbs.totalExecHr || 0) / 60
     : 0;
-  const availableHours = totalWbsHours - existingWbsHours;
-  const remainingHours = availableHours - totalAssignedHours;
+
+  // For 'Other', we don't calculate limits
+  const availableHours = isOtherWbs ? Infinity : (totalWbsHours - existingWbsHours);
+  const remainingHours = isOtherWbs ? Infinity : (availableHours - totalAssignedHours);
 
   const onSubmit = async (data) => {
     console.log("Form Data Submitted:", data);
 
-    const isOverLimit = existingWbsHours + totalAssignedHours > totalWbsHours;
+    const isOverLimit = !isOtherWbs && (existingWbsHours + totalAssignedHours > totalWbsHours);
 
     try {
       setIsSubmitting(true);
@@ -374,55 +380,64 @@ const AddTask = () => {
     { label: "Other", value: "other" },
   ];
 
-  const wbsOptions = filteredWbsItems.map((w) => {
-    const totalMinutes = selectedWbsType?.toLowerCase().includes("checking")
-      ? w.totalCheckHr || 0
-      : w.totalExecHr || 0;
+  const wbsOptions = selectedWbsType === "other"
+    ? [
+      { label: "Job Study", value: "Job Study" },
+      { label: "Submittal Preparations", value: "Submittal Preparations" },
+      { label: "Meetings", value: "Meetings" },
+      { label: "RFI Preparation", value: "RFI Preparation" },
+      { label: "Training & Practice", value: "Training & Practice" },
+      { label: "New WBS Item", value: "New WBS Item" },
+    ]
+    : filteredWbsItems.map((w) => {
+      const totalMinutes = selectedWbsType?.toLowerCase().includes("checking")
+        ? w.totalCheckHr || 0
+        : w.totalExecHr || 0;
 
-    const isChecking = selectedWbsType?.toLowerCase().includes("checking");
+      const isChecking = selectedWbsType?.toLowerCase().includes("checking");
 
-    // Calculate existing hours for this specific bundle and type
-    let existingHours = 0;
-    if (w.tasks && w.tasks.length > 0) {
-      const filtered = w.tasks.filter((t) => {
-        const taskWbsType = (t.wbsType || "").toLowerCase();
-        if (isChecking) {
-          return taskWbsType === selectedWbsType.toLowerCase();
-        } else {
-          return (
-            taskWbsType === (selectedWbsType?.toLowerCase() || "") ||
-            taskWbsType === ""
-          );
-        }
-      });
-      existingHours = filtered.reduce(
-        (sum, t) => sum + (parseFloat(t.allocationLog?.allocatedHours) || 0),
-        0,
-      );
-    } else {
-      // Fallback to projectTasks
-      const filtered = projectTasks.filter((t) => {
-        const taskId = t.project_bundle_id || t.wbs_id;
-        const typeMatch =
-          !selectedWbsType ||
-          String(t.wbsType).toLowerCase() ===
-          String(selectedWbsType).toLowerCase();
-        return (
-          String(taskId) === String(w.id || w._id || (w.wbs && w.wbs[0]?.id)) &&
-          typeMatch
+      // Calculate existing hours for this specific bundle and type
+      let existingHours = 0;
+      if (w.tasks && w.tasks.length > 0) {
+        const filtered = w.tasks.filter((t) => {
+          const taskWbsType = (t.wbsType || "").toLowerCase();
+          if (isChecking) {
+            return taskWbsType === selectedWbsType.toLowerCase();
+          } else {
+            return (
+              taskWbsType === (selectedWbsType?.toLowerCase() || "") ||
+              taskWbsType === ""
+            );
+          }
+        });
+        existingHours = filtered.reduce(
+          (sum, t) => sum + (parseFloat(t.allocationLog?.allocatedHours) || 0),
+          0,
         );
-      });
-      existingHours =
-        filtered.reduce((sum, t) => sum + Number(t.hours || 0), 0) / 60;
-    }
+      } else {
+        // Fallback to projectTasks
+        const filtered = projectTasks.filter((t) => {
+          const taskId = t.project_bundle_id || t.wbs_id;
+          const typeMatch =
+            !selectedWbsType ||
+            String(t.wbsType).toLowerCase() ===
+            String(selectedWbsType).toLowerCase();
+          return (
+            String(taskId) === String(w.id || w._id || (w.wbs && w.wbs[0]?.id)) &&
+            typeMatch
+          );
+        });
+        existingHours =
+          filtered.reduce((sum, t) => sum + Number(t.hours || 0), 0) / 60;
+      }
 
-    const remainingMinutes = totalMinutes - existingHours * 60;
+      const remainingMinutes = totalMinutes - existingHours * 60;
 
-    return {
-      label: `${w.name || w.bundle?.name || "Unnamed Bundle"} (${formatMinutesToHHMM(remainingMinutes)} remaining)`,
-      value: w.id || w._id || (w.wbs && w.wbs[0]?.id),
-    };
-  });
+      return {
+        label: `${w.name || w.bundle?.name || "Unnamed Bundle"} (${formatMinutesToHHMM(remainingMinutes)} remaining)`,
+        value: w.id || w._id || (w.wbs && w.wbs[0]?.id),
+      };
+    });
 
   const employeeOptions = employees.map((e) => ({
     label: `${e.firstName} ${e.lastName}`,
@@ -471,7 +486,42 @@ const AddTask = () => {
                   )}
                 </div>
 
-                {selectedProjectId && (
+                <div className="space-y-6 md:col-span-2">
+                  <div className="flex flex-col space-y-3">
+                    <label className="text-sm font-semibold text-slate-700">
+                      Task Category *
+                    </label>
+                    <div className="flex gap-4 p-1 bg-slate-100 rounded-xl w-fit">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTaskCategory("MILESTONE");
+                        }}
+                        className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${taskCategory === "MILESTONE"
+                          ? "bg-white text-indigo-600 shadow-sm"
+                          : "text-slate-500 hover:text-slate-700"
+                          }`}
+                      >
+                        Milestone Task
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTaskCategory("GENERAL");
+                          setValue("mileStone_id", ""); // Clear milestone if switching to general
+                        }}
+                        className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${taskCategory === "GENERAL"
+                          ? "bg-white text-indigo-600 shadow-sm"
+                          : "text-slate-500 hover:text-slate-700"
+                          }`}
+                      >
+                        General / Training Task
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {selectedProjectId && taskCategory === "MILESTONE" && (
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                       <Flag className="w-4 h-4 text-indigo-500" /> Milestone *
@@ -500,7 +550,7 @@ const AddTask = () => {
               </div>
             </section>
 
-            {selectedProjectId && selectedMilestoneId && (
+            {selectedProjectId && (taskCategory === "GENERAL" || selectedMilestoneId) && (
               <>
                 {/* WBS Section */}
                 <section className="space-y-6">
@@ -530,19 +580,24 @@ const AddTask = () => {
 
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                        <Layers className="w-4 h-4 text-blue-500" /> WBS Item *
+                        <Layers className="w-4 h-4 text-blue-500" />{" "}
+                        {selectedWbsType === "other" ? "Activity Item" : "WBS Item"} *
                       </label>
                       <Controller
                         name="project_bundle_id"
                         control={control}
-                        rules={{ required: "WBS Item is required" }}
+                        rules={{ required: "This field is required" }}
                         render={({ field }) => (
                           <Select
                             name="project_bundle_id"
                             options={wbsOptions}
                             value={field.value}
                             onChange={(_, val) => field.onChange(val)}
-                            placeholder="Select WBS Item"
+                            placeholder={
+                              selectedWbsType === "other"
+                                ? "Select Activity"
+                                : "Select WBS Item"
+                            }
                           />
                         )}
                       />
@@ -583,8 +638,8 @@ const AddTask = () => {
                   </div>
 
                   {/* WBS Timing Display */}
-                  {selectedWbs && (
-                    <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {selectedWbs && !isOtherWbs && (
+                    <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-4 gap-6">
                       <div className="flex items-center gap-4">
                         <div className="p-3 bg-blue-100 rounded-xl">
                           <Clock className="w-6 h-6 text-blue-600" />
@@ -738,19 +793,22 @@ const AddTask = () => {
                 <section className="space-y-6">
                   <div className="flex items-center justify-between">
                     <SectionTitle title="Team Assignment" />
-                    <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-xl">
-                      <span className="text-sm font-medium text-slate-600">
-                        Assigned:
-                      </span>
-                      <span
-                        className={`text-sm font-bold ${totalAssignedHours > remainingHours
-                          ? "text-red-600"
-                          : "text-indigo-600"
-                          }`}
-                      >
-                        {formatMinutesToHHMM(totalAssignedHours * 60)} / {formatMinutesToHHMM(availableHours * 60)}
-                      </span>
-                    </div>
+                    {!isOtherWbs && (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-xl">
+                        <span className="text-sm font-medium text-slate-600">
+                          Assigned:
+                        </span>
+                        <span
+                          className={`text-sm font-bold ${totalAssignedHours > remainingHours
+                              ? "text-red-600"
+                              : "text-indigo-600"
+                            }`}
+                        >
+                          {formatMinutesToHHMM(totalAssignedHours * 60)} /{" "}
+                          {formatMinutesToHHMM(availableHours * 60)}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-4">
@@ -784,16 +842,16 @@ const AddTask = () => {
                                       ) === String(selectedWbsId) &&
                                       String(t.user_id) === String(field.value),
                                   );
-                                  const isOverLimit =
-                                    existingWbsHours + totalAssignedHours >
-                                    totalWbsHours;
-                                  if (isDuplicate || isOverLimit) {
+                                  const isOverLimitValue =
+                                    !isOtherWbs && (existingWbsHours + totalAssignedHours >
+                                      totalWbsHours);
+                                  if (isDuplicate || isOverLimitValue) {
                                     return (
                                       <div className="flex items-center gap-1 text-[10px] font-bold text-amber-600 uppercase">
                                         <AlertCircle className="w-3 h-3" />
                                         Will be marked
                                         {isDuplicate && " (Duplicate User)"}
-                                        {isOverLimit && " (Hours Exceeded)"}
+                                        {isOverLimitValue && " (Hours Exceeded)"}
                                       </div>
                                     );
                                   }
