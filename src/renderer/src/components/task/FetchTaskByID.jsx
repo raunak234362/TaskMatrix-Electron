@@ -176,9 +176,9 @@ const FetchTaskByID = ({
       },
       IN_PROGRESS: {
         label: "In Progress",
-        bg: "bg-emerald-100",
-        text: "text-emerald-700",
-        border: "border-emerald-300",
+        bg: "bg-blue-100",
+        text: "text-blue-700",
+        border: "border-blue-300",
       },
       BREAK: {
         label: "On Break",
@@ -188,9 +188,9 @@ const FetchTaskByID = ({
       },
       COMPLETED: {
         label: "Completed",
-        bg: "bg-blue-100",
-        text: "text-blue-700",
-        border: "border-blue-300",
+        bg: "bg-green-100",
+        text: "text-green-700",
+        border: "border-green-300",
       },
       PENDING: {
         label: "Pending",
@@ -254,7 +254,7 @@ const FetchTaskByID = ({
           </p>
           <Button
             onClick={onClose}
-            className="mt-6 px-8 py-3 font-semibold transition"
+            className="mt-6 px-8 py-3 font-semibold transition bg-red-600 hover:bg-red-700"
           >
             Close
           </Button>
@@ -297,7 +297,7 @@ const FetchTaskByID = ({
             <Button
               onClick={onClose}
               variant="secondary"
-              className="px-6 py-3 font-medium transition"
+              className="px-6 py-3 text-white font-medium transition bg-red-600 hover:bg-red-700"
             >
               Close
             </Button>
@@ -329,6 +329,11 @@ const FetchTaskByID = ({
                     icon={<Building2 />}
                     label="Project"
                     value={task.project?.name || "—"}
+                  />
+                  <InfoItem
+                    icon={<Building2 />}
+                    label="WBS Item"
+                    value={task.projectBundle?.bundleKey.replace(/_/g, ' ') || '—'}
                   />
                   <InfoItem
                     icon={<Hash />}
@@ -385,7 +390,7 @@ const FetchTaskByID = ({
                       <span
                         className={`inline-block mt-1 px-4 py-2 rounded-full font-semibold text-sm border-2 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
                       >
-                        {statusConfig.label}
+                        {statusConfig.label.replace(/_/g, ' ') || '—'}
                       </span>
                     </div>
                   </div>
@@ -485,12 +490,12 @@ const FetchTaskByID = ({
                           label="Total Time"
                           value={formatSecondsToHHMM(totalDurationSeconds)}
                         />
-                        <SummaryCard
+                        <SummaryCardSession
                           icon={<Users />}
                           label="Sessions"
                           value={task.workingHourTask.length}
                         />
-                        <SummaryCard
+                        <SummaryCardStatus
                           icon={<Timer />}
                           label="Current Status"
                           value={statusConfig.label}
@@ -593,7 +598,29 @@ const SummaryCard = ({ icon, label, value, color = "text-indigo-700" }) => (
     </div>
     <div>
       <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl font-bold mt-2 ${color}`}>{value}</p>
+      <p className={`text-xl font-bold mt-2 ${color}`}>{value} hrs</p>
+    </div>
+  </div>
+);
+const SummaryCardSession = ({ icon, label, value, color = "text-indigo-700" }) => (
+  <div className="bg-white/80 backdrop-blur flex flex-row gap-5 items-center justify-center p-2 rounded-xl border border-indigo-100 text-center">
+    <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+      {icon}
+    </div>
+    <div>
+      <p className="text-sm text-gray-700">{label}</p>
+      <p className={`text-xl font-bold mt-2 ${color}`}>{value} </p>
+    </div>
+  </div>
+);
+const SummaryCardStatus = ({ icon, label, value, color = "text-indigo-700" }) => (
+  <div className="bg-white/80 backdrop-blur flex flex-row gap-5 items-center justify-center p-2 rounded-xl border border-indigo-100 text-center">
+    <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+      {icon}
+    </div>
+    <div>
+      <p className="text-sm text-gray-700">{label}</p>
+      <p className={`text-xl font-bold mt-2 ${color}`}>{value} </p>
     </div>
   </div>
 );

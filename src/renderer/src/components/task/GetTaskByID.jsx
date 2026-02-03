@@ -131,6 +131,16 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
     }).format(new Date(dateString))
   }
 
+  const formatSecondsToHHMM = (totalSeconds) => {
+    if (!totalSeconds || isNaN(totalSeconds)) return "00:00";
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+      2,
+      "0"
+    )}`;
+  };
+
   const handleAction = async (action) => {
     if (!task?.id) return
     try {
@@ -173,9 +183,9 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
       },
       IN_PROGRESS: {
         label: 'In Progress',
-        bg: 'bg-emerald-100',
-        text: 'text-emerald-700',
-        border: 'border-emerald-300'
+        bg: 'bg-blue-100',
+        text: 'text-blue-700',
+        border: 'border-blue-300'
       },
       BREAK: {
         label: 'On Break',
@@ -185,9 +195,9 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
       },
       COMPLETED: {
         label: 'Completed',
-        bg: 'bg-blue-100',
-        text: 'text-blue-700',
-        border: 'border-blue-300'
+        bg: 'bg-green-100',
+        text: 'text-green-700',
+        border: 'border-green-300'
       },
       PENDING: {
         label: 'Pending',
@@ -243,7 +253,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
           <p className="text-gray-600 mt-2">This task may have been deleted or is inaccessible.</p>
           <button
             onClick={onClose}
-            className="mt-6 px-8 py-3 bg-[#6bbd45] hover:bg-[#5aa33a] text-white font-semibold rounded-xl transition"
+            className="mt-6 px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition"
           >
             Close
           </button>
@@ -273,7 +283,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
             <Button
               onClick={() => setIsUpdatingStatus(true)}
               variant="outline"
-              className="flex items-center gap-2 px-6 py-3 font-medium transition border-orange-200 text-orange-700 hover:bg-orange-50"
+              className="flex items-center gap-2 px-6 py-3 font-medium transition border-orange-200 text-white hover:bg-orange-50"
             >
               <Timer className="w-4 h-4" /> Update Status
             </Button>
@@ -292,7 +302,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
               )}
             <button
               onClick={onClose}
-              className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-xl transition"
+              className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl transition"
             >
               Close
             </button>
@@ -321,6 +331,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   <InfoItem icon={<Building2 />} label="Project" value={task.project?.name || '—'} />
+                  <InfoItem icon={<Building2 />} label="WBS Item" value={task.projectBundle?.bundleKey?.replace(/_/g, ' ') || '—'} />
                   <InfoItem icon={<Hash />} label="Stage" value={task.Stage || '—'} />
                   <InfoItem
                     icon={<User />}
@@ -356,7 +367,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                       <span
                         className={`inline-block mt-1 px-4 py-2 rounded-full font-semibold text-sm border-2 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
                       >
-                        {statusConfig.label}
+                        {statusConfig.label.replace(/_/g, ' ') || '—'}
                       </span>
                     </div>
                   </div>
@@ -450,14 +461,14 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                       <SummaryCard
                         icon={<Clock4 />}
                         label="Total Time"
-                        value={formatHours(totalDurationSeconds / 3600)}
+                        value={formatSecondsToHHMM(totalDurationSeconds)}
                       />
-                      <SummaryCard
+                      <SummaryCardSession
                         icon={<Users />}
                         label="Sessions"
                         value={task.workingHourTask.length}
                       />
-                      <SummaryCard
+                      <SummaryCardStatus
                         icon={<Timer />}
                         label="Current Status"
                         value={statusConfig.label}
@@ -538,7 +549,7 @@ const InfoItem = ({ icon, label, value }) => (
       {icon && <div className="w-6 h-6 text-[#6bbd45]">{icon}</div>}
     </div>
     <div>
-      <p className="text-sm font-medium text-black">{label}</p>
+      <p className="text-sm font-bold text-black">{label}</p>
       <p className="font-semibold text-black mt-1">{value}</p>
     </div>
   </div>
@@ -563,16 +574,38 @@ const ActionButton = ({ children, icon, color, onClick, disabled }) => {
   )
 }
 
-const SummaryCard = ({ icon, label, value, color = 'text-indigo-700' }) => (
+const SummaryCard = ({ icon, label, value, color = "text-indigo-700" }) => (
   <div className="bg-white/80 backdrop-blur flex flex-row gap-5 items-center justify-center p-2 rounded-xl border border-indigo-100 text-center">
     <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
       {icon}
     </div>
     <div>
-      <p className="text-sm text-black">{label}</p>
-      <p className={`text-xl font-bold mt-2 ${color}`}>{value}</p>
+      <p className="text-sm text-gray-700">{label}</p>
+      <p className={`text-xl font-bold mt-2 ${color}`}>{value} hrs</p>
     </div>
   </div>
-)
+);
+const SummaryCardSession = ({ icon, label, value, color = "text-indigo-700" }) => (
+  <div className="bg-white/80 backdrop-blur flex flex-row gap-5 items-center justify-center p-2 rounded-xl border border-indigo-100 text-center">
+    <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+      {icon}
+    </div>
+    <div>
+      <p className="text-sm text-gray-700">{label}</p>
+      <p className={`text-xl font-bold mt-2 ${color}`}>{value} </p>
+    </div>
+  </div>
+);
+const SummaryCardStatus = ({ icon, label, value, color = "text-indigo-700" }) => (
+  <div className="bg-white/80 backdrop-blur flex flex-row gap-5 items-center justify-center p-2 rounded-xl border border-indigo-100 text-center">
+    <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+      {icon}
+    </div>
+    <div>
+      <p className="text-sm text-gray-700">{label}</p>
+      <p className={`text-xl font-bold mt-2 ${color}`}>{value} </p>
+    </div>
+  </div>
+);
 
 export default GetTaskByID
