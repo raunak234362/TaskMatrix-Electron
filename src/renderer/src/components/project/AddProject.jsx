@@ -406,9 +406,9 @@ const AddProject = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
                 {[
-                  "connectionDesign Design",
-                  "miscDesign",
-                  "customerDesign",
+                  "connectionDesign::Connection Design",
+                  "miscDesign::Misc Design",
+                  "customerDesign::Customer Design",
                 ].map((item) => {
                   const [key, label] = item.split("::");
                   return (
@@ -446,8 +446,8 @@ const AddProject = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
                 {[
-                  "detailingMain",
-                  "detailingMisc",
+                  "detailingMain::Detailing Main",
+                  "detailingMisc::Detailing Misc",
                 ].map((item) => {
                   const [key, label] = item.split("::");
                   return (

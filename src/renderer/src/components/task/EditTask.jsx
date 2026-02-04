@@ -164,25 +164,30 @@ const EditTask = ({ id, onClose, refresh }) => {
         {/* Task Details */}
         <section className="space-y-6">
           <SectionTitle title="Task Details" />
-
-          <Input label="Task Name" {...register("name")} />
-
-          <Controller
-            name="description"
-            control={control}
-            render={({ field }) => (
-              <RichTextEditor
-                value={field.value || ""}
+          <div>
+          <label className="text-sm font-medium text-slate-700">Task Name</label>
+            <Input {...register("name")} />
+          </div>
+          <div>
+          <label className="text-sm font-medium text-slate-700">Description</label>
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor
+                  value={field.value || ""}
                 onChange={field.onChange}
               />
             )}
           />
+          </div>
         </section>
 
         {/* Assignment & Stage */}
         <section className="space-y-6">
           <SectionTitle title="Assignment & Stage" />
-
+            <div>
+          <label className="text-sm font-medium text-slate-700">Stage</label>
           <Controller
             name="Stage"
             control={control}
@@ -194,7 +199,9 @@ const EditTask = ({ id, onClose, refresh }) => {
               />
             )}
           />
-
+          </div>
+          <div>
+          <label className="text-sm font-medium text-slate-700">Assignee</label>
           <Controller
             name="user_id"
             control={control}
@@ -206,20 +213,24 @@ const EditTask = ({ id, onClose, refresh }) => {
               />
             )}
           />
+          </div>
         </section>
 
         {/* Schedule & Priority */}
-        <section className="space-y-6">
+        <section className=" ">
           <SectionTitle title="Schedule & Priority" />
-
-          <Input type="datetime-local" label="Start Date" {...register("start_date")} />
-          <Input type="datetime-local" label="Due Date" {...register("due_date")} />
-
-          <div className="flex gap-2">
+          <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-2 py-2">
+            <Input type="datetime-local" label="Start Date" {...register("start_date")} />
+            <Input type="datetime-local" label="Due Date" {...register("due_date")} />
+          </div>
+          <label className="text-sm font-medium text-slate-700">Duration</label>
+          <div className="grid grid-cols-2 gap-2 py-2">
             <Input type="number" placeholder="HH" {...register("hours")} />
             <Input type="number" placeholder="MM" {...register("minutes")} />
           </div>
-
+          <div className="">
+            <label className="text-sm font-medium text-slate-700">Priority</label>
           <Controller
             name="priority"
             control={control}
@@ -236,10 +247,12 @@ const EditTask = ({ id, onClose, refresh }) => {
               />
             )}
           />
+          </div>
+          </div>
         </section>
 
         {/* Footer */}
-        <div className="flex justify-end gap-4 pt-6 border-t">
+        <div className="flex justify-end gap-4 pt-6">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
           </Button>

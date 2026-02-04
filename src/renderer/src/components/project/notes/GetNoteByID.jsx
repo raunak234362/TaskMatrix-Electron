@@ -24,6 +24,8 @@ const GetNoteByID = ({ projectId, noteId, onClose }) => {
             setLoading(false);
         }
     };
+    console.log(note);
+    
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleString("en-IN", {

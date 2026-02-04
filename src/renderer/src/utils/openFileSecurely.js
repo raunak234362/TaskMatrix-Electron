@@ -33,7 +33,7 @@ const getDownloadUrl = (table, parentId, fileId, versionId) => {
       return `${baseURL}/connectionDesign/viewFile/${parentId}/${fileId}`
     case 'designDrawings':
     case 'design-drawings':
-      return `${baseURL}/notes/viewfile/${parentId}/${fileId}`
+      return `${baseURL}/${table}/viewfile/${parentId}/${fileId}`
     default:
       return `${baseURL}/${table}/viewFile/${parentId}/${fileId}`
   }
@@ -103,9 +103,14 @@ export const downloadFileSecurely = async (type, id, fileId, originalName, versi
 
 export const shareFileSecurely = async (type, id, fileId, versionId) => {
   try {
-    const response = type === 'submittals'
-      ? await Service.createShareLink('submittalVersion', versionId, fileId)
-      : await Service.createShareLink(type, id, fileId, versionId)
+    let response
+    if (type === 'submittals') {
+      response = await Service.createShareLink('submittalVersion', versionId, fileId)
+    } else if (type === 'design-drawings' || type === 'designDrawings') {
+      response = await Service.createShareLink('designDrawings', id, fileId)
+    } else {
+      response = await Service.createShareLink(type, id, fileId, versionId)
+    }
     if (response?.shareUrl) {
       await navigator.clipboard.writeText(response.shareUrl)
       toast.success('Link copied to clipboard!')

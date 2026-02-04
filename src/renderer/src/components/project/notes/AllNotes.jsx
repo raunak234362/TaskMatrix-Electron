@@ -95,7 +95,7 @@ const AllNotes = ({ projectId }) => {
               <div className="mt-2 pt-2 border-t border-gray-100">
                 <RenderFiles
                   files={note.files}
-                  table="projectNotes"
+                  table="project/notes"
                   parentId={note.id}
                   hideHeader={true}
                 />

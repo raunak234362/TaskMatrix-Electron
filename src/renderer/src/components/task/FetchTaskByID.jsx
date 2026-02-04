@@ -37,6 +37,9 @@ const FetchTaskByID = ({
   const [showWorkSummary, setShowWorkSummary] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [staffData, setStaffData] = useState([]);
+  const [isEndModalOpen, setIsEndModalOpen] = useState(false);
+  const [endComment, setEndComment] = useState("");
+  const [completionPercentage, setCompletionPercentage] = useState("");
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const fetchTask = async () => {
     if (!id) return;
@@ -161,6 +164,65 @@ const FetchTaskByID = ({
       if (refresh) refresh();
     } catch (error) {
       toast.error("Action failed. Please try again.");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleEndTask = async (e) => {
+    if (e) e.preventDefault();
+    if (!endComment.trim()) {
+      toast.warning("Please provide a comment before ending the task");
+      return;
+    }
+    if (!completionPercentage) {
+      toast.warning("Please select the completion percentage");
+      return;
+    }
+    if (!task?.id || !activeWorkID) return;
+
+    try {
+      setProcessing(true);
+      const taskId = task.id.toString();
+
+      // Step 1: Update Task Completion Percentage
+      await Service.UpdateTaskById(taskId, {
+        lineItemCompletion: completionPercentage
+      });
+
+      // Step 2: Format the completion range (e.g., 81-90%)
+      const formattedRange = completionPercentage.replace("RANGE_", "").replace(/_/g, "-") + "%";
+
+      // Step 3: Add the structured comment
+      const user_id = sessionStorage.getItem("userId");
+      const commentPayload = {
+        task_id: task.id,
+        user_id: Number(user_id),
+        data: `
+          <div style="margin-bottom: 12px; font-family: sans-serif;">
+            <div style="display: inline-block; background-color: #ecfdf5; color: #065f46; border: 1px solid #10b981; padding: 4px 12px; border-radius: 9999px; font-weight: 700; font-size: 13px; margin-bottom: 8px;">
+              WBS Item Completion: ${formattedRange}
+            </div>
+            <div style="color: #374151; line-height: 1.6; white-space: pre-wrap;">
+              ${endComment.replace(/\n/g, '<br/>')}
+            </div>
+          </div>
+        `,
+      };
+      await Service.AddTaskComment(commentPayload);
+
+      // Step 3: End the task session
+      await Service.TaskEnd(taskId, { whId: activeWorkID });
+
+      toast.success("Task completed successfully");
+      setIsEndModalOpen(false);
+      setEndComment("");
+      setCompletionPercentage("");
+      await fetchTask();
+      if (refresh) refresh();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to end task. Please try again.");
     } finally {
       setProcessing(false);
     }
@@ -359,6 +421,11 @@ const FetchTaskByID = ({
                     label="Assigned Hrs"
                     value={task.allocationLog?.allocatedHours}
                   />
+                  <InfoItem
+                    icon={<Clock />}
+                    label="Assigned WBS Item Completion %"
+                    value={task.LineItemCompletion ? task.LineItemCompletion.replace("RANGE_", "").replace(/_/g, "-") + "%" : "—"}
+                  />
 
                   <div className="flex items-start gap-4">
                     <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
@@ -436,7 +503,10 @@ const FetchTaskByID = ({
                         <ActionButton
                           icon={<Square />}
                           color="red"
-                          onClick={() => handleAction("end")}
+                          onClick={() => {
+                            setEndComment(`Achieved: \nCompleted: \nIssues: \nPending: `);
+                            setIsEndModalOpen(true);
+                          }}
                           disabled={processing}
                         >
                           End Task
@@ -555,6 +625,76 @@ const FetchTaskByID = ({
           )}
         </div>
       </div>
+
+      {/* End Task Comment Modal */}
+      {isEndModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-6">
+            <div className="flex items-center gap-3 text-red-600">
+              <Square className="w-6 h-6 fill-current" />
+              <h3 className="text-xl font-bold">End Task session</h3>
+            </div>
+            <p className="text-gray-600">
+              Please provide a brief summary or feedback about the work done before ending the session.
+            </p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">WBS Item Completion (%) *</label>
+                <select
+                  value={completionPercentage}
+                  onChange={(e) => setCompletionPercentage(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all outline-none text-gray-700 bg-white"
+                >
+                  <option value="" disabled>Select completion range</option>
+                  {["0-10", "11-20", "21-30", "31-40", "41-50", "51-60", "61-70", "71-80", "81-90", "91-100"].map(range => (
+                    <option key={range} value={range}>{range}%</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Completion Summary *</label>
+                <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-800 mb-2">
+                  <strong>Please answer:</strong>
+                  <ul className="list-disc ml-4 mt-1 space-y-1">
+                    <li>What you achieved?</li>
+                    <li>What are the things you completed?</li>
+                    <li>What are the issues you phased during completion?</li>
+                    <li>What are pending things left?</li>
+                  </ul>
+                </div>
+                <textarea
+                  value={endComment}
+                  onChange={(e) => setEndComment(e.target.value)}
+                  className="w-full h-40 px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all outline-none resize-none text-gray-700"
+                  placeholder="Type your answers here..."
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <Button
+                onClick={() => {
+                  setIsEndModalOpen(false);
+                  setEndComment("");
+                  setCompletionPercentage("");
+                }}
+                variant="outline"
+                className="flex-1 py-3 text-red-600 font-semibold border-red-200"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleEndTask}
+                disabled={processing || !endComment.trim() || !completionPercentage}
+                className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center justify-center gap-2"
+              >
+                {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Square className="w-4 h-4" />}
+                Submit & End
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
