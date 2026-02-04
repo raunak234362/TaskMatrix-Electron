@@ -504,7 +504,7 @@ const AddTask = () => {
                       >
                         Milestone Task
                       </button>
-                      <button
+                      {/* <button
                         type="button"
                         onClick={() => {
                           setTaskCategory("GENERAL");
@@ -516,7 +516,7 @@ const AddTask = () => {
                           }`}
                       >
                         General / Training Task
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 </div>
