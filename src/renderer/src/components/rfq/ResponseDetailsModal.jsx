@@ -93,7 +93,7 @@ const ResponseDetailsModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-lg p-6 rounded-xl shadow-xl space-y-4 relative">
+      <div className="bg-white h-[90vh] overflow-y-auto w-fit p-6 rounded-xl shadow-xl space-y-4 relative">
         {/* Close Button */}
         <Button
           onClick={onClose}

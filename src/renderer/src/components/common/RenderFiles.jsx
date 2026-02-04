@@ -8,7 +8,7 @@ import {
 import Button from '../fields/Button'
 import { toast } from 'react-toastify'
 
-const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, hideHeader = false }) => {
+const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, versionId, hideHeader = false }) => {
     // Step 1: Normalize and flatten files
     const projectFiles = Array.isArray(files)
         ? files.map((doc) => {
@@ -29,7 +29,8 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, hide
                     ...f,
                     uploadedAt: curr.uploadedAt || curr.createdAt || curr.date,
                     user: curr.user || curr.sender,
-                    documentID: curr.id,
+                    documentID: table === 'submittals' && parentId ? parentId : curr.id,
+                    versionId: table === 'submittals' ? curr.id : (f.versionId || versionId),
                     stage: curr.stage
                 })
             })
@@ -39,7 +40,8 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, hide
             if (!acc[desc]) acc[desc] = []
             acc[desc].push({
                 ...curr,
-                documentID: parentId // Use passed parentId for flat files
+                documentID: parentId, // Use passed parentId for flat files
+                versionId: curr.versionId || versionId
             })
         }
         return acc
@@ -48,18 +50,18 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, hide
     const handleShare = async (e, file) => {
         e.preventDefault()
         e.stopPropagation()
-        await shareFileSecurely(table, file.documentID, file.id)
+        await shareFileSecurely(table, file.documentID, file.id, file.versionId || versionId)
     }
 
     const handleDownload = async (e, file) => {
         e.preventDefault()
         e.stopPropagation()
-        await downloadFileSecurely(table, file.documentID, file.id, file.originalName)
+        await downloadFileSecurely(table, file.documentID, file.id, file.originalName, file.versionId || versionId)
     }
 
     const handleOpen = (e, file) => {
         e.preventDefault()
-        openFileSecurely(table, file.documentID, file.id)
+        openFileSecurely(table, file.documentID, file.id, file.versionId || versionId)
     }
 
     // Step 3: Render grouped sections

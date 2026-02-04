@@ -465,7 +465,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                       />
                       <SummaryCardSession
                         icon={<Users />}
-                        label="Sessions"
+                        label="Breaks"
                         value={task.workingHourTask.length}
                       />
                       <SummaryCardStatus

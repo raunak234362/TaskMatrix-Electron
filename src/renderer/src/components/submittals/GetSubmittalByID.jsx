@@ -118,7 +118,7 @@ const GetSubmittalByID = ({ id }) => {
 
             {/* Versioned Attachments */}
             <RenderFiles
-              files={submittal.versions || (submittal.files ? [{ files: submittal.files, description: "Attachments" }] : [])}
+              files={submittal.versions || []}
               table="submittals"
               parentId={submittal.id}
             />
@@ -128,7 +128,7 @@ const GetSubmittalByID = ({ id }) => {
           <div className="bg-white p-6 rounded-xl shadow-md space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-green-700">Responses</h2>
-              {userRole === "CLIENT" && (
+              {userRole === "CLIENT_ADMIN" && (
                 <Button
                   className="bg-green-600 text-white"
                   onClick={() => setShowResponseModal(true)}

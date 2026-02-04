@@ -57,13 +57,15 @@ const CoTable = ({ coId }) => {
   }, [coId]);
 
   const onSubmit = async (data) => {
+    console.log(data);
     try {
-      // Map data to numbers as done in your original JSX
+      // Explicitly convert numeric strings to Numbers for backend validation
       const formattedRows = data.rows.map((row) => ({
         ...row,
-        QtyNo: row.QtyNo,
-        hours: row.hours,
-        cost: row.cost,
+        QtyNo: Number(row.QtyNo) || 0,
+        hours: Number(row.hours) || 0,
+        cost: Number(row.cost) || 0,
+        remarks: row.remarks && row.remarks.trim().length >= 2 ? row.remarks : "— "
       }));
 
       await Service.addCOTable(formattedRows, coId);

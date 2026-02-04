@@ -63,7 +63,7 @@ const GetCOByID = ({ id, projectId }) => {
 
       setLoading(true);
 
-      const response = await Service.GetChangeOrder(id);
+      const response = await Service.GetChangeOrderByID(id);
       console.log(response);
 
       setCO(response.data);

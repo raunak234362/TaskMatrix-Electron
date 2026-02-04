@@ -19,7 +19,7 @@ const AddCO = ({ project, onSuccess }) => {
     (state) => state.fabricatorInfo.fabricatorData,
   );
 
-  const { register, handleSubmit, control, reset } =
+  const { register, handleSubmit, control, reset, setValue } =
     useForm();
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
@@ -28,6 +28,23 @@ const AddCO = ({ project, onSuccess }) => {
   const selectedFabricator = fabricators?.find(
     (f) => String(f.id) === String(fabricatorId),
   );
+
+  React.useEffect(() => {
+    if (project && selectedFabricator) {
+      const year = new Date().getFullYear();
+      const initials = selectedFabricator.fabName
+        ? selectedFabricator.fabName
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
+        : "";
+      const nextNumber = (project.changeOrders?.length || 0) + 1;
+      const formattedNumber = nextNumber.toString().padStart(2, "0");
+      const prefilledCO = `CO#-${year}-${initials}-${formattedNumber}`;
+      setValue("changeOrderNumber", prefilledCO);
+    }
+  }, [project, selectedFabricator, setValue]);
 
   const pocOptions =
     selectedFabricator?.pointOfContact?.map((p) => ({

@@ -67,7 +67,7 @@ const AddClients = ({
     roleOptions.find((opt) => opt.value === selectedRole) || null;
 
   return (
-    <div className="w-full mx-auto bg-white rounded-xl shadow-md p-6 mt-6 border border-gray-200">
+    <div className="w-full h-[100vh] overflow-y-auto mx-auto bg-white rounded-xl shadow-md p-6 mt-6 border border-gray-200">
       <Button onClick={onClose}>Close</Button>
       <h2 className="text-xl font-semibold text-gray-700 mb-6">
         Add New Employee

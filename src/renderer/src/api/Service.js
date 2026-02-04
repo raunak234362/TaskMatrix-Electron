@@ -1457,10 +1457,10 @@ class Service {
     }
   }
   //submittal responses
-  static async addSubmittalResponse(formData, SubId) {
+  static async addSubmittalResponse(formData) {
     const token = sessionStorage.getItem('token')
 
-    const response = await api.post(`submittal/${SubId}/responses`, formData, {
+    const response = await api.post(`submittal/responses/`, formData, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'multipart/form-data'
@@ -1512,6 +1512,21 @@ class Service {
       return response.data
     } catch (error) {
       console.error('cannot find Co', error)
+    }
+  }
+
+  //change order by id
+  static async GetChangeOrderByID(ID){
+    try {
+      const response = await api.get(`changeOrder/${ID}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All Co fetched by ID:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find CO', error)
     }
   }
 
@@ -1570,7 +1585,7 @@ class Service {
 
   static async addCOTable(data, coId) {
     try {
-      const response = await api.post(`changeOrder/table/${coId}`, data, {
+      const response = await api.post(`changeOrder/${coId}/table`, data, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -1898,9 +1913,12 @@ static async AddTaskCommentAcknowledged(id,data) {
   }
 
   // Create Share Link
-  static async createShareLink(table, parentId, fileId) {
+  static async createShareLink(table, parentId, fileId, versionId) {
     try {
-      const response = await api.post(`share/${table}/${parentId}/${fileId}`)
+      const url = versionId 
+        ? `share/${table}/${parentId}/versions/${versionId}/${fileId}`
+        : `share/${table}/${parentId}/${fileId}`
+      const response = await api.post(url)
       return response.data
     } catch (error) {
       console.error('Error creating share link:', error)

@@ -1,7 +1,7 @@
 import Service from '../api/Service'
 import { toast } from 'react-toastify'
 
-const getDownloadUrl = (table, parentId, fileId) => {
+const getDownloadUrl = (table, parentId, fileId, versionId) => {
   const baseURL = import.meta.env.VITE_BASE_URL?.replace(/\/$/, '')
   switch (table) {
     case 'project':
@@ -10,13 +10,14 @@ const getDownloadUrl = (table, parentId, fileId) => {
       return `${baseURL}/estimation/viewFile/${parentId}/${fileId}`
     case 'rFI':
     case 'RFI':
-      return `${baseURL}/api/rfi/viewfile/${parentId}/${fileId}`
+      return `${baseURL}/rfi/viewfile/${parentId}/${fileId}`
     case 'rFIResponse':
-      return `${baseURL}/api/rfi/response/viewfile/${parentId}/${fileId}`
+      return `${baseURL}/rfi/response/viewfile/${parentId}/${fileId}`
     case 'submittals':
+      return `${baseURL}/submittal/${parentId}/versions/${versionId}/${fileId}`
     case 'submittalsResponse':
     case 'submittal/response':
-      return `${baseURL}/api/Submittals/submittals/${parentId}/${fileId}`
+      return `${baseURL}/submittal/response/${parentId}/viewfile/${fileId}`
     case 'rFQ':
       return `${baseURL}/rfq/viewFile/${parentId}/${fileId}`
     case 'rfqResponse':
@@ -25,21 +26,21 @@ const getDownloadUrl = (table, parentId, fileId) => {
     case 'changeOrders':
     case 'changeOrder/response':
     case 'cOResponse':
-      return `${baseURL}/api/co/viewfile/${parentId}/${fileId}`
+      return `${baseURL}/co/viewfile/${parentId}/${fileId}`
     case 'projectNotes':
-      return `${baseURL}/api/projectNotes/note/viewfile/${parentId}/${fileId}`
+      return `${baseURL}/projectNotes/note/viewfile/${parentId}/${fileId}`
     case 'connection-designer':
       return `${baseURL}/connectionDesign/viewFile/${parentId}/${fileId}`
     case 'designDrawings':
     case 'design-drawings':
-      return `${baseURL}/api/designDrawings/designdrawing/viewfile/${parentId}/${fileId}`
+      return `${baseURL}/notes/viewfile/${parentId}/${fileId}`
     default:
       return `${baseURL}/${table}/viewFile/${parentId}/${fileId}`
   }
 }
 
-export const openFileSecurely = async (type, id, fileId) => {
-  const downloadUrl = getDownloadUrl(type, id, fileId)
+export const openFileSecurely = async (type, id, fileId, versionId) => {
+  const downloadUrl = getDownloadUrl(type, id, fileId, versionId)
   try {
     const token = sessionStorage.getItem('token')
     if (!token) {
@@ -67,8 +68,8 @@ export const openFileSecurely = async (type, id, fileId) => {
   }
 }
 
-export const downloadFileSecurely = async (type, id, fileId, originalName) => {
-  const downloadUrl = getDownloadUrl(type, id, fileId)
+export const downloadFileSecurely = async (type, id, fileId, originalName, versionId) => {
+  const downloadUrl = getDownloadUrl(type, id, fileId, versionId)
   try {
     const token = sessionStorage.getItem('token')
     if (!token) {
@@ -100,9 +101,11 @@ export const downloadFileSecurely = async (type, id, fileId, originalName) => {
   }
 }
 
-export const shareFileSecurely = async (type, id, fileId) => {
+export const shareFileSecurely = async (type, id, fileId, versionId) => {
   try {
-    const response = await Service.createShareLink(type, id, fileId)
+    const response = type === 'submittals'
+      ? await Service.createShareLink('submittalVersion', versionId, fileId)
+      : await Service.createShareLink(type, id, fileId, versionId)
     if (response?.shareUrl) {
       await navigator.clipboard.writeText(response.shareUrl)
       toast.success('Link copied to clipboard!')
