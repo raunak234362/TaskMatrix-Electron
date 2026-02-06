@@ -34,7 +34,6 @@ export const navItems = [
             'client_admin',
             'system_admin',
             'user',
-            'estimator'
         ]
     },
     {
@@ -49,7 +48,6 @@ export const navItems = [
             'project_manager_officer',
             'system_admin',
             'user',
-            'estimator',
             'sales_manager',
             'sales'
         ]
@@ -78,7 +76,6 @@ export const navItems = [
             'deputy_manager',
             'client_admin',
             'client',
-            'estimator',
             'sales'
         ]
     },
@@ -91,6 +88,7 @@ export const navItems = [
             'sales_manager',
             'estimation_head',
             'operation_executive',
+            'estimator',
             'department-manager',
             'deputy_manager',
             'user'
@@ -138,6 +136,8 @@ export const navItems = [
             'admin',
             'staff',
             'operation_executive',
+            'estimator',
+            'estimation_head',
             'department-manager',
             'deputy_manager',
             'project_manager',
