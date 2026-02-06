@@ -1518,7 +1518,7 @@ class Service {
   //change order by id
   static async GetChangeOrderByID(ID){
     try {
-      const response = await api.get(`changeOrder/${ID}`, {
+      const response = await api.get(`changeOrder/ById/${ID}`, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -1572,7 +1572,7 @@ class Service {
   // Change Order Table Methods
   static async GetAllCOTableRows(coId) {
     try {
-      const response = await api.get(`changeOrder/table/${coId}`, {
+      const response = await api.get(`changeOrder/${coId}/table`, {
         headers: {
           'Content-Type': 'application/json'
         }
