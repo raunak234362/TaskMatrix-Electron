@@ -25,7 +25,7 @@ const AllRFQ = ({ rfq }) => {
     columns.push({
       accessorKey: "fabricator",
       header: "Fabricator",
-      cell: ({ row }) => (row.original).fabricator?.fabName || "—",
+      cell: ({ row }) => (row.original)?.fabricator?.fabName || "—",
     });
   }
 
@@ -34,7 +34,7 @@ const AllRFQ = ({ rfq }) => {
       accessorKey: "sender",
       header: "Requested By",
       cell: ({ row }) => {
-        const sender = row.original.sender;
+        const sender = row.original?.sender;
         const s = sender;
         return sender
           ? `${s.firstName ?? ""} ${s.middleName ?? ""} ${s.lastName ?? ""}`

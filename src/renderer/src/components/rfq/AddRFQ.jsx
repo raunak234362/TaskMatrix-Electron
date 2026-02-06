@@ -23,7 +23,7 @@ const AddRFQ = ({ onSuccess }) => {
     (state) => state.fabricatorInfo?.fabricatorData,
   ) || [];
 
-  const staffData = useSelector((state) => state.userInfo.staffData);
+  const staffData = useSelector((state) => state.userInfo?.staffData);
 
   // const userType =
   typeof window !== "undefined" ? sessionStorage.getItem("userType") : null;
@@ -94,7 +94,7 @@ const AddRFQ = ({ onSuccess }) => {
 
   // selector for the user
 
-  const userDetail = useSelector((state) => state.userInfo.userDetail);
+  const userDetail = useSelector((state) => state.userInfo?.userDetail);
   const userRole = userDetail?.role;
   const fabricatorId = userDetail?.FabricatorPointOfContacts[0]?.id;
   console.log(userDetail);
