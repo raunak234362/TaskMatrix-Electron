@@ -2,16 +2,17 @@ import { useEffect, useState } from "react";
 import { AddEstimation, AllEstimation } from "../components";
 import EstimationDashboard from "../components/estimation/EstimationDashboard";
 import Service from "../api/Service";
+import AllEstimationTask from "../components/estimation/estimationTask/AllEstimationTask";
 
 const EstimationLayout = () => {
   const [activeTab, setActiveTab] = useState("dashboard"); // Default to dashboard
   const [estmation, setEstimation] = useState([]);
-
+const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const fetchAllEstimation = async () => {
     try {
-      const response = await Service.AllEstimation();
-      console.log(response?.data);
-      setEstimation(response?.data);
+      const estimationTask = await Service.GetEstimationTaskForAssignee();
+      console.log(estimationTask?.data);
+      setEstimation(estimationTask?.data);
     } catch (error) {
       console.log(error);
     }
@@ -38,6 +39,16 @@ const EstimationLayout = () => {
           >
             Estimation Home
           </button>
+          <button
+            onClick={() => setActiveTab("allEstimation")}
+            className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-[1.25rem] text-sm md:text-base font-semibold transition-all ${
+              activeTab === "allEstimation"
+                ? "bg-green-500 text-white shadow-[0_8px_20px_-4px_rgba(34,197,94,0.4)] hover:bg-green-600 hover:shadow-[0_12px_24px_-4px_rgba(34,197,94,0.5)]"
+                : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-green-600 shadow-sm"
+            }`}
+          >
+            Estimation Task
+          </button>
 
           <button
             onClick={() => setActiveTab("addEstimation")}
@@ -59,7 +70,7 @@ const EstimationLayout = () => {
         )}
         {activeTab === "allEstimation" && (
           <div>
-            <AllEstimation
+            <AllEstimationTask
               estimations={estmation}
               onRefresh={fetchAllEstimation}
             />

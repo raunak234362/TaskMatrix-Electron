@@ -21,7 +21,7 @@ const GetEstimationByID = ({ id, onRefresh }) => {
   const [isInclusionOpen, setIsInclusionOpen] = useState(false)
   const [isEditingInclusion, setIsEditingInclusion] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
-
+  const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const fetchEstimation = async () => {
     if (!id) {
       setError('Invalid Estimation ID')
@@ -198,12 +198,16 @@ const GetEstimationByID = ({ id, onRefresh }) => {
 
       {/* Action Buttons (placeholders for future edit/view actions) */}
       <div className="py-3 flex gap-3">
-        <Button
-          className="py-1 px-2 text-md rounded-xl"
-          onClick={() => setIsEstimationTaskOpen(!isEstimationTaskOpen)}
+        {
+          userRole === 'admin' || userRole === 'estimation_head' && (
+            <Button
+              className="py-1 px-2 text-md rounded-xl"
+              onClick={() => setIsEstimationTaskOpen(!isEstimationTaskOpen)}
         >
           Estimation Task
         </Button>
+          )
+        }
         <Button
           className="py-1 px-2 text-md rounded-xl"
           onClick={() => setIsHoursOpen(!isHoursOpen)}
@@ -219,9 +223,11 @@ const GetEstimationByID = ({ id, onRefresh }) => {
         {/* <Button className="py-1 px-2 text-lg bg-blue-100 text-blue-700">
           Add To Project
         </Button> */}
-        <Button className="py-1 px-2 text-md rounded-xl" onClick={() => setIsEditing(!isEditing)}>
-          Edit Estimation
-        </Button>
+        {(userRole === 'admin' || userRole === 'estimation_head') && (
+          <Button className="py-1 px-2 text-md rounded-xl" onClick={() => setIsEditing(!isEditing)}>
+            Edit Estimation
+          </Button>
+        )}
       </div>
       {isEstimationTaskOpen && (
         <AllEstimationTask

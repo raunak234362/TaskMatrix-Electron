@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import DataTable from '../../ui/table'
 import { format } from 'date-fns'
-import { X  } from 'lucide-react'
+import { X } from 'lucide-react'
 import EstimationTaskByID from './EstimationTaskByID'
 import AddEstimationTask from './AddEstimationTask'
 
@@ -100,7 +100,7 @@ const AllEstimationTask = ({ estimations, onClose, estimationId, onRefresh }) =>
                                 onClick={() => setIsAddingTask(false)}
                                 className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-700"
                             >
-                                <CloseIcon size={24} />
+                                <X size={24} />
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto p-8">

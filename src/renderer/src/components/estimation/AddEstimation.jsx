@@ -23,7 +23,7 @@ const AddEstimation = ({ initialRfqId = null, onSuccess = () => { } }) => {
   const dispatch = useDispatch()
   const [files, setFiles] = useState([])
 
-  const rfqData = useSelector((state) => state.RFQInfos.RFQData || [])
+  const rfqData = useSelector((state) => state.RFQInfos?.RFQData || [])
   const fabricators = useSelector((state) => state.fabricatorInfo?.fabricatorData || [])
 
   const userType = sessionStorage.getItem('userRole')
@@ -125,7 +125,7 @@ const AddEstimation = ({ initialRfqId = null, onSuccess = () => { } }) => {
       toast.success('Estimation created successfully!')
       onSuccess?.()
       reset()
-      setFiles()
+      setFiles([])
     } catch (error) {
       toast.error(error?.message || 'Failed to create estimation')
     }
@@ -247,7 +247,7 @@ const AddEstimation = ({ initialRfqId = null, onSuccess = () => { } }) => {
             type="button"
             onClick={() => {
               reset()
-              setFiles()
+              setFiles([])
             }}
           >
             Cancel
