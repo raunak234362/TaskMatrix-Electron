@@ -94,7 +94,7 @@ const TeamMember = ({ members, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-[900px] bg-white rounded-xl p-4 shadow-xl">
+      <div className="w-3/4 h-2/3 overflow-y-auto bg-white rounded-xl p-4 shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-3 border-b pb-2">
           <h2 className="text-xl font-semibold text-gray-700">

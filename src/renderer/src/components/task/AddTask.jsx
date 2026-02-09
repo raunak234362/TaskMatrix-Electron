@@ -189,11 +189,26 @@ const AddTask = () => {
   useEffect(() => {
     const fetchWbsDetail = async () => {
       if (selectedWbsId) {
-        // Find locally first for immediate feedback
-        const localWbs = bundles.find((w) => {
-          const bundleId = w.id || w._id || (w.wbs && w.wbs[0]?.id);
-          return String(bundleId) === String(selectedWbsId);
-        });
+        // Find locally first for immediate feedback - search inside bundles' wbs arrays
+        let localWbs = null;
+        for (const b of bundles) {
+          if (b.wbs && Array.isArray(b.wbs)) {
+            const found = b.wbs.find((w) => String(w.id) === String(selectedWbsId));
+            if (found) {
+              localWbs = found;
+              break;
+            }
+          }
+        }
+
+        // If not found in wbs, check if it's a top-level bundle ID (fallback)
+        if (!localWbs) {
+          localWbs = bundles.find((w) => {
+            const bundleId = w.id || w._id || (w.wbs && w.wbs[0]?.id);
+            return String(bundleId) === String(selectedWbsId);
+          });
+        }
+
         setSelectedWbs(localWbs || null);
 
         try {
@@ -219,29 +234,8 @@ const AddTask = () => {
     if (selectedWbsId && selectedWbsType) {
       const isChecking = selectedWbsType.toLowerCase().includes("checking");
 
-      // Use tasks from the bundle object if available
-      const bundleTasks = selectedWbs?.tasks || [];
-
-      if (bundleTasks.length > 0) {
-        const filtered = bundleTasks.filter((t) => {
-          const taskWbsType = (t.wbsType || "").toLowerCase();
-          if (isChecking) {
-            return taskWbsType === selectedWbsType.toLowerCase();
-          } else {
-            // Match specific type OR match empty string (legacy/default) if not checking
-            return (
-              taskWbsType === selectedWbsType.toLowerCase() ||
-              taskWbsType === ""
-            );
-          }
-        });
-        const total = filtered.reduce(
-          (sum, t) => sum + (parseFloat(t.allocationLog?.allocatedHours) || 0),
-          0,
-        );
-        setExistingWbsHours(total);
-      } else if (projectTasks.length > 0) {
-        // Fallback to projectTasks (where hours are in minutes)
+      // Check projectTasks first as it covers all tasks
+      if (projectTasks.length > 0) {
         const filtered = projectTasks.filter((t) => {
           const taskId = t.project_bundle_id || t.wbs_id;
           const typeMatch =
@@ -254,6 +248,24 @@ const AddTask = () => {
           0,
         );
         setExistingWbsHours(totalMinutes / 60);
+      } else if (selectedWbs?.tasks && selectedWbs.tasks.length > 0) {
+        // Use tasks from the object if projectTasks isn't loaded/available
+        const filtered = selectedWbs.tasks.filter((t) => {
+          const taskWbsType = (t.wbsType || "").toLowerCase();
+          if (isChecking) {
+            return taskWbsType === selectedWbsType.toLowerCase();
+          } else {
+            return (
+              taskWbsType === selectedWbsType.toLowerCase() ||
+              taskWbsType === ""
+            );
+          }
+        });
+        const total = filtered.reduce(
+          (sum, t) => sum + (parseFloat(t.allocationLog?.allocatedHours) || 0),
+          0,
+        );
+        setExistingWbsHours(total);
       } else {
         setExistingWbsHours(0);
       }
@@ -272,7 +284,7 @@ const AddTask = () => {
 
     const typeOk =
       !selectedWbsType ||
-      selectedWbsType === "other" ||
+      selectedWbsType === "others" ||
       (isCheckingType
         ? (w.totalCheckHr || 0) > 0 && category === baseType
         : category === selectedWbsType.toLowerCase());
@@ -290,7 +302,7 @@ const AddTask = () => {
     return sum + h + (m / 60);
   }, 0);
 
-  const isOtherWbs = selectedWbsType === "other";
+  const isOtherWbs = selectedWbsType === "others";
 
   const totalWbsHours = selectedWbs && !isOtherWbs
     ? (selectedWbsType?.toLowerCase().includes("checking")
@@ -329,6 +341,12 @@ const AddTask = () => {
           "0",
         )}`;
 
+        // Decide which IDs to send. 
+        // If we have a selectedWbs and it has a projectBundleId, 
+        // then the selectedWbs is an activity (WBS item) and its parent is the bundle.
+        const bundleId = selectedWbs?.projectBundleId || data.project_bundle_id;
+        const wbsId = data.project_bundle_id;
+
         const payload = {
           name: data.name,
           description: data.name,
@@ -344,7 +362,8 @@ const AddTask = () => {
           start_date: data.start_date,
           Stage: data.Stage,
           departmentId: data.departmentId,
-          project_bundle_id: data.project_bundle_id,
+          project_bundle_id: bundleId,
+          wbs_id: wbsId,
           wbsType: selectedWbsType,
         };
         return Service.AddTask(payload);
@@ -377,64 +396,90 @@ const AddTask = () => {
     { label: "Detail Checking", value: "detailing_checking" },
     { label: "Erection", value: "erection" },
     { label: "Erection Checking", value: "erection_checking" },
-    { label: "Other", value: "other" },
+    { label: "OTHERS", value: "others" },
   ];
 
-  const wbsOptions = selectedWbsType === "other"
-    ? [
-      { label: "Job Study", value: "Job Study" },
-      { label: "Submittal Preparations", value: "Submittal Preparations" },
-      { label: "Meetings", value: "Meetings" },
-      { label: "RFI Preparation", value: "RFI Preparation" },
-      { label: "Training & Practice", value: "Training & Practice" },
-      { label: "New WBS Item", value: "New WBS Item" },
-    ]
-    : filteredWbsItems.map((w) => {
-      const totalMinutes = selectedWbsType?.toLowerCase().includes("checking")
-        ? w.totalCheckHr || 0
-        : w.totalExecHr || 0;
+  const wbsOptions = selectedWbsType === "others"
+    ? (() => {
+      const otherBundles = bundles.filter((w) => {
+        const category = (w.bundle?.category || w.bundleKey || w.category || w.type || "").toLowerCase();
+        return (category === "other" || category === "others");
+      });
 
-      const isChecking = selectedWbsType?.toLowerCase().includes("checking");
+      const items = otherBundles.flatMap(bundle => (bundle.wbs || []).map(item => ({
+        label: `${item.wbsTemplate?.name || item.name || "Unnamed Activity"}${bundle.stage && String(bundle.stage).toLowerCase() !== String(selectedStage).toLowerCase() ? ` (${bundle.stage})` : ""}`,
+        value: item.id,
+      })));
 
-      // Calculate existing hours for this specific bundle and type
-      let existingHours = 0;
-      if (w.tasks && w.tasks.length > 0) {
-        const filtered = w.tasks.filter((t) => {
-          const taskWbsType = (t.wbsType || "").toLowerCase();
-          if (isChecking) {
-            return taskWbsType === selectedWbsType.toLowerCase();
-          } else {
-            return (
-              taskWbsType === (selectedWbsType?.toLowerCase() || "") ||
-              taskWbsType === ""
-            );
-          }
-        });
-        existingHours = filtered.reduce(
-          (sum, t) => sum + (parseFloat(t.allocationLog?.allocatedHours) || 0),
-          0,
-        );
-      } else {
-        // Fallback to projectTasks
-        const filtered = projectTasks.filter((t) => {
-          const taskId = t.project_bundle_id || t.wbs_id;
-          const typeMatch =
-            !selectedWbsType ||
-            String(t.wbsType).toLowerCase() ===
-            String(selectedWbsType).toLowerCase();
-          return (
-            String(taskId) === String(w.id || w._id || (w.wbs && w.wbs[0]?.id)) &&
-            typeMatch
-          );
-        });
-        existingHours =
-          filtered.reduce((sum, t) => sum + Number(t.hours || 0), 0) / 60;
+      if (items.length > 0) {
+        return [
+          ...items,
+          { label: "New WBS Item", value: "New WBS Item" },
+        ];
       }
+
+      return [
+        { label: "Job Study", value: "Job Study" },
+        { label: "Submittal Preparations", value: "Submittal Preparations" },
+        { label: "Meetings", value: "Meetings" },
+        { label: "RFI Preparation", value: "RFI Preparation" },
+        { label: "Training & Practice", value: "Training & Practice" },
+        { label: "New WBS Item", value: "New WBS Item" },
+      ];
+    })()
+    : filteredWbsItems.flatMap((w) => {
+      const isChecking = selectedWbsType?.toLowerCase().includes("checking");
+      const bundleName = w.name || w.bundle?.name || "Unnamed Bundle";
+
+      if (w.wbs && Array.isArray(w.wbs)) {
+        return w.wbs.map((item) => {
+          const totalMinutes = isChecking
+            ? item.totalCheckHr || 0
+            : item.totalExecHr || 0;
+
+          // Calculate existing hours for this specific WBS item
+          let itemExistingHours = 0;
+          const filtered = projectTasks.filter((t) => {
+            const taskId = t.project_bundle_id || t.wbs_id;
+            const typeMatch =
+              !selectedWbsType ||
+              String(t.wbsType).toLowerCase() ===
+              String(selectedWbsType).toLowerCase();
+            return String(taskId) === String(item.id) && typeMatch;
+          });
+          itemExistingHours =
+            filtered.reduce((sum, t) => sum + Number(t.hours || 0), 0) / 60;
+
+          const remainingMinutes = totalMinutes - itemExistingHours * 60;
+
+          return {
+            label: `${bundleName} - ${item.wbsTemplate?.name || item.name || "Unnamed Activity"} (${formatMinutesToHHMM(remainingMinutes)} remaining)`,
+            value: item.id,
+          };
+        });
+      }
+
+      // Fallback if no nested wbs items
+      const totalMinutes = isChecking ? w.totalCheckHr || 0 : w.totalExecHr || 0;
+      let existingHours = 0;
+      const filtered = projectTasks.filter((t) => {
+        const taskId = t.project_bundle_id || t.wbs_id;
+        const typeMatch =
+          !selectedWbsType ||
+          String(t.wbsType).toLowerCase() ===
+          String(selectedWbsType).toLowerCase();
+        return (
+          String(taskId) === String(w.id || w._id || (w.wbs && w.wbs[0]?.id)) &&
+          typeMatch
+        );
+      });
+      existingHours =
+        filtered.reduce((sum, t) => sum + Number(t.hours || 0), 0) / 60;
 
       const remainingMinutes = totalMinutes - existingHours * 60;
 
       return {
-        label: `${w.name || w.bundle?.name || "Unnamed Bundle"} (${formatMinutesToHHMM(remainingMinutes)} remaining)`,
+        label: `${bundleName} (${formatMinutesToHHMM(remainingMinutes)} remaining)`,
         value: w.id || w._id || (w.wbs && w.wbs[0]?.id),
       };
     });
@@ -581,7 +626,7 @@ const AddTask = () => {
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                         <Layers className="w-4 h-4 text-blue-500" />{" "}
-                        {selectedWbsType === "other" ? "Activity Item" : "WBS Item"} *
+                        {selectedWbsType === "others" ? "Activity Item" : "WBS Item"} *
                       </label>
                       <Controller
                         name="project_bundle_id"
@@ -594,7 +639,7 @@ const AddTask = () => {
                             value={field.value}
                             onChange={(_, val) => field.onChange(val)}
                             placeholder={
-                              selectedWbsType === "other"
+                              selectedWbsType === "others"
                                 ? "Select Activity"
                                 : "Select WBS Item"
                             }
@@ -800,8 +845,8 @@ const AddTask = () => {
                         </span>
                         <span
                           className={`text-sm font-bold ${totalAssignedHours > remainingHours
-                              ? "text-red-600"
-                              : "text-indigo-600"
+                            ? "text-red-600"
+                            : "text-indigo-600"
                             }`}
                         >
                           {formatMinutesToHHMM(totalAssignedHours * 60)} /{" "}

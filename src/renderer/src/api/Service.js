@@ -1518,7 +1518,7 @@ class Service {
   //change order by id
   static async GetChangeOrderByID(ID){
     try {
-      const response = await api.get(`changeOrder/${ID}`, {
+      const response = await api.get(`changeOrder/ById/${ID}`, {
         headers: {
           'Content-Type': 'application/json'
         }

@@ -137,13 +137,13 @@ const InvoiceTrends = ({ invoices = [] }) => {
               dataKey="name"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#9ca3af', fontSize: 12 }}
+              tick={{ fill: '#9ca3af', fontSize: 14 }}
               dy={10}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#9ca3af', fontSize: 12 }}
+              tick={{ fill: '#9ca3af', fontSize: 14 }}
               tickFormatter={(value) =>
                 `$${value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value}`
               }
@@ -154,7 +154,7 @@ const InvoiceTrends = ({ invoices = [] }) => {
                   const data = payload[0].payload
                   return (
                     <div className="bg-white p-3 rounded-xl shadow-xl border border-gray-100">
-                      <p className="text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                      <p className="text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">
                         {selectedMonth !== null ? `${months[selectedMonth]} ${label}` : label}
                       </p>
                       <div className="flex flex-col gap-1">
