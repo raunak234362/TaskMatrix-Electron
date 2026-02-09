@@ -76,7 +76,7 @@ const Login = () => {
             <div className="mb-8">
               <p className="text-center text-4xl md:text-5xl text-gray-700 font-light leading-tight">
                 Welcome to <br />
-                <span className="font-bold text-green-700">Task Matrix</span>
+                <span className=" text-green-700">Task Matrix</span>
               </p>
               <p className="text-center text-lg text-gray-500 mt-4">
                 Please login to continue
@@ -111,7 +111,7 @@ const Login = () => {
               <div className="mt-4">
                 <Button
                   type="submit"
-                  className="w-full text-2xl font-bold py-4 rounded-[6px] bg-green-600 hover:bg-green-700 transition-all duration-300 shadow-lg shadow-green-600/30 text-white"
+                  className="w-full text-2xl  py-4 rounded-[6px] bg-green-600 hover:bg-green-700 transition-all duration-300 shadow-lg shadow-green-600/30 text-white"
                 >
                   Login
                 </Button>

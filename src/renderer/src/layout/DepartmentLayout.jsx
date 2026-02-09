@@ -11,11 +11,10 @@ const DepartmentLayout = () => {
           <div className="flex flex-row gap-3 items-end justify-end">
             <button
               onClick={() => setActiveTab("alldepartment")}
-              className={`px-1.5 md:px-4 py-2 rounded-lg ${
-                activeTab === "alldepartment"
-                  ? "md:text-base text-sm bg-green-700 text-white font-bold"
+              className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "alldepartment"
+                  ? "md:text-base text-sm bg-green-700 text-white "
                   : "text-base md:text-base bg-white/70 backdrop-xl text-gray-700 font-semibold"
-              }`}
+                }`}
             >
               All Department
             </button>
@@ -23,11 +22,10 @@ const DepartmentLayout = () => {
             {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
               <button
                 onClick={() => setActiveTab("addDepartment")}
-                className={`px-1.5 md:px-4 py-2 rounded-lg ${
-                  activeTab === "addDepartment"
-                    ? "md:text-base text-sm bg-green-700 text-white font-bold"
+                className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "addDepartment"
+                    ? "md:text-base text-sm bg-green-700 text-white "
                     : "text-base md:text-base bg-white/70 backdrop-xl text-gray-700 font-semibold"
-                }`}
+                  }`}
               >
                 Add Department
               </button>

@@ -217,7 +217,7 @@ const GetRFQByID = ({ id }) => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <h3 className="text-xl sm:text-2xl font-bold text-green-700 wrap-break-word max-w-full">
+                <h3 className="text-xl sm:text-2xl  text-green-700 wrap-break-word max-w-full">
                   {rfq?.projectName}
                 </h3>
 
@@ -286,7 +286,7 @@ const GetRFQByID = ({ id }) => {
 
             {/* Description */}
             <div className="space-y-2">
-              <h4 className="font-bold text-gray-700 text-sm">Description</h4>
+              <h4 className=" text-gray-700 text-sm">Description</h4>
               <div
                 className="text-gray-700 bg-white p-3 rounded-lg border prose prose-sm max-w-none text-xs sm:text-sm"
                 dangerouslySetInnerHTML={{
@@ -297,7 +297,7 @@ const GetRFQByID = ({ id }) => {
 
             {/* Scopes */}
             <div className="space-y-3">
-              <h4 className="font-bold text-gray-700 text-sm">Scope Summary</h4>
+              <h4 className=" text-gray-700 text-sm">Scope Summary</h4>
               <div className="grid grid-cols-2 xs:grid-cols-3 gap-2 sm:gap-4 text-[10px] sm:text-xs">
                 <Scope
                   label="Main Design"
@@ -330,13 +330,13 @@ const GetRFQByID = ({ id }) => {
               <div className="flex flex-col gap-2 pt-2">
                 <Button
                   onClick={() => setShowEstimationModal(true)}
-                  className="w-full sm:w-auto h-auto py-2.5 px-4 text-sm font-bold bg-green-500 text-white shadow-xs"
+                  className="w-full sm:w-auto h-auto py-2.5 px-4 text-sm  bg-green-500 text-white shadow-xs"
                 >
                   Raise For Estimation
                 </Button>
                 <Button
                   onClick={() => handleCDQuotationModal()}
-                  className="w-full sm:w-auto h-auto py-2.5 px-4 text-[11px] sm:text-sm bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 whitespace-normal leading-tight font-bold"
+                  className="w-full sm:w-auto h-auto py-2.5 px-4 text-[11px] sm:text-sm bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 whitespace-normal leading-tight "
                 >
                   Raise for Connection Designer Quotation
                 </Button>
@@ -427,7 +427,7 @@ const GetRFQByID = ({ id }) => {
         <div className="fixed inset-0 z-70 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-red-600 flex items-center gap-2">
+              <h3 className="text-xl  text-red-600 flex items-center gap-2">
                 <Trash2 size={24} /> Delete RFQ
               </h3>
               <button
@@ -481,7 +481,7 @@ const GetRFQByID = ({ id }) => {
         <div className="fixed inset-0 z-70 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-blue-600 flex items-center gap-2">
+              <h3 className="text-xl  text-blue-600 flex items-center gap-2">
                 Change RFQ Status
               </h3>
               <button
@@ -550,7 +550,7 @@ const Info = ({ label, value }) => (
     <p className="text-gray-500 text-[10px] sm:text-xs uppercase font-medium tracking-wider">
       {label}
     </p>
-    <p className="font-bold text-gray-800 text-sm sm:text-base">{value}</p>
+    <p className=" text-gray-800 text-sm sm:text-base">{value}</p>
   </div>
 );
 

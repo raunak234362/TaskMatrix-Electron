@@ -36,7 +36,7 @@ const UpdateStatusModal = ({ taskId, currentStatus, onClose, refresh }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
                 <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-                    <h3 className="text-lg font-bold text-slate-800">Update Task Status</h3>
+                    <h3 className="text-lg  text-slate-800">Update Task Status</h3>
                     <button onClick={onClose} className="p-1 hover:bg-slate-200 rounded-full transition-colors">
                         <X className="w-5 h-5 text-slate-500" />
                     </button>
@@ -51,15 +51,15 @@ const UpdateStatusModal = ({ taskId, currentStatus, onClose, refresh }) => {
                                 disabled={isSubmitting}
                                 onClick={() => handleUpdate(option.value)}
                                 className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all duration-200 ${currentStatus === option.value
-                                        ? "border-green-600 bg-green-50 text-green-700"
-                                        : "border-slate-100 hover:border-green-200 hover:bg-slate-50 text-slate-700 font-medium"
+                                    ? "border-green-600 bg-green-50 text-green-700"
+                                    : "border-slate-100 hover:border-green-200 hover:bg-slate-50 text-slate-700 font-medium"
                                     }`}
                             >
                                 <div className="flex items-center gap-3">
                                     <div className={`p-2 rounded-lg ${currentStatus === option.value ? "bg-green-100" : "bg-slate-100"}`}>
                                         {option.icon}
                                     </div>
-                                    <span className="font-bold">{option.label}</span>
+                                    <span className="">{option.label}</span>
                                 </div>
                                 {currentStatus === option.value && (
                                     <CheckCircle2 className="w-5 h-5 text-green-600" />

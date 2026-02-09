@@ -29,7 +29,7 @@ const CurrentTaskWidget = ({ task, onTaskUpdate }) => {
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
               In Progress
             </span>
-            <h3 className="text-2xl font-bold mt-3 leading-tight">
+            <h3 className="text-2xl  mt-3 leading-tight">
               {task.project?.name || task.estimation?.projectName || 'Untitled Project'}
             </h3>
             <p className="text-indigo-100 mt-1 flex items-center gap-2">

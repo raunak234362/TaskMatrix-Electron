@@ -4,13 +4,13 @@ import {
   Pie,
   Cell,
   Legend,
-  Tooltip ,
+  Tooltip,
   ResponsiveContainer,
 } from "recharts";
 import { motion, AnimatePresence } from "motion/react";
 import { Mail, Phone, MapPin, ChevronRight, Search } from "lucide-react";
 
-  onSelect: (id) => void;
+onSelect: (id) => void;
 }
 
 const CDNetworkOverview = ({
@@ -56,7 +56,7 @@ const CDNetworkOverview = ({
       >
         <div className="p-4 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-base sm:text-lg font-bold text-gray-800">
+            <h3 className="text-base sm:text-lg  text-gray-800">
               Connection Designer Directory
             </h3>
             <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5 sm:mt-1">
@@ -105,7 +105,7 @@ const CDNetworkOverview = ({
               >
                 {/* Main Info */}
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 rounded-full bg-linear-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-600 font-bold text-xs sm:text-sm">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 rounded-full bg-linear-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-600  text-xs sm:text-sm">
                     {designer.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -139,113 +139,113 @@ const CDNetworkOverview = ({
                 </div>
 
                 {/* HOVER POPOVER (Floating State List) */}
-                
-                  {hoveredId === (designer.id || designer._id) && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-14 top-1/2 -translate-y-1/2 z-50 bg-white p-4 rounded-xl shadow-xl border border-gray-100 w-64 pointer-events-none hidden sm:block"
-                    >
-                      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-50">
-                        <MapPin size={14} className="text-green-500" />
-                        <span className="text-xs font-bold text-gray-700">
-                          Coverage Area
+
+                {hoveredId === (designer.id || designer._id) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-14 top-1/2 -translate-y-1/2 z-50 bg-white p-4 rounded-xl shadow-xl border border-gray-100 w-64 pointer-events-none hidden sm:block"
+                  >
+                    <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-50">
+                      <MapPin size={14} className="text-green-500" />
+                      <span className="text-xs  text-gray-700">
+                        Coverage Area
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {states.length > 0 ? (
+                        states.slice(0, 8).map((s, i) => (
+                          <span
+                            key={i}
+                            className="text-[10px] bg-green-50 text-green-700 px-2 py-0.5 rounded-md border border-green-100"
+                          >
+                            {s}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-gray-400 italic">
+                          No specific states listed
                         </span>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {states.length > 0 ? (
-                          states.slice(0, 8).map((s, i) => (
-                            <span
-                              key={i}
-                              className="text-[10px] bg-green-50 text-green-700 px-2 py-0.5 rounded-md border border-green-100"
-                            >
-                              {s}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-xs text-gray-400 italic">
-                            No specific states listed
-                          </span>
-                        )}
-                        {states.length > 8 && (
-                          <span className="text-[10px] text-gray-400 pl-1">
-                            +{states.length - 8} more
-                          </span>
-                        )}
-                      </div>
-                      <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-t border-r border-gray-100 rotate-45 transform"></div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
-        </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="lg:col-span-1 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-[400px]"
-      >
-        <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4 sm:mb-6">
-          State Distribution
-        </h3>
-        <div className="flex-1 min-h-[300px] relative">
-          <ResponsiveContainer width="100%" height="100%">
-            
-              <Pie
-                data={stateData}
-                cx={pieCenterX}
-                cy={pieCenterY}
-                innerRadius={window.innerWidth < 640 ? 50 : 60}
-                outerRadius={window.innerWidth < 640 ? 70 : 80}
-                paddingAngle={5}
-                dataKey="count"
-              >
-                {stateData.map((_, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <RechartsTooltip
-                contentStyle={{
-                  borderRadius: "8px",
-                  border: "none",
-                  boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
-                  fontSize: '12px'
-                }}
-              />
-              <Legend
-                verticalAlign="bottom"
-                height={120}
-                wrapperStyle={{
-                  paddingTop: '20px',
-                  fontSize: '10px',
-                  overflowY: 'auto',
-                  scrollbarWidth: 'none'
-                }}
-                iconType="circle"
-                iconSize={8}
-                formatter={(value, entry) => (
-                  <span className="text-[10px] sm:text-xs text-gray-600 ml-1">
-                    {value} ({entry.payload.count})
-                  </span>
+                      )}
+                      {states.length > 8 && (
+                        <span className="text-[10px] text-gray-400 pl-1">
+                          +{states.length - 8} more
+                        </span>
+                      )}
+                    </div>
+                    <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-t border-r border-gray-100 rotate-45 transform"></div>
+                  </motion.div>
                 )}
-              />
-              <text
+              </AnimatePresence>
+              </motion.div>
+      );
+          })}
+    </div>
+      </motion.div >
 
-                x={pieCenterX}
-                y={pieCenterY}
-                textAnchor="middle"
-                dominantBaseline="middle"
-              >
-                {/* <tspan
+  <motion.div
+    initial={{ opacity: 0, x: 20 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ duration: 0.5, delay: 0.2 }}
+    className="lg:col-span-1 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-[400px]"
+  >
+    <h3 className="text-base sm:text-lg  text-gray-800 mb-4 sm:mb-6">
+      State Distribution
+    </h3>
+    <div className="flex-1 min-h-[300px] relative">
+      <ResponsiveContainer width="100%" height="100%">
+
+        <Pie
+          data={stateData}
+          cx={pieCenterX}
+          cy={pieCenterY}
+          innerRadius={window.innerWidth < 640 ? 50 : 60}
+          outerRadius={window.innerWidth < 640 ? 70 : 80}
+          paddingAngle={5}
+          dataKey="count"
+        >
+          {stateData.map((_, index) => (
+            <Cell
+              key={`cell-${index}`}
+              fill={COLORS[index % COLORS.length]}
+            />
+          ))}
+        </Pie>
+        <RechartsTooltip
+          contentStyle={{
+            borderRadius: "8px",
+            border: "none",
+            boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+            fontSize: '12px'
+          }}
+        />
+        <Legend
+          verticalAlign="bottom"
+          height={120}
+          wrapperStyle={{
+            paddingTop: '20px',
+            fontSize: '10px',
+            overflowY: 'auto',
+            scrollbarWidth: 'none'
+          }}
+          iconType="circle"
+          iconSize={8}
+          formatter={(value, entry) => (
+            <span className="text-[10px] sm:text-xs text-gray-600 ml-1">
+              {value} ({entry.payload.count})
+            </span>
+          )}
+        />
+        <text
+
+          x={pieCenterX}
+          y={pieCenterY}
+          textAnchor="middle"
+          dominantBaseline="middle"
+        >
+          {/* <tspan
                   x={pieCenterX}
                   dy="3em"
                   fontSize={window.innerWidth < 640 ? "18" : "24"}
@@ -262,12 +262,12 @@ const CDNetworkOverview = ({
                 >
                   Total States
                 </tspan> */}
-              </text>
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </motion.div>
-    </div>
+        </text>
+      </PieChart>
+    </ResponsiveContainer>
+  </div>
+      </motion.div >
+    </div >
   );
 };
 

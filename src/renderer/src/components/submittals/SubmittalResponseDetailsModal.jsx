@@ -59,7 +59,7 @@ const SubmittalResponseDetailsModal = ({
         </button>
 
         {/* Title */}
-        <h2 className="text-xl font-bold text-green-700">Response Details</h2>
+        <h2 className="text-xl  text-green-700">Response Details</h2>
 
         {/* Parent Message */}
         <div

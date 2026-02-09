@@ -61,7 +61,7 @@ const UpdateLineItem = ({
               <Calculator className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-800">
+              <h3 className="text-lg  text-gray-800">
                 Edit Line Item
               </h3>
               <p className="text-[10px] text-gray-500 font-medium uppercase tracking-wider">
@@ -95,7 +95,7 @@ const UpdateLineItem = ({
 
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-600 ml-1">
+              <label className="text-xs  text-gray-600 ml-1">
                 Quantity
               </label>
               <input
@@ -111,7 +111,7 @@ const UpdateLineItem = ({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-600 ml-1">
+                <label className="text-xs  text-gray-600 ml-1">
                   Exec Unit Time (h)
                 </label>
                 <input
@@ -129,7 +129,7 @@ const UpdateLineItem = ({
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-600 ml-1">
+                <label className="text-xs  text-gray-600 ml-1">
                   Check Unit Time (h)
                 </label>
                 <input
@@ -152,18 +152,18 @@ const UpdateLineItem = ({
           {/* Totals Preview */}
           <div className="grid grid-cols-2 gap-3 pt-2">
             <div className="bg-green-50/50 p-3 rounded-xl border border-green-100/50">
-              <p className="text-[10px] text-green-600 font-bold uppercase">
+              <p className="text-[10px] text-green-600  uppercase">
                 Total Exec
               </p>
-              <p className="text-lg font-black text-green-700">
+              <p className="text-lg  text-green-700">
                 {(formData.qtyNo * formData.unitTime).toFixed(1)}h
               </p>
             </div>
             <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100/50">
-              <p className="text-[10px] text-blue-600 font-bold uppercase">
+              <p className="text-[10px] text-blue-600  uppercase">
                 Total Check
               </p>
-              <p className="text-lg font-black text-blue-700">
+              <p className="text-lg  text-blue-700">
                 {(formData.qtyNo * formData.checkUnitTime).toFixed(1)}h
               </p>
             </div>
@@ -175,14 +175,14 @@ const UpdateLineItem = ({
           <Button
             onClick={onClose}
             variant="outline"
-            className="flex-1 rounded-xl h-12 font-bold text-gray-600"
+            className="flex-1 rounded-xl h-12  text-gray-600"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
             disabled={loading}
-            className="flex-1 rounded-xl h-12 font-bold bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-200 transition-all"
+            className="flex-1 rounded-xl h-12  bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-200 transition-all"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />

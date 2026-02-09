@@ -221,7 +221,7 @@ export default function DataTable({
                   key={column.id}
                   className="flex flex-col gap-1.5 min-w-[180px]"
                 >
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">
+                  <label className="text-[10px]  text-gray-500 uppercase tracking-widest ml-1">
                     {column.columnDef.header}
                   </label>
                   <ColumnFilter column={column} />

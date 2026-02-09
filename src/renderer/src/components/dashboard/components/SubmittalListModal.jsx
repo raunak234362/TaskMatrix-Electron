@@ -1,4 +1,4 @@
-import { X  } from 'lucide-react'
+import { X } from 'lucide-react'
 import DataTable from '../../ui/table'
 
 const SubmittalListModal = ({ isOpen, onClose, data }) => {
@@ -22,11 +22,10 @@ const SubmittalListModal = ({ isOpen, onClose, data }) => {
       header: 'Status',
       cell: ({ row }) => (
         <span
-          className={`px-3 py-1 rounded-full text-xs font-bold ${
-            row.original.status === 'PENDING'
+          className={`px-3 py-1 rounded-full text-xs  ${row.original.status === 'PENDING'
               ? 'bg-amber-100 text-amber-700'
               : 'bg-green-100 text-green-700'
-          }`}
+            }`}
         >
           {row.original.status}
         </span>
@@ -51,7 +50,7 @@ const SubmittalListModal = ({ isOpen, onClose, data }) => {
         {/* Modal Header */}
         <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div>
-            <h3 className="text-xl font-bold text-gray-700">Pending Submittals</h3>
+            <h3 className="text-xl  text-gray-700">Pending Submittals</h3>
             <p className="text-sm text-gray-700 mt-1">Showing {data.length} pending submittals</p>
           </div>
           <button

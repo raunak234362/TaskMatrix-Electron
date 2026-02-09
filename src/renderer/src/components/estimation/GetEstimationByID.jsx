@@ -123,7 +123,7 @@ const GetEstimationByID = ({ id, onRefresh }) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-xl font-bold text-green-800">Estimation #{estimationNumber}</h3>
+          <h3 className="text-xl  text-green-800">Estimation #{estimationNumber}</h3>
           <p className="text-gray-700 font-medium">Project: {projectName}</p>
         </div>
         <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}>
@@ -203,9 +203,9 @@ const GetEstimationByID = ({ id, onRefresh }) => {
             <Button
               className="py-1 px-2 text-md rounded-xl"
               onClick={() => setIsEstimationTaskOpen(!isEstimationTaskOpen)}
-        >
-          Estimation Task
-        </Button>
+            >
+              Estimation Task
+            </Button>
           )
         }
         <Button
@@ -248,7 +248,7 @@ const GetEstimationByID = ({ id, onRefresh }) => {
       {isHoursOpen && (
         <div className="mt-6 border-t pt-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-700">Estimated Hours/Weeks</h3>
+            <h3 className="text-lg  text-gray-700">Estimated Hours/Weeks</h3>
             <button
               onClick={() => setIsHoursOpen(false)}
               className="text-gray-700 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-md text-sm transition-colors"
@@ -262,7 +262,7 @@ const GetEstimationByID = ({ id, onRefresh }) => {
       {isInclusionOpen && (
         <div className="mt-6 border-t pt-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-700">Inclusion/Exclusion</h3>
+            <h3 className="text-lg  text-gray-700">Inclusion/Exclusion</h3>
             <button
               onClick={() => setIsInclusionOpen(false)}
               className="text-gray-700 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-md text-sm transition-colors"
@@ -305,7 +305,7 @@ const GetEstimationByID = ({ id, onRefresh }) => {
 // Reusable Info Row
 const InfoRow = ({ label, value }) => (
   <div className="flex justify-between gap-3">
-    <span className="font-bold text-gray-700">{label}:</span>
+    <span className=" text-gray-700">{label}:</span>
     <span className="text-gray-700 text-right wrap-break-words">{value}</span>
   </div>
 )

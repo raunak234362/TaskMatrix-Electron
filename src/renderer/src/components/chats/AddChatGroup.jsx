@@ -33,7 +33,7 @@ const AddChatGroup = ({ onClose, onCreated }) => {
             <div className="p-2 bg-green-50 rounded-lg text-green-600">
               <Users size={20} />
             </div>
-            <h2 className="text-lg font-bold text-gray-700">
+            <h2 className="text-lg  text-gray-700">
               Create New Group
             </h2>
           </div>

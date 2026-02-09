@@ -261,7 +261,7 @@ const AddInvoice = ({
     <div className="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full mx-auto">
       <header className="mb-6 border-b pb-4 border-green-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-green-700">
+          <h1 className="text-2xl  text-green-700">
             Create New Invoice
           </h1>
           <p className="text-gray-700">
@@ -580,7 +580,7 @@ const AddInvoice = ({
               Summary
             </legend>
             <div className="space-y-4">
-              <div className="flex justify-between items-center text-xl font-bold text-green-800">
+              <div className="flex justify-between items-center text-xl  text-green-800">
                 <span>Total Value:</span>
                 <span>
                   {watch("currencyType")}{" "}
@@ -624,7 +624,7 @@ const AddInvoice = ({
               </div>
               {watch("accountInfo") && watch("accountInfo").length > 0 && (
                 <div className="bg-green-50 p-3 rounded-lg border border-green-100 text-sm">
-                  <p className="font-bold text-green-800">
+                  <p className=" text-green-800">
                     Selected Bank Account:
                   </p>
                   <p>{watch("accountInfo")[0].accountName}</p>
@@ -638,7 +638,7 @@ const AddInvoice = ({
 
         <Button
           type="submit"
-          className="mt-8 bg-green-700 hover:bg-green-800 text-white w-full py-4 text-xl font-bold shadow-lg transition transform hover:scale-[1.01]"
+          className="mt-8 bg-green-700 hover:bg-green-800 text-white w-full py-4 text-xl  shadow-lg transition transform hover:scale-[1.01]"
         >
           Create Invoice
         </Button>

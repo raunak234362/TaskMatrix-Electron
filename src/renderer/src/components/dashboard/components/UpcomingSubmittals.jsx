@@ -3,7 +3,7 @@ import { ClipboardList, AlertCircle } from 'lucide-react'
 
 const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
   const [activeTab, setActiveTab] = React.useState('submittals')
-const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
+  const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
   const isOverdue = (dateString) => {
     if (!dateString) return false
     const today = new Date()
@@ -33,29 +33,29 @@ const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          
+
           <button
             onClick={() => setActiveTab('submittals')}
             className={`text-md font-semibold transition-all ${activeTab === 'submittals'
-                ? 'text-green-600 border-b-2 border-green-600'
-                : 'text-gray-400 hover:text-gray-700'
+              ? 'text-green-600 border-b-2 border-green-600'
+              : 'text-gray-400 hover:text-gray-700'
               }`}
           >
             Upcoming Submittals
           </button>
           {userRole === 'project_manager_officer' && (
-          <button
-            onClick={() => setActiveTab('invoices')}
-            className={`text-md font-semibold transition-all ${activeTab === 'invoices'
+            <button
+              onClick={() => setActiveTab('invoices')}
+              className={`text-md font-semibold transition-all ${activeTab === 'invoices'
                 ? 'text-green-600 border-b-2 border-green-600'
                 : 'text-gray-400 hover:text-gray-700'
-              }`}
-          >
-            Invoice Need Raise
-          </button>
+                }`}
+            >
+              Invoice Need Raise
+            </button>
           )}
         </div>
-        <span className="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full">
+        <span className="px-3 py-1 bg-green-50 text-green-700 text-xs  rounded-full">
           {activeTab === 'submittals'
             ? `${pendingSubmittals.length} Pending`
             : `${invoiceNeedRaise.length} Need Raise`}
@@ -69,10 +69,10 @@ const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
               <div key={projectName} className="space-y-3">
                 <div className="flex items-center gap-2 sticky top-0 bg-white py-1 z-10">
                   <div className="w-1 h-4 bg-green-500 rounded-full"></div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                  <h3 className="text-xs  text-gray-400 uppercase tracking-wider">
                     {projectName}
                   </h3>
-                  <span className="text-[10px] bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded-md font-bold">
+                  <span className="text-[10px] bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded-md ">
                     {items.length}
                   </span>
                 </div>
@@ -83,24 +83,24 @@ const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
                       <div
                         key={submittal.id || index}
                         className={`p-4 rounded-xl border transition-all group ${overdue
-                            ? 'bg-red-50 border-red-100 hover:bg-red-100/50 hover:border-red-200 shadow-sm shadow-red-50'
-                            : 'bg-gray-50/50 border-gray-50 hover:bg-white hover:border-green-100 hover:shadow-md hover:shadow-green-50/50'
+                          ? 'bg-red-50 border-red-100 hover:bg-red-100/50 hover:border-red-200 shadow-sm shadow-red-50'
+                          : 'bg-gray-50/50 border-gray-50 hover:bg-white hover:border-green-100 hover:shadow-md hover:shadow-green-50/50'
                           }`}
                       >
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center gap-2">
                             {overdue && <AlertCircle size={14} className="text-red-500" />}
                             <h4
-                              className={`font-bold text-sm transition-colors ${overdue
-                                  ? 'text-red-700'
-                                  : 'text-gray-700 group-hover:text-green-700'
+                              className={` text-sm transition-colors ${overdue
+                                ? 'text-red-700'
+                                : 'text-gray-700 group-hover:text-green-700'
                                 }`}
                             >
                               {submittal.subject || 'No Subject'}
                             </h4>
                           </div>
                           <span
-                            className={`text-[10px] font-bold uppercase tracking-wider ${overdue ? 'text-red-500' : 'text-gray-400'
+                            className={`text-[10px]  uppercase tracking-wider ${overdue ? 'text-red-500' : 'text-gray-400'
                               }`}
                           >
                             {submittal.approvalDate
@@ -144,10 +144,10 @@ const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
                 className="p-4 rounded-xl border border-gray-50 bg-gray-50/50 hover:bg-white hover:border-green-100 hover:shadow-md hover:shadow-green-50/50 transition-all group"
               >
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-bold text-sm text-gray-700 group-hover:text-green-700 transition-colors">
+                  <h4 className=" text-sm text-gray-700 group-hover:text-green-700 transition-colors">
                     {invoice.invoiceNumber || 'No Number'}
                   </h4>
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                  <span className="text-[10px]  text-gray-400 uppercase tracking-wider">
                     {invoice.invoiceDate
                       ? new Date(invoice.invoiceDate).toLocaleDateString()
                       : 'No Date'}
@@ -164,7 +164,7 @@ const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
                   </div>
                   <div className="flex flex-col items-end">
                     <span className="text-[10px] text-gray-400 uppercase font-medium">Amount</span>
-                    <span className="text-xs font-bold text-green-600">
+                    <span className="text-xs  text-green-600">
                       ${invoice.totalInvoiceValue?.toLocaleString() || '0'}
                     </span>
                   </div>

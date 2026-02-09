@@ -70,14 +70,14 @@ const InclusionExclusion = ({ estimationId, onEdit }) => {
       <div className="grid md:grid-cols-2 gap-8">
         {/* Inclusions Column */}
         <div>
-          <h3 className="text-md font-bold text-green-700 bg-green-50 px-3 py-2 rounded-lg mb-3 border-l-4 border-green-500">
+          <h3 className="text-md  text-green-700 bg-green-50 px-3 py-2 rounded-lg mb-3 border-l-4 border-green-500">
             Inclusions
           </h3>
           {inclusions.length > 0 ? (
             <ul className="space-y-2">
               {inclusions.map((item, index) => (
                 <li key={index} className="flex items-start text-gray-700">
-                  <span className="mr-2 text-green-500 font-bold">•</span>
+                  <span className="mr-2 text-green-500 ">•</span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -89,14 +89,14 @@ const InclusionExclusion = ({ estimationId, onEdit }) => {
 
         {/* Exclusions Column */}
         <div>
-          <h3 className="text-md font-bold text-red-700 bg-red-50 px-3 py-2 rounded-lg mb-3 border-l-4 border-red-500">
+          <h3 className="text-md  text-red-700 bg-red-50 px-3 py-2 rounded-lg mb-3 border-l-4 border-red-500">
             Exclusions
           </h3>
           {exclusions.length > 0 ? (
             <ul className="space-y-2">
               {exclusions.map((item, index) => (
                 <li key={index} className="flex items-start text-gray-700">
-                  <span className="mr-2 text-red-500 font-bold">•</span>
+                  <span className="mr-2 text-red-500 ">•</span>
                   <span>{item}</span>
                 </li>
               ))}

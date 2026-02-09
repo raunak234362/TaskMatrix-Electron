@@ -109,7 +109,7 @@ const GroupDetail = ({ group, onClose }) => {
       <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-4 border-b flex justify-between items-center bg-gray-50">
-          <h2 className="text-lg font-bold text-gray-700">{group.name}</h2>
+          <h2 className="text-lg  text-gray-700">{group.name}</h2>
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-200 rounded-full transition"
@@ -122,8 +122,8 @@ const GroupDetail = ({ group, onClose }) => {
         <div className="flex border-b">
           <button
             className={`flex-1 py-3 text-sm font-medium transition ${activeTab === "members"
-                ? "text-green-600 border-b-2 border-green-600 bg-green-50"
-                : "text-gray-700 hover:text-gray-700 hover:bg-gray-50"
+              ? "text-green-600 border-b-2 border-green-600 bg-green-50"
+              : "text-gray-700 hover:text-gray-700 hover:bg-gray-50"
               }`}
             onClick={() => setActiveTab("members")}
           >
@@ -131,8 +131,8 @@ const GroupDetail = ({ group, onClose }) => {
           </button>
           <button
             className={`flex-1 py-3 text-sm font-medium transition ${activeTab === "add"
-                ? "text-green-600 border-b-2 border-green-600 bg-green-50"
-                : "text-gray-700 hover:text-gray-700 hover:bg-gray-50"
+              ? "text-green-600 border-b-2 border-green-600 bg-green-50"
+              : "text-gray-700 hover:text-gray-700 hover:bg-gray-50"
               }`}
             onClick={() => setActiveTab("add")}
           >
@@ -155,7 +155,7 @@ const GroupDetail = ({ group, onClose }) => {
                     className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50 justify-between"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-xs">
+                      <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600  text-xs">
                         {member.firstName?.[0]}
                         {member.lastName?.[0]}
                       </div>
@@ -202,14 +202,14 @@ const GroupDetail = ({ group, onClose }) => {
                     key={user.id}
                     onClick={() => toggleUserSelection(user.id)}
                     className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition border ${selectedUsers.includes(user.id)
-                        ? "bg-green-50 border-green-200"
-                        : "hover:bg-gray-50 border-transparent"
+                      ? "bg-green-50 border-green-200"
+                      : "hover:bg-gray-50 border-transparent"
                       }`}
                   >
                     <div
                       className={`w-5 h-5 rounded border flex items-center justify-center ${selectedUsers.includes(user.id)
-                          ? "bg-green-500 border-green-500"
-                          : "border-gray-300"
+                        ? "bg-green-500 border-green-500"
+                        : "border-gray-300"
                         }`}
                     >
                       {selectedUsers.includes(user.id) && (

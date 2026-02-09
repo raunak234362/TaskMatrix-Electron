@@ -98,7 +98,7 @@ const TeamMember = ({ members, onClose }) => {
         {/* Header */}
         <div className="flex items-center justify-between mb-3 border-b pb-2">
           <h2 className="text-xl font-semibold text-gray-700">
-            Team - <span className="font-bold">{members.name}</span>
+            Team - <span className="">{members.name}</span>
           </h2>
           <button onClick={onClose} aria-label="Close">
             <X className="w-6 h-6 text-gray-700 hover:text-gray-700" />

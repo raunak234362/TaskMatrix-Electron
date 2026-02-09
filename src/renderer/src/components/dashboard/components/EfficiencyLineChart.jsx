@@ -31,12 +31,12 @@ const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
             <div className="bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-100 min-w-[200px]">
-                <p className="font-bold text-slate-900 mb-3 border-b border-slate-100 pb-2">{label}</p>
+                <p className=" text-slate-900 mb-3 border-b border-slate-100 pb-2">{label}</p>
                 <div className="space-y-2">
                     {payload.map((entry, index) => (
                         <div key={index} className="flex justify-between items-center gap-4">
                             <span className="text-xs font-medium text-slate-500">{entry.name}</span>
-                            <span className="text-sm font-bold" style={{ color: entry.color }}>
+                            <span className="text-sm " style={{ color: entry.color }}>
                                 {entry.name === 'Efficiency' ? `${entry.value}%` : entry.value.toFixed(1)}
                                 {entry.name === 'Worked Hours' ? 'h' : ''}
                             </span>
@@ -168,7 +168,7 @@ const EfficiencyLineChart = ({ tasks }) => {
                         <button
                             key={f.id}
                             onClick={() => setFilter(f.id)}
-                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${filter === f.id
+                            className={`px-4 py-1.5 rounded-lg text-xs  transition-all ${filter === f.id
                                 ? 'bg-white text-indigo-600 shadow-sm'
                                 : 'text-slate-500 hover:text-slate-700'
                                 }`}
@@ -217,7 +217,7 @@ const EfficiencyLineChart = ({ tasks }) => {
                                                 className="w-2 h-2 rounded-full"
                                                 style={{ backgroundColor: entry.color }}
                                             ></div>
-                                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                                            <span className="text-[10px]  text-slate-500 uppercase tracking-wider">
                                                 {entry.value}
                                             </span>
                                         </div>

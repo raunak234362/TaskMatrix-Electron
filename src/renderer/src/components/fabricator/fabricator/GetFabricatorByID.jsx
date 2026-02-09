@@ -100,7 +100,7 @@ const GetFabricatorByID = ({ id }) => {
     <div className="bg-linear-to-br from-green-50 to-green-50 p-4 sm:p-6 rounded-xl shadow-inner text-sm">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2 mb-5">
-        <h3 className="text-xl font-bold text-green-800">
+        <h3 className="text-xl  text-green-800">
           {fabricator.fabName}
         </h3>
         <span
@@ -270,7 +270,7 @@ const InfoRow = ({
   href,
 }) => (
   <div className="flex justify-between">
-    <span className="font-bold text-gray-700">{label}:</span>
+    <span className=" text-gray-700">{label}:</span>
     {href ? (
       <a
         href={href}

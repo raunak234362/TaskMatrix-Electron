@@ -19,28 +19,25 @@ const TeamsList = ({
           <div
             key={team.id}
             onClick={() => onTeamSelect(team.id)}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer group ${
-              selectedTeam === team.id
+            className={`p-4 rounded-2xl border transition-all cursor-pointer group ${selectedTeam === team.id
                 ? "bg-green-50 border-green-200 shadow-sm shadow-green-100"
                 : "bg-white border-gray-100 hover:border-green-200 hover:shadow-md hover:shadow-gray-100"
-            }`}
+              }`}
           >
             <div className="flex items-center justify-between mb-2">
               <h4
-                className={`font-bold transition-colors ${
-                  selectedTeam === team.id
+                className={` transition-colors ${selectedTeam === team.id
                     ? "text-green-700"
                     : "text-gray-700 group-hover:text-green-600"
-                }`}
+                  }`}
               >
                 {team.name}
               </h4>
               <div
-                className={`p-2 rounded-lg transition-colors ${
-                  selectedTeam === team.id
+                className={`p-2 rounded-lg transition-colors ${selectedTeam === team.id
                     ? "bg-green-100 text-green-600"
                     : "bg-gray-50 text-gray-400 group-hover:bg-green-50 group-hover:text-green-500"
-                }`}
+                  }`}
               >
                 <Users size={16} />
               </div>

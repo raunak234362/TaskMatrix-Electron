@@ -338,7 +338,7 @@ const FetchTaskByID = ({
               <ClipboardList className="w-7 h-7 text-green-700" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-700">{task.name}</h2>
+              <h2 className="text-2xl  text-gray-700">{task.name}</h2>
               {/* <p className="text-sm text-gray-700">ID: #{task.id}</p> */}
             </div>
           </div>
@@ -381,7 +381,7 @@ const FetchTaskByID = ({
             <>
               {/* Task Info Card */}
               <div className="bg-green-50 rounded-2xl p-8 border border-green-200">
-                <h3 className="text-2xl font-bold text-green-900 mb-6 flex items-center gap-3">
+                <h3 className="text-2xl  text-green-900 mb-6 flex items-center gap-3">
                   <FileText className="w-7 h-7" />
                   Task Information
                 </h3>
@@ -440,7 +440,7 @@ const FetchTaskByID = ({
                       <p className="text-sm font-medium text-gray-700">
                         Priority
                       </p>
-                      <p className={`font-bold mt-1 ${priority.color}`}>
+                      <p className={` mt-1 ${priority.color}`}>
                         {priority.label}
                       </p>
                     </div>
@@ -538,7 +538,7 @@ const FetchTaskByID = ({
                 ["admin", "deputy_manager", "human_resource", "operation_executive", "staff", "project_manager", "department_manager"].includes(userRole) && (
                   <div className="bg-green-50 rounded-2xl p-6 border border-green-200">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-3">
+                      <h3 className="text-xl  text-indigo-900 flex items-center gap-3">
                         <Timer className="w-6 h-6" />
                         Work Summary
                       </h3>
@@ -577,7 +577,7 @@ const FetchTaskByID = ({
                       <div className="mt-6 bg-white/50 rounded-xl border border-indigo-100 overflow-hidden">
                         <table className="w-full text-left text-sm">
                           <thead>
-                            <tr className="bg-indigo-50/50 text-indigo-700 font-bold border-b border-indigo-100">
+                            <tr className="bg-indigo-50/50 text-indigo-700  border-b border-indigo-100">
                               <th className="px-4 py-3">Activity</th>
                               <th className="px-4 py-3">Start Time</th>
                               <th className="px-4 py-3">End Time</th>
@@ -593,12 +593,12 @@ const FetchTaskByID = ({
                                 <td className="px-4 py-3 text-gray-700">{toIST(session.started_at)}</td>
                                 <td className="px-4 py-3 text-gray-700">
                                   {session.ended_at ? toIST(session.ended_at) : (
-                                    <span className="text-emerald-600 font-bold animate-pulse flex items-center gap-1">
+                                    <span className="text-emerald-600  animate-pulse flex items-center gap-1">
                                       <Play className="w-3 h-3 fill-current" /> Running...
                                     </span>
                                   )}
                                 </td>
-                                <td className="px-4 py-3 text-right font-mono font-bold text-indigo-700">
+                                <td className="px-4 py-3 text-right font-mono  text-indigo-700">
                                   {session.duration_seconds
                                     ? formatSecondsToHHMM(session.duration_seconds)
                                     : '—'}
@@ -632,7 +632,7 @@ const FetchTaskByID = ({
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-6">
             <div className="flex items-center gap-3 text-red-600">
               <Square className="w-6 h-6 fill-current" />
-              <h3 className="text-xl font-bold">End Task session</h3>
+              <h3 className="text-xl ">End Task session</h3>
             </div>
             <p className="text-gray-600">
               Please provide a brief summary or feedback about the work done before ending the session.
@@ -738,7 +738,7 @@ const SummaryCard = ({ icon, label, value, color = "text-indigo-700" }) => (
     </div>
     <div>
       <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl font-bold mt-2 ${color}`}>{value} hrs</p>
+      <p className={`text-xl  mt-2 ${color}`}>{value} hrs</p>
     </div>
   </div>
 );
@@ -749,7 +749,7 @@ const SummaryCardSession = ({ icon, label, value, color = "text-indigo-700" }) =
     </div>
     <div>
       <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl font-bold mt-2 ${color}`}>{value} </p>
+      <p className={`text-xl  mt-2 ${color}`}>{value} </p>
     </div>
   </div>
 );
@@ -760,7 +760,7 @@ const SummaryCardStatus = ({ icon, label, value, color = "text-indigo-700" }) =>
     </div>
     <div>
       <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl font-bold mt-2 ${color}`}>{value} </p>
+      <p className={`text-xl  mt-2 ${color}`}>{value} </p>
     </div>
   </div>
 );

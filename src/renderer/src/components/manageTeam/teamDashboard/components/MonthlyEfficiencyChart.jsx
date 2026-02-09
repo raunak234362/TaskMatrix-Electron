@@ -21,7 +21,7 @@ const MonthlyEfficiencyChart = ({
     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-bold text-gray-700">
+          <h3 className="text-lg  text-gray-700">
             Efficiency Analytics
           </h3>
           <p className="text-sm text-gray-700">

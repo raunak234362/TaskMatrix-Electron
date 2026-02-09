@@ -233,7 +233,7 @@ const AddFabricator = () => {
       {addedFabricatorId && (
         <div className="mt-12 pt-8 border-t border-gray-200">
           <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 mb-8">
-            <h3 className="text-xl font-bold text-emerald-800 mb-2">
+            <h3 className="text-xl  text-emerald-800 mb-2">
               Fabricator Added Successfully!
             </h3>
             <p className="text-emerald-700">

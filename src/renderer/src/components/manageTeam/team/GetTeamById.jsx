@@ -86,7 +86,7 @@ const GetTeamByID = ({ id }) => {
     <div className="bg-linear-to-br from-green-50 to-green-50 p-6 rounded-xl shadow-inner">
       {/* Header */}
       <div className="mb-5">
-        <h3 className="text-xl font-bold text-green-800">{team.name}</h3>
+        <h3 className="text-xl  text-green-800">{team.name}</h3>
       </div>
 
       {/* Two‑column grid */}
@@ -165,7 +165,7 @@ const InfoRow = ({
   value,
 }) => (
   <div className="flex justify-between">
-    <span className="font-bold text-gray-700">{label}:</span>
+    <span className=" text-gray-700">{label}:</span>
     <span className="text-gray-700 text-right">{value}</span>
   </div>
 );

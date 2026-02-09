@@ -13,8 +13,8 @@ import { toast } from "react-toastify";
 
 const COUNTRY_MAP<string, string> = {
   "United States": "US",
-  Canada: "CA",
-  India: "IN",
+    Canada: "CA",
+      India: "IN",
 };
 
 const parseLocation = (
@@ -64,12 +64,12 @@ const EditConnectionDesigner = ({
 }) => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [stateOptions, setStateOptions] = useState<
+  const [stateOptions, setStateOptions] = useState <
     { label; value }
-  >();
-  const [cityOptions, setCityOptions] = useState<
+    > ();
+  const [cityOptions, setCityOptions] = useState <
     { label; value }
-  >();
+    > ();
 
   const { country: initialCountry, city: initialCity } = parseLocation(
     designerData.location
@@ -128,7 +128,7 @@ const EditConnectionDesigner = ({
       );
 
       if (lastCountryRef.current && lastCountryRef.current !== country) {
-        setValue("headquater.states", );
+        setValue("headquater.states",);
         setValue("headquater.city", "");
         setCityOptions();
       }
@@ -137,7 +137,7 @@ const EditConnectionDesigner = ({
       setStateOptions();
       setCityOptions();
       if (lastCountryRef.current) {
-        setValue("headquater.states", );
+        setValue("headquater.states",);
         setValue("headquater.city", "");
       }
       lastCountryRef.current = country;
@@ -202,204 +202,205 @@ const EditConnectionDesigner = ({
       onClose();
     } catch (submissionError) {
       const apiMessage =
-        (submissionError } })
+        (submissionError }
+  })
           ?.response?.data?.message || "";
-      const message = apiMessage || "Failed to update Connection Designer";
-      setError(message);
-      toast.error(message);
+const message = apiMessage || "Failed to update Connection Designer";
+setError(message);
+toast.error(message);
     } finally {
-      setSubmitting(false);
-    }
+  setSubmitting(false);
+}
   };
 
-  return (
+return (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 bg-opacity-50 p-4"
+    onClick={onClose}
+  >
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 bg-opacity-50 p-4"
-      onClick={onClose}
+      className="bg-white max-w-4xl rounded-xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+      onClick={(e) => e.stopPropagation()}
     >
-      <div
-        className="bg-white max-w-4xl rounded-xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
+      {/* Header */}
+      <div className="flex justify-between items-center p-5 border-b bg-gray-50 shrink-0">
+        <h2 className="text-xl  text-gray-700">
+          Edit Connection Designer
+        </h2>
+        <button
+          onClick={onClose}
+          className="text-gray-700 hover:text-gray-700 transition"
+          aria-label="Close"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Body (Scrollable form) */}
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="p-5 space-y-5 overflow-y-auto flex-1"
       >
-        {/* Header */}
-        <div className="flex justify-between items-center p-5 border-b bg-gray-50 shrink-0">
-          <h2 className="text-xl font-bold text-gray-700">
-            Edit Connection Designer
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-700 hover:text-gray-700 transition"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
+        <Input
+          label="Connection Designer Name *"
+          type="text"
+          {...register("connectionDesignerName", {
+            required: "Connection Designer name is required",
+          })}
+          placeholder="Enter Connection Designer Name"
+        />
+        {errors.connectionDesignerName && (
+          <p className="text-red-500 text-xs mt-1">
+            {errors.connectionDesignerName.message}
+          </p>
+        )}
+
+        {/* Contact Info & Email */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Input
+            label="Contact Info (optional)"
+            type="text"
+            {...register("contactInfo")}
+            placeholder="+91 9876543210"
+          />
+          <Input
+            label="Email (optional)"
+            type="email"
+            {...register("email")}
+            placeholder="info@example.com"
+          />
         </div>
 
-        {/* Body (Scrollable form) */}
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="p-5 space-y-5 overflow-y-auto flex-1"
-        >
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-
+        {/* Website & Drive Link */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Input
-            label="Connection Designer Name *"
-            type="text"
-            {...register("connectionDesignerName", {
-              required: "Connection Designer name is required",
-            })}
-            placeholder="Enter Connection Designer Name"
+            label="Website (optional)"
+            type="url"
+            {...register("website")}
+            placeholder="https://example.com"
           />
-          {errors.connectionDesignerName && (
+        </div>
+
+        {/* Country, Multi-State, City */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Country */}
+          <Controller
+            name="headquater.country"
+            control={control}
+            rules={{ required: "Country is required" }}
+            render={({ field }) => (
+              <Select
+                placeholder="Select Country"
+                options={Object.keys(COUNTRY_MAP).map((c) => ({
+                  label: c,
+                  value: c,
+                }))}
+                value={
+                  field.value
+                    ? { label: field.value, value: field.value }
+                    : null
+                }
+                onChange={(option) => field.onChange(option?.value || "")}
+                menuPortalTarget={document.body}
+                styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+              />
+            )}
+          />
+          {errors.headquater?.country && (
             <p className="text-red-500 text-xs mt-1">
-              {errors.connectionDesignerName.message}
+              {errors.headquater.country.message}
             </p>
           )}
 
-          {/* Contact Info & Email */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Input
-              label="Contact Info (optional)"
-              type="text"
-              {...register("contactInfo")}
-              placeholder="+91 9876543210"
-            />
-            <Input
-              label="Email (optional)"
-              type="email"
-              {...register("email")}
-              placeholder="info@example.com"
-            />
-          </div>
-
-          {/* Website & Drive Link */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Input
-              label="Website (optional)"
-              type="url"
-              {...register("website")}
-              placeholder="https://example.com"
-            />
-          </div>
-
-          {/* Country, Multi-State, City */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Country */}
-            <Controller
-              name="headquater.country"
-              control={control}
-              rules={{ required: "Country is required" }}
-              render={({ field }) => (
-                <Select
-                  placeholder="Select Country"
-                  options={Object.keys(COUNTRY_MAP).map((c) => ({
-                    label: c,
-                    value: c,
-                  }))}
-                  value={
-                    field.value
-                      ? { label: field.value, value: field.value }
-                      : null
+          {/* Multi-State */}
+          <Controller
+            name="headquater.states"
+            control={control}
+            rules={{ required: "Select at least one state" }}
+            render={({ field }) => (
+              <Select
+                isMulti
+                placeholder="Select State(s)"
+                options={stateOptions}
+                value={
+                  Array.isArray(field.value)
+                    ? stateOptions.filter((opt) =>
+                      field.value.includes(opt.value)
+                    )
+                    : 
                   }
-                  onChange={(option) => field.onChange(option?.value || "")}
-                  menuPortalTarget={document.body}
-                  styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-                />
-              )}
-            />
-            {errors.headquater?.country && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.headquater.country.message}
-              </p>
+                onChange={(options) => {
+                  const selected = options
+                    ? options.map((opt) => opt.value)
+                    : []
+                  field.onChange(selected);
+                  setValue("headquater.city", "");
+                }}
+                menuPortalTarget={document.body}
+                styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+              />
             )}
+          />
+          {errors.headquater?.states && (
+            <p className="text-red-500 text-xs mt-1">
+              {errors.headquater.states.message}
+            </p>
+          )}
 
-            {/* Multi-State */}
-            <Controller
-              name="headquater.states"
-              control={control}
-              rules={{ required: "Select at least one state" }}
-              render={({ field }) => (
-                <Select
-                  isMulti
-                  placeholder="Select State(s)"
-                  options={stateOptions}
-                  value={
-                    Array.isArray(field.value)
-                      ? stateOptions.filter((opt) =>
-                          field.value.includes(opt.value)
-                        )
-                      : 
-                  }
-                  onChange={(options) => {
-                    const selected = options
-                      ? options.map((opt) => opt.value)
-                      : []
-                    field.onChange(selected);
-                    setValue("headquater.city", "");
-                  }}
-                  menuPortalTarget={document.body}
-                  styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-                />
-              )}
-            />
-            {errors.headquater?.states && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.headquater.states.message}
-              </p>
+          {/* City (Optional) */}
+          <Controller
+            name="headquater.city"
+            control={control}
+            render={({ field }) => (
+              <Select
+                placeholder="Select City (Optional)"
+                options={cityOptions}
+                value={
+                  field.value
+                    ? { label: field.value, value: field.value }
+                    : null
+                }
+                onChange={(option) => field.onChange(option?.value || "")}
+                menuPortalTarget={document.body}
+                styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+              />
             )}
+          />
+        </div>
 
-            {/* City (Optional) */}
-            <Controller
-              name="headquater.city"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  placeholder="Select City (Optional)"
-                  options={cityOptions}
-                  value={
-                    field.value
-                      ? { label: field.value, value: field.value }
-                      : null
-                  }
-                  onChange={(option) => field.onChange(option?.value || "")}
-                  menuPortalTarget={document.body}
-                  styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-                />
-              )}
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-3 border-t shrink-0">
-            <Button type="button" onClick={onClose} disabled={submitting}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={submitting}
-              className="bg-green-600 text-white hover:bg-green-700 flex items-center gap-2 disabled:opacity-70"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Check className="w-4 h-4" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
-      </div>
+        {/* Actions */}
+        <div className="flex justify-end gap-3 pt-3 border-t shrink-0">
+          <Button type="button" onClick={onClose} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="bg-green-600 text-white hover:bg-green-700 flex items-center gap-2 disabled:opacity-70"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Check className="w-4 h-4" />
+                Save Changes
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
     </div>
-  );
+  </div>
+);
 };
 
 export default EditConnectionDesigner;

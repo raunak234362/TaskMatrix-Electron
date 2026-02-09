@@ -20,7 +20,7 @@ const UpcomingDeadlinesWidget = ({ tasks = [] }) => {
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-gray-800 flex items-center gap-2">
+        <h3 className=" text-gray-800 flex items-center gap-2">
           <Calendar className="w-5 h-5 text-indigo-500" />
           Upcoming Deadlines
         </h3>

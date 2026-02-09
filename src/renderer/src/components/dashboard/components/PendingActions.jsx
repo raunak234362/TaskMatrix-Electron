@@ -94,7 +94,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
               <div className="flex flex-col">
                 <span className="font-semibold text-gray-700">{action.title}</span>
                 <span
-                  className="text-2xl font-bold mt-1"
+                  className="text-2xl  mt-1"
                   style={{ color: colors.text.replace('text-', '#') }}
                 >
                   {action.count}

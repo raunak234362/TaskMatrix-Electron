@@ -127,7 +127,7 @@ const GetMilestoneByID = ({ row, close }) => {
             <CheckCircle2 className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white leading-tight">
+            <h2 className="text-xl  text-white leading-tight">
               {milestone.subject}
             </h2>
             <p className="text-green-50 text-xs font-medium">
@@ -174,7 +174,7 @@ const GetMilestoneByID = ({ row, close }) => {
               Status
             </span>
             <div
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border-2 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border} w-fit mt-1`}
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs  border-2 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border} w-fit mt-1`}
             >
               {statusConfig.label}
             </div>
@@ -190,7 +190,7 @@ const GetMilestoneByID = ({ row, close }) => {
 
         {/* Description */}
         <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
-          <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+          <h3 className="text-sm  text-gray-700 mb-3 flex items-center gap-2">
             <FileText className="w-4 h-4 text-green-600" />
             Description
           </h3>
@@ -207,7 +207,7 @@ const GetMilestoneByID = ({ row, close }) => {
         {/* Tasks Section (Optional - if the API returns tasks) */}
         {milestone.tasks && milestone.tasks.length > 0 && (
           <div>
-            <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+            <h3 className="text-sm  text-gray-700 mb-4 flex items-center gap-2">
               <ClipboardList className="w-4 h-4 text-green-600" />
               Associated Tasks ({milestone.tasks.length})
             </h3>
@@ -235,7 +235,7 @@ const GetMilestoneByID = ({ row, close }) => {
                       </div>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 uppercase">
+                  <span className="text-[10px]  px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 uppercase">
                     {task.status}
                   </span>
                 </div>
@@ -261,7 +261,7 @@ const InfoCard = ({
     </span>
     <div className="flex items-center gap-2 mt-1">
       <div className={`p-1.5 ${bg} ${color} rounded-lg`}>{icon}</div>
-      <span className="text-sm font-bold text-gray-700">{value}</span>
+      <span className="text-sm  text-gray-700">{value}</span>
     </div>
   </div>
 );

@@ -25,7 +25,7 @@ const CoTablePage = () => {
         {/* Header */}
         <div className="bg-white rounded-xl shadow-md p-6 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-green-700">
+            <h1 className="text-2xl  text-green-700">
               Change Order Reference Table
             </h1>
             <p className="text-sm text-gray-700">
@@ -60,7 +60,7 @@ const CoTablePage = () => {
 const SummaryCard = ({ label, value }) => (
   <div className="bg-white rounded-xl shadow-sm border p-4">
     <p className="text-xs uppercase text-gray-700 font-semibold">{label}</p>
-    <p className="text-2xl font-bold text-gray-700 mt-1">{value}</p>
+    <p className="text-2xl  text-gray-700 mt-1">{value}</p>
   </div>
 );
 

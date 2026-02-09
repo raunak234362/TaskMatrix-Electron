@@ -109,8 +109,8 @@ const InvoiceTrends = ({ invoices = [] }) => {
         <button
           onClick={() => setSelectedMonth(null)}
           className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${selectedMonth === null
-              ? 'bg-green-600 text-white shadow-md shadow-green-100'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            ? 'bg-green-600 text-white shadow-md shadow-green-100'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
         >
           All Months
@@ -120,8 +120,8 @@ const InvoiceTrends = ({ invoices = [] }) => {
             key={month}
             onClick={() => setSelectedMonth(index)}
             className={`px-3 py-1 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${selectedMonth === index
-                ? 'bg-green-600 text-white shadow-md shadow-green-100'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? 'bg-green-600 text-white shadow-md shadow-green-100'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
           >
             {month}
@@ -154,11 +154,11 @@ const InvoiceTrends = ({ invoices = [] }) => {
                   const data = payload[0].payload
                   return (
                     <div className="bg-white p-3 rounded-xl shadow-xl border border-gray-100">
-                      <p className="text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">
+                      <p className="text-xs  text-gray-700 mb-1 uppercase tracking-wider">
                         {selectedMonth !== null ? `${months[selectedMonth]} ${label}` : label}
                       </p>
                       <div className="flex flex-col gap-1">
-                        <p className="text-sm font-bold text-green-700">
+                        <p className="text-sm  text-green-700">
                           Amount: ${data.amount.toLocaleString()}
                         </p>
                         <p className="text-xs font-medium text-gray-700">Invoices: {data.count}</p>

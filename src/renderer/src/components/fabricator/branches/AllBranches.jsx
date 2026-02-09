@@ -17,7 +17,7 @@ const AllBranches = ({ fabricator, onClose }) => {
       <div className="w-4xl bg-white rounded-xl p-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-3 border-b pb-2">
-          <h2 className="text-xl font-bold text-gray-700">
+          <h2 className="text-xl  text-gray-700">
             Fabricator Branches
           </h2>
           <button onClick={onClose} aria-label="Close">

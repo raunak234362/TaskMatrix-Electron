@@ -57,7 +57,7 @@ const GetAccountByID = ({ id }) => {
           <Building2 className="w-6 h-6 text-green-700" />
         </div>
         <div>
-          <h3 className="text-xl font-bold text-green-900">
+          <h3 className="text-xl  text-green-900">
             {account.accountName}
           </h3>
           <p className="text-sm text-green-600">{account.bankName}</p>

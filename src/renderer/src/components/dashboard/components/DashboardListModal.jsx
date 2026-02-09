@@ -41,7 +41,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data, onProjectSelect }) =>
             cell: ({ row }) => {
                 const status = row.original.status || 'PENDING'
                 return (
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
+                    <span className={`px-3 py-1 rounded-full text-[10px]  uppercase tracking-wider ${status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
                         status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
                             'bg-blue-100 text-blue-700'
                         }`}>
@@ -73,11 +73,11 @@ const DashboardListModal = ({ isOpen, onClose, type, data, onProjectSelect }) =>
                             <headerInfo.icon size={24} />
                         </div>
                         <div>
-                            <h3 className="text-2xl font-black text-gray-800 tracking-tight">
+                            <h3 className="text-2xl  text-gray-800 tracking-tight">
                                 {headerInfo.title}
                             </h3>
                             <p className="text-sm font-medium text-gray-500">
-                                You have <span className="text-gray-800 font-bold">{data.length}</span> items requiring attention
+                                You have <span className="text-gray-800 ">{data.length}</span> items requiring attention
                             </p>
                         </div>
                     </div>
@@ -110,7 +110,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data, onProjectSelect }) =>
                     </span>
                     <button
                         onClick={onClose}
-                        className="px-8 py-3 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-xl shadow-gray-200 hover:scale-105 active:scale-95"
+                        className="px-8 py-3 bg-gray-900 text-white rounded-2xl  hover:bg-gray-800 transition-all shadow-xl shadow-gray-200 hover:scale-105 active:scale-95"
                     >
                         Close Window
                     </button>

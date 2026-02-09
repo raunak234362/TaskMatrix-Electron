@@ -68,7 +68,7 @@ const AddMileStone = ({
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
         <div className="flex justify-between items-center p-5 border-b bg-gray-50">
-          <h3 className="text-xl font-bold text-gray-700 flex items-center gap-2">
+          <h3 className="text-xl  text-gray-700 flex items-center gap-2">
             <CheckCircle className="w-6 h-6 text-green-600" />
             Add New Milestone
           </h3>

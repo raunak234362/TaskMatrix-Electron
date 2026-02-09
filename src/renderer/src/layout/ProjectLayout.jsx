@@ -66,7 +66,7 @@ const ProjectLayout = () => {
               <span className="text-sm md:text-xl animate-in font-medium text-indigo-600 uppercase tracking-wider">
                 Total -
               </span>
-              <span className="text-sm md:text-xl animate-in font-bold text-indigo-700">
+              <span className="text-sm md:text-xl animate-in  text-indigo-700">
                 {stats.total}
               </span>
             </div>
@@ -74,7 +74,7 @@ const ProjectLayout = () => {
               <span className="text-sm md:text-xl animate-in font-medium text-green-600 uppercase tracking-wider">
                 Active -
               </span>
-              <span className="text-sm md:text-xl animate-in font-bold text-green-700">
+              <span className="text-sm md:text-xl animate-in  text-green-700">
                 {stats.active}
               </span>
             </div>
@@ -82,7 +82,7 @@ const ProjectLayout = () => {
               <span className="text-sm md:text-xl animate-in font-medium text-blue-600 uppercase tracking-wider">
                 Completed -
               </span>
-              <span className="text-sm md:text-xl animate-in font-bold text-blue-700">
+              <span className="text-sm md:text-xl animate-in  text-blue-700">
                 {stats.completed}
               </span>
             </div>
@@ -90,7 +90,7 @@ const ProjectLayout = () => {
               <span className="text-sm md:text-xl animate-in font-medium text-orange-600 uppercase tracking-wider">
                 On Hold -
               </span>
-              <span className="text-sm md:text-xl animate-in font-bold text-orange-700">
+              <span className="text-sm md:text-xl animate-in  text-orange-700">
                 {stats.onHold}
               </span>
             </div>
@@ -104,32 +104,30 @@ const ProjectLayout = () => {
             ].includes(
               sessionStorage.getItem("userRole")?.toLowerCase() || "",
             ) && (
-              <button
-                onClick={() => setActiveTab("projectDashboard")}
-                className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-[1.25rem] text-sm md:text-base font-semibold transition-all ${
-                  activeTab === "projectDashboard"
-                    ? "bg-green-500 text-white shadow-[0_8px_20px_-4px_rgba(34,197,94,0.4)] hover:bg-green-600 hover:shadow-[0_12px_24px_-4px_rgba(34,197,94,0.5)]"
-                    : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-green-600 shadow-sm"
-                }`}
-              >
-                Project Home
-              </button>
-            )}
+                <button
+                  onClick={() => setActiveTab("projectDashboard")}
+                  className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-[1.25rem] text-sm md:text-base font-semibold transition-all ${activeTab === "projectDashboard"
+                      ? "bg-green-500 text-white shadow-[0_8px_20px_-4px_rgba(34,197,94,0.4)] hover:bg-green-600 hover:shadow-[0_12px_24px_-4px_rgba(34,197,94,0.5)]"
+                      : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-green-600 shadow-sm"
+                    }`}
+                >
+                  Project Home
+                </button>
+              )}
 
             {["connection_designer_engineer", "estimation_head", "project_manager_officer", "operation_executive", "project_manager", "deputy_manager", "admin"].includes(
               sessionStorage.getItem("userRole")?.toLowerCase() || "",
             ) && (
-              <button
-                onClick={() => setActiveTab("allProject")}
-                className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-[1.25rem] text-sm md:text-base font-semibold transition-all ${
-                  activeTab === "allProject"
-                    ? "bg-green-500 text-white shadow-[0_8px_20px_-4px_rgba(34,197,94,0.4)] hover:bg-green-600 hover:shadow-[0_12px_24px_-4px_rgba(34,197,94,0.5)]"
-                    : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-green-600 shadow-sm"
-                }`}
-              >
-                All Projects
-              </button>
-            )}
+                <button
+                  onClick={() => setActiveTab("allProject")}
+                  className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-[1.25rem] text-sm md:text-base font-semibold transition-all ${activeTab === "allProject"
+                      ? "bg-green-500 text-white shadow-[0_8px_20px_-4px_rgba(34,197,94,0.4)] hover:bg-green-600 hover:shadow-[0_12px_24px_-4px_rgba(34,197,94,0.5)]"
+                      : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-green-600 shadow-sm"
+                    }`}
+                >
+                  All Projects
+                </button>
+              )}
 
             {[
               "admin",
@@ -140,17 +138,16 @@ const ProjectLayout = () => {
             ].includes(
               sessionStorage.getItem("userRole")?.toLowerCase() || "",
             ) && (
-              <button
-                onClick={() => setActiveTab("addProject")}
-                className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-[1.25rem] text-sm md:text-base font-semibold transition-all ${
-                  activeTab === "addProject"
-                    ? "bg-green-500 text-white shadow-[0_8px_20px_-4px_rgba(34,197,94,0.4)] hover:bg-green-600 hover:shadow-[0_12px_24px_-4px_rgba(34,197,94,0.5)]"
-                    : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-green-600 shadow-sm"
-                }`}
-              >
-                Add New Project
-              </button>
-            )}
+                <button
+                  onClick={() => setActiveTab("addProject")}
+                  className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-[1.25rem] text-sm md:text-base font-semibold transition-all ${activeTab === "addProject"
+                      ? "bg-green-500 text-white shadow-[0_8px_20px_-4px_rgba(34,197,94,0.4)] hover:bg-green-600 hover:shadow-[0_12px_24px_-4px_rgba(34,197,94,0.5)]"
+                      : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-green-600 shadow-sm"
+                    }`}
+                >
+                  Add New Project
+                </button>
+              )}
           </div>
         </div>
       </div>

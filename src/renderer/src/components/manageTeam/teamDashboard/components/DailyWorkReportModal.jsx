@@ -28,7 +28,7 @@ const DailyWorkReportModal = ({
         {/* Header */}
         <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div>
-            <h2 className="text-xl font-bold text-gray-700 flex items-center gap-2">
+            <h2 className="text-xl  text-gray-700 flex items-center gap-2">
               <FileText className="text-green-600" size={24} />
               Daily Work Report
             </h2>
@@ -57,7 +57,7 @@ const DailyWorkReportModal = ({
                     <User size={20} />
                   </div>
                   <div>
-                    <h4 className="font-bold text-gray-700">
+                    <h4 className=" text-gray-700">
                       {member.f_name} {member.l_name}
                     </h4>
                     <p className="text-xs text-gray-700">
@@ -66,10 +66,10 @@ const DailyWorkReportModal = ({
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-gray-400 uppercase tracking-wider font-bold">
+                  <p className="text-xs text-gray-400 uppercase tracking-wider ">
                     Tasks
                   </p>
-                  <p className="text-lg font-bold text-green-600">
+                  <p className="text-lg  text-green-600">
                     {member.tasks?.length || 0}
                   </p>
                 </div>
@@ -94,7 +94,7 @@ const DailyWorkReportModal = ({
                         <p className="text-[10px] text-gray-400 uppercase">
                           Duration
                         </p>
-                        <p className="text-xs font-bold text-gray-700">
+                        <p className="text-xs  text-gray-700">
                           {task.duration || "00:00"}
                         </p>
                       </div>
@@ -102,16 +102,15 @@ const DailyWorkReportModal = ({
                         <p className="text-[10px] text-gray-400 uppercase">
                           Worked
                         </p>
-                        <p className="text-xs font-bold text-indigo-600">
+                        <p className="text-xs  text-indigo-600">
                           {formatWorkedHours(task.workingHourTask)}
                         </p>
                       </div>
                       <span
-                        className={`px-2 py-1 rounded-lg text-[10px] font-bold ${
-                          task.status === "COMPLETE"
+                        className={`px-2 py-1 rounded-lg text-[10px]  ${task.status === "COMPLETE"
                             ? "bg-green-100 text-green-700"
                             : "bg-blue-100 text-blue-700"
-                        }`}
+                          }`}
                       >
                         {task.status}
                       </span>

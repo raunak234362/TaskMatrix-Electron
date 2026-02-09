@@ -89,7 +89,7 @@ const GetVendorByID = ({ id }) => {
     <div className="bg-linear-to-br from-green-50 to-green-50 p-4 sm:p-6 rounded-xl shadow-inner text-sm">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2 mb-5">
-        <h3 className="text-lg sm:text-xl font-bold text-green-800 tracking-tight">{designer.name}</h3>
+        <h3 className="text-lg sm:text-xl  text-green-800 tracking-tight">{designer.name}</h3>
         <span
           className={`px-3 py-1 rounded-full text-xs font-medium ${designer.isDeleted
             ? "bg-red-100 text-red-700"
@@ -215,7 +215,7 @@ const GetVendorByID = ({ id }) => {
 // ✅ Reusable Info Row
 const InfoRow = ({ label, value }) => (
   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 sm:gap-4 border-b border-green-100/50 sm:border-none pb-1 sm:pb-0">
-    <span className="font-bold text-gray-700 shrink-0">{label}:</span>
+    <span className=" text-gray-700 shrink-0">{label}:</span>
     <span className="text-gray-700 sm:text-right overflow-hidden text-ellipsis">{value}</span>
   </div>
 );

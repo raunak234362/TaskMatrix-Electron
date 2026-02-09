@@ -17,7 +17,7 @@ const TopFabricatorWidget = ({ fabricator }) => {
               <Building2 className="text-gray-700" size={28} />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-800">{fabricator.name}</h3>
+              <h3 className="text-xl  text-gray-800">{fabricator.name}</h3>
               <p className="text-sm text-gray-500">Most Estimations</p>
             </div>
           </div>
@@ -25,11 +25,11 @@ const TopFabricatorWidget = ({ fabricator }) => {
           <div className="grid grid-cols-2 gap-4 mt-4">
             <div className="bg-white p-3 rounded-lg shadow-sm">
               <p className="text-xs text-gray-500 uppercase font-semibold">Projects</p>
-              <p className="text-xl font-bold text-gray-800">{fabricator.projectCount}</p>
+              <p className="text-xl  text-gray-800">{fabricator.projectCount}</p>
             </div>
             <div className="bg-white p-3 rounded-lg shadow-sm">
               <p className="text-xs text-gray-500 uppercase font-semibold">Total Hours</p>
-              <p className="text-xl font-bold text-gray-800">{fabricator.totalHours.toFixed(2)}</p>
+              <p className="text-xl  text-gray-800">{fabricator.totalHours.toFixed(2)}</p>
             </div>
           </div>
         </div>

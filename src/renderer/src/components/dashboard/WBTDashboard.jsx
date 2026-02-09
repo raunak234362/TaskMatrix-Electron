@@ -263,8 +263,8 @@ const WBTDashboard = () => {
               <div className="p-3 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-200">
                 <LayoutDashboard className="w-8 h-8 text-white" />
               </div>
-            )}           
-          </div>        
+            )}
+          </div>
         </div>
 
         {isAdminRole ? (
@@ -298,7 +298,7 @@ const WBTDashboard = () => {
               {/* Left Column (Focus & Deadlines) */}
               {/* Current Focus */}
               <div className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 px-1">
+                <h2 className="text-xl  text-slate-800 flex items-center gap-2 px-1">
                   <Clock className="w-5 h-5 text-indigo-500" />
                   Current Focus
                 </h2>
@@ -310,7 +310,7 @@ const WBTDashboard = () => {
 
               {/* Upcoming Tasks */}
               <div className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 px-1">
+                <h2 className="text-xl  text-slate-800 flex items-center gap-2 px-1">
                   <CheckCircle2 className="w-5 h-5 text-blue-500" />
                   Upcoming Deadlines
                 </h2>
@@ -320,7 +320,7 @@ const WBTDashboard = () => {
                 />
               </div>
               <div className="">
-                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 px-1">
+                <h2 className="text-xl  text-slate-800 flex items-center gap-2 px-1">
                   <Briefcase className="w-5 h-5 text-pink-500" />
                   Notes & Updates
                 </h2>

@@ -38,7 +38,7 @@ const Toggle = forwardRef(
         />
 
         {/* SELECTED TEXT */}
-        {isChecked && <span className="ml-2 font-bold text-green-500 animate-in fade-in zoom-in duration-200">Selected</span>}
+        {isChecked && <span className="ml-2  text-green-500 animate-in fade-in zoom-in duration-200">Selected</span>}
       </div>
     );
   }

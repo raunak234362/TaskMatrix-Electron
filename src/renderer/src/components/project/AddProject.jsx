@@ -207,26 +207,26 @@ const AddProject = () => {
               <div className="bg-linear-to-r from-emerald-50 to-green-50 border-2 border-emerald-200 rounded-2xl p-8 -mt-6 mb-10 shadow-inner">
                 <div className="flex items-center gap-3 mb-4">
                   <Zap className="w-5 h-5 md:w-7 md:h-7 text-emerald-600" />
-                  <h3 className="text-lg md:text-2xl font-bold text-emerald-900">
+                  <h3 className="text-lg md:text-2xl  text-emerald-900">
                     RFQ Auto-Filled
                   </h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-sm">
                   <div className="bg-white/70 p-4 rounded-xl">
                     <p className="text-gray-700">Project</p>
-                    <p className="font-bold text-gray-700 truncate">
+                    <p className=" text-gray-700 truncate">
                       {selectedRfq.projectName}
                     </p>
                   </div>
                   <div className="bg-white/70 p-4 rounded-xl">
                     <p className="text-gray-700">Fabricator</p>
-                    <p className="font-bold">
+                    <p className="">
                       {selectedRfq.fabricator?.fabName}
                     </p>
                   </div>
                   <div className="bg-white/70 p-4 rounded-xl">
                     <p className="text-gray-700">Tool</p>
-                    <p className="font-bold text-purple-700">
+                    <p className=" text-purple-700">
                       {selectedRfq.tools || "TEKLA"}
                     </p>
                   </div>
@@ -396,7 +396,7 @@ const AddProject = () => {
               <div className="flex items-center gap-4 mb-8">
                 <Layers className="w-5 h-5 text-cyan-600" />
                 <div>
-                  <h3 className="text-lg md:text-xl font-bold text-cyan-900">
+                  <h3 className="text-lg md:text-xl  text-cyan-900">
                     Connection Design Scope
                   </h3>
                   <p className="text-cyan-700">
@@ -436,7 +436,7 @@ const AddProject = () => {
               <div className="flex items-center gap-4 mb-8">
                 <Wrench className="w-5 h-5 text-amber-600" />
                 <div>
-                  <h3 className="text-lg md:text-xl font-bold text-amber-900">
+                  <h3 className="text-lg md:text-xl  text-amber-900">
                     Detailing Scope
                   </h3>
                   <p className="text-amber-700">

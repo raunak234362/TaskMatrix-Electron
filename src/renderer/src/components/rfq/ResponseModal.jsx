@@ -434,7 +434,7 @@ const ResponseModal = ({
           <X className="w-5 h-5" />
         </Button>
 
-        <h2 className="text-xl font-bold text-green-700 mb-4">Add Response</h2>
+        <h2 className="text-xl  text-green-700 mb-4">Add Response</h2>
 
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           {/* Estimation Selection */}
@@ -498,7 +498,7 @@ const ResponseModal = ({
                       <div className="ml-7 flex gap-4 items-center animate-in fade-in slide-in-from-left-2 duration-200">
                         <div className="flex-1">
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs ">
                               {selectedEstimation?.fabricators?.currencyType ||
                                 "USD"}
                             </span>

@@ -141,7 +141,7 @@ const SalesDashboard = () => {
             {/* Tabs */}
             <div className="flex gap-10 border-b-2 border-gray-100 pb-0.5">
                 {['Overview'].map((tab, i) => (
-                    <button key={tab} className={`pb-2 text-base font-bold transition-all relative px-2 ${i === 0 ? 'text-green-700' : 'text-gray-400 hover:text-gray-600'}`}>
+                    <button key={tab} className={`pb-2 text-base  transition-all relative px-2 ${i === 0 ? 'text-green-700' : 'text-gray-400 hover:text-gray-600'}`}>
                         {tab}
                         {i === 0 && <motion.div layoutId="activeTab" className="absolute -bottom-1 left-0 right-0 h-1 bg-green-600 rounded-full" />}
                     </button>

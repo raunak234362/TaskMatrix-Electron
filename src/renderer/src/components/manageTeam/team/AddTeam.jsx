@@ -130,7 +130,7 @@ const AddTeam = () => {
 
   return (
     <div className="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-md p-8 mt-6 border border-gray-200">
-      <h2 className="text-2xl font-bold text-gray-700 mb-6">Create New Team</h2>
+      <h2 className="text-2xl  text-gray-700 mb-6">Create New Team</h2>
 
       <form onSubmit={handleSubmit(addTeam)} className="space-y-6">
         {/* Team Name */}
@@ -157,7 +157,7 @@ const AddTeam = () => {
             options={managerOptions}
             {...register("managerID")}
             onChange={(_, value) => setValue("managerID", value)}
-            // disabled={!hasManagers}
+          // disabled={!hasManagers}
           />
           {!hasManagers && (
             <p className="text-amber-600 text-xs mt-1">
@@ -176,7 +176,7 @@ const AddTeam = () => {
             options={departmentOptions}
             {...register("departmentID")}
             onChange={(_, value) => setValue("departmentID", value)}
-            // disabled={!hasDepartments}
+          // disabled={!hasDepartments}
           />
           {!hasDepartments && (
             <p className="text-amber-600 text-xs mt-1">
@@ -190,11 +190,10 @@ const AddTeam = () => {
           <Button
             type="submit"
             disabled={isSubmitting || !hasManagers || !hasDepartments}
-            className={`w-full px-8 py-3 rounded-lg font-medium transition ${
-              isSubmitting || !hasManagers || !hasDepartments
+            className={`w-full px-8 py-3 rounded-lg font-medium transition ${isSubmitting || !hasManagers || !hasDepartments
                 ? "bg-gray-300 text-gray-700 cursor-not-allowed"
                 : "bg-green-600 text-white hover:bg-green-700"
-            }`}
+              }`}
           >
             {isSubmitting ? "Creating..." : "Create Team"}
           </Button>

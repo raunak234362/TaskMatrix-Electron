@@ -54,7 +54,7 @@ const CDNetworkOverview = ({
       >
         <div className="p-4 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-base sm:text-lg font-bold text-gray-800">
+            <h3 className="text-base sm:text-lg  text-gray-800">
               Connection Designer Directory
             </h3>
             <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5 sm:mt-1">
@@ -103,7 +103,7 @@ const CDNetworkOverview = ({
               >
                 {/* Main Info */}
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 rounded-full bg-linear-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-600 font-bold text-xs sm:text-sm">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 rounded-full bg-linear-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-600  text-xs sm:text-sm">
                     {designer.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -149,7 +149,7 @@ const CDNetworkOverview = ({
                     >
                       <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-50">
                         <MapPin size={14} className="text-green-500" />
-                        <span className="text-xs font-bold text-gray-700">
+                        <span className="text-xs  text-gray-700">
                           Coverage Area
                         </span>
                       </div>
@@ -190,7 +190,7 @@ const CDNetworkOverview = ({
         transition={{ duration: 0.5, delay: 0.2 }}
         className="lg:col-span-1 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-[400px]"
       >
-        <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4 sm:mb-6">
+        <h3 className="text-base sm:text-lg  text-gray-800 mb-4 sm:mb-6">
           State Distribution
         </h3>
         <div className="flex-1 min-h-[300px] relative">

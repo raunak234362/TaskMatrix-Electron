@@ -1,4 +1,4 @@
-import { X  } from 'lucide-react'
+import { X } from 'lucide-react'
 
 const Modal = ({ isOpen, onClose, title, children, width = 'max-w-4xl' }) => {
   if (!isOpen) return null
@@ -10,7 +10,7 @@ const Modal = ({ isOpen, onClose, title, children, width = 'max-w-4xl' }) => {
       >
         {/* Modal Header */}
         <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-          <h3 className="text-lg font-bold text-gray-700">{title}</h3>
+          <h3 className="text-lg  text-gray-700">{title}</h3>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-700"

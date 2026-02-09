@@ -75,7 +75,7 @@ const MonthlyProjectStats = ({
           <Info className="w-6 h-6 text-blue-500" />
         </div>
         <div>
-          <h3 className="text-sm font-bold text-gray-700">Monthly Workload Insight</h3>
+          <h3 className="text-sm  text-gray-700">Monthly Workload Insight</h3>
           <p className="text-xs text-gray-700">
             Select a specific month to see projects with active tasks during that period.
           </p>
@@ -94,7 +94,7 @@ const MonthlyProjectStats = ({
           className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
         >
           <div className="p-4 border-b border-gray-50 bg-gray-50/50">
-            <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
+            <h3 className="text-sm  text-gray-700 flex items-center gap-2">
               <Briefcase className="w-4 h-4 text-green-600" />
               Team-wise Project Statistics
             </h3>
@@ -102,7 +102,7 @@ const MonthlyProjectStats = ({
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead>
-                <tr className="bg-white text-gray-400 text-[10px] uppercase tracking-wider font-bold border-b border-gray-100">
+                <tr className="bg-white text-gray-400 text-[10px] uppercase tracking-wider  border-b border-gray-100">
                   <th className="px-6 py-4">Detailed Team</th>
                   {['IFA', 'IFC', 'CO#'].map((stage) => (
                     <th key={stage} className="px-4 py-4 text-center border-l border-gray-50">
@@ -111,10 +111,10 @@ const MonthlyProjectStats = ({
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50 font-bold">
+              <tbody className="divide-y divide-gray-50 ">
                 {sortedTeams.map(([teamId, teamData]) => (
                   <tr key={teamId} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 text-gray-700 font-bold">{teamData.teamName}</td>
+                    <td className="px-6 py-4 text-gray-700 ">{teamData.teamName}</td>
                     {['IFA', 'IFC', 'CO#'].map((stage) => (
                       <td key={stage} className="px-4 py-4 border-l border-gray-50">
                         <div className="flex items-center justify-center gap-3">
@@ -178,7 +178,7 @@ const MonthlyProjectStats = ({
               <Briefcase className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-700">
+              <h3 className="text-base  text-gray-700">
                 Workload for {months[selectedMonth]} {selectedYear}
               </h3>
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">
@@ -187,10 +187,10 @@ const MonthlyProjectStats = ({
             </div>
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-2xl font-black text-green-600 leading-none">
+            <span className="text-2xl  text-green-600 leading-none">
               {workloadData.count}
             </span>
-            <span className="text-[10px] font-bold text-gray-400 uppercase">Active Projects</span>
+            <span className="text-[10px]  text-gray-400 uppercase">Active Projects</span>
           </div>
         </div>
 
@@ -201,11 +201,11 @@ const MonthlyProjectStats = ({
                 key={project.id}
                 className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-green-200 hover:bg-green-50/30 transition-all group"
               >
-                <div className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-[10px] font-bold text-green-600 shadow-sm group-hover:scale-110 transition-transform">
+                <div className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-[10px]  text-green-600 shadow-sm group-hover:scale-110 transition-transform">
                   {project.projectNumber.slice(-3)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-bold text-gray-700 truncate group-hover:text-green-700 transition-colors">
+                  <h4 className="text-sm  text-gray-700 truncate group-hover:text-green-700 transition-colors">
                     {project.name}
                   </h4>
                   <p className="text-[10px] font-medium text-gray-400 truncate">

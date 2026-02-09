@@ -168,12 +168,12 @@ const RenderFiles = ({
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1.5">
                 <div>
                   <h5
-                    className="text-sm border-l-4 border-green-500 pl-2 sm:text-base font-bold text-gray-800"
+                    className="text-sm border-l-4 border-green-500 pl-2 sm:text-base  text-gray-800"
                     dangerouslySetInnerHTML={{ __html: description }}
                   />
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1.5">
                     {firstFile?.stage && (
-                      <p className="text-[10px] sm:text-xs text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-full">
+                      <p className="text-[10px] sm:text-xs text-blue-600  bg-blue-50 px-2 py-0.5 rounded-full">
                         {firstFile.stage}
                       </p>
                     )}

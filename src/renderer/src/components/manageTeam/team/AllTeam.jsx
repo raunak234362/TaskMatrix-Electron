@@ -117,7 +117,7 @@ const AllTeam = () => {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
       <div className="p-6 border-b">
-        <h2 className="text-2xl font-bold text-gray-700">All Teams</h2>
+        <h2 className="text-2xl  text-gray-700">All Teams</h2>
         <p className="text-sm text-gray-700 mt-1">
           Manage and view all project teams
         </p>

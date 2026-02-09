@@ -160,7 +160,7 @@ const GetProjectById = ({ id }) => {
             <select
               value={activeTab}
               onChange={(e) => setActiveTab(e.target.value)}
-              className="w-full p-2 rounded-md bg-primary text-white font-bold focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full p-2 rounded-md bg-primary text-white  focus:outline-none focus:ring-2 focus:ring-green-500"
             >
               {[
                 { key: "details", label: "Details" },
@@ -205,25 +205,25 @@ const GetProjectById = ({ id }) => {
                 icon: Settings,
               },
             ]
-            .filter(
+              .filter(
                 (tab) =>
-            !(
-            userRole === "staff" &&
-            ["wbs", "rfi", "submittals", "changeOrder", "milestones"].includes(tab.key)
-            )
-            )
-            .map(({key, label, icon: TabIcon }) => (
-            <button
-              key={key}
-              onClick={() => setActiveTab(key)}
-              className={`flex items-center gap-2 bg-primary text-gray-800 px-4 py-2 text-md rounded-md font-medium transition-colors whitespace-nowrap ${activeTab === key
-                ? "bg-green-600 text-white font-bold"
-                : "text-gray-700 hover:text-green-700 font-semibold hover:bg-gray-50"
-                }`}
-            >
-              <TabIcon className="w-4 h-4" />
-              {label}
-            </button>
+                  !(
+                    userRole === "staff" &&
+                    ["wbs", "rfi", "submittals", "changeOrder", "milestones"].includes(tab.key)
+                  )
+              )
+              .map(({ key, label, icon: TabIcon }) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className={`flex items-center gap-2 bg-primary text-gray-800 px-4 py-2 text-md rounded-md font-medium transition-colors whitespace-nowrap ${activeTab === key
+                    ? "bg-green-600 text-white "
+                    : "text-gray-700 hover:text-green-700 font-semibold hover:bg-gray-50"
+                    }`}
+                >
+                  <TabIcon className="w-4 h-4" />
+                  {label}
+                </button>
               ))}
           </div>
         </div>

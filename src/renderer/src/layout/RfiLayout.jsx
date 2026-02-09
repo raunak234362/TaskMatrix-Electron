@@ -12,22 +12,20 @@ const RfiLayout = () => {
           <div className="flex flex-row gap-3 items-end justify-end">
             <button
               onClick={() => setActiveTab("allRFI")}
-              className={`px-1.5 md:px-4 py-2 rounded-lg ${
-                activeTab === "allRFI"
-                  ? "md:text-base text-sm bg-green-700 text-white font-bold"
+              className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "allRFI"
+                  ? "md:text-base text-sm bg-green-700 text-white "
                   : "text-base md:text-base bg-white/70 backdrop-xl text-gray-700 font-semibold"
-              }`}
+                }`}
             >
               ALL RFI
             </button>
 
             <button
               onClick={() => setActiveTab("addRFI")}
-              className={`px-1.5 md:px-4 py-2 rounded-lg ${
-                activeTab === "addRFI"
-                  ? "md:text-base text-sm bg-green-700 text-white font-bold"
+              className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "addRFI"
+                  ? "md:text-base text-sm bg-green-700 text-white "
                   : "text-base md:text-base bg-white/70 backdrop-xl text-gray-700 font-semibold"
-              }`}
+                }`}
             >
               Add RFI
             </button>

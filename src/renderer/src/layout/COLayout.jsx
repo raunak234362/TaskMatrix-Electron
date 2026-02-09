@@ -12,22 +12,20 @@ const COLayout = () => {
           <div className="flex flex-row gap-3 items-end justify-end">
             <button
               onClick={() => setActiveTab("allCO")}
-              className={`px-1.5 md:px-4 py-2 rounded-lg ${
-                activeTab === "allCO"
-                  ? "md:text-base text-sm bg-green-700 text-white font-bold"
+              className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "allCO"
+                  ? "md:text-base text-sm bg-green-700 text-white "
                   : "text-base md:text-base bg-white/70 backdrop-xl text-gray-700 font-semibold"
-              }`}
+                }`}
             >
               ALL CO
             </button>
 
             <button
               onClick={() => setActiveTab("addCO")}
-              className={`px-1.5 md:px-4 py-2 rounded-lg ${
-                activeTab === "addCO"
-                  ? "md:text-base text-sm bg-green-700 text-white font-bold"
+              className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "addCO"
+                  ? "md:text-base text-sm bg-green-700 text-white "
                   : "text-base md:text-base bg-white/70 backdrop-xl text-gray-700 font-semibold"
-              }`}
+                }`}
             >
               Add CO
             </button>

@@ -177,7 +177,7 @@ const EditFabricator = ({
       >
         {/* Header */}
         <div className="flex justify-between items-center p-5 border-b bg-gray-50 flex-shrink-0">
-          <h2 className="text-xl font-bold text-gray-700">Edit Fabricator</h2>
+          <h2 className="text-xl  text-gray-700">Edit Fabricator</h2>
           <button
             onClick={onClose}
             className="text-gray-700 hover:text-gray-700 transition"

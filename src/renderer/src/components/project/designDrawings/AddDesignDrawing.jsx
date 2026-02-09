@@ -42,7 +42,7 @@ const AddDesignDrawing = ({ projectId, onSuccess }) => {
       className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 space-y-6"
     >
       <div className="border-b border-gray-50 pb-4">
-        <h3 className="text-xl font-bold text-gray-800">Add Design Drawing</h3>
+        <h3 className="text-xl  text-gray-800">Add Design Drawing</h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

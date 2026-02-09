@@ -13,7 +13,7 @@ const SalesPerformanceChart = ({ data }) => {
     return (
         <div className="bg-white p-8 rounded-4xl border border-green-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-[400px] w-full">
             <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xl font-bold text-gray-800 tracking-tight">Monthly Performance</h3>
+                <h3 className="text-xl  text-gray-800 tracking-tight">Monthly Performance</h3>
                 <div className="flex gap-2">
                     <span className="w-2 h-2 rounded-full bg-green-600"></span>
                     <span className="w-2 h-2 rounded-full bg-emerald-400"></span>

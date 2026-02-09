@@ -182,7 +182,7 @@ const FabricatorDashboard = ({ fabricator }) => {
       {/* Projects Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden">
         <div className="p-4 border-b border-gray-50 flex flex-wrap items-center justify-between gap-2 bg-gray-50/50">
-          <h3 className="font-bold text-gray-800 flex items-center gap-2">
+          <h3 className=" text-gray-800 flex items-center gap-2">
             <LayoutDashboard size={18} className="text-green-600" />
             Project Overview
           </h3>
@@ -198,7 +198,7 @@ const FabricatorDashboard = ({ fabricator }) => {
       {/* RFQs Section (Simplified) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-          <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <h3 className=" text-gray-800 mb-4 flex items-center gap-2">
             <FileText size={18} className="text-cyan-600" />
             Recent RFQs
           </h3>
@@ -228,7 +228,7 @@ const FabricatorDashboard = ({ fabricator }) => {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-          <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <h3 className=" text-gray-800 mb-4 flex items-center gap-2">
             <Clock size={18} className="text-orange-600" />
             Timeline Summary
           </h3>
@@ -262,7 +262,7 @@ const StatCard = ({
     className={`${color} p-3 sm:p-4 rounded-xl border border-white/50 shadow-sm flex flex-col items-center justify-center text-center transition-transform hover:scale-105`}
   >
     <div className="mb-2 p-2 bg-white rounded-full shadow-sm">{icon}</div>
-    <p className="text-xl sm:text-2xl font-bold text-gray-800">{value}</p>
+    <p className="text-xl sm:text-2xl  text-gray-800">{value}</p>
     <p className="text-[10px] uppercase tracking-wider font-semibold text-gray-500">
       {label}
     </p>

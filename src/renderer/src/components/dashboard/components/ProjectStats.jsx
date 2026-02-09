@@ -88,7 +88,7 @@ const ProjectStats = ({ stats, onCardClick }) => {
 
               <div className="flex flex-col">
                 <span className="text-sm font-medium text-gray-600">{card.label}</span>
-                <span className={`text-2xl font-bold mt-1 ${colors.text}`}>{card.value}</span>
+                <span className={`text-2xl  mt-1 ${colors.text}`}>{card.value}</span>
               </div>
             </div>
           )

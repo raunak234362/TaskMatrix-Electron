@@ -12,23 +12,21 @@ const EmployeeLayout = () => {
           <div className="flex flex-row gap-3 items-end justify-end">
             <button
               onClick={() => setActiveTab("allEmployee")}
-              className={`px-1.5 md:px-4 py-2 rounded-lg ${
-                activeTab === "allEmployee"
-                  ? "md:text-base text-sm bg-green-700 text-white font-bold"
+              className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "allEmployee"
+                  ? "md:text-base text-sm bg-green-700 text-white "
                   : "text-base md:text-base bg-white/70 backdrop-xl text-gray-700 font-semibold"
-              }`}
+                }`}
             >
               All Employee
             </button>
 
-          {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
+            {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
               <button
                 onClick={() => setActiveTab("addEmployee")}
-                className={`px-1.5 md:px-4 py-2 rounded-lg ${
-                  activeTab === "addEmployee"
-                    ? "md:text-base text-sm bg-green-700 text-white font-bold"
+                className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "addEmployee"
+                    ? "md:text-base text-sm bg-green-700 text-white "
                     : "text-base md:text-base bg-white/70 backdrop-xl text-gray-700 font-semibold"
-                }`}
+                  }`}
               >
                 Add Employee
               </button>
@@ -41,7 +39,7 @@ const EmployeeLayout = () => {
               <AllEmployee />
             </div>
           )}
-        
+
           {activeTab === "addEmployee" && (
             <div>
               {" "}

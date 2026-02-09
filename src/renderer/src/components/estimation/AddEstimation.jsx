@@ -135,7 +135,7 @@ const AddEstimation = ({ initialRfqId = null, onSuccess = () => { } }) => {
 
   return (
     <div className="w-full mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 p-8 my-8">
-      <h2 className="text-3xl font-bold text-center mb-8 text-gray-700">
+      <h2 className="text-3xl  text-center mb-8 text-gray-700">
         {isRfqLocked ? 'Create Estimation from RFQ' : 'Create New Estimation'}
       </h2>
 

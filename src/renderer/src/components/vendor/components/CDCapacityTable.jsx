@@ -9,7 +9,7 @@ const CDCapacityTable = ({ recentActivity }) => {
         <div className="mb-8">
             {/* Recently Active Designers */}
             <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">Recently Active Designers</h3>
+                <h3 className="text-lg  text-gray-800 mb-4">Recently Active Designers</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {recentActivity.slice(0, 8).map((designer) => (
                         <div key={designer.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors border border-gray-100">

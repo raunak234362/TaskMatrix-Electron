@@ -136,7 +136,7 @@ const GetRFIByID = ({ id }) => {
           <div className="bg-white p-6 rounded-xl shadow-md space-y-5">
             {/* Header */}
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-green-700">
+              <h1 className="text-2xl  text-green-700">
                 {rfi.subject}
               </h1>
               <span

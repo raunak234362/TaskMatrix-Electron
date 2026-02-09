@@ -22,19 +22,19 @@ const CustomTooltip = ({ active, payload, label }) => {
     const data = payload[0].payload
     return (
       <div className="bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-100 min-w-[180px]">
-        <p className="font-bold text-slate-900 mb-3 border-b border-slate-100 pb-2">{label}</p>
+        <p className=" text-slate-900 mb-3 border-b border-slate-100 pb-2">{label}</p>
         <div className="space-y-2">
           <div className="flex justify-between items-center gap-4">
             <span className="text-xs font-medium text-slate-500">Efficiency</span>
-            <span className="text-sm font-bold text-emerald-600">{data.efficiency}%</span>
+            <span className="text-sm  text-emerald-600">{data.efficiency}%</span>
           </div>
           <div className="flex justify-between items-center gap-4">
             <span className="text-xs font-medium text-slate-500">Allocated</span>
-            <span className="text-sm font-bold text-indigo-600">{formatHours(data.allocated)}</span>
+            <span className="text-sm  text-indigo-600">{formatHours(data.allocated)}</span>
           </div>
           <div className="flex justify-between items-center gap-4">
             <span className="text-xs font-medium text-slate-500">Worked</span>
-            <span className="text-sm font-bold text-amber-600">{formatHours(data.worked)}</span>
+            <span className="text-sm  text-amber-600">{formatHours(data.worked)}</span>
           </div>
         </div>
       </div>

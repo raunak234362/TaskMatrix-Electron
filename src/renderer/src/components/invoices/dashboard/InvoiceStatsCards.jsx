@@ -36,7 +36,7 @@ const InvoiceStatsCards = ({ invoices }) => {
       subValue: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
         invoices.reduce((sum, inv) => sum + (parseFloat(inv.totalInvoiceValue) || 0), 0)
       ),
-      icon : FileText,
+      icon: FileText,
       color: 'bg-blue-50 text-blue-600',
       trend: '+12% from last month', // Mock trend for now
       trendUp: true
@@ -47,7 +47,7 @@ const InvoiceStatsCards = ({ invoices }) => {
         totalReceived
       ),
       subValue: `${invoices.filter((i) => i.paymentStatus).length} Paid Invoices`,
-      icon : DollarSign,
+      icon: DollarSign,
       color: 'bg-green-50 text-green-600',
       trend: '+8% from last month',
       trendUp: true
@@ -58,7 +58,7 @@ const InvoiceStatsCards = ({ invoices }) => {
         pendingAmount
       ),
       subValue: `${pendingInvoices.length} Pending Invoices`,
-      icon : Clock,
+      icon: Clock,
       color: 'bg-yellow-50 text-yellow-600',
       trend: '-2% from last month',
       trendUp: false
@@ -69,7 +69,7 @@ const InvoiceStatsCards = ({ invoices }) => {
       subValue: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
         overdueAmount
       ),
-      icon : AlertCircle,
+      icon: AlertCircle,
       color: 'bg-red-50 text-red-600',
       trend: '+5% from last month',
       trendUp: false // Increasing overdue is bad
@@ -89,18 +89,17 @@ const InvoiceStatsCards = ({ invoices }) => {
             </div>
             {/* Trend Label (Mocked for UI) */}
             <span
-              className={`text-xs font-medium px-2 py-1 rounded-full ${
-                stat.title === 'Overdue Invoices'
+              className={`text-xs font-medium px-2 py-1 rounded-full ${stat.title === 'Overdue Invoices'
                   ? 'bg-red-100 text-red-600'
                   : 'bg-green-100 text-green-600'
-              }`}
+                }`}
             >
               {stat.trend}
             </span>
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500 mb-1">{stat.title}</p>
-            <h3 className="text-2xl font-bold text-gray-800 mb-1">{stat.value}</h3>
+            <h3 className="text-2xl  text-gray-800 mb-1">{stat.value}</h3>
             <p className="text-xs text-gray-400">{stat.subValue}</p>
           </div>
         </div>

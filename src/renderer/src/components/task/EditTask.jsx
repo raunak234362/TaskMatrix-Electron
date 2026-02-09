@@ -149,7 +149,7 @@ const EditTask = ({ id, onClose, refresh }) => {
   return (
     <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden max-w-4xl mx-auto">
       <div className="bg-slate-50 px-8 py-4 border-b border-slate-200 flex justify-between items-center">
-        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+        <h2 className="text-xl  text-slate-800 flex items-center gap-2">
           <FileText className="w-5 h-5 text-indigo-500" /> Edit Task
         </h2>
         <button
@@ -165,54 +165,54 @@ const EditTask = ({ id, onClose, refresh }) => {
         <section className="space-y-6">
           <SectionTitle title="Task Details" />
           <div>
-          <label className="text-sm font-medium text-slate-700">Task Name</label>
+            <label className="text-sm font-medium text-slate-700">Task Name</label>
             <Input {...register("name")} />
           </div>
           <div>
-          <label className="text-sm font-medium text-slate-700">Description</label>
+            <label className="text-sm font-medium text-slate-700">Description</label>
             <Controller
               name="description"
               control={control}
               render={({ field }) => (
                 <RichTextEditor
                   value={field.value || ""}
-                onChange={field.onChange}
-              />
-            )}
-          />
+                  onChange={field.onChange}
+                />
+              )}
+            />
           </div>
         </section>
 
         {/* Assignment & Stage */}
         <section className="space-y-6">
           <SectionTitle title="Assignment & Stage" />
-            <div>
-          <label className="text-sm font-medium text-slate-700">Stage</label>
-          <Controller
-            name="Stage"
-            control={control}
-            render={({ field }) => (
-              <Select
-                options={stageOptions}
-                value={field.value}
-                onChange={(_, v) => field.onChange(v)}
-              />
-            )}
-          />
+          <div>
+            <label className="text-sm font-medium text-slate-700">Stage</label>
+            <Controller
+              name="Stage"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  options={stageOptions}
+                  value={field.value}
+                  onChange={(_, v) => field.onChange(v)}
+                />
+              )}
+            />
           </div>
           <div>
-          <label className="text-sm font-medium text-slate-700">Assignee</label>
-          <Controller
-            name="user_id"
-            control={control}
-            render={({ field }) => (
-              <Select
-                options={employeeOptions}
-                value={field.value}
-                onChange={(_, v) => field.onChange(v)}
-              />
-            )}
-          />
+            <label className="text-sm font-medium text-slate-700">Assignee</label>
+            <Controller
+              name="user_id"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  options={employeeOptions}
+                  value={field.value}
+                  onChange={(_, v) => field.onChange(v)}
+                />
+              )}
+            />
           </div>
         </section>
 
@@ -220,34 +220,34 @@ const EditTask = ({ id, onClose, refresh }) => {
         <section className=" ">
           <SectionTitle title="Schedule & Priority" />
           <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-2 py-2">
-            <Input type="datetime-local" label="Start Date" {...register("start_date")} />
-            <Input type="datetime-local" label="Due Date" {...register("due_date")} />
-          </div>
-          <label className="text-sm font-medium text-slate-700">Duration</label>
-          <div className="grid grid-cols-2 gap-2 py-2">
-            <Input type="number" placeholder="HH" {...register("hours")} />
-            <Input type="number" placeholder="MM" {...register("minutes")} />
-          </div>
-          <div className="">
-            <label className="text-sm font-medium text-slate-700">Priority</label>
-          <Controller
-            name="priority"
-            control={control}
-            render={({ field }) => (
-              <Select
-                options={[
-                  { label: "Low", value: 1 },
-                  { label: "Medium", value: 2 },
-                  { label: "High", value: 3 },
-                  { label: "Critical", value: 4 },
-                ]}
-                value={String(field.value)}
-                onChange={(_, v) => field.onChange(Number(v))}
+            <div className="grid grid-cols-2 gap-2 py-2">
+              <Input type="datetime-local" label="Start Date" {...register("start_date")} />
+              <Input type="datetime-local" label="Due Date" {...register("due_date")} />
+            </div>
+            <label className="text-sm font-medium text-slate-700">Duration</label>
+            <div className="grid grid-cols-2 gap-2 py-2">
+              <Input type="number" placeholder="HH" {...register("hours")} />
+              <Input type="number" placeholder="MM" {...register("minutes")} />
+            </div>
+            <div className="">
+              <label className="text-sm font-medium text-slate-700">Priority</label>
+              <Controller
+                name="priority"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    options={[
+                      { label: "Low", value: 1 },
+                      { label: "Medium", value: 2 },
+                      { label: "High", value: 3 },
+                      { label: "Critical", value: 4 },
+                    ]}
+                    value={String(field.value)}
+                    onChange={(_, v) => field.onChange(Number(v))}
+                  />
+                )}
               />
-            )}
-          />
-          </div>
+            </div>
           </div>
         </section>
 

@@ -141,7 +141,7 @@ const EditEmployee = ({
       <ModalContent onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="sticky top-0 z-10 flex md:flex-row flex-col items-center justify-between p-2 bg-linear-to-r from-green-400 to-green-100 border-b rounded-md">
-          <h2 className="text-2xl font-bold text-gray-700">Edit Employee</h2>
+          <h2 className="text-2xl  text-gray-700">Edit Employee</h2>
           <button
             onClick={onClose}
             className="text-gray-700 hover:text-gray-700 transition-colors"

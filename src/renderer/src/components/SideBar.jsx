@@ -8,12 +8,12 @@ import Button from './fields/Button'
 
 const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
   const userData = useSelector((state) => state?.userdata?.userDetail)
-  console.log(userData,"=========");
-  
+  console.log(userData, "=========");
+
   const navigate = useNavigate()
   const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
   const designation = sessionStorage.getItem('designation')?.toLowerCase() || ''
-  
+
   const canView = (roles) => roles.includes(userRole.toLowerCase())
 
   const handleRefresh = () => {
@@ -76,7 +76,7 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
                     end={to === '/dashboard'}
                     onClick={isMobile ? toggleSidebar : undefined}
                     className={({ isActive }) =>
-                      `flex items-center rounded-md gap-4 py-2.5 transition-all duration-200 font-bold text-md tracking-wide relative 
+                      `flex items-center rounded-md gap-4 py-2.5 transition-all duration-200  text-md tracking-wide relative 
                       ${isActive
                         ? 'bg-gray-50 text-[#6bbd45] shadow-sm ml-0 pl-6 z-20'
                         : 'text-white/80 hover:text-white hover:bg-white/20 pl-6 ml-0'
@@ -103,7 +103,7 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
                   {/* Tooltip for minimized sidebar */}
                   {isMinimized && (
                     <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 z-50 hidden group-hover:flex">
-                      <span className="bg-background text-white text-sm font-bold py-2 px-4 rounded-xl shadow-xl whitespace-nowrap">
+                      <span className="bg-background text-white text-sm  py-2 px-4 rounded-xl shadow-xl whitespace-nowrap">
                         {label}
                       </span>
                     </div>
@@ -123,8 +123,8 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
                 {sessionStorage.getItem('username')?.[0] || 'U'}
               </div>
               <div className="overflow-hidden text-white">
-                <p className="text-sm font-bold truncate">{sessionStorage.getItem('username')}</p>
-                <p className="text-[10px] font-bold uppercase tracking-wider truncate opacity-80">
+                <p className="text-sm  truncate">{sessionStorage.getItem('username')}</p>
+                <p className="text-[10px]  uppercase tracking-wider truncate opacity-80">
                   {userData?.role || designation}
                 </p>
               </div>
@@ -133,24 +133,24 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
           <div className="space-y-2 flex flex-col gap-2">
             <Button
               className={`w-full flex items-center gap-3 py-3 rounded-xl transition-all mb-2 ${isMinimized
-                  ? 'justify-center bg-white/10 text-white hover:bg-white/20'
-                  : 'justify-start px-6 bg-white/10 text-white hover:bg-white/20'
+                ? 'justify-center bg-white/10 text-white hover:bg-white/20'
+                : 'justify-start px-6 bg-white/10 text-white hover:bg-white/20'
                 }`}
               onClick={handleRefresh}
             >
               <RefreshCw size={20} />
-              {!isMinimized && <span className="font-bold text-sm">Refresh</span>}
+              {!isMinimized && <span className=" text-sm">Refresh</span>}
             </Button>
 
             <Button
               className={`w-full flex items-center gap-3 py-3 rounded-xl transition-all ${isMinimized
-                  ? 'justify-center bg-white/10 text-white hover:bg-white/20'
-                  : 'justify-start px-6 bg-white/10 text-white hover:bg-white/20'
+                ? 'justify-center bg-white/10 text-white hover:bg-white/20'
+                : 'justify-start px-6 bg-white/10 text-white hover:bg-white/20'
                 }`}
               onClick={fetchLogout}
             >
               <LogOut size={20} />
-              {!isMinimized && <span className="font-bold text-sm">Logout</span>}
+              {!isMinimized && <span className=" text-sm">Logout</span>}
             </Button>
           </div>
         </div>

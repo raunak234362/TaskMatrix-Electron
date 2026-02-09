@@ -113,7 +113,7 @@ const GetWBSByID = ({
       accessorFn: (row) => row.qtyNo ?? row.totalQtyNo ?? 0,
       header: "Qty",
       cell: ({ row }) => (
-        <span className="text-sm font-bold text-green-700 bg-green-50 px-2 py-1 rounded-md">
+        <span className="text-sm  text-green-700 bg-green-50 px-2 py-1 rounded-md">
           {row.getValue("qtyNo")}
         </span>
       ),
@@ -123,7 +123,7 @@ const GetWBSByID = ({
       accessorKey: "execHr",
       header: "Exec Total",
       cell: ({ row }) => (
-        <span className="text-sm font-bold text-gray-700">
+        <span className="text-sm  text-gray-700">
           {formatDecimalHoursToTime(row.original.execHr ?? row.original.totalExecHr ?? 0)}
         </span>
       ),
@@ -133,7 +133,7 @@ const GetWBSByID = ({
       accessorKey: "checkHr",
       header: "Check Total",
       cell: ({ row }) => (
-        <span className="text-sm font-bold text-gray-700">
+        <span className="text-sm  text-gray-700">
           {formatDecimalHoursToTime(row.original.checkHr ?? row.original.totalCheckHr ?? 0)}
         </span>
       ),
@@ -171,7 +171,7 @@ const GetWBSByID = ({
           <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center">
             <AlertCircle className="w-8 h-8 text-red-600" />
           </div>
-          <h3 className="text-xl font-bold text-gray-700">Oops!</h3>
+          <h3 className="text-xl  text-gray-700">Oops!</h3>
           <p className="text-gray-700">{error || "WBS data not found"}</p>
           <Button
             onClick={onClose}
@@ -199,13 +199,13 @@ const GetWBSByID = ({
               <Layers className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-700 tracking-tight">
+              <h2 className="text-2xl  text-gray-700 tracking-tight">
                 {wbsData?.bundle?.bundleKey ||
                   wbsData?.bundleKey ||
                   "Bundle Details"}
               </h2>
               <div className="flex items-center gap-2 mt-1">
-                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded-md tracking-wider">
+                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px]  uppercase rounded-md tracking-wider">
                   {wbsData?.stage || "—"}
                 </span>
                 <span className="text-gray-400 text-xs">•</span>

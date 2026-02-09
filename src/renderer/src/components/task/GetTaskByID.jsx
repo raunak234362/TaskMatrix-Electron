@@ -275,7 +275,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
               <ClipboardList className="w-7 h-7 text-[#6bbd45]" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-black">{task.name}</h2>
+              <h2 className="text-2xl  text-black">{task.name}</h2>
               {/* <p className="text-sm text-black">ID: #{task.id}</p> */}
             </div>
           </div>
@@ -324,7 +324,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
             <>
               {/* Task Info Card */}
               <div className="bg-[#f7fbf3] rounded-2xl p-8 border border-[#d4e9c8]">
-                <h3 className="text-2xl font-bold text-[#2d501d] mb-6 flex items-center gap-3">
+                <h3 className="text-2xl  text-[#2d501d] mb-6 flex items-center gap-3">
                   <FileText className="w-7 h-7" />
                   Task Information
                 </h3>
@@ -354,7 +354,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-black">Priority</p>
-                      <p className={`font-bold mt-1 ${priority.color}`}>{priority.label}</p>
+                      <p className={` mt-1 ${priority.color}`}>{priority.label}</p>
                     </div>
                   </div>
 
@@ -445,7 +445,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
               {task.workingHourTask && task.workingHourTask.length > 0 && (
                 <div className="bg-[#f5f3ff] rounded-2xl p-6 border border-[#ddd6fe]">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-3">
+                    <h3 className="text-xl  text-indigo-900 flex items-center gap-3">
                       <Timer className="w-6 h-6" />
                       Work Summary
                     </h3>
@@ -480,7 +480,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                     <div className="mt-6 bg-white/50 rounded-xl border border-indigo-100 overflow-hidden">
                       <table className="w-full text-left text-sm">
                         <thead>
-                          <tr className="bg-indigo-50/50 text-indigo-700 font-bold border-b border-indigo-100">
+                          <tr className="bg-indigo-50/50 text-indigo-700  border-b border-indigo-100">
                             <th className="px-4 py-3">Activity</th>
                             <th className="px-4 py-3">Start Time</th>
                             <th className="px-4 py-3">End Time</th>
@@ -496,12 +496,12 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                               <td className="px-4 py-3 text-gray-600">{toIST(session.started_at)}</td>
                               <td className="px-4 py-3 text-gray-600">
                                 {session.ended_at ? toIST(session.ended_at) : (
-                                  <span className="text-emerald-600 font-bold animate-pulse flex items-center gap-1">
+                                  <span className="text-emerald-600  animate-pulse flex items-center gap-1">
                                     <Play className="w-3 h-3 fill-current" /> Running...
                                   </span>
                                 )}
                               </td>
-                              <td className="px-4 py-3 text-right font-mono font-bold text-indigo-700">
+                              <td className="px-4 py-3 text-right font-mono  text-indigo-700">
                                 {session.duration_seconds
                                   ? formatHours(session.duration_seconds / 3600)
                                   : '—'}
@@ -549,7 +549,7 @@ const InfoItem = ({ icon, label, value }) => (
       {icon && <div className="w-6 h-6 text-[#6bbd45]">{icon}</div>}
     </div>
     <div>
-      <p className="text-sm font-bold text-black">{label}</p>
+      <p className="text-sm  text-black">{label}</p>
       <p className="font-semibold text-black mt-1">{value}</p>
     </div>
   </div>
@@ -581,7 +581,7 @@ const SummaryCard = ({ icon, label, value, color = "text-indigo-700" }) => (
     </div>
     <div>
       <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl font-bold mt-2 ${color}`}>{value} hrs</p>
+      <p className={`text-xl  mt-2 ${color}`}>{value} hrs</p>
     </div>
   </div>
 );
@@ -592,7 +592,7 @@ const SummaryCardSession = ({ icon, label, value, color = "text-indigo-700" }) =
     </div>
     <div>
       <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl font-bold mt-2 ${color}`}>{value} </p>
+      <p className={`text-xl  mt-2 ${color}`}>{value} </p>
     </div>
   </div>
 );
@@ -603,7 +603,7 @@ const SummaryCardStatus = ({ icon, label, value, color = "text-indigo-700" }) =>
     </div>
     <div>
       <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl font-bold mt-2 ${color}`}>{value} </p>
+      <p className={`text-xl  mt-2 ${color}`}>{value} </p>
     </div>
   </div>
 );

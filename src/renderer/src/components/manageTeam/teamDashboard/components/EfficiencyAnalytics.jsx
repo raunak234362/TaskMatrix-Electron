@@ -99,7 +99,7 @@ const EfficiencyAnalytics = ({
     <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div>
-          <h3 className="text-lg font-bold text-gray-800">
+          <h3 className="text-lg  text-gray-800">
             Efficiency Analytics
           </h3>
         </div>
@@ -126,8 +126,8 @@ const EfficiencyAnalytics = ({
                 key={tf}
                 onClick={() => onTimeFilterChange(tf)}
                 className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${timeFilter === tf
-                    ? "bg-white text-gray-800 shadow-sm"
-                    : "text-gray-500 hover:text-gray-700"
+                  ? "bg-white text-gray-800 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
                   }`}
               >
                 {tf}

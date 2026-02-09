@@ -55,7 +55,7 @@ const RecentInvoiceActivity = ({ invoices }) => {
 
     return (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full">
-            <h3 className="text-lg font-bold text-gray-800 mb-6">Recent Activity</h3>
+            <h3 className="text-lg  text-gray-800 mb-6">Recent Activity</h3>
             <div className="space-y-6">
                 {activities.length === 0 ? (
                     <p className="text-gray-400 text-sm text-center py-8">No recent activity</p>
@@ -75,7 +75,7 @@ const RecentInvoiceActivity = ({ invoices }) => {
                                 <div className="flex items-center justify-between mt-1">
                                     <span className="text-xs text-gray-400">{activity.time}</span>
                                     {activity.amount && (
-                                        <span className="text-xs font-bold text-gray-700">{activity.amount}</span>
+                                        <span className="text-xs  text-gray-700">{activity.amount}</span>
                                     )}
                                 </div>
                             </div>

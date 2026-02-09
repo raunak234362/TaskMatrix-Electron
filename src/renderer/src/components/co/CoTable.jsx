@@ -92,7 +92,7 @@ const CoTable = ({ coId }) => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="overflow-x-auto rounded-lg border border-gray-200">
           <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50 text-gray-700 font-bold border-b">
+            <thead className="bg-gray-50 text-gray-700  border-b">
               <tr>
                 <th className="p-3">#</th>
                 <th className="p-3">Description</th>
@@ -159,7 +159,7 @@ const CoTable = ({ coId }) => {
                   </td>
                 </tr>
               ))}
-              <tr className="bg-green-50 font-bold">
+              <tr className="bg-green-50 ">
                 <td colSpan={5} className="p-3 text-right text-green-900">
                   Total
                 </td>

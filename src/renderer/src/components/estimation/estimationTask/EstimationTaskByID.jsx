@@ -63,7 +63,7 @@ const SummaryCard = ({ icon, label, value, color = 'text-indigo-700' }) => (
     </div>
     <div>
       <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl font-bold mt-2 ${color}`}>{value}</p>
+      <p className={`text-xl  mt-2 ${color}`}>{value}</p>
     </div>
   </div>
 )
@@ -238,7 +238,7 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
               <FileText className="w-7 h-7 text-green-700" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-700">Estimation Task Details</h2>
+              <h2 className="text-2xl  text-gray-700">Estimation Task Details</h2>
               <p className="text-sm text-gray-700">ID: #{task.id}</p>
             </div>
           </div>
@@ -254,7 +254,7 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
         <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
           {/* Task Info Card */}
           <div className="bg-green-50 rounded-2xl p-8 border border-green-200">
-            <h3 className="text-2xl font-bold text-green-900 mb-6 flex items-center gap-3">
+            <h3 className="text-2xl  text-green-900 mb-6 flex items-center gap-3">
               <FileText className="w-7 h-7" />
               Task Information
             </h3>
@@ -364,7 +364,7 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
           {summary && (
             <div className="bg-green-50 rounded-2xl p-6 border border-green-200">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-indigo-900 flex items-center gap-3">
+                <h3 className="text-xl  text-indigo-900 flex items-center gap-3">
                   <Timer className="w-6 h-6" />
                   Work Summary
                 </h3>
@@ -401,7 +401,7 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
           {/* Line Item Groups Section */}
           <div className="border-t pt-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-gray-700 flex items-center gap-3">
+              <h3 className="text-2xl  text-gray-700 flex items-center gap-3">
                 <FolderOpen className="w-7 h-7 text-green-600" />
                 Line Item Groups
               </h3>

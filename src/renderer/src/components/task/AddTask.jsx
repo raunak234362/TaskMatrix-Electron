@@ -542,7 +542,7 @@ const AddTask = () => {
                         onClick={() => {
                           setTaskCategory("MILESTONE");
                         }}
-                        className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${taskCategory === "MILESTONE"
+                        className={`px-6 py-2 rounded-lg text-sm  transition-all ${taskCategory === "MILESTONE"
                           ? "bg-white text-indigo-600 shadow-sm"
                           : "text-slate-500 hover:text-slate-700"
                           }`}
@@ -555,7 +555,7 @@ const AddTask = () => {
                           setTaskCategory("GENERAL");
                           setValue("mileStone_id", ""); // Clear milestone if switching to general
                         }}
-                        className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${taskCategory === "GENERAL"
+                        className={`px-6 py-2 rounded-lg text-sm  transition-all ${taskCategory === "GENERAL"
                           ? "bg-white text-indigo-600 shadow-sm"
                           : "text-slate-500 hover:text-slate-700"
                           }`}
@@ -690,10 +690,10 @@ const AddTask = () => {
                           <Clock className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+                          <p className="text-xs  text-blue-600 uppercase tracking-wider">
                             Execution Hours
                           </p>
-                          <p className="text-xl font-black text-slate-900">
+                          <p className="text-xl  text-slate-900">
                             {formatMinutesToHHMM(selectedWbs.totalExecHr || 0)}
                           </p>
                         </div>
@@ -703,10 +703,10 @@ const AddTask = () => {
                           <Clock className="w-6 h-6 text-indigo-600" />
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
+                          <p className="text-xs  text-indigo-600 uppercase tracking-wider">
                             Checking Hours
                           </p>
-                          <p className="text-xl font-black text-slate-900">
+                          <p className="text-xl  text-slate-900">
                             {formatMinutesToHHMM(selectedWbs.totalCheckHr || 0)}
                           </p>
                         </div>
@@ -716,10 +716,10 @@ const AddTask = () => {
                           <CheckCircle2 className="w-6 h-6 text-emerald-600" />
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
+                          <p className="text-xs  text-emerald-600 uppercase tracking-wider">
                             Total Bundle Hours
                           </p>
-                          <p className="text-xl font-black text-slate-900">
+                          <p className="text-xl  text-slate-900">
                             {formatMinutesToHHMM(totalWbsHours * 60)}
                           </p>
                         </div>
@@ -730,10 +730,10 @@ const AddTask = () => {
                           <CheckCircle2 className="w-6 h-6 text-emerald-600" />
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
+                          <p className="text-xs  text-emerald-600 uppercase tracking-wider">
                             Remaining Hours
                           </p>
-                          <p className="text-xl font-black text-slate-900">
+                          <p className="text-xl  text-slate-900">
                             {formatMinutesToHHMM(remainingHours * 60)}
                           </p>
                         </div>
@@ -844,7 +844,7 @@ const AddTask = () => {
                           Assigned:
                         </span>
                         <span
-                          className={`text-sm font-bold ${totalAssignedHours > remainingHours
+                          className={`text-sm  ${totalAssignedHours > remainingHours
                             ? "text-red-600"
                             : "text-indigo-600"
                             }`}
@@ -863,7 +863,7 @@ const AddTask = () => {
                         className="flex items-end gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100"
                       >
                         <div className="flex-1 space-y-2">
-                          <label className="text-xs font-bold text-slate-500 uppercase">
+                          <label className="text-xs  text-slate-500 uppercase">
                             Employee
                           </label>
                           <Controller
@@ -892,7 +892,7 @@ const AddTask = () => {
                                       totalWbsHours);
                                   if (isDuplicate || isOverLimitValue) {
                                     return (
-                                      <div className="flex items-center gap-1 text-[10px] font-bold text-amber-600 uppercase">
+                                      <div className="flex items-center gap-1 text-[10px]  text-amber-600 uppercase">
                                         <AlertCircle className="w-3 h-3" />
                                         Will be marked
                                         {isDuplicate && " (Duplicate User)"}
@@ -915,7 +915,7 @@ const AddTask = () => {
                           />
                         </div>
                         <div className="w-56 space-y-2">
-                          <label className="text-xs font-bold text-slate-500 uppercase">
+                          <label className="text-xs  text-slate-500 uppercase">
                             Duration (HH:MM)
                           </label>
                           <div className="flex items-center gap-2">
@@ -928,7 +928,7 @@ const AddTask = () => {
                                 })}
                               />
                             </div>
-                            <span className="font-bold text-slate-400">:</span>
+                            <span className=" text-slate-400">:</span>
                             <div className="flex-1 space-y-1">
                               <Input
                                 type="number"
@@ -989,7 +989,7 @@ const AddTask = () => {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3 bg-primary hover:bg-primary/80 text-white font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95 disabled:opacity-50"
+                    className="w-full py-3 bg-primary hover:bg-primary/80 text-white  shadow-lg shadow-indigo-200 transition-all active:scale-95 disabled:opacity-50"
                   >
                     {isSubmitting ? "Assigning..." : "Confirm & Assign Tasks"}
                   </Button>

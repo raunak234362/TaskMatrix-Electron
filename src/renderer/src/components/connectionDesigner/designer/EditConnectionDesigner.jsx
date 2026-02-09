@@ -219,7 +219,7 @@ const EditConnectionDesigner = ({
       >
         {/* Header */}
         <div className="flex justify-between items-center p-5 border-b bg-gray-50 shrink-0">
-          <h2 className="text-xl font-bold text-gray-700">
+          <h2 className="text-xl  text-gray-700">
             Edit Connection Designer
           </h2>
           <button

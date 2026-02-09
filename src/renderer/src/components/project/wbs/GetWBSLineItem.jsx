@@ -80,7 +80,7 @@ const GetWBSLineItem = ({
       accessorFn: (row) => row.qtyNo ?? row.totalQtyNo ?? 0,
       header: "Qty",
       cell: ({ row }) => (
-        <span className="text-sm font-bold text-green-700 bg-green-50 px-2 py-1 rounded-md">
+        <span className="text-sm  text-green-700 bg-green-50 px-2 py-1 rounded-md">
           {row.getValue("qtyNo")}
         </span>
       ),
@@ -134,8 +134,8 @@ const GetWBSLineItem = ({
       <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
         <div className="flex items-center gap-2">
           <ListChecks className="w-5 h-5 text-green-600" />
-          <h3 className="text-lg font-bold text-gray-700">WBS Line Items</h3>
-          <span className="px-2 py-0.5 bg-gray-200 text-gray-700 text-[10px] font-bold rounded-full">
+          <h3 className="text-lg  text-gray-700">WBS Line Items</h3>
+          <span className="px-2 py-0.5 bg-gray-200 text-gray-700 text-[10px]  rounded-full">
             {lineItems.length} Items
           </span>
         </div>

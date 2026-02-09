@@ -61,7 +61,7 @@ const Profile = () => {
             {user.firstName?.[0] || "U"}
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-700">
+            <h2 className="text-2xl  text-gray-700">
               {user.firstName} {user.lastName}
             </h2>
             <p className="text-gray-700 flex items-center gap-1">

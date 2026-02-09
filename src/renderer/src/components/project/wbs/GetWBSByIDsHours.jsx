@@ -35,13 +35,13 @@ const GetWBSByIDsHours = ({
                         <p className="text-gray-400 text-xs font-medium uppercase tracking-widest mb-1">
                             Total Quantity
                         </p>
-                        <h3 className="text-2xl font-bold text-white">
+                        <h3 className="text-2xl  text-white">
                             {wbsData?.totalQtyNo || 0}
                         </h3>
                     </div>
                     <div className="pt-4 border-t border-gray-800 mt-4 flex justify-between items-end">
                         <div>
-                            <p className="text-gray-700 text-[10px] uppercase font-bold">
+                            <p className="text-gray-700 text-[10px] uppercase ">
                                 Last Updated
                             </p>
                             <p className="text-xs text-gray-300">
@@ -58,7 +58,7 @@ const GetWBSByIDsHours = ({
                 <section>
                     <div className="flex items-center gap-2 mb-4">
                         <div className="w-1 h-6 bg-green-600 rounded-full"></div>
-                        <h3 className="text-lg font-bold text-gray-700">
+                        <h3 className="text-lg  text-gray-700">
                             Hours Overview
                         </h3>
                     </div>
@@ -100,8 +100,8 @@ const GetWBSByIDsHours = ({
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                             <div className="w-1 h-6 bg-green-600 rounded-full"></div>
-                            <h3 className="text-lg font-bold text-gray-700">WBS Items</h3>
-                            <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-700 text-[10px] font-bold rounded-full">
+                            <h3 className="text-lg  text-gray-700">WBS Items</h3>
+                            <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-700 text-[10px]  rounded-full">
                                 {lineItems?.length || 0} Items
                             </span>
                             {loading && (
@@ -168,7 +168,7 @@ const DetailCard = ({ label, value, icon }) => (
             {icon}
         </div>
         <div>
-            <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">
+            <p className="text-[10px] uppercase  text-gray-400 tracking-wider mb-0.5">
                 {label}
             </p>
             <p className="text-sm font-semibold text-gray-700">{value || "—"}</p>
@@ -189,19 +189,19 @@ const StatCard = ({ label, value, subValue, subLabel, color }) => {
             className={`p-5 rounded-2xl border ${colors[color]} flex flex-col justify-between h-full`}
         >
             <div>
-                <p className="text-[10px] uppercase font-bold opacity-70 tracking-wider mb-2">
+                <p className="text-[10px] uppercase  opacity-70 tracking-wider mb-2">
                     {label}
                 </p>
-                <p className="text-2xl font-black tracking-tight">
+                <p className="text-2xl  tracking-tight">
                     {formatDecimalHoursToTime(value ?? 0)}
                 </p>
             </div>
             {subValue !== undefined && (
                 <div className="mt-3 pt-3 border-t border-current/10 flex items-center justify-between">
-                    <span className="text-[9px] uppercase font-bold opacity-60">
+                    <span className="text-[9px] uppercase  opacity-60">
                         {subLabel}
                     </span>
-                    <span className="text-xs font-bold">
+                    <span className="text-xs ">
                         {formatDecimalHoursToTime(subValue)}
                     </span>
                 </div>

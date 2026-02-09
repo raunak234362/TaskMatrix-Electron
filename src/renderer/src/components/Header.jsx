@@ -34,7 +34,7 @@ const Header = ({ isMinimized, toggleSidebar }) => {
             )}
           </Button>
           <div className="flex flex-col">
-            <h1 className="text-3xl font-black text-[#6bbd45] uppercase tracking-tight leading-none drop-shadow-sm">
+            <h1 className="text-3xl  text-[#6bbd45] uppercase tracking-tight leading-none drop-shadow-sm">
               {getPageTitle()}
             </h1>
           </div>
@@ -45,7 +45,7 @@ const Header = ({ isMinimized, toggleSidebar }) => {
           <div className="flex-col items-end hidden sm:flex">
             <span className="text-xl font-extrabold text-gray-800 tracking-tight">
               Welcome Back ,
-              <span className="ml-1 text-md font-bold text-[#6bbd45] tracking-wide uppercase">
+              <span className="ml-1 text-md  text-[#6bbd45] tracking-wide uppercase">
                 {sessionStorage.getItem('username') || 'User'}
               </span>
             </span>

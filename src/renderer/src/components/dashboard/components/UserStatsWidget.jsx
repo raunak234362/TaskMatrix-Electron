@@ -33,8 +33,8 @@ const StatCard = ({
       </div>
 
       <div>
-        <p className="text-xs font-bold text-white/70 uppercase tracking-widest">{title}</p>
-        <h3 className="text-4xl font-black text-white mt-2 tracking-tight group-hover:translate-x-1 transition-transform duration-500">
+        <p className="text-xs  text-white/70 uppercase tracking-widest">{title}</p>
+        <h3 className="text-4xl  text-white mt-2 tracking-tight group-hover:translate-x-1 transition-transform duration-500">
           {value}
         </h3>
         {subtext && (
@@ -125,7 +125,7 @@ const UserStatsWidget = ({ stats, loading }) => {
           <div className="p-3 bg-gray-100 rounded-2xl group-hover:bg-indigo-50 transition-colors">
             <CalendarCheck className="w-6 h-6 text-gray-400 group-hover:text-indigo-500" />
           </div>
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-relaxed max-w-[150px]">
+          <p className="text-[10px]  text-gray-500 uppercase tracking-widest leading-relaxed max-w-[150px]">
             YOU&apos;RE NOT ASSIGNED WITH ANY TASK TILL NOW
           </p>
         </div>

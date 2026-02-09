@@ -8,7 +8,7 @@ const NotesPage = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Project Notes</h1>
+      <h1 className="text-2xl  mb-4">Project Notes</h1>
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">Select Project</label>
         <select

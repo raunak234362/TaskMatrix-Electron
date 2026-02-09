@@ -71,7 +71,7 @@ const AddAccount = ({ onSuccess }) => {
               />
               {errors.accountName && (
                 <p className="text-red-500 text-xs">
-                  {errors.accountName.message  }
+                  {errors.accountName.message}
                 </p>
               )}
             </div>
@@ -85,7 +85,7 @@ const AddAccount = ({ onSuccess }) => {
               />
               {errors.accountNumber && (
                 <p className="text-red-500 text-xs">
-                  {errors.accountNumber.message  }
+                  {errors.accountNumber.message}
                 </p>
               )}
             </div>
@@ -99,7 +99,7 @@ const AddAccount = ({ onSuccess }) => {
               />
               {errors.accountType && (
                 <p className="text-red-500 text-xs">
-                  {errors.accountType.message  }
+                  {errors.accountType.message}
                 </p>
               )}
             </div>
@@ -113,7 +113,7 @@ const AddAccount = ({ onSuccess }) => {
               />
               {errors.paymentMethod && (
                 <p className="text-red-500 text-xs">
-                  {errors.paymentMethod.message  }
+                  {errors.paymentMethod.message}
                 </p>
               )}
             </div>
@@ -197,7 +197,7 @@ const AddAccount = ({ onSuccess }) => {
         {/* Submit */}
         <Button
           type="submit"
-          className="mt-8 bg-green-700 hover:bg-green-800 text-white w-full py-3 text-lg font-bold shadow-lg transition"
+          className="mt-8 bg-green-700 hover:bg-green-800 text-white w-full py-3 text-lg  shadow-lg transition"
         >
           Save Bank Account Details
         </Button>

@@ -108,7 +108,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
         {/* HEADER */}
         <div className="flex items-center justify-between px-8 py-5 border-b border-gray-100 bg-gray-50/80 backdrop-blur">
           <div>
-            <h2 className="text-xl font-bold text-gray-800">Edit Estimation</h2>
+            <h2 className="text-xl  text-gray-800">Edit Estimation</h2>
             <p className="text-sm text-gray-500 mt-1">Update estimation details and status</p>
           </div>
           <button

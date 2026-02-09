@@ -5,7 +5,7 @@ import { Plus, Download, Send, FileText } from "lucide-react";
 const QuickActionsPanel = ({ onRaiseInvoice, onDownloadReport, onSendReminders }) => {
     return (
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-4 sm:p-6 text-white shadow-lg shadow-green-200">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+            <h3 className="text-lg  mb-4 flex items-center gap-2">
                 <FileText size={20} className="text-green-100" />
                 Quick Actions
             </h3>

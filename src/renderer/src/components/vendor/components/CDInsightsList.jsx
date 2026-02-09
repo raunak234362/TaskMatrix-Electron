@@ -9,7 +9,7 @@ const CDInsightsList = ({ insights }) => {
       <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
         <div className="flex items-center gap-2 mb-4">
           <UserPlus size={20} className="text-blue-500" />
-          <h3 className="text-md font-bold text-blue-800">
+          <h3 className="text-md  text-blue-800">
             Recently Onboarded
           </h3>
         </div>

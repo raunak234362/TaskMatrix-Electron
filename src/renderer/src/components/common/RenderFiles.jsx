@@ -70,7 +70,7 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, vers
             {/* Header */}
             {!hideHeader && (
                 <div className="flex justify-between items-center mb-2">
-                    <h4 className="text-sm font-bold text-gray-700 uppercase tracking-tight">Project Files</h4>
+                    <h4 className="text-sm  text-gray-700 uppercase tracking-tight">Project Files</h4>
                     {onAddFilesClick && (
                         <Button onClick={onAddFilesClick} className="scale-90 origin-right">
                             <Plus size={14} className="mr-1" /> Add Document
@@ -97,12 +97,12 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, vers
                             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                                 <div>
                                     <h5
-                                        className="text-sm border-l-4 border-green-500 pl-3 sm:text-base font-bold text-gray-800"
+                                        className="text-sm border-l-4 border-green-500 pl-3 sm:text-base  text-gray-800"
                                         dangerouslySetInnerHTML={{ __html: description }}
                                     />
                                     <div className="flex flex-wrap items-center gap-3 mt-1.5 ml-4">
                                         {firstFile?.stage && (
-                                            <p className="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-full uppercase">
+                                            <p className="text-[10px] text-blue-600  bg-blue-50 px-2 py-0.5 rounded-full uppercase">
                                                 {firstFile.stage}
                                             </p>
                                         )}
@@ -135,7 +135,7 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, vers
                                                 <FileText size={18} className="text-green-600" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-gray-700 text-sm font-bold truncate group-hover:text-green-700">
+                                                <p className="text-gray-700 text-sm  truncate group-hover:text-green-700">
                                                     {file.originalName || `File ${index + 1}`}
                                                 </p>
                                                 {file.stage && <p className="text-[10px] text-gray-400 font-medium">{file.stage}</p>}

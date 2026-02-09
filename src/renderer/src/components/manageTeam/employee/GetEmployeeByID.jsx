@@ -74,13 +74,13 @@ const GetEmployeeByID = ({ id }) => {
     <div className="bg-linear-to-br from-green-50 to-blue-50 p-6 rounded-xl shadow-inner">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-xl font-bold text-green-800">
+        <h3 className="text-xl  text-green-800">
           {employee.firstName} {employee.middleName} {employee.lastName}
         </h3>
         <span
           className={`px-3 py-1 rounded-full text-xs font-medium ${employee.isActive
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
+            ? "bg-green-100 text-green-800"
+            : "bg-red-100 text-red-800"
             }`}
         >
           {employee.isActive ? "Active" : "Inactive"}
@@ -202,7 +202,7 @@ const InfoRow = ({
   href,
 }) => (
   <div className="flex md:justify-between gap-5">
-    <span className="font-bold text-gray-700">{label}:</span>
+    <span className=" text-gray-700">{label}:</span>
     {href ? (
       <a
         href={href}

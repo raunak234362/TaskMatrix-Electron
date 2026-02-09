@@ -12,7 +12,7 @@ const PersonalNotesWidget = ({ projectNotes = [] }) => {
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 h-full flex flex-col overflow-hidden group">
       <div className="p-4 border-b border-slate-100 bg-pink-50/30">
-        <h3 className="text-sm font-bold text-pink-600 flex items-center justify-between">
+        <h3 className="text-sm  text-pink-600 flex items-center justify-between">
           Project Updates
           {projectNotes.length > 0 && (
             <span className="w-5 h-5 bg-pink-500 text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white">
@@ -31,10 +31,10 @@ const PersonalNotesWidget = ({ projectNotes = [] }) => {
                 className="p-4 rounded-2xl border border-slate-50 bg-pink-50/20 hover:bg-pink-50/40 transition-all"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <span className="px-2 py-1 bg-pink-100 text-pink-700 text-[10px] font-bold rounded-lg uppercase tracking-wider">
+                  <span className="px-2 py-1 bg-pink-100 text-pink-700 text-[10px]  rounded-lg uppercase tracking-wider">
                     {note.stage || 'Update'}
                   </span>
-                  <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold">
+                  <div className="flex items-center gap-1 text-[10px] text-slate-400 ">
                     <Calendar size={10} />
                     {formatDate(note.createdAt)}
                   </div>
@@ -48,7 +48,7 @@ const PersonalNotesWidget = ({ projectNotes = [] }) => {
                     <User size={10} />
                     {note.createdBy?.firstName} {note.createdBy?.lastName}
                   </div>
-                  <button className="text-[10px] text-pink-600 font-bold hover:underline">
+                  <button className="text-[10px] text-pink-600  hover:underline">
                     View Full Update
                   </button>
                 </div>

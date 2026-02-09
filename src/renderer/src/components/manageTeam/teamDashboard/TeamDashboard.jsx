@@ -638,10 +638,10 @@ const TeamDashboard = () => {
 
                 {/* Mock Tabs for Visual Reference if needed, or keeping Action Button styled to match */}
                 <div className="flex items-center gap-3">
-                  <span className="px-4 py-2 bg-white/20 text-white font-bold rounded-lg cursor-pointer hover:bg-white/30 transition-all">Dashboard</span>
+                  <span className="px-4 py-2 bg-white/20 text-white  rounded-lg cursor-pointer hover:bg-white/30 transition-all">Dashboard</span>
                   <button
                     onClick={() => setIsViewModalOpen(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-white text-green-700 rounded-[1.25rem] font-bold hover:bg-green-50 transition-all shadow-[0_8px_20px_-4px_rgba(0,0,0,0.1)] hover:shadow-md"
+                    className="flex items-center gap-2 px-6 py-3 bg-white text-green-700 rounded-[1.25rem]  hover:bg-green-50 transition-all shadow-[0_8px_20px_-4px_rgba(0,0,0,0.1)] hover:shadow-md"
                   >
                     View Details
                   </button>

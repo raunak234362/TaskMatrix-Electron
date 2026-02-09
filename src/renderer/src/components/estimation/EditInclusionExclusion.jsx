@@ -110,7 +110,7 @@ const EditInclusionExclusion = ({ estimationId, onCancel, onSuccess }) => {
   return (
     <div className="bg-white p-6 rounded-xl shadow-xs border border-gray-200">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-800">Edit Scope of Work</h2>
+        <h2 className="text-xl  text-gray-800">Edit Scope of Work</h2>
         <button onClick={onCancel} className="text-gray-500 hover:text-gray-700 p-2">
           <X className="w-6 h-6" />
         </button>
@@ -119,7 +119,7 @@ const EditInclusionExclusion = ({ estimationId, onCancel, onSuccess }) => {
       <div className="grid md:grid-cols-2 gap-8">
         {/* Inclusions Input */}
         <div>
-          <h3 className="text-md font-bold text-green-700 bg-green-50 px-3 py-2 rounded-lg mb-4 border-l-4 border-green-500">
+          <h3 className="text-md  text-green-700 bg-green-50 px-3 py-2 rounded-lg mb-4 border-l-4 border-green-500">
             Inclusions
           </h3>
           <div className="flex gap-2 mb-4">
@@ -158,7 +158,7 @@ const EditInclusionExclusion = ({ estimationId, onCancel, onSuccess }) => {
 
         {/* Exclusions Input */}
         <div>
-          <h3 className="text-md font-bold text-red-700 bg-red-50 px-3 py-2 rounded-lg mb-4 border-l-4 border-red-500">
+          <h3 className="text-md  text-red-700 bg-red-50 px-3 py-2 rounded-lg mb-4 border-l-4 border-red-500">
             Exclusions
           </h3>
           <div className="flex gap-2 mb-4">

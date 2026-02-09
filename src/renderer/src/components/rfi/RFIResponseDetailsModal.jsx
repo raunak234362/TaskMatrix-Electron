@@ -57,7 +57,7 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
           <X size={18} className="text-gray-700 hover:text-red-600" />
         </button>
 
-        <h2 className="text-xl font-bold text-green-700">Response Details</h2>
+        <h2 className="text-xl  text-green-700">Response Details</h2>
 
         {/* Main message */}
         <div

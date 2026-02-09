@@ -18,10 +18,10 @@ const TaskDistribution = ({ teamStats }) => {
 
   return (
     <div className="bg-white p-6 rounded-[2rem] border border-green-50 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] mb-8 h-full">
-      <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+      <h3 className="text-xl  text-gray-800 mb-6 flex items-center gap-2">
         <Layers className="text-green-600" size={24} />
         Task Distribution
-        <span className="text-xs font-bold text-green-700 ml-auto bg-green-50 px-3 py-1.5 rounded-lg border border-green-100">Task Counts</span>
+        <span className="text-xs  text-green-700 ml-auto bg-green-50 px-3 py-1.5 rounded-lg border border-green-100">Task Counts</span>
       </h3>
 
       <div className="space-y-4">
@@ -33,7 +33,7 @@ const TaskDistribution = ({ teamStats }) => {
                 <div className={`p-2.5 rounded-xl ${item.bg} ${item.color}`}>
                   <Icon size={20} />
                 </div>
-                <span className="text-gray-600 font-bold text-sm group-hover:text-gray-900">{item.label}</span>
+                <span className="text-gray-600  text-sm group-hover:text-gray-900">{item.label}</span>
               </div>
               <span className="text-gray-800 font-extrabold bg-gray-50 border border-gray-100 px-4 py-1.5 rounded-xl text-sm shadow-sm">
                 {item.value || 0}

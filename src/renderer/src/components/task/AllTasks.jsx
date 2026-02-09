@@ -178,7 +178,7 @@ const AllTasks = () => {
         filterOptions: userOptions,
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-linear-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+            <div className="w-8 h-8 rounded-full bg-linear-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white text-xs  shadow-sm">
               {row.original.user?.firstName?.charAt(0) || (
                 <User className="w-4 h-4" />
               )}
@@ -204,7 +204,7 @@ const AllTasks = () => {
         filterOptions: statusOptions,
         cell: ({ row }) => (
           <span
-            className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(
+            className={`px-3 py-1 rounded-full text-xs  border ${getStatusColor(
               row.original.status
             )}`}
           >
@@ -259,7 +259,7 @@ const AllTasks = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-red-500 p-6 bg-red-50 rounded-xl border border-red-100 mx-4">
         <AlertCircle className="w-12 h-12 mb-4" />
-        <h3 className="text-lg font-bold mb-2">Failed to Load Tasks</h3>
+        <h3 className="text-lg  mb-2">Failed to Load Tasks</h3>
         <p className="text-center max-w-md">
           {error.message ||
             "An unexpected error occurred while fetching tasks. Please try again later."}

@@ -92,7 +92,7 @@ const GetSubmittalByID = ({ id }) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* LEFT PANEL */}
           <div className="bg-white p-6 rounded-xl shadow-md space-y-5">
-            <h1 className="text-2xl font-bold text-green-700">
+            <h1 className="text-2xl  text-green-700">
               {submittal.subject}
             </h1>
 

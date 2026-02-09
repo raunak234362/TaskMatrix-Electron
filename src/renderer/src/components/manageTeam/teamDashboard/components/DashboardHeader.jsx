@@ -15,7 +15,7 @@ const DashboardHeader = ({
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-700">
+        <h1 className="text-2xl  text-gray-700">
           Team Performance Dashboard
         </h1>
         <p className="text-gray-700 text-sm">

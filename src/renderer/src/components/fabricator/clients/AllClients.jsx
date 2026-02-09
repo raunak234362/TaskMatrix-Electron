@@ -135,7 +135,7 @@ const AllClients = ({ fabricator, onClose }) => {
       <div className="w-full max-w-5xl bg-white rounded-xl shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b">
-          <h2 className="text-xl font-bold text-gray-700">
+          <h2 className="text-xl  text-gray-700">
             Fabricator POCs (Clients)
           </h2>
           <button
@@ -151,7 +151,7 @@ const AllClients = ({ fabricator, onClose }) => {
         <div className="px-5 pt-3">
           <p className="text-sm font-semibold text-gray-700">
             Fabricator:{" "}
-            <span className="font-bold text-blue-600">
+            <span className=" text-blue-600">
               {fabricator.fabName}
             </span>
           </p>

@@ -112,14 +112,14 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
                 key={template.id}
                 onClick={() => toggleSelection(template.id)}
                 className={`group relative flex items-center p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${selectedIds.has(template.id)
-                    ? "border-green-500 bg-green-50/50 shadow-sm"
-                    : "border-gray-100 hover:border-green-200 hover:bg-gray-50"
+                  ? "border-green-500 bg-green-50/50 shadow-sm"
+                  : "border-gray-100 hover:border-green-200 hover:bg-gray-50"
                   }`}
               >
                 <div
                   className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${selectedIds.has(template.id)
-                      ? "bg-green-500 border-green-500"
-                      : "border-gray-300 group-hover:border-green-400"
+                    ? "bg-green-500 border-green-500"
+                    : "border-gray-300 group-hover:border-green-400"
                     }`}
                 >
                   {selectedIds.has(template.id) && (
@@ -129,16 +129,16 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
 
                 <div className="ml-4 grow">
                   <h3
-                    className={`font-bold transition-colors ${selectedIds.has(template.id)
-                        ? "text-green-900"
-                        : "text-gray-700"
+                    className={` transition-colors ${selectedIds.has(template.id)
+                      ? "text-green-900"
+                      : "text-gray-700"
                       }`}
                   >
                     {template.name}
                   </h3>
                   {/* Tooltip for Line Items */}
                   <div className="invisible group-hover:visible absolute left-full ml-4 top-0 z-50 w-64 p-4 bg-white/90 backdrop-blur-md border border-gray-100 rounded-2xl shadow-2xl transition-all duration-300 opacity-0 group-hover:opacity-100 pointer-events-none">
-                    <h4 className="text-xs font-bold text-green-600 uppercase tracking-widest mb-2">
+                    <h4 className="text-xs  text-green-600 uppercase tracking-widest mb-2">
                       Line Items
                     </h4>
                     <ul className="space-y-1">
@@ -181,7 +181,7 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
         {/* Footer Actions */}
         <div className="pt-4 flex items-center justify-between border-t border-gray-100">
           <p className="text-sm text-gray-700">
-            <span className="font-bold text-green-600">{selectedIds.size}</span>{" "}
+            <span className=" text-green-600">{selectedIds.size}</span>{" "}
             templates selected
           </p>
           <div className="flex space-x-3">
@@ -196,9 +196,9 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
             <Button
               onClick={handleSubmit}
               disabled={selectedIds.size === 0}
-              className={`px-8 py-2.5 font-bold transition-all ${selectedIds.size > 0
-                  ? "bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-200"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              className={`px-8 py-2.5  transition-all ${selectedIds.size > 0
+                ? "bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-200"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
                 }`}
             >
               Add Selected Templates
