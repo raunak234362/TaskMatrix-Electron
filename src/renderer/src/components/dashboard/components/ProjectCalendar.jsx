@@ -48,7 +48,7 @@ const ProjectCalendar = ({ projects, tasks }) => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-green-50 text-green-600 rounded-lg">
-            <CalendarIcon size={20} />
+            <Calendar size={20} />
           </div>
           <div>
             <h3 className="text-lg  text-gray-700">Project Timeline Calendar</h3>
@@ -85,7 +85,7 @@ const ProjectCalendar = ({ projects, tasks }) => {
           </div>
         ))}
         {[...padding, ...days].map((day, idx) => {
-          const dayProjects = day ? getProjectsForDay(day) : 
+          const dayProjects = day ? getProjectsForDay(day) : []
           return (
             <div
               key={idx}

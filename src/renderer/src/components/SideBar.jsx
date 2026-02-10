@@ -32,7 +32,7 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
   return (
     <aside
       className={`h-full transition-all duration-300 flex flex-col ${isMinimized ? 'w-24' : 'w-72'
-        } ${isMobile ? 'shadow-2xl bg-white' : 'relative'}`}
+        } ${isMobile ? 'shadow-2xl' : 'relative'}`}
     >
       {/* Header */}
       <div
@@ -79,7 +79,7 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
                       `flex items-center rounded-md gap-4 py-2.5 transition-all duration-200  text-md tracking-wide relative 
                       ${isActive
                         ? 'bg-gray-50 text-[#6bbd45] shadow-sm ml-0 pl-6 z-20'
-                        : 'text-white/80 hover:text-white hover:bg-white/20 pl-6 ml-0'
+                        : 'text-background hover:text-white font-bold hover:bg-green-500/50 pl-6 ml-0'
                       } ${isMinimized ? 'justify-center px-0 w-14 h-14 mx-auto rounded-xl! ml-0! pl-0!' : ''}`
                     }
                   >

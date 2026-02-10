@@ -33,7 +33,7 @@ const Layout = () => {
 
   return (
     // Outer container matches the Sidebar's Green Theme (Brand Color #6bbd45)
-    <div className="flex h-screen w-screen overflow-hidden bg-[#6bbd45]">
+    <div className="flex h-screen w-screen overflow-hidden">
       {/* Sidebar Area */}
       <div className="hidden md:flex relative z-10">
         <Sidebar
@@ -61,8 +61,8 @@ const Layout = () => {
       </div>
 
       {/* Main Content Area - White Card effect */}
-      <div className="flex flex-col flex-1 min-h-0 bg-background p-0 md:p-2 pl-0">
-        <div className="flex-1 bg-gray-50 rounded-md shadow-2xl overflow-hidden flex flex-col relative transition-all">
+      <div className="flex flex-col flex-1 min-h-0  p-0 md:p-2 pl-0">
+        <div className="flex-1 rounded-md overflow-hidden flex flex-col relative transition-all">
 
           {/* Optional Header is needed globally, it goes here inside the white card */}
           <div className="px-2 pt-2">

@@ -6,9 +6,6 @@ import { cn } from "../../lib/utils";
 export const LampContainer = ({
   children,
   className,
-}: {
-  children.ReactNode;
-  className?;
 }) => {
   return (
     <div

@@ -171,7 +171,9 @@ const GetProjectById = ({ id }) => {
                 { key: "timeline", label: "Timeline" },
                 { key: "notes", label: "Notes" },
                 { key: "rfi", label: "RFI" },
+                { key: "CDrfi", label: "CD RFI" },
                 { key: "submittals", label: "Submittals" },
+                { key: "CDsubmittals", label: "CD Submittals" },
                 { key: "changeOrder", label: "Change Order" },
               ]
                 .filter(
@@ -198,7 +200,9 @@ const GetProjectById = ({ id }) => {
               { key: "milestones", label: "Milestones", icon: Clock },
               { key: "notes", label: "Notes", icon: FileText },
               { key: "rfi", label: "RFI", icon: FileText },
+              { key: "CDrfi", label: "CD RFI", icon: FileText },
               { key: "submittals", label: "Submittals", icon: FileText },
+              { key: "CDsubmittals", label: "CD Submittals", icon: FileText },
               {
                 key: "changeOrder",
                 label: "Change Order",
@@ -432,6 +436,102 @@ const GetProjectById = ({ id }) => {
             </div>
           )}
           {activeTab === "submittals" && userRole !== "staff" && (
+            <div className="space-y-4">
+              {/* Sub-tabs for RFI */}
+              <div className="flex justify-start border-b border-gray-200 mb-4">
+                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                  <button
+                    onClick={() => setSubmittalView("list")}
+                    className={`
+                      whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                      ${submittalView === "list"
+                        ? "border-green-500 text-green-600"
+                        : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
+                      }
+                    `}
+                  >
+                    All Submittals
+                  </button>
+                  {userRole !== "client" && (
+                    <button
+                      onClick={() => setSubmittalView("add")}
+                      className={`
+                        whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                        ${submittalView === "add"
+                          ? "border-green-500 text-green-600"
+                          : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
+                        }
+                    `}
+                    >
+                      Create Submittal
+                    </button>
+                  )}
+                </nav>
+              </div>
+
+              {/* Submittal Content */}
+              {submittalView === "list" ? (
+                <AllSubmittals submittalData={submittalData} />
+              ) : (
+                <AddSubmittal
+                  project={project}
+                  onSuccess={() => {
+                    fetchProject();
+                    setSubmittalView("list");
+                  }}
+                />
+              )}
+            </div>
+          )}
+          {activeTab === "CDrfi" && userRole !== "staff" && (
+            <div className="space-y-4">
+              {/* Sub-tabs for RFI */}
+              <div className="flex justify-start border-b border-gray-200 mb-4">
+                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                  <button
+                    onClick={() => setRfiView("list")}
+                    className={`
+                      whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                      ${rfiView === "list"
+                        ? "border-green-500 text-green-600"
+                        : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
+                      }
+                    `}
+                  >
+                    All RFIs
+                  </button>
+                  {userRole !== "client" && (
+                    <button
+                      onClick={() => setRfiView("add")}
+                      className={`
+                        whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                        ${rfiView === "add"
+                          ? "border-green-500 text-green-600"
+                          : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
+                        }
+                    `}
+                    >
+                      Create RFI
+                    </button>
+                  )}
+                </nav>
+              </div>
+
+              {/* RFI Content */}
+              {rfiView === "list" ? (
+                <AllRFI rfiData={rfiData} />
+              ) : (
+                <AddRFI
+                  project={project}
+                  onSuccess={() => {
+                    fetchProject();
+                    setRfiView("list");
+                  }}
+                />
+              )}
+            </div>
+          )}
+          {activeTab === "CDsubmittals" && userRole !== "staff" && (
             <div className="space-y-4">
               {/* Sub-tabs for RFI */}
               <div className="flex justify-start border-b border-gray-200 mb-4">
