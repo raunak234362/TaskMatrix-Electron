@@ -9,7 +9,6 @@ import {
   Clock,
   CheckCircle2,
   Briefcase,
-  Briefcase,
   Bell,
   X
 } from 'lucide-react'
