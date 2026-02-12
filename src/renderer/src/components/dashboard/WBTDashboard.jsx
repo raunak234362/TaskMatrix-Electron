@@ -9,7 +9,9 @@ import {
   Clock,
   CheckCircle2,
   Briefcase,
-  Bell
+  Briefcase,
+  Bell,
+  X
 } from 'lucide-react'
 import FetchTaskByID from '../task/FetchTaskByID'
 
@@ -28,6 +30,13 @@ const InvoiceTrends = lazy(() => import('./components/InvoiceTrends'))
 const UpcomingSubmittals = lazy(() => import('./components/UpcomingSubmittals'))
 const ProjectListModal = lazy(() => import('./components/ProjectListModal'))
 const DashboardListModal = lazy(() => import('./components/DashboardListModal'))
+const ProjectDetailsModal = lazy(() => import('./components/ProjectDetailsModal'))
+
+// Detail Components for Modals
+const GetRFIByID = lazy(() => import('../rfi/GetRFIByID'))
+const GetSubmittalByID = lazy(() => import('../submittals/GetSubmittalByID'))
+const GetCOByID = lazy(() => import('../co/GetCOByID'))
+const GetRFQByID = lazy(() => import('../rfq/GetRFQByID'))
 
 const DashboardSkeleton = () => (
   <div className="animate-pulse space-y-8 p-6 bg-white min-h-screen">
@@ -99,6 +108,14 @@ const WBTDashboard = () => {
   // Modal States
   const [projectModal, setProjectModal] = useState({ isOpen: false, status: '', data: [] })
   const [actionModal, setActionModal] = useState({ isOpen: false, type: '', data: [] })
+  const [selectedProject, setSelectedProject] = useState(null)
+
+  // Detail Modal States
+  const [detailModal, setDetailModal] = useState({
+    isOpen: false,
+    type: null, // 'RFI', 'SUBMITTAL', 'CO', 'RFQ'
+    id: null
+  })
 
 
   const parseDurationToHours = (duration) => {
@@ -264,6 +281,38 @@ const WBTDashboard = () => {
     setActionModal({ isOpen: true, type, data })
   }
 
+  const handleItemSelect = (item) => {
+    // If it's a project object (has projectNumber or similar unique project fields)
+    if (item.projectNumber || item.fabricator) {
+      setSelectedProject(item)
+      return
+    }
+
+    // Determine type based on item properties if not explicitly passed
+    let type = null
+    if (item.rfiresponse !== undefined || item.subject) type = 'RFI' // Simple heuristic, might need refinement
+    // Better approach: use the actionModal type to determine what we are clicking
+
+    // However, DashboardListModal knows the type. Let's pass it from there.
+    // For now, let's look at the actionModal.type which is currently open
+    if (actionModal.isOpen) {
+      switch (actionModal.type) {
+        case 'PENDING_RFI': type = 'RFI'; break;
+        case 'PENDING_SUBMITTALS': type = 'SUBMITTAL'; break;
+        case 'CHANGE_ORDERS': type = 'CO'; break;
+        case 'PENDING_RFQ': type = 'RFQ'; break;
+      }
+    }
+
+    if (type && (item.id || item._id)) {
+      setDetailModal({
+        isOpen: true,
+        type,
+        id: item.id || item._id
+      })
+    }
+  }
+
   return (
     <div className="flex flex-col gap-8 p-1">
       <Suspense fallback={<DashboardSkeleton />}>
@@ -373,6 +422,7 @@ const WBTDashboard = () => {
             onClose={() => setProjectModal({ ...projectModal, isOpen: false })}
             status={projectModal.status}
             projects={projectModal.data}
+            onProjectSelect={(project) => setSelectedProject(project)}
           />
         )}
 
@@ -383,7 +433,46 @@ const WBTDashboard = () => {
             onClose={() => setActionModal({ ...actionModal, isOpen: false })}
             type={actionModal.type}
             data={actionModal.data}
+            onItemSelect={handleItemSelect}
           />
+        )}
+
+        {/* Project Details Modal */}
+        {selectedProject && (
+          <ProjectDetailsModal
+            project={selectedProject}
+            onClose={() => setSelectedProject(null)}
+          />
+        )}
+
+        {/* Item Detail Modal Wrapper */}
+        {detailModal.isOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="bg-white w-[95%] max-w-6xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in fade-in zoom-in duration-200">
+              <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                <h3 className="text-lg font-bold text-gray-700">
+                  {detailModal.type === 'RFI' && 'RFI Details'}
+                  {detailModal.type === 'SUBMITTAL' && 'Submittal Details'}
+                  {detailModal.type === 'CO' && 'Change Order Details'}
+                  {detailModal.type === 'RFQ' && 'RFQ Details'}
+                </h3>
+                <button
+                  onClick={() => setDetailModal({ isOpen: false, type: null, id: null })}
+                  className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-700"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 bg-gray-50/30">
+                <Suspense fallback={<div className="p-8 text-center">Loading details...</div>}>
+                  {detailModal.type === 'RFI' && <GetRFIByID id={detailModal.id} />}
+                  {detailModal.type === 'SUBMITTAL' && <GetSubmittalByID id={detailModal.id} />}
+                  {detailModal.type === 'CO' && <GetCOByID id={detailModal.id} />}
+                  {detailModal.type === 'RFQ' && <GetRFQByID id={detailModal.id} />}
+                </Suspense>
+              </div>
+            </div>
+          </div>
         )}
       </Suspense>
     </div>

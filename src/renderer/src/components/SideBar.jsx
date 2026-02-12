@@ -78,7 +78,7 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
                     className={({ isActive }) =>
                       `flex items-center gap-4 py-3.5 transition-all duration-500 text-sm font-black tracking-tight relative overflow-hidden
                       ${isActive
-                        ? 'bg-[#22c55e] text-white shadow-[0_8px_20px_rgba(0,0,0,0.25)] rounded-2xl px-6 scale-105 z-10'
+                        ? 'bg-[#6bbd45] text-white shadow-[0_8px_20px_rgba(0,0,0,0.25)] rounded-2xl px-6 scale-105 z-10'
                         : 'text-gray-900 hover:bg-white/10 hover:text-black px-6 rounded-2xl hover:translate-x-1'
                       } ${isMinimized ? 'justify-center w-14 h-14 mx-auto rounded-2xl shadow-md px-0!' : ''}`
                     }

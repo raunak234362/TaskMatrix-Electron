@@ -1,7 +1,7 @@
 import { X, FileText, ClipboardList, RefreshCw, Search } from 'lucide-react'
 import DataTable from '../../ui/table'
 
-const DashboardListModal = ({ isOpen, onClose, type, data, onProjectSelect }) => {
+const DashboardListModal = ({ isOpen, onClose, type, data, onItemSelect }) => {
     if (!isOpen) return null
 
     const getTitle = () => {
@@ -97,8 +97,8 @@ const DashboardListModal = ({ isOpen, onClose, type, data, onProjectSelect }) =>
                         searchPlaceholder={`Filter ${headerInfo.title.toLowerCase()}...`}
 
                         onRowClick={(row) => {
-                            // Handle row click if needed, or pass project selection
-                            if (onProjectSelect && row.project) onProjectSelect(row.project);
+                            // Pass the full row data to the parent
+                            if (onItemSelect) onItemSelect(row);
                         }}
                     />
                 </div>

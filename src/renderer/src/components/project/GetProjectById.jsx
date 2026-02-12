@@ -125,7 +125,7 @@ const GetProjectById = ({ id }) => {
 
   return (
     <>
-      <div className="w-full bg-white h-auto p-3 md:p-6 rounded-lg shadow-sm border border-gray-200 relative">
+      <div className="w-full bg-white h-auto p-3 md:p-6 rounded-lg shadow-sm border border-gray-200 relative laptop-fit">
         {/* Header */}
         <div className="flex justify-between items-center border-b pb-3 mb-3">
           <div>
@@ -216,7 +216,7 @@ const GetProjectById = ({ id }) => {
                 (tab) =>
                   !(
                     userRole === "staff" &&
-                    ["wbs", "changeOrder", "milestones", "analytics","CDrfi", "CDsubmittals"].includes(tab.key)
+                    ["wbs", "changeOrder", "milestones", "analytics", "CDrfi", "CDsubmittals"].includes(tab.key)
                   )
               )
               .map(({ key, label, icon: TabIcon }) => (
