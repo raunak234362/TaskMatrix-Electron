@@ -25,7 +25,7 @@ const MonthlyProjectStats = ({
     'December'
   ]
 
-  const teamSequence = ['TEKLA', 'SDS/2', 'PEMB']
+  const teamSequence = ['TEKLA', 'SDS/2', 'SDS/2 - TEAM 2', 'PEMB', 'PEMB DESIGNING']
 
   const sortedTeams = useMemo(() => {
     if (!projectsByTeam) return []

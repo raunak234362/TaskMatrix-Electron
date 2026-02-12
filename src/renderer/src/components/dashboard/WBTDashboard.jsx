@@ -59,7 +59,7 @@ const WBTDashboard = () => {
 
   // Role Based Logic
   const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
-  const isAdminRole = ['admin', 'operation_executive', 'project_manager', 'department_manager', 'project_manager_officer'].includes(userRole)
+  const isAdminRole = ['admin', 'dept_manager', 'operation_executive', 'project_manager', 'department_manager', 'project_manager_officer'].includes(userRole)
 
   const [userStats, setUserStats] = useState({
     totalTasks: 0,

@@ -23,6 +23,7 @@ export const navItems = [
         icon: <LayoutDashboard />,
         roles: [
             'admin',
+            'dept_manager',
             'staff',
             'project_manager_officer',
             'connection_designer_engineer',
@@ -137,6 +138,7 @@ export const navItems = [
             'staff',
             'operation_executive',
             'estimator',
+            'dept_manager',
             'estimation_head',
             'department-manager',
             'deputy_manager',

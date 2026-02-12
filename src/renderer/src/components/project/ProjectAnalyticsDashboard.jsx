@@ -242,10 +242,10 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
         <div className="flex items-center justify-end">
           <span
             className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter ${task.status === "COMPLETED"
-                ? "bg-green-100 text-green-700"
-                : task.status === "ASSIGNED"
-                  ? "bg-blue-100 text-blue-700"
-                  : "bg-amber-100 text-amber-700"
+              ? "bg-green-100 text-green-700"
+              : task.status === "ASSIGNED"
+                ? "bg-blue-100 text-blue-700"
+                : "bg-amber-100 text-amber-700"
               }`}
           >
             {task.status}
@@ -552,13 +552,33 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                           {bundle.totalCheckHr || 0}h
                         </p>
                       </div>
-                      <div>
-                        <p className="text-sm font-bold text-slate-700">
-                          {tasksByBundle[bundleId]?.length || 0} Tasks
-                        </p>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">
-                          Matched
-                        </p>
+                      <div className="flex flex-col items-end justify-center min-w-[100px]">
+                        {(() => {
+                          const bundleTasks = tasksByBundle[bundleId] || [];
+                          const totalWorkedSeconds = bundleTasks.reduce((sum, t) => sum + calculateWorkedSeconds(t), 0);
+                          const totalWorkedHours = totalWorkedSeconds / 3600;
+                          const totalAllocatedHours = (Number(bundle.totalExecHr) || 0) + (Number(bundle.totalCheckHr) || 0);
+                          const percentage = totalAllocatedHours > 0 ? Math.min(100, (totalWorkedHours / totalAllocatedHours) * 100) : 0;
+
+                          return (
+                            <>
+                              <div className="flex items-center gap-2 mb-1 justify-end">
+                                <span className="text-xs font-bold text-gray-700">{percentage.toFixed(0)}%</span>
+                                <span className="text-[10px] text-gray-400 font-medium">Completed</span>
+                              </div>
+                              <div className="flex items-center gap-2 mb-1 justify-end">
+                                <span className="text-xs font-bold text-gray-700">{(totalAllocatedHours - totalWorkedHours).toFixed(1)}h</span>
+                                <span className="text-[10px] text-gray-400 font-medium">Remaining</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full ${percentage >= 100 ? 'bg-green-500' : 'bg-blue-500'}`}
+                                  style={{ width: `${percentage}%` }}
+                                />
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   </button>
