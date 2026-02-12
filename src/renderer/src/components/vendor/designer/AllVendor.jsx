@@ -23,7 +23,7 @@ const AllConnectionDesigner = () => {
 
   // Handle row click (optional)
   const handleRowClick = (row) => {
-    const fabricatorUniqueId = (row  ).id ?? (row  ).fabId ?? "";
+    const fabricatorUniqueId = (row).id ?? (row).fabId ?? "";
     console.debug("Selected fabricator:", fabricatorUniqueId);
   };
 
@@ -41,10 +41,10 @@ const AllConnectionDesigner = () => {
         onRowClick={handleRowClick}
         detailComponent={({ row }) => {
           const fabricatorUniqueId =
-            (row  ).id ?? (row  ).fabId ?? "";
+            (row).id ?? (row).fabId ?? "";
           return <GetConnectionDesignerByID id={fabricatorUniqueId} />;
         }}
-        pageSizeOptions={[5, 10, 25]}
+
       />
     </div>
   );

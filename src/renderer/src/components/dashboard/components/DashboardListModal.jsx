@@ -95,7 +95,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data, onProjectSelect }) =>
                         columns={columns}
                         data={data}
                         searchPlaceholder={`Filter ${headerInfo.title.toLowerCase()}...`}
-                        pageSizeOptions={[5, 10, 25]}
+
                         onRowClick={(row) => {
                             // Handle row click if needed, or pass project selection
                             if (onProjectSelect && row.project) onProjectSelect(row.project);

@@ -197,7 +197,7 @@ const GetRFIByID = ({ id }) => {
               <DataTable
                 columns={responseColumns}
                 data={rfi.rfiresponse}
-                pageSizeOptions={[5, 10]}
+
                 onRowClick={(row) => setSelectedResponse(row)}
               />
             ) : (

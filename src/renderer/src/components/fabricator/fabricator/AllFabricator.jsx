@@ -65,24 +65,30 @@ const AllFabricator = () => {
 
   // Render DataTable
   return (
-    <div className="bg-white p-2 sm:p-4 rounded-2xl shadow-sm">
-      {/* Search Bar */}
-      <div className="mb-4">
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search fabricators by name..."
-            className="pl-9 pr-3 py-2 w-full border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
+    <div className="bg-[#fcfdfc] min-h-[500px]">
+      {/* Search Bar - Premium Style */}
+      <div className="mb-8 px-2">
+        <div className="relative group max-w-xl">
+          <div className="absolute -inset-1 bg-linear-to-r from-green-100 to-emerald-100 rounded-xl blur-sm opacity-25 group-hover:opacity-40 transition-duration-1000"></div>
+          <div className="relative bg-white border border-gray-100 rounded-xl p-1 flex items-center shadow-sm hover:border-green-200 transition-colors">
+            <Search className="ml-3 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search fabricators by name..."
+              className="flex-1 px-4 py-2 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none font-medium"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="p-1 px-3 text-gray-300 hover:text-gray-500 transition-colors"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
         </div>
-        {searchQuery && (
-          <p className="text-xs text-gray-500 mt-2">
-            Showing {filteredFabricators.length} of {fabricators?.length || 0} fabricators
-          </p>
-        )}
       </div>
 
       <DataTable
@@ -94,7 +100,7 @@ const AllFabricator = () => {
             (row).id ?? (row).fabId ?? "";
           return <GetFabricatorByID id={fabricatorUniqueId} />;
         }}
-        pageSizeOptions={[5, 10, 25]}
+        disablePagination={true}
       />
     </div>
   );

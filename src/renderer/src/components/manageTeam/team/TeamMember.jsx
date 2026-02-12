@@ -115,7 +115,7 @@ const TeamMember = ({ members, onClose }) => {
           <DataTable
             columns={columns}
             data={teamData?.members || []}
-            pageSizeOptions={[10, 20, 50]}
+
           />
         </div>
 

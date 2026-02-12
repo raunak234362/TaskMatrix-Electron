@@ -302,7 +302,6 @@ const AllActiveTask = () => {
           <DataTable
             columns={columns}
             data={filteredTasks}
-            pageSizeOptions={[10, 25, 50]}
           />
         </div>
       )}

@@ -93,7 +93,7 @@ const AllInvoices = () => {
         columns={columns}
         data={invoices}
         onRowClick={(row) => setSelectedInvoiceId(row._id || row.id)}
-        pageSizeOptions={[5, 10, 25]}
+
       />
       {selectedInvoiceId && (
         <GetInvoiceById

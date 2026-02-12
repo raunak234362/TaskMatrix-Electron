@@ -29,59 +29,71 @@ const AllDesignDrawings = ({ projectId }) => {
   }, [projectId]);
 
   const columns = [
-    { accessorKey: "stage", header: "Stage" },
+    {
+      accessorKey: "stage",
+      header: "Stage",
+      cell: ({ row }) => (
+        <span className="text-sm font-bold text-gray-600 tracking-tight uppercase">
+          {row.original.stage || "—"}
+        </span>
+      )
+    },
     {
       accessorKey: "description",
       header: "Description",
       cell: ({ row }) => (
-        <p className="truncate max-w-[300px]">{row.original.description}</p>
+        <p className="text-sm font-bold text-gray-700 truncate max-w-[400px]">
+          {row.original.description || "No description"}
+        </p>
       ),
     },
     {
       accessorKey: "createdAt",
       header: "Created On",
-      cell: ({ row }) =>
-        new Date(row.original.createdAt).toLocaleDateString("en-IN", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }),
+      cell: ({ row }) => (
+        <span className="text-sm font-bold text-gray-600">
+          {new Date(row.original.createdAt).toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })}
+        </span>
+      ),
     },
   ];
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-gray-700">
-        <Loader2 className="w-6 h-6 animate-spin mb-2" />
-        Loading Design Drawings...
+      <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+        <Loader2 className="w-8 h-8 animate-spin mb-4 opacity-20" />
+        <p className="text-sm font-black uppercase tracking-widest opacity-40">Loading Drawings...</p>
       </div>
     );
   }
 
   if (!loading && drawings.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-gray-700">
-        <Inbox className="w-10 h-10 mb-3 text-gray-400" />
-        <p className="text-lg font-medium">No Design Drawings Available</p>
+      <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+        <Inbox className="w-12 h-12 mb-4 opacity-10" />
+        <p className="text-sm font-black uppercase tracking-widest opacity-40">No drawings available</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="p-4 border-b border-gray-50 bg-gray-50/50">
-        <h3 className=" text-gray-800">Design Drawings</h3>
+    <div className="bg-[#fcfdfc] min-h-[400px] p-2 animate-in fade-in duration-700">
+      <div className="flex justify-between items-center mb-6 px-1">
+        <h2 className="text-lg font-black text-gray-900 tracking-tight uppercase">Design Drawings <span className="text-primary/40 ml-2">{drawings.length}</span></h2>
       </div>
-      <div className="p-0 overflow-x-auto">
-        <DataTable
-          columns={columns}
-          data={drawings}
-          detailComponent={({ row }) => (
-            <DesignDrawingDetails id={row.id} onUpdate={fetchDrawings} />
-          )}
-          pageSizeOptions={[5, 10, 25]}
-        />
-      </div>
+
+      <DataTable
+        columns={columns}
+        data={drawings}
+        detailComponent={({ row }) => (
+          <DesignDrawingDetails id={row.id} onUpdate={fetchDrawings} />
+        )}
+        disablePagination={true}
+      />
     </div>
   );
 };

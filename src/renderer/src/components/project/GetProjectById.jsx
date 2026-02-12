@@ -27,6 +27,7 @@ import RenderFiles from "../ui/RenderFiles";
 import AllCO from "../co/AllCO";
 import AddCO from "../co/AddCO";
 import CoTable from "../co/CoTable";
+import ProjectAnalyticsDashboard from "./ProjectAnalyticsDashboard";
 
 const GetProjectById = ({ id }) => {
   const [project, setProject] = useState(null);
@@ -175,6 +176,7 @@ const GetProjectById = ({ id }) => {
                 { key: "submittals", label: "Submittals" },
                 { key: "CDsubmittals", label: "CD Submittals" },
                 { key: "changeOrder", label: "Change Order" },
+                { key: "analytics", label: "Analytics" },
               ]
                 .filter(
                   (tab) =>
@@ -195,6 +197,7 @@ const GetProjectById = ({ id }) => {
           <div className="hidden md:flex gap-2 overflow-x-auto">
             {[
               { key: "details", label: "Details", icon: FileText },
+              { key: "analytics", label: "Analytics", icon: ClipboardList },
               { key: "files", label: "Files", icon: FolderOpenDot },
               { key: "wbs", label: "WBS", icon: ClipboardList },
               { key: "milestones", label: "Milestones", icon: Clock },
@@ -213,7 +216,7 @@ const GetProjectById = ({ id }) => {
                 (tab) =>
                   !(
                     userRole === "staff" &&
-                    ["wbs", "rfi", "submittals", "changeOrder", "milestones"].includes(tab.key)
+                    ["wbs", "changeOrder", "milestones", "analytics","CDrfi", "CDsubmittals"].includes(tab.key)
                   )
               )
               .map(({ key, label, icon: TabIcon }) => (
@@ -222,7 +225,7 @@ const GetProjectById = ({ id }) => {
                   onClick={() => setActiveTab(key)}
                   className={`flex items-center gap-2 bg-primary text-gray-800 px-4 py-2 text-md rounded-md font-medium transition-colors whitespace-nowrap ${activeTab === key
                     ? "bg-green-600 text-white "
-                    : "text-gray-700 hover:text-green-700 font-semibold hover:bg-gray-50"
+                    : "text-gray-700 bg-gray-100 hover:text-green-700 font-semibold hover:bg-gray-50"
                     }`}
                 >
                   <TabIcon className="w-4 h-4" />
@@ -387,7 +390,7 @@ const GetProjectById = ({ id }) => {
               <WBS id={id} stage={project.stage || ""} />
             </div>
           )}
-          {activeTab === "rfi" && userRole !== "staff" && (
+          {activeTab === "rfi" && (
             <div className="space-y-4">
               {/* Sub-tabs for RFI */}
               <div className="flex justify-start border-b border-gray-200 mb-4">
@@ -404,7 +407,7 @@ const GetProjectById = ({ id }) => {
                   >
                     All RFIs
                   </button>
-                  {userRole !== "client" && (
+                  {!["client", "staff", "estimator"].includes(userRole) && (
                     <button
                       onClick={() => setRfiView("add")}
                       className={`
@@ -435,7 +438,7 @@ const GetProjectById = ({ id }) => {
               )}
             </div>
           )}
-          {activeTab === "submittals" && userRole !== "staff" && (
+          {activeTab === "submittals" && (
             <div className="space-y-4">
               {/* Sub-tabs for RFI */}
               <div className="flex justify-start border-b border-gray-200 mb-4">
@@ -452,7 +455,7 @@ const GetProjectById = ({ id }) => {
                   >
                     All Submittals
                   </button>
-                  {userRole !== "client" && (
+                  {!["client", "staff", "estimator"].includes(userRole) && (
                     <button
                       onClick={() => setSubmittalView("add")}
                       className={`
@@ -500,7 +503,7 @@ const GetProjectById = ({ id }) => {
                   >
                     All RFIs
                   </button>
-                  {userRole !== "client" && (
+                  {!["client", "staff", "estimator"].includes(userRole) && (
                     <button
                       onClick={() => setRfiView("add")}
                       className={`
@@ -548,7 +551,7 @@ const GetProjectById = ({ id }) => {
                   >
                     All Submittals
                   </button>
-                  {userRole !== "client" && (
+                  {!["client", "staff", "estimator"].includes(userRole) && (
                     <button
                       onClick={() => setSubmittalView("add")}
                       className={`
@@ -596,7 +599,7 @@ const GetProjectById = ({ id }) => {
                   >
                     All Change Order
                   </button>
-                  {userRole !== "client" && (
+                  {!["client", "staff", "estimator"].includes(userRole) && (
                     <button
                       onClick={() => setChangeOrderView("add")}
                       className={`
@@ -635,6 +638,9 @@ const GetProjectById = ({ id }) => {
                 </div>
               )}
             </div>
+          )}
+          {activeTab === "analytics" && (
+            <ProjectAnalyticsDashboard projectId={id} />
           )}
         </div>
       </div>

@@ -52,42 +52,75 @@ const AllMileStone = ({ project, onUpdate }) => {
   };
 
   const columns = [
-    { accessorKey: "subject", header: "Subject" },
-    { accessorKey: "description", header: "Description" },
-    { accessorKey: "date", header: "Target Date" },
-    { accessorKey: "approvalDate", header: "Approval Date" },
-    { accessorKey: "status", header: "Status" },
+    {
+      accessorKey: "subject",
+      header: "Subject",
+      cell: ({ row }) => (
+        <span className="font-black text-gray-900">{row.original.subject}</span>
+      )
+    },
+    {
+      accessorKey: "description",
+      header: "Description",
+      cell: ({ row }) => (
+        <p className="text-sm font-bold text-gray-600 truncate max-w-[250px]">{row.original.description || "—"}</p>
+      )
+    },
+    {
+      accessorKey: "date",
+      header: "Target Date",
+      cell: ({ row }) => (
+        <span className="text-sm font-bold text-gray-600">
+          {row.original.date ? new Date(row.original.date).toLocaleDateString("en-IN", { day: '2-digit', month: 'short', year: 'numeric' }) : "—"}
+        </span>
+      )
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.original.status || 'PENDING';
+        return (
+          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+            }`}>
+            {status}
+          </span>
+        );
+      }
+    },
   ];
+
   const handleRowClick = (row) => {
     const milestonesId = (row).id ?? (row).fabId ?? "";
     console.debug("Selected milestones:", milestonesId);
   };
 
   return (
-    <div className="p-2">
-      <div className="flex justify-between items-center mb-4">
-
+    <div className="bg-[#fcfdfc] min-h-[400px] p-2 animate-in fade-in duration-700">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-lg font-black text-gray-900 tracking-tight uppercase">Milestones <span className="text-primary/40 ml-2">{milestones.length}</span></h2>
         {!(userRole === "staff" || userRole === "client" || userRole === "vendor") && (
           <Button
             onClick={handleOpenAddMileStone}
-            className="text-sm py-1 px-3 bg-green-600 text-white"
+            className="text-[10px] font-black uppercase tracking-widest py-2 px-4 bg-gray-900 text-white rounded-xl shadow-md hover:bg-gray-800 transition-all"
           >
             + Add Milestone
           </Button>
         )}
       </div>
+
       {milestones && milestones.length > 0 ? (
         <DataTable
           columns={columns}
           data={milestones}
           onRowClick={handleRowClick}
           detailComponent={GetMilestoneByID}
-          pageSizeOptions={[5, 10, 25]}
+          disablePagination={true}
         />
       ) : (
-        <div className="flex flex-col items-center justify-center py-8 text-gray-700">
-          <Clock className="w-8 h-8 mb-2 text-gray-300" />
-          <p>No milestones added yet.</p>
+        <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+          <Clock className="w-12 h-12 mb-4 opacity-10" />
+          <p className="text-sm font-black uppercase tracking-widest opacity-40">No milestones yet</p>
         </div>
       )}
 

@@ -129,7 +129,7 @@ const AllTeam = () => {
           data={teams}
           onRowClick={handleRowClick}
           onDelete={handleDelete}
-          pageSizeOptions={[10, 20, 50]}
+
           detailComponent={({ row }) => <GetTeamById id={row.id} />}
         />
       </div>

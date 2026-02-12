@@ -166,358 +166,313 @@ const AddProject = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-100 ">
+    <div className="min-h-screen bg-white p-4 lg:p-8">
       <div className="w-full mx-auto">
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 overflow-hidden">
+        <div className="bg-green-50/30 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
+          {/* Header */}
+          <div className="px-8 py-10 flex items-center justify-between bg-linear-to-r from-green-50/30 to-transparent border-b border-gray-50">
+            <div>
+              <h1 className="text-3xl font-extrabold text-gray-600 tracking-tight">
+                Create New <span className="text-green-600">Project</span>
+              </h1>
+        
+            </div>
+            <div className="hidden md:flex items-center gap-3">
+              <div className="h-10 w-px bg-gray-100" />
+              <div className="text-right">
+               
+              </div>
+            </div>
+          </div>
+
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="p-4 md:p-10 space-y-8 md:space-y-14"
+            className="px-8 py-12 space-y-12"
           >
-            {/* Link RFQ — Hero Section */}
-            <div className="relative ">
-              <Controller
-                name="rfqId"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    options={options.rfqs}
-                    value={
-                      options.rfqs.find((o) => o.value === field.value) || null
-                    }
-                    onChange={(opt) => field.onChange(opt?.value || "")}
-                    placeholder="Search RFQ by project name or fabricator..."
-                    isClearable
-                    isSearchable
-                    className="text-gray-700"
-                    styles={{
-                      control: (base) => ({
-                        ...base,
-                        backgroundColor: "white",
-                        borderRadius: "16px",
-                        padding: "8px",
-                      }),
-                    }}
-                  />
-                )}
-              />
-            </div>
-
-            {/* RFQ Preview */}
-            {selectedRfq && (
-              <div className="bg-linear-to-r from-emerald-50 to-green-50 border-2 border-emerald-200 rounded-2xl p-8 -mt-6 mb-10 shadow-inner">
-                <div className="flex items-center gap-3 mb-4">
-                  <Zap className="w-5 h-5 md:w-7 md:h-7 text-emerald-600" />
-                  <h3 className="text-lg md:text-2xl  text-emerald-900">
-                    RFQ Auto-Filled
-                  </h3>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-sm">
-                  <div className="bg-white/70 p-4 rounded-xl">
-                    <p className="text-gray-700">Project</p>
-                    <p className=" text-gray-700 truncate">
-                      {selectedRfq.projectName}
-                    </p>
+            {/* RFQ Integration */}
+            <div className="bg-zinc-100 rounded-2xl p-6 border border-gray-100">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-white rounded-xl shadow-sm border border-gray-100">
+                    <Zap className="w-6 h-6 text-green-500 fill-green-500/10" />
                   </div>
-                  <div className="bg-white/70 p-4 rounded-xl">
-                    <p className="text-gray-700">Fabricator</p>
-                    <p className="">
-                      {selectedRfq.fabricator?.fabName}
-                    </p>
-                  </div>
-                  <div className="bg-white/70 p-4 rounded-xl">
-                    <p className="text-gray-700">Tool</p>
-                    <p className=" text-purple-700">
-                      {selectedRfq.tools || "TEKLA"}
-                    </p>
+                  <div>
+                    <h3 className="text-base font-bold text-gray-800">Select RFQ</h3>
+                  
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Project Info */}
-            <SectionTitle title="Project Details" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-              <Input
-                label="Project Number *"
-                placeholder="PROJ-2025-089"
-                {...register("projectNumber", { required: "Required" })}
-              />
-              <Input
-                label="Project Name *"
-                placeholder="Empire State Tower - Phase II"
-                {...register("name", { required: "Required" })}
-              />
-              <div className="md:col-span-2">
-                <label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Description *
-                </label>
-                <Controller
-                  name="description"
-                  control={control}
-                  rules={{ required: "Required" }}
-                  render={({ field }) => (
-                    <RichTextEditor
-                      value={field.value || ""}
-                      onChange={field.onChange}
-                      placeholder="Full structural steel detailing for 40-story commercial building..."
-                    />
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Team Assignment */}
-            <SectionTitle title="Team & Assignments" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
-              <div>
-                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-3">
-                  <Building2 className="w-5 h-5 text-blue-600" /> Fabricator *
-                </label>
-                <Controller
-                  name="fabricatorID"
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <Select
-                      options={options.fabricators}
-                      value={options.fabricators.find(
-                        (o) => o.value === field.value,
-                      )}
-                      onChange={(o) => field.onChange(o?.value || "")}
-                      placeholder="Select..."
-                      isSearchable
-                    />
-                  )}
-                />
-              </div>
-              <div>
-                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-3">
-                  <HardHat className="w-5 h-5 text-amber-600" /> Project Manager
-                  *
-                </label>
-                <Controller
-                  name="managerID"
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <Select
-                      options={managerOption}
-                      value={managerOption.find(
-                        (o) => String(o.value) === String(field.value),
-                      )}
-                      onChange={(o) => field.onChange(o?.value || "")}
-                      placeholder="Assign manager"
-                      isSearchable
-                    />
-                  )}
-                />
-              </div>
-              <div>
-                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-3">
-                  <UserCheck className="w-5 h-5 text-green-600" /> Department *
-                </label>
-                <Controller
-                  name="departmentID"
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <Select
-                      options={options.departments}
-                      value={options.departments.find(
-                        (o) => o.value === field.value,
-                      )}
-                      onChange={(o) => field.onChange(o?.value || "")}
-                      placeholder="Select dept"
-                    />
-                  )}
-                />
-              </div>
-
-              {selectedDeptId && (
-                <div>
-                  <label className="flex items-center gap-2 font-semibold text-gray-700 mb-3">
-                    <Wrench className="w-5 h-5 text-purple-600" /> Tool
-                  </label>
+                <div className="w-full lg:w-[400px]">
                   <Controller
-                    name="tools"
+                    name="rfqId"
                     control={control}
                     render={({ field }) => (
                       <Select
-                        options={options.tools}
-                        value={options.tools.find(
-                          (o) => o.value === field.value,
-                        )}
-                        onChange={(o) => field.onChange(o?.value || "TEKLA")}
+                        options={options.rfqs}
+                        value={options.rfqs.find((o) => o.value === field.value) || null}
+                        onChange={(opt) => field.onChange(opt?.value || "")}
+                        placeholder="Search RFQ..."
+                        isClearable
+                        isSearchable
+                        className="text-sm"
+                        styles={{
+                          control: (base) => ({
+                            ...base,
+                            backgroundColor: "white",
+                            borderRadius: "12px",
+                            padding: "4px 8px",
+                            borderColor: "#e5e7eb",
+                            boxShadow: "none",
+                            "&:hover": { borderColor: "#d1d5db" }
+                          })
+                        }}
                       />
                     )}
                   />
                 </div>
+              </div>
+
+              {selectedRfq && (
+                <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 px-4 py-4 bg-white rounded-xl border border-green-100/50 animate-in fade-in slide-in-from-top-2">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] uppercase font-bold text-gray-400">Project</span>
+                    <p className="text-xs font-bold text-gray-800 truncate">{selectedRfq.projectName}</p>
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] uppercase font-bold text-gray-400">Fabricator</span>
+                    <p className="text-xs font-bold text-gray-800">{selectedRfq.fabricator?.fabName || "N/A"}</p>
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] uppercase font-bold text-gray-400">Tools</span>
+                    <p className="text-xs font-bold text-green-600">{selectedRfq.tools || "TEKLA"}</p>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="px-2 py-0.5 bg-green-50 text-green-700 rounded-md text-[10px] font-black border border-green-100 flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5" /> SYNCED
+                    </div>
+                  </div>
+                </div>
               )}
+            </div>
 
-              {selectedDeptId && (
-                <div>
-                  <label className="flex items-center gap-2 font-semibold text-gray-700 mb-3">
-                    <Users className="w-5 h-5 text-purple-600" /> Team
-                  </label>
-                  <Controller
-                    name="teamID"
-                    control={control}
-                    render={({ field }) => {
-                      const filteredTeams = teamDatas
-                        .filter(
-                          (t) =>
-                            !selectedDeptId ||
-                            t.departmentID === selectedDeptId,
-                        )
-                        .map((t) => ({
-                          label: t.name,
-                          value: t.id,
-                        }));
-
-                      return (
-                        <Select
-                          options={filteredTeams}
-                          value={filteredTeams.find(
-                            (o) => o.value === field.value,
+            {/* Form Sections */}
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
+              {/* Left Column - Core Info */}
+              <div className="xl:col-span-8 space-y-10">
+                <section className="bg-zinc-100 rounded-2xl border border-gray-50 p-8 space-y-8">
+                  <SectionTitle title="Core Identity" className="mb-6" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <Input
+                      label="Project Number *"
+                      
+                      placeholder="Give a unique project number..."
+                      className="bg-gray-50/50 border-gray-200 focus:bg-white transition-all"
+                      {...register("projectNumber", { required: "Required" })}
+                    />
+                    <Input
+                      label="Project Name *"
+                      placeholder="Enter project name..."
+                      className="bg-gray-50/50 border-gray-200 focus:bg-white transition-all"
+                      {...register("name", { required: "Required" })}
+                    />
+                    <div className="md:col-span-2 space-y-3">
+                      <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                        Project Description *
+                      </label>
+                      <div className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50/30">
+                        <Controller
+                          name="description"
+                          control={control}
+                          rules={{ required: "Required" }}
+                          render={({ field }) => (
+                            <RichTextEditor
+                              value={field.value || ""}
+                              onChange={field.onChange}
+                              placeholder="Describe the project scope..."
+                            />
                           )}
-                          onChange={(o) => field.onChange(o?.value || "")}
-                          placeholder="Select team"
-                          isClearable
                         />
-                      );
-                    }}
-                  />
-                </div>
-              )}
-            </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
 
-            {/* Scope Design */}
-            <div className="bg-linear-to-r from-cyan-50 to-blue-50 rounded-3xl p-2 border-2 border-cyan-200">
-              <div className="flex items-center gap-4 mb-8">
-                <Layers className="w-5 h-5 text-cyan-600" />
-                <div>
-                  <h3 className="text-lg md:text-xl  text-cyan-900">
-                    Connection Design Scope
-                  </h3>
-                  <p className="text-cyan-700">
-                    Define connection engineering deliverables
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
-                {[
-                  "connectionDesign::Connection Design",
-                  "miscDesign::Misc Design",
-                  "customerDesign::Customer Design",
-                ].map((item) => {
-                  const [key, label] = item.split("::");
-                  return (
+                <section className="bg-zinc-100 rounded-2xl border border-gray-50 p-8 space-y-8">
+                  <SectionTitle title="Timeline & Resources" className="mb-6" />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <Input label="Estimated Hours" type="number" className="bg-gray-50/50" {...register("estimatedHours")} />
+                    <Input label="Start Date *" type="date" className="bg-gray-50/50" {...register("startDate", { required: "Required" })} />
+                    <Input label="Deadline" type="date" className="bg-gray-50/50" {...register("endDate")} />
+                  </div>
+                </section>
+
+                <section className="bg-zinc-100 rounded-2xl border border-gray-50 p-8 space-y-6">
+                  <SectionTitle title="Documentation" className="mb-6" />
+                  <div className="bg-white border-2 border-dashed border-green-200 rounded-2xl p-10 hover:border-green-300 transition-all group">
                     <Controller
-                      key={key}
-                      name={key}
+                      name="files"
                       control={control}
                       render={({ field }) => (
-                        <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border border-cyan-100">
-                          <ToggleField
-                            label={label}
-                            checked={!!field.value}
-                            onChange={field.onChange}
-                          />
-                        </div>
+                        <MultipleFileUpload onFilesChange={(files) => field.onChange(files)} />
                       )}
                     />
-                  );
-                })}
+                  </div>
+                </section>
               </div>
-            </div>
 
-            {/* Scope */}
-            <div className="bg-linear-to-r from-amber-50 to-orange-50 rounded-3xl p-2 border-2 border-amber-200">
-              <div className="flex items-center gap-4 mb-8">
-                <Wrench className="w-5 h-5 text-amber-600" />
-                <div>
-                  <h3 className="text-lg md:text-xl  text-amber-900">
-                    Detailing Scope
-                  </h3>
-                  <p className="text-amber-700">
-                    Shop & erection drawing deliverables
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
-                {[
-                  "detailingMain::Detailing Main",
-                  "detailingMisc::Detailing Misc",
-                ].map((item) => {
-                  const [key, label] = item.split("::");
-                  return (
-                    <Controller
-                      key={key}
-                      name={key}
-                      control={control}
-                      render={({ field }) => (
-                        <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border border-amber-100">
-                          <ToggleField
-                            label={label}
-                            checked={!!field.value}
-                            onChange={field.onChange}
+              {/* Right Column - Assignments & Scope */}
+              <div className="xl:col-span-4 space-y-10">
+                <section className="bg-zinc-100 rounded-2xl border border-gray-50 p-8 space-y-6">
+                  <SectionTitle title="Leadership" className="mb-6" />
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase">Fabricator</label>
+                      <Controller
+                        name="fabricatorID"
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field }) => (
+                          <Select
+                            options={options.fabricators}
+                            value={options.fabricators.find((o) => o.value === field.value)}
+                            onChange={(o) => field.onChange(o?.value || "")}
+                            placeholder="Select..."
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
                           />
-                        </div>
-                      )}
-                    />
-                  );
-                })}
+                        )}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase">Project Manager</label>
+                      <Controller
+                        name="managerID"
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field }) => (
+                          <Select
+                            options={managerOption}
+                            value={managerOption.find((o) => String(o.value) === String(field.value))}
+                            onChange={(o) => field.onChange(o?.value || "")}
+                            placeholder="Assign..."
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase">Department</label>
+                      <Controller
+                        name="departmentID"
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field }) => (
+                          <Select
+                            options={options.departments}
+                            value={options.departments.find((o) => o.value === field.value)}
+                            onChange={(o) => field.onChange(o?.value || "")}
+                            placeholder="Select..."
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                </section>
+
+                <section className="bg-zinc-100 rounded-2xl border border-gray-50 p-8 space-y-8">
+                  <SectionTitle title="Detailing Scope" className="mb-6" />
+
+                  <div className="space-y-8">
+                    {/* Connection Design */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-green-600">
+                        <Layers size={14} />
+                        <h4 className="text-[10px] font-black uppercase tracking-widest">Engineering</h4>
+                      </div>
+                      <div className="space-y-2">
+                        {["connectionDesign::Connection", "miscDesign::Misc", "customerDesign::Customer"].map((item) => {
+                          const [key, label] = item.split("::");
+                          return (
+                            <Controller
+                              key={key}
+                              name={key}
+                              control={control}
+                              render={({ field }) => (
+                                <div
+                                  onClick={() => field.onChange(!field.value)}
+                                  className={`
+                                    flex items-center justify-between px-4 py-3 rounded-xl border transition-all cursor-pointer text-xs
+                                    ${field.value ? "bg-green-50 border-green-200 text-green-800" : "bg-gray-50/50 border-gray-100 text-gray-600 hover:border-gray-200"}
+                                  `}
+                                >
+                                  <span className="font-bold">{label}</span>
+                                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${field.value ? "border-green-600 bg-green-600" : "border-gray-300 bg-white"}`}>
+                                    {field.value && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                  </div>
+                                </div>
+                              )}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Detailing */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-green-600">
+                        <Wrench size={14} />
+                        <h4 className="text-[10px] font-black uppercase tracking-widest">Detailing</h4>
+                      </div>
+                      <div className="space-y-2">
+                        {["detailingMain::Main Shop", "detailingMisc::Misc Shop"].map((item) => {
+                          const [key, label] = item.split("::");
+                          return (
+                            <Controller
+                              key={key}
+                              name={key}
+                              control={control}
+                              render={({ field }) => (
+                                <div
+                                  onClick={() => field.onChange(!field.value)}
+                                  className={`
+                                    flex items-center justify-between px-4 py-3 rounded-xl border transition-all cursor-pointer text-xs
+                                    ${field.value ? "bg-green-50 border-green-200 text-green-800" : "bg-gray-50/50 border-gray-100 text-gray-600 hover:border-gray-200"}
+                                  `}
+                                >
+                                  <span className="font-bold">{label}</span>
+                                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${field.value ? "border-green-600 bg-green-600" : "border-gray-300 bg-white"}`}>
+                                    {field.value && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                  </div>
+                                </div>
+                              )}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </section>
               </div>
             </div>
 
-            {/* Timeline & Estimation */}
-            <SectionTitle title="Timeline & Estimation" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
-              <Input
-                label="Estimated Hours"
-                type="number"
-                placeholder="1200"
-                {...register("estimatedHours")}
-              />
-              <Input
-                label="Start Date *"
-                type="date"
-                {...register("startDate", { required: "Required" })}
-              />
-              <Input
-                label="Target End Date"
-                type="date"
-                {...register("endDate")}
-              />
-            </div>
-
-            {/* Attachments */}
-            <SectionTitle title="Project Attachments" />
-            <div className="bg-gray-50/70 border-2 border-dashed border-gray-300 rounded-3xl p-10 text-center">
-              <Controller
-                name="files"
-                control={control}
-                render={({ field }) => (
-                  <MultipleFileUpload
-                    onFilesChange={(files) => field.onChange(files)}
-                  />
-                )}
-              />
-            </div>
-
-            {/* Submit */}
-            <div className="flex justify-center w-full pt-10 border-t-2 border-gray-200">
+            {/* Submit Action */}
+            <div className="pt-8 flex justify-end">
               <Button
-                className="w-full flex items-center justify-center gap-3"
                 type="submit"
                 disabled={isSubmitting}
+                className="px-10 py-4 bg-gray-900 hover:bg-green-700 text-white rounded-xl font-bold transition-all shadow-lg flex items-center gap-3"
               >
                 {isSubmitting ? (
-                  <>Creating Project...</>
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                    Creating Project...
+                  </>
                 ) : (
                   <>
-                    <Sparkles className="w-6 h-6" />
-                    Create Project
+                   
+                    Add Project
                   </>
                 )}
               </Button>

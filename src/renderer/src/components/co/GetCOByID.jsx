@@ -269,7 +269,6 @@ const GetCOByID = ({ id, projectId }) => {
               <DataTable
                 columns={responseColumns}
                 data={responses}
-                pageSizeOptions={[5, 10]}
                 onRowClick={(row) => setSelectedResponse(row)}
               />
             ) : (

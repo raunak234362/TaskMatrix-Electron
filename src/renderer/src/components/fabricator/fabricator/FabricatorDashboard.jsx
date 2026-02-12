@@ -103,12 +103,14 @@ const FabricatorDashboard = ({ fabricator }) => {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${row.original.status === "ACTIVE"
-            ? "bg-green-100 text-green-700"
-            : "bg-gray-100 text-gray-700"
-            }`}
-        >
+       <span
+  className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+    row.original.status === "ACTIVE"
+      ? "bg-green-100 text-green-700"
+      : "bg-gray-100 text-gray-700"
+  }`}
+>
+
           {row.original.status}
         </span>
       ),
@@ -138,9 +140,10 @@ const FabricatorDashboard = ({ fabricator }) => {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-12 animate-in fade-in duration-500">
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5 mb-6">
+
         <StatCard
           icon={<Briefcase className="text-blue-600" />}
           label="Total Projects"
@@ -180,8 +183,9 @@ const FabricatorDashboard = ({ fabricator }) => {
       </div>
 
       {/* Projects Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden">
-        <div className="p-4 border-b border-gray-50 flex flex-wrap items-center justify-between gap-2 bg-gray-50/50">
+<div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+
           <h3 className=" text-gray-800 flex items-center gap-2">
             <LayoutDashboard size={18} className="text-green-600" />
             Project Overview
@@ -196,54 +200,55 @@ const FabricatorDashboard = ({ fabricator }) => {
       </div>
 
       {/* RFQs Section (Simplified) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-          <h3 className=" text-gray-800 mb-4 flex items-center gap-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h3 className=" text-gray-800 mb-6 flex items-center gap-2">
             <FileText size={18} className="text-cyan-600" />
             Recent RFQs
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {rfqs.slice(0, 5).map((rfq) => (
               <div
                 key={rfq.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                className="flex items-center justify-between px-4 py-3 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors"
+
               >
                 <div>
                   <p className="font-medium text-gray-800">{rfq.projectName}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 mt-1">
                     {new Date(rfq.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-                <span className="text-xs font-semibold text-cyan-700 bg-cyan-50 px-2 py-1 rounded">
+                <span className="text-xs font-semibold text-cyan-700 bg-cyan-50 px-2.5 py-1 rounded-md">
                   {rfq.status || "PENDING"}
                 </span>
               </div>
             ))}
             {rfqs.length === 0 && (
-              <p className="text-gray-500 text-center py-4 text-sm">
+              <p className="text-gray-500 text-center py-6 text-sm">
                 No RFQs found
               </p>
             )}
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-          <h3 className=" text-gray-800 mb-4 flex items-center gap-2">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h3 className=" text-gray-800 mb-6 flex items-center gap-2">
             <Clock size={18} className="text-orange-600" />
             Timeline Summary
           </h3>
-          <div className="space-y-4">
+          <div className="space-y-5">
             <TimelineItem
               label="Latest Project"
               value={projects[0]?.name || "N/A"}
               date={projects[0]?.startDate}
-              icon={<CheckCircle2 className="text-green-500" size={16} />}
+              icon={<CheckCircle2 className="text-green-500" size={18} />}
             />
             <TimelineItem
               label="Upcoming Deadline"
               value={projects.find((p) => p.status === "ACTIVE")?.name || "N/A"}
               date={projects.find((p) => p.status === "ACTIVE")?.endDate}
-              icon={<Clock className="text-orange-500" size={16} />}
+              icon={<Clock className="text-orange-500" size={18} />}
             />
           </div>
         </div>
@@ -251,19 +256,29 @@ const FabricatorDashboard = ({ fabricator }) => {
     </div>
   );
 };
-
-const StatCard = ({
-  icon,
-  label,
-  value,
-  color,
-}) => (
+const StatCard = ({ icon, label, value, color }) => (
   <div
-    className={`${color} p-3 sm:p-4 rounded-xl border border-white/50 shadow-sm flex flex-col items-center justify-center text-center transition-transform hover:scale-105`}
+    className={`
+      ${color}
+      px-5 py-5
+      rounded-lg
+      border border-gray-100
+      shadow-sm
+      flex flex-col
+      items-center
+      justify-center
+      text-center
+    `}
   >
-    <div className="mb-2 p-2 bg-white rounded-full shadow-sm">{icon}</div>
-    <p className="text-xl sm:text-2xl  text-gray-800">{value}</p>
-    <p className="text-[10px] uppercase tracking-wider font-semibold text-gray-500">
+    <div className="mb-2 p-2 bg-white rounded-md shadow-sm">
+      {icon}
+    </div>
+
+    <p className="text-2xl font-semibold text-gray-800">
+      {value}
+    </p>
+
+    <p className="text-[11px] uppercase tracking-wide font-medium text-gray-500">
       {label}
     </p>
   </div>

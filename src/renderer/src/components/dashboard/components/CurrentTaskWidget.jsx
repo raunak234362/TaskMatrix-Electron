@@ -17,49 +17,45 @@ const CurrentTaskWidget = ({ task, onTaskUpdate }) => {
   }
 
   return (
-    <div className="bg-[#6bbd45] text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+    <div className="bg-primary text-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(22,163,74,0.3)] relative overflow-hidden">
       {/* Background Decorative Circles */}
-      <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 bg-white opacity-5 rounded-full blur-3xl"></div>
+      <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 bg-black opacity-5 rounded-full blur-3xl"></div>
 
       <div className="relative z-10">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-xs font-medium backdrop-blur-sm border border-white/10">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm border border-white/10">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
               In Progress
             </span>
-            <h3 className="text-2xl  mt-3 leading-tight">
+            <h3 className="text-2xl font-black mt-3 leading-tight tracking-tight">
               {task.project?.name || task.estimation?.projectName || 'Untitled Project'}
             </h3>
-            <p className="text-indigo-100 mt-1 flex items-center gap-2">
-              <span className="opacity-80">
-                {task.name || []
-                  (task.estimation?.estimationNumber
-                    ? `Estimation #${task.estimation.estimationNumber}`
-                    : 'Untitled Task')}
-              </span>
+            <p className="text-white/80 mt-1 flex items-center gap-2 text-sm font-bold">
+              {task.name || (task.estimation?.estimationNumber
+                ? `Estimation #${task.estimation.estimationNumber}`
+                : 'Untitled Task')}
             </p>
           </div>
         </div>
 
         <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10 mb-6">
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-xs font-bold">
             <div className="flex items-center gap-2">
-              <Calendar size={16} className="text-indigo-200" />
-              <span className="text-indigo-100">
-                Due: {new Date(task.due_date || task.endDate).toLocaleDateString()}
+              <Calendar size={14} className="text-white/70" />
+              <span className="text-white/90">
+                Deadline: {new Date(task.due_date || task.endDate).toLocaleDateString()}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Note could be added here if we want direct control */}
         <button
-          onClick={() => onTaskUpdate?.()} // Just linking to detail view for now
-          className="w-full py-3 bg-white text-indigo-700 font-semibold rounded-xl hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2 group shadow-lg shadow-black/10"
+          onClick={() => onTaskUpdate?.()}
+          className="w-full py-3 bg-white text-primary font-black rounded-xl hover:bg-green-50 transition-colors flex items-center justify-center gap-2 group shadow-xl shadow-black/10 text-sm uppercase tracking-wider"
         >
-          View Details
+          View Task Details
           <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
         </button>
       </div>

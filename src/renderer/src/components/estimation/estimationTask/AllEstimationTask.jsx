@@ -131,7 +131,7 @@ const AllEstimationTask = ({ estimations, onClose, estimationId, onRefresh }) =>
                                 return <EstimationTaskByID id={estimationUniqueId} onClose={close} />
                             }}
                             searchPlaceholder="Search tasks..."
-                            pageSizeOptions={[5, 10, 25]}
+
                         />
                     ) : (
                         <div className="text-center text-gray-700 py-10">No estimation tasks found.</div>

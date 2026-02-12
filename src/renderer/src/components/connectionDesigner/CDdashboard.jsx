@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
 const DashboardSkeleton = () => (
-    <div className="p-6 space-y-6 animate-pulse">
+    <div className="p-6 space-y-6 animate-pulse ">
         {/* Snapshot Skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
@@ -150,15 +150,16 @@ const CDdashboard = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="h-full p-4 sm:p-6 space-y-4 sm:space-y-8 bg-transparent overflow-y-auto custom-scrollbar relative"
+            className="h-full p-4 sm:p-6 flex flex-col gap-12 sm:gap-8 bg-transparent overflow-y-auto custom-scrollbar relative"
         >
             {/* Header if needed */}
-
+        
             {/* SECTION B — EXECUTIVE SNAPSHOT */}
             <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.1 }}
+            
             >
                 <CDSnapshotCards stats={stats} />
             </motion.div>
@@ -176,6 +177,7 @@ const CDdashboard = () => {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
+                className="space-y-8"
             >
                 <CDCapacityTable recentActivity={recentActivity} />
             </motion.div>

@@ -23,8 +23,8 @@ const SubmittalListModal = ({ isOpen, onClose, data }) => {
       cell: ({ row }) => (
         <span
           className={`px-3 py-1 rounded-full text-xs  ${row.original.status === 'PENDING'
-              ? 'bg-amber-100 text-amber-700'
-              : 'bg-green-100 text-green-700'
+            ? 'bg-amber-100 text-amber-700'
+            : 'bg-green-100 text-green-700'
             }`}
         >
           {row.original.status}
@@ -67,7 +67,7 @@ const SubmittalListModal = ({ isOpen, onClose, data }) => {
             columns={columns}
             data={data}
             searchPlaceholder="Search submittals..."
-            pageSizeOptions={[5, 10, 25]}
+
           />
         </div>
 

@@ -161,7 +161,7 @@ const AllCDEngineer = ({ onClose, designerData }) => {
               data={engineers}
               onRowClick={handleRowClick}
               detailComponent={({ row }) => <GetEmployeeByID id={row.id} />}
-              pageSizeOptions={[5, 10, 25]}
+
             />
           ) : (
             <div className="text-center text-gray-700 py-10">

@@ -50,7 +50,7 @@ const LineItemGroup = ({ estimationId, refreshTrigger }) => {
         data={lineItem}
         onRowClick={handleRowClick}
         searchPlaceholder="Search groups..."
-        pageSizeOptions={[5, 10, 25]}
+
       />
       {selectedGroupId && (
         <LineItemList id={selectedGroupId} onClose={() => setSelectedGroupId(null)} />

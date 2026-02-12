@@ -115,7 +115,7 @@ const AllRFI = ({ rfiData = [] }) => {
         data={rfis}
 
         detailComponent={({ row }) => <GetRFIByID id={row.id} />}
-        pageSizeOptions={[5, 10, 25]}
+
       />
 
     </div>

@@ -8,39 +8,33 @@ const StatCard = ({
   icon: Icon,
   colorClass,
   trend,
-  trendColor = 'bg-white/20'
+  trendColor = 'bg-black/20'
 }) => (
   <div
-    className={`p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500 group relative overflow-hidden ${colorClass} text-white`}
+    className={`p-5 rounded-xl border border-black/5 shadow-[0_10px_10px_rgba(22,163,74,0.1),0_10px_30px_rgba(0,0,0,0.05)] transition-all duration-700 group hover:shadow-[0_30px_70px_rgba(22,163,74,0.15),0_20px_40px_rgba(0,0,0,0.1)] hover:-translate-y-2 relative overflow-hidden bg-green-50/10`}
   >
-    {/* Decorative Background Elements */}
-    <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white opacity-10 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700"></div>
-    <div className="absolute bottom-0 left-0 -ml-8 -mb-8 w-24 h-24 bg-black opacity-5 rounded-full blur-2xl"></div>
-
-    <div className="relative z-10 flex flex-col h-full justify-between gap-6">
+    <div className="flex flex-col h-full justify-between gap-5 relative z-10">
       <div className="flex items-start justify-between">
-        <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl border border-white/20 group-hover:rotate-12 transition-transform duration-500">
-          <Icon className="w-6 h-6 text-white" />
+        <div className="p-5 bg-white rounded-3xl shadow-lg group-hover:bg-primary group-hover:text-white transition-all duration-500 scale-110">
+          <Icon className="w-8 h-8 text-primary group-hover:text-green-700 transition-colors duration-500" />
         </div>
         {trend && (
           <span
-            className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full ${trendColor} text-white backdrop-blur-md flex items-center gap-1 border border-white/20 uppercase tracking-wider`}
+            className={`text-xs font-black px-5 py-2 rounded-2xl ${trendColor} bg-green-100 text-black uppercase tracking-widest shadow-lg`}
           >
-            <TrendingUp size={12} />
             {trend}
           </span>
         )}
       </div>
 
       <div>
-        <p className="text-xs  text-white/70 uppercase tracking-widest">{title}</p>
-        <h3 className="text-4xl  text-white mt-2 tracking-tight group-hover:translate-x-1 transition-transform duration-500">
+        <p className="text-sm font-black text-black/40 uppercase tracking-[0.2em]">{title}</p>
+        <h3 className="text-2xl font-semibold text-black mt-3 tracking-tighter">
           {value}
         </h3>
         {subtext && (
-          <div className="mt-4 pt-4 border-t border-white/10">
-            <p className="text-[11px] text-white/80 font-semibold flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+          <div className="mt-6 pt-5 border-t border-black/10">
+            <p className="text-xs text-black font-black uppercase tracking-wide">
               {subtext}
             </p>
           </div>
@@ -48,7 +42,7 @@ const StatCard = ({
       </div>
     </div>
   </div>
-)
+);
 
 const UserStatsWidget = ({ stats, loading }) => {
   const formatHours = (decimalHours) => {
@@ -62,7 +56,7 @@ const UserStatsWidget = ({ stats, loading }) => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-44 bg-gray-100 rounded-3xl animate-pulse"></div>
+          <div key={i} className="h-40 bg-white border border-gray-100 rounded-[4px] animate-pulse"></div>
         ))}
       </div>
     )
@@ -84,9 +78,8 @@ const UserStatsWidget = ({ stats, loading }) => {
         value={projectsCount}
         subtext={`${totalTasks} Total Tasks`}
         icon={Briefcase}
-        // colorClass="bg-[#6bbd45]"
-        colorClass="bg-[#6bbd45]"
         trend="Active"
+        trendColor="bg-primary"
       />
 
       {/* Allocated Hours */}
@@ -95,8 +88,8 @@ const UserStatsWidget = ({ stats, loading }) => {
         value={formatHours(allocatedHours)}
         subtext="Total Estimated Time"
         icon={Hourglass}
-        colorClass="bg-[#6bbd45]"
         trend="Planned"
+        trendColor="bg-primary"
       />
 
       {/* Worked Hours */}
@@ -105,9 +98,8 @@ const UserStatsWidget = ({ stats, loading }) => {
         value={formatHours(workedHours)}
         subtext={`${formatHours(Math.max(0, allocatedHours - workedHours))} Remaining`}
         icon={Clock}
-        colorClass="bg-[#6bbd45]"
         trend={workedHours > allocatedHours ? 'Overtime' : 'On Track'}
-        trendColor={workedHours > allocatedHours ? 'bg-red-500/40' : 'bg-white/20'}
+        trendColor={workedHours > allocatedHours ? 'bg-red-500' : 'bg-primary'}
       />
 
       {/* Efficiency */}
@@ -117,8 +109,8 @@ const UserStatsWidget = ({ stats, loading }) => {
           value={`${efficiency}%`}
           subtext="Performance Score"
           icon={CalendarCheck}
-          colorClass="bg-[#6bbd45]"
           trend={efficiency >= 100 ? 'Optimal' : 'Improving'}
+          trendColor="bg-primary"
         />
       ) : (
         <div className="p-6 rounded-3xl shadow-sm border border-dashed border-gray-300 bg-gray-50/50 flex flex-col items-center justify-center text-center gap-3 group hover:border-indigo-300 transition-colors duration-500">

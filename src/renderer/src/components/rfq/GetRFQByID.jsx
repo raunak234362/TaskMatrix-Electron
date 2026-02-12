@@ -145,38 +145,28 @@ const GetRFQByID = ({ id }) => {
     {
       accessorKey: "createdByRole",
       header: "From",
-      cell: ({ row }) => (
-        <span className="font-medium text-sm">
-          {row.original.createdByRole === "CLIENT" ? "Client" : "WBT Team"}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const role = row.original.createdByRole === "CLIENT" ? "Client" : "WBT Team";
+        return (
+          <span className="font-bold text-gray-900 text-sm">
+            {role}
+          </span>
+        );
+      }
     },
-    // {
-    //   accessorKey: "description",
-    //   header: "Message",
-    //   cell: ({ row }) => (
-    //     <p className="truncate max-w-[180px]">{row.original.description}</p>
-    //   ),
-    // },
-
     {
       accessorKey: "description",
       header: "Message",
       cell: ({ row }) => {
         const plainText =
-          row.original.description?.replace(/<[^>]*>?/gm, "") || "";
-        return <p className="truncate max-w-[180px]">{plainText}</p>;
-      },
-    },
-    {
-      accessorKey: "files",
-      header: "Files",
-      cell: ({ row }) => {
-        const count = row.original.files?.length ?? 0;
-        return count > 0 ? (
-          <span className="text-green-700 font-medium">{count} file(s)</span>
-        ) : (
-          <span className="text-gray-400">—</span>
+          row.original.description?.replace(/<[^>]*>?/gm, "") || "No message";
+        return (
+          <div className="flex flex-col max-w-[200px]">
+            <p className="truncate text-sm font-bold text-gray-700">{plainText}</p>
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+              {row.original.files?.length || 0} Attachments
+            </span>
+          </div>
         );
       },
     },
@@ -184,8 +174,15 @@ const GetRFQByID = ({ id }) => {
       accessorKey: "createdAt",
       header: "Created",
       cell: ({ row }) => (
-        <span className="text-gray-700 text-sm">
-          {new Date(row.original.createdAt).toLocaleString()}
+        <span className="text-gray-500 text-xs font-bold uppercase tracking-widest leading-none">
+          {new Date(row.original.createdAt).toLocaleDateString("en-IN", {
+            day: '2-digit',
+            month: 'short'
+          })}
+          <br />
+          <span className="text-[10px] opacity-60">
+            {new Date(row.original.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </span>
         </span>
       ),
     },
@@ -194,7 +191,7 @@ const GetRFQByID = ({ id }) => {
       header: "Status",
       cell: ({ row }) => (
         <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${row.original.status === "OPEN"
+          className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${row.original.status === "OPEN"
             ? "bg-green-100 text-green-700"
             : "bg-yellow-100 text-yellow-700"
             }`}
@@ -377,7 +374,7 @@ const GetRFQByID = ({ id }) => {
               <DataTable
                 columns={responseColumns}
                 data={rfq.responses}
-                pageSizeOptions={[5, 10]}
+
                 onRowClick={(row) => setSelectedResponse(row)} // 👈 open modal
               />
             ) : (

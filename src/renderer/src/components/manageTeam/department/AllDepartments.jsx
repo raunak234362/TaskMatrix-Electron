@@ -66,8 +66,8 @@ const AllDepartments = () => {
         data={departments}
         onRowClick={handleRowClick}
         detailComponent={({ row }) => <GetDepartmentById id={row.id || ""} />}
-        // onDelete={handleDelete}
-        pageSizeOptions={[5, 10, 25]}
+      // onDelete={handleDelete}
+
       />
     </div>
   );

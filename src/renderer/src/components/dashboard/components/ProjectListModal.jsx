@@ -80,7 +80,7 @@ const ProjectListModal = ({ isOpen, onClose, status, projects, onProjectSelect }
             data={projects}
             onRowClick={onProjectSelect}
             searchPlaceholder="Search projects..."
-            pageSizeOptions={[5, 10, 25]}
+
           />
         </div>
 

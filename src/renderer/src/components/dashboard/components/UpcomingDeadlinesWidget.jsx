@@ -18,13 +18,13 @@ const UpcomingDeadlinesWidget = ({ tasks = [] }) => {
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full flex flex-col">
+    <div className="bg-white p-6 rounded-2xl border border-primary/5 shadow-[0_15px_40px_rgba(22,163,74,0.08),0_10px_20px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.15),0_15px_30px_rgba(0,0,0,0.1)] h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className=" text-gray-800 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-indigo-500" />
+        <h3 className="text-sm font-black text-primary uppercase tracking-wider flex items-center gap-2">
+          <Calendar className="w-5 h-5" />
           Upcoming Deadlines
         </h3>
-        <span className="text-xs font-semibold bg-gray-100 text-gray-600 px-2 py-1 rounded-md">
+        <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-1 rounded-full uppercase tracking-widest shadow-sm">
           {upcoming.length} Pending
         </span>
       </div>
@@ -37,30 +37,27 @@ const UpcomingDeadlinesWidget = ({ tasks = [] }) => {
             return (
               <div
                 key={task.id}
-                className="flex items-center p-3 rounded-xl border border-gray-100 hover:border-indigo-100 hover:bg-indigo-50/30 transition-all group"
+                className="flex items-center p-3 rounded-xl border border-primary/5 bg-primary/2 hover:bg-primary/5 hover:border-primary/20 transition-all group hover:shadow-md"
               >
-                <div className={`p-2 rounded-lg ${urgency} mr-3`}>
+                <div className={`p-2 rounded-lg ${urgency} mr-3 shadow-sm`}>
                   <AlertCircle size={18} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4
-                    className="text-sm font-semibold text-gray-800 truncate"
+                    className="text-xs font-black text-gray-800 truncate uppercase tracking-tight"
                     title={task.project?.name || task.estimation?.projectName}
                   >
                     {task.project?.name || task.estimation?.projectName || 'Untitled'}
                   </h4>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Due {format(new Date(dueDate), 'MMM dd, yyyy')}
+                  <p className="text-[10px] text-gray-500 mt-0.5 font-bold">
+                    DUE: {format(new Date(dueDate), 'MMM dd, yyyy')}
                   </p>
-                </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  {/* Optional action button */}
                 </div>
               </div>
             )
           })
         ) : (
-          <div className="h-full flex flex-col items-center justify-center text-gray-400 text-sm">
+          <div className="h-full flex flex-col items-center justify-center text-gray-400 text-xs font-bold uppercase tracking-widest">
             <p>No upcoming deadlines!</p>
           </div>
         )}

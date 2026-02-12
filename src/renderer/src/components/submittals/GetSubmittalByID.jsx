@@ -143,7 +143,7 @@ const GetSubmittalByID = ({ id }) => {
                 columns={responseColumns}
                 data={submittal.submittalsResponse}
                 onRowClick={(row) => setSelectedResponse(row)}
-                pageSizeOptions={[5, 10]}
+
               />
             ) : (
               <p className="text-gray-700 italic">No responses yet.</p>

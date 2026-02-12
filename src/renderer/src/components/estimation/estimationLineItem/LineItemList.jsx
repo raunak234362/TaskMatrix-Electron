@@ -424,7 +424,7 @@ const LineItemList = ({ id, onClose }) => {
           columns={columns}
           data={lineItem}
           searchPlaceholder="Search line items..."
-          pageSizeOptions={[10, 20, 40]}
+
         />
       </div>
     </div>

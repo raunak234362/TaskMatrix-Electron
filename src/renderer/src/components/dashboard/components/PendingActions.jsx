@@ -38,34 +38,29 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
   const colorClasses = {
     amber: {
       bg: 'bg-amber-50',
-      hoverBg: 'bg-amber-100',
-      text: 'text-amber-600'
+      text: 'text-amber-700'
     },
     purple: {
-      bg: 'bg-purple-50',
-      hoverBg: 'bg-purple-100',
-      text: 'text-purple-600'
+      bg: 'bg-indigo-50',
+      text: 'text-indigo-700'
     },
     rose: {
-      bg: 'bg-rose-50',
-      hoverBg: 'bg-rose-100',
-      text: 'text-rose-600'
+      bg: 'bg-red-50',
+      text: 'text-red-700'
     },
     cyan: {
-      bg: 'bg-cyan-50',
-      hoverBg: 'bg-cyan-100',
-      text: 'text-cyan-600'
+      bg: 'bg-primary/5',
+      text: 'text-primary'
     }
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-      <h3 className="font-semibold text-lg text-gray-800 mb-6 flex items-center gap-3">
-        <ClipboardList className="text-green-600" size={24} />
-        Pending Actions
-      </h3>
+    <div className="bg-white p-6 rounded-3xl border border-primary/5 shadow-[0_15px_40px_rgba(22,163,74,0.08),0_10px_20px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.15),0_15px_30px_rgba(0,0,0,0.1)]">
+      <div className="flex items-center justify-between mb-6 px-1">
+        <h2 className="text-base font-black text-primary uppercase tracking-[0.15em]">Pending Actions</h2>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {actions.map((action) => {
           const colors = colorClasses[action.color]
 
@@ -83,24 +78,21 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
                   onActionClick(typeMap[action.title])
                 }
               }}
-              className="flex flex-row items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-200 cursor-pointer group"
+              className="flex items-center gap-4 p-5 rounded-2xl border border-primary/5 bg-green-50/20 hover:bg-green-50/50 hover:border-primary/20 transition-all duration-300 cursor-pointer group hover:shadow-lg hover:-translate-y-0.5"
             >
               <div
-                className={`p-3 rounded-lg ${colors.bg} ${colors.text} group-hover:${colors.hoverBg} transition-colors`}
+                className={`p-3 rounded-xl ${colors.bg} ${colors.text} shadow-md shrink-0 transition-all group-hover:scale-105`}
               >
-                <action.icon size={24} />
+                <action.icon size={22} />
               </div>
 
-              <div className="flex flex-col">
-                <span className="font-semibold text-gray-700">{action.title}</span>
-                <span
-                  className="text-2xl  mt-1"
-                  style={{ color: colors.text.replace('text-', '#') }}
-                >
+              <div className="flex flex-col text-left">
+                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{action.title}</span>
+                <span className={`text-4xl font-black mt-1 tracking-tight ${colors.text}`}>
                   {action.count}
                 </span>
-                <span className="text-xs text-gray-500 uppercase tracking-wider mt-2">
-                  {action.subtitle} - {action.subcount}
+                <span className="text-[10px] text-gray-400 font-bold uppercase mt-1 tracking-wider">
+                  {action.subtitle}: {action.subcount || 0}
                 </span>
               </div>
             </div>

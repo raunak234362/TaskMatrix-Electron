@@ -1,12 +1,5 @@
-@import 'tailwindcss';
-
-@theme {
-  --color-primary: #6bbd45;
-  --color-primary-foreground: #ffffff;
-  --color-ring: #6bbd45;
-  --color-background: #6bbd45;
-}
 @import './base.css';
+@import 'tailwindcss';
 
 html,
 body,
@@ -51,18 +44,18 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #6bbd45;
+  background: #166534; /* Darker green (green-800) for better visibility */
   border-radius: 9999px;
-  border: 2px solid transparent;
-  background-clip: content-box;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background-clip: padding-box;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #559e35;
+  background: #14532d; /* Even darker on hover (green-900) */
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #f0fdf4;
+  background: rgba(0, 0, 0, 0.05);
 }
 
 /* Laptop Responsive "Shrink" Utility */

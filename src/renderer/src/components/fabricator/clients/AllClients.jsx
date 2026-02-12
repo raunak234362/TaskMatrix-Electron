@@ -177,7 +177,7 @@ const AllClients = ({ fabricator, onClose }) => {
               data={clients}
               onRowClick={handleRowClick}
               detailComponent={({ row }) => <GetEmployeeByID id={row.id} />}
-              pageSizeOptions={[5, 10, 25]}
+
             />
           )}
         </div>

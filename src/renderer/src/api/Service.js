@@ -1705,6 +1705,21 @@ class Service {
     }
   }
 
+  //delete Task by ID
+  static async DeleteTaskById(id) {
+    try {
+      const response = await api.delete(`task/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Task deleted by ID:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot delete Task', error)
+    }
+  }
+
   //Task Start
   static async TaskStart(id) {
     try {

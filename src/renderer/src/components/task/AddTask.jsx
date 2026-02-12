@@ -32,6 +32,15 @@ const formatMinutesToHHMM = (minutes) => {
   return `${isNegative ? "-" : ""}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 };
 
+const parseHHMMToMinutes = (hhmm) => {
+  if (!hhmm || typeof hhmm !== "string") return 0;
+  const parts = hhmm.split(":");
+  if (parts.length !== 2) return 0;
+  const h = parseInt(parts[0], 10) || 0;
+  const m = parseInt(parts[1], 10) || 0;
+  return h * 60 + m;
+};
+
 const AddTask = () => {
   const [taskCategory, setTaskCategory] = useState("MILESTONE");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -243,10 +252,12 @@ const AddTask = () => {
             String(selectedWbsType).toLowerCase();
           return String(taskId) === String(selectedWbsId) && typeMatch;
         });
-        const totalMinutes = filtered.reduce(
-          (sum, t) => sum + Number(t.hours || 0),
-          0,
-        );
+        const totalMinutes = filtered.reduce((sum, t) => {
+          if (t.allocationLog?.allocatedHours) {
+            return sum + parseHHMMToMinutes(t.allocationLog.allocatedHours);
+          }
+          return sum + Number(t.hours || 0);
+        }, 0);
         setExistingWbsHours(totalMinutes / 60);
       } else if (selectedWbs?.tasks && selectedWbs.tasks.length > 0) {
         // Use tasks from the object if projectTasks isn't loaded/available
@@ -261,11 +272,14 @@ const AddTask = () => {
             );
           }
         });
-        const total = filtered.reduce(
-          (sum, t) => sum + (parseFloat(t.allocationLog?.allocatedHours) || 0),
-          0,
-        );
-        setExistingWbsHours(total);
+        const totalMin = filtered.reduce((sum, t) => {
+          if (t.allocationLog?.allocatedHours) {
+            return sum + parseHHMMToMinutes(t.allocationLog.allocatedHours);
+          }
+          const hrs = parseFloat(t.hours) || 0;
+          return sum + (hrs * 60);
+        }, 0);
+        setExistingWbsHours(totalMin / 60);
       } else {
         setExistingWbsHours(0);
       }
@@ -427,37 +441,9 @@ const AddTask = () => {
         { label: "New WBS Item", value: "New WBS Item" },
       ];
     })()
-    : filteredWbsItems.flatMap((w) => {
+    : filteredWbsItems.map((w) => {
       const isChecking = selectedWbsType?.toLowerCase().includes("checking");
       const bundleName = w.name || w.bundle?.name || "Unnamed Bundle";
-
-      if (w.wbs && Array.isArray(w.wbs)) {
-        return w.wbs.map((item) => {
-          const totalMinutes = isChecking
-            ? item.totalCheckHr || 0
-            : item.totalExecHr || 0;
-
-          // Calculate existing hours for this specific WBS item
-          let itemExistingHours = 0;
-          const filtered = projectTasks.filter((t) => {
-            const taskId = t.project_bundle_id || t.wbs_id;
-            const typeMatch =
-              !selectedWbsType ||
-              String(t.wbsType).toLowerCase() ===
-              String(selectedWbsType).toLowerCase();
-            return String(taskId) === String(item.id) && typeMatch;
-          });
-          itemExistingHours =
-            filtered.reduce((sum, t) => sum + Number(t.hours || 0), 0) / 60;
-
-          const remainingMinutes = totalMinutes - itemExistingHours * 60;
-
-          return {
-            label: `${bundleName} - ${item.wbsTemplate?.name || item.name || "Unnamed Activity"} (${formatMinutesToHHMM(remainingMinutes)} remaining)`,
-            value: item.id,
-          };
-        });
-      }
 
       // Fallback if no nested wbs items
       const totalMinutes = isChecking ? w.totalCheckHr || 0 : w.totalExecHr || 0;
@@ -473,10 +459,14 @@ const AddTask = () => {
           typeMatch
         );
       });
-      existingHours =
-        filtered.reduce((sum, t) => sum + Number(t.hours || 0), 0) / 60;
+      const existingMinutes = filtered.reduce((sum, t) => {
+        if (t.allocationLog?.allocatedHours) {
+          return sum + parseHHMMToMinutes(t.allocationLog.allocatedHours);
+        }
+        return sum + Number(t.hours || 0);
+      }, 0);
 
-      const remainingMinutes = totalMinutes - existingHours * 60;
+      const remainingMinutes = totalMinutes - existingMinutes;
 
       return {
         label: `${bundleName} (${formatMinutesToHHMM(remainingMinutes)} remaining)`,
@@ -989,7 +979,7 @@ const AddTask = () => {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3 bg-primary hover:bg-primary/80 text-white  shadow-lg shadow-indigo-200 transition-all active:scale-95 disabled:opacity-50"
+                    className="w-full py-3 bg-[#6bbd45] hover:bg-primary/80 text-white  shadow-lg shadow-indigo-200 transition-all active:scale-95 disabled:opacity-50"
                   >
                     {isSubmitting ? "Assigning..." : "Confirm & Assign Tasks"}
                   </Button>

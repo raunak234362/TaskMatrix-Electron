@@ -73,7 +73,7 @@ const AllWBS = ({ id, stage }) => {
       accessorKey: "bundleKey",
       header: "Bundle Name",
       cell: ({ row }) => (
-        <span className="font-medium text-gray-700">
+        <span className="font-black text-gray-900">
           {row.original.name ||
             row.original.bundle?.name ||
             row.original.bundleKey ||
@@ -85,32 +85,34 @@ const AllWBS = ({ id, stage }) => {
       accessorKey: "stage",
       header: "Stage",
       cell: ({ row }) => (
-        <span className="text-gray-700">{row.original.stage || "—"}</span>
+        <span className="text-sm font-bold text-gray-600 tracking-tight uppercase">
+          {row.original.stage || "—"}
+        </span>
       ),
     },
     {
       accessorKey: "totalQtyNo",
-      header: "Total Quantity",
+      header: "Quantity",
       cell: ({ row }) => (
-        <span className="text-gray-700">
+        <span className="text-sm font-bold text-gray-700">
           {row.original.totalQtyNo || 0}
         </span>
       ),
     },
     {
       accessorKey: "totalExecHr",
-      header: "Total Exec Hrs",
+      header: "Exec Time",
       cell: ({ row }) => (
-        <span className="text-gray-700">
+        <span className="text-sm font-bold text-gray-600">
           {formatMinutesToTime(row.original.totalExecHr)}
         </span>
       ),
     },
     {
       accessorKey: "totalCheckHr",
-      header: "Total Check Hrs",
+      header: "Check Time",
       cell: ({ row }) => (
-        <span className="text-gray-700">
+        <span className="text-sm font-bold text-gray-600">
           {formatMinutesToTime(row.original.totalCheckHr)}
         </span>
       ),
@@ -125,9 +127,9 @@ const AllWBS = ({ id, stage }) => {
   // ✅ Loading state
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-10 text-gray-700">
-        <Loader2 className="w-5 h-5 animate-spin mr-2" />
-        Loading WBS data...
+      <div className="flex justify-center items-center py-20 text-gray-400">
+        <Loader2 className="w-8 h-8 animate-spin mb-2 opacity-20" />
+        <span className="text-sm font-black uppercase tracking-widest opacity-40">Loading WBS...</span>
       </div>
     );
   }
@@ -135,32 +137,31 @@ const AllWBS = ({ id, stage }) => {
   // ✅ Error state
   if (error) {
     return (
-      <div className="flex justify-center items-center py-10 text-red-600">
-        <AlertCircle className="w-5 h-5 mr-2" />
-        {error}
+      <div className="flex justify-center items-center py-20 text-red-400">
+        <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
+        <span className="text-sm font-black uppercase tracking-widest opacity-60">{error}</span>
       </div>
     );
   }
 
+  // ✅ Table configuration update
   return (
-    <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-      <div className="flex justify-between items-center mb-4">
+    <div className="bg-[#fcfdfc] min-h-[400px] p-2 animate-in fade-in duration-700">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-lg font-semibold text-gray-700 mb-3">
-            Work Breakdown Structure (WBS)
+          <h2 className="text-lg font-black text-gray-900 tracking-tight uppercase">
+            Work Breakdown Structure
+            <span className="text-primary/40 ml-2">{wbsBundles.length}</span>
           </h2>
-          <p className="text-sm text-gray-700">
-            Total Bundles:{" "}
-            <span className="font-semibold">
-              {wbsBundles.length}
-            </span>
-          </p>
         </div>
 
         {(userRole === "admin" ||
           userRole === "operation_executive" ||
           userRole === "estimation_head") && (
-            <Button onClick={() => setShowFetchTemplate(true)}>
+            <Button
+              onClick={() => setShowFetchTemplate(true)}
+              className="text-[10px] font-black uppercase tracking-widest py-2 px-4 bg-gray-900 text-white rounded-xl shadow-md hover:bg-gray-800 transition-all border-none"
+            >
               Add New Bundle
             </Button>
           )}
@@ -170,7 +171,7 @@ const AllWBS = ({ id, stage }) => {
         columns={columns}
         data={wbsBundles}
         onRowClick={canViewDetails ? handleRowClick : undefined}
-        pageSizeOptions={[10, 25, 50, 100]}
+        disablePagination={true}
         initialSorting={[
           { id: "totalQtyNo", desc: true },
           { id: "bundleKey", desc: false },

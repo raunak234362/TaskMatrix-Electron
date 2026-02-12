@@ -32,8 +32,10 @@ const Layout = () => {
   };
 
   return (
-    // Outer container matches the Sidebar's Green Theme (Brand Color #6bbd45)
-    <div className="flex h-screen w-screen overflow-hidden">
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-200 font-sans relative">
+      {/* Black ambient shadow to tone down */}
+      <div className="absolute inset-0 bg-black/5 pointer-events-none" />
+
       {/* Sidebar Area */}
       <div className="hidden md:flex relative z-10">
         <Sidebar
@@ -46,7 +48,7 @@ const Layout = () => {
       {/* Mobile Sidebar Overlay */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 z-40 bg-black/60 md:hidden backdrop-blur-sm transition-opacity"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
@@ -60,16 +62,16 @@ const Layout = () => {
         />
       </div>
 
-      {/* Main Content Area - White Card effect */}
-      <div className="flex flex-col flex-1 min-h-0  p-0 md:p-2 pl-0">
-        <div className="flex-1 rounded-md overflow-hidden flex flex-col relative transition-all">
+      {/* Main Content Area - Distinguishable White Card with Black Shadow */}
+      <div className="flex flex-col flex-1 min-h-0 relative z-10 p-3 md:p-4 md:pl-0">
+        <div className="flex-1 flex flex-col relative transition-all overflow-hidden bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/40">
 
-          {/* Optional Header is needed globally, it goes here inside the white card */}
-          <div className="px-2 pt-2">
+          {/* Header inside main area */}
+          <div className="border-b border-slate-200 bg-slate-50/50 shadow-sm z-20">
             <Header isMinimized={isMinimized} toggleSidebar={toggleSidebar} />
           </div>
 
-          <main className="flex-1 w-full overflow-y-auto custom-scrollbar">
+          <main className="flex-1 w-full overflow-y-auto custom-scrollbar p-2 bg-gray-50/20">
             <Outlet />
           </main>
         </div>

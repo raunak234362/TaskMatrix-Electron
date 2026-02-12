@@ -103,8 +103,10 @@ const WBTDashboard = () => {
 
   const parseDurationToHours = (duration) => {
     if (!duration) return 0
+    if (typeof duration === 'number') return duration
+
     // Handle formats like "10:30", "10h 30m", "10"
-    const parts = duration.split(/[:\s]+/)
+    const parts = String(duration).split(/[:\s]+/)
     let hours = 0
     let minutes = 0
 
@@ -119,7 +121,16 @@ const WBTDashboard = () => {
   }
 
   const calculateHours = (task) => {
-    const allocated = parseDurationToHours(task.duration)
+    // Try allocationLog first as it's the source for planned hours
+    let allocated = 0
+    if (task.allocationLog?.allocatedHours) {
+      allocated = parseDurationToHours(task.allocationLog.allocatedHours)
+    } else if (task.duration) {
+      allocated = parseDurationToHours(task.duration)
+    } else if (task.hours) {
+      allocated = Number(task.hours) || 0
+    }
+
     const worked =
       (task.workingHourTask || []).reduce(
         (acc, wh) => acc + (Number(wh.duration_seconds) || 0),
@@ -254,28 +265,33 @@ const WBTDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8 overflow-y-auto custom-scrollbar">
+    <div className="flex flex-col gap-8 p-1">
       <Suspense fallback={<DashboardSkeleton />}>
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <div className="flex items-center gap-4">
-            {!isAdminRole && (
-              <div className="p-3 bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-200">
-                <LayoutDashboard className="w-8 h-8 text-white" />
-              </div>
-            )}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-1">
+          <div>
+            <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+              {getGreeting()}, {sessionStorage.getItem('username')?.split(' ')[0]}
+            </h2>
+            <p className="text-base text-gray-500 mt-1 font-medium">
+              Here is what&apos;s happening with your projects today.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 text-sm font-black text-primary bg-green-50 px-5 py-2.5 rounded-xl border border-primary/10 shadow-sm">
+            <Calendar className="w-5 h-5 text-primary" />
+            <span className="uppercase tracking-widest">{format(new Date(), 'MMMM dd, yyyy')}</span>
           </div>
         </div>
 
         {isAdminRole ? (
           /* ---------- ADMIN DASHBOARD LAYOUT ---------- */
-          <div className="flex flex-col gap-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="flex flex-col gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <ProjectStats stats={adminData.projectStats} onCardClick={handleProjectStatClick} />
               <PendingActions dashboardStats={adminData.dashboardStats} onActionClick={handleActionClick} />
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
               {userRole === 'project_manager_officer' && (
                 <InvoiceTrends invoices={adminData.invoices} />
               )}
@@ -287,50 +303,57 @@ const WBTDashboard = () => {
           </div>
         ) : (
           /* ---------- STAFF DASHBOARD LAYOUT ---------- */
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-8">
             {/* Stats Overview */}
-            <div>
-              <UserStatsWidget stats={userStats} loading={loading} />
-            </div>
+            <UserStatsWidget stats={userStats} loading={loading} />
 
             {/* Main Content Grid */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 my-5 z-50 gap-5">
-              {/* Left Column (Focus & Deadlines) */}
-              {/* Current Focus */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+              {/* Left Column (Focus) */}
               <div className="space-y-4">
-                <h2 className="text-xl  text-slate-800 flex items-center gap-2 px-1">
-                  <Clock className="w-5 h-5 text-indigo-500" />
-                  Current Focus
-                </h2>
+                <div className="flex items-center gap-2 px-1">
+                  <div className="p-1.5 bg-green-50 rounded-[4px]">
+                    <Clock className="w-4 h-4 text-primary" />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+                    Current Focus
+                  </h3>
+                </div>
                 <CurrentTaskWidget
                   task={currentTask}
                   onTaskUpdate={() => setDetailTaskId(currentTask?.id)}
                 />
               </div>
 
-              {/* Upcoming Tasks */}
+              {/* Middle Column (Deadlines) */}
               <div className="space-y-4">
-                <h2 className="text-xl  text-slate-800 flex items-center gap-2 px-1">
-                  <CheckCircle2 className="w-5 h-5 text-blue-500" />
-                  Upcoming Deadlines
-                </h2>
+                <div className="flex items-center gap-2 px-1">
+                  <div className="p-1.5 bg-blue-50 rounded-[4px]">
+                    <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+                    Upcoming Deadlines
+                  </h3>
+                </div>
                 <UpcomingDeadlinesWidget
                   tasks={tasks}
                   onTaskClick={(id) => setDetailTaskId(id)}
                 />
               </div>
-              <div className="">
-                <h2 className="text-xl  text-slate-800 flex items-center gap-2 px-1">
-                  <Briefcase className="w-5 h-5 text-pink-500" />
-                  Notes & Updates
-                </h2>
+
+              {/* Right Column (Notes) */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 px-1">
+                  <div className="p-1.5 bg-amber-50 rounded-[4px]">
+                    <Briefcase className="w-4 h-4 text-amber-600" />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+                    Notes & Updates
+                  </h3>
+                </div>
                 <PersonalNotesWidget projectNotes={projectNotes} />
               </div>
             </div>
-
-            {/* <div className="mt-8">
-              <EfficiencyLineChart tasks={tasks} />
-            </div> */}
           </div>
         )}
 

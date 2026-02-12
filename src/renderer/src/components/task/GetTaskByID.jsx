@@ -280,6 +280,12 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {(userRole === "admin" ||
+              userRole === "operation_executive" ||
+              userRole === "project_manager" ||
+              userRole === "department_manager" ||
+              userRole === "deputy_manager") && (
+            <>
             <Button
               onClick={() => setIsUpdatingStatus(true)}
               variant="outline"
@@ -287,11 +293,6 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
             >
               <Timer className="w-4 h-4" /> Update Status
             </Button>
-            {(userRole === "admin" ||
-              userRole === "operation_executive" ||
-              userRole === "project_manager" ||
-              userRole === "department_manager" ||
-              userRole === "deputy_manager") && (
                 <Button
                   onClick={() => setIsEditing(true)}
                   variant="outline"
@@ -299,6 +300,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                 >
                   <Edit className="w-4 h-4" /> Edit Task
                 </Button>
+                </>
               )}
             <button
               onClick={onClose}

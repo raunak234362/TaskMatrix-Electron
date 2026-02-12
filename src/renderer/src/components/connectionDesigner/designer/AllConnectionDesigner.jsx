@@ -21,12 +21,12 @@ const AllConnectionDesigner = () => {
     fetchCD();
   }, []);
 
-    // Handle row click (optional)
-    const handleRowClick = (row) => {
-      const fabricatorUniqueId = row.id ?? row.fabId ?? "";
-      console.debug("Selected fabricator:", fabricatorUniqueId);
-    };
-  
+  // Handle row click (optional)
+  const handleRowClick = (row) => {
+    const fabricatorUniqueId = row.id ?? row.fabId ?? "";
+    console.debug("Selected fabricator:", fabricatorUniqueId);
+  };
+
 
   const columns = [
     { accessorKey: "name", header: "Name" },
@@ -44,7 +44,7 @@ const AllConnectionDesigner = () => {
             (row).id ?? (row).fabId ?? "";
           return <GetConnectionDesignerByID id={fabricatorUniqueId} />;
         }}
-        pageSizeOptions={[5, 10, 25]}
+
       />
     </div>
   );

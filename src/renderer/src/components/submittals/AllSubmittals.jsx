@@ -10,86 +10,86 @@ import GetSubmittalByID from "./GetSubmittalByID";
 const AllSubmittals = ({ submittalData }) => {
   const [submittals, setSubmittals] = useState([]);
   const [loading, setLoading] = useState(true);
-console.log(submittalData);
+  console.log(submittalData);
 
   const userRole = sessionStorage.getItem("userRole");
 
-const fetchSubmittals = async () => {
-  try {
-    setLoading(true);
-    let result;
+  const fetchSubmittals = async () => {
+    try {
+      setLoading(true);
+      let result;
 
-    if (userRole === "CLIENT") result = await Service.SubmittalSent();
-    else result = await Service.SubmittalRecieved();
+      if (userRole === "CLIENT") result = await Service.SubmittalSent();
+      else result = await Service.SubmittalRecieved();
 
-    const data = Array.isArray(result?.data) ? result.data : [];
+      const data = Array.isArray(result?.data) ? result.data : [];
 
-    const normalized = data.map((item) => ({
-      ...item,
-      milestone: item.mileStoneBelongsTo || item.milestone || null, 
-      recipient: item.recepients || null,                          
-      sender: item.sender || null,                                  
-      createdAt: item.createdAt || item.date || null,
-      statusLabel:
-        item.isAproovedByAdmin === true
-          ? "APPROVED"
-          : item.isAproovedByAdmin === false
-          ? "REJECTED"
-          : "PENDING",
-    }));
+      const normalized = data.map((item) => ({
+        ...item,
+        milestone: item.mileStoneBelongsTo || item.milestone || null,
+        recipient: item.recepients || null,
+        sender: item.sender || null,
+        createdAt: item.createdAt || item.date || null,
+        statusLabel:
+          item.isAproovedByAdmin === true
+            ? "APPROVED"
+            : item.isAproovedByAdmin === false
+              ? "REJECTED"
+              : "PENDING",
+      }));
 
-    setSubmittals(normalized);
-  } catch {
-    setSubmittals([]);
-  } finally {
-    setLoading(false);
-  }
-};
+      setSubmittals(normalized);
+    } catch {
+      setSubmittals([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
- useEffect(() => {
-  if (submittalData && submittalData.length > 0) {
-    setSubmittals(submittalData);
-    setLoading(false);
-  } else {
-    fetchSubmittals();
-  }
- 
-}, []);
+  useEffect(() => {
+    if (submittalData && submittalData.length > 0) {
+      setSubmittals(submittalData);
+      setLoading(false);
+    } else {
+      fetchSubmittals();
+    }
 
-const columns = [
-  { accessorKey: "subject", header: "Subject" },
+  }, []);
 
-  {
-    accessorKey: "sender",
-    header: "Sender",
-    cell: ({ row }) => {
-      const s = row.original.sender;
-      return s ? `${s.firstName ?? ""} ${s.lastName ?? ""}`.trim() : "—";
+  const columns = [
+    { accessorKey: "subject", header: "Subject" },
+
+    {
+      accessorKey: "sender",
+      header: "Sender",
+      cell: ({ row }) => {
+        const s = row.original.sender;
+        return s ? `${s.firstName ?? ""} ${s.lastName ?? ""}`.trim() : "—";
+      },
     },
-  },
 
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${row.original.status === true
-          ? "bg-yellow-100 text-yellow-700"
-          : "bg-green-100 text-green-700"
-          }`}
-      >
-        {row.original.status === true ? "Pending" : "Responded"}
-      </span>
-    ),
-  },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${row.original.status === true
+            ? "bg-yellow-100 text-yellow-700"
+            : "bg-green-100 text-green-700"
+            }`}
+        >
+          {row.original.status === true ? "Pending" : "Responded"}
+        </span>
+      ),
+    },
 
-  {
-    accessorKey: "createdAt",
-    header: "Created",
-    cell: ({ row }) =>
-       new Date(row.original.date).toLocaleString(),
-  },
-];
+    {
+      accessorKey: "createdAt",
+      header: "Created",
+      cell: ({ row }) =>
+        new Date(row.original.date).toLocaleString(),
+    },
+  ];
 
   if (loading) {
     return (
@@ -114,7 +114,7 @@ const columns = [
         columns={columns}
         data={submittals}
         detailComponent={({ row }) => <GetSubmittalByID id={row.id} />}
-        pageSizeOptions={[5, 10, 25]}
+
       />
     </div>
   );
