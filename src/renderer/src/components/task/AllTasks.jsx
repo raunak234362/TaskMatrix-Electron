@@ -8,6 +8,7 @@ import {
   User,
   Briefcase,
   Tag,
+  Clock,
 } from "lucide-react";
 
 import DataTable from "../ui/table";
@@ -154,19 +155,6 @@ const AllTasks = () => {
         ),
       },
       {
-        accessorKey: "Stage",
-        header: "Stage",
-        enableColumnFilter: true,
-        filterType: "select",
-        filterOptions: stageOptions,
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2 text-xs text-gray-700">
-            <Tag className="w-3.5 h-3.5 text-gray-400" />
-            <span>{row.original.Stage || "N/A"}</span>
-          </div>
-        ),
-      },
-      {
         accessorFn: (row) =>
           row.user
             ? `${row.user.firstName} ${row.user.lastName}`
@@ -231,6 +219,19 @@ const AllTasks = () => {
             </div>
           );
         },
+      },
+      {
+        accessorFn: (row) => row.allocationLog?.allocatedHours || "—",
+        id: "assignedHours",
+        header: "Assigned Hrs",
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2 text-sm text-gray-700">
+            <Clock className="w-4 h-4 text-gray-400" />
+            <span className="font-medium">
+              {row.original.allocationLog?.allocatedHours || "—"}
+            </span>
+          </div>
+        ),
       },
       {
         accessorKey: "due_date",

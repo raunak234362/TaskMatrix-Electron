@@ -285,21 +285,21 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
               userRole === "project_manager" ||
               userRole === "department_manager" ||
               userRole === "deputy_manager") && (
-            <>
-            <Button
-              onClick={() => setIsUpdatingStatus(true)}
-              variant="outline"
-              className="flex items-center gap-2 px-6 py-3 font-medium transition border-orange-200 text-white hover:bg-orange-50"
-            >
-              <Timer className="w-4 h-4" /> Update Status
-            </Button>
-                <Button
-                  onClick={() => setIsEditing(true)}
-                  variant="outline"
-                  className="flex items-center gap-2 px-6 py-3 font-medium transition border-indigo-200 text-white bg-[#6bbd45] hover:bg-[#5aa33a]"
-                >
-                  <Edit className="w-4 h-4" /> Edit Task
-                </Button>
+                <>
+                  <Button
+                    onClick={() => setIsUpdatingStatus(true)}
+                    variant="outline"
+                    className="flex items-center gap-2 px-6 py-3 font-medium transition border-orange-200 text-white hover:bg-orange-50"
+                  >
+                    <Timer className="w-4 h-4" /> Update Status
+                  </Button>
+                  <Button
+                    onClick={() => setIsEditing(true)}
+                    variant="outline"
+                    className="flex items-center gap-2 px-6 py-3 font-medium transition border-indigo-200 text-white bg-[#6bbd45] hover:bg-[#5aa33a]"
+                  >
+                    <Edit className="w-4 h-4" /> Edit Task
+                  </Button>
                 </>
               )}
             <button
@@ -346,6 +346,11 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                     icon={<Timer />}
                     label="Allocated Time"
                     value={formatHours(parseDurationToHours(task?.allocationLog?.allocatedHours))}
+                  />
+                  <InfoItem
+                    icon={<Clock />}
+                    label="Allocation Log"
+                    value={task?.allocationLog ? JSON.stringify(task.allocationLog, null, 2) : '—'}
                   />
 
                   <div className="flex items-start gap-4">

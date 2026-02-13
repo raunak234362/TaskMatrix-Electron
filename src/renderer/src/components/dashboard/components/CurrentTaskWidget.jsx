@@ -17,7 +17,7 @@ const CurrentTaskWidget = ({ task, onTaskUpdate }) => {
   }
 
   return (
-    <div className="bg-primary text-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(22,163,74,0.3)] relative overflow-hidden">
+    <div className="bg-primary text-black p-6 rounded-2xl shadow-[0_8px_30px_rgb(22,163,74,0.3)] relative overflow-hidden">
       {/* Background Decorative Circles */}
       <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 bg-black opacity-5 rounded-full blur-3xl"></div>
@@ -26,13 +26,13 @@ const CurrentTaskWidget = ({ task, onTaskUpdate }) => {
         <div className="flex justify-between items-start mb-6">
           <div>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm border border-white/10">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
               In Progress
             </span>
             <h3 className="text-2xl font-black mt-3 leading-tight tracking-tight">
               {task.project?.name || task.estimation?.projectName || 'Untitled Project'}
             </h3>
-            <p className="text-white/80 mt-1 flex items-center gap-2 text-sm font-bold">
+            <p className="text-black/80 mt-1 flex items-center gap-2 text-sm font-bold">
               {task.name || (task.estimation?.estimationNumber
                 ? `Estimation #${task.estimation.estimationNumber}`
                 : 'Untitled Task')}
@@ -40,14 +40,14 @@ const CurrentTaskWidget = ({ task, onTaskUpdate }) => {
           </div>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10 mb-6">
+        <div className="bg-black/50 backdrop-blur-md rounded-xl p-4 border border-white/10 mb-6">
           <div className="flex items-center justify-between text-xs font-bold">
             <div className="flex items-center gap-2">
               <Calendar size={14} className="text-white/70" />
               <span className="text-white/90">
                 Deadline: {new Date(task.due_date || task.endDate).toLocaleDateString()}
               </span>
-            </div>
+            </div>``
           </div>
         </div>
 
