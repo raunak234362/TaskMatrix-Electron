@@ -1516,7 +1516,7 @@ class Service {
   }
 
   //change order by id
-  static async GetChangeOrderByID(ID){
+  static async GetChangeOrderByID(ID) {
     try {
       const response = await api.get(`changeOrder/ById/${ID}`, {
         headers: {
@@ -1780,37 +1780,37 @@ class Service {
     }
   }
 
-// Task Comments
-static async AddTaskComment(data) {
-  try {
-    const response = await api.post(`comment`, data, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    console.log('Task comment added:', response.data)
-    return response.data
-  } catch (error) {
-    console.error('Error adding task comment:', error)
-    throw error
+  // Task Comments
+  static async AddTaskComment(data) {
+    try {
+      const response = await api.post(`comment`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Task comment added:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error adding task comment:', error)
+      throw error
+    }
   }
-}
 
-// Add Acknowledged by comment ID
-static async AddTaskCommentAcknowledged(id,data) {
-  try {
-    const response = await api.patch(`comment/acknowledge/${id}`, data, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    console.log('Task comment acknowledged:', response.data)
-    return response.data
-  } catch (error) {
-    console.error('Error acknowledging task comment:', error)
-    throw error
+  // Add Acknowledged by comment ID
+  static async AddTaskCommentAcknowledged(id, data) {
+    try {
+      const response = await api.patch(`comment/acknowledge/${id}`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Task comment acknowledged:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error acknowledging task comment:', error)
+      throw error
+    }
   }
-}
 
   // Get User Stats
   static async getUsersStats(userId) {
@@ -1930,7 +1930,7 @@ static async AddTaskCommentAcknowledged(id,data) {
   // Create Share Link
   static async createShareLink(table, parentId, fileId, versionId) {
     try {
-      const url = versionId 
+      const url = versionId
         ? `share/${table}/${parentId}/versions/${versionId}/${fileId}`
         : `share/${table}/${parentId}/${fileId}`
       const response = await api.post(url)
@@ -2081,5 +2081,312 @@ static async AddTaskCommentAcknowledged(id,data) {
     }
   }
 
+  // ==================== MEETINGS API ====================
+
+  // Create a new meeting
+  static async CreateMeeting(meetingData) {
+    try {
+      const response = await api.post('meetings', meetingData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Meeting created:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error creating meeting:', error)
+      throw error
+    }
+  }
+
+  // Mark attendance for a meeting
+  static async MarkMeetingAttendance(attendanceData) {
+    try {
+      const response = await api.post('meetings/attendance', attendanceData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Attendance marked:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error marking attendance:', error)
+      throw error
+    }
+  }
+
+  // Get attendance history
+  static async GetAttendanceHistory(params) {
+    try {
+      const response = await api.get('meetings/attendance/history', {
+        params,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Attendance history fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching attendance history:', error)
+      throw error
+    }
+  }
+
+  // Add participants to a meeting
+  static async AddMeetingParticipants(participantsData) {
+    try {
+      const response = await api.post('meetings/participants', participantsData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Participants added:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error adding participants:', error)
+      throw error
+    }
+  }
+
+  // Delete a participant from a meeting
+  static async DeleteMeetingParticipant(attendeeId) {
+    try {
+      const response = await api.delete(`meetings/participants/${attendeeId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Participant deleted:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error deleting participant:', error)
+      throw error
+    }
+  }
+
+  // Update a participant in a meeting
+  static async UpdateMeetingParticipant(attendeeId, participantData) {
+    try {
+      const response = await api.put(`meetings/participants/${attendeeId}`, participantData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Participant updated:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error updating participant:', error)
+      throw error
+    }
+  }
+
+  // Get meeting status count
+  static async GetMeetingStatusCount() {
+    try {
+      const response = await api.get('meetings/status/count', {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Meeting status count:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching meeting status count:', error)
+      throw error
+    }
+  }
+
+  // Get current user's meetings
+  static async GetMyMeetings() {
+    try {
+      const response = await api.get('meetings/user/me', {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('My meetings fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching my meetings:', error)
+      throw error
+    }
+  }
+
+  // Get current user's past meetings
+  static async GetMyPastMeetings() {
+    try {
+      const response = await api.get('meetings/user/me/past', {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('My past meetings fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching my past meetings:', error)
+      throw error
+    }
+  }
+
+  // Get current user's upcoming meetings
+  static async GetMyUpcomingMeetings() {
+    try {
+      const response = await api.get('meetings/user/me/upcoming', {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('My upcoming meetings fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching my upcoming meetings:', error)
+      throw error
+    }
+  }
+
+  // View file from a meeting
+  static async ViewMeetingFile(meetingId, fileId) {
+    try {
+      const response = await api.get(`meetings/viewFile/${meetingId}/${fileId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Meeting file viewed:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error viewing meeting file:', error)
+      throw error
+    }
+  }
+
+  // Delete a meeting by ID
+  static async DeleteMeeting(id) {
+    try {
+      const response = await api.delete(`meetings/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Meeting deleted:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error deleting meeting:', error)
+      throw error
+    }
+  }
+
+  // Get meeting by ID
+  static async GetMeetingById(id) {
+    try {
+      const response = await api.get(`meetings/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Meeting fetched by ID:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching meeting by ID:', error)
+      throw error
+    }
+  }
+
+  // Update meeting by ID
+  static async UpdateMeetingById(id, meetingData) {
+    try {
+      const response = await api.put(`meetings/${id}`, meetingData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Meeting updated:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error updating meeting:', error)
+      throw error
+    }
+  }
+
+  // Update meeting status
+  static async UpdateMeetingStatus(id, statusData) {
+    try {
+      const response = await api.patch(`meetings/${id}/status`, statusData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Meeting status updated:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error updating meeting status:', error)
+      throw error
+    }
+  }
+
+  // Get meeting summary
+  static async GetMeetingSummary(id) {
+    try {
+      const response = await api.get(`meetings/${id}/summary`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Meeting summary fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching meeting summary:', error)
+      throw error
+    }
+  }
+
+  // Get meeting attendance by meeting ID
+  static async GetMeetingAttendance(meetingId) {
+    try {
+      const response = await api.get(`meetings/${meetingId}/attendance`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Meeting attendance fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching meeting attendance:', error)
+      throw error
+    }
+  }
+
+  // Get meeting file by meeting ID and file ID
+  static async GetMeetingFileById(meetingId, fileId) {
+    try {
+      const response = await api.get(`meetings/${meetingId}/files/${fileId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        responseType: 'blob' // For file download
+      })
+      console.log('Meeting file fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching meeting file:', error)
+      throw error
+    }
+  }
+
+  // Update RSVP status for a meeting
+  static async UpdateMeetingRSVP(meetingId, rsvpData) {
+    try {
+      const response = await api.patch(`meetings/${meetingId}/rsvp`, rsvpData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('RSVP updated:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error updating RSVP:', error)
+      throw error
+    }
+  }
 }
 export default Service

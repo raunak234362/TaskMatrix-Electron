@@ -13,7 +13,8 @@ import {
     UserCircle,
     DollarSign,
     Factory,
-    FileText
+    FileText,
+    Calendar
 } from 'lucide-react'
 
 export const navItems = [
@@ -123,6 +124,12 @@ export const navItems = [
         to: 'invoices',
         icon: <Receipt />,
         roles: ['admin', 'project_manager_officer', 'client_admin', 'pmo', 'client']
+    },
+    {
+        label: 'Calendar',
+        to: 'calendar',
+        icon: <Calendar />,
+        roles: ['admin', 'project_manager_officer', 'pmo','operation_executive']
     },
     {
         label: 'Accounts',
