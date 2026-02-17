@@ -160,12 +160,13 @@ const WBTDashboard = () => {
     try {
       if (isAdminRole) {
         // Fetch Admin Data
-        const [projectsRes, rfiRes, subRes, coRes, rfqRes] = await Promise.all([
+        const [projectsRes, rfiRes, subRes, coRes, rfqRes, myTasksRes] = await Promise.all([
           Service.GetAllProjects(),
           Service.pendingRFIs(),
           Service.PendingSubmittal(),
           Service.PendingCo(),
-          Service.RFQRecieved() // Using Recieved as 'Pending' pool for now
+          Service.RFQRecieved(),
+          Service.GetMyTask() // Fetch personal tasks for Admin too
         ])
 
         const projects = projectsRes?.data || []
@@ -188,15 +189,53 @@ const WBTDashboard = () => {
           },
           dashboardStats: {
             pendingRFI: rfis.length,
-            newRFI: 0, // Placeholder as 'new' logic needs specific criteria
+            newRFI: 0,
             pendingSubmittals: submittals.length,
             pendingChangeOrders: cos.length,
             newChangeOrders: 0,
             pendingRFQ: rfqs.length,
             newRFQ: 0
           },
-          invoices: [] // Placeholder until invoice API is confirmed
+          invoices: []
         })
+
+        // Process Personal Tasks for Admin
+        if (myTasksRes?.data) {
+          const fetchedTasks = Array.isArray(myTasksRes.data)
+            ? myTasksRes.data
+            : Object.values(myTasksRes.data || {})
+
+          setTasks(fetchedTasks)
+
+          // Calculate Stats
+          let totalAllocated = 0
+          let totalWorked = 0
+          const completed = fetchedTasks.filter((t) => t.status === 'COMPLETED').length
+          const projectIds = new Set()
+
+          fetchedTasks.forEach((t) => {
+            const { allocated, worked } = calculateHours(t)
+            totalAllocated += allocated
+            totalWorked += worked
+            if (t.project?.id) projectIds.add(t.project.id)
+          })
+
+          setUserStats({
+            totalTasks: fetchedTasks.length,
+            completedTasks: completed,
+            pendingTasks: fetchedTasks.length - completed,
+            allocatedHours: totalAllocated,
+            workedHours: totalWorked,
+            projectsCount: projectIds.size,
+            efficiency: totalWorked > 0 ? Math.round((totalAllocated / totalWorked) * 100) : 0
+          })
+
+          // Fetch Notes for unique projects
+          const notesPromises = Array.from(projectIds).map((id) => Service.GetProjectNotes(id))
+          const allNotesResponses = await Promise.all(notesPromises)
+          const flattenedNotes = allNotesResponses.flat().filter(Boolean)
+          setProjectNotes(flattenedNotes)
+        }
 
       } else {
         // Fetch Staff Data
@@ -281,27 +320,35 @@ const WBTDashboard = () => {
   }
 
   const handleItemSelect = (item) => {
-    // If it's a project object (has projectNumber or similar unique project fields)
-    if (item.projectNumber || item.fabricator) {
-      setSelectedProject(item)
-      return
-    }
-
-    // Determine type based on item properties if not explicitly passed
-    let type = null
-    if (item.rfiresponse !== undefined || item.subject) type = 'RFI' // Simple heuristic, might need refinement
-    // Better approach: use the actionModal type to determine what we are clicking
-
-    // However, DashboardListModal knows the type. Let's pass it from there.
-    // For now, let's look at the actionModal.type which is currently open
+    // 1. If Action Modal is open, determining type is explicit
     if (actionModal.isOpen) {
+      let type = null
       switch (actionModal.type) {
         case 'PENDING_RFI': type = 'RFI'; break;
         case 'PENDING_SUBMITTALS': type = 'SUBMITTAL'; break;
         case 'CHANGE_ORDERS': type = 'CO'; break;
         case 'PENDING_RFQ': type = 'RFQ'; break;
       }
+
+      if (type && (item.id || item._id)) {
+        setDetailModal({
+          isOpen: true,
+          type,
+          id: item.id || item._id
+        })
+        return
+      }
     }
+
+    // 2. If it's a project object (has projectNumber) - fallback for ProjectListModal
+    if (item.projectNumber || item.fabricator) {
+      setSelectedProject(item)
+      return
+    }
+
+    // 3. Last resort heuristic
+    let type = null
+    if (item.rfiresponse !== undefined || item.subject) type = 'RFI'
 
     if (type && (item.id || item._id)) {
       setDetailModal({
@@ -333,21 +380,55 @@ const WBTDashboard = () => {
 
         {isAdminRole ? (
           /* ---------- ADMIN DASHBOARD LAYOUT ---------- */
-          <div className="flex flex-col gap-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="flex flex-col gap-4 lg:gap-6 transition-all duration-300 ease-in-out">
+            {/* Row 1: User Stats (Active, Allocated, Worked, Efficiency) */}
+            <UserStatsWidget stats={userStats} loading={loading} />
+
+            {/* Row 2: Project Overview & Pending Actions */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 transition-all duration-300">
               <ProjectStats stats={adminData.projectStats} onCardClick={handleProjectStatClick} />
               <PendingActions dashboardStats={adminData.dashboardStats} onActionClick={handleActionClick} />
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-              {userRole === 'project_manager_officer' && (
-                <InvoiceTrends invoices={adminData.invoices} />
-              )}
-              <UpcomingSubmittals
-                pendingSubmittals={adminData.submittals}
-                invoices={adminData.invoices}
-              />
+            {/* Row 3: Detail Widgets (Deadlines, Notes, Submittals, Focus) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 h-auto lg:h-80 xl:h-96 transition-all duration-300">
+              {/* Upcoming Deadlines */}
+              <div className="h-full">
+                <UpcomingDeadlinesWidget tasks={tasks} onTaskClick={(id) => setDetailTaskId(id)} />
+              </div>
+
+              {/* Notes & Updates */}
+              <div className="h-full">
+                <PersonalNotesWidget projectNotes={projectNotes} />
+              </div>
+
+              {/* Upcoming Submittals */}
+              <div className="h-full">
+                <UpcomingSubmittals
+                  pendingSubmittals={adminData.submittals}
+                  invoices={adminData.invoices}
+                />
+              </div>
+
+              {/* Current Focus */}
+              <div className="h-full">
+                <CurrentTaskWidget
+                  task={currentTask}
+                  onTaskUpdate={() => setDetailTaskId(currentTask?.id)}
+                />
+              </div>
             </div>
+
+            {/* Extra Row for Invoice Trends if needed, or remove if not requested in new layout
+                The user asked for specific rows, I will place this at the bottom or hide it if it disrupts the "clean" look.
+                User didn't explicitly ask to remove it, but listed specific items. I'll keep it at the bottom to be safe.
+            */}
+            {userRole === 'project_manager_officer' && (
+              <div className="grid grid-cols-1 gap-6">
+                <InvoiceTrends invoices={adminData.invoices} />
+              </div>
+            )}
+
           </div>
         ) : (
           /* ---------- STAFF DASHBOARD LAYOUT ---------- */

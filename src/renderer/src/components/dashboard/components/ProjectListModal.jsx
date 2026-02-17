@@ -1,4 +1,5 @@
 import { X } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import DataTable from '../../ui/table'
 
 const ProjectListModal = ({ isOpen, onClose, status, projects, onProjectSelect }) => {
@@ -40,7 +41,7 @@ const ProjectListModal = ({ isOpen, onClose, status, projects, onProjectSelect }
     }
   ]
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white w-[90%] max-w-[80%] max-h-[80vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in fade-in zoom-in duration-200">
         {/* Modal Header */}
@@ -94,7 +95,8 @@ const ProjectListModal = ({ isOpen, onClose, status, projects, onProjectSelect }
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

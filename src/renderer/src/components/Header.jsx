@@ -23,7 +23,7 @@ const Header = ({ isMinimized, toggleSidebar }) => {
       <div className="flex items-center gap-6">
         <button
           onClick={toggleSidebar}
-          className="p-2.5 text-primary bg-primary/5 hover:bg-primary/10 rounded-xl transition-all shadow-sm border border-primary/5"
+          className="p-2.5 text-black bg-[#ebf5ea] hover:bg-[#dcecdb] rounded-xl transition-all shadow-sm border border-black"
         >
           {isMinimized ? (
             <Menu size={20} className="stroke-[2.5]" />
@@ -41,7 +41,7 @@ const Header = ({ isMinimized, toggleSidebar }) => {
 
       {/* Right Area: Notifications Area Only */}
       <div className="flex items-center gap-6">
-        <button className="relative p-2.5 text-gray-400 hover:text-primary bg-white/50 hover:bg-white rounded-xl transition-all group border border-transparent hover:border-primary/10 shadow-sm">
+        <button className="relative p-2.5 text-black hover:text-black bg-white hover:bg-[#ebf5ea] rounded-xl transition-all group border border-black shadow-sm">
           <Bell size={20} strokeWidth={2.5} />
           <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white shadow-sm"></span>
         </button>

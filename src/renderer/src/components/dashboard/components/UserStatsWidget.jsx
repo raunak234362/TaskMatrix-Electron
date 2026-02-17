@@ -11,16 +11,16 @@ const StatCard = ({
   trendColor = 'bg-black/20'
 }) => (
   <div
-    className={`p-5 rounded-xl border border-black/5 shadow-[0_10px_10px_rgba(22,163,74,0.1),0_10px_30px_rgba(0,0,0,0.05)] transition-all duration-700 group hover:shadow-[0_30px_70px_rgba(22,163,74,0.15),0_20px_40px_rgba(0,0,0,0.1)] hover:-translate-y-2 relative overflow-hidden bg-green-50/10`}
+    className={`p-4 lg:p-5 rounded-xl border border-black shadow-[0_10px_10px_rgba(22,163,74,0.1),0_10px_30px_rgba(0,0,0,0.05)] transition-all duration-700 group hover:shadow-[0_30px_70px_rgba(22,163,74,0.15),0_20px_40px_rgba(0,0,0,0.1)] hover:-translate-y-2 relative overflow-hidden bg-green-50/10`}
   >
-    <div className="flex flex-col h-full justify-between gap-5 relative z-10">
+    <div className="flex flex-col h-full justify-between gap-3 lg:gap-5 relative z-10">
       <div className="flex items-start justify-between">
-        <div className="p-5 bg-white rounded-3xl shadow-lg group-hover:bg-primary group-hover:text-white transition-all duration-500 scale-110">
-          <Icon className="w-8 h-8 text-primary group-hover:text-green-700 transition-colors duration-500" />
+        <div className="p-3 lg:p-5 bg-white rounded-3xl shadow-lg group-hover:bg-primary group-hover:text-white transition-all duration-500 scale-110">
+          <Icon className="w-6 h-6 lg:w-8 lg:h-8 text-primary group-hover:text-green-700 transition-colors duration-500" />
         </div>
         {trend && (
           <span
-            className={`text-xs font-black px-5 py-2 rounded-2xl ${trendColor} bg-green-100 text-black uppercase tracking-widest shadow-lg`}
+            className={`text-[10px] lg:text-xs font-black px-3 py-1 lg:px-5 lg:py-2 rounded-2xl ${trendColor} bg-green-100 text-black uppercase tracking-widest shadow-lg`}
           >
             {trend}
           </span>
@@ -28,14 +28,16 @@ const StatCard = ({
       </div>
 
       <div>
-        <p className="text-sm font-black text-black/40 uppercase tracking-[0.2em]">{title}</p>
-        <h3 className="text-2xl font-semibold text-black mt-3 tracking-tighter">
+        <p className="text-xs lg:text-sm font-black text-black/40 uppercase tracking-[0.2em]">{title}</p>
+        <h3 className="text-xl lg:text-2xl font-semibold text-black mt-2 lg:mt-3 tracking-tighter">
           {value}
         </h3>
         {subtext && (
-          <div className="mt-6 pt-5 border-t border-black/10">
-            <p className="text-xs text-black font-black uppercase tracking-wide">
-              {subtext}
+          <div className="mt-4 pt-4 lg:mt-6 lg:pt-5 border-t border-black/10">
+            <p className="text-[10px] lg:text-xs text-black font-black uppercase tracking-wide">
+              <span className="border-b-2 border-green-500 pb-0.5 inline-block">
+                {subtext}
+              </span>
             </p>
           </div>
         )}
@@ -54,7 +56,7 @@ const UserStatsWidget = ({ stats, loading }) => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="h-40 bg-white border border-gray-100 rounded-[4px] animate-pulse"></div>
         ))}
@@ -71,7 +73,7 @@ const UserStatsWidget = ({ stats, loading }) => {
   } = stats || {}
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
       {/* Active Projects */}
       <StatCard
         title="Active Projects"
