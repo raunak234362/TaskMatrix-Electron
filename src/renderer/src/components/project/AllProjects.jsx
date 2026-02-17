@@ -14,7 +14,7 @@ const AllProjects = () => {
   const projects = useSelector(
     (state) => state.projectInfo?.projectData || []
   );
-
+  console.log(projects)
   // Handle row click
   const handleRowClick = (row) => {
     setSelectedProject(row);
@@ -28,7 +28,7 @@ const AllProjects = () => {
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span className="font-black text-gray-900">{row.original.name}</span>
-          <span className="text-[10px] text-primary font-bold uppercase tracking-widest mt-0.5">{row.original.clientName || 'N/A'}</span>
+          <span className="text-[10px] text-primary font-bold uppercase tracking-widest mt-0.5">{row.original.fabricator.fabName || 'N/A'}</span>
         </div>
       )
     },
