@@ -38,7 +38,7 @@ function TextFilter({ column }) {
     <input
       value={column.getFilterValue() ?? ""}
       onChange={(e) => column.setFilterValue(e.target.value || undefined)}
-      className="w-full mt-1 border border-gray-200 dark:border-slate-700 px-2 py-1 rounded text-xs focus:ring-1 focus:ring-blue-500 outline-none bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-200"
+      className="w-full mt-1 border text-md border-gray-200 dark:border-slate-700 px-2 py-1 rounded text-xs focus:ring-1 focus:ring-blue-500 outline-none bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-200"
       placeholder="Filter..."
     />
   );
@@ -67,7 +67,7 @@ function ColumnFilter({ column }) {
       <input
         value={column.getFilterValue() ?? ""}
         onChange={(e) => column.setFilterValue(e.target.value || undefined)}
-        className="pl-8 pr-2 py-1.5 w-full border border-gray-200 dark:border-slate-700 rounded-md text-xs focus:ring-1 focus:ring-blue-500 outline-none transition-all bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-200"
+        className="py-1 px-2 w-full border border-gray-200 dark:border-slate-700 rounded-md text-lg focus:ring-1 focus:ring-blue-500 outline-none transition-all bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-200"
         placeholder={`Search ${header}...`}
       />
     </div>

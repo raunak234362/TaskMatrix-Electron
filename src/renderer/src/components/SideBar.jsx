@@ -43,7 +43,7 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
             <img
               src={LOGO}
               alt="Logo"
-              className="bg-white w-56 object-contain rounded-xl transition-transform duration-500"
+              className="bg-white w-64 object-contain rounded-xl transition-transform duration-500"
             />
           ) : (
             <img

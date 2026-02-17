@@ -1,29 +1,23 @@
 
 import DataTable from "../ui/table";
-import React, { Suspense } from "react";
+import React, { Suspense, useState } from "react";
 import { useSelector } from "react-redux";
+import Modal from "../ui/Modal";
 const GetProjectById = React.lazy(() =>
   import("./GetProjectById").then((module) => ({ default: module.default }))
 );
 
-const ProjectDetailComponent = ({ row }) => {
-  const fabricatorUniqueId = row.id ?? row.fabId ?? "";
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <GetProjectById id={fabricatorUniqueId} />
-    </Suspense>
-  );
-};
 
 const AllProjects = () => {
+  const [selectedProject, setSelectedProject] = useState(null);
+
   const projects = useSelector(
     (state) => state.projectInfo?.projectData || []
   );
 
-  // Handle row click (optional)
+  // Handle row click
   const handleRowClick = (row) => {
-    const projectUniqueId = (row).id ?? (row).fabId ?? "";
-    console.debug("Selected project:", projectUniqueId);
+    setSelectedProject(row);
   };
 
   // Define columns for DataTable with premium styling (Name / Subtext)
@@ -78,9 +72,21 @@ const AllProjects = () => {
         columns={columns}
         data={projects}
         onRowClick={handleRowClick}
-        detailComponent={ProjectDetailComponent}
         disablePagination={true}
       />
+
+      {selectedProject && (
+        <Modal
+          isOpen={!!selectedProject}
+          onClose={() => setSelectedProject(null)}
+          title="Project Details"
+          width="max-w-7xl"
+        >
+          <Suspense fallback={<div className="p-4 text-center">Loading project details...</div>}>
+            <GetProjectById id={selectedProject.id ?? selectedProject.fabId ?? ""} />
+          </Suspense>
+        </Modal>
+      )}
     </div>
   );
 };

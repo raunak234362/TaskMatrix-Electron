@@ -79,7 +79,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
               }}
               className="flex items-center justify-between p-4 rounded-2xl border border-black bg-green-50/20 hover:bg-green-50/50 hover:border-black/50 transition-all duration-300 cursor-pointer group hover:shadow-lg hover:-translate-y-0.5"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex flex-row items-center gap-3">
                 <div
                   className={`p-2.5 rounded-xl ${colors.bg} ${colors.text} shadow-md shrink-0 transition-all group-hover:scale-105`}
                 >
@@ -88,9 +88,9 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
 
                 <div className="flex flex-col text-left">
                   <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{action.title}</span>
-                  <span className="text-[9px] text-gray-400 font-bold uppercase mt-0.5 tracking-wider">
+                  {/* <span className="text-[9px] text-gray-400 font-bold uppercase mt-0.5 tracking-wider">
                     {action.subtitle}: {action.subcount || 0}
-                  </span>
+                  </span> */}
                 </div>
               </div>
 

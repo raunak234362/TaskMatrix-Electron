@@ -125,7 +125,7 @@ const GetProjectById = ({ id }) => {
 
   return (
     <>
-      <div className="w-full bg-white h-auto p-3 md:p-6 rounded-lg shadow-sm border border-gray-200 relative laptop-fit">
+      <div className="w-full relative laptop-fit">
         {/* Header */}
         <div className="flex justify-between items-center border-b pb-3 mb-3">
           <div>
@@ -330,14 +330,14 @@ const GetProjectById = ({ id }) => {
               </div>
 
               {/* Footer Buttons */}
-              {/* <div className="pt-2 flex flex-wrap gap-3">
+              <div className="pt-2 flex flex-wrap gap-3">
                 <Button
                   className="py-1 px-3 text-sm bg-green-600 text-white"
                   onClick={() => handleEditModel(project)}
                 >
                   Edit Project
                 </Button>
-              </div> */}
+              </div>
             </div>
           )}
 
