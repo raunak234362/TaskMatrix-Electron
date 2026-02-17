@@ -2388,5 +2388,20 @@ class Service {
       throw error
     }
   }
+  //pm dashboard
+  static async GetPMDashboard() {
+    try {
+      const response = await api.get('dashBoardData/clientAdmin', {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('PM dashboard fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching PM dashboard:', error)
+      throw error
+    }
+  }
 }
 export default Service

@@ -18,13 +18,15 @@ const UpcomingDeadlinesWidget = ({ tasks = [] }) => {
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-primary/5 shadow-[0_15px_40px_rgba(22,163,74,0.08),0_10px_20px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.15),0_15px_30px_rgba(0,0,0,0.1)] h-full flex flex-col">
+    <div className="bg-white p-4 lg:p-6 rounded-2xl border border-black shadow-[0_15px_40px_rgba(22,163,74,0.08),0_10px_20px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.15),0_15px_30px_rgba(0,0,0,0.1)] h-full flex flex-col hover:-translate-y-1">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-black text-primary uppercase tracking-wider flex items-center gap-2">
-          <Calendar className="w-5 h-5" />
-          Upcoming Deadlines
-        </h3>
-        <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-1 rounded-full uppercase tracking-widest shadow-sm">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-blue-50 rounded-[4px]">
+            <Calendar className="w-4 h-4 text-blue-600" />
+          </div>
+          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Upcoming Deadlines</h3>
+        </div>
+        <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full uppercase tracking-widest shadow-sm border border-blue-100">
           {upcoming.length} Pending
         </span>
       </div>
@@ -37,14 +39,15 @@ const UpcomingDeadlinesWidget = ({ tasks = [] }) => {
             return (
               <div
                 key={task.id}
-                className="flex items-center p-3 rounded-xl border border-primary/5 bg-primary/2 hover:bg-primary/5 hover:border-primary/20 transition-all group hover:shadow-md"
+                className="flex items-center p-3 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-blue-100 transition-all group hover:shadow-md cursor-pointer"
+                onClick={() => onTaskClick?.(task.id)}
               >
                 <div className={`p-2 rounded-lg ${urgency} mr-3 shadow-sm`}>
                   <AlertCircle size={18} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4
-                    className="text-xs font-black text-gray-800 truncate uppercase tracking-tight"
+                    className="text-xs font-black text-gray-800 truncate uppercase tracking-tight group-hover:text-blue-600 transition-colors"
                     title={task.project?.name || task.estimation?.projectName}
                   >
                     {task.project?.name || task.estimation?.projectName || 'Untitled'}
@@ -57,8 +60,9 @@ const UpcomingDeadlinesWidget = ({ tasks = [] }) => {
             )
           })
         ) : (
-          <div className="h-full flex flex-col items-center justify-center text-gray-400 text-xs font-bold uppercase tracking-widest">
-            <p>No upcoming deadlines!</p>
+          <div className="h-full flex flex-col items-center justify-center text-gray-300 space-y-3 font-bold uppercase tracking-widest text-xs">
+            <Calendar size={40} strokeWidth={1.5} className="text-gray-200" />
+            <p>No upcoming deadlines</p>
           </div>
         )}
       </div>

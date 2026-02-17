@@ -1,4 +1,5 @@
 import { X, FileText, ClipboardList, RefreshCw, Search } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import DataTable from '../../ui/table'
 
 const DashboardListModal = ({ isOpen, onClose, type, data, onItemSelect }) => {
@@ -62,7 +63,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data, onItemSelect }) => {
         }
     ]
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
             <div className="bg-white w-full max-w-5xl max-h-[85vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in zoom-in-95 duration-200">
 
@@ -116,7 +117,8 @@ const DashboardListModal = ({ isOpen, onClose, type, data, onItemSelect }) => {
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     )
 }
 

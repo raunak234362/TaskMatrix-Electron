@@ -68,11 +68,12 @@ const AddConnectionDesigner = () => {
       formData.append("email", data.email || "");
       formData.append("insurenceLiability", data.insuranceLiability || "");
 
-      // Append states  string if backend expects it that way,
-      // or multiple appends if it expects multiple values with same key.
-      // Given the previous payload was { state: data.headquater.states },
-      // and it w, I'll stringify it if it's not handled by FormData automatically.
-      formData.append("state", JSON.stringify(data.headquater.states));
+      // Append states individually to ensure backend treats it as an array/list
+      if (data.headquater.states && Array.isArray(data.headquater.states)) {
+        data.headquater.states.forEach((s) => {
+          formData.append("state", s);
+        });
+      }
 
       const location = data.headquater.city
         ? `${data.headquater.city}, ${data.headquater.country}`

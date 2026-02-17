@@ -61,14 +61,13 @@ const ProjectStats = ({ stats, onCardClick }) => {
       text: 'text-orange-900'
     }
   }
-
   return (
-    <div className="bg-white p-6 rounded-3xl border border-primary/5 shadow-[0_15px_40px_rgba(22,163,74,0.08),0_10px_20px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.15),0_15px_30px_rgba(0,0,0,0.1)]">
+    <div className="bg-white p-4 lg:p-6 rounded-3xl border border-black shadow-[0_15px_40px_rgba(22,163,74,0.08),0_10px_20px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.15),0_15px_30px_rgba(0,0,0,0.1)] h-full">
       <div className="flex items-center justify-between mb-6 px-1">
         <h2 className="text-base font-black text-primary uppercase tracking-[0.15em]">Project Overview</h2>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {projectCards.map((card) => {
           const colors = colorClasses[card.color]
           const isClickable = card.clickable
@@ -78,20 +77,20 @@ const ProjectStats = ({ stats, onCardClick }) => {
               key={card.label}
               onClick={() => isClickable && card.status && onCardClick(card.status)}
               className={`
-                flex items-center gap-4 p-5 rounded-2xl border border-primary/5 transition-all duration-300
+                flex items-center justify-between p-4 rounded-2xl border border-black transition-all duration-300
                 ${isClickable
-                  ? 'hover:bg-green-50/50 hover:border-primary/20 cursor-pointer hover:shadow-lg hover:-translate-y-0.5'
+                  ? 'hover:bg-green-50/50 hover:border-black/50 cursor-pointer hover:shadow-lg hover:-translate-y-0.5'
                   : 'bg-green-50/20'}
               `}
             >
-              <div className={`p-3 rounded-xl ${colors.iconBg} text-white shadow-md shrink-0`}>
-                <card.icon size={22} />
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl ${colors.iconBg} text-white shadow-md shrink-0`}>
+                  <card.icon size={20} />
+                </div>
+                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{card.label}</span>
               </div>
 
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{card.label}</span>
-                <span className={`text-4xl font-black mt-1 tracking-tight ${colors.text}`}>{card.value}</span>
-              </div>
+              <span className={`text-3xl font-black tracking-tight ${colors.text}`}>{card.value}</span>
             </div>
           )
         })}
