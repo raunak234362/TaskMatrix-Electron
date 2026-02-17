@@ -289,7 +289,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                   <Button
                     onClick={() => setIsUpdatingStatus(true)}
                     variant="outline"
-                    className="flex items-center gap-2 px-6 py-3 font-medium transition border-orange-200 text-white hover:bg-orange-50"
+                    className="flex items-center gap-2 px-6 py-3 font-medium transition bg-orange-500 border-orange-200 text-white hover:bg-orange-50"
                   >
                     <Timer className="w-4 h-4" /> Update Status
                   </Button>
@@ -350,7 +350,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                   <InfoItem
                     icon={<Clock />}
                     label="Allocation Log"
-                    value={task?.allocationLog ? JSON.stringify(task.allocationLog, null, 2) : '—'}
+                    value={task?.allocationLog?.allocatedHours || '—'}
                   />
 
                   <div className="flex items-start gap-4">

@@ -9,11 +9,13 @@ import {
   Briefcase,
   Tag,
   Clock,
+  Trash2,
 } from "lucide-react";
 
 import DataTable from "../ui/table";
 import FetchTaskByID from "./FetchTaskByID";
 import GetTaskByID from "./GetTaskByID";
+import BulkUpdateStatusModal from "./components/BulkUpdateStatusModal";
 
 const TaskDetailWrapper = ({ row, close }) => {
   return <GetTaskByID id={row.id} onClose={close} />;
@@ -50,6 +52,32 @@ const AllTasks = () => {
     };
     fetchTasks();
   }, [userRole]);
+
+  const [rowSelection, setRowSelection] = useState({});
+  const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
+
+  const refreshTasks = async () => {
+    try {
+      setLoading(true);
+      const response =
+        userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" || userRole === "deputy_manager"
+          ? await Service.GetAllTask()
+          : await Service.GetMyTask();
+
+      const taskData = Array.isArray(response.data)
+        ? response.data
+        : response.data
+          ? Object.values(response.data)
+          : [];
+
+      setTasks(taskData);
+      setRowSelection({});
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (date) =>
     date
@@ -284,6 +312,16 @@ const AllTasks = () => {
             {tasks.length} Total Tasks
           </span>
         </div>
+
+        {Object.keys(rowSelection).length > 0 && (
+          <button
+            onClick={() => setShowBulkUpdateModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm"
+          >
+            <ClipboardList size={16} />
+            <span>Update Status ({Object.keys(rowSelection).length})</span>
+          </button>
+        )}
       </div>
 
       {tasks.length === 0 ? (
@@ -304,9 +342,19 @@ const AllTasks = () => {
             columns={columns}
             data={tasks}
             detailComponent={TaskDetailWrapper}
-
+            enableRowSelection={true}
+            rowSelection={rowSelection}
+            onRowSelectionChange={setRowSelection}
+            getRowId={(row) => row.id}
           />
         </div>
+      )}
+      {showBulkUpdateModal && (
+        <BulkUpdateStatusModal
+          selectedIds={Object.keys(rowSelection)}
+          onClose={() => setShowBulkUpdateModal(false)}
+          refresh={refreshTasks}
+        />
       )}
     </div>
   );
