@@ -88,7 +88,9 @@ const WBTDashboard = () => {
     submittals: [],
     cos: [],
     rfqs: [],
+    pmDashboard: [],
     projectStats: {
+
       totalProjects: 0,
       activeProjects: 0,
       completedProjects: 0,
@@ -223,7 +225,7 @@ const WBTDashboard = () => {
             completedProjects: projects.filter(p => p.status?.toUpperCase() === 'COMPLETED').length,
             onHoldProjects: projects.filter(p => p.status?.toUpperCase() === 'ON_HOLD').length
           },
-          
+
           invoices: []
         })
 
@@ -462,7 +464,7 @@ const WBTDashboard = () => {
                         <span className="text-xs font-black text-gray-700 uppercase tracking-[0.1em]">Upcoming Submittal</span>
                       </div>
                       <span className="text-3xl font-black text-indigo-600 tracking-tighter">
-                        {adminData.submittals.length}
+                        {adminData.pmDashboard?.submittals?.length || 0}
                       </span>
                     </div>
                   </div>
