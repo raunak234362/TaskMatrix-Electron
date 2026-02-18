@@ -57,7 +57,7 @@ const SubmittalListModal = ({ isOpen, onClose, data }) => {
             onClick={onClose}
             className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-700"
           >
-            <CloseIcon size={24} />
+            <X size={24} />
           </button>
         </div>
 

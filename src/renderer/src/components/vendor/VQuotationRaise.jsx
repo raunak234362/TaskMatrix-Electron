@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react/prop-types */
 import { X } from "lucide-react";
 import Service from "../../api/Service";
 import { useForm, Controller } from "react-hook-form";
@@ -6,29 +6,16 @@ import Select from "react-select";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-}
-
-
 const VQuotationRaise = ({
   rfqId,
   onClose,
   onSuccess,
-}: {
-  rfqId;
-  onClose: () => void;
-  onSuccess: () => void;
 }) => {
   const { handleSubmit, control, watch } = useForm();
 
-
-
   const selectedDesignerIds = watch("ConnectionDesignerIds");
-  const [connectionDesigners, setConnectionDesigners] = useState<
-    ConnectionDesigner
-  >();
-  const [filteredDesigners, setFilteredDesigners] = useState<
-    ConnectionDesigner
-  >();
+  const [connectionDesigners, setConnectionDesigners] = useState([]);
+  const [filteredDesigners, setFilteredDesigners] = useState([]);
   const [selectedStates, setSelectedStates] = useState([]);
 
   // Fetch all Connection Designers
@@ -39,7 +26,7 @@ const VQuotationRaise = ({
 
       // Parse 'state' safely
       const parsedData = rawData.map((cd) => {
-        let parsedState = ;
+        let parsedState = [];
         if (Array.isArray(cd.state)) {
           parsedState = cd.state;
         } else if (typeof cd.state === "string") {
@@ -48,7 +35,7 @@ const VQuotationRaise = ({
             parsedState = Array.isArray(parsed) ? parsed : []
           } catch (e) {
             console.warn("Failed to parse state for CD:", cd.name, e);
-            parsedState = ;
+            parsedState = [];
           }
         }
         return { ...cd, state: parsedState };
@@ -70,7 +57,7 @@ const VQuotationRaise = ({
   const allStates = Array.from(
     new Set(
       connectionDesigners.flatMap((cd) =>
-        Array.isArray(cd.state) ? cd.state : 
+        Array.isArray(cd.state) ? cd.state : []
       )
     )
   ).map((state) => ({ label: state, value: state }));
@@ -103,7 +90,7 @@ const VQuotationRaise = ({
       const payload = {
         ConnectionDesignerIds: data.ConnectionDesignerIds?.map(
           (cd) => cd.value
-        ) || []
+        ) || [],
         connectionEngineerIds: data.EngineerIds?.map((eng) => eng.value) || []
       };
 
@@ -123,7 +110,7 @@ const VQuotationRaise = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-gray-100">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b bg-gray-50 rounded-t-2xl">
           <h2 className="text-xl font-semibold text-gray-700">
@@ -131,7 +118,7 @@ const VQuotationRaise = ({
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-700 hover:text-gray-700 transition"
+            className="text-gray-400 hover:text-gray-700 transition p-2 hover:bg-gray-100 rounded-full"
             aria-label="Close"
           >
             <X className="w-6 h-6" />
@@ -153,7 +140,7 @@ const VQuotationRaise = ({
               isMulti
               placeholder="Search or select multiple states..."
               onChange={(selected) =>
-                setSelectedStates(selected.map((s) => s.value))
+                setSelectedStates(selected ? selected.map((s) => s.value) : [])
               }
               classNamePrefix="react-select"
               styles={{

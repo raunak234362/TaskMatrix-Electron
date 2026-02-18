@@ -42,10 +42,10 @@ const EditDepartment = ({
         if (dept) {
           reset({
             name: dept.name,
-            managerIds.isArray(dept.managerIds)
+            managerIds: Array.isArray(dept.managerIds)
               ? dept.managerIds.map((m) =>
-                  typeof m === "string" ? m : m.id
-                )
+                typeof m === "string" ? m : m.id
+              )
               : []
           });
         }

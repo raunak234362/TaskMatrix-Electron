@@ -5,7 +5,7 @@ import { Clock, Calendar, ArrowRight, PlayCircle } from 'lucide-react'
 const CurrentTaskWidget = ({ task, onTaskUpdate }) => {
 
   const CardWrapper = ({ children }) => (
-    <div className="bg-white p-4 lg:p-6 rounded-2xl border border-black shadow-[0_15px_40px_rgba(22,163,74,0.08),0_10px_20px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.15),0_15px_30px_rgba(0,0,0,0.1)] h-full flex flex-col justify-between hover:-translate-y-1">
+    <div className="bg-white p-4 lg:p-6 rounded-2xl border border-gray-100 shadow-[0_15px_40px_rgba(22,163,74,0.08),0_10px_20px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.15),0_15px_30px_rgba(0,0,0,0.1)] h-full flex flex-col justify-between hover:-translate-y-1">
       {children}
     </div>
   )
