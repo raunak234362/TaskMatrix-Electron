@@ -1319,6 +1319,23 @@ class Service {
       console.error('cannot find pending RFIs', error)
     }
   }
+
+  //pending RFIs for ProjectManager
+  static async pendingRFIsForProjectManager() {
+    try {
+      const response = await api.get(`rfi/pending/projectManager`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('pending RFIs for ProjectManager:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find pending RFIs for ProjectManager', error)
+    }
+  }
+
+
   static async RfiSent() {
     try {
       const response = await api.get(`rfi/sents`, {
@@ -1431,6 +1448,21 @@ class Service {
     }
   }
 
+//Pending submittals for Project Manager
+static async PendingSubmittalForProjectManager() {
+  try {
+    const response = await api.get(`submittal/pending/projectManager`, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    console.log(' Pending submittals for Project Manager:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('cannot find submittals for Project Manager', error)
+  }
+}
+
   //All Submitals
   static async SubmittalSent() {
     try {
@@ -1529,6 +1561,21 @@ class Service {
       return response.data
     } catch (error) {
       console.error('cannot find Co', error)
+    }
+  }
+
+  //pending CO for Project Manager
+  static async PendingCoForProjectManager() {
+    try {
+      const response = await api.get(`changeOrder/pending/projectManager`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Pending Co for Project Manager:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find Co for Project Manager', error)
     }
   }
 

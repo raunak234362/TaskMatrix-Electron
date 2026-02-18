@@ -1,6 +1,9 @@
 import { ClipboardList, FileText, RefreshCw, Activity, Search } from 'lucide-react'
 
 const PendingActions = ({ dashboardStats, onActionClick }) => {
+
+  console.log(dashboardStats);
+  
   const actions = [
     {
       title: 'RFI',
@@ -54,7 +57,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
     }
   }
   return (
-    <div className="bg-white p-4 lg:p-6 rounded-3xl border border-gray-200 shadow-[0_15px_40px_rgba(22,163,74,0.08),0_10px_20px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.15),0_15px_30px_rgba(0,0,0,0.1)] h-full">
+    <div className="bg-white p-4 lg:p-6 rounded-3xl border border-gray-200 transition-all duration-500 h-full">
       <div className="flex items-center justify-between mb-6 px-1">
         <h2 className="text-base font-black text-primary uppercase tracking-[0.15em]">Pending Actions</h2>
       </div>

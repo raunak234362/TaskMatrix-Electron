@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { ClipboardList, AlertCircle, ChevronRight } from "lucide-react";
 
-const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
+const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittalClick }) => {
   const [activeTab, setActiveTab] = React.useState("submittals");
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
 
@@ -43,11 +43,10 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => setActiveTab("submittals")}
-            className={`text-xs font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${
-              activeTab === "submittals"
-                ? "text-primary border-primary"
-                : "text-gray-400 border-transparent hover:text-gray-600"
-            }`}
+            className={`text-xs font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === "submittals"
+              ? "text-primary border-primary"
+              : "text-gray-400 border-transparent hover:text-gray-600"
+              }`}
           >
             Upcoming Submittals
           </button>
@@ -55,11 +54,10 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
           {userRole === "project_manager_officer" && (
             <button
               onClick={() => setActiveTab("invoices")}
-              className={`text-xs font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${
-                activeTab === "invoices"
-                  ? "text-primary border-primary"
-                  : "text-gray-400 border-transparent hover:text-gray-600"
-              }`}
+              className={`text-xs font-black uppercase tracking-widest pb-1 border-b-2 transition-all ${activeTab === "invoices"
+                ? "text-primary border-primary"
+                : "text-gray-400 border-transparent hover:text-gray-600"
+                }`}
             >
               Invoices
             </button>
@@ -113,7 +111,8 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
                         return (
                           <div
                             key={submittal.id || index}
-                            className="grid grid-cols-12 gap-4 px-4 py-3 items-center hover:bg-slate-50 transition-colors group"
+                            className="grid grid-cols-12 gap-4 px-4 py-3 items-center hover:bg-slate-50 transition-colors group cursor-pointer"
+                            onClick={() => onSubmittalClick && onSubmittalClick(submittal)}
                           >
                             {/* Subject */}
                             <div className="col-span-12 lg:col-span-5 flex items-center gap-3 min-w-0">
@@ -129,11 +128,10 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
 
                               <div className="flex flex-col min-w-0">
                                 <span
-                                  className={`text-sm font-semibold truncate ${
-                                    overdue
-                                      ? "text-red-600"
-                                      : "text-gray-800"
-                                  }`}
+                                  className={`text-sm font-semibold truncate ${overdue
+                                    ? "text-red-600"
+                                    : "text-gray-800"
+                                    }`}
                                   title={submittal.subject || submittal.name}
                                 >
                                   {submittal.subject ||
@@ -146,14 +144,13 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
                                 </span>
                               </div>
                               <div>
-                                
+
                               </div>
-                               <span
-                                className={`text-xs font-semibold uppercase ${
-                                  overdue
-                                    ? "text-red-500"
-                                    : "text-gray-500"
-                                }`}
+                              <span
+                                className={`text-xs font-semibold uppercase ${overdue
+                                  ? "text-red-500"
+                                  : "text-gray-500"
+                                  }`}
                               >
                                 {dueDate
                                   ? new Date(dueDate).toLocaleDateString()
@@ -170,7 +167,7 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
 
                             {/* Due Date */}
                             <div className="col-span-12 lg:col-span-2 lg:text-right">
-                             
+
                             </div>
 
                             {/* Arrow */}

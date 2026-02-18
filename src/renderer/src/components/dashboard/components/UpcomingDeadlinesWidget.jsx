@@ -21,7 +21,7 @@ const UpcomingDeadlinesWidget = ({ tasks = [], onTaskClick }) => {
       <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-primary" />
-          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-800">Upcoming Deadlines</h3>
+          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-800">Upcoming Assigned Tasks Deadlines</h3>
         </div>
         <span className="text-[10px] font-black bg-gray-50 text-gray-400 px-3 py-1 rounded-full uppercase tracking-widest border border-gray-100">
           {upcoming.length} PENDING

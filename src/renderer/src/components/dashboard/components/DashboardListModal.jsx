@@ -2,7 +2,7 @@ import { X, FileText, ClipboardList, RefreshCw, Search } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import DataTable from '../../ui/table'
 
-const DashboardListModal = ({ isOpen, onClose, type, data, onItemSelect }) => {
+const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) => {
     if (!isOpen) return null
 
     const getTitle = () => {
