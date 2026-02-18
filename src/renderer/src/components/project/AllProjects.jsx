@@ -64,14 +64,7 @@ const AllProjects = () => {
 
   return (
     <div className="bg-[#fcfdfc] min-h-[600px] animate-in fade-in duration-700">
-      <div className="flex items-center justify-between mb-6 px-2">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Projects</h2>
-          <p className="text-sm text-gray-500 font-medium">
-            Total Projects: <span className="text-gray-900 font-bold">{projects.length}</span>
-          </p>
-        </div>
-      </div>
+
       <DataTable
         columns={columns}
         data={projects}

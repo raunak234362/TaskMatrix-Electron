@@ -121,7 +121,7 @@ const ProjectLayout = () => {
                 <button
                   onClick={() => setActiveTab("allProject")}
                   className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "allProject"
-                    ? "bg-black text-white border-black shadow-sm"
+                    ? "bg-[#6bbd45]/15 text-black border-black shadow-sm"
                     : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
                     }`}
                 >
