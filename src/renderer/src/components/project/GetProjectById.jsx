@@ -131,7 +131,7 @@ const GetProjectById = ({ id, onClose }) => {
           {/* Header */}
           <div className="flex justify-between items-center border-b pb-3 mb-3">
             <div>
-              <h2 className="text-xl md:text-2xl font-semibold text-green-700">
+              <h2 className="text-xl md:text-2xl font-semibold text-[#6bbd45]">
                 {project.name}
               </h2>
               <p className="text-gray-700 text-sm">
@@ -141,7 +141,7 @@ const GetProjectById = ({ id, onClose }) => {
             <div className="flex items-center gap-2">
               <span
                 className={`px-3 py-1 rounded-full text-xs font-medium ${project.status === "ACTIVE"
-                  ? "bg-green-100 text-green-800"
+                  ? "bg-[#6bbd45]/15 text-[#6bbd45]"
                   : "bg-red-100 text-red-700"
                   }`}
               >
@@ -165,7 +165,7 @@ const GetProjectById = ({ id, onClose }) => {
               <select
                 value={activeTab}
                 onChange={(e) => setActiveTab(e.target.value)}
-                className="w-full p-2 rounded-md bg-primary text-white  focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full p-2 rounded-md bg-primary text-white  focus:outline-none focus:ring-2 focus:ring-[#6bbd45]"
               >
                 {[
                   { key: "details", label: "Details" },
@@ -228,8 +228,8 @@ const GetProjectById = ({ id, onClose }) => {
                     key={key}
                     onClick={() => setActiveTab(key)}
                     className={`flex items-center gap-2 bg-primary text-gray-800 px-4 py-2 text-md rounded-md font-medium transition-colors whitespace-nowrap ${activeTab === key
-                      ? "bg-green-600 text-white "
-                      : "text-gray-700 bg-gray-100 hover:text-green-700 font-semibold hover:bg-gray-50"
+                      ? "bg-[#6bbd45] text-white "
+                      : "text-gray-700 bg-gray-100 hover:text-[#6bbd45] font-semibold hover:bg-gray-50"
                       }`}
                   >
                     <TabIcon className="w-4 h-4" />
@@ -247,7 +247,7 @@ const GetProjectById = ({ id, onClose }) => {
           {activeTab === "details" && (
             <div className="grid max-sm:grid-cols-1 md:grid-cols-2 gap-6 text-sm">
               <div className="md:col-span-2 mt-6">
-                <h4 className="font-semibold text-green-700 mb-2 flex items-center gap-1">
+                <h4 className="font-semibold text-[#6bbd45] mb-2 flex items-center gap-1">
                   <FolderOpenDot className="w-4 h-4" />
                   Project Description
                 </h4>
@@ -304,7 +304,7 @@ const GetProjectById = ({ id, onClose }) => {
               </div>
 
               <div className="p-4 bg-gray-50 rounded-lg border text-sm">
-                <h4 className="text-lg font-semibold text-green-700 mb-3 flex items-center gap-1">
+                <h4 className="text-lg font-semibold text-[#6bbd45] mb-3 flex items-center gap-1">
                   <Settings className="w-5 h-5" /> Connection Design Scope
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -320,7 +320,7 @@ const GetProjectById = ({ id, onClose }) => {
                 </div>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg border text-sm">
-                <h4 className="text-lg font-semibold text-green-700 mb-3 flex items-center gap-1">
+                <h4 className="text-lg font-semibold text-[#6bbd45] mb-3 flex items-center gap-1">
                   <Settings className="w-5 h-5" /> Detailing Scope
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -338,7 +338,7 @@ const GetProjectById = ({ id, onClose }) => {
               {/* Footer Buttons */}
               <div className="pt-2 flex flex-wrap gap-3">
                 <Button
-                  className="py-1 px-3 text-sm bg-green-600 text-white"
+                  className="py-1 px-3 text-sm bg-[#6bbd45] text-white"
                   onClick={() => handleEditModel(project)}
                 >
                   Edit Project
@@ -367,7 +367,7 @@ const GetProjectById = ({ id, onClose }) => {
           {/* ✅ Team */}
           {activeTab === "team" && (
             <div className="text-gray-700 text-sm">
-              <h4 className="font-semibold text-green-700 mb-2 flex items-center gap-1">
+              <h4 className="font-semibold text-[#6bbd45] mb-2 flex items-center gap-1">
                 <Users className="w-4 h-4" /> Assigned Team
               </h4>
               <p>Team: {project.team?.name || "No team assigned."}</p>
@@ -406,7 +406,7 @@ const GetProjectById = ({ id, onClose }) => {
                     className={`
                       whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                       ${rfiView === "list"
-                        ? "border-green-500 text-green-600"
+                        ? "border-[#6bbd45] text-[#6bbd45]"
                         : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                       }
                     `}
@@ -419,7 +419,7 @@ const GetProjectById = ({ id, onClose }) => {
                       className={`
                         whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                         ${rfiView === "add"
-                          ? "border-green-500 text-green-600"
+                          ? "border-[#6bbd45] text-[#6bbd45]"
                           : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                         }
                     `}
@@ -454,7 +454,7 @@ const GetProjectById = ({ id, onClose }) => {
                     className={`
                       whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                       ${submittalView === "list"
-                        ? "border-green-500 text-green-600"
+                        ? "border-[#6bbd45] text-[#6bbd45]"
                         : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                       }
                     `}
@@ -467,7 +467,7 @@ const GetProjectById = ({ id, onClose }) => {
                       className={`
                         whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                         ${submittalView === "add"
-                          ? "border-green-500 text-green-600"
+                          ? "border-[#6bbd45] text-[#6bbd45]"
                           : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                         }
                     `}
@@ -502,7 +502,7 @@ const GetProjectById = ({ id, onClose }) => {
                     className={`
                       whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                       ${rfiView === "list"
-                        ? "border-green-500 text-green-600"
+                        ? "border-[#6bbd45] text-[#6bbd45]"
                         : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                       }
                     `}
@@ -515,7 +515,7 @@ const GetProjectById = ({ id, onClose }) => {
                       className={`
                         whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                         ${rfiView === "add"
-                          ? "border-green-500 text-green-600"
+                          ? "border-[#6bbd45] text-[#6bbd45]"
                           : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                         }
                     `}
@@ -550,7 +550,7 @@ const GetProjectById = ({ id, onClose }) => {
                     className={`
                       whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                       ${submittalView === "list"
-                        ? "border-green-500 text-green-600"
+                        ? "border-[#6bbd45] text-[#6bbd45]"
                         : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                       }
                     `}
@@ -563,7 +563,7 @@ const GetProjectById = ({ id, onClose }) => {
                       className={`
                         whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                         ${submittalView === "add"
-                          ? "border-green-500 text-green-600"
+                          ? "border-[#6bbd45] text-[#6bbd45]"
                           : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                         }
                     `}
@@ -598,7 +598,7 @@ const GetProjectById = ({ id, onClose }) => {
                     className={`
                       whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                       ${changeOrderView === "list"
-                        ? "border-green-500 text-green-600"
+                        ? "border-[#6bbd45] text-[#6bbd45]"
                         : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                       }
                     `}
@@ -611,7 +611,7 @@ const GetProjectById = ({ id, onClose }) => {
                       className={`
                         whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                         ${changeOrderView === "add"
-                          ? "border-green-500 text-green-600"
+                          ? "border-[#6bbd45] text-[#6bbd45]"
                           : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                         }
                     `}
@@ -630,12 +630,12 @@ const GetProjectById = ({ id, onClose }) => {
               ) : (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <h4 className="text-lg font-semibold text-green-700">
+                    <h4 className="text-lg font-semibold text-[#6bbd45]">
                       Change Order Table
                     </h4>
                     <button
                       onClick={() => setChangeOrderView("list")}
-                      className="text-sm text-green-600 hover:text-green-700 font-medium"
+                      className="text-sm text-[#6bbd45] hover:text-[#6bbd45] font-medium"
                     >
                       &larr; Back to List
                     </button>
@@ -680,7 +680,7 @@ const InfoRow = ({
 const ScopeTag = ({ label, active }) => (
   <span
     className={`px-3 py-1 text-sm font-medium rounded-full ${active
-      ? "bg-green-100 text-green-800 border border-green-300"
+      ? "bg-[#6bbd45]/15 text-[#6bbd45] border border-[#6bbd45]"
       : "bg-gray-100 text-gray-700 border border-gray-200"
       }`}
   >

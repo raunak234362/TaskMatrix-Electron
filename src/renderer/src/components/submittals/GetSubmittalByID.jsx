@@ -91,8 +91,8 @@ const GetSubmittalByID = ({ id }) => {
       <div className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* LEFT PANEL */}
-          <div className="bg-white p-6 rounded-xl shadow-md space-y-5">
-            <h1 className="text-2xl  text-green-700">
+          <div className="bg-white p-6 rounded-xl shadow-none border border-gray-100 space-y-5">
+            <h1 className="text-2xl  text-[#6bbd45]">
               {submittal.subject}
             </h1>
 
@@ -125,12 +125,12 @@ const GetSubmittalByID = ({ id }) => {
           </div>
 
           {/* RIGHT PANEL */}
-          <div className="bg-white p-6 rounded-xl shadow-md space-y-6">
+          <div className="bg-white p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-green-700">Responses</h2>
+              <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>
               {userRole === "CLIENT_ADMIN" && (
                 <Button
-                  className="bg-green-600 text-white"
+                  className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
                   onClick={() => setShowResponseModal(true)}
                 >
                   + Add Response
