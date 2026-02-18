@@ -115,7 +115,8 @@ const WBTDashboard = () => {
   const [detailModal, setDetailModal] = useState({
     isOpen: false,
     type: null, // 'RFI', 'SUBMITTAL', 'CO', 'RFQ'
-    id: null
+    id: null,
+    projectId: null
   })
 
   // Popup States for Widgets
@@ -189,26 +190,32 @@ const WBTDashboard = () => {
     try {
       if (isAdminRole) {
         // Fetch Admin Data
-        const [projectsRes, rfiRes, subRes, coRes, rfqRes, myTasksRes] = await Promise.all([
+        const [projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes] = await Promise.all([
           Service.GetAllProjects(),
           Service.pendingRFIs(),
           Service.GetPendingSubmittal(),
+          Service.PendingSubmittal(),
           Service.PendingCo(),
           Service.RFQRecieved(),
+          Service.GetPMDashboard(),
           Service.GetMyTask() // Fetch personal tasks for Admin too
         ])
 
         const projects = projectsRes?.data || []
         const rfis = rfiRes?.data || []
         const submittals = subRes?.data || []
+        const pendingSubmittals = pendingSubRes?.data || []
         const cos = coRes?.data || []
         const rfqs = rfqRes?.data || []
+        const pmDashboard = pmDashboardRes?.data || []
 
         setAdminData({
           projects,
           rfis,
           submittals,
+          pendingSubmittals,
           cos,
+          pmDashboard,
           rfqs,
           projectStats: {
             totalProjects: projects.length,
@@ -216,15 +223,7 @@ const WBTDashboard = () => {
             completedProjects: projects.filter(p => p.status?.toUpperCase() === 'COMPLETED').length,
             onHoldProjects: projects.filter(p => p.status?.toUpperCase() === 'ON_HOLD').length
           },
-          dashboardStats: {
-            pendingRFI: rfis.length,
-            newRFI: 0,
-            pendingSubmittals: submittals.length,
-            pendingChangeOrders: cos.length,
-            newChangeOrders: 0,
-            pendingRFQ: rfqs.length,
-            newRFQ: 0
-          },
+          
           invoices: []
         })
 
@@ -360,11 +359,16 @@ const WBTDashboard = () => {
       }
 
       if (type && (item.id || item._id)) {
-        setActionModal({ isOpen: false, type: '', data: [] }) // Close list modal before opening detail
+        setActionModal({ ...actionModal, isOpen: false }) // Close list modal before opening detail
+
+        // Extract Project ID safely - try various common patterns
+        const projectId = item.projectId || item.project?.id || item.project?._id || (typeof item.project === 'string' ? item.project : null);
+
         setDetailModal({
           isOpen: true,
           type,
-          id: item.id || item._id
+          id: item.id || item._id,
+          projectId
         })
         return
       }
@@ -376,15 +380,16 @@ const WBTDashboard = () => {
       return
     }
 
-    // 3. Last resort heuristic
+    // 3. Last resort heuristic (Fallback if modal wasn't open for some reason)
     let type = null
-    if (item.rfiresponse !== undefined || item.subject) type = 'RFI'
+    if (item.rfiresponse !== undefined) type = 'RFI'
 
     if (type && (item.id || item._id)) {
       setDetailModal({
         isOpen: true,
         type,
-        id: item.id || item._id
+        id: item.id || item._id,
+        projectId: item.projectId || item.project?.id || item.project?._id
       })
     }
   }
@@ -413,7 +418,7 @@ const WBTDashboard = () => {
           <div className="flex flex-col gap-4 lg:gap-6 transition-all duration-300 ease-in-out">
             {/* Row 1: Priority Header Row */}
             <div className="relative">
-              <div className="bg-gradient-to-br from-gray-50/50 to-white/50 p-6 rounded-3xl border border-gray-200 shadow-sm relative overflow-hidden">
+              <div className="bg-linear-to-br from-gray-50/50 to-white/50 p-6 rounded-3xl border border-gray-200 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 relative z-10">
                   {/* 1. Priority Focus (Highest Priority) */}
@@ -721,7 +726,7 @@ const WBTDashboard = () => {
                 <Suspense fallback={<div className="p-8 text-center text-xs font-bold uppercase tracking-widest text-gray-400">Loading details...</div>}>
                   {detailModal.type === 'RFI' && <GetRFIByID id={detailModal.id} />}
                   {detailModal.type === 'SUBMITTAL' && <GetSubmittalByID id={detailModal.id} />}
-                  {detailModal.type === 'CO' && <GetCOByID id={detailModal.id} />}
+                  {detailModal.type === 'CO' && <GetCOByID id={detailModal.id} projectId={detailModal.projectId} />}
                   {detailModal.type === 'RFQ' && <GetRFQByID id={detailModal.id} />}
                 </Suspense>
               </div>

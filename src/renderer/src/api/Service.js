@@ -1944,6 +1944,19 @@ class Service {
     }
   }
 
+    static async PendingSubmittal() {
+    try {
+      const response = await api.get(`submittal/pendingSubmittal`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("cannot find submittals", error);
+    }
+  }
+
   // Create Share Link
   static async createShareLink(table, parentId, fileId, versionId) {
     try {
@@ -2408,7 +2421,7 @@ class Service {
   //pm dashboard
   static async GetPMDashboard() {
     try {
-      const response = await api.get('dashBoardData/clientAdmin', {
+      const response = await api.get('dashBoardData/projectManager', {
         headers: {
           'Content-Type': 'application/json'
         }
