@@ -7,11 +7,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Phone, MapPin, ChevronRight, Search } from "lucide-react";
-
-onSelect: (id) => void;
-}
 
 const CDNetworkOverview = ({
   designers,
@@ -37,11 +34,11 @@ const CDNetworkOverview = ({
   const [hoveredId, setHoveredId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const pieCenterX = "50%";
-  const pieCenterY = "50%"; // slightly lower looks visually perfect
+  const pieCenterY = "50%";
 
   const filteredDesigners = designers.filter(
     (d) =>
-      d.name.toLowerCase().includes(searchTerm.toLowerCase()) || []
+      d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       d.email?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
@@ -81,7 +78,7 @@ const CDNetworkOverview = ({
         <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar">
           {filteredDesigners.map((designer) => {
             // Parse states for this designer
-            let states = ;
+            let states = [];
             if (Array.isArray(designer.state)) states = designer.state;
             else if (typeof designer.state === "string") {
               try {
@@ -139,135 +136,111 @@ const CDNetworkOverview = ({
                 </div>
 
                 {/* HOVER POPOVER (Floating State List) */}
-
-                {hoveredId === (designer.id || designer._id) && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-14 top-1/2 -translate-y-1/2 z-50 bg-white p-4 rounded-xl shadow-xl border border-gray-100 w-64 pointer-events-none hidden sm:block"
-                  >
-                    <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-50">
-                      <MapPin size={14} className="text-green-500" />
-                      <span className="text-xs  text-gray-700">
-                        Coverage Area
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {states.length > 0 ? (
-                        states.slice(0, 8).map((s, i) => (
-                          <span
-                            key={i}
-                            className="text-[10px] bg-green-50 text-green-700 px-2 py-0.5 rounded-md border border-green-100"
-                          >
-                            {s}
+                <AnimatePresence>
+                  {hoveredId === (designer.id || designer._id) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-14 top-1/2 -translate-y-1/2 z-50 bg-white p-4 rounded-xl shadow-xl border border-gray-100 w-64 pointer-events-none hidden sm:block"
+                    >
+                      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-50">
+                        <MapPin size={14} className="text-green-500" />
+                        <span className="text-xs  text-gray-700">
+                          Coverage Area
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {states.length > 0 ? (
+                          states.slice(0, 8).map((s, i) => (
+                            <span
+                              key={i}
+                              className="text-[10px] bg-green-50 text-green-700 px-2 py-0.5 rounded-md border border-green-100"
+                            >
+                              {s}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">
+                            No specific states listed
                           </span>
-                        ))
-                      ) : (
-                        <span className="text-xs text-gray-400 italic">
-                          No specific states listed
-                        </span>
-                      )}
-                      {states.length > 8 && (
-                        <span className="text-[10px] text-gray-400 pl-1">
-                          +{states.length - 8} more
-                        </span>
-                      )}
-                    </div>
-                    <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-t border-r border-gray-100 rotate-45 transform"></div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                        )}
+                        {states.length > 8 && (
+                          <span className="text-[10px] text-gray-400 pl-1">
+                            +{states.length - 8} more
+                          </span>
+                        )}
+                      </div>
+                      <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-t border-r border-gray-100 rotate-45 transform"></div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
-      );
+            );
           })}
+        </div>
+      </motion.div>
+
+      {/* RIGHT State Distribution (Pie Chart) */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="lg:col-span-1 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-[400px]"
+      >
+        <h3 className="text-base sm:text-lg  text-gray-800 mb-4 sm:mb-6">
+          State Distribution
+        </h3>
+        <div className="flex-1 min-h-[300px] relative">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={stateData}
+                cx={pieCenterX}
+                cy={pieCenterY}
+                innerRadius={window.innerWidth < 640 ? 50 : 60}
+                outerRadius={window.innerWidth < 640 ? 70 : 80}
+                paddingAngle={5}
+                dataKey="count"
+              >
+                {stateData.map((_, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{
+                  borderRadius: "8px",
+                  border: "none",
+                  boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+                  fontSize: '12px'
+                }}
+              />
+              <Legend
+                verticalAlign="bottom"
+                height={120}
+                wrapperStyle={{
+                  paddingTop: '20px',
+                  fontSize: '10px',
+                  overflowY: 'auto',
+                  scrollbarWidth: 'none'
+                }}
+                iconType="circle"
+                iconSize={8}
+                formatter={(value, entry) => (
+                  <span className="text-[10px] sm:text-xs text-gray-600 ml-1">
+                    {value} ({entry.payload.count})
+                  </span>
+                )}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </motion.div>
     </div>
-      </motion.div >
-
-  <motion.div
-    initial={{ opacity: 0, x: 20 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ duration: 0.5, delay: 0.2 }}
-    className="lg:col-span-1 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col min-h-[400px]"
-  >
-    <h3 className="text-base sm:text-lg  text-gray-800 mb-4 sm:mb-6">
-      State Distribution
-    </h3>
-    <div className="flex-1 min-h-[300px] relative">
-      <ResponsiveContainer width="100%" height="100%">
-
-        <Pie
-          data={stateData}
-          cx={pieCenterX}
-          cy={pieCenterY}
-          innerRadius={window.innerWidth < 640 ? 50 : 60}
-          outerRadius={window.innerWidth < 640 ? 70 : 80}
-          paddingAngle={5}
-          dataKey="count"
-        >
-          {stateData.map((_, index) => (
-            <Cell
-              key={`cell-${index}`}
-              fill={COLORS[index % COLORS.length]}
-            />
-          ))}
-        </Pie>
-        <RechartsTooltip
-          contentStyle={{
-            borderRadius: "8px",
-            border: "none",
-            boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
-            fontSize: '12px'
-          }}
-        />
-        <Legend
-          verticalAlign="bottom"
-          height={120}
-          wrapperStyle={{
-            paddingTop: '20px',
-            fontSize: '10px',
-            overflowY: 'auto',
-            scrollbarWidth: 'none'
-          }}
-          iconType="circle"
-          iconSize={8}
-          formatter={(value, entry) => (
-            <span className="text-[10px] sm:text-xs text-gray-600 ml-1">
-              {value} ({entry.payload.count})
-            </span>
-          )}
-        />
-        <text
-
-          x={pieCenterX}
-          y={pieCenterY}
-          textAnchor="middle"
-          dominantBaseline="middle"
-        >
-          {/* <tspan
-                  x={pieCenterX}
-                  dy="3em"
-                  fontSize={window.innerWidth < 640 ? "18" : "24"}
-                  fontWeight="bold"
-                  fill="#1f2937"
-                >
-                  {stateData.reduce((a, b) => a + b.count, 0)}
-                </tspan>
-                <tspan
-                  x={pieCenterX}
-                  dy="1.5em"
-                  fontSize={window.innerWidth < 640 ? "10" : "12"}
-                  fill="#6b7280"
-                >
-                  Total States
-                </tspan> */}
-        </text>
-      </PieChart>
-    </ResponsiveContainer>
-  </div>
-      </motion.div >
-    </div >
   );
 };
 

@@ -36,7 +36,7 @@ const TopFabricatorWidget = ({ fabricator }) => {
       ) : (
         <div className="flex flex-col items-center justify-center h-40 bg-gray-50 rounded-xl border border-dashed border-gray-200">
           <Building2 className="text-gray-400 mb-2" size={32} />
-          <p className="text-gray-500">No data available
+          <p className="text-gray-500">No data available</p>
         </div>
       )}
     </div>

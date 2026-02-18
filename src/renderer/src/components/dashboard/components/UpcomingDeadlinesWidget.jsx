@@ -3,7 +3,7 @@
 import { Calendar, AlertCircle } from 'lucide-react'
 import { format, differenceInDays } from 'date-fns'
 
-const UpcomingDeadlinesWidget = ({ tasks = [] }) => {
+const UpcomingDeadlinesWidget = ({ tasks = [], onTaskClick }) => {
   // Filter for pending tasks and sort by due date
   const upcoming = tasks
     .filter((t) => t.status !== 'COMPLETED' && t.status !== 'IN_PROGRESS') // Assuming In Progress is shown separately

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo } from "react";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import DataTable from "../../ui/table";
 
 import GetFabricatorByID from "./GetFabricatorByID";

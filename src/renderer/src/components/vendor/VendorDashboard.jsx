@@ -5,7 +5,7 @@ import CDNetworkOverview from "./components/CDNetworkOverview";
 import CDCapacityTable from "./components/CDCapacityTable";
 // import CDInsightsList from "./components/CDInsightsList"; // Removed based on feedback/redundancy
 import GetConnectionDesignerByID from "./designer/GetVendorByID";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
 const DashboardSkeleton = () => (
@@ -47,7 +47,6 @@ const VendorDashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // setLoading(true); // Already true init
                 const response = await Service.FetchAllConnectionDesigner();
                 const data = Array.isArray(response) ? response : (response?.data || []);
                 setCdData(data);
@@ -68,21 +67,21 @@ const VendorDashboard = () => {
 
         // 1. Snapshot Stats
         const totalCDs = data.length;
-        const allCountries = new Set<string>();
-        const allStates = new Set<string>();
+        const allCountries = new Set();
+        const allStates = new Set();
         let totalEngineers = 0;
-        const stateCounts<string, number> = {};
+        const stateCounts = {};
 
         data.forEach(cd => {
             // Location Processing
-            let statesArr = ;
+            let statesArr = [];
             if (Array.isArray(cd.state)) {
                 statesArr = cd.state;
             } else if (typeof cd.state === 'string') {
                 try {
                     if (cd.state.startsWith('[')) {
                         statesArr = JSON.parse(cd.state);
-                    } else {
+                    } else if (cd.state) {
                         statesArr = [cd.state];
                     }
                 } catch {
@@ -164,7 +163,6 @@ const VendorDashboard = () => {
             </motion.div>
 
             {/* SECTION C — LOCATION INTELLIGENCE (Redesigned) */}
-            {/* New component on Left, Pie on Right */}
             <CDNetworkOverview
                 designers={cdData}
                 stateData={stateDist}
@@ -181,7 +179,7 @@ const VendorDashboard = () => {
             </motion.div>
 
             {/* DETAILS MODAL */}
-            
+            <AnimatePresence>
                 {selectedDesignerId && (
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -211,7 +209,6 @@ const VendorDashboard = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
-
         </motion.div>
     );
 };
