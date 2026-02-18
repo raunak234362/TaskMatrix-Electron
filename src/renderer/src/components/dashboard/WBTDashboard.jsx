@@ -426,16 +426,16 @@ const WBTDashboard = () => {
                         <div className="p-2.5 bg-green-100 rounded-xl border border-primary/20 shadow-sm transition-transform group-hover:scale-110">
                           <Clock className="w-5 h-5 text-primary" strokeWidth={2.5} />
                         </div>
-                        <span className="text-xs font-black text-[#6bbd45] uppercase tracking-[0.1em]">Priority Focus</span>
+                        <span className="text-xs font-black text-primary uppercase tracking-[0.1em]">Priority Focus</span>
                       </div>
                       {currentTask && (
                         <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#6bbd45] animate-pulse shadow-[0_0_8px_rgba(107,189,69,0.5)]"></span>
+                          <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-primary/50"></span>
                         </div>
                       )}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-base font-black text-gray-900 line-clamp-1 group-hover:text-[#6bbd45] transition-colors">
+                      <h3 className="text-base font-black text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">
                         {currentTask?.project?.name || 'No Active Task'}
                       </h3>
                       <p className="text-[11px] text-gray-500 font-bold uppercase mt-1">

@@ -27,8 +27,8 @@ const AllProjects = () => {
       header: "Project Name",
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-bold text-gray-900">{row.original.name}</span>
-          <span className="text-[10px] text-[#6bbd45] font-bold uppercase tracking-widest mt-0.5">{row.original.fabricator?.fabName || 'N/A'}</span>
+          <span className="font-medium text-gray-900">{row.original.name}</span>
+          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">{row.original.fabricator?.fabName || 'N/A'}</span>
         </div>
       )
     },
@@ -47,7 +47,7 @@ const AllProjects = () => {
       cell: ({ row }) => {
         const status = row.original.status || 'UNKNOWN';
         const colors = {
-          ACTIVE: 'bg-[#6bbd45]/10 text-[#6bbd45]',
+          ACTIVE: 'bg-green-100 text-green-800',
           COMPLETED: 'bg-blue-100 text-blue-700',
           ON_HOLD: 'bg-orange-100 text-orange-700',
           AWARDED: 'bg-purple-100 text-purple-700',
@@ -64,6 +64,14 @@ const AllProjects = () => {
 
   return (
     <div className="bg-[#fcfdfc] min-h-[600px] animate-in fade-in duration-700">
+      <div className="flex items-center justify-between mb-6 px-2">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">Projects</h2>
+          <p className="text-sm text-gray-500 font-medium">
+            Total Projects: <span className="text-gray-900 font-bold">{projects.length}</span>
+          </p>
+        </div>
+      </div>
       <DataTable
         columns={columns}
         data={projects}
