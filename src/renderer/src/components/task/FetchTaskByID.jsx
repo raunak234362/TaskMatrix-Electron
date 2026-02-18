@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Loader2,
   Calendar,
@@ -291,22 +292,23 @@ const FetchTaskByID = ({
   };
 
   if (loading) {
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
         <div className="bg-white rounded-2xl shadow-2xl p-10 flex flex-col items-center">
-          <Loader2 className="w-12 h-12 animate-spin text-green-600" />
+          <Loader2 className="w-12 h-12 animate-spin text-[#6bbd45]" />
           <p className="mt-4 text-lg font-medium text-gray-700">
             Loading task details...
           </p>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
   if (!task) {
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-2xl shadow-2xl p-10 text-center w-full">
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+        <div className="bg-white rounded-2xl shadow-2xl p-10 text-center w-full max-w-md">
           <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
             <FileText className="w-10 h-10 text-gray-400" />
           </div>
@@ -316,54 +318,59 @@ const FetchTaskByID = ({
           </p>
           <Button
             onClick={onClose}
-            className="mt-6 px-8 py-3 font-semibold transition bg-red-600 hover:bg-red-700"
+            className="mt-6 px-8 py-3 font-semibold transition bg-red-600 hover:bg-red-700 text-white"
           >
             Close
           </Button>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
   const statusConfig = getStatusConfig(task.status);
   const priority = getPriorityLabel(task.priority);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-[80%] h-[95vh] overflow-hidden flex flex-col">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] overflow-hidden flex flex-col relative">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-8 py-5 flex justify-between items-center">
+        <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-green-100 rounded-xl">
-              <ClipboardList className="w-7 h-7 text-green-700" />
+            <div className="p-3 bg-[#6bbd45]/15 rounded-xl text-[#6bbd45]">
+              <ClipboardList className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-2xl  text-gray-700">{task.name}</h2>
-              {/* <p className="text-sm text-gray-700">ID: #{task.id}</p> */}
+              <h2 className="text-xl md:text-2xl font-bold text-gray-800">{task.name}</h2>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">ID: #{task.id}</span>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {(userRole === "admin" ||
-              userRole === "operation_executive" ||
-              userRole === "project_manager" ||
-              userRole === "department_manager" ||
-              userRole === "deputy_manager") && (
-                <Button
-                  onClick={() => setIsEditing(true)}
-                  variant="outline"
-                  className="flex items-center gap-2 px-6 py-3 font-medium transition border-indigo-200 text-background hover:bg-indigo-50"
-                >
-                  <Edit className="w-4 h-4" /> Edit Task
-                </Button>
-              )}
-            <Button
+            <button
               onClick={onClose}
-              variant="secondary"
-              className="px-6 py-3 text-white font-medium transition bg-red-600 hover:bg-red-700"
+              className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 hover:text-gray-700"
             >
-              Close
-            </Button>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+            </button>
           </div>
+        </div>
+
+        {/* Action Bar */}
+        <div className="px-6 py-3 border-b border-gray-100 flex flex-wrap gap-3 items-center justify-end bg-white">
+          {(userRole === "admin" ||
+            userRole === "operation_executive" ||
+            userRole === "project_manager" ||
+            userRole === "department_manager" ||
+            userRole === "deputy_manager") && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-[#6bbd45]/20 text-black border border-black rounded-lg text-xs font-bold uppercase hover:bg-[#6bbd45]/30 transition-colors"
+              >
+                <Edit className="w-4 h-4" /> Edit Task
+              </button>
+            )}
         </div>
 
         {/* Scrollable Content */}
@@ -695,7 +702,8 @@ const FetchTaskByID = ({
           </div>
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 };
 

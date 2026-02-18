@@ -141,11 +141,11 @@ export default function DataTable({
   pageSizeOptions = [25, 50],
   showColumnFiltersInHeader = false,
   initialSorting = [],
-  
+
   // Custom additions for bulk delete functionality (not in original user snippet but necessary)
   enableRowSelection = false,
   rowSelection = {},
-  onRowSelectionChange = () => {},
+  onRowSelectionChange = () => { },
   getRowId,
 }) {
   const { isMobile } = useScreen();
@@ -173,37 +173,37 @@ export default function DataTable({
     };
 
     const selectionCol = {
-        id: "select",
-        header: ({ table }) => (
-          <div className="px-1">
-            <input
-              type="checkbox"
-              checked={table.getIsAllPageRowsSelected()}
-              onChange={table.getToggleAllPageRowsSelectedHandler()}
-              className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-            />
-          </div>
-        ),
-        cell: ({ row }) => (
-          <div className="px-1">
-            <input
-              type="checkbox"
-              checked={row.getIsSelected()}
-              onChange={row.getToggleSelectedHandler()}
-              className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-        ),
-        enableSorting: false,
-        enableColumnFilter: false,
-        size: 40,
-      };
+      id: "select",
+      header: ({ table }) => (
+        <div className="px-1">
+          <input
+            type="checkbox"
+            checked={table.getIsAllPageRowsSelected()}
+            onChange={table.getToggleAllPageRowsSelectedHandler()}
+            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+          />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="px-1">
+          <input
+            type="checkbox"
+            checked={row.getIsSelected()}
+            onChange={row.getToggleSelectedHandler()}
+            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      ),
+      enableSorting: false,
+      enableColumnFilter: false,
+      size: 40,
+    };
 
     const baseColumns = [sNoCol, ...userColumns];
 
     if (enableRowSelection) {
-        return [selectionCol, ...baseColumns];
+      return [selectionCol, ...baseColumns];
     }
     return baseColumns;
   }, [userColumns, enableRowSelection]);
@@ -348,9 +348,9 @@ export default function DataTable({
                       ))}
                     </tr>
                     {expandedRowId === row.id && DetailComponent && (
-                      <tr className="bg-gray-50/50 dark:bg-slate-800/30">
+                      <tr className="bg-gray-50/50">
                         <td colSpan={columns.length} className="px-4 py-4">
-                          <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800 shadow-sm p-4 text-gray-800 dark:text-slate-300">
+                          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-gray-800">
                             <DetailComponent
                               row={row.original}
                               close={() => setExpandedRowId(null)}

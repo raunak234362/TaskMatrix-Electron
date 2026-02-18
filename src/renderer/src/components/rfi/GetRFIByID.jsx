@@ -84,7 +84,7 @@ const GetRFIByID = ({ id }) => {
       cell: ({ row }) => {
         const count = row.original.files?.length ?? 0;
         return count > 0 ? (
-          <span className="text-green-700 font-medium">{count} file(s)</span>
+          <span className="text-[#6bbd45] font-medium">{count} file(s)</span>
         ) : (
           <span className="text-gray-400">—</span>
         );
@@ -118,8 +118,8 @@ const GetRFIByID = ({ id }) => {
       cell: ({ row }) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-medium ${row.original.status === "OPEN"
-            ? "bg-green-100 text-green-700"
-            : "bg-yellow-100 text-yellow-700"
+            ? "bg-[#6bbd45]/15 text-[#6bbd45]"
+            : "bg-[#6bbd45]/15 text-[#6bbd45]"
             }`}
         >
           {row.original.status}
@@ -133,16 +133,16 @@ const GetRFIByID = ({ id }) => {
       <div className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* LEFT Details */}
-          <div className="bg-white p-6 rounded-xl shadow-md space-y-5">
+          <div className="bg-white p-6 rounded-xl shadow-none border border-gray-100 space-y-5">
             {/* Header */}
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl  text-green-700">
+              <h1 className="text-2xl  text-[#6bbd45]">
                 {rfi.subject}
               </h1>
               <span
                 className={`px-3 py-1 rounded-full text-xs font-semibold ${rfi.isAproovedByAdmin
-                  ? "bg-green-100 text-green-700"
-                  : "bg-yellow-100 text-yellow-700"
+                  ? "bg-[#6bbd45]/15 text-[#6bbd45]"
+                  : "bg-[#6bbd45]/15 text-[#6bbd45]"
                   }`}
               >
                 {rfi.isAproovedByAdmin ? "Approved" : "Pending"}
@@ -177,15 +177,15 @@ const GetRFIByID = ({ id }) => {
           </div>
 
           {/* RIGHT */}
-          <div className="bg-white p-6 rounded-xl shadow-md space-y-6">
+          <div className="bg-white p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
             {/* Header + Add Response Button */}
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-green-700">Responses</h2>
+              <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>
 
               {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN") && (
                 <Button
                   onClick={() => setShowModal(true)}
-                  className="bg-green-600 text-white"
+                  className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
                 >
                   + Add Response
                 </Button>

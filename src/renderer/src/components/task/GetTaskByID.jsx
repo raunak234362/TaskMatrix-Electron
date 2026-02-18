@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Loader2,
   Calendar,
@@ -232,19 +233,20 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
   }
 
   if (loading) {
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
         <div className="bg-white rounded-2xl shadow-2xl p-10 flex flex-col items-center">
           <Loader2 className="w-12 h-12 animate-spin text-[#6bbd45]" />
           <p className="mt-4 text-lg font-medium text-gray-700">Loading task details...</p>
         </div>
-      </div>
+      </div>,
+      document.body
     )
   }
 
   if (!task) {
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
         <div className="bg-white rounded-2xl shadow-2xl p-10 text-center max-w-md">
           <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
             <FileText className="w-10 h-10 text-gray-400" />
@@ -258,61 +260,69 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
             Close
           </button>
         </div>
-      </div>
+      </div>,
+      document.body
     )
   }
 
   const statusConfig = getStatusConfig(task.status)
   const priority = getPriorityLabel(task.priority)
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[95vh] overflow-hidden flex flex-col">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] overflow-hidden flex flex-col relative">
+
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-8 py-5 flex justify-between items-center">
+        <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-[#eef7e9] rounded-xl">
-              <ClipboardList className="w-7 h-7 text-[#6bbd45]" />
+            <div className="p-3 bg-[#6bbd45]/15 rounded-xl text-[#6bbd45]">
+              <ClipboardList className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-2xl  text-black">{task.name}</h2>
-              {/* <p className="text-sm text-black">ID: #{task.id}</p> */}
+              <h2 className="text-xl md:text-2xl font-bold text-gray-800">{task.name}</h2>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">ID: #{task.id}</span>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${priority.bg} ${priority.color}`}>{priority.label} Priority</span>
+              </div>
             </div>
           </div>
+
           <div className="flex items-center gap-3">
-            {(userRole === "admin" ||
-              userRole === "operation_executive" ||
-              userRole === "project_manager" ||
-              userRole === "department_manager" ||
-              userRole === "deputy_manager") && (
-                <>
-                  <Button
-                    onClick={() => setIsUpdatingStatus(true)}
-                    variant="outline"
-                    className="flex items-center gap-2 px-6 py-3 font-medium transition bg-orange-500 border-orange-200 text-white hover:bg-orange-50"
-                  >
-                    <Timer className="w-4 h-4" /> Update Status
-                  </Button>
-                  <Button
-                    onClick={() => setIsEditing(true)}
-                    variant="outline"
-                    className="flex items-center gap-2 px-6 py-3 font-medium transition border-indigo-200 text-white bg-[#6bbd45] hover:bg-[#5aa33a]"
-                  >
-                    <Edit className="w-4 h-4" /> Edit Task
-                  </Button>
-                </>
-              )}
             <button
               onClick={onClose}
-              className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl transition"
+              className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 hover:text-gray-700"
             >
-              Close
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
             </button>
           </div>
         </div>
 
+        {/* Action Bar (Top) */}
+        <div className="px-6 py-3 border-b border-gray-100 flex flex-wrap gap-3 items-center justify-end bg-white">
+          {(userRole === "admin" ||
+            userRole === "operation_executive" ||
+            userRole === "project_manager" ||
+            userRole === "department_manager" ||
+            userRole === "deputy_manager") && (
+              <>
+                <button
+                  onClick={() => setIsUpdatingStatus(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#6bbd45]/20 text-black border border-black rounded-lg text-xs font-bold uppercase hover:bg-[#6bbd45]/30 transition-colors"
+                >
+                  <Timer className="w-4 h-4" /> Update Status
+                </button>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#6bbd45]/20 text-black border border-black rounded-lg text-xs font-bold uppercase hover:bg-[#6bbd45]/30 transition-colors"
+                >
+                  <Edit className="w-4 h-4" /> Edit Task
+                </button>
+              </>
+            )}
+        </div>
+
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-8 py-8 space-y-8">
+        <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
           {isEditing ? (
             <EditTask
               id={task.id}
@@ -323,214 +333,127 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
               }}
             />
           ) : (
-            <>
-              {/* Task Info Card */}
-              <div className="bg-[#f7fbf3] rounded-2xl p-8 border border-[#d4e9c8]">
-                <h3 className="text-2xl  text-[#2d501d] mb-6 flex items-center gap-3">
-                  <FileText className="w-7 h-7" />
-                  Task Information
-                </h3>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Column: Main Info */}
+              <div className="lg:col-span-2 space-y-8">
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  <InfoItem icon={<Building2 />} label="Project" value={task.project?.name || '—'} />
-                  <InfoItem icon={<Building2 />} label="WBS Item" value={task.projectBundle?.bundleKey?.replace(/_/g, ' ') || '—'} />
-                  <InfoItem icon={<Hash />} label="Stage" value={task.Stage || '—'} />
-                  <InfoItem
-                    icon={<User />}
-                    label="Assigned To"
-                    value={task.user ? `${task.user.firstName} ${task.user.lastName}` : 'Unassigned'}
-                  />
-                  <InfoItem icon={<Calendar />} label="Due Date" value={toIST(task.due_date)} />
-                  <InfoItem icon={<Clock />} label="Created At" value={toIST(task.created_on)} />
-                  <InfoItem
-                    icon={<Timer />}
-                    label="Allocated Time"
-                    value={formatHours(parseDurationToHours(task?.allocationLog?.allocatedHours))}
-                  />
-                  <InfoItem
-                    icon={<Clock />}
-                    label="Allocation Log"
-                    value={task?.allocationLog?.allocatedHours || '—'}
-                  />
-
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
-                      <div
-                        className={`w-6 h-6 rounded-full ${priority.color.replace('text', 'bg')}`}
-                      ></div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-black">Priority</p>
-                      <p className={` mt-1 ${priority.color}`}>{priority.label}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-black">Status</p>
-                      <span
-                        className={`inline-block mt-1 px-4 py-2 rounded-full font-semibold text-sm border-2 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
-                      >
-                        {statusConfig.label.replace(/_/g, ' ') || '—'}
-                      </span>
+                {/* Info Grid */}
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                  <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-[#6bbd45]" /> Task Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+                    <InfoItem icon={<Building2 />} label="Project" value={task.project?.name || '—'} />
+                    <InfoItem icon={<Building2 />} label="WBS Item" value={task.projectBundle?.bundleKey?.replace(/_/g, ' ') || '—'} />
+                    <InfoItem icon={<Hash />} label="Stage" value={task.Stage || '—'} />
+                    <InfoItem
+                      icon={<User />}
+                      label="Assigned To"
+                      value={task.user ? `${task.user.firstName} ${task.user.lastName}` : 'Unassigned'}
+                    />
+                    <InfoItem icon={<Calendar />} label="Due Date" value={toIST(task.due_date)} />
+                    <InfoItem icon={<Clock />} label="Created At" value={toIST(task.created_on)} />
+                    <InfoItem
+                      icon={<Timer />}
+                      label="Allocated Time"
+                      value={formatHours(parseDurationToHours(task?.allocationLog?.allocatedHours))}
+                    />
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-gray-50 rounded-lg text-gray-400 mt-1"><Timer size={18} /></div>
+                      <div>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Status</p>
+                        <span className={`inline-block mt-1 px-3 py-1 rounded-md text-xs font-bold border ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}>
+                          {statusConfig.label}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Description */}
                 {task.description && (
-                  <div className="mt-8 p-6 bg-white/70 backdrop-blur rounded-xl border border-[#eef7e9]">
-                    <h4 className="font-semibold text-black mb-3 flex items-center gap-2">
+                  <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                    <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
                       <FileText className="w-5 h-5 text-[#6bbd45]" />
                       Description
                     </h4>
                     <div
-                      className="text-black leading-relaxed prose prose-sm max-w-none"
+                      className="text-gray-600 text-sm leading-relaxed prose prose-sm max-w-none"
                       dangerouslySetInnerHTML={{ __html: task.description }}
                     />
                   </div>
                 )}
 
-                {/* Actions */}
-                {/* <div className="mt-8 pt-6 border-t border-[#d4e9c8]">
-              <h4 className="text-lg font-semibold text-gray-800 mb-4">Task Controls</h4>
-              <div className="flex flex-wrap items-center gap-4">
-                {(task.status === 'ASSIGNED' || task.status === 'REWORK') && (
-                  <ActionButton
-                    icon={<Play />}
-                    color="emerald"
-                    onClick={() => handleAction('start')}
-                    disabled={processing}
-                  >
-                    Start Task
-                  </ActionButton>
-                )}
-                {task.status === 'IN_PROGRESS' && (
-                  <>
-                    <ActionButton
-                      icon={<Pause />}
-                      color="amber"
-                      onClick={() => handleAction('pause')}
-                      disabled={processing}
-                    >
-                      Pause
-                    </ActionButton>
-                    <ActionButton
-                      icon={<Square />}
-                      color="red"
-                      onClick={() => handleAction('end')}
-                      disabled={processing}
-                    >
-                      End Task
-                    </ActionButton>
-                  </>
-                )}
-                {task.status === 'BREAK' && (
-                  <ActionButton
-                    icon={<Play />}
-                    color="#6bbd45"
-                    onClick={() => handleAction('resume')}
-                    disabled={processing}
-                  >
-                    Resume Task
-                  </ActionButton>
-                )}
-                {processing && (
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Processing...</span>
-                  </div>
-                )}
-              </div>
-            </div> */}
+                {/* Comments */}
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                  <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-[#6bbd45]" />
+                    Comments & Activity
+                  </h4>
+                  <Comment
+                    comments={task.taskcomment}
+                    onAddComment={handleAddComment}
+                    staffData={staffData}
+                    onAcknowledge={handleAcknowledgeComment}
+                  />
+                </div>
+
               </div>
 
-              {/* Work Summary */}
-              {task.workingHourTask && task.workingHourTask.length > 0 && (
-                <div className="bg-[#f5f3ff] rounded-2xl p-6 border border-[#ddd6fe]">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl  text-indigo-900 flex items-center gap-3">
-                      <Timer className="w-6 h-6" />
-                      Work Summary
-                    </h3>
-                    <button
-                      onClick={() => setShowWorkSummary(!showWorkSummary)}
-                      className="text-indigo-600 hover:text-indigo-800"
-                    >
-                      {showWorkSummary ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
-                    </button>
-                  </div>
-                  {showWorkSummary && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <SummaryCard
-                        icon={<Clock4 />}
-                        label="Total Time"
-                        value={formatSecondsToHHMM(totalDurationSeconds)}
-                      />
-                      <SummaryCardSession
-                        icon={<Users />}
-                        label="Breaks"
-                        value={task.workingHourTask.length}
-                      />
-                      <SummaryCardStatus
-                        icon={<Timer />}
-                        label="Current Status"
-                        value={statusConfig.label}
-                        color={statusConfig.text}
-                      />
+              {/* Right Column: Work Summary */}
+              <div className="space-y-6">
+                {task.workingHourTask && task.workingHourTask.length > 0 && (
+                  <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 sticky top-0">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                        <Timer className="w-5 h-5 text-slate-500" />
+                        Work Session
+                      </h3>
                     </div>
-                  )}
-                  {showWorkSummary && ["admin", "human_resource", "operation_executive"].includes(userRole) && (
-                    <div className="mt-6 bg-white/50 rounded-xl border border-indigo-100 overflow-hidden">
-                      <table className="w-full text-left text-sm">
-                        <thead>
-                          <tr className="bg-indigo-50/50 text-indigo-700  border-b border-indigo-100">
-                            <th className="px-4 py-3">Activity</th>
-                            <th className="px-4 py-3">Start Time</th>
-                            <th className="px-4 py-3">End Time</th>
-                            <th className="px-4 py-3 text-right">Duration</th>
+
+                    <div className="grid grid-cols-2 gap-3 mb-6">
+                      <div className="bg-white p-4 rounded-xl border border-slate-200 text-center">
+                        <p className="text-xs font-bold text-slate-400 uppercase">Total Time</p>
+                        <p className="text-lg font-black text-slate-700 mt-1">{formatSecondsToHHMM(totalDurationSeconds)}</p>
+                      </div>
+                      <div className="bg-white p-4 rounded-xl border border-slate-200 text-center">
+                        <p className="text-xs font-bold text-slate-400 uppercase">Sessions</p>
+                        <p className="text-lg font-black text-slate-700 mt-1">{task.workingHourTask.length}</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-100 text-slate-500 font-bold uppercase">
+                          <tr>
+                            <th className="px-3 py-2">Start</th>
+                            <th className="px-3 py-2 text-right">Dur.</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-indigo-100">
-                          {[...task.workingHourTask].reverse().map((session, idx) => (
-                            <tr key={session.id || idx} className="hover:bg-indigo-50/30 transition-colors">
-                              <td className="px-4 py-3 font-semibold text-indigo-900 capitalize">
-                                {session.type?.toLowerCase() || 'Work'}
+                        <tbody className="divide-y divide-slate-100">
+                          {[...task.workingHourTask].reverse().slice(0, 5).map((session, idx) => (
+                            <tr key={idx}>
+                              <td className="px-3 py-2 text-slate-600">
+                                <div>{toIST(session.started_at).split(',')[0]}</div>
+                                <div className="text-[10px] text-slate-400">{toIST(session.started_at).split(',')[1]}</div>
                               </td>
-                              <td className="px-4 py-3 text-gray-600">{toIST(session.started_at)}</td>
-                              <td className="px-4 py-3 text-gray-600">
-                                {session.ended_at ? toIST(session.ended_at) : (
-                                  <span className="text-emerald-600  animate-pulse flex items-center gap-1">
-                                    <Play className="w-3 h-3 fill-current" /> Running...
-                                  </span>
-                                )}
-                              </td>
-                              <td className="px-4 py-3 text-right font-mono  text-indigo-700">
-                                {session.duration_seconds
-                                  ? formatHours(session.duration_seconds / 3600)
-                                  : '—'}
+                              <td className="px-3 py-2 text-right font-mono font-medium text-slate-700">
+                                {session.duration_seconds ? formatHours(session.duration_seconds / 3600) : <span className="text-green-500 animate-pulse">Running</span>}
                               </td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
+                      {task.workingHourTask.length > 5 && (
+                        <div className="px-3 py-2 text-center text-xs text-slate-400 bg-slate-50 border-t border-slate-100">
+                          + {task.workingHourTask.length - 5} more sessions
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              )}
-              {/* Comments Section */}
-              <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-6">
-                <Comment
-                  comments={task.taskcomment}
-                  onAddComment={handleAddComment}
-                  staffData={staffData}
-                  onAcknowledge={handleAcknowledgeComment}
-                />
+                  </div>
+                )}
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -545,74 +468,22 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
           }}
         />
       )}
-    </div>
+    </div>,
+    document.body
   )
 }
 
 // Helper Components
 const InfoItem = ({ icon, label, value }) => (
-  <div className="flex items-start gap-4">
-    <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
-      {icon && <div className="w-6 h-6 text-[#6bbd45]">{icon}</div>}
+  <div className="flex items-start gap-3">
+    <div className="p-2 bg-gray-50 rounded-lg text-gray-400 mt-1 shrink-0">
+      {React.cloneElement(icon, { size: 18 })}
     </div>
-    <div>
-      <p className="text-sm  text-black">{label}</p>
-      <p className="font-semibold text-black mt-1">{value}</p>
+    <div className="min-w-0">
+      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{label}</p>
+      <p className="font-semibold text-gray-800 mt-0.5 break-words text-sm">{value}</p>
     </div>
   </div>
 )
-
-const ActionButton = ({ children, icon, color, onClick, disabled }) => {
-  const colors = {
-    emerald: 'bg-emerald-600 hover:bg-emerald-700',
-    amber: 'bg-amber-600 hover:bg-amber-700',
-    red: 'bg-red-600 hover:bg-red-700',
-    teal: 'bg-[#6bbd45] hover:bg-[#5aa33a]'
-  }
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`flex items-center gap-2 px-6 py-3 ${colors[color]} text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed`}
-    >
-      {icon}
-      {children}
-    </button>
-  )
-}
-
-const SummaryCard = ({ icon, label, value, color = "text-indigo-700" }) => (
-  <div className="bg-white/80 backdrop-blur flex flex-row gap-5 items-center justify-center p-2 rounded-xl border border-indigo-100 text-center">
-    <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
-      {icon}
-    </div>
-    <div>
-      <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl  mt-2 ${color}`}>{value} hrs</p>
-    </div>
-  </div>
-);
-const SummaryCardSession = ({ icon, label, value, color = "text-indigo-700" }) => (
-  <div className="bg-white/80 backdrop-blur flex flex-row gap-5 items-center justify-center p-2 rounded-xl border border-indigo-100 text-center">
-    <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
-      {icon}
-    </div>
-    <div>
-      <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl  mt-2 ${color}`}>{value} </p>
-    </div>
-  </div>
-);
-const SummaryCardStatus = ({ icon, label, value, color = "text-indigo-700" }) => (
-  <div className="bg-white/80 backdrop-blur flex flex-row gap-5 items-center justify-center p-2 rounded-xl border border-indigo-100 text-center">
-    <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
-      {icon}
-    </div>
-    <div>
-      <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl  mt-2 ${color}`}>{value} </p>
-    </div>
-  </div>
-);
 
 export default GetTaskByID

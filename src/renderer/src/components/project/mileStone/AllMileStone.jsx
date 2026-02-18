@@ -81,7 +81,7 @@ const AllMileStone = ({ project, onUpdate }) => {
       cell: ({ row }) => {
         const status = row.original.status || 'PENDING';
         return (
-          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${status === 'COMPLETED' ? 'bg-[#6bbd45]/15 text-[#6bbd45]' : 'bg-[#6bbd45]/15 text-[#6bbd45]'
             }`}>
             {status}
           </span>
