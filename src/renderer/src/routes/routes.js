@@ -20,6 +20,8 @@ import CoTablePage from '../components/co/CoTablePage'
 import SalesDashboard from '../components/sales/SalesDashboard'
 import DesignerLandingDashboard from '../components/dashboard/DesignerLandingDashboard'
 import App from '../App'
+import CalendarLayout from '../layout/CalendarLayout'
+import CommunicationLayout from '../layout/CommunicationLayout'
 
 const routes = [
   { path: '/', Component: Login },
@@ -41,6 +43,8 @@ const routes = [
           { path: 'projects', Component: ProjectPage },
           { path: 'notes', Component: NotesPage },
           { path: 'vendor', Component: VendorPage },
+          { path: 'calendar', Component: CalendarLayout },
+          { path: 'communication-followup', Component: CommunicationLayout },
           { path: 'fabricator', Component: FabricatorPage },
           { path: 'rfq', Component: RFQPage },
           { path: 'connection-designer', Component: ConnectionPage },
