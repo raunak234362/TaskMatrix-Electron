@@ -6,7 +6,8 @@ const initialState = {
   userDetail: null,
   departmentData: [],
   teamData: [],
-  staffData: []
+  staffData: [],
+  isAnyModalOpen: false
 }
 
 // Slice
@@ -67,6 +68,9 @@ const userSlice = createSlice({
     updatetoken: (state, action) => {
       state.token = action.payload.token
       sessionStorage.setItem('token', action.payload.token)
+    },
+    setModalOpen: (state, action) => {
+      state.isAnyModalOpen = action.payload
     }
   }
 })
@@ -85,7 +89,8 @@ export const {
   showTeam,
   updatetoken,
   updateDepartmentData,
-  logout
+  logout,
+  setModalOpen
 } = userSlice.actions
 
 export default userSlice.reducer

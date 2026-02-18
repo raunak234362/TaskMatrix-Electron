@@ -82,12 +82,14 @@ const DashboardListModal = ({ isOpen, onClose, type, data, onItemSelect }) => {
                             </p>
                         </div>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-3 hover:bg-gray-100 rounded-2xl transition-all duration-200 text-gray-400 hover:text-gray-900 group"
-                    >
-                        <X size={24} className="group-hover:rotate-90 transition-transform duration-300" />
-                    </button>
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={onClose}
+                            className="px-4 py-2 bg-red-100 border border-red-600 text-black font-bold rounded-xl transition-all hover:bg-red-200 active:scale-95 uppercase text-xs tracking-widest"
+                        >
+                            Close
+                        </button>
+                    </div>
                 </div>
 
                 {/* Modal Content */}
@@ -111,9 +113,9 @@ const DashboardListModal = ({ isOpen, onClose, type, data, onItemSelect }) => {
                     </span>
                     <button
                         onClick={onClose}
-                        className="px-8 py-3 bg-gray-900 text-white rounded-2xl  hover:bg-gray-800 transition-all shadow-xl shadow-gray-200 hover:scale-105 active:scale-95"
+                        className="px-4 py-2 bg-red-100 border border-red-600 text-black font-bold rounded-xl transition-all hover:bg-red-200 active:scale-95 uppercase text-xs tracking-widest"
                     >
-                        Close Window
+                        Close
                     </button>
                 </div>
             </div>
