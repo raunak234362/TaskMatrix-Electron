@@ -85,9 +85,13 @@ const AllProjects = () => {
           onClose={() => setSelectedProject(null)}
           title="Project Details"
           width="max-w-7xl"
+          hideHeader={true}
         >
           <Suspense fallback={<div className="p-4 text-center">Loading project details...</div>}>
-            <GetProjectById id={selectedProject.id ?? selectedProject.fabId ?? ""} />
+            <GetProjectById 
+              id={selectedProject.id ?? selectedProject.fabId ?? ""} 
+              onClose={() => setSelectedProject(null)}
+            />
           </Suspense>
         </Modal>
       )}
