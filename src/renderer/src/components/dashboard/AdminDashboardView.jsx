@@ -32,7 +32,7 @@ const AdminDashboardView = ({
 
     return (
         <div className="flex flex-col gap-4 lg:gap-6 transition-all duration-300 ease-in-out">
-          
+
             {/* Row 1: Project Overview & Pending Actions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5 transition-all duration-300">
                 <ProjectStats stats={adminData.projectStats} onCardClick={handleProjectStatClick} />
@@ -72,7 +72,7 @@ const AdminDashboardView = ({
                             </div>
                         </div>
 
-                          {/* 2. Upcoming Deadlines Trigger */}
+                        {/* 2. Upcoming Deadlines Trigger */}
                         <div
                             className="bg-green-50/60 p-4 rounded-2xl border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                             onClick={() => setShowDeadlinesPopup(true)}
@@ -108,7 +108,7 @@ const AdminDashboardView = ({
                             </div>
                         </div>
 
-                      
+
 
                         {/* 4. Notes & Updates Trigger */}
                         <div
@@ -134,7 +134,40 @@ const AdminDashboardView = ({
             {/* Row 3: User Stats (Compressed) */}
             <UserStatsWidget stats={userStats} loading={loading} />
 
-          
+            {userRole === 'project_manager' && (
+                <div className="bg-white p-6 rounded-3xl border border-gray-200">
+                    <h3 className="text-sm font-black text-gray-500 uppercase tracking-widest mb-6">
+                        Team & Task Overview
+                    </h3>
+                    <div className="grid grid-cols-2 lg:grid-cols-6 gap-6">
+                        <div className="flex flex-col gap-1 p-4 bg-slate-50 rounded-2xl">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Completed Tasks</span>
+                            <span className="text-2xl font-black text-slate-700">{adminData.pmDashboard?.completedTasks || 0}</span>
+                        </div>
+                        <div className="flex flex-col gap-1 p-4 bg-red-50 rounded-2xl">
+                            <span className="text-[10px] font-bold text-red-300 uppercase tracking-wider">Overdue Tasks</span>
+                            <span className="text-2xl font-black text-red-600">{adminData.pmDashboard?.overdueTasks || 0}</span>
+                        </div>
+                        <div className="flex flex-col gap-1 p-4 bg-amber-50 rounded-2xl">
+                            <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">Pending Tasks</span>
+                            <span className="text-2xl font-black text-amber-600">{adminData.pmDashboard?.pendingTasks || 0}</span>
+                        </div>
+                        <div className="flex flex-col gap-1 p-4 bg-blue-50 rounded-2xl">
+                            <span className="text-[10px] font-bold text-blue-300 uppercase tracking-wider">Total Tasks</span>
+                            <span className="text-2xl font-black text-blue-600">{adminData.pmDashboard?.totalTasks || 0}</span>
+                        </div>
+                        <div className="flex flex-col gap-1 p-4 bg-blue-50 rounded-2xl">
+                            <span className="text-[10px] font-bold text-blue-300 uppercase tracking-wider">Task Completion Rate</span>
+                            <span className="text-2xl font-black text-blue-600">{adminData.pmDashboard?.taskCompletionRate || 0}</span>
+                        </div>
+                        <div className="flex flex-col gap-1 p-4 bg-indigo-50 rounded-2xl">
+                            <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-wider">Total Team Members</span>
+                            <span className="text-2xl font-black text-indigo-600">{adminData.pmDashboard?.totalTeamMembers || 0}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {userRole === 'project_manager_officer' && (
                 <div className="grid grid-cols-1 gap-6">
                     <InvoiceTrends invoices={adminData.invoices} />

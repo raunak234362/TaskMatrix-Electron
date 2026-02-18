@@ -189,7 +189,7 @@ const WBTDashboard = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-1">
           <div>
             <h2 className="text-3xl font-black text-gray-900 tracking-tight">
-              {getGreeting()}, {sessionStorage.getItem('username')?.split(' ')[0]}
+              {getGreeting()}, {sessionStorage.getItem('firstName')?.split(' ')[0]}
             </h2>
           </div>
           <div className="flex items-center gap-3 text-xs font-black text-primary bg-green-50 px-4 py-2 rounded-xl border border-primary/10 shadow-sm">

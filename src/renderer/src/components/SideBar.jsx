@@ -109,11 +109,11 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
         {!isMinimized && (
           <div className="flex items-center gap-3 mb-6 px-2">
             <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold text-lg border border-gray-300">
-              {sessionStorage.getItem('username')?.[0]?.toUpperCase() || 'U'}
+              {sessionStorage.getItem('firstName')?.[0]?.toUpperCase() || 'U'}
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-bold text-gray-900 truncate">
-                {sessionStorage.getItem('username')}
+                {sessionStorage.getItem('firstName') + ' ' + sessionStorage.getItem('lastName')}
               </p>
               <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold truncate">
                 {userData?.role || designation}
