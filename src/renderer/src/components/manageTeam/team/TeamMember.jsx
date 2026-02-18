@@ -74,17 +74,17 @@ const TeamMember = ({ members, onClose }) => {
         <div className="flex gap-2">
           <button
             onClick={() => setEditingMember(row.original)}
-            className="text-blue-600 hover:text-blue-800"
+            className="border border-black text-sm px-3 py-1 rounded-md"
             title="Edit Role"
           >
-            ✏️
+            Edit
           </button>
           <button
             onClick={() => console.log("DELETE MEMBER:", row.original.id)}
-            className="text-red-600 hover:text-red-800"
+            className="border border-red-500 text-red-500 text-sm px-3 py-1 rounded-md"
             title="Delete Member"
           >
-            🗑️
+            Delete
           </button>
         </div>
       ),
