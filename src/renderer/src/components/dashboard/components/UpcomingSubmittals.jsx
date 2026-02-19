@@ -30,7 +30,7 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
   }, [invoices])
 
   return (
-    <div className="p-6 rounded-3xl border border-primary/5 shadow-[0_15px_40px_rgba(22,163,74,0.08),0_10px_20px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.15),0_15px_30px_rgba(0,0,0,0.1)] flex flex-col h-full bg-green-50/5">
+    <div className="p-6 rounded-3xl border border-gray-300 shadow-[0_15px_40px_rgba(22,163,74,0.04),0_10px_20px_rgba(0,0,0,0.02)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.08),0_15px_30px_rgba(0,0,0,0.05)] flex flex-col h-full bg-green-100/20">
       <div className="flex items-center justify-between mb-6 px-1">
         <div className="flex items-center gap-6">
           <button
@@ -83,7 +83,7 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [] }) => {
                         key={submittal.id || index}
                         className={`p-5 rounded-2xl border transition-all duration-300 group ${overdue
                           ? 'bg-red-50/50 border-red-100 hover:bg-red-100/50 hover:border-red-200 shadow-sm'
-                          : 'bg-white border-primary/5 hover:border-primary/20 hover:bg-green-50/50 hover:shadow-lg hover:-translate-y-0.5'
+                          : 'bg-white/40 border-gray-200 hover:border-primary/20 hover:bg-white/80 hover:shadow-lg hover:-translate-y-0.5'
                           }`}
                       >
                         <div className="flex justify-between items-start mb-2">

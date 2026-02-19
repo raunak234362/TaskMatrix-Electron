@@ -18,7 +18,7 @@ const UpcomingDeadlinesWidget = ({ tasks = [] }) => {
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-primary/5 shadow-[0_15px_40px_rgba(22,163,74,0.08),0_10px_20px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.15),0_15px_30px_rgba(0,0,0,0.1)] h-full flex flex-col">
+    <div className="bg-green-100/20 p-6 rounded-2xl border border-gray-300 shadow-[0_15px_40px_rgba(22,163,74,0.04),0_10px_20px_rgba(0,0,0,0.02)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.08),0_15px_30px_rgba(0,0,0,0.05)] h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-black text-primary uppercase tracking-wider flex items-center gap-2">
           <Calendar className="w-5 h-5" />
@@ -37,7 +37,7 @@ const UpcomingDeadlinesWidget = ({ tasks = [] }) => {
             return (
               <div
                 key={task.id}
-                className="flex items-center p-3 rounded-xl border border-primary/5 bg-primary/2 hover:bg-primary/5 hover:border-primary/20 transition-all group hover:shadow-md"
+                className="flex items-center p-3 rounded-xl border border-gray-100 bg-white/40 hover:bg-white/80 hover:border-primary/10 transition-all group hover:shadow-md"
               >
                 <div className={`p-2 rounded-lg ${urgency} mr-3 shadow-sm`}>
                   <AlertCircle size={18} />

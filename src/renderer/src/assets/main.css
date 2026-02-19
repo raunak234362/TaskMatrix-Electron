@@ -58,6 +58,15 @@ body {
   background: rgba(0, 0, 0, 0.05);
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Laptop Responsive "Shrink" Utility */
 @media screen and (min-width: 1024px) and (max-width: 1536px) {
   .laptop-fit {

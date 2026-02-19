@@ -67,7 +67,7 @@ const DesignerLandingDashboard = () => {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="p-6 space-y-8 max-w-7xl mx-auto"
+      className="p-6 space-y-8 max-w-7xl mx-auto laptop-fit"
     >
       {/* Welcome Section */}
       <motion.section variants={itemVariants} className="space-y-2">

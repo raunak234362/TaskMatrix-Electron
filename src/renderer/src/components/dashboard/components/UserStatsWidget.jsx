@@ -11,7 +11,7 @@ const StatCard = ({
   trendColor = 'bg-black/20'
 }) => (
   <div
-    className={`p-5 rounded-xl border border-black/5 shadow-[0_10px_10px_rgba(22,163,74,0.1),0_10px_30px_rgba(0,0,0,0.05)] transition-all duration-700 group hover:shadow-[0_30px_70px_rgba(22,163,74,0.15),0_20px_40px_rgba(0,0,0,0.1)] hover:-translate-y-2 relative overflow-hidden bg-green-50/10`}
+    className={`p-5 rounded-xl border border-gray-300 shadow-[0_10px_10px_rgba(22,163,74,0.02),0_10px_30px_rgba(0,0,0,0.01)] transition-all duration-700 group hover:shadow-[0_30px_70px_rgba(22,163,74,0.1),0_20px_40px_rgba(0,0,0,0.05)] hover:-translate-y-1 relative overflow-hidden bg-green-100/20`}
   >
     <div className="flex flex-col h-full justify-between gap-5 relative z-10">
       <div className="flex items-start justify-between">

@@ -55,7 +55,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
   }
 
   return (
-    <div className="bg-white p-6 rounded-3xl border border-primary/5 shadow-[0_15px_40px_rgba(22,163,74,0.08),0_10px_20px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.15),0_15px_30px_rgba(0,0,0,0.1)]">
+    <div className="bg-green-100/20 p-6 rounded-3xl border border-gray-300 shadow-[0_15px_40px_rgba(22,163,74,0.04),0_10px_20px_rgba(0,0,0,0.02)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.08),0_15px_30px_rgba(0,0,0,0.05)]">
       <div className="flex items-center justify-between mb-6 px-1">
         <h2 className="text-base font-black text-primary uppercase tracking-[0.15em]">Pending Actions</h2>
       </div>
@@ -78,7 +78,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
                   onActionClick(typeMap[action.title])
                 }
               }}
-              className="flex items-center gap-4 p-5 rounded-2xl border border-primary/5 bg-green-50/20 hover:bg-green-50/50 hover:border-primary/20 transition-all duration-300 cursor-pointer group hover:shadow-lg hover:-translate-y-0.5"
+              className="flex items-center gap-4 p-5 rounded-2xl border border-gray-200 bg-white/40 hover:bg-white/80 hover:border-primary/20 transition-all duration-300 cursor-pointer group hover:shadow-lg hover:-translate-y-0.5"
             >
               <div
                 className={`p-3 rounded-xl ${colors.bg} ${colors.text} shadow-md shrink-0 transition-all group-hover:scale-105`}

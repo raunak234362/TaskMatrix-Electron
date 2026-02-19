@@ -313,7 +313,7 @@ const WBTDashboard = () => {
   }
 
   return (
-    <div className="flex flex-col gap-8 p-1">
+    <div className="flex flex-col gap-8 p-1 laptop-fit">
       <Suspense fallback={<DashboardSkeleton />}>
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-1">

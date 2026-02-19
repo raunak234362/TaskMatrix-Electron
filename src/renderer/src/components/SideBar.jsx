@@ -31,7 +31,7 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
 
   return (
     <aside
-      className={`h-full transition-all duration-500 flex flex-col ${isMinimized ? 'w-24' : 'w-72'
+      className={`h-full transition-all duration-500 flex flex-col ${isMinimized ? 'w-20' : 'xl:w-72 lg:w-64 w-60'
         } ${isMobile ? 'shadow-2xl bg-slate-800' : 'relative z-20'}`}
     >
       {/* Header / Logo */}
@@ -65,8 +65,8 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
         )}
       </div>
 
-      <div className="flex-1 py-6 flex flex-col overflow-y-auto">
-        <nav className="flex flex-col gap-1 w-full px-4">
+      <div className="flex-1 py-2 flex flex-col overflow-y-auto no-scrollbar">
+        <nav className="flex flex-col gap-0.5 w-full px-3">
           {navItems.map(
             ({ label, to, roles, icon }) =>
               canView(roles) && (
@@ -76,15 +76,15 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
                     end={to === '/dashboard'}
                     onClick={isMobile ? toggleSidebar : undefined}
                     className={({ isActive }) =>
-                      `flex items-center gap-4 py-3.5 transition-all duration-500 text-sm font-black tracking-tight relative overflow-hidden
+                      `flex items-center gap-4 py-2.5 transition-all duration-500 text-sm font-black tracking-tight relative overflow-hidden
                       ${isActive
-                        ? 'bg-[#6bbd45] text-white shadow-[0_8px_20px_rgba(0,0,0,0.25)] rounded-2xl px-6 scale-105 z-10'
-                        : 'text-gray-900 hover:bg-white/10 hover:text-black px-6 rounded-2xl hover:translate-x-1'
-                      } ${isMinimized ? 'justify-center w-14 h-14 mx-auto rounded-2xl shadow-md px-0!' : ''}`
+                        ? 'bg-[#6bbd45] text-white shadow-[0_8px_20px_rgba(0,0,0,0.25)] rounded-xl px-5 scale-105 z-10'
+                        : 'text-gray-900 hover:bg-white/10 hover:text-grey-900 px-5 rounded-xl hover:translate-x-1'
+                      } ${isMinimized ? 'justify-center w-12 h-12 mx-auto rounded-xl shadow-md px-0!' : ''}`
                     }
                   >
                     {/* Rolling Hover Background Effect */}
-                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 -z-10" />
+                    <div className="absolute inset-0 bg-green-50/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 -z-10" />
                     <div className={`${isMinimized ? 'scale-125' : ''} shrink-0 transition-transform duration-500 group-hover:rotate-12`}>
                       {icon}
                     </div>
@@ -103,7 +103,7 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
       </div>
 
       {/* User & Actions Footer */}
-      <div className="p-6 mt-auto">
+      <div className="p-4 mt-auto">
         {!isMinimized && (
           <div className="flex items-center gap-4 mb-8 bg-black/20 p-4 rounded-3xl border border-white/5 backdrop-blur-md shadow-lg">
             <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#22c55e] font-black text-xl shadow-[0_5px_15px_rgba(0,0,0,0.15)]">

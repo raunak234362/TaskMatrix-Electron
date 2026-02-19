@@ -10,7 +10,7 @@ const PersonalNotesWidget = ({ projectNotes = [] }) => {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-primary/5 shadow-[0_15px_40px_rgba(22,163,74,0.08),0_10px_20px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.15),0_15px_30px_rgba(0,0,0,0.1)] h-full flex flex-col overflow-hidden group">
+    <div className="bg-green-100/20 rounded-2xl border border-gray-300 shadow-[0_15px_40px_rgba(22,163,74,0.04),0_10px_20px_rgba(0,0,0,0.02)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.08),0_15px_30px_rgba(0,0,0,0.05)] h-full flex flex-col overflow-hidden group">
       <div className="p-4 border-b border-gray-100 bg-primary/5">
         <h3 className="text-sm font-black text-primary flex items-center justify-between uppercase tracking-wider">
           Project Updates
@@ -28,7 +28,7 @@ const PersonalNotesWidget = ({ projectNotes = [] }) => {
             projectNotes.map((note) => (
               <div
                 key={note.id}
-                className="p-4 rounded-xl border border-primary/5 bg-primary/2 hover:bg-primary/5 transition-all shadow-sm hover:shadow-md"
+                className="p-4 rounded-xl border border-gray-100 bg-white/40 hover:bg-white/80 transition-all shadow-sm hover:shadow-md"
               >
                 <div className="flex items-center justify-between mb-3">
                   <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black rounded-full uppercase tracking-widest shadow-sm">
