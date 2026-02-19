@@ -115,7 +115,7 @@ export const useDashboardData = () => {
           ] = await Promise.all([
             Service.GetAllProjects(),
             Service.pendingRFIsForProjectManager(), // Specialized
-            Service.GetPendingSubmittal(), // Keep generic for compatibility or replace if needed (assuming generic list)
+            Service.GetPendingSubmittalForPM(), // Keep generic for compatibility or replace if needed (assuming generic list)
             Service.PendingSubmittalForProjectManager(), // Specialized
             Service.PendingCoForProjectManager(), // Specialized
             Service.RFQRecieved(),
@@ -132,7 +132,7 @@ export const useDashboardData = () => {
               Service.PendingSubmittal(),
               Service.PendingCo(),
               Service.RFQRecieved(),
-              Service.GetPMDashboard(),
+              Promise.resolve(null),
               Service.GetMyTask()
             ])
         }
@@ -162,11 +162,11 @@ export const useDashboardData = () => {
             onHoldProjects: projects.filter((p) => p.status?.toUpperCase() === 'ON_HOLD').length
           },
           dashboardStats: {
-            pendingRFI: pmDashboard.pendingRFI || 0,
-            newRFI: pmDashboard.newRFI || 0,
-            pendingSubmittals: pmDashboard.pendingSubmittals || 0,
-            pendingChangeOrders: pmDashboard.pendingChangeOrders || 0,
-            newChangeOrders: pmDashboard.newChangeOrders || 0,
+            pendingRFI: pmDashboard?.pendingRFI ?? rfis.length ?? 0,
+            newRFI: pmDashboard?.newRFI || 0,
+            pendingSubmittals: pmDashboard?.pendingSubmittals ?? pendingSubmittals.length ?? 0,
+            pendingChangeOrders: pmDashboard?.pendingChangeOrders ?? cos.length ?? 0,
+            newChangeOrders: pmDashboard?.newChangeOrders || 0,
             pendingRFQ: rfqs.length || 0, // Keep existing if not in PM data, or update if available
             newRFQ: 0
           },

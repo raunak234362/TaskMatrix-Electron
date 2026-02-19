@@ -1335,7 +1335,6 @@ class Service {
     }
   }
 
-
   static async RfiSent() {
     try {
       const response = await api.get(`rfi/sents`, {
@@ -1448,20 +1447,20 @@ class Service {
     }
   }
 
-//Pending submittals for Project Manager
-static async PendingSubmittalForProjectManager() {
-  try {
-    const response = await api.get(`submittal/pending/projectManager`, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    console.log(' Pending submittals for Project Manager:', response.data)
-    return response.data
-  } catch (error) {
-    console.error('cannot find submittals for Project Manager', error)
+  //Pending submittals for Project Manager
+  static async PendingSubmittalForProjectManager() {
+    try {
+      const response = await api.get(`submittal/pending/projectManager`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Pending submittals for Project Manager:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find submittals for Project Manager', error)
+    }
   }
-}
 
   //All Submitals
   static async SubmittalSent() {
@@ -1991,16 +1990,28 @@ static async PendingSubmittalForProjectManager() {
     }
   }
 
-    static async PendingSubmittal() {
+  // upcoming Submittal for PRoject Manager
+  static async GetPendingSubmittalForPM() {
+    try {
+      const response = await api.get(`mileStone/pendingSubmittals/projectManager`)
+      console.log('Upcoming submittal fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching upcoming submittal:', error)
+      throw error
+    }
+  }
+
+  static async PendingSubmittal() {
     try {
       const response = await api.get(`submittal/pendingSubmittal`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
     } catch (error) {
-      console.error("cannot find submittals", error);
+      console.error('cannot find submittals', error)
     }
   }
 
