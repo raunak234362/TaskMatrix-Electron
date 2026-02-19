@@ -1,8 +1,8 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import Service from '../../../api/Service'
 import DataTable from '../../ui/table'
-import { X, Edit2, Save, Layers, AlignLeft, Calculator, Clock } from 'lucide-react'
+import { X, Edit2, Save, Layers, AlignLeft, Calculator, Clock, CheckCircle2 } from 'lucide-react'
 import RichTextEditor from '../../fields/RichTextEditor'
 
 const LineItemList = ({ id, onClose }) => {
@@ -13,13 +13,14 @@ const LineItemList = ({ id, onClose }) => {
 
   const groupId = groupData?.group?.id
 
-  const fetchGroupById = async () => {
+  const fetchGroupById = useCallback(async () => {
     const response = await Service.FetchGroupById(id)
     console.log(response.data)
 
     setGroupData(response.data)
-  }
-  const fetchLineItem = async () => {
+  }, [id])
+
+  const fetchLineItem = useCallback(async () => {
     if (!groupId) return
     setLoading(true)
     try {
@@ -31,17 +32,17 @@ const LineItemList = ({ id, onClose }) => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [groupId]) // setLoading is a stable setter, Service is stable, setLineItem is stable
 
   useEffect(() => {
     fetchGroupById()
-  }, [id])
+  }, [fetchGroupById])
 
   useEffect(() => {
     if (groupId) {
       fetchLineItem()
     }
-  }, [groupId])
+  }, [groupId, fetchLineItem])
 
   const [editingRowId, setEditingRowId] = useState(null)
   const [editFormData, setEditFormData] = useState({})
@@ -49,6 +50,10 @@ const LineItemList = ({ id, onClose }) => {
   // Group Editing State
   const [isEditingGroup, setIsEditingGroup] = useState(false)
   const [groupFormData, setGroupFormData] = useState({})
+
+  // Bulk Quantity Edit State
+  const [pendingChanges, setPendingChanges] = useState({})
+  const [isBulkSaving, setIsBulkSaving] = useState(false)
 
   const handleGroupEditClick = () => {
     setIsEditingGroup(true)
@@ -106,7 +111,8 @@ const LineItemList = ({ id, onClose }) => {
     setGroupFormData({ ...groupFormData, [field]: e.target.value })
   }
 
-  const handleEditClick = (row) => {
+  // Stabilize handlers with useCallback
+  const handleEditClick = useCallback((row) => {
     setEditingRowId(row.id)
     setEditFormData({
       scopeOfWork: row.scopeOfWork,
@@ -114,14 +120,14 @@ const LineItemList = ({ id, onClose }) => {
       hoursPerQty: row.hoursPerQty,
       totalHours: row.totalHours
     })
-  }
+  }, []) // setEditingRowId and setEditFormData are stable setters
 
-  const handleCancelClick = () => {
+  const handleCancelClick = useCallback(() => {
     setEditingRowId(null)
     setEditFormData({})
-  }
+  }, []) // setEditingRowId and setEditFormData are stable setters
 
-  const handleSaveClick = async (rowId) => {
+  const handleSaveClickCorrect = useCallback(async (rowId) => {
     try {
       const payload = {
         ...editFormData,
@@ -136,25 +142,61 @@ const LineItemList = ({ id, onClose }) => {
     } catch (error) {
       console.error('Error updating line item:', error)
     }
-  }
+  }, [editFormData, fetchLineItem, fetchGroupById]) // editFormData, fetchLineItem, fetchGroupById can change
 
-  const handleInputChange = (value, field) => {
-    const newData = { ...editFormData, [field]: value }
-    setEditFormData(newData)
-  }
+  const handleInputChange = useCallback((value, field) => {
+    setEditFormData(prev => ({ ...prev, [field]: value }))
+  }, []) // setEditFormData is a stable setter
 
-  const handleInputRawChange = (e, field) => {
+  const handleInputRawChange = useCallback((e, field) => {
     const value = e.target.value
-    const newData = { ...editFormData, [field]: value }
+    setEditFormData(prev => {
+      const newData = { ...prev, [field]: value }
 
-    if (field === 'quantity' || field === 'hoursPerQty') {
-      const qty = parseFloat(field === 'quantity' ? value : (newData.quantity || 0)) || 0
-      const hours =
-        parseFloat(field === 'hoursPerQty' ? value : (newData.hoursPerQty || 0)) || 0
-      newData.totalHours = qty * hours
+      if (field === 'quantity' || field === 'hoursPerQty') {
+        const qty = parseFloat(field === 'quantity' ? value : (newData.quantity || 0)) || 0
+        const hours =
+          parseFloat(field === 'hoursPerQty' ? value : (newData.hoursPerQty || 0)) || 0
+        newData.totalHours = qty * hours
+      }
+      return newData
+    })
+  }, []) // setEditFormData is a stable setter
+
+  // --- Bulk Quantity Logic ---
+  const handleQuantityChange = useCallback((id, newQuantity, hoursPerQty) => {
+    const qty = parseFloat(newQuantity) || 0;
+    const hours = parseFloat(hoursPerQty) || 0;
+    const totalHours = qty * hours;
+
+    setPendingChanges(prev => ({
+      ...prev,
+      [id]: {
+        quantity: qty,
+        totalHours: totalHours
+      }
+    }));
+  }, []) // setPendingChanges is a stable setter
+
+  const handleBulkSave = async () => {
+    setIsBulkSaving(true);
+    try {
+      const promises = Object.entries(pendingChanges).map(([id, data]) => {
+        return Service.UpdateLineItemById(id, {
+          quantity: data.quantity,
+          totalHours: data.totalHours
+        });
+      });
+
+      await Promise.all(promises);
+      setPendingChanges({});
+      fetchLineItem();
+      fetchGroupById();
+    } catch (error) {
+      console.error("Bulk save failed", error);
+    } finally {
+      setIsBulkSaving(false);
     }
-
-    setEditFormData(newData)
   }
 
   const formatDecimalHours = (decimalHours) => {
@@ -165,14 +207,32 @@ const LineItemList = ({ id, onClose }) => {
     return `${hours}h ${minutes}m`
   }
 
-  const columns = [
+  // Merge pending changes into data so columns can be pure
+  const mergedLineItems = useMemo(() => {
+    return lineItem.map(item => {
+      const pending = pendingChanges[item.id];
+      if (pending) {
+        return {
+          ...item,
+          quantity: pending.quantity,
+          totalHours: pending.totalHours,
+          isPending: true
+        };
+      }
+      return item;
+    })
+  }, [lineItem, pendingChanges]);
+
+  // Memoize columns to prevent regeneration on every render
+  const columns = useMemo(() => [
     {
       accessorKey: 'scopeOfWork',
       header: 'Scope of Work',
       cell: ({ row }) => {
         const isEditing = editingRowId === row.original.id
         return isEditing ? (
-          <RichTextEditor
+          <input
+            type="text"
             value={editFormData.scopeOfWork || ''}
             onChange={(val) => handleInputChange(val, 'scopeOfWork')}
             placeholder="Enter scope of work"
@@ -189,16 +249,31 @@ const LineItemList = ({ id, onClose }) => {
       accessorKey: 'quantity',
       header: 'Quantity',
       cell: ({ row }) => {
-        const isEditing = editingRowId === row.original.id
-        return isEditing ? (
-          <input
-            type="number"
-            value={editFormData.quantity || 0}
-            onChange={(e) => handleInputRawChange(e, 'quantity')}
-            className="w-full border rounded p-1"
-          />
-        ) : (
-          row.original.quantity
+        const isEditing = editingRowId === row.original.id;
+        // Use merged value from row.original
+        const val = isEditing ? (editFormData.quantity || 0) : row.original.quantity;
+        const isPending = row.original.isPending;
+
+        if (isEditing) {
+          return (
+            <input
+              type="number"
+              value={val}
+              onChange={(e) => handleInputRawChange(e, 'quantity')}
+              className="w-full border rounded p-1"
+            />
+          );
+        }
+
+        return (
+          <div className="relative">
+            <input
+              type="number"
+              value={val}
+              onChange={(e) => handleQuantityChange(row.original.id, e.target.value, row.original.hoursPerQty)}
+              className={`w-full border rounded p-1 transition-colors ${isPending ? 'border-orange-400 bg-orange-50' : 'border-gray-200'}`}
+            />
+          </div>
         )
       }
     },
@@ -223,17 +298,27 @@ const LineItemList = ({ id, onClose }) => {
       accessorKey: 'totalHours',
       header: 'Total Hours',
       cell: ({ row }) => {
-        const isEditing = editingRowId === row.original.id
-        return isEditing ? (
-          <input
-            type="number"
-            value={editFormData.totalHours || 0}
-            onChange={(e) => handleInputRawChange(e, 'totalHours')}
-            className="w-full border rounded p-1"
-          />
-        ) : (
-          row.original.totalHours
-        )
+        const isEditing = editingRowId === row.original.id;
+        // Use merged value from row.original
+        const val = isEditing ? editFormData.totalHours : row.original.totalHours;
+        const isPending = row.original.isPending;
+
+        if (isEditing) {
+          return (
+            <input
+              type="number"
+              value={val || 0}
+              onChange={(e) => handleInputRawChange(e, 'totalHours')}
+              className="w-full border rounded p-1"
+            />
+          )
+        }
+
+        return (
+          <span className={isPending ? "font-bold text-orange-600" : ""}>
+            {Number(val).toFixed(2)}
+          </span>
+        );
       }
     },
     {
@@ -244,7 +329,7 @@ const LineItemList = ({ id, onClose }) => {
         return isEditing ? (
           <div className="flex gap-2">
             <button
-              onClick={() => handleSaveClick(row.original.id)}
+              onClick={() => handleSaveClickCorrect(row.original.id)}
               className="text-green-600 hover:text-green-800 font-medium"
             >
               Save
@@ -266,7 +351,7 @@ const LineItemList = ({ id, onClose }) => {
         )
       }
     }
-  ]
+  ], [editingRowId, editFormData, handleQuantityChange, handleInputRawChange, handleInputChange, handleEditClick, handleCancelClick, handleSaveClickCorrect]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -274,9 +359,25 @@ const LineItemList = ({ id, onClose }) => {
       <div className="bg-white w-full max-w-5xl rounded-xl shadow-2xl overflow-hidden p-5 max-h-[90vh] flex flex-col">
         <div className="flex justify-between items-center mb-6 border-b pb-4 sticky top-0 bg-white z-10">
           <h2 className="text-2xl  text-gray-700">Line Items</h2>
-          <button onClick={onClose} className="text-gray-700 hover:text-gray-700">
-            <X className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-4">
+            {Object.keys(pendingChanges).length > 0 && (
+              <button
+                onClick={handleBulkSave}
+                disabled={isBulkSaving}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-medium animate-in fade-in"
+              >
+                {isBulkSaving ? (
+                  <Clock className="w-4 h-4 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4" />
+                )}
+                Save Changes ({Object.keys(pendingChanges).length})
+              </button>
+            )}
+            <button onClick={onClose} className="text-gray-700 hover:text-gray-700">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
         </div>
         <div className="mb-6 bg-gray-50 rounded-xl p-5 border border-gray-200 shadow-sm relative group">
           {!isEditingGroup && (
@@ -422,7 +523,7 @@ const LineItemList = ({ id, onClose }) => {
         </div>
         <DataTable
           columns={columns}
-          data={lineItem}
+          data={mergedLineItems}
           searchPlaceholder="Search line items..."
 
         />

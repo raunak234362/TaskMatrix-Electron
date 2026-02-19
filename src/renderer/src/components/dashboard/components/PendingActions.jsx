@@ -6,6 +6,14 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
   
   const actions = [
     {
+      title: 'RFQ',
+      count: dashboardStats?.pendingRFQ || 0,
+      subcount: dashboardStats?.newRFQ || 0,
+      subtitle: 'New RFQ',
+      icon: Search,
+      color: 'cyan'
+    },
+    {
       title: 'RFI',
       count: dashboardStats?.pendingRFI || 0,
       subtitle: 'New RFI',
@@ -28,14 +36,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
       icon: RefreshCw,
       color: 'rose'
     },
-    {
-      title: 'RFQ',
-      count: dashboardStats?.pendingRFQ || 0,
-      subcount: dashboardStats?.newRFQ || 0,
-      subtitle: 'New RFQ',
-      icon: Search,
-      color: 'cyan'
-    }
+    
   ]
 
   const colorClasses = {
@@ -72,10 +73,10 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
               onClick={() => {
                 if (onActionClick) {
                   const typeMap = {
+                    'RFQ': 'PENDING_RFQ',
                     'RFI': 'PENDING_RFI',
                     'Submittals': 'PENDING_SUBMITTALS',
                     'Change Orders': 'CHANGE_ORDERS',
-                    'RFQ': 'PENDING_RFQ'
                   }
                   onActionClick(typeMap[action.title])
                 }

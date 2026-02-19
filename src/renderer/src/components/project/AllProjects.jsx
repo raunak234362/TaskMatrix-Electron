@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { Suspense, useMemo, useState } from "react";
+import React, { Suspense, useMemo, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import DataTable from "../ui/table";
 import Modal from "../ui/Modal";
 import { Filter } from "lucide-react";
+import Service from "../../api/Service";
 
 const GetProjectById = React.lazy(() =>
   import("./GetProjectById").then((module) => ({ default: module.default }))
@@ -11,6 +12,7 @@ const GetProjectById = React.lazy(() =>
 
 const AllProjects = () => {
   const [selectedProject, setSelectedProject] = useState(null);
+  const [tasks, setTasks] = useState([]);
   const [filters, setFilters] = useState({
     manager: "All Managers",
     fabricator: "All Fabricators",
@@ -21,6 +23,21 @@ const AllProjects = () => {
   const projects = useSelector(
     (state) => state.projectInfo?.projectData || []
   );
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const data = await Service.GetAllTask();
+        if (data) {
+          const taskList = Array.isArray(data) ? data : (data.data || []);
+          setTasks(taskList);
+        }
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      }
+    };
+    fetchTasks();
+  }, []);
 
   // --- Derive Unique Filter Options ---
   const managers = useMemo(() => {
@@ -50,15 +67,31 @@ const AllProjects = () => {
 
   // --- Filter Logic ---
   const filteredProjects = useMemo(() => {
-    return projects.filter((project) => {
+    return projects.map(project => {
+      // Calculate worked hours for this project
+      const projectTasks = tasks.filter(t => {
+        const taskProjectId = t.project?.id || t.project_id || (typeof t.project === 'string' ? t.project : null);
+        return taskProjectId === project.id;
+      });
+      const workedHours = projectTasks.reduce((total, task) => {
+        const taskWorked = (task.workingHourTask || []).reduce(
+          (acc, wh) => acc + (Number(wh.duration_seconds) || 0),
+          0
+        ) / 3600;
+        return total + taskWorked;
+      }, 0);
+
+      return {
+        ...project,
+        workedHours // Add calculated worked hours to the project object
+      };
+    }).filter((project) => {
       const managerName = project.manager
         ? `${project.manager.firstName || ""} ${project.manager.lastName || ""}`.trim()
         : "Unassigned";
       const fabName = project.fabricator?.fabName || "Unassigned";
       const stage = project.stage || "Unknown";
 
-      // Mock worked hours calculation since it's not in the base object yet
-      // You can replace this with actual data integration later
       const estHours = Number(project.estimatedHours) || 0;
       const workedHours = Number(project.workedHours) || 0;
       const isOverrun = workedHours > estHours && estHours > 0;
@@ -79,7 +112,7 @@ const AllProjects = () => {
 
       return true;
     });
-  }, [projects, filters]);
+  }, [projects, filters, tasks]);
 
   // --- Column Definitions ---
   const columns = [
@@ -122,10 +155,7 @@ const AllProjects = () => {
       id: "workedHours",
       header: "Worked Hours",
       cell: ({ row }) => {
-        // Placeholder or actual if available
         const worked = row.original.workedHours || 0;
-        // Format as HH:MM if it was seconds, assuming hours for now based on 'estimatedHours'
-        // If it's a decimal number:
         const hours = Math.floor(worked);
         const minutes = Math.round((worked - hours) * 60);
         const display = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
@@ -153,30 +183,30 @@ const AllProjects = () => {
         );
       },
     },
-    {
-      id: "progress",
-      header: "Progress",
-      cell: ({ row }) => {
-        const est = Number(row.original.estimatedHours) || 0;
-        const worked = Number(row.original.workedHours) || 0;
-        let percent = est > 0 ? (worked / est) * 100 : 0;
-        if (percent > 100) percent = 100;
+    // {
+    //   id: "progress",
+    //   header: "Progress",
+    //   cell: ({ row }) => {
+    //     const est = Number(row.original.estimatedHours) || 0;
+    //     const worked = Number(row.original.workedHours) || 0;
+    //     let percent = est > 0 ? (worked / est) * 100 : 0;
+    //     if (percent > 100) percent = 100;
 
-        return (
-          <div className="w-24">
-            <div className="flex justify-between text-[10px] mb-1 font-bold text-gray-400">
-              <span>{Math.round(percent)}% UTILIZED</span>
-            </div>
-            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full ${worked > est ? "bg-red-500" : "bg-orange-500"}`}
-                style={{ width: `${percent}%` }}
-              />
-            </div>
-          </div>
-        )
-      }
-    },
+    //     return (
+    //       <div className="w-24">
+    //         <div className="flex justify-between text-[10px] mb-1 font-bold text-gray-400">
+    //           <span>{Math.round(percent)}% UTILIZED</span>
+    //         </div>
+    //         <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+    //           <div
+    //             className={`h-full rounded-full ${worked > est ? "bg-red-500" : "bg-orange-500"}`}
+    //             style={{ width: `${percent}%` }}
+    //           />
+    //         </div>
+    //       </div>
+    //     )
+    //   }
+    // },
     {
       accessorKey: "status",
       header: "Status",

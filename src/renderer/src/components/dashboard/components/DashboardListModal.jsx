@@ -7,10 +7,10 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
 
     const getTitle = () => {
         switch (type) {
-            case 'PENDING_RFI': return { title: 'Pending RFIs', icon: FileText, color: 'text-amber-600', iconBg: 'bg-amber-100' }
-            case 'PENDING_SUBMITTALS': return { title: 'Pending Submittals', icon: ClipboardList, color: 'text-purple-600', iconBg: 'bg-purple-100' }
-            case 'CHANGE_ORDERS': return { title: 'Change Orders', icon: RefreshCw, color: 'text-rose-600', iconBg: 'bg-rose-100' }
-            case 'PENDING_RFQ': return { title: 'Pending RFQs', icon: Search, color: 'text-cyan-600', iconBg: 'bg-cyan-100' }
+            case 'PENDING_RFI': return { title: 'Pending Action on RFIs', icon: FileText, color: 'text-amber-600', iconBg: 'bg-amber-100' }
+            case 'PENDING_SUBMITTALS': return { title: 'Pending Action on Submittals', icon: ClipboardList, color: 'text-purple-600', iconBg: 'bg-purple-100' }
+            case 'CHANGE_ORDERS': return { title: 'Pending Action on Change Orders', icon: RefreshCw, color: 'text-rose-600', iconBg: 'bg-rose-100' }
+            case 'PENDING_RFQ': return { title: 'Pending Action on RFQ ', icon: Search, color: 'text-cyan-600', iconBg: 'bg-cyan-100' }
             default: return { title: 'Items', icon: FileText, color: 'text-gray-600', iconBg: 'bg-gray-100' }
         }
     }

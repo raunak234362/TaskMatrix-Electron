@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Service from "../../api/Service";
 
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Settings } from "lucide-react";
 import ResponseModal from "./ResponseModal";
 import DataTable from "../ui/table";
 
@@ -293,28 +293,47 @@ const GetRFQByID = ({ id }) => {
             </div>
 
             {/* Scopes */}
-            <div className="space-y-3">
-              <h4 className=" text-gray-700 text-sm">Scope Summary</h4>
-              <div className="grid grid-cols-2 xs:grid-cols-3 gap-2 sm:gap-4 text-[10px] sm:text-xs">
-                <Scope
-                  label="Main Design"
-                  enabled={rfq?.connectionDesign || false}
-                />
-                <Scope label="Misc Design" enabled={rfq?.miscDesign || false} />
-                <Scope
-                  label="Customer Design"
-                  enabled={rfq?.customerDesign || false}
-                />
-                <Scope
-                  label="Main Steel"
-                  enabled={rfq?.detailingMain || false}
-                />
-                <Scope
-                  label="Misc Steel"
-                  enabled={rfq?.detailingMisc || false}
-                />
+           <div className="space-y-3">
+                <div className="p-4 bg-white/60 rounded-2xl border border-green-100/50 text-sm">
+                  <h4 className="text-sm font-black text-black mb-3 flex items-center gap-1 uppercase tracking-tight">
+                    <Settings className="w-4 h-4" /> Connection Design Scope
+                  </h4>
+                  <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
+                    <Scope
+                      label="Connection Design"
+                      enabled={rfq?.connectionDesign || false}
+                    />
+                    <Scope
+                      label="Misc Design"
+                      enabled={rfq?.miscDesign || false}
+                    />
+                    <Scope
+                      label={
+                        !rfq?.customerDesign && rfq?.sender?.fabricator?.fabName
+                          ? `Connection design by ${rfq.sender.fabricator.fabName}`
+                          : "Connection Design by WBT"
+                      }
+                      enabled={true}
+                    />
+                  </div>
+                </div>
+                <div className="p-4 bg-white/60 rounded-2xl border border-green-100/50 text-sm">
+                  <h4 className="text-sm font-black text-black mb-3 flex items-center gap-1 uppercase tracking-tight">
+                    <Settings className="w-4 h-4" /> Detailing Scope
+                  </h4>
+                  <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
+                    <Scope
+                      label="Detailing Main"
+                      enabled={rfq?.detailingMain || false}
+                    />
+                    <Scope
+                      label="Detailing Misc"
+                      enabled={rfq?.detailingMisc || false}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+
 
             {/* Files */}
             <RenderFiles

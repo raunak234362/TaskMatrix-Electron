@@ -75,6 +75,7 @@ const AddEstimation = ({ initialRfqId = null, onSuccess = () => { } }) => {
     // Auto-fill all fields from selected RFQ
     setValue('projectName', rfq.projectName || '')
     setValue('description', rfq.description || '')
+    setValue('estimationNumber', rfq.projectNumber || '')
     setValue('fabricatorId', String(rfq.fabricatorId || ''))
     setValue('tools', rfq.tools || '')
     if (rfq.estimationDate) {

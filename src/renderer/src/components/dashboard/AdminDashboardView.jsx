@@ -141,27 +141,27 @@ const AdminDashboardView = ({
                     </h3>
                     <div className="grid grid-cols-2 lg:grid-cols-6 gap-6">
                         <div className="flex flex-col gap-1 p-4 bg-slate-50 rounded-2xl">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Completed Tasks</span>
+                            <span className="text-sm font-bold text-black uppercase tracking-wider">Completed Tasks</span>
                             <span className="text-2xl font-black text-slate-700">{adminData.pmDashboard?.completedTasks || 0}</span>
                         </div>
                         <div className="flex flex-col gap-1 p-4 bg-red-50 rounded-2xl">
-                            <span className="text-[10px] font-bold text-red-300 uppercase tracking-wider">Overdue Tasks</span>
+                            <span className="text-sm font-bold text-red-500 uppercase tracking-wider">Overdue Tasks</span>
                             <span className="text-2xl font-black text-red-600">{adminData.pmDashboard?.overdueTasks || 0}</span>
                         </div>
                         <div className="flex flex-col gap-1 p-4 bg-amber-50 rounded-2xl">
-                            <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">Pending Tasks</span>
+                            <span className="text-sm font-bold text-black uppercase tracking-wider">Pending Tasks</span>
                             <span className="text-2xl font-black text-amber-600">{adminData.pmDashboard?.pendingTasks || 0}</span>
                         </div>
                         <div className="flex flex-col gap-1 p-4 bg-blue-50 rounded-2xl">
-                            <span className="text-[10px] font-bold text-blue-300 uppercase tracking-wider">Total Tasks</span>
+                            <span className="text-sm font-bold text-black uppercase tracking-wider">Total Tasks</span>
                             <span className="text-2xl font-black text-blue-600">{adminData.pmDashboard?.totalTasks || 0}</span>
                         </div>
                         <div className="flex flex-col gap-1 p-4 bg-blue-50 rounded-2xl">
-                            <span className="text-[10px] font-bold text-blue-300 uppercase tracking-wider">Task Completion Rate</span>
+                            <span className="text-sm font-bold text-black uppercase tracking-wider">Task Completion Rate</span>
                             <span className="text-2xl font-black text-blue-600">{adminData.pmDashboard?.taskCompletionRate || 0}</span>
                         </div>
                         <div className="flex flex-col gap-1 p-4 bg-indigo-50 rounded-2xl">
-                            <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-wider">Total Team Members</span>
+                            <span className="text-sm font-bold text-black uppercase tracking-wider">Total Team Members</span>
                             <span className="text-2xl font-black text-indigo-600">{adminData.pmDashboard?.totalTeamMembers || 0}</span>
                         </div>
                     </div>

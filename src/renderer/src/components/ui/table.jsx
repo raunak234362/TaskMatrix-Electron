@@ -297,7 +297,7 @@ export default function DataTable({
                     {hg.headers.map((header) => (
                       <th
                         key={header.id}
-                        className="px-4 py-3 text-left text-md md:text-lg font-medium bg-gray-200 text-gray-700"
+                        className="px-4 py-3 text-left text-sm md:text-md font-bold bg-gray-200 text-gray-800"
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         <div className="flex items-center gap-1 cursor-pointer">
@@ -327,7 +327,7 @@ export default function DataTable({
                 {table.getPaginationRowModel().rows.map((row) => (
                   <React.Fragment key={row.id}>
                     <tr
-                      className={`hover:bg-gray-50 cursor-pointer transition-colors ${expandedRowId === row.id ? "bg-gray-50" : ""
+                      className={`hover:bg-green-50 cursor-pointer transition-colors ${expandedRowId === row.id ? "bg-gray-50" : ""
                         }`}
                       onClick={() => {
                         onRowClick?.(row.original);
@@ -339,7 +339,7 @@ export default function DataTable({
                       }}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id} className="px-4 py-3 text-md md:text-lg text-gray-800">
+                        <td key={cell.id} className="px-4 py-3 text-sm md:text-md text-gray-800">
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext(),
@@ -368,9 +368,9 @@ export default function DataTable({
       )}
 
       {/* pagination */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm p-4 border-t border-gray-50 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row items-center gap-4 text-sm p-4 border-gray-50 dark:border-slate-800">
         <div className="flex items-center gap-4">
-          <span className="text-gray-600 dark:text-slate-400">
+          <span className="text-gray-800 ">
             Page {table.getState().pagination.pageIndex + 1} of{" "}
             {table.getPageCount()}
           </span>
@@ -379,14 +379,14 @@ export default function DataTable({
           <Button
             disabled={!table.getCanPreviousPage()}
             onClick={() => table.previousPage()}
-            className="px-3 py-1 border border-gray-200 dark:border-slate-700 rounded disabled:opacity-50 text-gray-700 dark:text-slate-300"
+            className="px-3 py-1 border border-gray-200 rounded disabled:opacity-50 text-gray-700 "
           >
             {"<"}
           </Button>
           <Button
             disabled={!table.getCanNextPage()}
             onClick={() => table.nextPage()}
-            className="px-3 py-1 border border-gray-200 dark:border-slate-700 rounded disabled:opacity-50 text-gray-700 dark:text-slate-300"
+            className="px-3 py-1 border border-gray-200 rounded disabled:opacity-50 text-gray-700 "
           >
             {">"}
           </Button>

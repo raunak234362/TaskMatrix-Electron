@@ -10,6 +10,7 @@ import {
   Tag,
   Clock,
   Trash2,
+  Filter,
 } from "lucide-react";
 
 import DataTable from "../ui/table";
@@ -26,6 +27,12 @@ const AllTasks = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [filters, setFilters] = useState({
+    projectName: "All Projects",
+    stage: "All Stages",
+    status: "All Status",
+  });
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -91,13 +98,13 @@ const AllTasks = () => {
   const getStatusColor = (status) => {
     switch (status?.toUpperCase()) {
       case "COMPLETED":
-        return "bg-green-100 text-green-700 border-green-200";
+        return "bg-green-100 text-green-800 border-green-200";
       case "IN_PROGRESS":
-        return "bg-blue-100 text-blue-700 border-blue-200";
+        return "bg-blue-100 text-blue-800 border-blue-200";
       case "ASSIGNED":
-        return "bg-green-100 text-green-700 border-green-200";
+        return "bg-orange-100 text-orange-800 border-orange-200";
       case "PENDING":
-        return "bg-yellow-100 text-yellow-700 border-yellow-200";
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       default:
         return "bg-gray-100 text-gray-700 border-gray-200";
     }
@@ -135,18 +142,39 @@ const AllTasks = () => {
       });
 
       return {
-        projectOptions: Array.from(projects).map((p) => ({
-          label: p,
-          value: p,
-        })),
-        stageOptions: Array.from(stages).map((s) => ({ label: s, value: s })),
-        statusOptions: Array.from(statuses).map((s) => ({
-          label: s,
-          value: s,
-        })),
+        projectOptions: ["All Projects", ...Array.from(projects)],
+        stageOptions: ["All Stages", ...Array.from(stages)],
+        statusOptions: ["All Status", ...Array.from(statuses)],
         userOptions: Array.from(users).map((u) => ({ label: u, value: u })),
       };
     }, [tasks]);
+
+  // --- Filter Logic ---
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((task) => {
+      const projectName = task.project?.name || "Unassigned";
+      const stage = task.Stage || "Unknown";
+      const status = task.status || "Unknown";
+
+      if (
+        filters.projectName !== "All Projects" &&
+        projectName !== filters.projectName
+      )
+        return false;
+      if (
+        filters.stage !== "All Stages" &&
+        stage !== filters.stage
+      )
+        return false;
+      if (
+        filters.status !== "All Status" &&
+        status !== filters.status
+      )
+        return false;
+
+      return true;
+    });
+  }, [tasks, filters]);
 
   const columns = useMemo(
     () => [
@@ -158,21 +186,12 @@ const AllTasks = () => {
             <span className="font-semibold text-gray-700 group-hover:text-green-700 transition-colors">
               {row.original.name}
             </span>
-            <div
-              className="text-xs text-gray-400 mt-1 line-clamp-1 prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{
-                __html: row.original.description || "No description",
-              }}
-            />
           </div>
         ),
       },
       {
         accessorKey: "project.name",
         header: "Project",
-        enableColumnFilter: true,
-        filterType: "select",
-        filterOptions: projectOptions,
         cell: ({ row }) => (
           <div className="flex items-center gap-2 text-sm text-gray-700">
             <Briefcase className="w-3.5 h-3.5 text-gray-400" />
@@ -189,9 +208,6 @@ const AllTasks = () => {
             : "Unassigned",
         id: "assignedTo",
         header: "Assigned To",
-        enableColumnFilter: userRole !== "staff",
-        filterType: "select",
-        filterOptions: userOptions,
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-linear-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white text-xs  shadow-sm">
@@ -215,9 +231,6 @@ const AllTasks = () => {
       {
         accessorKey: "status",
         header: "Status",
-        enableColumnFilter: true,
-        filterType: "select",
-        filterOptions: statusOptions,
         cell: ({ row }) => (
           <span
             className={`px-3 py-1 rounded-full text-xs  border ${getStatusColor(
@@ -272,7 +285,7 @@ const AllTasks = () => {
         ),
       },
     ],
-    [projectOptions, stageOptions, statusOptions, userOptions, userRole]
+    [userRole]
   );
 
   if (loading) {
@@ -304,19 +317,65 @@ const AllTasks = () => {
   }
 
   return (
-    <div className="p-4 md:p-2 w-full mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-        <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full border border-green-100">
+    <div className="p-4 md:p-2 w-full mx-auto animate-in fade-in duration-700 flex flex-col gap-4">
+      {/* Filters Section */}
+      <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <Filter size={16} className="text-gray-400" />
+          <span className="text-xs font-black text-gray-500 uppercase tracking-widest">Filters</span>
+        </div>
+
+        <div className="flex flex-wrap items-end gap-4">
+          {/* Project Filter */}
+          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Project</label>
+            <select
+              className="w-full text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+              value={filters.projectName}
+              onChange={(e) => setFilters(prev => ({ ...prev, projectName: e.target.value }))}
+            >
+              {projectOptions.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+
+          {/* Stage Filter */}
+          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Stage</label>
+            <select
+              className="w-full text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+              value={filters.stage}
+              onChange={(e) => setFilters(prev => ({ ...prev, stage: e.target.value }))}
+            >
+              {stageOptions.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+
+          {/* Status Filter */}
+          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Status</label>
+            <select
+              className="w-full text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+              value={filters.status}
+              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+            >
+              {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full border border-green-100">
           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
           <span className="text-sm font-semibold text-green-700">
             {tasks.length} Total Tasks
           </span>
-        </div>
+        </div> */}
 
         {Object.keys(rowSelection).length > 0 && (
           <button
             onClick={() => setShowBulkUpdateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 border border-black  hover:bg-gray-200 text-black rounded-lg transition-colors shadow-sm"
           >
             <ClipboardList size={16} />
             <span>Update Status ({Object.keys(rowSelection).length})</span>
@@ -340,7 +399,7 @@ const AllTasks = () => {
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-4">
           <DataTable
             columns={columns}
-            data={tasks}
+            data={filteredTasks}
             detailComponent={TaskDetailWrapper}
             enableRowSelection={true}
             rowSelection={rowSelection}

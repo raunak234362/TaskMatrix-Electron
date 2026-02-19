@@ -2535,5 +2535,25 @@ class Service {
       throw error
     }
   }
+
+  static async Notifications() {
+    try {
+      const response = await api.get(`notifications`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      throw error;
+    }
+  }
+
+  static async MarkNotificationAsRead(id) {
+    try {
+      const response = await api.patch(`notifications/read/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      throw error;
+    }
+  }
 }
 export default Service

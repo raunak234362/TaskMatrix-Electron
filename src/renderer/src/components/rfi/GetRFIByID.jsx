@@ -45,7 +45,7 @@ const GetRFIByID = ({ id }) => {
     return (
       <div className="flex items-center justify-center py-8 text-gray-700">
         <Loader2 className="w-5 h-5 animate-spin mr-2" />
-        Loading RFQ details...
+        Loading RFI details...
       </div>
     );
   }

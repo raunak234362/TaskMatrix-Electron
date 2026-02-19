@@ -129,10 +129,10 @@ const WBTDashboard = () => {
   const handleActionClick = (type) => {
     let data = []
     switch (type) {
+      case 'PENDING_RFQ': data = adminData.rfqs; break;
       case 'PENDING_RFI': data = adminData.rfis; break;
       case 'PENDING_SUBMITTALS': data = adminData.pendingSubmittals; break;
       case 'CHANGE_ORDERS': data = adminData.pendingChangeOrders; break;
-      case 'PENDING_RFQ': data = adminData.rfqs; break;
       default: data = [];
     }
     setActionModal({ isOpen: true, type, data })
@@ -143,10 +143,10 @@ const WBTDashboard = () => {
     if (actionModal.isOpen) {
       let type = null
       switch (actionModal.type) {
+        case 'PENDING_RFQ': type = 'RFQ'; break;
         case 'PENDING_RFI': type = 'RFI'; break;
         case 'PENDING_SUBMITTALS': type = 'SUBMITTAL'; break;
         case 'CHANGE_ORDERS': type = 'CO'; break;
-        case 'PENDING_RFQ': type = 'RFQ'; break;
       }
 
       if (type && (item.id || item._id)) {
@@ -348,13 +348,13 @@ const WBTDashboard = () => {
         {/* Item Detail Modal Wrapper */}
         {detailModal.isOpen && createPortal(
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="bg-white w-[95%] max-w-6xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in fade-in zoom-in duration-200">
+            <div className="bg-white w-[95%] max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in fade-in zoom-in duration-200">
               <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                 <h3 className="text-sm font-bold text-gray-700 uppercase tracking-widest">
+                  {detailModal.type === 'RFQ' && 'RFQ Details'}
                   {detailModal.type === 'RFI' && 'RFI Details'}
                   {detailModal.type === 'SUBMITTAL' && 'Submittal Details'}
                   {detailModal.type === 'CO' && 'Change Order Details'}
-                  {detailModal.type === 'RFQ' && 'RFQ Details'}
                 </h3>
                 <button
                   onClick={() => setDetailModal({ isOpen: false, type: null, id: null })}
@@ -365,10 +365,10 @@ const WBTDashboard = () => {
               </div>
               <div className="flex-1 overflow-y-auto p-4 bg-gray-50/30">
                 <Suspense fallback={<div className="p-8 text-center text-xs font-bold uppercase tracking-widest text-gray-400">Loading details...</div>}>
+                  {detailModal.type === 'RFQ' && <GetRFQByID id={detailModal.id} />}
                   {detailModal.type === 'RFI' && <GetRFIByID id={detailModal.id} />}
                   {detailModal.type === 'SUBMITTAL' && <GetSubmittalByID id={detailModal.id} />}
                   {detailModal.type === 'CO' && <GetCOByID id={detailModal.id} projectId={detailModal.projectId} />}
-                  {detailModal.type === 'RFQ' && <GetRFQByID id={detailModal.id} />}
                 </Suspense>
               </div>
             </div>

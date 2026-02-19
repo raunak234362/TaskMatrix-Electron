@@ -12,7 +12,7 @@ const AllEstimation = ({ estimations, onRefresh }) => {
   const columns = [
     { accessorKey: 'estimationNumber', header: 'Est. Number' },
     { accessorKey: 'projectName', header: 'Project Name' },
-    { accessorKey: 'fabricator.fabName', header: 'Fabricator' }, // Assuming fabricator is populated
+    { accessorKey: 'fabricators.fabName', header: 'Fabricator' }, // Assuming fabricator is populated
     { accessorKey: 'status', header: 'Status' },
     {
       accessorKey: 'estimateDate',
