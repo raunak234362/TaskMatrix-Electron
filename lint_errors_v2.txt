@@ -1,0 +1,434 @@
+
+> taskmatrix-wbt@1.0.0 lint
+> eslint --cache . --quiet
+
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/Header.jsx
+  4:8  error  'Button' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/accounts/getAccountByID.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/chats/ChatMain.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/chats/GroupDetail.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/co/AllCO.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/co/CoTable.jsx
+  74:14  error  'err' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/co/GetCOByID.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/common/RenderFiles.jsx
+  1:8   error  'React' is defined but never used  no-unused-vars
+  9:10  error  'toast' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/QuotationRaise.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/components/CDCapacityTable.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/components/CDInsightsList.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/components/CDLocationCharts.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/components/CDNetworkOverview.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/components/CDSnapshotCards.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/designer/AddConnectionDesigner.jsx
+  2:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/designer/AllConnectionDesigner.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/designer/GetConnectionDesignerByID.jsx
+  3:32  error  'Link2' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/engineer/AddCDEngineer.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/engineer/AllCDEngineer.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/dashboard/DesignerLandingDashboard.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/dashboard/WBTDashboard.jsx
+   8:3  error  'LayoutDashboard' is defined but never used       no-unused-vars
+  12:3  error  'Bell' is defined but never used                  no-unused-vars
+  23:7  error  'GetTaskByID' is assigned a value but never used  no-unused-vars
+  62:9  error  'user' is assigned a value but never used         no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/dashboard/components/PendingActions.jsx
+  1:46  error  'Activity' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/dashboard/components/UserStatsWidget.jsx
+  2:28  error  'TrendingUp' is defined but never used  no-unused-vars
+  9:3   error  'colorClass' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/fabricator/branches/AllBranches.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/fabricator/clients/AddClient.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/fabricator/clients/AllClients.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/fabricator/fabricator/AllFabricator.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/fabricator/fabricator/EditFabricator.jsx
+  2:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/fields/Button.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/fields/MultipleFileUpload.jsx
+  3:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/fields/RichTextEditor.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/fields/Select.jsx
+  3:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/fields/Toggle.jsx
+   3:8   error  'React' is defined but never used             no-unused-vars
+   3:24  error  'useState' is defined but never used          no-unused-vars
+  10:16  error  Component definition is missing display name  react/display-name
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/invoices/GetInvoiceById.jsx
+  487:46  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/invoices/dashboard/InvoiceAnalytics.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/invoices/dashboard/InvoiceStatsCards.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/invoices/dashboard/QuickActionsPanel.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/department/AddDepartment.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/department/AllDepartments.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/department/EditDepartment.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/employee/AddEmployee.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/employee/AllEmployee.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/employee/EditEmployee.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/team/AddTeam.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/team/AddTeamMembers.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/team/AllTeam.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/team/GetTeamById.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/team/TeamMember.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/team/UpdateRoleByMemberID.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/TeamDashboard.jsx
+    1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  784:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  785:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  789:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  790:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  794:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  795:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  799:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  800:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  804:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  805:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  809:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/DailyWorkReportModal.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/DashboardHeader.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/EfficiencyAnalytics.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/MonthlyEfficiencyChart.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/TaskDistribution.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/TeamCalendar.jsx
+  1:8  error  'React' is defined but never used     no-unused-vars
+  5:3  error  'Calendar' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/TeamMembersTable.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/TeamStatsCards.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/TeamsList.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/profile/ChangePasswordModal.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/profile/Profile.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/AddProject.jsx
+    1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+    2:8  error  'React' is defined but never used                                       no-unused-vars
+    8:3  error  'Building2' is defined but never used                                   no-unused-vars
+    9:3  error  'UserCheck' is defined but never used                                   no-unused-vars
+   10:3  error  'HardHat' is defined but never used                                     no-unused-vars
+   15:3  error  'Users' is defined but never used                                       no-unused-vars
+   23:8  error  'ToggleField' is defined but never used                                 no-unused-vars
+  106:9  error  'selectedDeptId' is assigned a value but never used                     no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/EditProject.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/GetProjectById.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/ProjectAnalyticsDashboard.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/designDrawings/AddDesignDrawing.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/designDrawings/AllDesignDrawings.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/designDrawings/DesignDrawingDetails.jsx
+   1:1   error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  20:14  error  'err' is defined but never used                                         no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/designDrawings/EditDesignDrawing.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/mileStone/AddMileStone.jsx
+   1:19  error  'Controller' is defined but never used        no-unused-vars
+   9:8   error  'RichTextEditor' is defined but never used    no-unused-vars
+  21:5   error  'control' is assigned a value but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/mileStone/AllMileStone.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/mileStone/GetMilestoneByID.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/projectDocument/AllDocument.jsx
+  4:10  error  'useParams' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/wbs/AllWBS.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/wbs/GetWBSByID.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/wbs/GetWBSByIDsHours.jsx
+  1:1   error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  3:10  error  'Button' is defined but never used                                      no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/wbs/GetWBSLineItem.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/project/wbs/UpdateLineItem.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/rfi/AllRfi.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/rfi/GetRFIByID.jsx
+   1:8   error  'React' is defined but never used  no-unused-vars
+  31:14  error  'err' is defined but never used    no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/rfi/RFIResponseModal.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/rfq/AddRFQ.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/rfq/GetRFQByID.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/rfq/ResponseModal.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/sales/SalesDashboard.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/sales/components/SalesSecondaryStats.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/sales/components/SalesStatsCards.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/submittals/AllSubmittals.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/submittals/GetSubmittalByID.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/task/AddTask.jsx
+    1:1   error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+    2:8   error  'React' is defined but never used                                       no-unused-vars
+   21:8   error  'RichTextEditor' is defined but never used                              no-unused-vars
+   49:10  error  'isLoadingTasks' is assigned a value but never used                     no-unused-vars
+  450:11  error  'existingHours' is assigned a value but never used                      no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/task/AllActiveTask.jsx
+  297:20  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/task/AllTasks.jsx
+   10:3   error  'Tag' is defined but never used                                  no-unused-vars
+   12:3   error  'Trash2' is defined but never used                               no-unused-vars
+   16:8   error  'FetchTaskByID' is defined but never used                        no-unused-vars
+  336:20  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/task/EditTask.jsx
+   1:1   error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+   2:8   error  'React' is defined but never used                                       no-unused-vars
+   8:3   error  'AlertCircle' is defined but never used                                 no-unused-vars
+   9:3   error  'User' is defined but never used                                        no-unused-vars
+  10:3   error  'Layers' is defined but never used                                      no-unused-vars
+  11:3   error  'Save' is defined but never used                                        no-unused-vars
+  13:3   error  'Flag' is defined but never used                                        no-unused-vars
+  35:18  error  'errors' is assigned a value but never used                             no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/task/FetchTaskByID.jsx
+    1:8   error  'React' is defined but never used  no-unused-vars
+  165:14  error  'error' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/task/GetTaskByID.jsx
+   14:3   error  'Pause' is defined but never used                  no-unused-vars
+   16:3   error  'Square' is defined but never used                 no-unused-vars
+   32:10  error  'processing' is assigned a value but never used    no-unused-vars
+  144:9   error  'handleAction' is assigned a value but never used  no-unused-vars
+  565:7   error  'ActionButton' is assigned a value but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/task/comments/Comment.jsx
+   2:33  error  'Clock' is defined but never used           no-unused-vars
+  11:5   error  'reset' is assigned a value but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/task/components/BulkUpdateStatusModal.jsx
+   1:8   error  'React' is defined but never used  no-unused-vars
+  32:63  error  'index' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/task/components/UpdateStatusModal.jsx
+  1:8   error  'React' is defined but never used   no-unused-vars
+  2:60  error  'Square' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/ui/RenderFiles.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  6:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/ui/button.jsx
+   1:13  error  'React' is defined but never used                                                                                               no-unused-vars
+  53:18  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/ui/input.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/ui/lamp.jsx
+  2:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/ui/separator.jsx
+  1:13  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/ui/sheet.jsx
+  3:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/ui/sidebar.jsx
+  240:7  error  Unknown property 'variant' found  react/no-unknown-property
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/ui/tooltip.jsx
+  1:13  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/vendor/components/CDCapacityTable.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/vendor/components/CDInsightsList.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/vendor/components/CDLocationCharts.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/vendor/components/CDNetworkOverview.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/vendor/components/CDSnapshotCards.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/vendor/designer/AddVendor.jsx
+  2:8  error  'React' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/vendor/designer/AllVendor.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/vendor/designer/EditVendor.jsx
+  14:18  error  Parsing error: Unexpected token <
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/vendor/designer/GetVendorByID.jsx
+  3:32  error  'Link2' is defined but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/vendor/engineer/AddCDEngineer.jsx
+  203:1  error  Parsing error: Unexpected token `}`. Did you mean `&rbrace;` or `{"}"}`?
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/components/vendor/engineer/AllCDEngineer.jsx
+  96:25  error  Parsing error: Unexpected token ;
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/layout/EstimationLayout.jsx
+   2:25  error  'AllEstimation' is defined but never used      no-unused-vars
+  10:9   error  'userRole' is assigned a value but never used  no-unused-vars
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/layout/ProjectLayout.jsx
+  10:5  error  Unexpected constant condition                                              no-constant-condition
+  10:5  error  Unexpected constant truthiness on the left-hand side of a `||` expression  no-constant-binary-expression
+  10:5  error  Unexpected constant truthiness on the left-hand side of a `||` expression  no-constant-binary-expression
+  10:5  error  Unexpected constant truthiness on the left-hand side of a `||` expression  no-constant-binary-expression
+
+/home/siddhi/projects/TaskMatrix-Electron/src/renderer/src/pages/TeamPage.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+✖ 187 problems (187 errors, 0 warnings)
+

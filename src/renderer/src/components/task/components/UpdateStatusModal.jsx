@@ -13,6 +13,8 @@ const UpdateStatusModal = ({ taskId, currentStatus, onClose, refresh }) => {
         { label: "On Break", value: "BREAK", icon: <Pause className="w-4 h-4" /> },
         { label: "Completed", value: "COMPLETED", icon: <CheckCircle2 className="w-4 h-4" /> },
         { label: "Pending", value: "PENDING", icon: <AlertCircle className="w-4 h-4" /> },
+        { label: "Absent", value: "ABSENT", icon: <AlertCircle className="w-4 h-4" /> },
+        { label: "Wrong Allocation", value: "WRONG_ALLOCATION", icon: <AlertCircle className="w-4 h-4" /> },
         { label: "Rework", value: "REWORK", icon: <AlertCircle className="w-4 h-4" /> },
     ];
 

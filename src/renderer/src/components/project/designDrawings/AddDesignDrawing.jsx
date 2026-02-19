@@ -117,7 +117,7 @@ const AddDesignDrawing = ({ projectId, onSuccess }) => {
               <span>Creating...</span>
             </div>
           ) : (
-            "Create Design Drawing"
+            "Create Document"
           )}
         </Button>
       </div>

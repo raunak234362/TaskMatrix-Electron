@@ -4,7 +4,6 @@ import Service from "../../api/Service";
 import { Calendar, Loader2 } from "lucide-react";
 import { setProjectData, updateProject } from "../../store/projectSlice";
 import { setMilestonesForProject } from "../../store/milestoneSlice";
-
 import ProjectDetailsModal from "./components/ProjectDetailsModal";
 import MonthlyProjectStats from "./components/MonthlyProjectStats";
 import ProjectListModal from "./components/ProjectListModal";
@@ -14,11 +13,8 @@ import { Button } from "../ui/button";
 const ProjectDashboard = () => {
   const dispatch = useDispatch();
   const projects = useSelector(
-    (state) => state.projectInfo?.projectData || []
+    (state) => state.projectInfo?.projectData || [],
   );
-  // const milestonesByProject = useSelector(
-  //   (state) => state.milestoneInfo?.milestonesByProject || {}
-  // ) <string, ProjectMilestone>;
 
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
@@ -86,7 +82,7 @@ const ProjectDashboard = () => {
                 setMilestonesForProject({
                   projectId: p.id,
                   milestones: milestonesRes.data,
-                })
+                }),
               );
             }
 
@@ -114,13 +110,13 @@ const ProjectDashboard = () => {
   const projectsWithStats = useMemo(() => {
     return projects.map((project) => {
       const projectTasks = allTasks.filter(
-        (task) => task.project_id === project.id
+        (task) => task.project_id === project.id,
       );
 
       const workedSeconds = projectTasks.reduce((sum, task) => {
         const taskSeconds = (task.workingHourTask || []).reduce(
           (tSum, wht) => tSum + (wht.duration_seconds || 0),
-          0
+          0,
         );
         return sum + taskSeconds;
       }, 0);
@@ -194,7 +190,7 @@ const ProjectDashboard = () => {
   const handleStatClick = (
     projects,
     stage,
-    status
+    status,
   ) => {
     let filtered = projects.filter((p) => p.stage === stage);
     if (status !== "TOTAL") {
@@ -217,7 +213,7 @@ const ProjectDashboard = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500 laptop-fit">
       {/* Filters Header */}
-      <div className="bg-white p-3 md:p-4 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
+      <div className="bg-white p-3 md:p-4 rounded-2xl border border-green-500/10 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
         <div className="flex items-center gap-4">
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -225,10 +221,10 @@ const ProjectDashboard = () => {
               value={selectedYear === null ? "all" : selectedYear}
               onChange={(e) =>
                 setSelectedYear(
-                  e.target.value === "all" ? null : parseInt(e.target.value)
+                  e.target.value === "all" ? null : parseInt(e.target.value),
                 )
               }
-              className="pl-10 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm md:text-lg font-medium text-gray-700 focus:ring-2 focus:ring-green-500 outline-none appearance-none cursor-pointer hover:bg-gray-100 transition-colors w-full md:w-auto"
+              className="pl-10 pr-8 py-2 bg-white border border-green-500/20 rounded-xl text-sm md:text-lg font-medium text-gray-700 focus:ring-2 focus:ring-green-500 outline-none appearance-none cursor-pointer hover:bg-green-50 transition-colors w-full md:w-auto"
             >
               <option value="all">All Years</option>
               {years.map((year) => (
@@ -247,10 +243,10 @@ const ProjectDashboard = () => {
                 value={selectedMonth === null ? "all" : selectedMonth}
                 onChange={(e) =>
                   setSelectedMonth(
-                    e.target.value === "all" ? null : parseInt(e.target.value)
+                    e.target.value === "all" ? null : parseInt(e.target.value),
                   )
                 }
-                className="pl-10 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-green-500 outline-none appearance-none cursor-pointer hover:bg-gray-100 transition-colors w-full"
+                className="pl-10 pr-8 py-2 bg-white border border-green-500/20 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-green-500 outline-none appearance-none cursor-pointer hover:bg-green-50 transition-colors w-full"
               >
                 <option value="all">All Months</option>
                 {months.map((month, index) => (
@@ -267,8 +263,8 @@ const ProjectDashboard = () => {
               <Button
                 onClick={() => setSelectedMonth(null)}
                 className={`px-3 md:px-4 py-1 md:py-1.5 rounded-full text-sm md:text-base font-semibold transition-all whitespace-nowrap h-auto ${selectedMonth === null
-                  ? "bg-green-600 text-white shadow-md shadow-green-100 hover:bg-green-700"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-none"
+                    ? "bg-green-600 text-white shadow-md shadow-green-100 hover:bg-green-700"
+                    : "bg-green-50 text-gray-700 hover:bg-green-100"
                   }`}
               >
                 All Months
@@ -278,8 +274,8 @@ const ProjectDashboard = () => {
                   key={month}
                   onClick={() => setSelectedMonth(index)}
                   className={`px-3 md:px-4 py-1 md:py-1.5 rounded-full text-sm md:text-base font-semibold transition-all whitespace-nowrap h-auto ${selectedMonth === index
-                    ? "bg-green-600 text-white shadow-md shadow-green-100 hover:bg-green-700"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-none"
+                      ? "bg-green-600 text-white shadow-md shadow-green-100 hover:bg-green-700"
+                      : "bg-green-50 text-gray-700 hover:bg-green-100"
                     }`}
                 >
                   {month}
@@ -288,8 +284,6 @@ const ProjectDashboard = () => {
             </div>
           </div>
         </div>
-
-
       </div>
 
       {/* Monthly Workload Stats */}

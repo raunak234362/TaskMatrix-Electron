@@ -1,10 +1,11 @@
-import { X  } from 'lucide-react'
+import { X } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import GetProjectById from '../../project/GetProjectById'
 
 const ProjectDetailsModal = ({ project, onClose }) => {
   if (!project) return null
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-white w-[95%] max-w-6xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in fade-in zoom-in duration-200">
         {/* Modal Header */}
@@ -22,7 +23,8 @@ const ProjectDetailsModal = ({ project, onClose }) => {
           <GetProjectById id={project.id} />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

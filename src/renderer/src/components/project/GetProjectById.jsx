@@ -9,6 +9,7 @@ import {
   Users,
   Clock,
   ClipboardList,
+  X
 } from "lucide-react";
 import Service from "../../api/Service";
 import Button from "../fields/Button";
@@ -29,7 +30,7 @@ import AddCO from "../co/AddCO";
 import CoTable from "../co/CoTable";
 import ProjectAnalyticsDashboard from "./ProjectAnalyticsDashboard";
 
-const GetProjectById = ({ id }) => {
+const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -125,123 +126,128 @@ const GetProjectById = ({ id }) => {
 
   return (
     <>
-      <div className="w-full bg-white h-auto p-3 md:p-6 rounded-lg shadow-sm border border-gray-200 relative laptop-fit">
-        {/* Header */}
-        <div className="flex justify-between items-center border-b pb-3 mb-3">
-          <div>
-            <h2 className="text-xl md:text-2xl font-semibold text-green-700">
-              {project.name}
-            </h2>
-            <p className="text-gray-700 text-sm">
-              Project No: {project.projectNumber}
-            </p>
+      <div className="w-full relative laptop-fit">
+        <div className="sticky top-0 bg-white z-50 pb-2 border-b">
+          {/* Header */}
+          <div className="flex justify-between items-center border-b pb-3 mb-3">
+            <div>
+              <h2 className="text-xl md:text-2xl font-semibold text-[#6bbd45]">
+                {project.name}
+              </h2>
+              <p className="text-gray-700 text-sm">
+                Project Serial No: {project.serialNo}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-medium ${project.status === "ACTIVE"
+                  ? "bg-[#6bbd45]/15 text-[#6bbd45]"
+                  : "bg-red-100 text-red-700"
+                  }`}
+              >
+                {project.status}
+              </span>
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  className="p-1 rounded-full hover:bg-gray-100 text-gray-700 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium ${project.status === "ACTIVE"
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-700"
-                }`}
-            >
-              {project.status}
-            </span>
-            {/* <button
-              onClick={onClose}
-              className="p-2 rounded-full hover:bg-gray-100 text-gray-700"
-            >
-              <X className="w-5 h-5" />
-            </button> */}
-          </div>
-        </div>
 
-        {/* Tabs */}
-        <div className="mb-4">
-          {/* Mobile Dropdown */}
-          <div className="block md:hidden mb-2">
-            <select
-              value={activeTab}
-              onChange={(e) => setActiveTab(e.target.value)}
-              className="w-full p-2 rounded-md bg-primary text-white  focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
+          {/* Tabs */}
+          <div className="mb-4">
+            {/* Mobile Dropdown */}
+            <div className="block md:hidden mb-2">
+              <select
+                value={activeTab}
+                onChange={(e) => setActiveTab(e.target.value)}
+                className="w-full p-2 rounded-md bg-primary text-white  focus:outline-none focus:ring-2 focus:ring-[#6bbd45]"
+              >
+                {[
+                  { key: "details", label: "Details" },
+                  { key: "files", label: "Files" },
+                  { key: "wbs", label: "WBS" },
+                  { key: "milestones", label: "Milestones" },
+                  { key: "team", label: "Team" },
+                  { key: "timeline", label: "Timeline" },
+                  { key: "notes", label: "Notes" },
+                  { key: "rfi", label: "RFI" },
+                  { key: "CDrfi", label: "CD RFI" },
+                  { key: "submittals", label: "Submittals" },
+                  { key: "CDsubmittals", label: "CD Submittals" },
+                  { key: "changeOrder", label: "Change Order" },
+                  { key: "analytics", label: "Analytics" },
+                ]
+                  .filter(
+                    (tab) =>
+                      !(
+                        userRole === "staff" &&
+                        ["wbs", "rfi", "submittals", "changeOrder"].includes(tab.key)
+                      )
+                  )
+                  .map((tab) => (
+                    <option key={tab.key} value={tab.key}>
+                      {tab.label}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            {/* Desktop Tabs */}
+            <div className="hidden md:flex gap-2 overflow-x-auto">
               {[
-                { key: "details", label: "Details" },
-                { key: "files", label: "Files" },
-                { key: "wbs", label: "WBS" },
-                { key: "milestones", label: "Milestones" },
-                { key: "team", label: "Team" },
-                { key: "timeline", label: "Timeline" },
-                { key: "notes", label: "Notes" },
-                { key: "rfi", label: "RFI" },
-                { key: "CDrfi", label: "CD RFI" },
-                { key: "submittals", label: "Submittals" },
-                { key: "CDsubmittals", label: "CD Submittals" },
-                { key: "changeOrder", label: "Change Order" },
-                { key: "analytics", label: "Analytics" },
+                { key: "details", label: "Details", icon: FileText },
+                { key: "analytics", label: "Analytics", icon: ClipboardList },
+                { key: "files", label: "Files", icon: FolderOpenDot },
+                { key: "wbs", label: "WBS", icon: ClipboardList },
+                { key: "milestones", label: "Milestones", icon: Clock },
+                { key: "notes", label: "Notes", icon: FileText },
+                { key: "rfi", label: "RFI", icon: FileText },
+                { key: "CDrfi", label: "CD RFI", icon: FileText },
+                { key: "submittals", label: "Submittals", icon: FileText },
+                { key: "CDsubmittals", label: "CD Submittals", icon: FileText },
+                {
+                  key: "changeOrder",
+                  label: "Change Order",
+                  icon: Settings,
+                },
               ]
                 .filter(
                   (tab) =>
                     !(
                       userRole === "staff" &&
-                      ["wbs", "rfi", "submittals", "changeOrder"].includes(tab.key)
+                      ["wbs", "changeOrder", "milestones", "analytics", "CDrfi", "CDsubmittals"].includes(tab.key)
                     )
                 )
-                .map((tab) => (
-                  <option key={tab.key} value={tab.key}>
-                    {tab.label}
-                  </option>
+                .map(({ key, label, icon: TabIcon }) => (
+                  <button
+                    key={key}
+                    onClick={() => setActiveTab(key)}
+                    className={`flex items-center gap-2 bg-primary text-gray-800 px-4 py-2 text-md rounded-md font-medium transition-colors whitespace-nowrap ${activeTab === key
+                      ? "bg-[#6bbd45] text-white "
+                      : "text-gray-700 bg-gray-100 hover:text-[#6bbd45] font-semibold hover:bg-gray-50"
+                      }`}
+                  >
+                    <TabIcon className="w-4 h-4" />
+                    {label}
+                  </button>
                 ))}
-            </select>
+            </div>
           </div>
 
-          {/* Desktop Tabs */}
-          <div className="hidden md:flex gap-2 overflow-x-auto">
-            {[
-              { key: "details", label: "Details", icon: FileText },
-              { key: "analytics", label: "Analytics", icon: ClipboardList },
-              { key: "files", label: "Files", icon: FolderOpenDot },
-              { key: "wbs", label: "WBS", icon: ClipboardList },
-              { key: "milestones", label: "Milestones", icon: Clock },
-              { key: "notes", label: "Notes", icon: FileText },
-              { key: "rfi", label: "RFI", icon: FileText },
-              { key: "CDrfi", label: "CD RFI", icon: FileText },
-              { key: "submittals", label: "Submittals", icon: FileText },
-              { key: "CDsubmittals", label: "CD Submittals", icon: FileText },
-              {
-                key: "changeOrder",
-                label: "Change Order",
-                icon: Settings,
-              },
-            ]
-              .filter(
-                (tab) =>
-                  !(
-                    userRole === "staff" &&
-                    ["wbs", "changeOrder", "milestones", "analytics", "CDrfi", "CDsubmittals"].includes(tab.key)
-                  )
-              )
-              .map(({ key, label, icon: TabIcon }) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveTab(key)}
-                  className={`flex items-center gap-2 bg-primary text-gray-800 px-4 py-2 text-md rounded-md font-medium transition-colors whitespace-nowrap ${activeTab === key
-                    ? "bg-green-600 text-white "
-                    : "text-gray-700 bg-gray-100 hover:text-green-700 font-semibold hover:bg-gray-50"
-                    }`}
-                >
-                  <TabIcon className="w-4 h-4" />
-                  {label}
-                </button>
-              ))}
-          </div>
         </div>
 
         {/* Tab Content */}
-        <div className="p-2">
+        <div className="pt-4 p-2">
           {/* ✅ Details */}
           {activeTab === "details" && (
             <div className="grid max-sm:grid-cols-1 md:grid-cols-2 gap-6 text-sm">
               <div className="md:col-span-2 mt-6">
-                <h4 className="font-semibold text-green-700 mb-2 flex items-center gap-1">
+                <h4 className="font-semibold text-[#6bbd45] mb-2 flex items-center gap-1">
                   <FolderOpenDot className="w-4 h-4" />
                   Project Description
                 </h4>
@@ -298,7 +304,7 @@ const GetProjectById = ({ id }) => {
               </div>
 
               <div className="p-4 bg-gray-50 rounded-lg border text-sm">
-                <h4 className="text-lg font-semibold text-green-700 mb-3 flex items-center gap-1">
+                <h4 className="text-lg font-semibold text-[#6bbd45] mb-3 flex items-center gap-1">
                   <Settings className="w-5 h-5" /> Connection Design Scope
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -314,7 +320,7 @@ const GetProjectById = ({ id }) => {
                 </div>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg border text-sm">
-                <h4 className="text-lg font-semibold text-green-700 mb-3 flex items-center gap-1">
+                <h4 className="text-lg font-semibold text-[#6bbd45] mb-3 flex items-center gap-1">
                   <Settings className="w-5 h-5" /> Detailing Scope
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -330,14 +336,14 @@ const GetProjectById = ({ id }) => {
               </div>
 
               {/* Footer Buttons */}
-              {/* <div className="pt-2 flex flex-wrap gap-3">
+              <div className="pt-2 flex flex-wrap gap-3">
                 <Button
-                  className="py-1 px-3 text-sm bg-green-600 text-white"
+                  className="py-1 px-3 text-sm bg-[#6bbd45] text-white"
                   onClick={() => handleEditModel(project)}
                 >
                   Edit Project
                 </Button>
-              </div> */}
+              </div>
             </div>
           )}
 
@@ -361,7 +367,7 @@ const GetProjectById = ({ id }) => {
           {/* ✅ Team */}
           {activeTab === "team" && (
             <div className="text-gray-700 text-sm">
-              <h4 className="font-semibold text-green-700 mb-2 flex items-center gap-1">
+              <h4 className="font-semibold text-[#6bbd45] mb-2 flex items-center gap-1">
                 <Users className="w-4 h-4" /> Assigned Team
               </h4>
               <p>Team: {project.team?.name || "No team assigned."}</p>
@@ -400,7 +406,7 @@ const GetProjectById = ({ id }) => {
                     className={`
                       whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                       ${rfiView === "list"
-                        ? "border-green-500 text-green-600"
+                        ? "border-[#6bbd45] text-[#6bbd45]"
                         : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                       }
                     `}
@@ -413,7 +419,7 @@ const GetProjectById = ({ id }) => {
                       className={`
                         whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                         ${rfiView === "add"
-                          ? "border-green-500 text-green-600"
+                          ? "border-[#6bbd45] text-[#6bbd45]"
                           : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                         }
                     `}
@@ -448,7 +454,7 @@ const GetProjectById = ({ id }) => {
                     className={`
                       whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                       ${submittalView === "list"
-                        ? "border-green-500 text-green-600"
+                        ? "border-[#6bbd45] text-[#6bbd45]"
                         : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                       }
                     `}
@@ -461,7 +467,7 @@ const GetProjectById = ({ id }) => {
                       className={`
                         whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                         ${submittalView === "add"
-                          ? "border-green-500 text-green-600"
+                          ? "border-[#6bbd45] text-[#6bbd45]"
                           : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                         }
                     `}
@@ -496,7 +502,7 @@ const GetProjectById = ({ id }) => {
                     className={`
                       whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                       ${rfiView === "list"
-                        ? "border-green-500 text-green-600"
+                        ? "border-[#6bbd45] text-[#6bbd45]"
                         : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                       }
                     `}
@@ -509,7 +515,7 @@ const GetProjectById = ({ id }) => {
                       className={`
                         whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                         ${rfiView === "add"
-                          ? "border-green-500 text-green-600"
+                          ? "border-[#6bbd45] text-[#6bbd45]"
                           : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                         }
                     `}
@@ -544,7 +550,7 @@ const GetProjectById = ({ id }) => {
                     className={`
                       whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                       ${submittalView === "list"
-                        ? "border-green-500 text-green-600"
+                        ? "border-[#6bbd45] text-[#6bbd45]"
                         : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                       }
                     `}
@@ -557,7 +563,7 @@ const GetProjectById = ({ id }) => {
                       className={`
                         whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                         ${submittalView === "add"
-                          ? "border-green-500 text-green-600"
+                          ? "border-[#6bbd45] text-[#6bbd45]"
                           : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                         }
                     `}
@@ -592,7 +598,7 @@ const GetProjectById = ({ id }) => {
                     className={`
                       whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                       ${changeOrderView === "list"
-                        ? "border-green-500 text-green-600"
+                        ? "border-[#6bbd45] text-[#6bbd45]"
                         : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                       }
                     `}
@@ -605,7 +611,7 @@ const GetProjectById = ({ id }) => {
                       className={`
                         whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
                         ${changeOrderView === "add"
-                          ? "border-green-500 text-green-600"
+                          ? "border-[#6bbd45] text-[#6bbd45]"
                           : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
                         }
                     `}
@@ -624,12 +630,12 @@ const GetProjectById = ({ id }) => {
               ) : (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <h4 className="text-lg font-semibold text-green-700">
+                    <h4 className="text-lg font-semibold text-[#6bbd45]">
                       Change Order Table
                     </h4>
                     <button
                       onClick={() => setChangeOrderView("list")}
-                      className="text-sm text-green-600 hover:text-green-700 font-medium"
+                      className="text-sm text-[#6bbd45] hover:text-[#6bbd45] font-medium"
                     >
                       &larr; Back to List
                     </button>
@@ -643,7 +649,7 @@ const GetProjectById = ({ id }) => {
             <ProjectAnalyticsDashboard projectId={id} />
           )}
         </div>
-      </div>
+      </div >
       {editModel && (
         <EditProject
           projectId={id}
@@ -653,7 +659,8 @@ const GetProjectById = ({ id }) => {
             fetchProject();
           }}
         />
-      )}
+      )
+      }
     </>
   );
 };
@@ -673,7 +680,7 @@ const InfoRow = ({
 const ScopeTag = ({ label, active }) => (
   <span
     className={`px-3 py-1 text-sm font-medium rounded-full ${active
-      ? "bg-green-100 text-green-800 border border-green-300"
+      ? "bg-[#6bbd45]/15 text-[#6bbd45] border border-[#6bbd45]"
       : "bg-gray-100 text-gray-700 border border-gray-200"
       }`}
   >

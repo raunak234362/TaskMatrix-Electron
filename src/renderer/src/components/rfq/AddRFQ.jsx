@@ -205,7 +205,7 @@ const AddRFQ = ({ onSuccess }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {/* FABRICATOR (HIDDEN FOR CLIENTS) */}
-          {userRole !== "CLIENT" && (
+          {(userRole !== "CLIENT" || userRole !== "CLIENT_ADMIN") && (
             <>
               <div>
                 <label className="font-semibold text-gray-700 mb-1 block">
@@ -276,7 +276,7 @@ const AddRFQ = ({ onSuccess }) => {
           )}
 
           {/* CONTACT */}
-          <div className="md:col-span-2">
+          {/* <div className="md:col-span-2">
             <label className="font-semibold text-gray-700 mb-1 block">
               WBT Point of Contact *
             </label>
@@ -300,7 +300,7 @@ const AddRFQ = ({ onSuccess }) => {
                 {errors.recipientId.message}
               </p>
             )}
-          </div>
+          </div> */}
 
           {/* PROJECT NAME */}
           <div className="md:col-span-2">

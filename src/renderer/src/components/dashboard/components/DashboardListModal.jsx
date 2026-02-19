@@ -1,7 +1,8 @@
 import { X, FileText, ClipboardList, RefreshCw, Search } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import DataTable from '../../ui/table'
 
-const DashboardListModal = ({ isOpen, onClose, type, data, onItemSelect }) => {
+const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) => {
     if (!isOpen) return null
 
     const getTitle = () => {
@@ -62,7 +63,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data, onItemSelect }) => {
         }
     ]
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
             <div className="bg-white w-full max-w-5xl max-h-[85vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in zoom-in-95 duration-200">
 
@@ -81,12 +82,14 @@ const DashboardListModal = ({ isOpen, onClose, type, data, onItemSelect }) => {
                             </p>
                         </div>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-3 hover:bg-gray-100 rounded-2xl transition-all duration-200 text-gray-400 hover:text-gray-900 group"
-                    >
-                        <X size={24} className="group-hover:rotate-90 transition-transform duration-300" />
-                    </button>
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={onClose}
+                            className="px-4 py-2 bg-red-100 border border-red-600 text-black font-bold rounded-xl transition-all hover:bg-red-200 active:scale-95 uppercase text-xs tracking-widest"
+                        >
+                            Close
+                        </button>
+                    </div>
                 </div>
 
                 {/* Modal Content */}
@@ -110,13 +113,14 @@ const DashboardListModal = ({ isOpen, onClose, type, data, onItemSelect }) => {
                     </span>
                     <button
                         onClick={onClose}
-                        className="px-8 py-3 bg-gray-900 text-white rounded-2xl  hover:bg-gray-800 transition-all shadow-xl shadow-gray-200 hover:scale-105 active:scale-95"
+                        className="px-4 py-2 bg-red-100 border border-red-600 text-black font-bold rounded-xl transition-all hover:bg-red-200 active:scale-95 uppercase text-xs tracking-widest"
                     >
-                        Close Window
+                        Close
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     )
 }
 

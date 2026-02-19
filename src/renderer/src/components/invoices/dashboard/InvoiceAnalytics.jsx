@@ -109,7 +109,7 @@ const InvoiceAnalytics = ({ invoices }) => {
                             />
                             <CartesianGrid vertical={false} stroke="#f3f4f6" />
                             <Area type="monotone" dataKey="raised" stroke="#94a3b8" strokeWidth={2} fillOpacity={1} fill="url(#colorRaised)" name="Invoices Raised" />
-                            <Area type="monotone" dataKey="received" stroke="#22c55e" strokeWidth={3} fillOpacity={1} fill="url(#colorReceived)" name="Payment Received" />
+                            <Area type="monotone" dataKey="received" stroke="#39c037ff" strokeWidth={3} fillOpacity={1} fill="url(#colorReceived)" name="Payment Received" />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>

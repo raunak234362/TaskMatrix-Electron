@@ -1,15 +1,12 @@
-/* eslint-disable react/prop-types */
 import { NavLink, useNavigate } from 'react-router-dom'
 import LOGO from '../assets/logo.png'
+import ICON from '../assets/icon.png'
 import { LogOut, X, RefreshCw } from 'lucide-react'
 import { navItems } from '../constants/navigation'
 import { useSelector } from 'react-redux'
-import Button from './fields/Button'
 
 const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
   const userData = useSelector((state) => state?.userdata?.userDetail)
-  console.log(userData, "=========");
-
   const navigate = useNavigate()
   const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
   const designation = sessionStorage.getItem('designation')?.toLowerCase() || ''
@@ -31,12 +28,14 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
 
   return (
     <aside
-      className={`h-full transition-all duration-500 flex flex-col ${isMinimized ? 'w-20' : 'xl:w-72 lg:w-64 w-60'
-        } ${isMobile ? 'shadow-2xl bg-slate-800' : 'relative z-20'}`}
+      className={`h-full flex flex-col bg-white transition-all duration-300 border-r border-gray-200
+        ${isMinimized ? 'w-20' : 'w-72'}
+        ${isMobile ? 'w-72 shadow-none' : ''}
+      `}
     >
       {/* Header / Logo */}
       <div
-        className={`flex items-center pt-8 pb-4 px-6 ${isMobile ? 'justify-between' : isMinimized ? 'justify-center' : 'justify-start'
+        className={`flex items-center ${isMinimized ? 'pt-6 pb-2' : 'pt-8 pb-4'} px-4 ${isMobile ? 'justify-between' : 'justify-center'
           }`}
       >
         <div className="flex items-center w-full justify-center group">
@@ -44,13 +43,13 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
             <img
               src={LOGO}
               alt="Logo"
-              className="bg-white w-56 object-contain rounded-3xl shadow-[0_10px_25px_rgba(0,0,0,0.2)] group-hover:scale-105 transition-transform duration-500"
+              className="bg-white w-64 object-contain rounded-xl transition-transform duration-500"
             />
           ) : (
             <img
-              src={LOGO}
-              alt="Logo"
-              className="bg-white w-16 h-16 object-contain p-2 rounded-2xl shadow-[0_5px_15px_rgba(0,0,0,0.2)] group-hover:rotate-12 transition-all duration-500"
+              src={ICON}
+              alt="Icon"
+              className="w-12 h-12 object-contain transition-all duration-300 hover:scale-110"
             />
           )}
         </div>
@@ -58,80 +57,87 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
         {isMobile && (
           <button
             onClick={toggleSidebar}
-            className="p-2 text-white hover:bg-white/10 transition-colors"
+            className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <X size={22} />
+            <X size={20} />
           </button>
         )}
       </div>
 
-      <div className="flex-1 py-2 flex flex-col overflow-y-auto no-scrollbar">
-        <nav className="flex flex-col gap-0.5 w-full px-3">
-          {navItems.map(
-            ({ label, to, roles, icon }) =>
-              canView(roles) && (
-                <div key={label} className="group relative">
-                  <NavLink
-                    to={to}
-                    end={to === '/dashboard'}
-                    onClick={isMobile ? toggleSidebar : undefined}
-                    className={({ isActive }) =>
-                      `flex items-center gap-4 py-2.5 transition-all duration-500 text-sm font-black tracking-tight relative overflow-hidden
-                      ${isActive
-                        ? 'bg-[#6bbd45] text-white shadow-[0_8px_20px_rgba(0,0,0,0.25)] rounded-xl px-5 scale-105 z-10'
-                        : 'text-gray-900 hover:bg-white/10 hover:text-grey-900 px-5 rounded-xl hover:translate-x-1'
-                      } ${isMinimized ? 'justify-center w-12 h-12 mx-auto rounded-xl shadow-md px-0!' : ''}`
-                    }
-                  >
-                    {/* Rolling Hover Background Effect */}
-                    <div className="absolute inset-0 bg-green-50/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 -z-10" />
-                    <div className={`${isMinimized ? 'scale-125' : ''} shrink-0 transition-transform duration-500 group-hover:rotate-12`}>
-                      {icon}
-                    </div>
-                    {!isMinimized && <span className="truncate uppercase tracking-wider">{label}</span>}
-                  </NavLink>
+      {/* Navigation */}
+      <div className={`flex-1 ${isMinimized ? 'py-1' : 'py-4'} flex flex-col overflow-y-auto custom-scrollbar`}>
+        <nav className={`flex flex-col ${isMinimized ? 'gap-0.5' : 'gap-1'} w-full px-3`}>
+          {navItems.map(({ label, to, roles, icon }) =>
+            canView(roles) && (
+              <div key={label} className="group relative">
+                <NavLink
+                  to={to}
+                  end={to === '/dashboard'}
+                  onClick={isMobile ? toggleSidebar : undefined}
+                  className={({ isActive }) =>
+                    `flex items-center gap-4 ${isMinimized ? 'py-3' : 'py-3 px-4'} rounded-lg transition-all duration-200 text-sm font-medium tracking-wide
+                    ${isActive
+                      ? 'bg-white border-l-4 border-[#6bbd45] text-[#1f2933] font-bold shadow-sm'
+                      : 'text-black border-l-4 border-transparent hover:bg-gray-50 hover:text-black'
+                    } 
+                    ${isMinimized ? 'justify-center px-0' : ''}`
+                  }
+                >
+                  <div className={`shrink-0 transition-colors duration-200`}>
+                    {icon}
+                  </div>
 
-                  {isMinimized && (
-                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-4 py-2 bg-[#22c55e] text-white text-[10px] font-black rounded-xl shadow-[5px_5px_15px_rgba(0,0,0,0.2)] opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 translate-x-2 group-hover:translate-x-0 whitespace-nowrap z-50 uppercase tracking-widest">
-                      {label}
-                    </div>
+                  {!isMinimized && (
+                    <span className="truncate">{label}</span>
                   )}
-                </div>
-              )
+                </NavLink>
+
+                {/* Tooltip for minimized state */}
+                {isMinimized && (
+                  <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-50 whitespace-nowrap">
+                    {label}
+                  </div>
+                )}
+              </div>
+            )
           )}
         </nav>
       </div>
 
       {/* User & Actions Footer */}
-      <div className="p-4 mt-auto">
+      <div className={`${isMinimized ? 'p-2' : 'p-4'} border-t border-gray-100 bg-gray-50/30`}>
         {!isMinimized && (
-          <div className="flex items-center gap-4 mb-8 bg-black/20 p-4 rounded-3xl border border-white/5 backdrop-blur-md shadow-lg">
-            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#22c55e] font-black text-xl shadow-[0_5px_15px_rgba(0,0,0,0.15)]">
-              {sessionStorage.getItem('username')?.[0] || 'U'}
+          <div className="flex items-center gap-3 mb-6 px-2">
+            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold text-lg border border-gray-300">
+              {sessionStorage.getItem('firstName')?.[0]?.toUpperCase() || 'U'}
             </div>
-            <div className="overflow-hidden text-gray-900">
-              <p className="text-sm font-black truncate uppercase tracking-tight">{sessionStorage.getItem('username')}</p>
-              <p className="text-[10px] uppercase tracking-widest truncate opacity-80 font-bold">
+            <div className="overflow-hidden">
+              <p className="text-sm font-bold text-gray-900 truncate">
+                {sessionStorage.getItem('firstName') + ' ' + sessionStorage.getItem('lastName')}
+              </p>
+              <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold truncate">
                 {userData?.role || designation}
               </p>
             </div>
           </div>
         )}
 
-        <div className="space-y-4">
+        <div className={`space-y-2 ${isMinimized ? 'flex flex-col items-center' : ''}`}>
           <button
-            className={`w-full flex items-center gap-3 py-3 rounded-2xl transition-all text-gray-900 hover:bg-white/20 hover:text-black text-xs font-black uppercase tracking-widest shadow-sm hover:shadow-md
-              ${isMinimized ? 'justify-center px-0' : 'justify-start px-6'}`}
+            className={`w-full flex items-center gap-3 py-2.5 rounded-lg bg-[#ebf5ea] text-black border border-black shadow-sm hover:bg-[#dcecdb] hover:shadow-md transition-all text-xs font-bold uppercase tracking-wider
+              ${isMinimized ? 'justify-center px-0 w-10 h-10' : 'justify-start px-4'}`}
             onClick={handleRefresh}
+            title={isMinimized ? "Refresh" : ""}
           >
-            <RefreshCw size={18} className="group-hover:rotate-180 transition-transform duration-700" />
+            <RefreshCw size={18} />
             {!isMinimized && <span>Refresh</span>}
           </button>
 
           <button
-            className={`w-full flex items-center gap-3 py-3 rounded-2xl transition-all text-gray-900 hover:bg-red-500/30 hover:text-red-900 text-xs font-black uppercase tracking-widest shadow-sm hover:shadow-md
-              ${isMinimized ? 'justify-center px-0' : 'justify-start px-6'}`}
+            className={`w-full flex items-center gap-3 py-2.5 rounded-lg bg-white text-black border border-black shadow-sm hover:bg-red-50 hover:text-red-600 hover:border-red-600 transition-all text-xs font-bold uppercase tracking-wider
+              ${isMinimized ? 'justify-center px-0 w-10 h-10' : 'justify-start px-4'}`}
             onClick={fetchLogout}
+            title={isMinimized ? "Logout" : ""}
           >
             <LogOut size={18} />
             {!isMinimized && <span>Logout</span>}

@@ -37,6 +37,8 @@ const AppContent = () => {
 
       sessionStorage.setItem('userId', userDetail.id)
       sessionStorage.setItem('username', userDetail.username)
+      sessionStorage.setItem('firstName', userDetail.firstName)
+      sessionStorage.setItem('lastName', userDetail.lastName)
       sessionStorage.setItem('userRole', userDetail.role)
       sessionStorage.setItem('designation', userDetail.designation)
       dispatch(setUserData(userDetail))

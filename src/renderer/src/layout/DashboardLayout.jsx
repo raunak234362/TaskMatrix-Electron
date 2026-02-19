@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Header from "../components/Header";
 import Sidebar from "../components/SideBar";
 
 const Layout = () => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const isAnyModalOpen = useSelector((state) => state.userInfo.isAnyModalOpen);
 
   // Close sidebar automatically when resizing from mobile → desktop
   useEffect(() => {
@@ -32,49 +34,49 @@ const Layout = () => {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-200 font-sans relative">
-      {/* Black ambient shadow to tone down */}
-      <div className="absolute inset-0 bg-black/5 pointer-events-none" />
-
-      {/* Sidebar Area */}
-      <div className="hidden md:flex relative z-10">
-        <Sidebar
-          isMinimized={isMinimized}
-          toggleSidebar={toggleSidebar}
-          isMobile={false}
-        />
-      </div>
+    <div className="flex h-screen w-screen overflow-hidden bg-white font-sans text-[#1f2933]">
+      {/* Sidebar Area - Desktop */}
+      {!isAnyModalOpen && (
+        <div className="hidden md:flex relative z-20 h-full border-r border-gray-200 bg-white">
+          <Sidebar
+            isMinimized={isMinimized}
+            toggleSidebar={toggleSidebar}
+            isMobile={false}
+          />
+        </div>
+      )}
 
       {/* Mobile Sidebar Overlay */}
-      {isMobileOpen && (
+      {isMobileOpen && !isAnyModalOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 md:hidden backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 z-40 bg-black/50 md:hidden backdrop-blur-sm transition-opacity"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
 
       {/* Mobile Sidebar */}
-      <div className="md:hidden">
-        <Sidebar
-          isMinimized={!isMobileOpen}
-          toggleSidebar={() => setIsMobileOpen(false)}
-          isMobile={true}
-        />
-      </div>
+      {!isAnyModalOpen && (
+        <div className={`md:hidden fixed inset-y-0 left-0 z-50 bg-white shadow-xl transition-transform duration-300 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <Sidebar
+            isMinimized={false}
+            toggleSidebar={() => setIsMobileOpen(false)}
+            isMobile={true}
+          />
+        </div>
+      )}
 
-      {/* Main Content Area - Distinguishable White Card with Black Shadow */}
-      <div className="flex flex-col flex-1 min-h-0 relative z-10 p-3 md:p-4 md:pl-0">
-        <div className="flex-1 flex flex-col relative transition-all overflow-hidden bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/40">
-
-          {/* Header inside main area */}
-          <div className="border-b border-slate-200 bg-slate-50/50 shadow-sm z-20">
+      {/* Main Content Area */}
+      <div className="flex flex-col flex-1 min-h-0 relative z-10 bg-[#f9fafb]">
+        {/* Header - Sticky top with border */}
+        {!isAnyModalOpen && (
+          <div className="sticky top-0 z-30 w-full border-b border-gray-200 bg-white/95 backdrop-blur-sm">
             <Header isMinimized={isMinimized} toggleSidebar={toggleSidebar} />
           </div>
+        )}
 
-          <main className="flex-1 w-full overflow-y-auto custom-scrollbar p-2 bg-gray-50/20">
-            <Outlet />
-          </main>
-        </div>
+        <main className={`flex-1 w-full overflow-y-auto custom-scrollbar ${isAnyModalOpen ? 'p-0' : 'p-6'}`}>
+          <Outlet />
+        </main>
       </div>
     </div>
   );

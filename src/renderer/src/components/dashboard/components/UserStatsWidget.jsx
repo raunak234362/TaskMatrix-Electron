@@ -11,16 +11,16 @@ const StatCard = ({
   trendColor = 'bg-black/20'
 }) => (
   <div
-    className={`p-5 rounded-xl border border-gray-300 shadow-[0_10px_10px_rgba(22,163,74,0.02),0_10px_30px_rgba(0,0,0,0.01)] transition-all duration-700 group hover:shadow-[0_30px_70px_rgba(22,163,74,0.1),0_20px_40px_rgba(0,0,0,0.05)] hover:-translate-y-1 relative overflow-hidden bg-green-100/20`}
+    className={`p-3 lg:p-4 rounded-xl border border-gray-200 shadow-sm transition-all duration-700 group hover:shadow-md hover:-translate-y-1 relative overflow-hidden bg-green-50/10`}
   >
-    <div className="flex flex-col h-full justify-between gap-5 relative z-10">
+    <div className="flex flex-col h-full justify-between gap-2 lg:gap-3 relative z-10">
       <div className="flex items-start justify-between">
-        <div className="p-5 bg-white rounded-3xl shadow-lg group-hover:bg-primary group-hover:text-white transition-all duration-500 scale-110">
-          <Icon className="w-8 h-8 text-primary group-hover:text-green-700 transition-colors duration-500" />
+        <div className="p-2 lg:p-3 bg-white rounded-2xl shadow-sm group-hover:bg-primary group-hover:text-white transition-all duration-500">
+          <Icon className="w-5 h-5 lg:w-6 lg:h-6 text-primary transition-colors duration-500" />
         </div>
         {trend && (
           <span
-            className={`text-xs font-black px-5 py-2 rounded-2xl ${trendColor} bg-green-100 text-black uppercase tracking-widest shadow-lg`}
+            className={`text-[8px] lg:text-[10px] font-black px-2 py-0.5 lg:px-3 lg:py-1 rounded-full ${trendColor} bg-green-100 text-black uppercase tracking-widest`}
           >
             {trend}
           </span>
@@ -28,14 +28,16 @@ const StatCard = ({
       </div>
 
       <div>
-        <p className="text-sm font-black text-black/40 uppercase tracking-[0.2em]">{title}</p>
-        <h3 className="text-2xl font-semibold text-black mt-3 tracking-tighter">
+        <p className="text-[10px] lg:text-xs font-black text-black/40 uppercase tracking-[0.15em]">{title}</p>
+        <h3 className="text-lg lg:text-xl font-semibold text-black mt-1 tracking-tighter">
           {value}
         </h3>
         {subtext && (
-          <div className="mt-6 pt-5 border-t border-black/10">
-            <p className="text-xs text-black font-black uppercase tracking-wide">
-              {subtext}
+          <div className="mt-2 pt-2 border-t border-black/10">
+            <p className="text-[9px] lg:text-[10px] text-black font-black uppercase tracking-tight truncate">
+              <span className="border-b border-green-500 pb-0.5 inline-block">
+                {subtext}
+              </span>
             </p>
           </div>
         )}
@@ -54,9 +56,9 @@ const UserStatsWidget = ({ stats, loading }) => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-40 bg-white border border-gray-100 rounded-[4px] animate-pulse"></div>
+          <div key={i} className="h-32 bg-white border border-gray-200 rounded-xl animate-pulse"></div>
         ))}
       </div>
     )
@@ -71,7 +73,7 @@ const UserStatsWidget = ({ stats, loading }) => {
   } = stats || {}
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
       {/* Active Projects */}
       <StatCard
         title="Active Projects"
@@ -113,12 +115,12 @@ const UserStatsWidget = ({ stats, loading }) => {
           trendColor="bg-primary"
         />
       ) : (
-        <div className="p-6 rounded-3xl shadow-sm border border-dashed border-gray-300 bg-gray-50/50 flex flex-col items-center justify-center text-center gap-3 group hover:border-indigo-300 transition-colors duration-500">
-          <div className="p-3 bg-gray-100 rounded-2xl group-hover:bg-indigo-50 transition-colors">
-            <CalendarCheck className="w-6 h-6 text-gray-400 group-hover:text-indigo-500" />
+        <div className="p-4 rounded-xl shadow-sm border border-dashed border-gray-400 bg-gray-50/50 flex flex-col items-center justify-center text-center gap-2 group hover:border-indigo-300 transition-colors duration-500">
+          <div className="p-2 bg-gray-100 rounded-lg group-hover:bg-indigo-50 transition-colors">
+            <CalendarCheck className="w-5 h-5 text-gray-400 group-hover:text-indigo-500" />
           </div>
-          <p className="text-[10px]  text-gray-500 uppercase tracking-widest leading-relaxed max-w-[150px]">
-            YOU&apos;RE NOT ASSIGNED WITH ANY TASK TILL NOW
+          <p className="text-[8px] text-gray-500 uppercase tracking-widest leading-relaxed max-w-[120px]">
+            NO ASSIGNED TASKS
           </p>
         </div>
       )}

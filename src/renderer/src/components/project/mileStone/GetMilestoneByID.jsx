@@ -67,9 +67,9 @@ const GetMilestoneByID = ({ row, close }) => {
       },
       PENDING: {
         label: "Pending",
-        bg: "bg-yellow-100",
-        text: "text-yellow-700",
-        border: "border-yellow-300",
+        bg: "bg-[#6bbd45]/15",
+        text: "text-[#6bbd45]",
+        border: "border-[#6bbd45]",
       },
       REJECTED: {
         label: "Rejected",
@@ -92,7 +92,7 @@ const GetMilestoneByID = ({ row, close }) => {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex flex-col items-center">
-          <Loader2 className="w-10 h-10 animate-spin text-green-600" />
+          <Loader2 className="w-10 h-10 animate-spin text-[#6bbd45]" />
           <p className="mt-4 text-sm font-medium text-gray-700">
             Loading milestone details...
           </p>
@@ -115,7 +115,7 @@ const GetMilestoneByID = ({ row, close }) => {
         </p>
         <Button
           onClick={close}
-          className="mt-6 px-6 py-2 bg-green-600 text-white hover:bg-green-700 transition"
+          className="mt-6 px-6 py-2 bg-[#6bbd45] text-white hover:bg-[#6bbd45]/90 transition"
         >
           Go Back
         </Button>
@@ -173,9 +173,9 @@ const GetMilestoneByID = ({ row, close }) => {
   ];
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+    <div className="bg-white rounded-xl overflow-hidden shadow-none border-none">
       {/* Header */}
-      <div className="bg-linear-to-r from-green-600 to-green-500 px-6 py-4 flex justify-between items-center">
+      <div className="bg-[#6bbd45] px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
             <CheckCircle2 className="w-6 h-6 text-white" />
@@ -184,7 +184,7 @@ const GetMilestoneByID = ({ row, close }) => {
             <h2 className="text-xl  text-white leading-tight">
               {milestone.subject}
             </h2>
-            <p className="text-green-50 text-xs font-medium">
+            <p className="text-white/80 text-xs font-medium">
               ID: #{milestone.id}
             </p>
           </div>
@@ -206,8 +206,8 @@ const GetMilestoneByID = ({ row, close }) => {
             icon={<Calendar className="w-5 h-5" />}
             label="Target Date"
             value={formatDate(milestone.date)}
-            color="text-green-600"
-            bg="bg-green-50"
+            color="text-[#6bbd45]"
+            bg="bg-[#6bbd45]/15"
           />
           <InfoCard
             icon={<Calendar className="w-5 h-5" />}
@@ -237,15 +237,15 @@ const GetMilestoneByID = ({ row, close }) => {
             icon={<Tag className="w-5 h-5" />}
             label="Project"
             value={milestone.project?.name || "—"}
-            color="text-green-600"
-            bg="bg-green-50"
+            color="text-[#6bbd45]"
+            bg="bg-[#6bbd45]/15"
           />
         </div>
 
         {/* Description */}
         <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
           <h3 className="text-sm  text-gray-700 mb-3 flex items-center gap-2">
-            <FileText className="w-4 h-4 text-green-600" />
+            <FileText className="w-4 h-4 text-[#6bbd45]" />
             Description
           </h3>
           <div
@@ -262,7 +262,7 @@ const GetMilestoneByID = ({ row, close }) => {
         {milestone.tasks && milestone.tasks.length > 0 && (
           <div>
             <h3 className="text-sm  text-gray-700 mb-4 flex items-center gap-2">
-              <ClipboardList className="w-4 h-4 text-green-600" />
+              <ClipboardList className="w-4 h-4 text-[#6bbd45]" />
               Associated Tasks ({milestone.tasks.length})
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -272,8 +272,8 @@ const GetMilestoneByID = ({ row, close }) => {
                   className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl hover:border-green-200 transition-colors shadow-sm"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center">
-                      <ClipboardList className="w-4 h-4 text-green-600" />
+                    <div className="w-8 h-8 rounded-full bg-[#6bbd45]/15 flex items-center justify-center">
+                      <ClipboardList className="w-4 h-4 text-[#6bbd45]" />
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-gray-700">

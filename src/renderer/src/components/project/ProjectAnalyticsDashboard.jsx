@@ -153,7 +153,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
     return Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
   }, [filteredTasks]);
 
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
+  const COLORS = ["#6bbd45", "#374151", "#FFBB28", "#FF8042", "#8884d8"];
 
   const handleDownload = () => {
     const headers = ["Task Name", "Type", "Assigned To", "Assigned Hours", "Worked Hours", "Status", "Created At"];
@@ -187,7 +187,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray-700">
-        <Loader2 className="w-8 h-8 animate-spin text-green-600 mb-4" />
+        <Loader2 className="w-8 h-8 animate-spin text-[#6bbd45] mb-4" />
         <p className="text-lg font-medium">Calculating project statistics...</p>
       </div>
     );
@@ -208,7 +208,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
       >
         <div className="col-span-2 flex items-center gap-3">
           <div
-            className={`p-1.5 rounded-lg ${isOverrun ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"}`}
+            className={`p-1.5 rounded-lg ${isOverrun ? "bg-red-50 text-red-600" : "bg-[#6bbd45]/15 text-[#6bbd45]"}`}
           >
             <CheckCircle2 size={16} />
           </div>
@@ -242,7 +242,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
         <div className="flex items-center justify-end">
           <span
             className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter ${task.status === "COMPLETED"
-              ? "bg-green-100 text-green-700"
+              ? "bg-[#6bbd45]/15 text-[#6bbd45]"
               : task.status === "ASSIGNED"
                 ? "bg-blue-100 text-blue-700"
                 : "bg-amber-100 text-amber-700"
@@ -266,7 +266,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="text-sm border-gray-200 rounded-lg focus:ring-green-500 focus:border-green-500"
+              className="text-sm border-gray-200 rounded-lg focus:ring-[#6bbd45] focus:border-[#6bbd45]"
               placeholder="Start Date"
             />
             <span className="text-gray-400">to</span>
@@ -274,7 +274,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="text-sm border-gray-200 rounded-lg focus:ring-green-500 focus:border-green-500"
+              className="text-sm border-gray-200 rounded-lg focus:ring-[#6bbd45] focus:border-[#6bbd45]"
               placeholder="End Date"
             />
           </div>
@@ -283,7 +283,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="text-sm border-gray-200 rounded-lg focus:ring-green-500 focus:border-green-500"
+              className="text-sm border-gray-200 rounded-lg focus:ring-[#6bbd45] focus:border-[#6bbd45]"
             >
               <option value="ALL">All Status</option>
               <option value="ASSIGNED">Assigned</option>
@@ -294,7 +294,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
         </div>
         <button
           onClick={handleDownload}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-green-200 active:scale-95"
+          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#6bbd45] hover:bg-[#6bbd45]/90 text-white rounded-xl font-bold transition-all shadow-lg shadow-[#6bbd45]/20 active:scale-95"
         >
           <Download size={18} />
           Download Report
@@ -322,7 +322,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
           color="amber"
         />
         <SummaryCard
-          icon={<TrendingUp className="text-green-600" size={20} />}
+          icon={<TrendingUp className="text-[#6bbd45]" size={20} />}
           label="Success Rate"
           value={`${Math.round((filteredTasks.filter((t) => t.status === "COMPLETED").length / (filteredTasks.length || 1)) * 100)}%`}
           color="green"
@@ -346,8 +346,8 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                   contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}
                 />
                 <Legend />
-                <Bar dataKey="assigned" name="Assigned Hours" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="worked" name="Worked Hours" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="assigned" name="Assigned Hours" fill="#374151" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="worked" name="Worked Hours" fill="#6bbd45" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -355,7 +355,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
 
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
           <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <CheckCircle2 size={20} className="text-green-600" />
+            <CheckCircle2 size={20} className="text-[#6bbd45]" />
             Task Status Distribution
           </h3>
           <div className="h-80 w-full">
@@ -366,8 +366,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
+                  outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
                 >
@@ -376,6 +375,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                   ))}
                 </Pie>
                 <Tooltip />
+                <Legend verticalAlign="bottom" height={36} iconType="circle" />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -478,7 +478,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                           {tasksByMilestone[ms.id].map(renderTaskRow)}
                         </div>
                       ) : (
-                        <div className="p-8 text-center text-gray-500 italic text-sm">
+                        <div className="p-8 text-center text-gray-500 text-sm">
                           No tasks match the filters for this milestone.
                         </div>
                       )}
@@ -488,7 +488,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
               </div>
             ))
           ) : (
-            <div className="p-8 text-center text-gray-400 italic text-sm">
+            <div className="p-8 text-center text-gray-400 text-sm">
               No milestones found for this project.
             </div>
           )}
@@ -572,7 +572,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                               </div>
                               <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
                                 <div
-                                  className={`h-full rounded-full ${percentage >= 100 ? 'bg-green-500' : 'bg-blue-500'}`}
+                                  className={`h-full rounded-full ${percentage >= 100 ? 'bg-[#6bbd45]' : 'bg-blue-500'}`}
                                   style={{ width: `${percentage}%` }}
                                 />
                               </div>
@@ -608,7 +608,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                             {tasksByBundle[bundleId].map(renderTaskRow)}
                           </div>
                         ) : (
-                          <div className="p-8 text-center text-gray-500 italic text-sm">
+                          <div className="p-8 text-center text-gray-500 text-sm">
                             No tasks found matching these filters.
                           </div>
                         )}
@@ -619,7 +619,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
               );
             })
           ) : (
-            <div className="p-8 text-center text-gray-400 italic text-sm">
+            <div className="p-8 text-center text-gray-400 text-sm">
               No WBS bundles found for this project.
             </div>
           )}
@@ -639,21 +639,23 @@ const SummaryCard = ({
     blue: "bg-blue-50 text-blue-600",
     purple: "bg-purple-50 text-purple-600",
     amber: "bg-amber-50 text-amber-600",
-    green: "bg-green-50 text-green-600",
+    green: "bg-[#6bbd45]/15 text-[#6bbd45]",
   };
 
   return (
-    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 group hover:shadow-md transition-shadow">
-      <div
-        className={`p-3 rounded-2xl ${colorMap[color]} group-hover:scale-110 transition-transform`}
-      >
-        {icon}
-      </div>
-      <div>
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-row justify-between items-center gap-4 group hover:shadow-md transition-shadow">
+      <div className="flex flex-col gap-1 items-start">
+        <p className="text-md font-bold text-gray-400 uppercase tracking-widest">
           {label}
         </p>
-        <p className="text-2xl font-black text-gray-800 tracking-tight">
+        <div
+          className={`p-3 rounded-2xl ${colorMap[color]} group-hover:scale-110 transition-transform w-fit mt-2`}
+        >
+          {icon}
+        </div>
+      </div>
+      <div>
+        <p className="text-3xl font-black text-gray-800 tracking-tight text-right">
           {value}
         </p>
       </div>

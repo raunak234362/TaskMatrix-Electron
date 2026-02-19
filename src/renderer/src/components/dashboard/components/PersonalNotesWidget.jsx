@@ -1,66 +1,95 @@
 /* eslint-disable react/prop-types */
-import { MessageSquare, Calendar, User } from 'lucide-react'
+import { MessageSquare, Calendar, User, ChevronRight } from 'lucide-react'
 
 const PersonalNotesWidget = ({ projectNotes = [] }) => {
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-IN', {
       day: '2-digit',
-      month: 'short'
+      month: 'short',
+      year: 'numeric'
     })
   }
 
   return (
-    <div className="bg-green-100/20 rounded-2xl border border-gray-300 shadow-[0_15px_40px_rgba(22,163,74,0.04),0_10px_20px_rgba(0,0,0,0.02)] transition-all duration-500 hover:shadow-[0_20px_60px_rgba(22,163,74,0.08),0_15px_30px_rgba(0,0,0,0.05)] h-full flex flex-col overflow-hidden group">
-      <div className="p-4 border-b border-gray-100 bg-primary/5">
-        <h3 className="text-sm font-black text-primary flex items-center justify-between uppercase tracking-wider">
-          Project Updates
-          {projectNotes.length > 0 && (
-            <span className="w-6 h-6 bg-primary text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white shadow-sm font-black">
-              {projectNotes.length}
-            </span>
-          )}
-        </h3>
+    <div className="bg-white flex-1 flex flex-col min-h-0">
+      <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="w-4 h-4 text-amber-600" />
+          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-800">Notes & Updates</h3>
+        </div>
+        <span className="text-[10px] font-black bg-gray-50 text-gray-400 px-3 py-1 rounded-full uppercase tracking-widest border border-gray-100">
+          {projectNotes.length} NEW
+        </span>
       </div>
 
-      <div className="p-6 flex-1 flex flex-col min-h-0">
-        <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-          {projectNotes.length > 0 ? (
-            projectNotes.map((note) => (
-              <div
-                key={note.id}
-                className="p-4 rounded-xl border border-gray-100 bg-white/40 hover:bg-white/80 transition-all shadow-sm hover:shadow-md"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black rounded-full uppercase tracking-widest shadow-sm">
-                    {note.stage || 'Update'}
-                  </span>
-                  <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold">
-                    <Calendar size={10} />
-                    {formatDate(note.createdAt)}
-                  </div>
-                </div>
-                <div
-                  className="text-xs text-gray-700 font-bold prose prose-sm max-w-none line-clamp-3 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: note.content }}
-                />
-                <div className="mt-3 pt-3 border-t border-primary/10 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-black uppercase tracking-tight">
-                    <User size={10} className="text-primary/60" />
-                    {note.createdBy?.firstName} {note.createdBy?.lastName}
-                  </div>
-                  <button className="text-[10px] text-primary font-black hover:underline uppercase tracking-widest">
-                    Details
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center text-gray-300 space-y-3 font-bold uppercase tracking-widest text-xs">
-              <MessageSquare size={40} strokeWidth={1.5} className="text-primary/20" />
-              <p>No Updates</p>
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
+        {projectNotes.length > 0 ? (
+          <div className="w-full">
+            {/* Table Header */}
+            <div className="grid grid-cols-12 gap-4 px-4 py-2 bg-gray-50/50 rounded-lg mb-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+              <div className="col-span-12 lg:col-span-6">Content / Stage</div>
+              <div className="hidden lg:block lg:col-span-3">Author</div>
+              <div className="hidden lg:block lg:col-span-3 text-right">Date</div>
             </div>
-          )}
-        </div>
+
+            <div className="space-y-1">
+              {projectNotes.map((note) => (
+                <div
+                  key={note.id}
+                  className="grid grid-cols-12 gap-4 px-4 py-4 items-start hover:bg-amber-50/30 transition-colors border-b border-gray-50 group last:border-0"
+                >
+                  <div className="col-span-12 lg:col-span-6 flex items-start gap-4">
+                    <div className="p-2 bg-amber-50 text-amber-600 rounded-lg shrink-0 mt-0.5">
+                      <MessageSquare size={14} />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <div
+                        className="text-xs text-gray-700 font-medium prose prose-sm max-w-none line-clamp-2 leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: note.content }}
+                      />
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-100 text-[9px] font-black rounded-full uppercase tracking-widest">
+                          {note.stage || 'Update'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="hidden lg:flex lg:col-span-3 items-center gap-2 mt-1">
+                    <div className="p-1 bg-gray-100 rounded-full">
+                      <User size={10} className="text-gray-400" />
+                    </div>
+                    <span className="text-[10px] font-bold text-gray-600 uppercase tracking-tight truncate">
+                      {note.createdBy?.firstName || 'Unknown'}
+                    </span>
+                  </div>
+
+                  <div className="col-span-12 lg:col-span-3 flex justify-between lg:justify-end items-center mt-2 lg:mt-1">
+                    <div className="flex items-center gap-1.5 lg:hidden">
+                      <User size={10} className="text-gray-400" />
+                      <span className="text-[9px] font-bold text-gray-500 uppercase tracking-tight">
+                        {note.createdBy?.firstName || 'Unknown'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        {formatDate(note.createdAt)}
+                      </span>
+                      <button className="p-1 text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-48 text-gray-300 space-y-3">
+            <MessageSquare size={40} className="text-gray-100" strokeWidth={1} />
+            <p className="text-[10px] font-black uppercase tracking-widest">No Updates</p>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Service from "../../api/Service";
 import CDSnapshotCards from "./components/CDSnapshotCards";
 import CDNetworkOverview from "./components/CDNetworkOverview";
@@ -146,76 +147,81 @@ const CDdashboard = () => {
     }
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="h-full p-4 sm:p-6 flex flex-col gap-12 sm:gap-8 bg-transparent overflow-y-auto custom-scrollbar relative"
-        >
-            {/* Header if needed */}
-        
-            {/* SECTION B — EXECUTIVE SNAPSHOT */}
+        <>
             <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.1 }}
-            
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="h-full p-4 sm:p-6 flex flex-col gap-12 sm:gap-8 bg-transparent overflow-y-auto custom-scrollbar relative"
             >
-                <CDSnapshotCards stats={stats} />
+                {/* Header if needed */}
+
+                {/* SECTION B — EXECUTIVE SNAPSHOT */}
+                <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+
+                >
+                    <CDSnapshotCards stats={stats} />
+                </motion.div>
+
+                {/* SECTION C — LOCATION INTELLIGENCE (Redesigned) */}
+                {/* New component on Left, Pie on Right */}
+                <CDNetworkOverview
+                    designers={cdData}
+                    stateData={stateDist}
+                    onSelect={(id) => setSelectedDesignerId(id)}
+                />
+
+                {/* SECTION D — RECENT ACTIVITY */}
+                <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="space-y-8"
+                >
+                    <CDCapacityTable recentActivity={recentActivity} />
+                </motion.div>
+
             </motion.div>
 
-            {/* SECTION C — LOCATION INTELLIGENCE (Redesigned) */}
-            {/* New component on Left, Pie on Right */}
-            <CDNetworkOverview
-                designers={cdData}
-                stateData={stateDist}
-                onSelect={(id) => setSelectedDesignerId(id)}
-            />
-
-            {/* SECTION D — RECENT ACTIVITY */}
-            <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="space-y-8"
-            >
-                <CDCapacityTable recentActivity={recentActivity} />
-            </motion.div>
-
-            {/* DETAILS MODAL */}
-
-            <AnimatePresence>
-                {selectedDesignerId && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-                        onClick={() => setSelectedDesignerId(null)}
-                    >
+            {/* DETAILS MODAL - Moved outside to escape parent transform if any, and ensure fixed positioning relative to viewport */}
+            {/* DETAILS MODAL - Portaled to document.body to ensure full overlay over Sidebar/Layout */}
+            {createPortal(
+                <AnimatePresence>
+                    {selectedDesignerId && (
                         <motion.div
-                            initial={{ scale: 0.95, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.95, y: 20 }}
-                            onClick={(e) => e.stopPropagation()} // Prevent close on content click
-                            className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                            onClick={() => setSelectedDesignerId(null)}
                         >
-                            <button
-                                onClick={() => setSelectedDesignerId(null)}
-                                className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors z-10"
+                            <motion.div
+                                initial={{ scale: 0.95, y: 20 }}
+                                animate={{ scale: 1, y: 0 }}
+                                exit={{ scale: 0.95, y: 20 }}
+                                onClick={(e) => e.stopPropagation()} // Prevent close on content click
+                                className="bg-white rounded-xl shadow-2xl w-[95vw] h-[90vh] overflow-hidden relative flex flex-col"
                             >
-                                <X size={20} className="text-gray-600" />
-                            </button>
+                                <button
+                                    onClick={() => setSelectedDesignerId(null)}
+                                    className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors z-10"
+                                >
+                                    <X size={20} className="text-gray-600" />
+                                </button>
 
-                            <div className="p-1">
-                                <GetConnectionDesignerByID id={selectedDesignerId} />
-                            </div>
+                                <div className="flex-1 overflow-y-auto p-6 mt-8 custom-scrollbar">
+                                    <GetConnectionDesignerByID id={selectedDesignerId} />
+                                </div>
+                            </motion.div>
                         </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-        </motion.div>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
+        </>
     );
 };
 

@@ -13,7 +13,8 @@ import {
     UserCircle,
     DollarSign,
     Factory,
-    FileText
+    FileText,
+    Calendar
 } from 'lucide-react'
 
 export const navItems = [
@@ -125,6 +126,37 @@ export const navItems = [
         roles: ['admin', 'project_manager_officer', 'client_admin', 'pmo', 'client']
     },
     {
+        label: 'Meeting Calendar',
+        to: 'calendar',
+        icon: <Calendar />,
+        roles: ['admin', 'project_manager_officer', 'pmo','operation_executive']
+    },
+    {
+        label: 'Communication Followup',
+        to: 'communication-followup',
+        icon: <MessageCircle />,
+        roles: ['admin', 'project_manager_officer', 'deputy_manager', 'department_manager','operation_executive']
+    },
+    {
+        label: 'Notes',
+        to: 'notes',
+        icon: <FileText />,
+        roles: [
+            'admin',
+            'staff',
+            'department_manager',
+            'operation_executive',
+            'deputy_manager',
+            'project_manager',
+            'client',
+            'estimation_head',
+            'system-admin',
+            'user',
+            'estimator',
+            'sales'
+        ]
+    },
+    {
         label: 'Accounts',
         to: 'accounts',
         icon: <Landmark />,
@@ -185,24 +217,6 @@ export const navItems = [
             'deputy_manager',
             'user',
             'human-resource'
-        ]
-    },
-    {
-        label: 'Notes',
-        to: 'notes',
-        icon: <FileText />,
-        roles: [
-            'admin',
-            'staff',
-            'department-manager',
-            'deputy_manager',
-            'project-manager',
-            'client',
-            'estimation_head',
-            'system-admin',
-            'user',
-            'estimator',
-            'sales'
         ]
     },
     {

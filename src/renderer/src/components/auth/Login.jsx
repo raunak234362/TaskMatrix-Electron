@@ -76,7 +76,8 @@ const Login = () => {
             <div className="mb-8">
               <p className="text-center text-4xl md:text-5xl text-gray-700 font-light leading-tight">
                 Welcome to <br />
-                <span className=" text-green-700">Task Matrix</span>
+                <span className=" text-green-700">Task Matrix <span className=" text-green-700 text-xs">verion: 1.0.0</span></span>
+                
               </p>
               <p className="text-center text-lg text-gray-500 mt-4">
                 Please login to continue

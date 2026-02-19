@@ -66,7 +66,7 @@ const AllDesignDrawings = ({ projectId }) => {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray-400">
         <Loader2 className="w-8 h-8 animate-spin mb-4 opacity-20" />
-        <p className="text-sm font-black uppercase tracking-widest opacity-40">Loading Drawings...</p>
+        <p className="text-sm font-black uppercase tracking-widest opacity-40">Loading Documents...</p>
       </div>
     );
   }
@@ -75,7 +75,7 @@ const AllDesignDrawings = ({ projectId }) => {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray-400">
         <Inbox className="w-12 h-12 mb-4 opacity-10" />
-        <p className="text-sm font-black uppercase tracking-widest opacity-40">No drawings available</p>
+        <p className="text-sm font-black uppercase tracking-widest opacity-40">No Documents available</p>
       </div>
     );
   }
@@ -83,7 +83,7 @@ const AllDesignDrawings = ({ projectId }) => {
   return (
     <div className="bg-[#fcfdfc] min-h-[400px] p-2 animate-in fade-in duration-700">
       <div className="flex justify-between items-center mb-6 px-1">
-        <h2 className="text-lg font-black text-gray-900 tracking-tight uppercase">Design Drawings <span className="text-primary/40 ml-2">{drawings.length}</span></h2>
+        {/* <h2 className="text-lg font-black text-gray-900 tracking-tight uppercase">Documents <span className="text-primary/40 ml-2"></span></h2> */}
       </div>
 
       <DataTable
