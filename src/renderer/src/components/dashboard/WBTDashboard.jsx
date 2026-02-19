@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState, Suspense, lazy, useMemo, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useDispatch } from 'react-redux'
 import { setModalOpen } from '../../store/userSlice'
 import { format } from 'date-fns'
@@ -274,7 +275,7 @@ const WBTDashboard = () => {
         )}
 
         {/* Widget Popups */}
-        {showSubmittalsPopup && (
+        {showSubmittalsPopup && createPortal(
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
             <div className="bg-white w-full max-w-6xl max-h-[85vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
               <div className="flex-1 overflow-auto">
@@ -298,10 +299,11 @@ const WBTDashboard = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
-        {showDeadlinesPopup && (
+        {showDeadlinesPopup && createPortal(
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
             <div className="bg-white w-full max-w-4xl max-h-[80vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
               <div className="flex-1 overflow-auto">
@@ -318,10 +320,11 @@ const WBTDashboard = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
-        {showNotesPopup && (
+        {showNotesPopup && createPortal(
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
             <div className="bg-white w-full max-w-4xl max-h-[80vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
               <div className="flex-1 overflow-auto">
@@ -338,11 +341,12 @@ const WBTDashboard = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
 
         {/* Item Detail Modal Wrapper */}
-        {detailModal.isOpen && (
+        {detailModal.isOpen && createPortal(
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <div className="bg-white w-[95%] max-w-6xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in fade-in zoom-in duration-200">
               <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
@@ -368,9 +372,10 @@ const WBTDashboard = () => {
                 </Suspense>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
-        {selectedMilestone && (
+        {selectedMilestone && createPortal(
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <div className="bg-white w-[95%] max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in fade-in zoom-in duration-200">
               <Suspense fallback={<div className="p-8 text-center text-xs font-bold uppercase tracking-widest text-gray-400">Loading milestone...</div>}>
@@ -380,7 +385,8 @@ const WBTDashboard = () => {
                 />
               </Suspense>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </Suspense>
     </div>
