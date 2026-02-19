@@ -10,10 +10,14 @@ import {
   User,
   Tag,
   X,
+  MessageSquare,
 } from "lucide-react";
 import Service from "../../../api/Service";
 import { toast } from "react-toastify";
 import { Button } from "../../ui/button";
+import DataTable from "../../ui/table";
+import MilestoneResponseModal from "./MilestoneResponseModal";
+import MilestoneResponseDetailsModal from "./MilestoneResponseDetailsModal";
 
 
 
@@ -21,7 +25,10 @@ import { Button } from "../../ui/button";
 const GetMilestoneByID = ({ row, close }) => {
   const [milestone, setMilestone] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showResponseModal, setShowResponseModal] = useState(false);
+  const [selectedResponse, setSelectedResponse] = useState(null);
   const id = row?.id;
+  const userRole = sessionStorage.getItem("userRole")?.toUpperCase() || "";
 
   const fetchMilestone = async () => {
     if (!id) return;
@@ -117,6 +124,53 @@ const GetMilestoneByID = ({ row, close }) => {
   }
 
   const statusConfig = getStatusConfig(milestone.status);
+
+  const responseColumns = [
+    {
+      accessorKey: "userRole",
+      header: "From",
+      cell: ({ row }) => {
+        const role = row.original.userRole?.toUpperCase() === "CLIENT" ? "Client" : "Team";
+        return (
+          <span className="font-bold text-gray-900 text-sm">
+            {role}
+          </span>
+        );
+      }
+    },
+    {
+      accessorKey: "description",
+      header: "Message",
+      cell: ({ row }) => {
+        const plainText =
+          row.original.description?.replace(/<[^>]*>?/gm, "") || "No message";
+        return (
+          <div className="flex flex-col max-w-[200px]">
+            <p className="truncate text-sm font-bold text-gray-700">{plainText}</p>
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+              {row.original.files?.length || 0} Attachments
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Created",
+      cell: ({ row }) => (
+        <span className="text-gray-500 text-xs font-bold uppercase tracking-widest leading-none">
+          {new Date(row.original.createdAt).toLocaleDateString("en-IN", {
+            day: '2-digit',
+            month: 'short'
+          })}
+          <br />
+          <span className="text-[10px] opacity-60">
+            {new Date(row.original.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </span>
+        </span>
+      ),
+    }
+  ];
 
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-none border-none">
@@ -243,7 +297,61 @@ const GetMilestoneByID = ({ row, close }) => {
             </div>
           </div>
         )}
+
+        {/* Responses Section */}
+        <div className="border-t border-gray-100 pt-8 mt-8">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-green-600" />
+              Responses & Discussion
+            </h3>
+
+            {(userRole === "ADMIN" ||
+              userRole === "DEPUTY_MANAGER" ||
+              userRole === "OPERATION_EXECUTIVE" ||
+              userRole === "USER") && (
+                <Button
+                  onClick={() => setShowResponseModal(true)}
+                  className="bg-green-600 text-white hover:bg-green-700"
+                >
+                  + Add Response
+                </Button>
+              )}
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
+            {milestone.responses?.length > 0 ? (
+              <DataTable
+                columns={responseColumns}
+                data={milestone.responses}
+                onRowClick={(row) => setSelectedResponse(row)}
+              />
+            ) : (
+              <div className="p-8 text-center bg-gray-50/50">
+                <p className="text-gray-500 text-sm">No responses yet. Start the conversation!</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Modals */}
+      {showResponseModal && (
+        <MilestoneResponseModal
+          milestoneId={milestone.id}
+          versionId={milestone.versionId}
+          onClose={() => setShowResponseModal(false)}
+          onSuccess={fetchMilestone}
+        />
+      )}
+
+      {selectedResponse && (
+        <MilestoneResponseDetailsModal
+          response={selectedResponse}
+          onClose={() => setSelectedResponse(null)}
+          onSuccess={fetchMilestone}
+        />
+      )}
     </div>
   );
 };

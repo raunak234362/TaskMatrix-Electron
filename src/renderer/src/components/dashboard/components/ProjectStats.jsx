@@ -89,7 +89,7 @@ const ProjectStats = ({ stats, onCardClick }) => {
               className={`
                 flex items-center justify-between p-4 rounded-2xl border border-gray-200 transition-all duration-300
                 ${isClickable
-                  ? 'hover:bg-green-50/50 hover:border-primary/20 cursor-pointer hover:shadow-lg hover:-translate-y-0.5'
+                  ? 'hover:bg-white/80 hover:border-primary/20 cursor-pointer hover:shadow-lg hover:-translate-y-0.5'
                   : 'bg-green-50/20'}
               `}
             >

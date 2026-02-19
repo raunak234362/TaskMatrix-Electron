@@ -968,6 +968,68 @@ class Service {
     }
   }
 
+  // Milestone Responses
+  static async addMilestoneResponse(formData) {
+    const token = sessionStorage.getItem('token')
+    try {
+      const response = await api.post(`mileStone/responses`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error adding milestone response:', error)
+      throw error
+    }
+  }
+
+  static async UpdateMilestoneResponseStatus(parentResponseId, data) {
+    const token = sessionStorage.getItem('token')
+    try {
+      const response = await api.patch(`mileStone/responses/${parentResponseId}/status`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error updating milestone response status:', error)
+      throw error
+    }
+  }
+
+  static async GetMilestoneResponseById(id) {
+    try {
+      const response = await api.get(`mileStone/responses/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching milestone response:', error)
+      throw error
+    }
+  }
+
+  static async ViewMilestoneResponseFile(responseId, fileId) {
+    try {
+      const response = await api.get(`mileStone/response/${responseId}/viewFile/${fileId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        responseType: 'blob'
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error viewing milestone response file:', error)
+      throw error
+    }
+  }
+
   //Fetch WBS-Template
   static async GetWBSTemplate() {
     try {
