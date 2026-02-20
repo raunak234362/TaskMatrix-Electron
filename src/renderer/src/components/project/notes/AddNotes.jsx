@@ -84,13 +84,14 @@ const AddNotes = ({ projectId, onNoteAdded, onClose }) => {
               className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
               <option value="">Select Stage</option>
-              <option value="PLANNING">Planning</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="COMPLETED">Completed</option>
               <option value="IFA">IFA</option>
               <option value="RFI">RFI</option>
-              <option value="SUBMITTAL">Submittal</option>
-              <option value="OTHER">Other</option>
+              <option value="RIFA">RIFA</option>
+              <option value="RIFC">RIFC</option>
+              <option value="CO">COR</option>
+              <option value="REV">REVESION</option>
+              <option value="COMPLETED">Completed</option>
+
             </select>
             {errors.stage && (
               <p className="text-red-500 text-xs mt-1">
@@ -161,13 +162,7 @@ const AddNotes = ({ projectId, onNoteAdded, onClose }) => {
           </div>
 
           <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
-            <Button
-              type="button"
-              onClick={onClose}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
+
             <Button type="submit" disabled={loading} className="w-full">
               {loading ? (
                 <>

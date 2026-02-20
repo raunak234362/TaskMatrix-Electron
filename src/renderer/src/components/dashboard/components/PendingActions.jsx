@@ -3,7 +3,9 @@ import { ClipboardList, FileText, RefreshCw, Activity, Search } from 'lucide-rea
 const PendingActions = ({ dashboardStats, onActionClick }) => {
 
   console.log(dashboardStats);
-  
+
+  const userRole = sessionStorage.getItem('userRole')
+
   const actions = [
     {
       title: 'RFQ',
@@ -36,8 +38,12 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
       icon: RefreshCw,
       color: 'rose'
     },
-    
-  ]
+  ].filter((action) => {
+    if (action.title === 'RFQ') {
+      return !['project_manager', 'department_manager', 'staff'].includes(userRole)
+    }
+    return true
+  })
 
   const colorClasses = {
     amber: {

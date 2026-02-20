@@ -65,30 +65,30 @@ const GetWBSByIDsHours = ({
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <StatCard
                             label="Execution Hours"
-                            value={wbsData?.totalExecHr/60 || 0}
-                            subValue={wbsData?.execHrWithRework}
+                            value={wbsData?.totalExecHr / 60 || 0}
+                            subValue={(wbsData?.execHrWithRework || 0) / 60}
                             subLabel="w/ Rework"
                             color="green"
                         />
                         <StatCard
                             label="Checking Hours"
-                            value={wbsData?.totalCheckHr/60 || 0}
-                            subValue={wbsData?.checkHrWithRework}
+                            value={wbsData?.totalCheckHr / 60 || 0}
+                            subValue={(wbsData?.checkHrWithRework || 0) / 60}
                             subLabel="w/ Rework"
                             color="indigo"
                         />
                         <StatCard
                             label="Total Hours"
                             value={
-                                (wbsData?.totalExecHr/60 || 0) + (wbsData?.totalCheckHr/60 || 0)
+                                (wbsData?.totalExecHr / 60 || 0) + (wbsData?.totalCheckHr / 60 || 0)
                             }
                             color="gray"
                         />
                         <StatCard
                             label="Rework Total"
                             value={
-                                (wbsData?.execHrWithRework/60 || 0) +
-                                (wbsData?.checkHrWithRework/60 || 0)
+                                (wbsData?.execHrWithRework / 60 || 0) +
+                                (wbsData?.checkHrWithRework / 60 || 0)
                             }
                             color="red"
                         />

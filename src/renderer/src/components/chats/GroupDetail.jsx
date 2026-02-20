@@ -12,7 +12,7 @@ const GroupDetail = ({ group, onClose }) => {
       (state.userData?.staffData ?? state.userInfo?.staffData ?? [])
   );
   console.log(allEmployees);
-
+  const userRole = sessionStorage.getItem("userRole")?.toUpperCase() || "";
   const [activeTab, setActiveTab] = useState("members");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [groupMembers, setGroupMembers] = useState([]);
@@ -129,15 +129,20 @@ const GroupDetail = ({ group, onClose }) => {
           >
             Members
           </button>
-          <button
-            className={`flex-1 py-3 text-sm font-medium transition ${activeTab === "add"
-              ? "text-green-600 border-b-2 border-green-600 bg-green-50"
-              : "text-gray-700 hover:text-gray-700 hover:bg-gray-50"
+          {
+            userRole === "admin" || userRole === "operation_executive" || userRole === "deputy_manager" || userRole === "human_resource" && (
+              <button
+                className={`flex-1 py-3 text-sm font-medium transition ${activeTab === "add"
+                  ? "text-green-600 border-b-2 border-green-600 bg-green-50"
+                  : "text-gray-700 hover:text-gray-700 hover:bg-gray-50"
               }`}
             onClick={() => setActiveTab("add")}
           >
             Add Members
           </button>
+            )
+          }
+
         </div>
 
         {/* Content */}

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Header from "../components/Header";
 import Sidebar from "../components/SideBar";
 
 const Layout = () => {
+  const location = useLocation();
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const isAnyModalOpen = useSelector((state) => state.userInfo.isAnyModalOpen);
@@ -32,6 +33,8 @@ const Layout = () => {
       setIsMinimized((prev) => !prev);
     }
   };
+
+  const isChatPage = location.pathname.includes('/chats');
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-white font-sans text-[#1f2933]">
@@ -74,7 +77,7 @@ const Layout = () => {
           </div>
         )}
 
-        <main className={`flex-1 w-full overflow-y-auto custom-scrollbar ${isAnyModalOpen ? 'p-0' : 'p-6'}`}>
+        <main className={`flex flex-col flex-1 w-full min-h-0 custom-scrollbar ${isAnyModalOpen ? 'p-0' : 'p-6'} ${isChatPage ? 'overflow-hidden' : 'overflow-y-auto'}`}>
           <Outlet />
         </main>
       </div>
