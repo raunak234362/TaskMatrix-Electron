@@ -126,38 +126,41 @@ const GetProjectById = ({ id, onClose }) => {
 
   return (
     <>
-      <div className="w-full relative laptop-fit">
+      <div className="w-full relative laptop:fit">
         <div className="sticky top-0 bg-white z-50 pb-2">
           {/* Header */}
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-xl md:text-2xl font-black text-black uppercase tracking-tight">
-                {project.name}
-              </h2>
-              <p className="text-black/40 text-[10px] font-black uppercase tracking-widest">
-                Project Serial No: {project.serialNo}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span
+          <div className="flex justify-between items-center pr-4">
+            <div className="flex items-center gap-4">
+             
+              <div>
+                <h2 className="text-xl md:text-2xl font-black text-black uppercase tracking-tight">
+                  {project.name}
+                </h2>
+                <p className="text-black/40 text-[10px] font-black uppercase tracking-widest">
+                  Project Serial No: {project.serialNo}
+                </p>
+              </div>
+              <div
                 className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border border-black ${project.status === "ACTIVE"
                   ? "bg-green-100 text-black"
                   : "bg-red-100 text-black"
                   }`}
               >
                 {project.status}
-              </span>
-              {onClose && (
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+               {onClose && (
                 <button
                   onClick={onClose}
-                  className="px-4 py-1.5 bg-red-100 border border-black text-black font-black uppercase text-[10px] tracking-widest rounded-lg hover:bg-red-200 transition-all shadow-sm"
+                  className="p-1 hover:bg-red-100 bg-red-100 border border-red-600 px-2 rounded-lg transition-colors text-red-600 hover:text-red-700"
+                  title="Close"
                 >
                   Close
                 </button>
               )}
             </div>
           </div>
-
           {/* Tabs */}
           <div className="mb-4">
             {/* Mobile Dropdown */}

@@ -320,8 +320,6 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
         <Modal
           isOpen={!!selectedProject}
           onClose={() => setSelectedProject(null)}
-          title="Project Details"
-          width="max-w-7xl"
           hideHeader={true}
         >
           <Suspense fallback={<div className="p-4 text-center">Loading project details...</div>}>
