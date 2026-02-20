@@ -2,36 +2,41 @@ import React from "react";
 import { DollarSign, FileText, Target, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
 
-const SalesStatsCards = ({ stats }) => {
-    // Unified Green Theme Palette
-    // Primary: green-600 (#16a34a)
-    // Light: green-50 (#f0fdf4)
-    // Accents: green-100, green-200
-
+const SalesStatsCards = ({ data }) => {
     const cards = [
         {
-            title: "Total RFQs Received",
-            value: stats.totalRfqs,
+            title: "Total RFQs",
+            value: data.totalRFQs || 0,
             icon: FileText,
+            bgColor: "bg-green-50/60",
+            iconBg: "bg-green-100",
+            textColor: "text-green-700"
         },
         {
-            title: "Projects Awarded",
-            value: stats.projectsAwarded,
-            icon: Trophy,
+            title: "In Pipeline",
+            value: data.inPipelineRFQs || 0,
+            icon: Target,
+            bgColor: "bg-blue-50/60",
+            iconBg: "bg-blue-100",
+            textColor: "text-blue-700"
         },
         {
             title: "Win Rate",
-            value: `${stats.winRate}%`,
-            icon: Target,
+            value: `${data.winRate || 0}%`,
+            icon: Trophy,
+            bgColor: "bg-indigo-50/60",
+            iconBg: "bg-indigo-100",
+            textColor: "text-indigo-700"
         },
         {
-            title: "Total Sales Value",
-            value: `$${stats.totalSalesValue.toLocaleString()}`,
+            title: "Pipeline Value",
+            value: `$${(data.totalBidPrice || 0).toLocaleString()}`,
             icon: DollarSign,
+            bgColor: "bg-amber-50/60",
+            iconBg: "bg-amber-100",
+            textColor: "text-amber-700"
         },
     ];
-
-    const formatValue = (val) => val;
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -43,29 +48,17 @@ const SalesStatsCards = ({ stats }) => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="bg-white p-6 rounded-4xl border border-green-100/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(22,163,74,0.1)] transition-all duration-300 relative overflow-hidden group"
+                        className={`${card.bgColor} p-6 rounded-2xl border border-gray-300 shadow-sm hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group relative overflow-hidden`}
                     >
-                        {/* Decorative Background Blob */}
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-50 rounded-full opacity-50 group-hover:scale-110 transition-transform duration-500" />
-
-                        <div className="flex justify-between items-start mb-6 relative z-10">
+                        <div className="flex justify-between items-start relative z-10">
                             <div>
-                                <p className="text-gray-500 text-sm font-semibold mb-2 tracking-wide">{card.title}</p>
-                                <h3 className="text-3xl font-extrabold text-gray-800 tracking-tight">{formatValue(card.value)}</h3>
+                                <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">{card.title}</p>
+                                <h3 className={`text-3xl font-black ${card.textColor} tracking-tighter`}>{card.value}</h3>
                             </div>
-                            <div className="p-3.5 rounded-2xl bg-green-50 text-green-600 shadow-sm group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
-                                <Icon size={24} />
+                            <div className={`p-3 rounded-xl ${card.iconBg} border border-gray-200 shadow-sm transition-transform group-hover:scale-110`}>
+                                <Icon size={24} className={card.textColor} strokeWidth={2.5} />
                             </div>
                         </div>
-
-                        {/* <div className="flex items-center gap-2 relative z-10">
-                            <div className="flex items-center gap-1 bg-green-100/80 px-2.5 py-1 rounded-full">
-                                <span className="text-green-700 text-xs ">
-                                    {card.change?.split(' ')[0] || "Live"}
-                                </span>
-                            </div>
-                            <span className="text-gray-400 text-xs font-medium">from last period</span>
-                        </div> */}
                     </motion.div>
                 );
             })}

@@ -2617,5 +2617,15 @@ class Service {
       throw error
     }
   }
+  //sales dashboard
+  static async SalesDashboard() {
+    try {
+      const response = await api.get(`dashBoardData/sales`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching sales dashboard:", error);
+      throw error;
+    }
+  }
 }
 export default Service
