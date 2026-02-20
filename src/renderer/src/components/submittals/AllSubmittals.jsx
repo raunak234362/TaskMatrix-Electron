@@ -80,28 +80,18 @@ const AllSubmittals = ({ submittalData }) => {
     {
       accessorKey: "status",
       header: "Status",
-      cell: ({ row }) => (
-        <span
-          className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-black ${row.original.status === true
-            ? "bg-orange-100 text-black shadow-sm"
-            : "bg-green-100 text-black shadow-sm"
-            }`}
-        >
-          {row.original.status === true ? "Pending" : "Responded"}
-        </span>
-      ),
       cell: ({ row }) => {
-        const isSubmitted = row.original.status === true
+        const isPending = row.original.status === true;
         return (
           <span
-            className={`px-2 py-1 rounded-full text-xs font-medium ${isSubmitted
-              ? "bg-amber-100 text-amber-700"
-              : "bg-green-100 text-green-700"
+            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-black ${isPending
+              ? "bg-orange-100 text-black shadow-sm"
+              : "bg-green-100 text-black shadow-sm"
               }`}
           >
-            {!isSubmitted ? "Submitted to EOR" : "Pending"}
+            {isPending ? "Pending" : "Submitted to EOR"}
           </span>
-        )
+        );
       },
     },
 

@@ -130,8 +130,7 @@ const AllRFI = ({ rfiData = [] }) => {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-700">
         <Inbox className="w-10 h-10 mb-3 text-gray-400" />
-        <p className="text-lg font-medi
-um">No RFIs Available</p>
+        <p className="text-lg font-medium">No RFIs Available</p>
         <p className="text-sm text-gray-400">
           {userRole === "CLIENT"
             ? "You haven’t sent any RFIs yet."
