@@ -3,6 +3,7 @@ import { Files, Activity, CheckCircle2, PauseCircle } from 'lucide-react'
 
 const ProjectStats = ({ stats, onCardClick }) => {
   const navigate = useNavigate()
+console.log(stats);
 
   const projectCards = [
     {

@@ -101,12 +101,16 @@ export const useDashboardData = () => {
         // Fetch Admin Data
         let projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes
 
-        if (userRole === 'project_manager') {
+        if (
+          userRole === 'project_manager' ||
+          userRole === 'assistant_project_manager' ||
+          userRole === 'project_manager_officer'
+        ) {
           // Use specialized PM APIs
           ;[
             projectsRes,
             rfiRes,
-            subRes, // Using standard GetPendingSubmittal for the general list if needed, or maybe specialized
+            subRes,
             pendingSubRes,
             coRes,
             rfqRes,
@@ -115,7 +119,7 @@ export const useDashboardData = () => {
           ] = await Promise.all([
             Service.GetAllProjects(),
             Service.pendingRFIsForProjectManager(), // Specialized
-            Service.GetPendingSubmittalForPM(), // Keep generic for compatibility or replace if needed (assuming generic list)
+            Service.GetPendingSubmittalForPM(), // Specialized
             Service.PendingSubmittalForProjectManager(), // Specialized
             Service.PendingCoForProjectManager(), // Specialized
             Service.RFQRecieved(),
@@ -137,29 +141,46 @@ export const useDashboardData = () => {
             ])
         }
 
-        const projects = projectsRes?.data || []
-        const rfis = rfiRes?.data || []
-        const submittals = subRes?.data || []
-        const pendingSubmittals = pendingSubRes?.data || []
-        const cos = coRes?.data || []
-        const rfqs = rfqRes?.data || []
-        const pmDashboard = pmDashboardRes?.data || []
+        // Robust data extraction helper
+        const extractData = (res) => {
+          if (!res) return []
+          if (Array.isArray(res)) return res
+          if (res?.data && Array.isArray(res.data)) return res.data
+          return []
+        }
+
+        const projects = extractData(projectsRes)
+        const rfis = extractData(rfiRes)
+        const submittals = extractData(subRes)
+        const pendingSubmittals = extractData(pendingSubRes)
+        const cos = extractData(coRes)
+        const rfqs = extractData(rfqRes)
+
+        // Merge pmDashboard root stats (like completedTasks) with nested .data stats
+        const pmDashboard =
+          pmDashboardRes?.data && typeof pmDashboardRes.data === 'object'
+            ? { ...pmDashboardRes, ...pmDashboardRes.data }
+            : pmDashboardRes || {}
 
         setAdminData({
           projects,
           rfis,
           submittals,
-          pendingSubmittals, // Added explicitly
+          pendingSubmittals,
           cos,
           pmDashboard,
           rfqs,
           projectStats: {
-            totalProjects: projects.length,
-            activeProjects: projects.filter((p) => !p.status || p.status.toUpperCase() === 'ACTIVE')
-              .length,
-            completedProjects: projects.filter((p) => p.status?.toUpperCase() === 'COMPLETED')
-              .length,
-            onHoldProjects: projects.filter((p) => p.status?.toUpperCase() === 'ON_HOLD').length
+            totalProjects: pmDashboard?.totalProjects ?? projects.length,
+            activeProjects:
+              pmDashboard?.totalActiveProjects ??
+              projects.filter((p) => !p.status || p.status.toUpperCase() === 'ACTIVE').length,
+            completedProjects:
+              pmDashboard?.totalCompleteProject ??
+              projects.filter((p) => p.status?.toUpperCase() === 'COMPLETED').length,
+            onHoldProjects:
+              pmDashboard?.totalOnHoldProject ??
+              projects.filter((p) => p.status?.toUpperCase() === 'ON_HOLD').length
           },
           dashboardStats: {
             pendingRFI: pmDashboard?.pendingRFI ?? rfis.length ?? 0,
@@ -167,17 +188,20 @@ export const useDashboardData = () => {
             pendingSubmittals: pmDashboard?.pendingSubmittals ?? pendingSubmittals.length ?? 0,
             pendingChangeOrders: pmDashboard?.pendingChangeOrders ?? cos.length ?? 0,
             newChangeOrders: pmDashboard?.newChangeOrders || 0,
-            pendingRFQ: rfqs.length || 0, // Keep existing if not in PM data, or update if available
-            newRFQ: 0
+            pendingRFQ: pmDashboard?.pendingRFQ ?? rfqs.length ?? 0,
+            newRFQ: pmDashboard?.newRFQ || 0
           },
           invoices: []
         })
 
         // Process Personal Tasks for Admin
-        if (myTasksRes?.data) {
-          const fetchedTasks = Array.isArray(myTasksRes.data)
-            ? myTasksRes.data
-            : Object.values(myTasksRes.data || {})
+        const myTasksData = myTasksRes?.data ?? myTasksRes
+        if (myTasksData) {
+          const fetchedTasks = Array.isArray(myTasksData)
+            ? myTasksData
+            : typeof myTasksData === 'object'
+              ? Object.values(myTasksData || {})
+              : []
 
           setTasks(fetchedTasks)
 
