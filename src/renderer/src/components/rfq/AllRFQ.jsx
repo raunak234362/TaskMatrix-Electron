@@ -57,10 +57,10 @@ const AllRFQ = ({ rfq }) => {
       cell: ({ row }) => {
         const status = row.original.status || 'PENDING';
         const colors = {
-          IN_REVIEW: 'bg-yellow-100 text-yellow-700',
-          COMPLETED: 'bg-green-100 text-green-700',
-          PENDING: 'bg-gray-100 text-gray-700',
-          RECEIVED: 'bg-blue-100 text-blue-700'
+          IN_REVIEW: 'bg-orange-100 text-black shadow-sm border border-black',
+          COMPLETED: 'bg-green-100 text-black shadow-sm border border-black',
+          PENDING: 'bg-gray-100 text-black/40 shadow-sm border border-black',
+          RECEIVED: 'bg-blue-100 text-black shadow-sm border border-black'
         };
         return (
           <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${colors[status] || colors.PENDING}`}>
@@ -119,9 +119,9 @@ const AllRFQ = ({ rfq }) => {
         </div>
       </div>
 
-      <div className="flex justify-between items-center mb-8 px-1">
+      {/* <div className="flex justify-between items-center mb-8 px-1">
         <h1 className="text-2xl font-black text-gray-900 tracking-tight uppercase">Total-RFQs <span className="text-primary/40 ml-2">{filteredRfq.length}</span></h1>
-      </div>
+      </div> */}
 
       <DataTable
         columns={columns}

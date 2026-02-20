@@ -15,12 +15,12 @@ const StatCard = ({
   >
     <div className="flex flex-col h-full justify-between gap-2 lg:gap-3 relative z-10">
       <div className="flex items-start justify-between">
-        <div className="p-2 lg:p-3 bg-white rounded-2xl shadow-sm group-hover:bg-primary group-hover:text-white transition-all duration-500">
-          <Icon className="w-5 h-5 lg:w-6 lg:h-6 text-primary transition-colors duration-500" />
+        <div className="p-2 lg:p-3 bg-white rounded-2xl shadow-sm group-hover:bg-primary transition-all duration-500">
+          <Icon className="w-5 h-5 lg:w-6 lg:h-6 text-primary group-hover:text-white transition-colors duration-500" />
         </div>
         {trend && (
           <span
-            className={`text-[8px] lg:text-[10px] font-black px-2 py-0.5 lg:px-3 lg:py-1 rounded-full ${trendColor} bg-green-100 text-black uppercase tracking-widest`}
+            className={`text-[8px] lg:text-[10px] font-black px-2 py-0.5 lg:px-3 lg:py-1 rounded-full bg-green-100 border border-black text-black uppercase tracking-widest shadow-sm`}
           >
             {trend}
           </span>
@@ -28,13 +28,13 @@ const StatCard = ({
       </div>
 
       <div>
-        <p className="text-[10px] lg:text-xs font-black text-black/40 uppercase tracking-[0.15em]">{title}</p>
+        <p className="text-[12px] lg:text-[14px] font-black text-black/40 uppercase tracking-[0.15em]">{title}</p>
         <h3 className="text-lg lg:text-xl font-semibold text-black mt-1 tracking-tighter">
           {value}
         </h3>
         {subtext && (
           <div className="mt-2 pt-2 border-t border-black/10">
-            <p className="text-[9px] lg:text-[10px] text-black font-black uppercase tracking-tight truncate">
+            <p className="text-[11px] lg:text-[12px] text-black font-black uppercase tracking-tight truncate">
               <span className="border-b border-green-500 pb-0.5 inline-block">
                 {subtext}
               </span>

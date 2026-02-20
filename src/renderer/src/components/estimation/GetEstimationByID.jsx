@@ -113,20 +113,20 @@ const GetEstimationByID = ({ id, onRefresh }) => {
 
   const statusColor =
     status === 'DRAFT'
-      ? 'bg-yellow-100 text-yellow-800'
+      ? 'bg-orange-100 text-black'
       : status === 'COMPLETED'
-        ? 'bg-green-100 text-green-800'
-        : 'bg-blue-100 text-blue-800'
+        ? 'bg-green-100 text-black'
+        : 'bg-blue-100 text-black'
 
   return (
-    <div className="bg-linear-to-br from-green-50 to-cyan-50 rounded-2xl p-8 border border-green-200">
+    <div className="bg-green-100 rounded-3xl p-8 border border-black shadow-sm">
       {/* Header */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h3 className="text-xl  text-green-800">Estimation #{estimationNumber}</h3>
-          <p className="text-gray-700 font-medium">Project: {projectName}</p>
+          <h3 className="text-xl font-black text-black uppercase tracking-tight">Estimation #{estimationNumber}</h3>
+          <p className="text-black/60 text-xs font-black uppercase tracking-widest">Project: {projectName}</p>
         </div>
-        <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}>
+        <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-black ${statusColor}`}>
           {status}
         </span>
       </div>
@@ -304,9 +304,9 @@ const GetEstimationByID = ({ id, onRefresh }) => {
 
 // Reusable Info Row
 const InfoRow = ({ label, value }) => (
-  <div className="flex justify-between gap-3">
-    <span className=" text-gray-700">{label}:</span>
-    <span className="text-gray-700 text-right wrap-break-words">{value}</span>
+  <div className="flex justify-between gap-3 pb-1.5 border-b border-black/5 last:border-0">
+    <span className="font-black text-black/40 uppercase tracking-widest text-[10px]">{label}:</span>
+    <span className="text-black font-black uppercase tracking-tight text-xs text-right whitespace-pre-wrap">{value}</span>
   </div>
 )
 

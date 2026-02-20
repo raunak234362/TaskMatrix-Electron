@@ -28,11 +28,11 @@ const ProjectListModal = ({ isOpen, onClose, status, projects, onProjectSelect }
       header: 'Status',
       cell: ({ row }) => (
         <span
-          className={`px-3 py-1 rounded-full text-xs  ${row.original.status === 'ACTIVE'
-            ? 'bg-green-100 text-green-700'
+          className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-black ${row.original.status === 'ACTIVE'
+            ? 'bg-green-100 text-black'
             : row.original.status === 'COMPLETED'
-              ? 'bg-blue-100 text-blue-700'
-              : 'bg-orange-100 text-orange-700'
+              ? 'bg-blue-100 text-black shadow-sm'
+              : 'bg-orange-100 text-black shadow-sm'
             }`}
         >
           {row.original.status}
@@ -68,9 +68,9 @@ const ProjectListModal = ({ isOpen, onClose, status, projects, onProjectSelect }
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-700"
+            className="px-4 py-1.5 bg-red-100 border border-black text-black font-black uppercase text-[10px] tracking-widest rounded-lg hover:bg-red-200 transition-all shadow-sm"
           >
-            <X size={24} />
+            Close
           </button>
         </div>
 
@@ -89,7 +89,7 @@ const ProjectListModal = ({ isOpen, onClose, status, projects, onProjectSelect }
         <div className="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-gray-800 text-white rounded-xl font-semibold hover:bg-gray-700 transition-colors shadow-lg shadow-gray-200"
+            className="px-6 py-2 bg-red-100 border border-black text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-red-200 transition-all shadow-sm"
           >
             Close
           </button>

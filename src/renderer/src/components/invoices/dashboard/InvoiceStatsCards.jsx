@@ -81,7 +81,7 @@ const InvoiceStatsCards = ({ invoices }) => {
       {stats.map((stat, index) => (
         <div
           key={index}
-          className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+          className="bg-green-100 p-4 sm:p-6 rounded-3xl shadow-sm border border-black hover:shadow-md transition-shadow group"
         >
           <div className="flex items-start justify-between mb-4">
             <div className={`p-3 rounded-xl ${stat.color}`}>
@@ -90,17 +90,17 @@ const InvoiceStatsCards = ({ invoices }) => {
             {/* Trend Label (Mocked for UI) */}
             <span
               className={`text-xs font-medium px-2 py-1 rounded-full ${stat.title === 'Overdue Invoices'
-                  ? 'bg-red-100 text-red-600'
-                  : 'bg-green-100 text-green-600'
+                ? 'bg-red-100 text-red-600'
+                : 'bg-green-100 text-green-600'
                 }`}
             >
               {stat.trend}
             </span>
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-500 mb-1">{stat.title}</p>
-            <h3 className="text-2xl  text-gray-800 mb-1">{stat.value}</h3>
-            <p className="text-xs text-gray-400">{stat.subValue}</p>
+            <p className="text-[10px] font-black text-black/40 uppercase tracking-widest mb-1.5">{stat.title}</p>
+            <h3 className="text-2xl font-black text-black tracking-tight mb-1">{stat.value}</h3>
+            <p className="text-xs font-black text-black/50 uppercase tracking-tight">{stat.subValue}</p>
           </div>
         </div>
       ))}

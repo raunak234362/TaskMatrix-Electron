@@ -127,22 +127,22 @@ const GetProjectById = ({ id, onClose }) => {
   return (
     <>
       <div className="w-full relative laptop-fit">
-        <div className="sticky top-0 bg-white z-50 pb-2 border-b">
+        <div className="sticky top-0 bg-white z-50 pb-2">
           {/* Header */}
-          <div className="flex justify-between items-center border-b pb-3 mb-3">
+          <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-xl md:text-2xl font-semibold text-[#6bbd45]">
+              <h2 className="text-xl md:text-2xl font-black text-black uppercase tracking-tight">
                 {project.name}
               </h2>
-              <p className="text-gray-700 text-sm">
+              <p className="text-black/40 text-[10px] font-black uppercase tracking-widest">
                 Project Serial No: {project.serialNo}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${project.status === "ACTIVE"
-                  ? "bg-[#6bbd45]/15 text-[#6bbd45]"
-                  : "bg-red-100 text-red-700"
+                className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border border-black ${project.status === "ACTIVE"
+                  ? "bg-green-100 text-black"
+                  : "bg-red-100 text-black"
                   }`}
               >
                 {project.status}
@@ -150,9 +150,9 @@ const GetProjectById = ({ id, onClose }) => {
               {onClose && (
                 <button
                   onClick={onClose}
-                  className="p-1 rounded-full hover:bg-gray-100 text-gray-700 transition-colors"
+                  className="px-4 py-1.5 bg-red-100 border border-black text-black font-black uppercase text-[10px] tracking-widest rounded-lg hover:bg-red-200 transition-all shadow-sm"
                 >
-                  <X className="w-5 h-5" />
+                  Close
                 </button>
               )}
             </div>
@@ -227,9 +227,9 @@ const GetProjectById = ({ id, onClose }) => {
                   <button
                     key={key}
                     onClick={() => setActiveTab(key)}
-                    className={`flex items-center gap-2 bg-primary text-gray-800 px-4 py-2 text-md rounded-md font-medium transition-colors whitespace-nowrap ${activeTab === key
-                      ? "bg-[#6bbd45] text-white "
-                      : "text-gray-700 bg-gray-100 hover:text-[#6bbd45] font-semibold hover:bg-gray-50"
+                    className={`flex items-center gap-2 border border-black px-4 py-2 text-[13px] rounded-lg font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === key
+                      ? "bg-green-100 text-black shadow-sm"
+                      : "text-black bg-gray-100 hover:bg-green-100/50"
                       }`}
                   >
                     <TabIcon className="w-4 h-4" />
@@ -247,12 +247,12 @@ const GetProjectById = ({ id, onClose }) => {
           {activeTab === "details" && (
             <div className="grid max-sm:grid-cols-1 md:grid-cols-2 gap-6 text-sm">
               <div className="md:col-span-2 mt-6">
-                <h4 className="font-semibold text-[#6bbd45] mb-2 flex items-center gap-1">
-                  <FolderOpenDot className="w-4 h-4" />
+                <h4 className="font-black text-black uppercase tracking-widest mb-3 flex items-center gap-2 text-md">
+                  <FolderOpenDot className="w-5 h-5" />
                   Project Description
                 </h4>
                 <div
-                  className="text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm prose prose-sm max-w-none"
+                  className="text-black bg-green-100 p-4 rounded-xl border border-black shadow-sm prose prose-sm max-w-none font-medium"
                   dangerouslySetInnerHTML={{
                     __html: project.description || "No description available."
                   }}
@@ -303,8 +303,8 @@ const GetProjectById = ({ id, onClose }) => {
                 {/* <InfoRow label="RFQ ID" value={project.rfqId || "—"} /> */}
               </div>
 
-              <div className="p-4 bg-gray-50 rounded-lg border text-sm">
-                <h4 className="text-lg font-semibold text-[#6bbd45] mb-3 flex items-center gap-1">
+              <div className="p-4 bg-green-200 rounded-xl border border-black text-sm">
+                <h4 className="text-md font-black text-black uppercase tracking-widest mb-4 flex items-center gap-2">
                   <Settings className="w-5 h-5" /> Connection Design Scope
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -319,8 +319,8 @@ const GetProjectById = ({ id, onClose }) => {
                   />
                 </div>
               </div>
-              <div className="p-4 bg-gray-50 rounded-lg border text-sm">
-                <h4 className="text-lg font-semibold text-[#6bbd45] mb-3 flex items-center gap-1">
+              <div className="p-4 bg-green-200 rounded-xl border border-black text-sm">
+                <h4 className="text-md font-black text-black uppercase tracking-widest mb-4 flex items-center gap-2">
                   <Settings className="w-5 h-5" /> Detailing Scope
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -338,7 +338,7 @@ const GetProjectById = ({ id, onClose }) => {
               {/* Footer Buttons */}
               <div className="pt-2 flex flex-wrap gap-3">
                 <Button
-                  className="py-1 px-3 text-sm bg-[#6bbd45] text-white"
+                  className="py-1 px-3 text-sm bg-green-100 text-black border border-black font-black uppercase tracking-widest hover:bg-green-200 transition-all"
                   onClick={() => handleEditModel(project)}
                 >
                   Edit Project
@@ -367,10 +367,10 @@ const GetProjectById = ({ id, onClose }) => {
           {/* ✅ Team */}
           {activeTab === "team" && (
             <div className="text-gray-700 text-sm">
-              <h4 className="font-semibold text-[#6bbd45] mb-2 flex items-center gap-1">
+              <h4 className="font-black text-black mb-2 flex items-center gap-1 uppercase tracking-widest">
                 <Users className="w-4 h-4" /> Assigned Team
               </h4>
-              <p>Team: {project.team?.name || "No team assigned."}</p>
+              <p className="font-medium">Team: {project.team?.name || "No team assigned."}</p>
               <p>
                 Manager:{" "}
                 {project.manager
@@ -399,15 +399,15 @@ const GetProjectById = ({ id, onClose }) => {
           {activeTab === "rfi" && (
             <div className="space-y-4">
               {/* Sub-tabs for RFI */}
-              <div className="flex justify-start border-b border-gray-200 mb-4">
+              <div className="flex justify-start mb-4">
                 <nav className="-mb-px flex space-x-8" aria-label="Tabs">
                   <button
                     onClick={() => setRfiView("list")}
                     className={`
-                      whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                      whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
                       ${rfiView === "list"
-                        ? "border-[#6bbd45] text-[#6bbd45]"
-                        : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
+                        ? "bg-green-100 text-black"
+                        : "bg-gray-50 text-black hover:bg-green-50"
                       }
                     `}
                   >
@@ -417,10 +417,10 @@ const GetProjectById = ({ id, onClose }) => {
                     <button
                       onClick={() => setRfiView("add")}
                       className={`
-                        whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                        whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
                         ${rfiView === "add"
-                          ? "border-[#6bbd45] text-[#6bbd45]"
-                          : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
+                          ? "bg-green-100 text-black"
+                          : "bg-gray-50 text-black hover:bg-green-50"
                         }
                     `}
                     >
@@ -447,15 +447,15 @@ const GetProjectById = ({ id, onClose }) => {
           {activeTab === "submittals" && (
             <div className="space-y-4">
               {/* Sub-tabs for RFI */}
-              <div className="flex justify-start border-b border-gray-200 mb-4">
+              <div className="flex justify-start mb-4">
                 <nav className="-mb-px flex space-x-8" aria-label="Tabs">
                   <button
                     onClick={() => setSubmittalView("list")}
                     className={`
-                      whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                      whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
                       ${submittalView === "list"
-                        ? "border-[#6bbd45] text-[#6bbd45]"
-                        : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
+                        ? "bg-green-100 text-black"
+                        : "bg-gray-50 text-black hover:bg-green-50"
                       }
                     `}
                   >
@@ -465,10 +465,10 @@ const GetProjectById = ({ id, onClose }) => {
                     <button
                       onClick={() => setSubmittalView("add")}
                       className={`
-                        whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                        whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
                         ${submittalView === "add"
-                          ? "border-[#6bbd45] text-[#6bbd45]"
-                          : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
+                          ? "bg-green-100 text-black"
+                          : "bg-gray-50 text-black hover:bg-green-50"
                         }
                     `}
                     >
@@ -495,15 +495,15 @@ const GetProjectById = ({ id, onClose }) => {
           {activeTab === "CDrfi" && userRole !== "staff" && (
             <div className="space-y-4">
               {/* Sub-tabs for RFI */}
-              <div className="flex justify-start border-b border-gray-200 mb-4">
+              <div className="flex justify-start mb-4">
                 <nav className="-mb-px flex space-x-8" aria-label="Tabs">
                   <button
                     onClick={() => setRfiView("list")}
                     className={`
-                      whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                      whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
                       ${rfiView === "list"
-                        ? "border-[#6bbd45] text-[#6bbd45]"
-                        : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
+                        ? "bg-green-100 text-black"
+                        : "bg-gray-50 text-black hover:bg-green-50"
                       }
                     `}
                   >
@@ -513,10 +513,10 @@ const GetProjectById = ({ id, onClose }) => {
                     <button
                       onClick={() => setRfiView("add")}
                       className={`
-                        whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                        whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
                         ${rfiView === "add"
-                          ? "border-[#6bbd45] text-[#6bbd45]"
-                          : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
+                          ? "bg-green-100 text-black"
+                          : "bg-gray-50 text-black hover:bg-green-50"
                         }
                     `}
                     >
@@ -543,15 +543,15 @@ const GetProjectById = ({ id, onClose }) => {
           {activeTab === "CDsubmittals" && userRole !== "staff" && (
             <div className="space-y-4">
               {/* Sub-tabs for RFI */}
-              <div className="flex justify-start border-b border-gray-200 mb-4">
+              <div className="flex justify-start mb-4">
                 <nav className="-mb-px flex space-x-8" aria-label="Tabs">
                   <button
                     onClick={() => setSubmittalView("list")}
                     className={`
-                      whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                      whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
                       ${submittalView === "list"
-                        ? "border-[#6bbd45] text-[#6bbd45]"
-                        : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
+                        ? "bg-green-100 text-black"
+                        : "bg-gray-50 text-black hover:bg-green-50"
                       }
                     `}
                   >
@@ -561,10 +561,10 @@ const GetProjectById = ({ id, onClose }) => {
                     <button
                       onClick={() => setSubmittalView("add")}
                       className={`
-                        whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                        whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
                         ${submittalView === "add"
-                          ? "border-[#6bbd45] text-[#6bbd45]"
-                          : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
+                          ? "bg-green-100 text-black"
+                          : "bg-gray-50 text-black hover:bg-green-50"
                         }
                     `}
                     >
@@ -591,15 +591,15 @@ const GetProjectById = ({ id, onClose }) => {
           {activeTab === "changeOrder" && userRole !== "staff" && (
             <div className="space-y-4">
               {/* Sub-tabs for RFI */}
-              <div className="flex justify-start border-b border-gray-200 mb-4">
+              <div className="flex justify-start mb-4">
                 <nav className="-mb-px flex space-x-8" aria-label="Tabs">
                   <button
                     onClick={() => setChangeOrderView("list")}
                     className={`
-                      whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                      whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
                       ${changeOrderView === "list"
-                        ? "border-[#6bbd45] text-[#6bbd45]"
-                        : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
+                        ? "bg-green-100 text-black"
+                        : "bg-gray-50 text-black hover:bg-green-50"
                       }
                     `}
                   >
@@ -609,10 +609,10 @@ const GetProjectById = ({ id, onClose }) => {
                     <button
                       onClick={() => setChangeOrderView("add")}
                       className={`
-                        whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                        whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
                         ${changeOrderView === "add"
-                          ? "border-[#6bbd45] text-[#6bbd45]"
-                          : "border-transparent text-gray-700 hover:text-gray-700 hover:border-gray-300"
+                          ? "bg-green-100 text-black"
+                          : "bg-gray-50 text-black hover:bg-green-50"
                         }
                     `}
                     >
@@ -630,12 +630,12 @@ const GetProjectById = ({ id, onClose }) => {
               ) : (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <h4 className="text-lg font-semibold text-[#6bbd45]">
+                    <h4 className="text-lg font-semibold text-black">
                       Change Order Table
                     </h4>
                     <button
                       onClick={() => setChangeOrderView("list")}
-                      className="text-sm text-[#6bbd45] hover:text-[#6bbd45] font-medium"
+                      className="text-sm text-black hover:text-black font-medium"
                     >
                       &larr; Back to List
                     </button>
@@ -670,18 +670,18 @@ const InfoRow = ({
   label,
   value,
 }) => (
-  <div className="flex justify-between border-b border-gray-100 md:text-md text-sm pb-1">
-    <span className="font-medium text-gray-700">{label}:</span>
-    <span className="text-gray-700">{value}</span>
+  <div className="flex justify-between md:text-md text-sm pb-1">
+    <span className="font-black text-black/50 uppercase tracking-widest text-[10px]">{label}:</span>
+    <span className="text-black font-black uppercase tracking-tight">{value}</span>
   </div>
 );
 
 // ✅ ScopeTag Component
 const ScopeTag = ({ label, active }) => (
   <span
-    className={`px-3 py-1 text-sm font-medium rounded-full ${active
-      ? "bg-[#6bbd45]/15 text-[#6bbd45] border border-[#6bbd45]"
-      : "bg-gray-100 text-gray-700 border border-gray-200"
+    className={`px-4 py-1.5 text-xs font-black uppercase tracking-widest rounded-full border border-black ${active
+      ? "bg-green-100 text-black shadow-sm"
+      : "bg-gray-100 text-black/50"
       }`}
   >
     {label}

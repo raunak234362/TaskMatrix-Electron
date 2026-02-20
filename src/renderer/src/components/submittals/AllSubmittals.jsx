@@ -73,9 +73,9 @@ const AllSubmittals = ({ submittalData }) => {
       header: "Status",
       cell: ({ row }) => (
         <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${row.original.status === true
-            ? "bg-yellow-100 text-yellow-700"
-            : "bg-green-100 text-green-700"
+          className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-black ${row.original.status === true
+            ? "bg-orange-100 text-black shadow-sm"
+            : "bg-green-100 text-black shadow-sm"
             }`}
         >
           {row.original.status === true ? "Pending" : "Responded"}

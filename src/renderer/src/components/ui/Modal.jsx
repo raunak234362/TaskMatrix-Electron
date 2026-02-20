@@ -15,9 +15,9 @@ const Modal = ({ isOpen, onClose, title, children, width = 'max-w-4xl', hideHead
             <h3 className="text-lg  text-gray-700">{title}</h3>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-700"
+              className="px-4 py-1.5 bg-red-100 border border-black text-black font-black uppercase text-[10px] tracking-widest rounded-lg hover:bg-red-200 transition-all shadow-sm"
             >
-              <X size={20} />
+              Close
             </button>
           </div>
         )}

@@ -210,19 +210,19 @@ const GetRFQByID = ({ id }) => {
       <div className="p-0 sm:p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* ---------------- LEFT COLUMN — RFQ DETAILS ---------------- */}
-          <div className="bg-white sm:bg-linear-to-br sm:from-green-50 sm:to-white p-4 sm:p-6 rounded-xl shadow-sm sm:shadow-md space-y-5 sm:space-y-6">
+          <div className="bg-green-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <h3 className="text-xl sm:text-2xl  text-green-700 wrap-break-word max-w-full">
+                <h3 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight wrap-break-word max-w-full">
                   {rfq?.projectName}
                 </h3>
 
                 {/* Status tag */}
                 <span
-                  className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium shrink-0 ${rfq?.status === "RECEIVED"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-green-100 text-green-700"
+                  className={`px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-widest border border-black ${rfq?.status === "RECEIVED"
+                    ? "bg-orange-100 text-black"
+                    : "bg-green-100 text-black"
                     }`}
                 >
                   {rfq?.status}
@@ -282,10 +282,12 @@ const GetRFQByID = ({ id }) => {
             </div>
 
             {/* Description */}
-            <div className="space-y-2">
-              <h4 className=" text-gray-700 text-sm">Description</h4>
+            <div className="space-y-3">
+              <h4 className="text-xs font-black text-black uppercase tracking-widest flex items-center gap-2">
+                Description
+              </h4>
               <div
-                className="text-gray-700 bg-white p-3 rounded-lg border prose prose-sm max-w-none text-xs sm:text-sm"
+                className="text-black bg-white p-4 rounded-xl border border-black prose prose-sm max-w-none text-xs sm:text-sm font-medium"
                 dangerouslySetInnerHTML={{
                   __html: rfq?.description || "No description provided",
                 }}
@@ -293,46 +295,46 @@ const GetRFQByID = ({ id }) => {
             </div>
 
             {/* Scopes */}
-           <div className="space-y-3">
-                <div className="p-4 bg-white/60 rounded-2xl border border-green-100/50 text-sm">
-                  <h4 className="text-sm font-black text-black mb-3 flex items-center gap-1 uppercase tracking-tight">
-                    <Settings className="w-4 h-4" /> Connection Design Scope
-                  </h4>
-                  <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
-                    <Scope
-                      label="Connection Design"
-                      enabled={rfq?.connectionDesign || false}
-                    />
-                    <Scope
-                      label="Misc Design"
-                      enabled={rfq?.miscDesign || false}
-                    />
-                    <Scope
-                      label={
-                        !rfq?.customerDesign && rfq?.sender?.fabricator?.fabName
-                          ? `Connection design by ${rfq.sender.fabricator.fabName}`
-                          : "Connection Design by WBT"
-                      }
-                      enabled={true}
-                    />
-                  </div>
-                </div>
-                <div className="p-4 bg-white/60 rounded-2xl border border-green-100/50 text-sm">
-                  <h4 className="text-sm font-black text-black mb-3 flex items-center gap-1 uppercase tracking-tight">
-                    <Settings className="w-4 h-4" /> Detailing Scope
-                  </h4>
-                  <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
-                    <Scope
-                      label="Detailing Main"
-                      enabled={rfq?.detailingMain || false}
-                    />
-                    <Scope
-                      label="Detailing Misc"
-                      enabled={rfq?.detailingMisc || false}
-                    />
-                  </div>
+            <div className="space-y-4">
+              <div className="p-4 bg-white rounded-2xl border border-black text-sm">
+                <h4 className="text-xs font-black text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
+                  <Settings className="w-4 h-4" /> Connection Design Scope
+                </h4>
+                <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
+                  <Scope
+                    label="Connection Design"
+                    enabled={rfq?.connectionDesign || false}
+                  />
+                  <Scope
+                    label="Misc Design"
+                    enabled={rfq?.miscDesign || false}
+                  />
+                  <Scope
+                    label={
+                      !rfq?.customerDesign && rfq?.sender?.fabricator?.fabName
+                        ? `Connection design by ${rfq.sender.fabricator.fabName}`
+                        : "Connection Design by WBT"
+                    }
+                    enabled={true}
+                  />
                 </div>
               </div>
+              <div className="p-4 bg-white rounded-2xl border border-black text-sm">
+                <h4 className="text-xs font-black text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
+                  <Settings className="w-4 h-4" /> Detailing Scope
+                </h4>
+                <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
+                  <Scope
+                    label="Detailing Main"
+                    enabled={rfq?.detailingMain || false}
+                  />
+                  <Scope
+                    label="Detailing Misc"
+                    enabled={rfq?.detailingMisc || false}
+                  />
+                </div>
+              </div>
+            </div>
 
 
             {/* Files */}
@@ -361,10 +363,10 @@ const GetRFQByID = ({ id }) => {
           </div>
 
           {/* ---------------- RIGHT COLUMN — RESPONSES ---------------- */}
-          <div className="bg-white sm:bg-linear-to-br sm:from-green-50 sm:to-white p-4 sm:p-6 rounded-xl shadow-sm sm:shadow-md space-y-5 sm:space-y-6">
+          <div className="bg-green-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8">
             {/* Header + Add Response Button */}
             <div className="flex justify-between items-center gap-4">
-              <h1 className="text-xl sm:text-2xl font-semibold text-green-700">
+              <h1 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight">
                 Responses
               </h1>
 
@@ -562,19 +564,19 @@ const GetRFQByID = ({ id }) => {
 };
 
 const Info = ({ label, value }) => (
-  <div className="space-y-0.5 sm:space-y-1">
-    <p className="text-gray-500 text-[10px] sm:text-xs uppercase font-medium tracking-wider">
-      {label}
+  <div className="flex justify-between items-center gap-4 py-2 border-b border-black/5 last:border-0">
+    <p className="text-black/40 text-[10px] font-black uppercase tracking-widest ">
+      {label}:
     </p>
-    <p className=" text-gray-800 text-sm sm:text-base">{value}</p>
+    <p className="text-black text-xs font-black uppercase tracking-tight text-right">{value}</p>
   </div>
 );
 
 const Scope = ({ label, enabled }) => (
   <div
-    className={`px-3 py-2 rounded-md border ${enabled
-      ? "bg-green-100 border-green-400 text-green-700"
-      : "bg-gray-100 border-gray-300 text-gray-700"
+    className={`px-4 py-1.5 rounded-full border border-black text-[10px] font-black uppercase tracking-widest shadow-sm transition-all ${enabled
+      ? "bg-green-100 text-black"
+      : "bg-gray-100 text-black/40"
       }`}
   >
     {label}

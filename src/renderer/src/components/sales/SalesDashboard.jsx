@@ -1,15 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import Service from "../../api/Service";
 import { motion } from "framer-motion";
 import SalesStatsCards from "./components/SalesStatsCards";
 import SalesSecondaryStats from "./components/SalesSecondaryStats";
 import SalesPerformanceChart from "./components/SalesPerformanceChart";
-import { Download, Filter } from "lucide-react";
+import { Bell, ChevronLeft, Download, Filter } from "lucide-react";
 
 const SalesDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [dashboardData, setDashboardData] = useState(null);
+    const userName = sessionStorage.getItem('firstName') + " " + sessionStorage.getItem('lastName') || "Admin User";
 
     useEffect(() => {
         const fetchData = async () => {
@@ -42,14 +42,13 @@ const SalesDashboard = () => {
     if (!dashboardData) {
         return (
             <div className="flex items-center justify-center h-full min-h-screen">
-                <p className="text-gray-500">No data available</p>
+                <p className="text-gray-500 font-bold uppercase tracking-widest">No data available</p>
             </div>
         )
     }
 
-    const { data, activeProjectsFromSales, completedProjectsFromSales } = dashboardData;
+    const data = dashboardData.data;
 
-    // Prepare status distribution data for the graph
     const statusChartData = [
         { name: 'Total', value: data.totalRFQs || 0 },
         { name: 'Pipeline', value: data.inPipelineRFQs || 0 },
@@ -60,41 +59,54 @@ const SalesDashboard = () => {
     ];
 
     return (
-        <div className="h-full p-8 space-y-10 font-sans text-slate-800">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Sales Dashboard</h1>
-                    <p className="text-gray-500 mt-1 font-medium">Real-time performance metrics</p>
+        <div className="min-h-screen bg-[#fcfdfc] p-6 lg:p-8 space-y-8 font-sans">
+            {/* Optimized Header Area */}
+            <div className="bg-white p-5 rounded-3xl border border-gray-200 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)] flex justify-between items-center transition-all">
+                <div className="flex items-center gap-6">
+                    <button className="p-3 bg-white border border-gray-100 rounded-2xl shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-95 group">
+                        <ChevronLeft size={20} className="text-gray-400 group-hover:text-gray-700 transition-colors" />
+                    </button>
+                    <div className="space-y-1">
+                        <h1 className="text-xl font-black text-gray-900 tracking-tighter uppercase leading-none">Sales</h1>
+                        <p className="text-sm font-bold text-gray-400 tracking-wide uppercase">
+                            Welcome Back, <span className="text-gray-800 font-black">{userName}</span>
+                        </p>
+                    </div>
                 </div>
-                <div className="flex gap-4">
-                    <button className="flex items-center gap-2 px-4 py-1.5 bg-white border border-gray-300 rounded-xl text-gray-600 font-bold hover:bg-green-50 hover:text-green-700 hover:border-green-400 transition-all shadow-sm uppercase text-[10px] tracking-widest">
-                        <Filter size={16} />
-                        Filter
-                    </button>
-                    <button className="flex items-center gap-2 px-4 py-1.5 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-all shadow-md uppercase text-[10px] tracking-widest">
-                        <Download size={16} />
-                        Export
-                    </button>
+                <div className="p-3 bg-green-50/50 text-green-600 rounded-2xl border border-green-100/50 relative hover:bg-green-100 transition-colors cursor-pointer group">
+                    <Bell size={24} className="group-hover:scale-110 transition-transform" />
+                    <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
                 </div>
             </div>
 
-            {/* Stats Cards - Primary KPIs */}
+            {/* Top Row KPIs */}
             <SalesStatsCards data={data} />
 
-            {/* Performance Chart */}
-            <div className="pt-4">
-                <SalesPerformanceChart data={statusChartData} />
-            </div>
-
-            {/* Secondary Stats - Detailed Metrics */}
+            {/* Middle Row Detailed Stats */}
             <SalesSecondaryStats
                 data={data}
-                activeProjects={activeProjectsFromSales}
-                completedProjects={completedProjectsFromSales}
+                activeProjects={data.activeProjectsFromSales}
+                totalProjects={data.totalProjectsFromSales}
+                completedProjects={data.completedProjectsFromSales}
             />
+
+            {/* Performance Visualization Section */}
+            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.03)]">
+                <div className="flex justify-between items-center mb-10 pl-2">
+                    <h3 className="text-lg font-black text-gray-800 uppercase tracking-widest">Monthly Performance</h3>
+                    <div className="flex gap-2.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-500/30"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-500/60"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                    </div>
+                </div>
+                <div className="h-[400px]">
+                    <SalesPerformanceChart data={statusChartData} />
+                </div>
+            </div>
         </div>
     );
 };
 
 export default SalesDashboard;
+

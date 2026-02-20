@@ -41,28 +41,23 @@ const EstimationStats = ({ stats }) => {
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full">
-      <h2 className="text-lg font-semibold text-gray-800 mb-6">Estimation Stats</h2>
+    <div className="bg-white p-6 rounded-3xl border border-black shadow-sm h-full">
+      <h2 className="text-xl font-black text-black uppercase tracking-tight mb-8">Estimation Stats</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {cards.map((card) => {
-          const colors = colorClasses[card.color]
-
           return (
             <div
               key={card.label}
-              className={`
-                flex items-center gap-4 p-4 rounded-xl border 
-                ${colors.bg} border-gray-200
-              `}
+              className="flex items-center gap-5 p-5 rounded-2xl border border-black bg-green-100 shadow-sm transition-all hover:shadow-md"
             >
-              <div className={`p-3 rounded-lg ${colors.iconBg} text-white shrink-0`}>
-                <card.icon size={24} />
+              <div className="p-3.5 rounded-xl bg-black text-green-100 shrink-0 shadow-sm">
+                <card.icon size={22} className="stroke-[2.5]" />
               </div>
 
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-600">{card.label}</span>
-                <span className={`text-2xl  mt-1 ${colors.text}`}>{card.value}</span>
+                <span className="text-[10px] font-black text-black/40 uppercase tracking-widest leading-none mb-1.5">{card.label}</span>
+                <span className="text-2xl font-black text-black tracking-tight">{card.value}</span>
               </div>
             </div>
           )

@@ -172,15 +172,15 @@ const AddProject = () => {
           {/* Header */}
           <div className="px-8 py-10 flex items-center justify-between bg-linear-to-r from-green-50/30 to-transparent border-b border-gray-50">
             <div>
-              <h1 className="text-3xl font-extrabold text-gray-600 tracking-tight">
-                Create New <span className="text-green-600">Project</span>
+              <h1 className="text-3xl font-black text-black tracking-tight uppercase">
+                Create New <span className="text-black border-b-2 border-green-400">Project</span>
               </h1>
-        
+
             </div>
             <div className="hidden md:flex items-center gap-3">
               <div className="h-10 w-px bg-gray-100" />
               <div className="text-right">
-               
+
               </div>
             </div>
           </div>
@@ -198,7 +198,7 @@ const AddProject = () => {
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-gray-800">Select RFQ</h3>
-                  
+
                   </div>
                 </div>
                 <div className="w-full lg:w-[400px]">
@@ -243,7 +243,7 @@ const AddProject = () => {
                   </div>
                   <div className="space-y-0.5">
                     <span className="text-[10px] uppercase font-bold text-gray-400">Tools</span>
-                    <p className="text-xs font-bold text-green-600">{selectedRfq.tools || "TEKLA"}</p>
+                    <p className="text-xs font-bold text-black">{selectedRfq.tools || "TEKLA"}</p>
                   </div>
                   <div className="flex items-center">
                     <div className="px-2 py-0.5 bg-green-50 text-green-700 rounded-md text-[10px] font-black border border-green-100 flex items-center gap-1">
@@ -263,7 +263,7 @@ const AddProject = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <Input
                       label="Project Number *"
-                      
+
                       placeholder="Give a unique project number..."
                       className="bg-gray-50/50 border-gray-200 focus:bg-white transition-all"
                       {...register("projectNumber", { required: "Required" })}
@@ -278,7 +278,7 @@ const AddProject = () => {
                       <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                         Project Description *
                       </label>
-                      <div className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50/30">
+                      <div className="rounded-xl overflow-hidden border border-black bg-green-200">
                         <Controller
                           name="description"
                           control={control}
@@ -471,7 +471,7 @@ const AddProject = () => {
                   </>
                 ) : (
                   <>
-                   
+
                     Add Project
                   </>
                 )}

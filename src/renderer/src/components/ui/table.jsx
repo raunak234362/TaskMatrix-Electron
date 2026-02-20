@@ -288,16 +288,16 @@ export default function DataTable({
           onRowClick={onRowClick}
         />
       ) : (
-        <div className="w-full border border-gray-100 rounded-lg overflow-hidden">
+        <div className="w-full border border-gray-100 rounded-lg overflow-hidden bg-[#fcfdfc]">
           <div className="max-h-[800px] overflow-y-auto overflow-x-auto">
-            <table className="min-w-full divide-y">
-              <thead className="bg-gray-50 sticky top-0 z-10 shadow-sm">
+            <table className="min-w-full divide-y-0">
+              <thead className="bg-gray-50 sticky top-0 z-10">
                 {table.getHeaderGroups().map((hg) => (
                   <tr key={hg.id}>
                     {hg.headers.map((header) => (
                       <th
                         key={header.id}
-                        className="px-4 py-3 text-left text-sm md:text-md font-bold bg-gray-200 text-gray-800"
+                        className="px-4 py-3 text-left text-[10px] md:text-xs font-black uppercase tracking-widest bg-gray-100 text-gray-500 border-b border-black/5"
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         <div className="flex items-center gap-1 cursor-pointer">
