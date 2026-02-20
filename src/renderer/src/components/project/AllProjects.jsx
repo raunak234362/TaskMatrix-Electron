@@ -5,6 +5,8 @@ import DataTable from "../ui/table";
 import Modal from "../ui/Modal";
 import { Filter } from "lucide-react";
 import Service from "../../api/Service";
+import DateFilter from "../common/DateFilter";
+import { matchesDateFilter } from "../../utils/dateFilter";
 
 const GetProjectById = React.lazy(() =>
   import("./GetProjectById").then((module) => ({ default: module.default }))
@@ -18,6 +20,12 @@ const AllProjects = () => {
     fabricator: "All Fabricators",
     stage: "All Stages",
     overrunOnly: false,
+  });
+
+  const [dateFilter, setDateFilter] = useState({
+    type: "all",
+    year: new Date().getFullYear(),
+    month: new Date().getMonth(),
   });
 
   const projects = useSelector(
@@ -110,9 +118,12 @@ const AllProjects = () => {
         return false;
       if (filters.overrunOnly && !isOverrun) return false;
 
+      // Filter by Date (assuming created_on as default)
+      if (!matchesDateFilter(project.created_on, dateFilter)) return false;
+
       return true;
     });
-  }, [projects, filters, tasks]);
+  }, [projects, filters, tasks, dateFilter]);
 
   // --- Column Definitions ---
   const columns = [
@@ -280,6 +291,12 @@ const AllProjects = () => {
             <label htmlFor="overrunOnly" className="text-sm font-bold text-gray-600 cursor-pointer select-none">
               Overrun Only
             </label>
+          </div>
+
+          {/* Date Filter */}
+          <div className="flex flex-col gap-1 w-full sm:w-auto">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date Period</label>
+            <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
           </div>
         </div>
       </div>

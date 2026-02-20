@@ -12,6 +12,8 @@ import {
   Trash2,
   Filter,
 } from "lucide-react";
+import DateFilter from "../common/DateFilter";
+import { matchesDateFilter } from "../../utils/dateFilter";
 
 import DataTable from "../ui/table";
 import FetchTaskByID from "./FetchTaskByID";
@@ -32,6 +34,12 @@ const AllTasks = () => {
     projectName: "All Projects",
     stage: "All Stages",
     status: "All Status",
+  });
+
+  const [dateFilter, setDateFilter] = useState({
+    type: "all",
+    year: new Date().getFullYear(),
+    month: new Date().getMonth(),
   });
 
   useEffect(() => {
@@ -172,9 +180,12 @@ const AllTasks = () => {
       )
         return false;
 
+      // Filter by Date (using created_on)
+      if (!matchesDateFilter(task.created_on, dateFilter)) return false;
+
       return true;
     });
-  }, [tasks, filters]);
+  }, [tasks, filters, dateFilter]);
 
   const columns = useMemo(
     () => [
@@ -360,6 +371,12 @@ const AllTasks = () => {
             >
               {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
+          </div>
+
+          {/* Date Filter */}
+          <div className="flex flex-col gap-1 w-full sm:w-auto">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date Period</label>
+            <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
           </div>
         </div>
       </div>

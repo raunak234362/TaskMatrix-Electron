@@ -9,7 +9,10 @@ import {
   Briefcase,
   Tag,
   Eye,
+  Filter,
 } from "lucide-react";
+import DateFilter from "../common/DateFilter";
+import { matchesDateFilter } from "../../utils/dateFilter";
 
 import DataTable from "../ui/table";
 import FetchTaskByID from "./FetchTaskByID";
@@ -20,6 +23,12 @@ const AllActiveTask = () => {
   const [error, setError] = useState(null);
   const [specificTask, setSpecificTask] = useState("");
   const [displayTask, setDisplayTask] = useState(false);
+
+  const [dateFilter, setDateFilter] = useState({
+    type: "all",
+    year: new Date().getFullYear(),
+    month: new Date().getMonth(),
+  });
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -89,9 +98,10 @@ const AllActiveTask = () => {
       (task) =>
         task.status !== "VALIDATE_COMPLETE" &&
         task.status !== "COMPLETE_OTHER" &&
-        task.status !== "USER_FAULT"
+        task.status !== "USER_FAULT" &&
+        matchesDateFilter(task.created_on, dateFilter)
     );
-  }, [tasks]);
+  }, [tasks, dateFilter]);
 
   // Find the highest-priority unlockable task from ASSIGNED, IN_PROGRESS, BREAK, or REWORK
   const unlockableStatuses = ["ASSIGNED", "IN_PROGRESS", "BREAK", "REWORK"];
@@ -282,6 +292,11 @@ const AllActiveTask = () => {
           <span className="text-sm font-semibold text-green-700">
             {tasks.length} Active Tasks
           </span>
+        </div>
+
+        <div className="flex flex-col gap-1 w-full sm:w-auto">
+          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date Period</label>
+          <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
         </div>
       </div>
 
