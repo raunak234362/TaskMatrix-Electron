@@ -80,6 +80,16 @@ const AllSubmittals = ({ submittalData }) => {
     {
       accessorKey: "status",
       header: "Status",
+      cell: ({ row }) => (
+        <span
+          className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-black ${row.original.status === true
+            ? "bg-orange-100 text-black shadow-sm"
+            : "bg-green-100 text-black shadow-sm"
+            }`}
+        >
+          {row.original.status === true ? "Pending" : "Responded"}
+        </span>
+      ),
       cell: ({ row }) => {
         const isSubmitted = row.original.status === true
         return (

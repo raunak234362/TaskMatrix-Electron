@@ -5,36 +5,28 @@ import { motion } from "framer-motion";
 const SalesStatsCards = ({ data }) => {
     const cards = [
         {
-            title: "Total RFQs",
+            title: "Total RFQs Received",
             value: data.totalRFQs || 0,
             icon: FileText,
-            bgColor: "bg-green-50/60",
-            iconBg: "bg-green-100",
-            textColor: "text-green-700"
+            change: "+12%"
         },
         {
-            title: "In Pipeline",
-            value: data.inPipelineRFQs || 0,
-            icon: Target,
-            bgColor: "bg-blue-50/60",
-            iconBg: "bg-blue-100",
-            textColor: "text-blue-700"
+            title: "Projects Awarded",
+            value: data.awardedRFQs || 0,
+            icon: Trophy,
+            change: "+8%"
         },
         {
             title: "Win Rate",
             value: `${data.winRate || 0}%`,
-            icon: Trophy,
-            bgColor: "bg-indigo-50/60",
-            iconBg: "bg-indigo-100",
-            textColor: "text-indigo-700"
+            icon: Target,
+            change: "+2.3%"
         },
         {
-            title: "Pipeline Value",
+            title: "Total Sales Value",
             value: `$${(data.totalBidPrice || 0).toLocaleString()}`,
             icon: DollarSign,
-            bgColor: "bg-amber-50/60",
-            iconBg: "bg-amber-100",
-            textColor: "text-amber-700"
+            change: "+15%"
         },
     ];
 
@@ -48,16 +40,23 @@ const SalesStatsCards = ({ data }) => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`${card.bgColor} p-6 rounded-2xl border border-gray-300 shadow-sm hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group relative overflow-hidden`}
+                        className="bg-white p-7 rounded-[2.5rem] border border-gray-100 shadow-[0_4px_25px_-5px_rgba(0,0,0,0.03)] hover:shadow-[0_10px_35px_-8px_rgba(0,0,0,0.06)] transition-all duration-500 group relative overflow-hidden"
                     >
-                        <div className="flex justify-between items-start relative z-10">
+                        <div className="flex justify-between items-start mb-6">
                             <div>
-                                <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">{card.title}</p>
-                                <h3 className={`text-3xl font-black ${card.textColor} tracking-tighter`}>{card.value}</h3>
+                                <p className="text-[13px] font-black text-gray-400/80 uppercase tracking-[0.15em] mb-2">{card.title}</p>
+                                <h3 className="text-4xl font-black text-gray-900 tracking-tighter leading-none">{card.value}</h3>
                             </div>
-                            <div className={`p-3 rounded-xl ${card.iconBg} border border-gray-200 shadow-sm transition-transform group-hover:scale-110`}>
-                                <Icon size={24} className={card.textColor} strokeWidth={2.5} />
+                            <div className="p-3.5 bg-gray-50/50 text-gray-400 rounded-[1.25rem] border border-gray-100 group-hover:bg-green-600 group-hover:text-white group-hover:border-green-600 group-hover:shadow-[0_8px_15px_-4px_rgba(22,163,74,0.3)] transition-all duration-500">
+                                <Icon size={24} strokeWidth={2.5} />
                             </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 mt-auto">
+                            <div className="bg-green-100/40 text-green-700 px-3 py-1.5 rounded-xl text-[10px] font-black tracking-tight flex items-center gap-1.5 border border-green-100/50">
+                                {card.change} <span className="text-[9px] opacity-70">from last period</span>
+                            </div>
+                            <span className="text-[9px] font-black text-gray-300 uppercase tracking-[0.2em]">From last period</span>
                         </div>
                     </motion.div>
                 );

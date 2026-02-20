@@ -62,7 +62,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
   return (
     <div className="bg-white p-4 lg:p-6 rounded-3xl border border-gray-200 transition-all duration-500 h-full">
       <div className="flex items-center justify-between mb-6 px-1">
-        <h2 className="text-base font-black text-primary uppercase tracking-[0.15em]">Pending Actions</h2>
+        <h2 className="text-base font-black text-black uppercase tracking-[0.15em]">Pending Actions</h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -93,7 +93,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
                 </div>
 
                 <div className="flex flex-col text-left">
-                  <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{action.title}</span>
+                  <span className="text-[15px] font-black text-gray-500 uppercase tracking-widest">{action.title}</span>
                   {/* <span className="text-[9px] text-gray-400 font-bold uppercase mt-0.5 tracking-wider">
                     {action.subtitle}: {action.subcount || 0}
                   </span> */}

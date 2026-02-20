@@ -171,7 +171,7 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
         const minutes = Math.round((worked - hours) * 60);
         const display = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
         return (
-          <span className={`font-medium ${worked > (row.original.estimatedHours || 0) ? "text-red-600" : "text-green-600"}`}>
+          <span className={`font-black ${worked > (row.original.estimatedHours || 0) ? "text-red-600" : "text-black"}`}>
             {display}
           </span>
         );
@@ -222,8 +222,15 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => (
-        <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-md text-[10px] font-black uppercase tracking-wider border border-gray-200">
-          {row.original.status || "UNKNOWN"}
+        <span
+          className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-black ${row.original.status === 'ACTIVE'
+            ? 'bg-green-100 text-black'
+            : row.original.status === 'COMPLETED'
+              ? 'bg-blue-100 text-black shadow-sm'
+              : 'bg-orange-100 text-black shadow-sm'
+            }`}
+        >
+          {row.original.status}
         </span>
       ),
     },

@@ -67,7 +67,7 @@ const InvoiceAnalytics = ({ invoices }) => {
     const pendingCount = invoices.length - paidCount - overdueCount;
 
     const pieData = [
-        { name: "Paid", value: paidCount, color: "#22c55e" },
+        { name: "Paid", value: paidCount, color: "#6bbd45" },
         { name: "Pending", value: Math.max(0, pendingCount), color: "#eab308" },
         { name: "Overdue", value: overdueCount, color: "#ef4444" },
     ].filter(d => d.value > 0);
@@ -80,9 +80,9 @@ const InvoiceAnalytics = ({ invoices }) => {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* 1. Trends Line Chart */}
-            <div className="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg  text-gray-800">Invoices & Payments Trend</h3>
+            <div className="lg:col-span-2 bg-green-100 p-6 rounded-3xl border border-black shadow-sm">
+                <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-sm font-black text-black uppercase tracking-widest">Invoices & Payments Trend</h3>
                     <select className="text-sm border-none bg-gray-50 rounded-lg px-3 py-1 focus:ring-1 focus:ring-green-500 text-gray-600 outline-hidden cursor-pointer">
                         <option>Last 6 Months</option>
                         <option>This Year</option>
@@ -93,8 +93,8 @@ const InvoiceAnalytics = ({ invoices }) => {
                         <AreaChart data={lineData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="colorReceived" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.2} />
-                                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                                    <stop offset="5%" stopColor="#6bbd45" stopOpacity={0.2} />
+                                    <stop offset="95%" stopColor="#6bbd45" stopOpacity={0} />
                                 </linearGradient>
                                 <linearGradient id="colorRaised" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.2} />
@@ -109,7 +109,7 @@ const InvoiceAnalytics = ({ invoices }) => {
                             />
                             <CartesianGrid vertical={false} stroke="#f3f4f6" />
                             <Area type="monotone" dataKey="raised" stroke="#94a3b8" strokeWidth={2} fillOpacity={1} fill="url(#colorRaised)" name="Invoices Raised" />
-                            <Area type="monotone" dataKey="received" stroke="#39c037ff" strokeWidth={3} fillOpacity={1} fill="url(#colorReceived)" name="Payment Received" />
+                            <Area type="monotone" dataKey="received" stroke="#6bbd45" strokeWidth={3} fillOpacity={1} fill="url(#colorReceived)" name="Payment Received" />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
@@ -118,8 +118,8 @@ const InvoiceAnalytics = ({ invoices }) => {
             {/* 2. Status Donut Chart & Payment Breakdown */}
             <div className="lg:col-span-1 space-y-6">
                 {/* Status Breakdown */}
-                <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[280px]">
-                    <h3 className="text-lg  text-gray-800 mb-2">Invoice Status</h3>
+                <div className="bg-green-100 p-6 rounded-3xl border border-black shadow-sm flex flex-col h-[300px]">
+                    <h3 className="text-sm font-black text-black uppercase tracking-widest mb-4">Invoice Status</h3>
                     <div className="flex-1 relative">
                         <ResponsiveContainer width="100%" height="100%">
 
@@ -154,8 +154,8 @@ const InvoiceAnalytics = ({ invoices }) => {
                 </div>
 
                 {/* Payment Method Breakdown (Mini List) */}
-                <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h3 className="text-lg  text-gray-800 mb-4">Payment Methods</h3>
+                <div className="bg-green-100 p-6 rounded-3xl border border-black shadow-sm">
+                    <h3 className="text-sm font-black text-black uppercase tracking-widest mb-6">Payment Methods</h3>
                     <div className="space-y-4">
                         {paymentMethods.map((pm, i) => (
                             <div key={i} className="flex items-center justify-between">

@@ -54,9 +54,9 @@ const RecentInvoiceActivity = ({ invoices }) => {
     }, [invoices]);
 
     return (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-full">
-            <h3 className="text-lg  text-gray-800 mb-6">Recent Activity</h3>
-            <div className="space-y-6">
+        <div className="bg-green-100 p-6 rounded-3xl border border-black shadow-sm h-full">
+            <h3 className="text-sm font-black text-black uppercase tracking-widest mb-8">Recent Activity</h3>
+            <div className="space-y-8">
                 {activities.length === 0 ? (
                     <p className="text-gray-400 text-sm text-center py-8">No recent activity</p>
                 ) : (

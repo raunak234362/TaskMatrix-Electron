@@ -54,7 +54,7 @@ const AdminDashboardView = ({
                                     <div className="p-2.5 bg-green-100 rounded-xl border border-primary/20 shadow-sm transition-transform group-hover:scale-110">
                                         <Clock className="w-5 h-5 text-primary" strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-xs font-black text-primary uppercase tracking-[0.1em]">Priority Focus</span>
+                                    <span className="text-[15px] font-black text-primary uppercase tracking-[0.1em]">Priority Focus</span>
                                 </div>
                                 {currentTask && (
                                     <div className="flex items-center gap-2">
@@ -66,7 +66,7 @@ const AdminDashboardView = ({
                                 <h3 className="text-base font-black text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">
                                     {currentTask?.project?.name || 'No Active Task'}
                                 </h3>
-                                <p className="text-[11px] text-gray-500 font-bold uppercase mt-1">
+                                <p className="text-[12px] text-gray-500 font-bold uppercase mt-1">
                                     {currentTask?.name || 'Ready to start'}
                                 </p>
                             </div>
@@ -82,7 +82,7 @@ const AdminDashboardView = ({
                                     <div className="p-2.5 bg-blue-100/60 rounded-xl border border-blue-200 shadow-sm group-hover:scale-110 transition-transform">
                                         <Calendar className="w-5 h-5 text-blue-600" strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-xs font-black text-gray-700 uppercase tracking-wide">Upcoming Assigned Task Deadlines</span>
+                                    <span className="text-[15px] font-black text-gray-700 uppercase tracking-wide">Upcoming Assigned Task Deadlines</span>
                                 </div>
                                 <span className="text-3xl font-black text-blue-600 tracking-tighter">
                                     {tasks.filter(t => t.status !== 'COMPLETED').length}
@@ -100,7 +100,7 @@ const AdminDashboardView = ({
                                     <div className="p-2.5 bg-indigo-100/60 rounded-xl border border-indigo-200 shadow-sm group-hover:scale-110 transition-transform">
                                         <Briefcase className="w-5 h-5 text-indigo-600" strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-xs font-black text-gray-700 uppercase tracking-[0.1em]">Upcoming Submittal</span>
+                                    <span className="text-[15px] font-black text-gray-700 uppercase tracking-[0.1em]">Upcoming Submittal</span>
                                 </div>
                                 <span className="text-3xl font-black text-indigo-600 tracking-tighter">
                                     {adminData?.submittals?.length || 0}
@@ -120,7 +120,7 @@ const AdminDashboardView = ({
                                     <div className="p-2.5 bg-amber-100/60 rounded-xl border border-amber-200 shadow-sm group-hover:scale-110 transition-transform">
                                         <Bell className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-xs font-black text-gray-700 uppercase tracking-[0.1em]">Notes & Updates</span>
+                                    <span className="text-[15px] font-black text-gray-700 uppercase tracking-[0.1em]">Notes & Updates</span>
                                 </div>
                                 <span className="text-3xl font-black text-amber-600 tracking-tighter">
                                     {projectNotes.length}

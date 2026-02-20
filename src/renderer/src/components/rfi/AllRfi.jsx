@@ -67,9 +67,9 @@ const AllRFI = ({ rfiData = [] }) => {
       header: "Status",
       cell: ({ row }) => (
         <span
-          className={`px-2 py-1 text-xs rounded-full ${row.original.status === true
-            ? "bg-yellow-100 text-yellow-700"
-            : "bg-green-100 text-green-700"
+          className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border border-black ${row.original.status === true
+            ? "bg-orange-100 text-black shadow-sm"
+            : "bg-green-100 text-black shadow-sm"
             }`}
         >
           {row.original.status ? "PENDING" : "RESPONDED"}
@@ -130,7 +130,8 @@ const AllRFI = ({ rfiData = [] }) => {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-700">
         <Inbox className="w-10 h-10 mb-3 text-gray-400" />
-        <p className="text-lg font-medium">No RFIs Available</p>
+        <p className="text-lg font-medi
+um">No RFIs Available</p>
         <p className="text-sm text-gray-400">
           {userRole === "CLIENT"
             ? "You haven’t sent any RFIs yet."

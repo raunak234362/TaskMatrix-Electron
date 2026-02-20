@@ -13,14 +13,14 @@ const FabricatorProjectChart = ({ data, fabricators }) => {
   // Theme colors consistent with the website (Greens, Teals, Blues)
   // Green shades for the bar graph
   const colors = [
-    '#16a34a', // green-600
-    '#22c55e', // green-500
-    '#4ade80', // green-400
-    '#86efac', // green-300
-    '#15803d', // green-700
-    '#14532d', // green-900
-    '#bbf7d0', // green-200
-    '#059669' // emerald-600 (mix in some emeralds for variety)
+    '#6bbd45', // Primary Green
+    '#7cc45a', // Lighter
+    '#8ccd6f', // Even Lighter
+    '#9dd584', // Much Lighter
+    '#57a136', // Darker
+    '#44842a', // Much Darker
+    '#ade59b', // Pastel
+    '#62af3f'  // Slightly darker primary
   ]
 
   return (

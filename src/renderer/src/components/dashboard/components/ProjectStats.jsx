@@ -3,7 +3,7 @@ import { Files, Activity, CheckCircle2, PauseCircle } from 'lucide-react'
 
 const ProjectStats = ({ stats, onCardClick }) => {
   const navigate = useNavigate()
-console.log(stats);
+  console.log(stats);
 
   const projectCards = [
     {
@@ -69,7 +69,7 @@ console.log(stats);
   return (
     <div className="bg-white p-4 lg:p-6 rounded-3xl border border-gray-200  transition-all duration-500">
       <div className="flex items-center justify-between mb-6 px-1">
-        <h2 className="text-base font-black text-primary uppercase tracking-[0.15em]">Project Overview</h2>
+        <h2 className="text-base font-black text-black uppercase tracking-[0.15em]">Project Overview</h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -98,7 +98,7 @@ console.log(stats);
                 <div className={`p-2.5 rounded-xl ${colors.iconBg} text-white shadow-md shrink-0`}>
                   <card.icon size={20} />
                 </div>
-                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{card.label}</span>
+                <span className="text-[15px] font-black text-gray-500 uppercase tracking-widest">{card.label}</span>
               </div>
 
               <span className={`text-3xl font-black tracking-tight ${colors.text}`}>{card.value}</span>

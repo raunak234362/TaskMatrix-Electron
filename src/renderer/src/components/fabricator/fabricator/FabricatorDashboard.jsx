@@ -187,7 +187,7 @@ const FabricatorDashboard = ({ fabricator }) => {
        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
 
           <h3 className=" text-gray-800 flex items-center gap-2">
-            <LayoutDashboard size={18} className="text-green-600" />
+            <LayoutDashboard size={18} className="text-black-600" />
             Project Overview
           </h3>
         </div>
