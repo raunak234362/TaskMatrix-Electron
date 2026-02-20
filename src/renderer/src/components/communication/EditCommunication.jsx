@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import CommunicationForm from './CommunicationForm';
 import Service from '../../api/Service';
 import { toast } from 'react-toastify';
 
 const EditCommunication = ({ communication, projects, fabricators, onClose, onSuccess }) => {
+
+    const fetchClientsByFabricator = useCallback(async (fabricatorId) => {
+        try {
+            const data = await Service.FetchAllClientsByFabricatorID(fabricatorId);
+            return Array.isArray(data) ? data : (data?.data || []);
+        } catch (error) {
+            console.error("Failed to fetch clients", error);
+            return [];
+        }
+    }, []);
 
     const handleSubmit = async (data) => {
         try {
@@ -24,6 +34,7 @@ const EditCommunication = ({ communication, projects, fabricators, onClose, onSu
             fabricators={fabricators}
             onSubmit={handleSubmit}
             onCancel={onClose}
+            fetchClientsByFabricator={fetchClientsByFabricator}
         />
     );
 };

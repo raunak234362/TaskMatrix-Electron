@@ -1,4 +1,4 @@
-import { ClipboardList, FileText, RefreshCw, Activity, Search } from 'lucide-react'
+import { ClipboardList, FileText, RefreshCw, Search } from 'lucide-react'
 
 const PendingActions = ({ dashboardStats, onActionClick }) => {
 
@@ -13,7 +13,8 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
       subcount: dashboardStats?.newRFQ || 0,
       subtitle: 'New RFQ',
       icon: Search,
-      color: 'cyan'
+      color: 'cyan',
+      hidden: userRole?.toUpperCase() === 'PROJECT_MANAGER' || userRole?.toUpperCase() === 'DEPARTMENT_MANAGER'
     },
     {
       title: 'RFI',
@@ -38,12 +39,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
       icon: RefreshCw,
       color: 'rose'
     },
-  ].filter((action) => {
-    if (action.title === 'RFQ') {
-      return !['project_manager', 'department_manager', 'staff'].includes(userRole)
-    }
-    return true
-  })
+  ].filter(action => !action.hidden)
 
   const colorClasses = {
     amber: {

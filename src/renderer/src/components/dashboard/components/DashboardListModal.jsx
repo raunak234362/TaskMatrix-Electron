@@ -117,17 +117,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
                 </div>
 
                 {/* Modal Footer */}
-                <div className="px-8 py-5 border-t border-gray-100 bg-white flex justify-end items-center gap-4">
-                    <span className="text-sm text-gray-400 font-medium italic">
-                        Tip: Click on a row to view details
-                    </span>
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 bg-red-100 border border-red-600 text-black font-bold rounded-xl transition-all hover:bg-red-200 active:scale-95 uppercase text-xs tracking-widest"
-                    >
-                        Close
-                    </button>
-                </div>
+                
             </div>
         </div>,
         document.body

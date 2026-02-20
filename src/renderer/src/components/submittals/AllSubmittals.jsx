@@ -2,14 +2,23 @@
 import { useEffect, useState } from "react";
 import DataTable from "../ui/table";
 
-import { Loader2, Inbox } from "lucide-react";
+import { useSelector } from "react-redux";
+import { Loader2, Inbox, MessageSquare } from "lucide-react";
 import Service from "../../api/Service";
 import GetSubmittalByID from "./GetSubmittalByID";
+import Modal from "../ui/Modal";
+import AddCommunication from "../communication/AddCommunication";
 
 
 const AllSubmittals = ({ submittalData }) => {
   const [submittals, setSubmittals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
+  const [prefilledData, setPrefilledData] = useState(null);
+
+  const projects = useSelector((state) => state.projectInfo?.projectData || []);
+  const fabricators = useSelector((state) => state.fabricatorInfo?.fabricatorData || []);
+
   console.log(submittalData);
 
   const userRole = sessionStorage.getItem("userRole");
@@ -76,11 +85,11 @@ const AllSubmittals = ({ submittalData }) => {
         return (
           <span
             className={`px-2 py-1 rounded-full text-xs font-medium ${isSubmitted
-              ? "bg-green-100 text-green-700"
-              : "bg-amber-100 text-amber-700"
+              ? "bg-amber-100 text-amber-700"
+              : "bg-green-100 text-green-700"
               }`}
           >
-            {isSubmitted ? "Submitted to EOR" : "Pending"}
+            {!isSubmitted ? "Submitted to EOR" : "Pending"}
           </span>
         )
       },
@@ -91,6 +100,31 @@ const AllSubmittals = ({ submittalData }) => {
       header: "Created",
       cell: ({ row }) =>
         new Date(row.original.date).toLocaleString(),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            const item = row.original;
+            setPrefilledData({
+              projectId: item.project?.id || item.project || "",
+              fabricatorId: item.fabricator?.id || item.fabricator || "",
+              clientId: item.client?.id || item.client || "",
+              subject: `Follow-up: ${item.subject || ""}`,
+              notes: `Ref: Submittal ${item.subject || ""}`
+            });
+            setIsFollowUpOpen(true);
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors shadow-sm"
+          title="Create Follow-up"
+        >
+          <MessageSquare className="w-3.5 h-3.5" />
+          Follow-up
+        </button>
+      )
     },
   ];
 
@@ -117,8 +151,23 @@ const AllSubmittals = ({ submittalData }) => {
         columns={columns}
         data={submittals}
         detailComponent={({ row }) => <GetSubmittalByID id={row.id} />}
-
       />
+
+      {isFollowUpOpen && (
+        <Modal
+          isOpen={isFollowUpOpen}
+          onClose={() => setIsFollowUpOpen(false)}
+          title="New Communication Follow-up"
+          size="lg"
+        >
+          <AddCommunication
+            projects={projects}
+            fabricators={fabricators}
+            onClose={() => setIsFollowUpOpen(false)}
+            initialValues={prefilledData}
+          />
+        </Modal>
+      )}
     </div>
   );
 };

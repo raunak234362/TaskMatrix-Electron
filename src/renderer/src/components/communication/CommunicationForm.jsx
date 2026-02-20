@@ -1,122 +1,153 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import Select from 'react-select';
 import { format, parseISO } from 'date-fns';
-import Service from '../../api/Service';
 
 const customStyles = {
     control: (base) => ({
         ...base,
-        backgroundColor: 'white',
-        borderColor: '#e5e7eb',
-        borderRadius: '0.5rem',
-        padding: '2px',
-        boxShadow: 'none',
-        '&:hover': {
-            borderColor: '#3b82f6'
-        }
+        backgroundColor: "#f9fafb", // gray-50
+        borderColor: "#e5e7eb", // gray-200
+        borderRadius: "0.5rem",
+        minHeight: "40px",
+        boxShadow: "none",
+        "&:hover": {
+            borderColor: "#d1d5db", // gray-300
+        },
+        cursor: "pointer",
+        fontSize: "0.875rem"
     }),
-    singleValue: (base) => ({
+    valueContainer: (base) => ({
         ...base,
-        color: '#374151'
+        padding: "2px 12px",
     }),
-    option: (base, state) => ({
+    placeholder: (base) => ({
         ...base,
-        backgroundColor: state.isSelected ? '#eff6ff' : state.isFocused ? '#f9fafb' : 'white',
-        color: state.isSelected ? '#1d4ed8' : '#374151',
-        cursor: 'pointer'
+        color: "#9ca3af", // gray-400
     }),
+    menuPortal: base => ({ ...base, zIndex: 9999 }),
     menu: (base) => ({
         ...base,
         zIndex: 9999,
-        borderRadius: '0.5rem',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-    })
+        borderRadius: "0.75rem",
+        overflow: "hidden",
+        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+        border: "1px solid #f3f4f6"
+    }),
+    option: (base, state) => ({
+        ...base,
+        backgroundColor: state.isSelected
+            ? "#eff6ff"
+            : state.isFocused
+                ? "#f9fafb"
+                : "white",
+        color: state.isSelected ? "#2563eb" : "#374151",
+        fontSize: "0.875rem",
+        cursor: "pointer",
+        ":active": {
+            backgroundColor: "#ebf2ff",
+        },
+    }),
 };
 
-const CommunicationForm = ({
-    initialData,
-    projects = [],
-    fabricators = [],
-    onSubmit,
-    onCancel
-}) => {
+const CommunicationForm = ({ initialData, projects = [], fabricators = [], onSubmit, onCancel, fetchClientsByFabricator }) => {
     const [clients, setClients] = useState([]);
+    const [isFetchingClients, setIsFetchingClients] = useState(false);
 
-    const { register, handleSubmit, control, reset, watch, formState: { errors } } = useForm({
-        defaultValues: {
-            projectId: '',
-            fabricatorId: '',
-            clientName: '',
-            subject: '',
-            notes: '',
-            communicationDate: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-            followUpDate: '',
-            reminderSent: true,
-            isCompleted: false
-        }
-    });
+    const { register, handleSubmit, control, reset, watch, setValue, formState: { errors } } = useForm();
 
     const watchedFabricatorId = watch('fabricatorId');
 
-    // Populate form if editing
+    // Default fetch function if not provided
+    const defaultFetchClients = async (fabId) => {
+        // This is a placeholder, will be overridden or implemented via prop
+        // We'll see how AddCommunication implements it
+        return [];
+    };
+
+    const fetchClients = fetchClientsByFabricator || defaultFetchClients;
+
+    // Populate form if pre-filling
     useEffect(() => {
         if (initialData) {
+            let finalFabricatorId = initialData.fabricatorId;
+            let finalProjectId = initialData.projectId;
+
+            // If project is provided but fabricator isn't, try to find it
+            if (finalProjectId && !finalFabricatorId) {
+                const foundProject = projects.find(p => String(p.id || p._id) === String(finalProjectId));
+                if (foundProject) {
+                    finalFabricatorId = foundProject.fabricatorId || foundProject.fabricatorID || foundProject.fabId || (foundProject.fabricator?.id || foundProject.fabricator?._id || foundProject.fabricator?.fabId);
+                }
+            }
+
             reset({
-                projectId: initialData.projectId,
-                fabricatorId: initialData.fabricatorId,
-                clientName: initialData.clientName,
-                subject: initialData.subject,
-                notes: initialData.notes,
-                communicationDate: initialData.communicationDate ? format(parseISO(initialData.communicationDate), "yyyy-MM-dd'T'HH:mm") : '',
-                followUpDate: initialData.followUpDate ? format(parseISO(initialData.followUpDate), "yyyy-MM-dd'T'HH:mm") : '',
-                reminderSent: initialData.reminderSent,
-                isCompleted: initialData.isCompleted
+                projectId: finalProjectId || '',
+                fabricatorId: finalFabricatorId || '',
+                clientName: initialData.clientName || '',
+                subject: initialData.subject || '',
+                notes: initialData.notes || '',
+                communicationDate: initialData.communicationDate
+                    ? format(initialData.communicationDate.includes('T') ? parseISO(initialData.communicationDate) : new Date(initialData.communicationDate), "yyyy-MM-dd'T'HH:mm")
+                    : '',
+                followUpDate: initialData.followUpDate
+                    ? format(initialData.followUpDate.includes('T') ? parseISO(initialData.followUpDate) : new Date(initialData.followUpDate), "yyyy-MM-dd'T'HH:mm")
+                    : '',
+                reminderSent: initialData.reminderSent ?? false,
+                isCompleted: initialData.isCompleted ?? false
             });
         }
-    }, [initialData, reset]);
+    }, [initialData, reset, projects]);
 
     // Fetch Clients when Fabricator changes
     useEffect(() => {
-        const fetchClients = async () => {
+        const getClients = async () => {
             if (watchedFabricatorId) {
+                setIsFetchingClients(true);
                 try {
-                    const data = await Service.FetchAllClientsByFabricatorID(watchedFabricatorId);
-                    const clientList = Array.isArray(data) ? data : (data?.data || []);
+                    const clientList = await fetchClients(watchedFabricatorId);
                     setClients(clientList);
                 } catch (error) {
                     console.error("Failed to fetch clients", error);
                     setClients([]);
+                } finally {
+                    setIsFetchingClients(false);
                 }
             } else {
                 setClients([]);
             }
         };
-        fetchClients();
-    }, [watchedFabricatorId]);
+        getClients();
+    }, [watchedFabricatorId, fetchClients]);
 
-    // Derived state for projects based on selected fabricator
-    const availableProjects = watchedFabricatorId
-        ? projects.filter(p => p.fabricatorId === watchedFabricatorId)
-        : [];
+    // Derived collections
+    const fabricatorOptions = useMemo(() =>
+        fabricators.map(f => ({ value: f.id || f._id, label: f.fabName || f.name || f.fabricatorName })),
+        [fabricators]);
 
-    const onFormSubmit = (data) => {
+    const availableProjects = useMemo(() => {
+        if (!watchedFabricatorId) return [];
+        return projects.filter(p => {
+            const fid = p.fabricatorId || p.fabricatorID || p.fabId || (p.fabricator?.id || p.fabricator?._id || p.fabricator?.fabId);
+            return String(fid) === String(watchedFabricatorId);
+        });
+    }, [projects, watchedFabricatorId]);
+
+    const projectOptions = useMemo(() =>
+        availableProjects.map(p => ({ value: p.id || p._id, label: p.projectName || p.name || p.project_name })),
+        [availableProjects]);
+
+    const handleFormSubmit = (data) => {
         const payload = {
-            projectId: data.projectId,
-            fabricatorId: data.fabricatorId,
-            clientName: data.clientName,
-            subject: data.subject,
-            notes: data.notes,
+            ...data,
             communicationDate: data.communicationDate ? new Date(data.communicationDate).toISOString() : null,
             followUpDate: data.followUpDate ? new Date(data.followUpDate).toISOString() : null,
-            reminderSent: data.reminderSent,
-            isCompleted: data.isCompleted
         };
         onSubmit(payload);
     };
 
     return (
-        <form onSubmit={handleSubmit(onFormSubmit)} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="p-6 space-y-4">
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                     <label className="text-sm font-medium text-gray-700">Fabricator <span className="text-red-500">*</span></label>
@@ -126,9 +157,14 @@ const CommunicationForm = ({
                         rules={{ required: true }}
                         render={({ field }) => (
                             <Select
-                                options={fabricators.map(f => ({ value: f.id || f._id, label: f.fabName }))}
-                                value={fabricators.map(f => ({ value: f.id || f._id, label: f.fabName })).find(op => op.value === field.value) || null}
-                                onChange={(val) => field.onChange(val ? val.value : '')}
+                                isClearable
+                                options={fabricatorOptions}
+                                value={fabricatorOptions.find(op => String(op.value) === String(field.value)) || null}
+                                onChange={(val) => {
+                                    field.onChange(val ? val.value : '');
+                                    setValue('projectId', '');
+                                    setValue('clientName', '');
+                                }}
                                 placeholder="Select Fabricator"
                                 menuPortalTarget={document.body}
                                 styles={customStyles}
@@ -145,10 +181,10 @@ const CommunicationForm = ({
                         rules={{ required: true }}
                         render={({ field }) => (
                             <Select
-                                {...field}
                                 isDisabled={!watchedFabricatorId}
-                                options={availableProjects.map(p => ({ value: p.id || p._id, label: p.projectName }))}
-                                value={availableProjects.map(p => ({ value: p.id || p._id, label: p.projectName })).find(op => op.value === field.value) || null}
+                                isClearable
+                                options={projectOptions}
+                                value={projectOptions.find(op => String(op.value) === String(field.value)) || null}
                                 onChange={(val) => field.onChange(val ? val.value : '')}
                                 styles={customStyles}
                                 placeholder="Select Project"
@@ -171,13 +207,13 @@ const CommunicationForm = ({
                         const selectedOption = options.find(op => op.value === field.value) || (field.value ? { value: field.value, label: field.value } : null);
                         return (
                             <Select
-                                {...field}
-                                isDisabled={!watchedFabricatorId}
+                                isDisabled={!watchedFabricatorId || isFetchingClients}
+                                isClearable
                                 options={options}
                                 value={selectedOption}
                                 onChange={(val) => field.onChange(val ? val.value : '')}
                                 styles={customStyles}
-                                placeholder="Select Client"
+                                placeholder={isFetchingClients ? "Loading clients..." : "Select Client"}
                                 menuPortalTarget={document.body}
                             />
                         );
@@ -201,7 +237,6 @@ const CommunicationForm = ({
                     <label className="text-sm font-medium text-gray-700">Date <span className="text-red-500">*</span></label>
                     <input
                         type="datetime-local"
-                        defaultValue={initialData ? undefined : format(new Date(), "yyyy-MM-dd'T'HH:mm")}
                         {...register('communicationDate', { required: true })}
                         className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
                     />
