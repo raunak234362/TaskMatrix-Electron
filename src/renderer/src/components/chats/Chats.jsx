@@ -1,5 +1,5 @@
 // src/pages/Chats.tsx
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import ChatMain from "./ChatMain";
 import ChatSidebar from "./ChatSidebar";
 import useGroupMessages from "../../hooks/userGroupMessages";
@@ -8,7 +8,23 @@ import AddChatGroup from "./AddChatGroup";
 
 const Chats = () => {
   const [recentChats, setRecentChats] = useState([]);
-  const [activeChat, setActiveChat] = useState(null);
+  const [activeChat, setActiveChat] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('activeChat');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    if (activeChat) {
+      sessionStorage.setItem('activeChat', JSON.stringify(activeChat));
+    } else {
+      sessionStorage.removeItem('activeChat');
+    }
+  }, [activeChat]);
+
   const [unreadIds, setUnreadIds] = useState([]);
   const [isAddGroupOpen, setIsAddGroupOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -67,10 +83,10 @@ const Chats = () => {
   };
 
   return (
-    <div className="flex md:h-[92.5vh] h-[93vh] overflow-y-hidden bg-gray-50 rounded-2xl">
+    <div className="flex h-full overflow-y-hidden bg-gray-50 rounded-2xl">
       {/* Desktop */}
-      <div className="hidden md:flex w-full rounded-2xl">
-        <div className="w-80 border-r">
+      <div className="hidden md:flex w-full h-full rounded-2xl">
+        <div className="w-80 border-r h-full">
           <ChatSidebar
             recentChats={recentChats}
             activeChat={activeChat}
@@ -82,7 +98,7 @@ const Chats = () => {
             refreshKey={refreshKey}
           />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 h-full">
           {isAddGroupOpen ? (
             <AddChatGroup
               onClose={handleCloseAddGroup}
@@ -104,7 +120,7 @@ const Chats = () => {
       </div>
 
       {/* Mobile */}
-      <div className="md:hidden w-full">
+      <div className="md:hidden w-full h-full">
         {isAddGroupOpen ? (
           <AddChatGroup
             onClose={handleCloseAddGroup}

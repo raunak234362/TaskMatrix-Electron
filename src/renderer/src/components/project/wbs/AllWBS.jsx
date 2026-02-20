@@ -104,7 +104,7 @@ const AllWBS = ({ id, stage }) => {
       header: "Exec Time",
       cell: ({ row }) => (
         <span className="text-sm font-bold text-gray-600">
-          {formatMinutesToTime(row.original.totalExecHr)}
+          {formatMinutesToTime(row.original.totalExecHr)} hrs
         </span>
       ),
     },
@@ -113,7 +113,7 @@ const AllWBS = ({ id, stage }) => {
       header: "Check Time",
       cell: ({ row }) => (
         <span className="text-sm font-bold text-gray-600">
-          {formatMinutesToTime(row.original.totalCheckHr)}
+          {formatMinutesToTime(row.original.totalCheckHr)} hrs
         </span>
       ),
     },

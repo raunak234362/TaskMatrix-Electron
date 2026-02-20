@@ -91,7 +91,7 @@ const GetWBSLineItem = ({
       header: "Exec Hr",
       cell: ({ row }) => (
         <span className="text-sm text-gray-700">
-          {formatDecimalHoursToTime(row.original.execHr ?? row.original.totalExecHr ?? 0)}
+          {formatDecimalHoursToTime(row.original.execHr / 60 ?? row.original.totalExecHr / 60 ?? 0)} hrs
         </span>
       ),
       enableSorting: true,
@@ -101,7 +101,7 @@ const GetWBSLineItem = ({
       header: "Check Hr",
       cell: ({ row }) => (
         <span className="text-sm text-gray-700">
-          {formatDecimalHoursToTime(row.original.checkHr ?? row.original.totalCheckHr ?? 0)}
+          {formatDecimalHoursToTime(row.original.checkHr / 60 ?? row.original.totalCheckHr / 60 ?? 0)}  hrs
         </span>
       ),
       enableSorting: true,

@@ -613,6 +613,33 @@ const AddTask = () => {
                       />
                     </div>
 
+                     <div className="space-y-2">
+                      <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <Layers className="w-4 h-4 text-blue-500" /> Status *
+                      </label>
+                      <Controller
+                        name="status"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            name="status"
+                            options={[
+                              { label: "Assign", value: "ASSIGNED" },
+                              { label: "Rework", value: "REWORK" },
+                            ]}
+                            value={field.value}
+                            onChange={(_, val) => {
+                              field.onChange(val);
+                              // Reset WBS selection when stage changes
+                              setValue("project_bundle_id", "");
+                              setSelectedWbs(null);
+                            }}
+                            placeholder="Select Stage"
+                          />
+                        )}
+                      />
+                    </div>
+
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                         <Layers className="w-4 h-4 text-blue-500" />{" "}
@@ -670,32 +697,7 @@ const AddTask = () => {
                         )}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                        <Layers className="w-4 h-4 text-blue-500" /> Status *
-                      </label>
-                      <Controller
-                        name="status"
-                        control={control}
-                        render={({ field }) => (
-                          <Select
-                            name="status"
-                            options={[
-                              { label: "Assign", value: "ASSIGNED" },
-                              { label: "Rework", value: "REWORK" },
-                            ]}
-                            value={field.value}
-                            onChange={(_, val) => {
-                              field.onChange(val);
-                              // Reset WBS selection when stage changes
-                              setValue("project_bundle_id", "");
-                              setSelectedWbs(null);
-                            }}
-                            placeholder="Select Stage"
-                          />
-                        )}
-                      />
-                    </div>
+                   
                   </div>
 
                   {/* WBS Timing Display */}

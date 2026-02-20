@@ -40,9 +40,19 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
             accessorKey: 'status',
             header: 'Status',
             cell: ({ row }) => {
+                if (type === 'PENDING_SUBMITTALS') {
+                    const isSubmitted = row.original.status === true
+                    return (
+                        <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${isSubmitted ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'
+                            }`}>
+                            {isSubmitted ? 'Pending' : 'Submitted to EOR'}
+                        </span>
+                    )
+                }
+
                 const status = row.original.status || 'PENDING'
                 return (
-                    <span className={`px-3 py-1 rounded-full text-[10px]  uppercase tracking-wider ${status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
+                    <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
                         status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
                             'bg-blue-100 text-blue-700'
                         }`}>

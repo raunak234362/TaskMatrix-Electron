@@ -1,4 +1,4 @@
-import { Provider, useDispatch } from 'react-redux'
+import { Provider, useDispatch, useSelector } from 'react-redux'
 import store from './store/store'
 import Layout from './layout/DashboardLayout'
 import Service from './api/Service'
@@ -10,11 +10,20 @@ import { loadFabricator } from './store/fabricatorSlice'
 import { setRFQData } from './store/rfqSlice'
 import { setProjectData } from './store/projectSlice'
 import useNotifications from './hooks/useNotifications'
+import NotificationReceiver from './utils/NotificationReceiver'
 
 const AppContent = () => {
   const dispatch = useDispatch()
+  const userDetail = useSelector((state) => state.userData?.userData ?? state.userInfo?.userDetail)
   useNotifications()
   const userType = sessionStorage.getItem('userRole')
+
+  // Connect socket when userDetail is available
+  useEffect(() => {
+    if (userDetail?.id) {
+      connectSocket(userDetail.id)
+    }
+  }, [userDetail?.id])
 
   /*
   // Electron IPC test handler
@@ -32,22 +41,19 @@ const AppContent = () => {
   const fetchSignedinUser = async () => {
     try {
       const response = await Service.GetUserByToken()
-      const userDetail = response?.data?.user
-      if (!userDetail?.id) throw new Error('Invalid user')
+      const fetchedUser = response?.data?.user
+      if (!fetchedUser?.id) throw new Error('Invalid user')
 
-      sessionStorage.setItem('userId', userDetail.id)
-      sessionStorage.setItem('username', userDetail.username)
-      sessionStorage.setItem('firstName', userDetail.firstName)
-      sessionStorage.setItem('lastName', userDetail.lastName)
-      sessionStorage.setItem('userRole', userDetail.role)
-      sessionStorage.setItem('designation', userDetail.designation)
-      dispatch(setUserData(userDetail))
-
-      // Connect socket after user is set
-      connectSocket(userDetail.id)
+      sessionStorage.setItem('userId', fetchedUser.id)
+      sessionStorage.setItem('username', fetchedUser.username)
+      sessionStorage.setItem('firstName', fetchedUser.firstName)
+      sessionStorage.setItem('lastName', fetchedUser.lastName)
+      sessionStorage.setItem('userRole', fetchedUser.role)
+      sessionStorage.setItem('designation', fetchedUser.designation)
+      dispatch(setUserData(fetchedUser))
     } catch (err) {
       console.error('User fetch failed:', err)
-      toast.error('Failed to load user')
+      // toast.error('Failed to load user')
     }
   }
 
@@ -141,7 +147,8 @@ const AppContent = () => {
 
   return (
     <>
-      <ToastContainer position="top-right" autoClose={1000} />
+      <ToastContainer position="top-right" autoClose={5000} newestOnTop />
+      <NotificationReceiver />
 
       {/* Main Layout */}
       <Layout />

@@ -31,6 +31,7 @@ const AddRFI = ({
     useForm();
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // Match selected fabricator
   const selectedFabricator = fabricators?.find(
@@ -60,6 +61,7 @@ const AddRFI = ({
 
   const onSubmit = async (data) => {
     try {
+      setLoading(true);
       const payload = {
         ...data,
         project_id: project_id,
@@ -82,14 +84,16 @@ const AddRFI = ({
       });
 
       await Service.addRFI(formData);
-      toast.success("RFI Submitted");
+      toast.success("RFI Submitted Successfully");
       reset();
       setDescription("");
       setFiles([]);
       onSuccess?.();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to create RFI");
+      toast.error(err?.response?.data?.message || "Failed to create RFI");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -113,7 +117,7 @@ const AddRFI = ({
   return (
     <div className="w-full mx-auto bg-white p-2 rounded-xl shadow">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <SectionTitle title="Fabrication & Routing" />
+        {/* <SectionTitle title="Fabrication & Routing" /> */}
 
         {userRole !== "CLIENT" && (
           <>
@@ -156,7 +160,7 @@ const AddRFI = ({
           )}
         />
 
-        <SectionTitle title="Details" />
+        {/* <SectionTitle title="Details" /> */}
 
         <Input
           label="Subject"
@@ -175,13 +179,13 @@ const AddRFI = ({
           />
         </div>
 
-        <SectionTitle title="Files" />
+        {/* <SectionTitle title="Files" /> */}
 
         <MultipleFileUpload onFilesChange={setFiles} />
 
         <div className="flex justify-center w-full mt-6">
-          <Button type="submit" className="w-full">
-            Submit RFI
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Submitting RFI..." : "Submit RFI"}
           </Button>
         </div>
       </form>

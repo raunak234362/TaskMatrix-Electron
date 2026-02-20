@@ -19,6 +19,7 @@ import DataTable from "../ui/table";
 import FetchTaskByID from "./FetchTaskByID";
 import GetTaskByID from "./GetTaskByID";
 import BulkUpdateStatusModal from "./components/BulkUpdateStatusModal";
+import Select from "../fields/Select";
 
 const TaskDetailWrapper = ({ row, close }) => {
   return <GetTaskByID id={row.id} onClose={close} />;
@@ -34,6 +35,8 @@ const AllTasks = () => {
     projectName: "All Projects",
     stage: "All Stages",
     status: "All Status",
+    assignedUser: "All Users",
+    wbsType: "All Types",
   });
 
   const [dateFilter, setDateFilter] = useState({
@@ -132,17 +135,19 @@ const AllTasks = () => {
   };
 
   /* -------------------- Filters Options -------------------- */
-  const { projectOptions, stageOptions, statusOptions, userOptions } =
+  const { projectOptions, stageOptions, statusOptions, userOptions, wbsTypeOptions } =
     useMemo(() => {
       const projects = new Set();
       const stages = new Set();
       const statuses = new Set();
       const users = new Set();
+      const wbsTypes = new Set();
 
       tasks.forEach((task) => {
         if (task.project?.name) projects.add(task.project.name);
         if (task.Stage) stages.add(task.Stage);
         if (task.status) statuses.add(task.status);
+        if (task.wbsType) wbsTypes.add(task.wbsType);
         const userName = task.user
           ? `${task.user.firstName} ${task.user.lastName}`
           : "Unassigned";
@@ -150,10 +155,26 @@ const AllTasks = () => {
       });
 
       return {
-        projectOptions: ["All Projects", ...Array.from(projects)],
-        stageOptions: ["All Stages", ...Array.from(stages)],
-        statusOptions: ["All Status", ...Array.from(statuses)],
-        userOptions: Array.from(users).map((u) => ({ label: u, value: u })),
+        projectOptions: [
+          { label: "All Projects", value: "All Projects" },
+          ...Array.from(projects).map((p) => ({ label: p, value: p })),
+        ],
+        stageOptions: [
+          { label: "All Stages", value: "All Stages" },
+          ...Array.from(stages).map((s) => ({ label: s, value: s })),
+        ],
+        statusOptions: [
+          { label: "All Status", value: "All Status" },
+          ...Array.from(statuses).map((s) => ({ label: s, value: s })),
+        ],
+        userOptions: [
+          { label: "All Users", value: "All Users" },
+          ...Array.from(users).map((u) => ({ label: u, value: u })),
+        ],
+        wbsTypeOptions: [
+          { label: "All Types", value: "All Types" },
+          ...Array.from(wbsTypes).map((w) => ({ label: w, value: w })),
+        ],
       };
     }, [tasks]);
 
@@ -177,6 +198,22 @@ const AllTasks = () => {
       if (
         filters.status !== "All Status" &&
         status !== filters.status
+      )
+        return false;
+
+      const userName = task.user
+        ? `${task.user.firstName} ${task.user.lastName}`
+        : "Unassigned";
+      if (
+        filters.assignedUser !== "All Users" &&
+        userName !== filters.assignedUser
+      )
+        return false;
+
+      const wbsType = task.wbsType || "N/A";
+      if (
+        filters.wbsType !== "All Types" &&
+        wbsType !== filters.wbsType
       )
         return false;
 
@@ -340,37 +377,61 @@ const AllTasks = () => {
           {/* Project Filter */}
           <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Project</label>
-            <select
-              className="w-full text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+            <Select
+              options={projectOptions}
               value={filters.projectName}
-              onChange={(e) => setFilters(prev => ({ ...prev, projectName: e.target.value }))}
-            >
-              {projectOptions.map(p => <option key={p} value={p}>{p}</option>)}
-            </select>
+              onChange={(_, val) => setFilters(prev => ({ ...prev, projectName: val }))}
+              placeholder="Select Project"
+              className="font-semibold text-gray-700 bg-gray-50"
+            />
           </div>
 
           {/* Stage Filter */}
           <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Stage</label>
-            <select
-              className="w-full text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+            <Select
+              options={stageOptions}
               value={filters.stage}
-              onChange={(e) => setFilters(prev => ({ ...prev, stage: e.target.value }))}
-            >
-              {stageOptions.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+              onChange={(_, val) => setFilters(prev => ({ ...prev, stage: val }))}
+              placeholder="Select Stage"
+              className="font-semibold text-gray-700 bg-gray-50"
+            />
           </div>
 
           {/* Status Filter */}
           <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Status</label>
-            <select
-              className="w-full text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+            <Select
+              options={statusOptions}
               value={filters.status}
-              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-            >
-              {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+              onChange={(_, val) => setFilters(prev => ({ ...prev, status: val }))}
+              placeholder="Select Status"
+              className="font-semibold text-gray-700 bg-gray-50"
+            />
+          </div>
+
+          {/* User Filter */}
+          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Assigned User</label>
+            <Select
+              options={userOptions}
+              value={filters.assignedUser}
+              onChange={(_, val) => setFilters(prev => ({ ...prev, assignedUser: val }))}
+              placeholder="Select User"
+              className="font-semibold text-gray-700 bg-gray-50"
+            />
+          </div>
+
+          {/* WBS Type Filter */}
+          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">WBS Type</label>
+            <Select
+              options={wbsTypeOptions}
+              value={filters.wbsType}
+              onChange={(_, val) => setFilters(prev => ({ ...prev, wbsType: val }))}
+              placeholder="Select Type"
+              className="font-semibold text-gray-700 bg-gray-50"
+            />
           </div>
 
           {/* Date Filter */}

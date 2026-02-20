@@ -75,6 +75,8 @@ const ChatSidebar = ({
     setUnreadChatIds((prev) => prev.filter((id) => id !== chat.group.id));
   };
 
+  const userRole = sessionStorage.getItem("userRole")?.toUpperCase() || "";
+
   return (
     <div className="flex flex-col h-full bg-white border-r border-gray-200 rounded-l-2xl">
       {/* Header */}
@@ -117,19 +119,21 @@ const ChatSidebar = ({
           );
         })}
       </div>
-
-      {/* Footer Buttons */}
-      <div className="p-3 border-t flex gap-2">
-        <Button
-        //   onClick={() => setPrivateChatOpen(true)}
-        >
-          <TiUserAdd className="w-5 h-5" />
-        </Button>
-        <Button onClick={onAddGroupClick}>
-          <MdGroupAdd className="w-5 h-5" />
-        </Button>
-      </div>
-
+      {userRole === "ADMIN" && (
+        <>
+          {/* Footer Buttons */}
+          <div className="p-3 border-t flex gap-2">
+            <Button
+            //   onClick={() => setPrivateChatOpen(true)}
+            >
+              <TiUserAdd className="w-5 h-5" />
+            </Button>
+            <Button onClick={onAddGroupClick}>
+              <MdGroupAdd className="w-5 h-5" />
+            </Button>
+          </div>
+        </>
+      )}
       {/* Modals */}
       {/* {addGroupOpen && <AddGroupModal onClose={() => setAddGroupOpen(false)} />}
       {privateChatOpen && (

@@ -81,6 +81,19 @@ const AllSubmittals = ({ submittalData }) => {
           {row.original.status === true ? "Pending" : "Responded"}
         </span>
       ),
+      cell: ({ row }) => {
+        const isSubmitted = row.original.status === true
+        return (
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-medium ${isSubmitted
+              ? "bg-green-100 text-green-700"
+              : "bg-amber-100 text-amber-700"
+              }`}
+          >
+            {isSubmitted ? "Submitted to EOR" : "Pending"}
+          </span>
+        )
+      },
     },
 
     {

@@ -134,35 +134,35 @@ const Select = ({
             }, 100);
           }
         }}
-        className={`flex items-center justify-between p-2 text-sm border rounded-md bg-white cursor-pointer transition-all ${isOpen ? "border-blue-500 ring-2 ring-blue-100" : "border-gray-300"
+        className={`flex items-center justify-between p-2.5 text-xs font-bold border rounded-lg bg-white cursor-pointer transition-all ${isOpen ? "border-sky-400 ring-4 ring-sky-50 shadow-sm" : "border-gray-200"
           } ${className}`}
       >
         <div className="flex-1">
           {isOpen && showSearch ? (
             <div className="flex items-center">
-              <Search className="w-4 h-4 text-gray-400 mr-2" />
+              <Search className="w-3.5 h-3.5 text-gray-400 mr-2" />
               <input
                 ref={searchRef}
                 type="text"
                 value={searchTerm}
                 onChange={handleSearch}
-                className="w-full bg-transparent outline-none"
+                className="w-full bg-transparent outline-none placeholder:font-normal placeholder:text-gray-400"
                 placeholder="Search..."
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
           ) : (
             <span
-              className={selectedOption ? "text-gray-700" : "text-gray-700"}
+              className={`uppercase tracking-wide ${selectedOption ? "text-slate-600" : "text-gray-400"}`}
             >
               {selectedOption
                 ? selectedOption.label
-                : label || placeholder || "Select an option"}
+                : placeholder || "ALL"}
             </span>
           )}
         </div>
         <svg
-          className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? "transform rotate-180" : ""
+          className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""
             }`}
           fill="none"
           stroke="currentColor"
@@ -171,7 +171,7 @@ const Select = ({
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="2"
+            strokeWidth="2.5"
             d="M19 9l-7 7-7-7"
           />
         </svg>
@@ -188,7 +188,7 @@ const Select = ({
               filteredOptions.map((option) => (
                 <div
                   key={option.value}
-                  className="px-4 py-2 cursor-pointer hover:bg-gray-100 transition-colors"
+                  className="px-4 py-2.5 cursor-pointer hover:bg-sky-50 hover:text-sky-700 transition-colors uppercase font-bold tracking-wider text-[11px]"
                   onClick={() => handleSelect(option)}
                 >
                   {highlightMatch(option.label, searchTerm)}

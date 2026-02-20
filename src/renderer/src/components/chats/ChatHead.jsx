@@ -11,7 +11,7 @@ const ChatHead = ({ contact, onBack }) => {
   const group = contact?.group;
 
   return (
-    <div className="p-4 border-b bg-white flex justify-between items-center rounded-2xl">
+    <div className="p-2 border-b bg-white flex justify-between items-center rounded-2xl">
       <div className="flex items-center gap-3">
         {onBack && (
           <button
@@ -31,7 +31,7 @@ const ChatHead = ({ contact, onBack }) => {
 
       <Button
         onClick={() => setDetailOpen(true)}
-        className="rounded-full bg-green-500 text-white"
+        className="rounded-full border border-black bg-green-100 text-black"
       >
         <MoreVertical size={20} />
       </Button>
