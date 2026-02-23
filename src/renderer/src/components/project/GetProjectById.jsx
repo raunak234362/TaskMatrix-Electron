@@ -252,7 +252,7 @@ const GetProjectById = ({ id, onClose }) => {
               <div className="md:col-span-2 mt-6">
                 <h4 className="font-black text-black uppercase tracking-widest mb-3 flex items-center gap-2 text-md">
                   <FolderOpenDot className="w-5 h-5" />
-                  Project Description
+                  Project Scope
                 </h4>
                 <div
                   className="text-black bg-green-100 p-4 rounded-xl border border-black shadow-sm prose prose-sm max-w-none font-medium"

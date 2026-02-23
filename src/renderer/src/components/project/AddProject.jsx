@@ -276,7 +276,7 @@ const AddProject = () => {
                     />
                     <div className="md:col-span-2 space-y-3">
                       <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                        Project Description *
+                        Project Scope *
                       </label>
                       <div className="rounded-xl overflow-hidden border border-black bg-green-200">
                         <Controller
