@@ -3,14 +3,22 @@ import { useEffect, useState } from "react";
 import DataTable from "../ui/table";
 
 
+import { useSelector } from "react-redux";
+import { Loader2, Inbox, MessageSquare } from "lucide-react";
 import GetRFIByID from "./GetRFIByID";
-import { Loader2, Inbox } from "lucide-react";
+import Modal from "../ui/Modal";
+import AddCommunication from "../communication/AddCommunication";
 
 
 const AllRFI = ({ rfiData = [] }) => {
   const [rfis, setRFIs] = useState([]);
   const [loading, setLoading] = useState(true);
-  // const [selectedRfiID, setSelectedRfiID] = useState(null);
+  const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
+  const [prefilledData, setPrefilledData] = useState(null);
+
+  const projects = useSelector((state) => state.projectInfo?.projectData || []);
+  const fabricators = useSelector((state) => state.fabricatorInfo?.fabricatorData || []);
+
   console.log(rfiData);
 
   const userRole = sessionStorage.getItem("userRole");
@@ -79,6 +87,31 @@ const AllRFI = ({ rfiData = [] }) => {
             year: "numeric",
           })
           : "—",
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            const item = row.original;
+            setPrefilledData({
+              projectId: item.project?.id || item.project || "",
+              fabricatorId: item.fabricator?.id || item.fabricator || "",
+              clientId: item.client?.id || item.client || "",
+              subject: `Follow-up: ${item.subject || ""}`,
+              notes: `Ref: RFI ${item.subject || ""}`
+            });
+            setIsFollowUpOpen(true);
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors shadow-sm"
+          title="Create Follow-up"
+        >
+          <MessageSquare className="w-3.5 h-3.5" />
+          Follow-up
+        </button>
+      )
     }
   );
 
@@ -97,8 +130,7 @@ const AllRFI = ({ rfiData = [] }) => {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-700">
         <Inbox className="w-10 h-10 mb-3 text-gray-400" />
-        <p className="text-lg font-medi
-um">No RFIs Available</p>
+        <p className="text-lg font-medium">No RFIs Available</p>
         <p className="text-sm text-gray-400">
           {userRole === "CLIENT"
             ? "You haven’t sent any RFIs yet."
@@ -114,11 +146,24 @@ um">No RFIs Available</p>
       <DataTable
         columns={columns}
         data={rfis}
-
         detailComponent={({ row }) => <GetRFIByID id={row.id} />}
-
       />
 
+      {isFollowUpOpen && (
+        <Modal
+          isOpen={isFollowUpOpen}
+          onClose={() => setIsFollowUpOpen(false)}
+          title="New Communication Follow-up"
+          size="lg"
+        >
+          <AddCommunication
+            projects={projects}
+            fabricators={fabricators}
+            onClose={() => setIsFollowUpOpen(false)}
+            initialValues={prefilledData}
+          />
+        </Modal>
+      )}
     </div>
   );
 };

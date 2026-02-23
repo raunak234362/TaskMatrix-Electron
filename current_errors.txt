@@ -1,0 +1,534 @@
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/api/Service.js
+  2067:3  error  Duplicate name 'PendingSubmittal'                    no-dupe-class-members
+  2558:3  error  Duplicate name 'AddClientCommunicationFollowup'      no-dupe-class-members
+  2569:3  error  Duplicate name 'GetClientCommunicationFollowupList'  no-dupe-class-members
+  2580:3  error  Duplicate name 'UpdateClientCommunicationFollowup'   no-dupe-class-members
+  2591:3  error  Duplicate name 'MarkClientCommunicationAsCompleted'  no-dupe-class-members
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/Header.jsx
+    2:35  error  'X' is defined but never used      no-unused-vars
+  119:14  error  'error' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/accounts/getAccountByID.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/calendar/Calendar.jsx
+    1:8   error  'React' is defined but never used                         no-unused-vars
+   18:12  error  'loading' is assigned a value but never used              no-unused-vars
+   86:11  error  'handleSelectDate' is assigned a value but never used     no-unused-vars
+  135:11  error  'handleCreateForDate' is assigned a value but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/calendar/components/CalendarHeader.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/calendar/components/MeetingListSidebar.jsx
+  2:8   error  'React' is defined but never used         no-unused-vars
+  4:51  error  'MoreVertical' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/calendar/modals/MeetingModal.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/calendar/views/DayView.jsx
+   1:8   error  'React' is defined but never used  no-unused-vars
+  17:18  error  'e' is defined but never used      no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/calendar/views/MonthView.jsx
+   1:8   error  'React' is defined but never used  no-unused-vars
+  18:18  error  'e' is defined but never used      no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/calendar/views/WeekView.jsx
+  17:18  error  'e' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/chats/ChatMain.jsx
+  1:1   error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  4:8   error  'Button' is defined but never used                                      no-unused-vars
+  8:10  error  'useCallback' is defined but never used                                 no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/chats/Chats.jsx
+  15:14  error  'e' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/chats/GroupDetail.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/co/AllCO.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/co/CoTable.jsx
+  74:14  error  'err' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/co/GetCOByID.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/common/RenderFiles.jsx
+  1:8   error  'React' is defined but never used  no-unused-vars
+  9:10  error  'toast' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/communication/AddCommunication.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/communication/Communication.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/communication/CommunicationCalendar.jsx
+   1:8   error  'React' is defined but never used             no-unused-vars
+  22:5   error  'Search' is defined but never used            no-unused-vars
+  23:17  error  'CalendarIcon' is defined but never used      no-unused-vars
+  26:5   error  'ArrowRight' is defined but never used        no-unused-vars
+  40:12  error  'loading' is assigned a value but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/communication/CommunicationForm.jsx
+   1:8   error  'React' is defined but never used  no-unused-vars
+  62:40  error  'fabId' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/communication/CommunicationListSidebar.jsx
+  1:8   error  'React' is defined but never used         no-unused-vars
+  3:64  error  'CalendarIcon' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/communication/EditCommunication.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/communication/GetCommunicationById.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/communication/ListCommunication.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/QuotationRaise.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/components/CDCapacityTable.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/components/CDInsightsList.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/components/CDLocationCharts.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/components/CDNetworkOverview.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/components/CDSnapshotCards.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/designer/AddConnectionDesigner.jsx
+  2:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/designer/AllConnectionDesigner.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/designer/GetConnectionDesignerByID.jsx
+  3:32  error  'Link2' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/engineer/AddCDEngineer.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/connectionDesigner/engineer/AllCDEngineer.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/dashboard/AdminDashboardView.jsx
+  2:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/dashboard/DesignerLandingDashboard.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/dashboard/StaffDashboardView.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/dashboard/components/DashboardListModal.jsx
+  1:10  error  'X' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/dashboard/components/PendingActions.jsx
+  1:46  error  'Activity' is defined but never used           no-unused-vars
+  7:9   error  'userRole' is assigned a value but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/dashboard/components/PersonalNotesWidget.jsx
+  2:25  error  'Calendar' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/dashboard/components/UserStatsWidget.jsx
+  2:28  error  'TrendingUp' is defined but never used  no-unused-vars
+  9:3   error  'colorClass' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/fabricator/branches/AllBranches.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/fabricator/clients/AddClient.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/fabricator/clients/AllClients.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/fabricator/fabricator/AllFabricator.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/fabricator/fabricator/EditFabricator.jsx
+  2:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/fields/Button.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/fields/MultipleFileUpload.jsx
+  3:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/fields/RichTextEditor.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/fields/Select.jsx
+   3:8  error  'React' is defined but never used  no-unused-vars
+  11:3  error  'label' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/fields/Toggle.jsx
+   3:8   error  'React' is defined but never used             no-unused-vars
+   3:24  error  'useState' is defined but never used          no-unused-vars
+  10:16  error  Component definition is missing display name  react/display-name
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/invoices/GetInvoiceById.jsx
+  487:46  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/invoices/dashboard/InvoiceAnalytics.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/invoices/dashboard/InvoiceStatsCards.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/invoices/dashboard/QuickActionsPanel.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/department/AddDepartment.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/department/AllDepartments.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/department/EditDepartment.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/employee/AddEmployee.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/employee/AllEmployee.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/employee/EditEmployee.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/team/AddTeam.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/team/AddTeamMembers.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/team/AllTeam.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/team/GetTeamById.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/team/TeamMember.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/team/UpdateRoleByMemberID.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/TeamDashboard.jsx
+    1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  784:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  785:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  789:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  790:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  794:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  795:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  799:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  800:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  804:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  805:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+  809:9  error  Unexpected lexical declaration in case block                            no-case-declarations
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/DailyWorkReportModal.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/DashboardHeader.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/EfficiencyAnalytics.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/MonthlyEfficiencyChart.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/TaskDistribution.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/TeamCalendar.jsx
+  1:8  error  'React' is defined but never used     no-unused-vars
+  5:3  error  'Calendar' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/TeamMembersTable.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/TeamStatsCards.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/manageTeam/teamDashboard/components/TeamsList.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/profile/ChangePasswordModal.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/profile/Profile.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/AddProject.jsx
+    1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+    2:8  error  'React' is defined but never used                                       no-unused-vars
+    8:3  error  'Building2' is defined but never used                                   no-unused-vars
+    9:3  error  'UserCheck' is defined but never used                                   no-unused-vars
+   10:3  error  'HardHat' is defined but never used                                     no-unused-vars
+   15:3  error  'Users' is defined but never used                                       no-unused-vars
+   23:8  error  'ToggleField' is defined but never used                                 no-unused-vars
+  106:9  error  'selectedDeptId' is assigned a value but never used                     no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/AllProjects.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/EditProject.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/GetProjectById.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/ProjectAnalyticsDashboard.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/designDrawings/AddDesignDrawing.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/designDrawings/AllDesignDrawings.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/designDrawings/DesignDrawingDetails.jsx
+   1:1   error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  20:14  error  'err' is defined but never used                                         no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/designDrawings/EditDesignDrawing.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/mileStone/AddMileStone.jsx
+   1:19  error  'Controller' is defined but never used        no-unused-vars
+   9:8   error  'RichTextEditor' is defined but never used    no-unused-vars
+  21:5   error  'control' is assigned a value but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/mileStone/AllMileStone.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/mileStone/GetMilestoneByID.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/mileStone/MilestoneResponseModal.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/notes/AllNotes.jsx
+   7:3  error  'User' is defined but never used         no-unused-vars
+  13:8  error  'RenderFiles' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/projectDocument/AllDocument.jsx
+  4:10  error  'useParams' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/wbs/AllWBS.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/wbs/GetWBSByID.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/wbs/GetWBSByIDsHours.jsx
+  1:1   error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  3:10  error  'Button' is defined but never used                                      no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/wbs/GetWBSLineItem.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/project/wbs/UpdateLineItem.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  2:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/rfi/AddRFI.jsx
+  10:8  error  'SectionTitle' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/rfi/AllRfi.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/rfi/GetRFIByID.jsx
+   1:8   error  'React' is defined but never used  no-unused-vars
+  31:14  error  'err' is defined but never used    no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/rfi/RFIResponseModal.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/rfq/AddRFQ.jsx
+   1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+   2:8  error  'React' is defined but never used                                       no-unused-vars
+  62:9  error  'recipientOption' is assigned a value but never used                    no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/rfq/GetRFQByID.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/rfq/ResponseModal.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/sales/SalesDashboard.jsx
+  1:1   error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  4:10  error  'motion' is defined but never used                                      no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/sales/components/SalesSecondaryStats.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/sales/components/SalesStatsCards.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/submittals/AllSubmittals.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/submittals/GetSubmittalByID.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/task/AddTask.jsx
+    1:1   error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+    2:8   error  'React' is defined but never used                                       no-unused-vars
+   21:8   error  'RichTextEditor' is defined but never used                              no-unused-vars
+   49:10  error  'isLoadingTasks' is assigned a value but never used                     no-unused-vars
+  450:11  error  'existingHours' is assigned a value but never used                      no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/task/AllActiveTask.jsx
+   12:3   error  'Filter' is defined but never used                               no-unused-vars
+  312:20  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/task/AllTasks.jsx
+   10:3   error  'Tag' is defined but never used                                  no-unused-vars
+   12:3   error  'Trash2' is defined but never used                               no-unused-vars
+   19:8   error  'FetchTaskByID' is defined but never used                        no-unused-vars
+  473:20  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/task/EditTask.jsx
+   1:1   error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+   2:8   error  'React' is defined but never used                                       no-unused-vars
+   8:3   error  'AlertCircle' is defined but never used                                 no-unused-vars
+   9:3   error  'User' is defined but never used                                        no-unused-vars
+  10:3   error  'Layers' is defined but never used                                      no-unused-vars
+  11:3   error  'Save' is defined but never used                                        no-unused-vars
+  13:3   error  'Flag' is defined but never used                                        no-unused-vars
+  35:18  error  'errors' is assigned a value but never used                             no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/task/FetchTaskByID.jsx
+    1:8   error  'React' is defined but never used  no-unused-vars
+  166:14  error  'error' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/task/GetTaskByID.jsx
+    8:3   error  'Clock4' is defined but never used                       no-unused-vars
+    9:3   error  'ChevronDown' is defined but never used                  no-unused-vars
+   10:3   error  'ChevronUp' is defined but never used                    no-unused-vars
+   15:3   error  'Pause' is defined but never used                        no-unused-vars
+   16:3   error  'Play' is defined but never used                         no-unused-vars
+   17:3   error  'Square' is defined but never used                       no-unused-vars
+   24:10  error  'Button' is defined but never used                       no-unused-vars
+   33:10  error  'processing' is assigned a value but never used          no-unused-vars
+   34:10  error  'showWorkSummary' is assigned a value but never used     no-unused-vars
+   34:27  error  'setShowWorkSummary' is assigned a value but never used  no-unused-vars
+  145:9   error  'handleAction' is assigned a value but never used        no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/task/comments/Comment.jsx
+   2:33  error  'Clock' is defined but never used           no-unused-vars
+  11:5   error  'reset' is assigned a value but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/task/components/BulkUpdateStatusModal.jsx
+   1:8   error  'React' is defined but never used  no-unused-vars
+  32:63  error  'index' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/task/components/UpdateStatusModal.jsx
+  1:8   error  'React' is defined but never used   no-unused-vars
+  2:60  error  'Square' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/ui/RenderFiles.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+  6:8  error  'React' is defined but never used                                       no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/ui/button.jsx
+   1:13  error  'React' is defined but never used                                                                                               no-unused-vars
+  53:18  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/ui/input.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/ui/lamp.jsx
+  2:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/ui/separator.jsx
+  1:13  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/ui/sheet.jsx
+  3:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/ui/sidebar.jsx
+  240:7  error  Unknown property 'variant' found  react/no-unknown-property
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/ui/tooltip.jsx
+  1:13  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/vendor/components/CDCapacityTable.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/vendor/components/CDInsightsList.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/vendor/components/CDLocationCharts.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/vendor/components/CDNetworkOverview.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/vendor/components/CDSnapshotCards.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/vendor/designer/AddVendor.jsx
+  2:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/vendor/designer/AllVendor.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/vendor/designer/GetVendorByID.jsx
+  3:32  error  'Link2' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/vendor/engineer/AddCDEngineer.jsx
+  203:1  error  Parsing error: Unexpected token `}`. Did you mean `&rbrace;` or `{"}"}`?
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/components/vendor/engineer/AllCDEngineer.jsx
+  96:25  error  Parsing error: Unexpected token ;
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/layout/CalendarLayout.jsx
+  1:8  error  'React' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/layout/CommunicationLayout.jsx
+  1:8  error  'React' is defined but never used          no-unused-vars
+  2:8  error  'Communication' is defined but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/layout/EstimationLayout.jsx
+   2:25  error  'AllEstimation' is defined but never used      no-unused-vars
+  10:9   error  'userRole' is assigned a value but never used  no-unused-vars
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/layout/ProjectLayout.jsx
+  10:5  error  Unexpected constant condition                                              no-constant-condition
+  10:5  error  Unexpected constant truthiness on the left-hand side of a `||` expression  no-constant-binary-expression
+  10:5  error  Unexpected constant truthiness on the left-hand side of a `||` expression  no-constant-binary-expression
+  10:5  error  Unexpected constant truthiness on the left-hand side of a `||` expression  no-constant-binary-expression
+
+/home/raunak/Projects/projectstation/TaskMatrix-Electron/src/renderer/src/pages/TeamPage.jsx
+  1:1  error  Definition for rule '@typescript-eslint/no-explicit-any' was not found  @typescript-eslint/no-explicit-any
+
+✖ 241 problems (241 errors, 0 warnings)
+

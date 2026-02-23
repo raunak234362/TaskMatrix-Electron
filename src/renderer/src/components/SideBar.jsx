@@ -28,7 +28,7 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
 
   return (
     <aside
-      className={`h-full flex flex-col bg-white transition-all duration-300 border-r border-gray-200
+      className={`h-full flex flex-col bg-white transition-all duration-300 border-r border-gray-200 overflow-x-hidden
         ${isMinimized ? 'w-20' : 'w-72'}
         ${isMobile ? 'w-72 shadow-none' : ''}
       `}
@@ -65,8 +65,8 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
       </div>
 
       {/* Navigation */}
-      <div className={`flex-1 ${isMinimized ? 'py-1' : 'py-4'} flex flex-col overflow-y-auto custom-scrollbar`}>
-        <nav className={`flex flex-col ${isMinimized ? 'gap-0.5' : 'gap-1'} w-full px-3`}>
+      <div className={`flex-1 ${isMinimized ? 'py-1' : 'py-4'} flex flex-col overflow-y-auto overflow-x-hidden custom-scrollbar`}>
+        <nav className={`flex flex-col ${isMinimized ? 'gap-0.5' : 'gap-1'} w-full ${isMinimized ? 'px-2' : 'px-3'}`}>
           {navItems.map(({ label, to, roles, icon }) =>
             canView(roles) && (
               <div key={label} className="group relative">
@@ -75,12 +75,12 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
                   end={to === '/dashboard'}
                   onClick={isMobile ? toggleSidebar : undefined}
                   className={({ isActive }) =>
-                    `flex items-center gap-4 ${isMinimized ? 'py-3' : 'py-3 px-4'} rounded-lg transition-all duration-200 text-sm font-medium tracking-wide
+                    `flex items-center ${isMinimized ? 'gap-0 justify-center py-3' : 'gap-4 py-3 px-4'} rounded-lg transition-all duration-200 text-sm font-medium tracking-wide
                     ${isActive
                       ? 'bg-white border-l-4 border-[#6bbd45] text-[#1f2933] font-bold shadow-sm'
                       : 'text-black border-l-4 border-transparent hover:bg-gray-50 hover:text-black'
                     } 
-                    ${isMinimized ? 'justify-center px-0' : ''}`
+                    ${isMinimized ? 'px-0' : ''}`
                   }
                 >
                   <div className={`shrink-0 transition-colors duration-200`}>
@@ -124,8 +124,8 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
 
         <div className={`space-y-2 ${isMinimized ? 'flex flex-col items-center' : ''}`}>
           <button
-            className={`w-full flex items-center gap-3 py-2.5 rounded-lg bg-[#ebf5ea] text-black border border-black shadow-sm hover:bg-[#dcecdb] hover:shadow-md transition-all text-xs font-bold uppercase tracking-wider
-              ${isMinimized ? 'justify-center px-0 w-10 h-10' : 'justify-start px-4'}`}
+            className={`flex items-center gap-3 py-2.5 rounded-lg bg-[#ebf5ea] text-black border border-black shadow-sm hover:bg-[#dcecdb] hover:shadow-md transition-all text-xs font-bold uppercase tracking-wider
+              ${isMinimized ? 'justify-center px-0 w-10 h-10' : 'w-full justify-start px-4'}`}
             onClick={handleRefresh}
             title={isMinimized ? "Refresh" : ""}
           >
@@ -134,8 +134,8 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
           </button>
 
           <button
-            className={`w-full flex items-center gap-3 py-2.5 rounded-lg bg-white text-black border border-black shadow-sm hover:bg-red-50 hover:text-red-600 hover:border-red-600 transition-all text-xs font-bold uppercase tracking-wider
-              ${isMinimized ? 'justify-center px-0 w-10 h-10' : 'justify-start px-4'}`}
+            className={`flex items-center gap-3 py-2.5 rounded-lg bg-white text-black border border-black shadow-sm hover:bg-red-50 hover:text-red-600 hover:border-red-600 transition-all text-xs font-bold uppercase tracking-wider
+              ${isMinimized ? 'justify-center px-0 w-10 h-10' : 'w-full justify-start px-4'}`}
             onClick={fetchLogout}
             title={isMinimized ? "Logout" : ""}
           >

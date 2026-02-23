@@ -2064,19 +2064,6 @@ class Service {
     }
   }
 
-  static async PendingSubmittal() {
-    try {
-      const response = await api.get(`submittal/pendingSubmittal`, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      return response.data
-    } catch (error) {
-      console.error('cannot find submittals', error)
-    }
-  }
-
   // Create Share Link
   static async createShareLink(table, parentId, fileId, versionId) {
     try {
@@ -2620,11 +2607,11 @@ class Service {
   //sales dashboard
   static async SalesDashboard() {
     try {
-      const response = await api.get(`dashBoardData/sales`);
-      return response.data;
+      const response = await api.get(`dashBoardData/sales`)
+      return response.data
     } catch (error) {
-      console.error("Error fetching sales dashboard:", error);
-      throw error;
+      console.error('Error fetching sales dashboard:', error)
+      throw error
     }
   }
 }

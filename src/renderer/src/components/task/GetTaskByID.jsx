@@ -281,8 +281,8 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
             <div>
               <h2 className="text-xl md:text-2xl font-bold text-gray-800">{task.name}</h2>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">ID: #{task.id}</span>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${priority.bg} ${priority.color}`}>{priority.label} Priority</span>
+                {/* <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">ID: #{task.id}</span> */}
+                <span className={`px-2 py-0.5 rounded text-sm border border-black font-bold uppercase ${priority.bg} ${priority.color}`}>{priority.label} Priority</span>
               </div>
             </div>
           </div>

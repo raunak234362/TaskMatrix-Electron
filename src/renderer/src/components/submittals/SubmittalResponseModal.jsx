@@ -6,16 +6,15 @@ import RichTextEditor from "../fields/RichTextEditor";
 
 const SubmittalResponseModal = ({
   submittalId,
+  submittalVersionId,
   onClose,
-
+  onSuccess,
   parentResponseId = null,
 }) => {
-  console.log(submittalId);
+  console.log("submittalId:", submittalId, "submittalVersionId:", submittalVersionId);
 
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
-
-  // ENUMS
 
   const [files, setFiles] = useState([]);
 
@@ -26,8 +25,7 @@ const SubmittalResponseModal = ({
     if (description) formData.append("description", description);
 
     formData.append("submittalsId", submittalId);
-    // formData.append("status", status);
-    // formData.append("wbtStatus", wbtStatus);
+    formData.append("submittalVersionId", submittalVersionId);
 
     if (parentResponseId) {
       formData.append("parentResponseId", parentResponseId);
@@ -36,7 +34,9 @@ const SubmittalResponseModal = ({
     files.forEach((file) => formData.append("files", file));
 
     try {
-      await Service.addSubmittalResponse(formData, submittalId);
+      await Service.addSubmittalResponse(formData);
+      if (onSuccess) onSuccess();
+      if (onClose) onClose();
     } catch (err) {
       console.error("Submittal response failed:", err);
     }

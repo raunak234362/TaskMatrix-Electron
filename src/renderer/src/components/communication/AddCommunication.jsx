@@ -1,13 +1,23 @@
-import React from 'react';
-import CommunicationForm from './CommunicationForm';
+import React, { useCallback } from 'react';
 import Service from '../../api/Service';
 import { toast } from 'react-toastify';
+import CommunicationForm from './CommunicationForm';
 
-const AddCommunication = ({ projects, fabricators, onClose, onSuccess }) => {
+const AddCommunication = ({ projects = [], fabricators = [], onClose, onSuccess, initialValues }) => {
 
-    const handleSubmit = async (data) => {
+    const fetchClientsByFabricator = useCallback(async (fabricatorId) => {
         try {
-            await Service.AddClientCommunicationFollowup(data);
+            const data = await Service.FetchAllClientsByFabricatorID(fabricatorId);
+            return Array.isArray(data) ? data : (data?.data || []);
+        } catch (error) {
+            console.error("Failed to fetch clients", error);
+            return [];
+        }
+    }, []);
+
+    const handleSubmit = async (payload) => {
+        try {
+            await Service.AddClientCommunicationFollowup(payload);
             toast.success("Communication added successfully");
             if (onSuccess) onSuccess();
             if (onClose) onClose();
@@ -19,10 +29,12 @@ const AddCommunication = ({ projects, fabricators, onClose, onSuccess }) => {
 
     return (
         <CommunicationForm
+            initialData={initialValues}
             projects={projects}
             fabricators={fabricators}
             onSubmit={handleSubmit}
             onCancel={onClose}
+            fetchClientsByFabricator={fetchClientsByFabricator}
         />
     );
 };

@@ -86,14 +86,7 @@ const ProjectListModal = ({ isOpen, onClose, status, projects, onProjectSelect }
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-red-100 border border-black text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-red-200 transition-all shadow-sm"
-          >
-            Close
-          </button>
-        </div>
+        
       </div>
     </div>,
     document.body

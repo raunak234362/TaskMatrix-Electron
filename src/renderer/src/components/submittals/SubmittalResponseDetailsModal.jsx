@@ -7,9 +7,9 @@ import RenderFiles from "../common/RenderFiles";
 
 // Status options for submittal
 const STATUS_OPTIONS = [
-  { label: "Not Approved", value: "NOT_APPROVED" },
-  { label: "Approved", value: "APPROVED" },
-  { label: "Rejected", value: "REJECTED" },
+  { label: "Submitted to EOR", value: "SUBMITTED_TO_EOR" },
+  { label: "Revised & Resubmitted", value: "REVISED_RESUBMITTAL" },
+  { label: "NOT APPROVED", value: "NOT_APPROVED" },
 ];
 
 
@@ -33,6 +33,7 @@ const SubmittalResponseDetailsModal = ({
     const formData = new FormData();
     formData.append("reason", replyMessage);
     formData.append("submittalsId", response.submittalsId);
+    formData.append("submittalVersionId", response.submittalVersionId);
     formData.append("parentResponseId", response.id);
     formData.append("userId", userId);
     formData.append("status", replyStatus);
@@ -40,7 +41,7 @@ const SubmittalResponseDetailsModal = ({
     replyFiles.forEach((file) => formData.append("files", file));
 
     try {
-      await Service.addSubmittalResponse(formData, response.submittalsId);
+      await Service.addSubmittalResponse(formData);
       onClose(); // close to refresh parent
     } catch (err) {
       console.error("Failed to send submittal reply:", err);
@@ -49,7 +50,7 @@ const SubmittalResponseDetailsModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
-      <div className="bg-white h-[90vh] w-full max-w-lg p-6 rounded-xl space-y-5 relative">
+      <div className="bg-white h-[90vh] overflow-y-auto w-full max-w-4xl p-6 rounded-xl space-y-5 relative">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -127,54 +128,52 @@ const SubmittalResponseDetailsModal = ({
         )}
 
         {/* Reply Form */}
-        {replyMode && (
-          <div className="pt-4 space-y-4 border-t">
-            {/* Message */}
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">
-                Your Reply
-              </label>
-              <RichTextEditor
-                value={replyMessage}
-                onChange={setReplyMessage}
-                placeholder="Type your reply..."
-              />
-            </div>
-
-            {/* Status */}
-            <select
-              className="w-full border rounded p-2"
-              value={replyStatus}
-              onChange={(e) => setReplyStatus(e.target.value)}
-            >
-              {STATUS_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-
-            {/* File Upload */}
-            <input
-              type="file"
-              multiple
-              onChange={(e) =>
-                setReplyFiles(e.target.files ? Array.from(e.target.files) : [])
-              }
+        <div className="pt-4 space-y-4 border-t">
+          {/* Message */}
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">
+              Your Reply
+            </label>
+            <RichTextEditor
+              value={replyMessage}
+              onChange={setReplyMessage}
+              placeholder="Type your reply..."
             />
-
-            {/* Actions */}
-            <div className="flex justify-end gap-3">
-              <Button onClick={() => setReplyMode(false)}>Cancel</Button>
-              <Button
-                className="bg-green-600 text-white"
-                onClick={handleReplySubmit}
-              >
-                Send Reply
-              </Button>
-            </div>
           </div>
-        )}
+
+          {/* Status */}
+          <select
+            className="w-full border rounded p-2"
+            value={replyStatus}
+            onChange={(e) => setReplyStatus(e.target.value)}
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+
+          {/* File Upload */}
+          <input
+            type="file"
+            multiple
+            onChange={(e) =>
+              setReplyFiles(e.target.files ? Array.from(e.target.files) : [])
+            }
+          />
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3">
+            <Button onClick={() => setReplyMode(false)}>Cancel</Button>
+            <Button
+              className="bg-green-600 text-white"
+              onClick={handleReplySubmit}
+            >
+              Send Reply
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

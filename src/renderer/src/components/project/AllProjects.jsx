@@ -21,7 +21,7 @@ const AllProjects = () => {
     stage: "All Stages",
     overrunOnly: false,
   });
-
+const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const [dateFilter, setDateFilter] = useState({
     type: "all",
     year: new Date().getFullYear(),
@@ -251,6 +251,7 @@ const AllProjects = () => {
 
         <div className="flex flex-wrap items-end gap-4">
           {/* Manager Filter */}
+          {userRole !== "project_manager" && (
           <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Manager</label>
             <select
@@ -261,7 +262,7 @@ const AllProjects = () => {
               {managers.map(m => <option key={m} value={m}>{m}</option>)}
             </select>
           </div>
-
+          )}
           {/* Fabricator Filter */}
           <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Fabricator</label>
@@ -319,8 +320,6 @@ const AllProjects = () => {
         <Modal
           isOpen={!!selectedProject}
           onClose={() => setSelectedProject(null)}
-          title="Project Details"
-          width="max-w-7xl"
           hideHeader={true}
         >
           <Suspense fallback={<div className="p-4 text-center">Loading project details...</div>}>
