@@ -147,6 +147,7 @@ export default function DataTable({
   rowSelection = {},
   onRowSelectionChange = () => { },
   getRowId,
+  getRowClassName = () => "",
 }) {
   const { isMobile } = useScreen();
 
@@ -328,7 +329,7 @@ export default function DataTable({
                   <React.Fragment key={row.id}>
                     <tr
                       className={`hover:bg-green-50 cursor-pointer transition-colors ${expandedRowId === row.id ? "bg-gray-50" : ""
-                        }`}
+                        } ${getRowClassName(row.original)}`}
                       onClick={() => {
                         onRowClick?.(row.original);
                         if (DetailComponent) {

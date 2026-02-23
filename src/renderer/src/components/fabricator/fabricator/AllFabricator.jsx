@@ -57,6 +57,36 @@ const AllFabricator = () => {
   // Define columns for DataTable
   const columns = [
     { accessorKey: "fabName", header: "Fabricator Name" },
+    {
+      accessorKey: "createdAt",
+      header: "Working Since",
+      cell: ({ row }) => {
+        const date = row.original.createdAt ? new Date(row.original.createdAt) : null;
+        const formattedDate = date
+          ? `${(date.getMonth() + 1).toString().padStart(2, "0")}/${date
+            .getDate()
+            .toString()
+            .padStart(2, "0")}/${date.getFullYear()}`
+          : "N/A";
+        return (
+          <div className="text-black uppercase">
+            {formattedDate}
+          </div>
+        );
+      },
+    },
+    {
+      id: "location",
+      header: "Location",
+      cell: ({ row }) => {
+        const country = row.original.branches?.[0]?.country || "N/A";
+        return (
+          <div className="text-black uppercase">
+            {country}
+          </div>
+        );
+      },
+    },
   ];
 
   // Loading and error states

@@ -269,9 +269,9 @@ const AllTasks = () => {
                   ? `${row.original.user.firstName} ${row.original.user.lastName}`
                   : "Unassigned"}
               </span>
-              <span className="text-xs text-gray-400">
+              {/* <span className="text-xs text-gray-400">
                 {row.original.department?.name || "General"}
-              </span>
+              </span> */}
             </div>
           </div>
         ),
@@ -321,6 +321,32 @@ const AllTasks = () => {
             </span>
           </div>
         ),
+      },
+      {
+        id: "workingHours",
+        header: "Working Hrs",
+        cell: ({ row }) => {
+          const totalSeconds = row.original.workingHourTask?.reduce(
+            (acc, wh) => acc + (Number(wh.duration_seconds) || 0),
+            0
+          ) || 0;
+
+          const formatSecondsToHHMM = (totalSeconds) => {
+            if (!totalSeconds || isNaN(totalSeconds)) return "00:00";
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+          };
+
+          return (
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <Clock className="w-4 h-4 text-gray-500" />
+              <span className="font-bold text-gray-700">
+                {formatSecondsToHHMM(totalSeconds)}
+              </span>
+            </div>
+          );
+        },
       },
       {
         accessorKey: "due_date",
@@ -409,18 +435,18 @@ const AllTasks = () => {
               className="font-semibold text-gray-700 bg-gray-50"
             />
           </div>
-
-          {/* User Filter */}
-          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Assigned User</label>
-            <Select
-              options={userOptions}
-              value={filters.assignedUser}
-              onChange={(_, val) => setFilters(prev => ({ ...prev, assignedUser: val }))}
-              placeholder="Select User"
-              className="font-semibold text-gray-700 bg-gray-50"
-            />
-          </div>
+          {["admin", "project_manager", "operation_executive", "department_manager", "human_resource", "deputy_manager"].includes(userRole) && (
+            <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Assigned User</label>
+              <Select
+                options={userOptions}
+                value={filters.assignedUser}
+                onChange={(_, val) => setFilters(prev => ({ ...prev, assignedUser: val }))}
+                placeholder="Select User"
+                className="font-semibold text-gray-700 bg-gray-50"
+              />
+            </div>
+          )}
 
           {/* WBS Type Filter */}
           <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
@@ -483,6 +509,23 @@ const AllTasks = () => {
             rowSelection={rowSelection}
             onRowSelectionChange={setRowSelection}
             getRowId={(row) => row.id}
+            getRowClassName={(task) => {
+              const allocatedStr = task.allocationLog?.allocatedHours || "00:00";
+              const [h, m] = allocatedStr.split(":").map(Number);
+              const allocatedSeconds = (h || 0) * 3600 + (m || 0) * 60;
+
+              const workedSeconds = task.workingHourTask?.reduce(
+                (acc, wh) => acc + (Number(wh.duration_seconds) || 0),
+                0
+              ) || 0;
+
+              // Buffer of 20 minutes (1200 seconds)
+              const bufferSeconds = 20 * 60;
+
+              return workedSeconds > (allocatedSeconds + bufferSeconds) && allocatedSeconds > 0
+                ? "bg-red-50 hover:bg-red-100!"
+                : "";
+            }}
           />
         </div>
       )}

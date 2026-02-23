@@ -421,35 +421,36 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                         <p className="text-lg font-black text-slate-700 mt-1">{task.workingHourTask.length}</p>
                       </div>
                     </div>
-
-                    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                      <table className="w-full text-left text-xs">
-                        <thead className="bg-slate-100 text-slate-500 font-bold uppercase">
-                          <tr>
-                            <th className="px-3 py-2">Start</th>
-                            <th className="px-3 py-2 text-right">Dur.</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {[...task.workingHourTask].reverse().slice(0, 5).map((session, idx) => (
-                            <tr key={idx}>
-                              <td className="px-3 py-2 text-slate-600">
-                                <div>{toIST(session.started_at).split(',')[0]}</div>
-                                <div className="text-[10px] text-slate-400">{toIST(session.started_at).split(',')[1]}</div>
-                              </td>
-                              <td className="px-3 py-2 text-right font-mono font-medium text-slate-700">
-                                {session.duration_seconds ? formatHours(session.duration_seconds / 3600) : <span className="text-green-500 animate-pulse">Running</span>}
-                              </td>
+                    {["admin", "project_manager", "human_resource", "department_manager", "deputy_manager"].includes(userRole) && (
+                      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-slate-100 text-slate-500 font-bold uppercase">
+                            <tr>
+                              <th className="px-3 py-2">Start</th>
+                              <th className="px-3 py-2 text-right">Dur.</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                      {task.workingHourTask.length > 5 && (
-                        <div className="px-3 py-2 text-center text-xs text-slate-400 bg-slate-50 border-t border-slate-100">
-                          + {task.workingHourTask.length - 5} more sessions
-                        </div>
-                      )}
-                    </div>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {[...task.workingHourTask].reverse().slice(0, 5).map((session, idx) => (
+                              <tr key={idx}>
+                                <td className="px-3 py-2 text-slate-600">
+                                  <div>{toIST(session.started_at).split(',')[0]}</div>
+                                  <div className="text-[10px] text-slate-400">{toIST(session.started_at).split(',')[1]}</div>
+                                </td>
+                                <td className="px-3 py-2 text-right font-mono font-medium text-slate-700">
+                                  {session.duration_seconds ? formatHours(session.duration_seconds / 3600) : <span className="text-green-500 animate-pulse">Running</span>}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        {task.workingHourTask.length > 5 && (
+                          <div className="px-3 py-2 text-center text-xs text-slate-400 bg-slate-50 border-t border-slate-100">
+                            + {task.workingHourTask.length - 5} more sessions
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

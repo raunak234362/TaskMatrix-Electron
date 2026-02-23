@@ -5,7 +5,7 @@ import { format, differenceInDays } from 'date-fns'
 const UpcomingDeadlinesWidget = ({ tasks = [], onTaskClick }) => {
   // Filter for pending tasks and sort by due date
   const upcoming = tasks
-    .filter((t) => t.status !== 'COMPLETED' && t.status !== 'IN_PROGRESS')
+    .filter((t) => t.status === 'ASSIGNED' || t.status === 'REWORK')
     .sort((a, b) => new Date(a.due_date || a.endDate) - new Date(b.due_date || b.endDate))
     .slice(0, 10) // Show more in the popup list
 

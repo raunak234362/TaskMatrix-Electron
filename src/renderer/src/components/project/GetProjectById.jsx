@@ -131,7 +131,7 @@ const GetProjectById = ({ id, onClose }) => {
           {/* Header */}
           <div className="flex justify-between items-center pr-4">
             <div className="flex items-center gap-4">
-             
+
               <div>
                 <h2 className="text-xl md:text-2xl font-black text-black uppercase tracking-tight">
                   {project.name}
@@ -150,7 +150,7 @@ const GetProjectById = ({ id, onClose }) => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-               {onClose && (
+              {onClose && (
                 <button
                   onClick={onClose}
                   className="p-1 hover:bg-red-100 bg-red-100 border border-red-600 px-2 rounded-lg transition-colors text-red-600 hover:text-red-700"
@@ -262,7 +262,7 @@ const GetProjectById = ({ id, onClose }) => {
                 />
               </div>
               <div className="space-y-3">
-                {userRole !== 'staff' || userRole !== 'project_manager' || userRole !== 'department_manager' && (
+                {!["staff", "project_manager", "department_manager"].includes(userRole) && (
                   <InfoRow
                     label="Estimated Hours"
                     value={project.estimatedHours || 0}
@@ -338,15 +338,16 @@ const GetProjectById = ({ id, onClose }) => {
                 </div>
               </div>
 
-              {/* Footer Buttons */}
-              <div className="pt-2 flex flex-wrap gap-3">
-                <Button
-                  className="py-1 px-3 text-sm bg-green-100 text-black border border-black font-black uppercase tracking-widest hover:bg-green-200 transition-all"
-                  onClick={() => handleEditModel(project)}
-                >
-                  Edit Project
-                </Button>
-              </div>
+              {userRole === "admin" && (
+                <div className="pt-2 flex flex-wrap gap-3">
+                  <Button
+                    className="py-1 px-3 text-sm bg-green-100 text-black border border-black font-black uppercase tracking-widest hover:bg-green-200 transition-all"
+                    onClick={() => handleEditModel(project)}
+                  >
+                    Edit Project
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 

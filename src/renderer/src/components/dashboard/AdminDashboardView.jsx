@@ -87,7 +87,7 @@ const AdminDashboardView = ({
                                     <span className="text-[15px] font-black text-gray-700 uppercase tracking-wide">Upcoming Assigned Task Deadlines</span>
                                 </div>
                                 <span className="text-3xl font-black text-blue-600 tracking-tighter">
-                                    {tasks.filter(t => t.status !== 'COMPLETED').length}
+                                    {tasks.filter(t => t.status === 'ASSIGNED' || t.status === 'REWORK').length}
                                 </span>
                             </div>
                         </div>
