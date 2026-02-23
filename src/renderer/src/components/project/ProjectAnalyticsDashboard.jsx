@@ -568,8 +568,6 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                               </div>
                               <div className="flex items-center gap-2 mb-1 justify-end">
                                 <span className="text-xs font-bold text-gray-700">{(totalAllocatedHours - totalWorkedHours).toFixed(1)}h</span>
-                                
-                                
                                 <span className="text-[10px] text-gray-400 font-medium">Remaining</span>
                               </div>
                               <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">

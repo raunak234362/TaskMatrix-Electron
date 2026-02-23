@@ -35,6 +35,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
   const [staffData, setStaffData] = useState([]);
+  const [showAllSessions, setShowAllSessions] = useState(false);
 
   const fetchTask = async () => {
     if (!id) return
@@ -427,27 +428,44 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                           <thead className="bg-slate-100 text-slate-500 font-bold uppercase">
                             <tr>
                               <th className="px-3 py-2">Start</th>
+                              <th className="px-3 py-2">End/Pause</th>
                               <th className="px-3 py-2 text-right">Dur.</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
-                            {[...task.workingHourTask].reverse().slice(0, 5).map((session, idx) => (
+                            {[...task.workingHourTask]
+                              .reverse()
+                              .slice(0, showAllSessions ? task.workingHourTask.length : 5)
+                              .map((session, idx) => (
                               <tr key={idx}>
                                 <td className="px-3 py-2 text-slate-600">
-                                  <div>{toIST(session.started_at).split(',')[0]}</div>
-                                  <div className="text-[10px] text-slate-400">{toIST(session.started_at).split(',')[1]}</div>
+                                  <div className="font-medium">{toIST(session.started_at).split(',')[1]}</div>
+                                  <div className="text-[10px] text-slate-400 capitalize">{toIST(session.started_at).split(',')[0]}</div>
+                                </td>
+                                <td className="px-3 py-2 text-slate-600">
+                                  {session.ended_at ? (
+                                    <>
+                                      <div className="font-medium">{toIST(session.ended_at).split(',')[1]}</div>
+                                      <div className="text-[10px] text-slate-400 capitalize">{toIST(session.ended_at).split(',')[0]}</div>
+                                    </>
+                                  ) : (
+                                    <span className="text-green-500 font-bold uppercase text-[10px] animate-pulse">Active</span>
+                                  )}
                                 </td>
                                 <td className="px-3 py-2 text-right font-mono font-medium text-slate-700">
-                                  {session.duration_seconds ? formatHours(session.duration_seconds / 3600) : <span className="text-green-500 animate-pulse">Running</span>}
+                                  {session.duration_seconds ? formatHours(session.duration_seconds / 3600) : '--:--'}
                                 </td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
                         {task.workingHourTask.length > 5 && (
-                          <div className="px-3 py-2 text-center text-xs text-slate-400 bg-slate-50 border-t border-slate-100">
-                            + {task.workingHourTask.length - 5} more sessions
-                          </div>
+                          <button
+                            onClick={() => setShowAllSessions(!showAllSessions)}
+                            className="w-full px-3 py-2 text-center text-xs font-bold text-blue-500 bg-slate-50 border-t border-slate-100 hover:bg-slate-100 transition-colors uppercase tracking-widest"
+                          >
+                            {showAllSessions ? 'Show Less' : `+ ${task.workingHourTask.length - 5} more sessions`}
+                          </button>
                         )}
                       </div>
                     )}
