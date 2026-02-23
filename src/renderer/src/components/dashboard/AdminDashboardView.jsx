@@ -10,6 +10,7 @@ import UserStatsWidget from './components/UserStatsWidget'
 import ProjectStats from './components/ProjectStats'
 import PendingActions from './components/PendingActions'
 import InvoiceTrends from './components/InvoiceTrends'
+import LiveTaskTimer from './components/LiveTaskTimer'
 
 const AdminDashboardView = ({
     adminData,
@@ -58,11 +59,12 @@ const AdminDashboardView = ({
                                 </div>
                                 {currentTask && (
                                     <div className="flex items-center gap-2">
+                                        <LiveTaskTimer task={currentTask} />
                                         <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-primary/50"></span>
                                     </div>
                                 )}
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 mt-auto">
                                 <h3 className="text-base font-black text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">
                                     {currentTask?.project?.name || 'No Active Task'}
                                 </h3>

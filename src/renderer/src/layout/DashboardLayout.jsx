@@ -59,7 +59,7 @@ const Layout = () => {
 
       {/* Mobile Sidebar */}
       {!isAnyModalOpen && (
-        <div className={`md:hidden fixed inset-y-0 left-0 z-50 bg-white shadow-xl transition-transform duration-300 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className={`md:hidden fixed inset-y-0 left-0 z-0 bg-white shadow-xl transition-transform duration-300 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <Sidebar
             isMinimized={false}
             toggleSidebar={() => setIsMobileOpen(false)}
@@ -69,7 +69,7 @@ const Layout = () => {
       )}
 
       {/* Main Content Area */}
-      <div className="flex flex-col flex-1 min-h-0 relative z-10 bg-[#f9fafb]">
+      <div className="flex flex-col flex-1 min-h-0 relative z-50 bg-[#f9fafb]">
         {/* Header - Sticky top with border */}
         {!isAnyModalOpen && (
           <div className="sticky top-0 z-30 w-full border-b border-gray-200 bg-white/95 backdrop-blur-sm">

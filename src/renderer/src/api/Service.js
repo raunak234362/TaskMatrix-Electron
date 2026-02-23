@@ -2614,5 +2614,37 @@ class Service {
       throw error
     }
   }
+
+  // Get communication by ID
+  static async GetCommunicationById(id) {
+    try {
+      const response = await api.get(`communications/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Communication fetched by ID:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching communication by ID:', error)
+      throw error
+    }
+  }
+
+  // Delete communication by ID
+  static async DeleteCommunication(id) {
+    try {
+      const response = await api.delete(`communications/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Communication deleted:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error deleting communication:', error)
+      throw error
+    }
+  }
 }
 export default Service

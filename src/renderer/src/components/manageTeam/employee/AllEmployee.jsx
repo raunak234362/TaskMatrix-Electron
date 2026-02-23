@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
-
+import { useState, useMemo, useEffect } from "react";
+import { Search } from "lucide-react";
 import { toast } from "react-toastify";
 import DataTable from "../../ui/table";
 import GetEmployeeByID from "./GetEmployeeByID";
@@ -8,10 +8,35 @@ import GetEmployeeByID from "./GetEmployeeByID";
 import { useSelector } from "react-redux";
 const AllEmployee = () => {
   const staffData = useSelector((state) => state.userInfo.staffData);
-  const [employees, setEmployees] = useState(staffData);
+  const [employees, setEmployees] = useState(staffData || []);
+  const [searchTerm, setSearchTerm] = useState("");
   const [employeeID, setEmployeeID] = useState(null);
   const [loading] = useState(false);
   const [error] = useState(null);
+
+  useEffect(() => {
+    if (staffData) {
+      setEmployees(staffData);
+    }
+  }, [staffData]);
+
+  const filteredEmployees = useMemo(() => {
+    if (!searchTerm) return employees;
+    const lowerSearch = searchTerm.toLowerCase();
+    return (employees || []).filter((emp) => {
+      const fullName = [emp.firstName, emp.middleName, emp.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return (
+        emp.username?.toLowerCase().includes(lowerSearch) ||
+        emp.email?.toLowerCase().includes(lowerSearch) ||
+        emp.designation?.toLowerCase().includes(lowerSearch) ||
+        emp.phone?.toLowerCase().includes(lowerSearch) ||
+        fullName.includes(lowerSearch)
+      );
+    });
+  }, [employees, searchTerm]);
 
   console.log(employees);
   const handleDelete = async (selectedRows) => {
@@ -75,14 +100,25 @@ const AllEmployee = () => {
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (
-    <div className="bg-white p-2 rounded-2xl">
+    <div className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm transition-all duration-300">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+        <div className="relative flex-1 max-w-md w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+          <input
+            type="text"
+            placeholder="Search employees by name, email, designation..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-sm"
+          />
+        </div>
+      </div>
       <DataTable
         columns={columns}
-        data={employees}
+        data={filteredEmployees}
         onRowClick={handleRowClick}
         detailComponent={({ row }) => <GetEmployeeByID id={row.id} />}
         onDelete={handleDelete}
-
       />
     </div>
   );

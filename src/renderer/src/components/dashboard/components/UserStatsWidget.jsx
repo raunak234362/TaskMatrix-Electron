@@ -105,7 +105,7 @@ const UserStatsWidget = ({ stats, loading }) => {
       />
 
       {/* Efficiency */}
-      {totalTasks > 0 ? (
+      {/* {totalTasks > 0 ? (
         <StatCard
           title="Efficiency"
           value={`${efficiency}%`}
@@ -123,7 +123,7 @@ const UserStatsWidget = ({ stats, loading }) => {
             NO ASSIGNED TASKS
           </p>
         </div>
-      )}
+      )} */}
     </div>
   )
 }

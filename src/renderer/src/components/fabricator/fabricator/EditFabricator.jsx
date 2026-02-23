@@ -1,19 +1,16 @@
 /* eslint-disable no-useless-escape */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/components/fabricator/EditFabricator.tsx
+// src/components/fabricator/EditFabricator.jsx
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Loader2, X, Check, Trash2, Paperclip } from "lucide-react"; // Added Trash2, Paperclip
-
+import { Loader2, X, Check, Trash2, Paperclip } from "lucide-react";
+import { motion } from "framer-motion";
 import Service from "../../../api/Service";
 import Input from "../../fields/input";
 import Button from "../../fields/Button";
-import MultipleFileUpload from "../../fields/MultipleFileUpload"; // Component for new file selection
-import { toast } from "react-toastify"; // Assume toast is available
-
-// --- File Interfaces (matching your fabricatorData.files structure) ---
-
-
+import MultipleFileUpload from "../../fields/MultipleFileUpload";
+import Select from "../../fields/Select";
+import { toast } from "react-toastify";
 
 const EditFabricator = ({
   fabricatorData,
@@ -25,10 +22,12 @@ const EditFabricator = ({
   const [error, setError] = useState(null);
   const [accounts, setAccounts] = useState([]);
   const [fetchingAccounts, setFetchingAccounts] = useState(false);
+  const [wbtContactOptions, setWbtContactOptions] = useState();
+  console.log(wbtContactOptions);
 
   // State to manage existing files that the user decides to KEEP
   const [filesToKeep, setFilesToKeep] = useState(
-    (fabricatorData.files ?? []) || []
+    fabricatorData.files || []
   );
 
   const {
@@ -42,13 +41,14 @@ const EditFabricator = ({
       fabName: "",
       website: "",
       drive: "",
-      fabStage: undefined,
+      fabStage: "",
       accountId: "",
       SAC: "",
       fabricatPercentage: 0,
       approvalPercentage: 0,
       paymenTDueDate: 0,
       currencyType: "",
+      wbtFabricatorPointOfContact: "",
       files: null, // Initialize new files to null
     },
   });
@@ -67,7 +67,41 @@ const EditFabricator = ({
         setFetchingAccounts(false);
       }
     };
+
+    const fetchWBTContacts = async () => {
+      try {
+        const [admins, sales] = await Promise.all([
+          Service.FetchEmployeeByRole("ADMIN"),
+          Service.FetchEmployeeByRole("SALES_MANAGER"),
+        ]);
+        console.log(admins, sales);
+        const allContacts = [
+          ...(Array.isArray(admins?.data?.employees)
+            ? admins.data.employees
+            : []),
+          ...(Array.isArray(sales?.data?.employees)
+            ? sales.data.employees
+            : [])
+        ];
+
+        // Remove duplicates if any
+        const uniqueContacts = Array.from(
+          new Map(allContacts.map((item) => [item.id || item._id, item])).values()
+        );
+
+        const options = uniqueContacts.map((u) => ({
+          label: `${u.firstName} ${u.lastName} (${u.role})`,
+          value: u.id || u._id,
+        }));
+
+        setWbtContactOptions(options);
+      } catch (error) {
+        console.error("Failed to fetch WBT contacts", error);
+      }
+    };
+
     fetchAccounts();
+    fetchWBTContacts();
   }, []);
 
   // Pre‑fill form with fabricator data and initialize filesToKeep
@@ -76,16 +110,19 @@ const EditFabricator = ({
       fabName: fabricatorData.fabName || "",
       website: fabricatorData.website || "",
       drive: fabricatorData.drive || "",
-      fabStage: fabricatorData.fabStage,
-      accountId: (fabricatorData).accountId || "",
+      fabStage: fabricatorData.fabStage || "",
+      accountId: fabricatorData.accountId || "",
       SAC: fabricatorData.SAC || "",
       fabricatPercentage: fabricatorData.fabricatPercentage || 0,
       approvalPercentage: fabricatorData.approvalPercentage || 0,
       paymenTDueDate: fabricatorData.paymenTDueDate || 0,
       currencyType: fabricatorData.currencyType || "",
+      wbtFabricatorPointOfContact: Array.isArray(fabricatorData.wbtFabricatorPointOfContact)
+        ? fabricatorData.wbtFabricatorPointOfContact[0] || ""
+        : fabricatorData.wbtFabricatorPointOfContact || "",
       files: null,
     });
-    setFilesToKeep((fabricatorData.files ?? []) || []);
+    setFilesToKeep(fabricatorData.files || []);
   }, [fabricatorData, reset]);
 
   // Handler to remove an existing file from the 'filesToKeep' list
@@ -95,7 +132,7 @@ const EditFabricator = ({
         `Are you sure you want to delete the file: ${fileName}? This change will take effect on save.`
       )
     ) {
-      setFilesToKeep((prev) => prev.filter((file) => file.id !== fileId));
+      setFilesToKeep((prev) => prev.filter((file) => (file.id || file._id) !== fileId));
       toast.info(`File '${fileName}' marked for deletion.`);
     }
   };
@@ -112,6 +149,11 @@ const EditFabricator = ({
       if (data.fabName) formData.append("fabName", data.fabName);
       if (data.website) formData.append("website", data.website);
       if (data.drive) formData.append("drive", data.drive);
+      if (data.wbtFabricatorPointOfContact)
+        formData.append(
+          "wbtFabricatorPointOfContact",
+          JSON.stringify(Array.isArray(data.wbtFabricatorPointOfContact) ? data.wbtFabricatorPointOfContact : [data.wbtFabricatorPointOfContact])
+        );
       if (data.fabStage) formData.append("fabStage", data.fabStage);
       if (data.accountId) formData.append("accountId", data.accountId);
       if (data.SAC) formData.append("SAC", data.SAC);
@@ -133,7 +175,7 @@ const EditFabricator = ({
       if (data.currencyType) formData.append("currencyType", data.currencyType);
 
       // 2. Append IDs of files to KEEP (only if not empty)
-      const fileIdsToKeep = filesToKeep.map((file) => file.id);
+      const fileIdsToKeep = filesToKeep.map((file) => file.id || file._id);
       if (fileIdsToKeep.length > 0) {
         formData.append("files", JSON.stringify(fileIdsToKeep));
       }
@@ -147,7 +189,7 @@ const EditFabricator = ({
 
       // API Call
       const response = await Service.EditFabricatorByID(
-        fabricatorData.id,
+        fabricatorData.id || fabricatorData._id,
         formData
       );
       console.log(response);
@@ -168,306 +210,308 @@ const EditFabricator = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 bg-opacity-50 p-4"
+      className="fixed inset-0 z-10001 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
       onClick={onClose}
     >
-      <div
-        className="bg-white w-full max-w-lg rounded-xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0, y: 30 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 30 }}
+        className="bg-white w-full max-w-5xl rounded-[40px] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col relative border border-white/20"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex justify-between items-center p-5 border-b bg-gray-50 flex-shrink-0">
-          <h2 className="text-xl  text-gray-700">Edit Fabricator</h2>
+        <div className="flex justify-between items-center px-10 py-8 border-b border-slate-100 shrink-0 bg-slate-50/50">
+          <div>
+            <h2 className="text-3xl text-slate-900 tracking-tight leading-none mb-2 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-green-100 flex items-center justify-center text-green-600">
+                <Check className="w-6 h-6" />
+              </div>
+              Edit Engineering Partner
+            </h2>
+            <p className="text-xs text-slate-400 uppercase tracking-widest">
+              Update global fabricator intelligence and credentials
+            </p>
+          </div>
           <button
             onClick={onClose}
-            className="text-gray-700 hover:text-gray-700 transition"
+            className="p-3 bg-white shadow-sm border border-slate-100 rounded-2xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all active:scale-90"
             aria-label="Close"
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* Body (Scrollable form) */}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="p-5 space-y-5 overflow-y-auto flex-1"
+          className="px-10 py-8 space-y-10 overflow-y-auto flex-1 custom-scrollbar"
         >
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-              {error}
+            <div className="p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl text-sm animate-in slide-in-from-top-2">
+              Error: {error}
             </div>
           )}
 
-          {/* Fabricator Name */}
-          <div>
-            <Input
-              label="Fabricator Name"
-              {...register("fabName", {
-                required: "Fabricator name is required",
-              })}
-              placeholder="e.g. SteelWorks Inc."
-              className="w-full"
-            />
-            {errors.fabName && (
-              <p className="mt-1 text-xs text-red-600">
-                {errors.fabName.message}
-              </p>
-            )}
-          </div>
-
-
-          {/* Website */}
-          <div>
-            <Input
-              label="Website"
-              {...register("website", {
-                pattern: {
-                  value:
-                    /^$|^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/i,
-                  message: "Please enter a valid URL",
-                },
-              })}
-              type="url"
-              placeholder="https://example.com"
-              className="w-full"
-            />
-            {errors.website && (
-              <p className="mt-1 text-xs text-red-600">
-                {errors.website.message}
-              </p>
-            )}
-          </div>
-
-          {/* Drive Link */}
-          <div>
-            <Input
-              label="Drive Link"
-              {...register("drive", {
-                pattern: {
-                  value:
-                    /^$|^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/i,
-                  message: "Please enter a valid URL",
-                },
-              })}
-              type="url"
-              placeholder="https://drive.google.com/..."
-              className="w-full"
-            />
-            {errors.drive && (
-              <p className="mt-1 text-xs text-red-600">
-                {errors.drive.message}
-              </p>
-            )}
-          </div>
-          {(userRole === "ADMIN" || userRole === "PROJECT_MANAGER_OFFICER") && (
-            <>
+          {/* Section 1: Identity */}
+          <section className="space-y-6">
+            <h3 className="text-[10px] text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+              Core Identity & Access
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <Input
-                  label="SAC"
-                  {...register("SAC")}
-                  placeholder="e.g. 1234567890"
-                  className="w-full"
-                />
-                {errors.SAC && (
-                  <p className="mt-1 text-xs text-red-600">{errors.SAC.message}</p>
-                )}
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                <div>
-                  <Input
-                    label="Approval Percentage (%)"
-                    type="number"
-                    {...register("approvalPercentage", { valueAsNumber: true })}
-                    placeholder="0"
-                    className="w-full"
-                  />
-                  {errors.approvalPercentage && (
-                    <p className="mt-1 text-xs text-red-600">
-                      {errors.approvalPercentage.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <Input
-                    label="Fabrication Percentage (%)"
-                    type="number"
-                    {...register("fabricatPercentage", { valueAsNumber: true })}
-                    placeholder="0"
-                    className="w-full"
-                  />
-                  {errors.fabricatPercentage && (
-                    <p className="mt-1 text-xs text-red-600">
-                      {errors.fabricatPercentage.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Input
-                    label="Payment Due Date (Days)"
-                    type="number"
-                    {...register("paymenTDueDate", { valueAsNumber: true })}
-                    placeholder="0"
-                    className="w-full"
-                  />
-                  {errors.paymenTDueDate && (
-                    <p className="mt-1 text-xs text-red-600">
-                      {errors.paymenTDueDate.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Currency Type
-                  </label>
-                  <select
-                    {...register("currencyType")}
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all bg-white"
-                  >
-                    <option value="">-- Select Currency --</option>
-                    <option value="USD">USD</option>
-                    <option value="CAD">CAD</option>
-                    <option value="Rupees">Rupees</option>
-                  </select>
-                  {errors.currencyType && (
-                    <p className="mt-1 text-xs text-red-600">
-                      {errors.currencyType.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div>
-                <label className="block text-gray-700 font-semibold mb-1">
-                  Stage <span className="text-red-500">*</span>
+                <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                  Partner Name
                 </label>
-                <select
-                  {...register("fabStage", { required: "Stage is required" })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-green-500 focus:border-green-500 outline-none bg-white transition-all shadow-sm"
-                >
-                  <option value="">Select Stage</option>
-                  <option value="RFQ">RFQ</option>
-                  <option value="PRODUCTION">PRODUCTION</option>
-                </select>
-                {errors.fabStage && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {String(errors.fabStage.message)}
+                <Input
+                  label=""
+                  {...register("fabName", {
+                    required: "Fabricator name is required",
+                  })}
+                  placeholder="e.g. SteelWorks Global"
+                  className="w-full bg-slate-50 border-slate-200 rounded-2xl focus:bg-white transition-all font-bold"
+                />
+                {errors.fabName && (
+                  <p className="mt-2 text-[10px] text-rose-600 uppercase tracking-wider">
+                    {errors.fabName.message}
                   </p>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Bank Account
+                <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                  Partner Stage
                 </label>
                 <select
-                  {...register("accountId")}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all bg-white"
-                  disabled={fetchingAccounts}
+                  {...register("fabStage", { required: "Stage is required" })}
+                  className="w-full h-[46px] border border-slate-200 bg-slate-50 rounded-2xl px-4 py-2 focus:ring-4 focus:ring-green-500/10 focus:border-green-500 focus:bg-white outline-none transition-all shadow-sm text-slate-800 font-bold"
                 >
-                  <option value="">-- Select Bank Account --</option>
-                  {accounts.map((account) => (
-                    <option
-                      key={account._id || account.id}
-                      value={account._id || account.id}
-                    >
-                      {account.accountName} ({account.accountNumber})
-                    </option>
-                  ))}
+                  <option value="">Select Stage</option>
+                  <option value="RFQ">RFQ Analysis</option>
+                  <option value="PRODUCTION">Full Production</option>
                 </select>
               </div>
-            </>
+            </div>
+            <div className="space-y-4 font-bold">
+              <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                WBT Point of Contact
+              </label>
+              <Controller
+                name="wbtFabricatorPointOfContact"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    name="wbtFabricatorPointOfContact"
+                    options={wbtContactOptions}
+                    label=""
+                    value={field.value}
+                    onChange={(_, val) => field.onChange(val)}
+                  />
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-bold">
+              <div>
+                <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                  Digital Hub (URL)
+                </label>
+                <Input
+                  label=""
+                  {...register("website")}
+                  type="url"
+                  placeholder="https://engineering.hub"
+                  className="w-full bg-slate-50 border-slate-200 rounded-2xl"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                  Shared Repository (Cloud)
+                </label>
+                <Input
+                  label=""
+                  {...register("drive")}
+                  type="url"
+                  placeholder="https://drive.repository"
+                  className="w-full bg-slate-50 border-slate-200 rounded-2xl"
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Section 2: Financials & Compliance */}
+          {(userRole === "ADMIN" || userRole === "PROJECT_MANAGER_OFFICER") && (
+            <section className="space-y-6 pt-10 border-t border-slate-100">
+              <h3 className="text-[10px] text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                Financial Compliance & Policy
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                  <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                    SAC Code
+                  </label>
+                  <Input
+                    label=""
+                    {...register("SAC")}
+                    placeholder="e.g. 998311"
+                    className="w-full bg-slate-50 border-slate-200 rounded-2xl font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                    Primary Currency
+                  </label>
+                  <select
+                    {...register("currencyType")}
+                    className="w-full h-[46px] border border-slate-200 bg-slate-50 rounded-2xl px-4 py-2 focus:ring-4 focus:ring-green-500/10 focus:border-green-500 focus:bg-white outline-none transition-all shadow-sm text-slate-800 font-bold"
+                  >
+                    <option value="">Select Currency</option>
+                    <option value="USD">USD (Dollar)</option>
+                    <option value="CAD">CAD (Dollar)</option>
+                    <option value="INR">INR (Rupee)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                    Vault Settlement
+                  </label>
+                  <select
+                    {...register("accountId")}
+                    className="w-full h-[46px] border border-slate-200 bg-slate-50 rounded-2xl px-4 py-2 focus:ring-4 focus:ring-green-500/10 focus:border-green-500 focus:bg-white outline-none transition-all shadow-sm text-slate-800 font-bold"
+                    disabled={fetchingAccounts}
+                  >
+                    <option value="">Select Account</option>
+                    {accounts.map((account) => (
+                      <option
+                        key={account._id || account.id}
+                        value={account._id || account.id}
+                      >
+                        {account.accountName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                  <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                    Approval %
+                  </label>
+                  <Input
+                    label=""
+                    type="number"
+                    {...register("approvalPercentage", { valueAsNumber: true })}
+                    className="w-full bg-slate-50 border-slate-200 rounded-2xl font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                    Fabrication %
+                  </label>
+                  <Input
+                    label=""
+                    type="number"
+                    {...register("fabricatPercentage", { valueAsNumber: true })}
+                    className="w-full bg-slate-50 border-slate-200 rounded-2xl font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                    Settlement Cycle
+                  </label>
+                  <div className="relative">
+                    <Input
+                      label=""
+                      type="number"
+                      {...register("paymenTDueDate", { valueAsNumber: true })}
+                      className="w-full bg-slate-50 border-slate-200 rounded-2xl pr-12 font-bold"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-bold">
+                      DAYS
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
           )}
 
+          {/* Section 3: Assets */}
+          <section className="space-y-6 pt-10 border-t border-slate-100">
+            <h3 className="text-[10px] text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+              Compliance Vault (Files)
+            </h3>
 
-
-          {/* --- Existing Files Display/Deletion --- */}
-          {filesToKeep.length > 0 && (
-            <div className="p-3 border rounded-lg bg-gray-50">
-              <p className="text-sm font-semibold text-gray-700 mb-2">
-                Existing Files
-              </p>
-              <ul className="space-y-2">
+            {/* Existing Files */}
+            {filesToKeep.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {filesToKeep.map((file) => (
-                  <li
-                    key={file.id}
-                    className="flex items-center justify-between p-2 border bg-white rounded-md"
+                  <div
+                    key={file.id || file._id}
+                    className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-500/5"
                   >
-                    <a
-                      href={file.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center text-blue-600 hover:underline text-sm truncate mr-4"
-                    >
-                      <Paperclip className="w-4 h-4 mr-2 shrink-0 text-gray-700" />
-                      {file?.filename}
-                    </a>
+                    <div className="flex items-center gap-3 truncate">
+                      <Paperclip className="w-4 h-4 text-slate-400 group-hover:text-green-500 transition-colors" />
+                      <span className="text-xs text-slate-700 truncate font-bold">
+                        {file?.filename}
+                      </span>
+                    </div>
                     <button
                       type="button"
                       onClick={() =>
-                        handleRemoveExistingFile(file.id, file.filename)
+                        handleRemoveExistingFile(file.id || file._id, file.filename)
                       }
-                      className="text-red-500 hover:text-red-700 p-1 rounded transition"
-                      aria-label={`Delete existing file ${file.filename}`}
+                      className="p-2 bg-white rounded-xl text-slate-300 hover:text-rose-600 hover:shadow-sm transition-all"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                  </li>
+                  </div>
                 ))}
-              </ul>
-            </div>
-          )}
-
-          {/* New File Upload (via Controller and MultipleFileUpload) */}
-          <div className="md:col-span-2">
-            <Controller
-              name="files"
-              control={control}
-              render={({ field }) => (
-                <MultipleFileUpload
-                  // Assuming MultipleFileUpload takes an onFilesChange prop
-                  onFilesChange={(files) => {
-                    // Update RHF state with the new File[]
-                    field.onChange(files);
-                  }}
-                // You might need to pass the existing files here if MultipleFileUpload handles both
-                // For this structure, we're assuming it only handles *new* selections.
-                // existingFiles={filesToKeep}
-                />
-              )}
-            />
-            {errors.files && (
-              <p className="text-red-500 text-xs mt-1">
-                {String(errors.files.message)}
-              </p>
+              </div>
             )}
-          </div>
+
+            {/* New Upload Area */}
+            <div className="md:col-span-2">
+              <Controller
+                name="files"
+                control={control}
+                render={({ field }) => (
+                  <MultipleFileUpload
+                    onFilesChange={(files) => field.onChange(files)}
+                  />
+                )}
+              />
+            </div>
+          </section>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-3 border-t flex-shrink-0">
-            <Button type="button" onClick={onClose} disabled={submitting}>
-              Cancel
-            </Button>
+          <div className="flex items-center justify-end gap-4 pt-10 border-t border-slate-100 sticky bottom-0 bg-white pb-6 mt-10">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={submitting}
+              className="px-8 py-3 text-[10px] uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all active:scale-95 font-bold"
+            >
+              Cancel Edit
+            </button>
             <Button
               type="submit"
               disabled={submitting}
-              className="bg-green-600 text-white hover:bg-green-700 flex items-center gap-2 disabled:opacity-70"
+              className="px-10 py-3 bg-green-600 text-white text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-green-100 transition-all active:scale-95 flex items-center gap-3 border-none font-bold"
             >
               {submitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving...
+                  Updating Intel...
                 </>
               ) : (
                 <>
-                  <Check className="w-4 h-4" />
-                  Save Changes
+                  <Check className="w-5 h-5" />
+                  Commit Changes
                 </>
               )}
             </Button>
           </div>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 };

@@ -37,6 +37,10 @@ import TeamDashboard from './manageTeam/teamDashboard/TeamDashboard'
 import AllTasks from './task/AllTasks'
 import AllActiveTask from './task/AllActiveTask'
 
+// Get By ID Components
+import GetCommunicationById from './communication/GetCommunicationById'
+import GetMeetingById from './calendar/GetMeetingById'
+
 export {
   Login,
   WBTDashboard,
@@ -61,5 +65,7 @@ export {
   InvoiceDashboard,
   TeamDashboard,
   AllTasks,
-  AllActiveTask
+  AllActiveTask,
+  GetCommunicationById,
+  GetMeetingById
 }

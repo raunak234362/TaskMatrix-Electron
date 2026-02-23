@@ -1,6 +1,6 @@
 import React from 'react';
 import { format, parseISO } from 'date-fns';
-import { Edit2, Check, Search, Eye } from 'lucide-react';
+import { Edit2, Check, Search, Eye, Trash2 } from 'lucide-react';
 
 const ListCommunication = ({
     communications,
@@ -10,6 +10,7 @@ const ListCommunication = ({
     onEdit,
     onComplete,
     onView,
+    onDelete,
     searchTerm,
     onSearchChange
 }) => {
@@ -121,6 +122,13 @@ const ListCommunication = ({
                                             title="Edit"
                                         >
                                             <Edit2 size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => onDelete && onDelete(comm.id || comm._id)}
+                                            className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                                            title="Delete"
+                                        >
+                                            <Trash2 size={16} />
                                         </button>
                                     </td>
                                 </tr>

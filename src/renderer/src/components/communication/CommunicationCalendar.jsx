@@ -264,6 +264,13 @@ const CommunicationCalendar = () => {
                         communication={selectedComm}
                         projects={projects}
                         fabricators={fabricators}
+                        onEdit={(comm) => {
+                            handleCloseModal();
+                            // Logic for edit from calendar if needed, usually just opening edit modal
+                            // For now let's keep it simple
+                        }}
+                        onDelete={handleSuccess}
+                        onComplete={handleSuccess}
                     />
                 )}
             </Modal>

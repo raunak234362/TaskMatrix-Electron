@@ -1,21 +1,109 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { format, parseISO } from 'date-fns';
-import { Check } from 'lucide-react';
+import { Check, Edit2, Trash2, Loader2, AlertCircle } from 'lucide-react';
+import Service from '../../api/Service';
+import { toast } from 'react-toastify';
 
-const GetCommunicationById = ({ communication, projects = [], fabricators = [] }) => {
-    if (!communication) return null;
+const GetCommunicationById = ({ id, communication: initialComm, projects: initialProjects = [], fabricators: initialFabricators = [], onEdit, onDelete, onComplete }) => {
+    const [communication, setCommunication] = useState(initialComm);
+    const [loading, setLoading] = useState(!initialComm && !!id);
+    const [error, setError] = useState(null);
+    const [projects, setProjects] = useState(initialProjects);
+    const [fabricators, setFabricators] = useState(initialFabricators);
+
+    useEffect(() => {
+        if (id && !initialComm) {
+            fetchCommunication();
+        }
+    }, [id]);
+
+    useEffect(() => {
+        if (projects.length === 0 || fabricators.length === 0) {
+            fetchDropdownData();
+        }
+    }, []);
+
+    const fetchCommunication = async () => {
+        try {
+            setLoading(true);
+            const res = await Service.GetCommunicationById(id);
+            setCommunication(res.data || res);
+        } catch (err) {
+            console.error("Error fetching communication:", err);
+            setError("Failed to load communication details");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchDropdownData = async () => {
+        try {
+            const [pData, fData] = await Promise.all([
+                Service.GetAllProjects(),
+                Service.GetAllFabricators()
+            ]);
+            setProjects(Array.isArray(pData) ? pData : (pData?.data || []));
+            setFabricators(Array.isArray(fData) ? fData : (fData?.data || []));
+        } catch (err) {
+            console.error("Error fetching dropdown data:", err);
+        }
+    };
+
+    const handleComplete = async () => {
+        const commId = communication.id || communication._id;
+        try {
+            await Service.MarkClientCommunicationAsCompleted(commId);
+            toast.success("Marked as completed");
+            if (onComplete) onComplete(commId);
+            if (id) fetchCommunication();
+            else setCommunication({ ...communication, isCompleted: true });
+        } catch (err) {
+            toast.error("Failed to update status");
+        }
+    };
+
+    const handleDelete = async () => {
+        const commId = communication.id || communication._id;
+        if (window.confirm("Are you sure you want to delete this communication?")) {
+            try {
+                await Service.DeleteCommunication(commId);
+                toast.success("Communication deleted successfully");
+                if (onDelete) onDelete(commId);
+            } catch (err) {
+                toast.error("Failed to delete communication");
+            }
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center p-12 text-gray-500">
+                <Loader2 className="w-8 h-8 animate-spin mb-4 text-blue-600" />
+                <p>Loading communication details...</p>
+            </div>
+        );
+    }
+
+    if (error || !communication) {
+        return (
+            <div className="flex flex-col items-center justify-center p-12 text-red-500">
+                <AlertCircle className="w-8 h-8 mb-4" />
+                <p>{error || "Communication not found"}</p>
+            </div>
+        );
+    }
 
     const projectName = projects.find(p => p._id === communication.projectId || p.id === communication.projectId)?.projectName || 'N/A';
     const fabricatorName = fabricators.find(f => f._id === communication.fabricatorId || f.id === communication.fabricatorId)?.name || 'N/A';
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl overflow-hidden">
             <div className="p-6 border-b border-gray-100 bg-gray-50/30 flex justify-between items-start">
                 <div>
                     <h2 className="text-xl font-bold text-gray-900">{communication.subject}</h2>
                     <p className="text-gray-600 font-medium mt-1">{communication.clientName}</p>
                 </div>
-                <div>
+                <div className="flex flex-col items-end gap-3">
                     {communication.isCompleted ? (
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 gap-1.5">
                             <Check size={14} /> Completed
@@ -25,6 +113,32 @@ const GetCommunicationById = ({ communication, projects = [], fabricators = [] }
                             Pending
                         </span>
                     )}
+
+                    <div className="flex items-center gap-2 mt-2">
+                        {!communication.isCompleted && (
+                            <button
+                                onClick={handleComplete}
+                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors border border-green-100"
+                                title="Mark as Completed"
+                            >
+                                <Check size={18} />
+                            </button>
+                        )}
+                        <button
+                            onClick={() => onEdit && onEdit(communication)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-100"
+                            title="Edit"
+                        >
+                            <Edit2 size={18} />
+                        </button>
+                        <button
+                            onClick={handleDelete}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-100"
+                            title="Delete"
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    </div>
                 </div>
             </div>
 

@@ -108,7 +108,7 @@ const WBTDashboard = () => {
     dispatch
   ])
 
-  const currentTask = useMemo(() => tasks.find((t) => t.status === 'IN_PROGRESS'), [tasks])
+  const currentTask = useMemo(() => tasks.find((t) => t.status === 'IN_PROGRESS' || t.status === 'BREAK'), [tasks])
 
   const getGreeting = () => {
     const hour = new Date().getHours()
@@ -193,7 +193,7 @@ const WBTDashboard = () => {
               {getGreeting()}, {sessionStorage.getItem('firstName')?.split(' ')[0]}
             </h2>
           </div>
-          <div className="flex items-center gap-3 text-xs font-black border border-green-500 text-black bg-green-50 px-4 py-2 rounded-xl border border-primary/10 shadow-sm">
+          <div className="flex items-center gap-3 text-xs font-black text-black bg-green-50 px-4 py-2 rounded-xl border border-primary/10 shadow-sm">
             <Calendar className="w-4 h-4 text-black" />
             <span className="uppercase tracking-widest">{format(new Date(), 'MMMM dd, yyyy')}</span>
           </div>

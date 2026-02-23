@@ -95,6 +95,19 @@ const Communication = () => {
         }
     };
 
+    const handleDelete = async (id) => {
+        if (window.confirm("Are you sure you want to delete this communication?")) {
+            try {
+                await Service.DeleteCommunication(id);
+                toast.success("Communication deleted successfully");
+                fetchCommunications();
+            } catch (error) {
+                console.error("Error deleting communication", error);
+                toast.error("Failed to delete communication");
+            }
+        }
+    };
+
     // Render Modal Content based on Type
     const renderModalContent = () => {
         switch (modalType) {
@@ -123,6 +136,9 @@ const Communication = () => {
                         communication={selectedComm}
                         projects={projects}
                         fabricators={fabricators}
+                        onEdit={handleOpenEdit}
+                        onDelete={handleDelete}
+                        onComplete={handleMarkCompleted}
                     />
                 );
             default:
@@ -163,6 +179,7 @@ const Communication = () => {
                 onEdit={handleOpenEdit}
                 onComplete={handleMarkCompleted}
                 onView={handleOpenView}
+                onDelete={handleDelete}
             />
 
             {/* Modal */}
