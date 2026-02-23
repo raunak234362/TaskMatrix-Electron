@@ -82,7 +82,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
 
   const calculateWorkedSeconds = (task) => {
     return (task.workingHourTask || []).reduce(
-      (sum, entry) => sum + (entry.duration_seconds || 0),
+      (sum, entry) => sum + ((entry.duration_seconds) || 0),
       0,
     );
   };
@@ -198,7 +198,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
     const assignedHours = task.allocationLog?.allocatedHours
       ? parseTimeToDecimal(task.allocationLog.allocatedHours)
       : parseFloat(task.hours) || 0;
-    const workedHours = workedSeconds / 3600;
+    const workedHours = workedSeconds / 60;
     const isOverrun = workedHours > assignedHours && assignedHours > 0;
 
     return (
@@ -546,10 +546,10 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                           Check
                         </p>
                         <p className="text-sm font-bold text-slate-700">
-                          {bundle.totalExecHr || 0}h
+                          {((bundle.totalExecHr) / 60 || 0).toFixed(2)}h
                         </p>
                         <p className="text-sm font-bold text-slate-700">
-                          {bundle.totalCheckHr || 0}h
+                          {((bundle.totalCheckHr) / 60 || 0).toFixed(2)}h
                         </p>
                       </div>
                       <div className="flex flex-col items-end justify-center min-w-[100px]">
@@ -557,7 +557,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                           const bundleTasks = tasksByBundle[bundleId] || [];
                           const totalWorkedSeconds = bundleTasks.reduce((sum, t) => sum + calculateWorkedSeconds(t), 0);
                           const totalWorkedHours = totalWorkedSeconds / 3600;
-                          const totalAllocatedHours = (Number(bundle.totalExecHr) || 0) + (Number(bundle.totalCheckHr) || 0);
+                          const totalAllocatedHours = (Number(bundle.totalExecHr/60) || 0) + (Number(bundle.totalCheckHr/60) || 0);
                           const percentage = totalAllocatedHours > 0 ? Math.min(100, (totalWorkedHours / totalAllocatedHours) * 100) : 0;
 
                           return (
@@ -568,6 +568,8 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                               </div>
                               <div className="flex items-center gap-2 mb-1 justify-end">
                                 <span className="text-xs font-bold text-gray-700">{(totalAllocatedHours - totalWorkedHours).toFixed(1)}h</span>
+                                
+                                
                                 <span className="text-[10px] text-gray-400 font-medium">Remaining</span>
                               </div>
                               <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">

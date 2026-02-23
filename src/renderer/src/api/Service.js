@@ -968,6 +968,51 @@ class Service {
     }
   }
 
+  // update exsting milestone y Id
+  static async EditExistingMilestoneByID(id, data) {
+    try {
+      const response = await api.put(`mileStone/existing/${id}`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // edit milestone by ID
+  static async EditMilestoneById(id, data) {
+    try {
+      const response = await api.put(`mileStone/${id}`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // Update the completion percent by milestone id
+  static async UpdateCompletionPercentById(id, data) {
+    try {
+      const response = await api.put(`mileStone/completion/${id}`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   // Milestone Responses
   static async addMilestoneResponse(formData) {
     const token = sessionStorage.getItem('token')

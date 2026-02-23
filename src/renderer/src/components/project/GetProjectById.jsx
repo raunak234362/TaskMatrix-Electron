@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useMemo } from "react";
 import {
   Loader2,
@@ -9,15 +8,15 @@ import {
   Users,
   Clock,
   ClipboardList,
+  CheckCircle2,
+  TrendingUp,
   X
 } from "lucide-react";
 import Service from "../../api/Service";
 import Button from "../fields/Button";
 import AllMileStone from "./mileStone/AllMileStone";
 import AllDocument from "./projectDocument/AllDocument";
-
 import WBS from "./wbs/WBS";
-
 import AllRFI from "../rfi/AllRfi";
 import AddRFI from "../rfi/AddRFI";
 import AllSubmittals from "../submittals/AllSubmittals";
@@ -29,18 +28,59 @@ import AllCO from "../co/AllCO";
 import AddCO from "../co/AddCO";
 import CoTable from "../co/CoTable";
 import ProjectAnalyticsDashboard from "./ProjectAnalyticsDashboard";
+import ProjectMilestoneMetrics from "./mileStone/ProjectMilestoneMetrics";
 
 const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("details");
+  const [activeTab, setActiveTab] = useState("overview");
   const [rfiView, setRfiView] = useState("list");
   const [submittalView, setSubmittalView] = useState("list");
   const [editModel, setEditModel] = useState(null);
   const [changeOrderView, setChangeOrderView] = useState("list");
   const [selectedCoId, setSelectedCoId] = useState(null);
+  const [projectTasks, setProjectTasks] = useState([]);
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+
+  const fetchProjectTasks = async () => {
+    try {
+      const response = await Service.GetAllTask();
+      if (response && response.data) {
+        const allTasks = Array.isArray(response.data) ? response.data : [];
+        setProjectTasks(allTasks.filter((t) => t.project_id === id));
+      }
+    } catch (error) {
+      console.error("Error fetching project tasks:", error);
+    }
+  };
+
+  const projectStats = useMemo(() => {
+    if (!project) return { assigned: 0, completed: 0, overrun: 0, completedStr: "00:00", overrunStr: "00:00" };
+
+    const assigned = Number(project.estimatedHours) || 0;
+    const totalSeconds = projectTasks.reduce((sum, task) => {
+      return sum + (task.workingHourTask || []).reduce((tSum, entry) => tSum + (entry.duration_seconds || 0), 0);
+    }, 0);
+
+    const completedHours = totalSeconds / 3600;
+    const overrunHours = Math.max(0, completedHours - assigned);
+
+    const formatSecondsToHHMM = (totalSecs) => {
+      const h = Math.floor(totalSecs / 3600);
+      const m = Math.floor((totalSecs % 3600) / 60);
+      return `${h}:${m.toString().padStart(2, "0")}`;
+    };
+
+    return {
+      assigned,
+      completed: completedHours,
+      overrun: overrunHours,
+      completedStr: formatSecondsToHHMM(totalSeconds),
+      overrunStr: formatSecondsToHHMM(Math.max(0, totalSeconds - (assigned * 3600)))
+    };
+  }, [project, projectTasks]);
+
   const rfiData = useMemo(() => {
     return project?.rfi || [];
   }, [project]);
@@ -48,12 +88,16 @@ const GetProjectById = ({ id, onClose }) => {
   const changeOrderData = useMemo(() => {
     return project?.changeOrders || [];
   }, [project]);
+
   const fetchProject = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await Service.GetProjectById(id);
-      setProject(response?.data || null);
+      const [projRes] = await Promise.all([
+        Service.GetProjectById(id),
+        fetchProjectTasks()
+      ]);
+      setProject(projRes?.data || null);
     } catch (err) {
       setError("Failed to load project details");
       console.error("Error fetching project:", err);
@@ -63,29 +107,12 @@ const GetProjectById = ({ id, onClose }) => {
   };
 
   const handleEditModel = (project) => {
-    console.log(project);
     setEditModel(project);
   };
 
   const submittalData = useMemo(() => {
     return project?.submittals || [];
   }, [project]);
-
-  // const FetchWBSbyProjectId = async () => {
-  //   try {
-  //     setLoading(true);
-  //     setError(null);
-  //     const response = await Service.GetWBSByProjectId(id);
-  //   //   setProject(response?.data || null);
-  //   console.log(response);
-
-  //   } catch (err) {
-  //     setError("Failed to load WBS details");
-  //     console.error("Error fetching project:", err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   useEffect(() => {
     if (id) fetchProject();
@@ -96,7 +123,7 @@ const GetProjectById = ({ id, onClose }) => {
     if (coId) {
       setSelectedCoId(coId);
       setChangeOrderView("table");
-      fetchProject(); // Refresh project to get updated CO list
+      fetchProject();
     }
   };
 
@@ -131,13 +158,12 @@ const GetProjectById = ({ id, onClose }) => {
           {/* Header */}
           <div className="flex justify-between items-center pr-4">
             <div className="flex items-center gap-4">
-
               <div>
                 <h2 className="text-xl md:text-2xl font-black text-black uppercase tracking-tight">
                   {project.name}
                 </h2>
                 <p className="text-black/40 text-[10px] font-black uppercase tracking-widest">
-                  Project Serial No: {project.serialNo}
+                  Project No: {project.projectCode || project.serialNo}
                 </p>
               </div>
               <div
@@ -153,8 +179,7 @@ const GetProjectById = ({ id, onClose }) => {
               {onClose && (
                 <button
                   onClick={onClose}
-                  className="p-1 hover:bg-red-100 bg-red-100 border border-red-600 px-2 rounded-lg transition-colors text-red-600 hover:text-red-700"
-                  title="Close"
+                  className="px-4 py-1.5 bg-white border-2 border-slate-200 text-slate-800 font-bold uppercase tracking-widest rounded-lg hover:bg-slate-50 transition-colors text-xs"
                 >
                   Close
                 </button>
@@ -162,49 +187,12 @@ const GetProjectById = ({ id, onClose }) => {
             </div>
           </div>
           {/* Tabs */}
-          <div className="mb-4">
-            {/* Mobile Dropdown */}
-            <div className="block md:hidden mb-2">
-              <select
-                value={activeTab}
-                onChange={(e) => setActiveTab(e.target.value)}
-                className="w-full p-2 rounded-md bg-primary text-white  focus:outline-none focus:ring-2 focus:ring-[#6bbd45]"
-              >
-                {[
-                  { key: "details", label: "Details" },
-                  { key: "files", label: "Files" },
-                  { key: "wbs", label: "WBS" },
-                  { key: "milestones", label: "Milestones" },
-                  { key: "team", label: "Team" },
-                  { key: "timeline", label: "Timeline" },
-                  { key: "notes", label: "Notes" },
-                  { key: "rfi", label: "RFI" },
-                  { key: "CDrfi", label: "CD RFI" },
-                  { key: "submittals", label: "Submittals" },
-                  { key: "CDsubmittals", label: "CD Submittals" },
-                  { key: "changeOrder", label: "Change Order" },
-                  { key: "analytics", label: "Analytics" },
-                ]
-                  .filter(
-                    (tab) =>
-                      !(
-                        userRole === "staff" &&
-                        ["wbs", "rfi", "submittals", "changeOrder"].includes(tab.key)
-                      )
-                  )
-                  .map((tab) => (
-                    <option key={tab.key} value={tab.key}>
-                      {tab.label}
-                    </option>
-                  ))}
-              </select>
-            </div>
-
-            {/* Desktop Tabs */}
-            <div className="hidden md:flex gap-2 overflow-x-auto">
+          <div className="mb-4 mt-4">
+            <div className="hidden md:flex gap-2 overflow-x-auto custom-scrollbar pb-2">
               {[
-                { key: "details", label: "Details", icon: FileText },
+                { key: "overview", label: "Overview", icon: ClipboardList },
                 { key: "analytics", label: "Analytics", icon: ClipboardList },
+                { key: "details", label: "Details", icon: FileText },
                 { key: "files", label: "Files", icon: FolderOpenDot },
                 { key: "wbs", label: "WBS", icon: ClipboardList },
                 { key: "milestones", label: "Milestones", icon: Clock },
@@ -213,11 +201,7 @@ const GetProjectById = ({ id, onClose }) => {
                 { key: "CDrfi", label: "CD RFI", icon: FileText },
                 { key: "submittals", label: "Submittals", icon: FileText },
                 { key: "CDsubmittals", label: "CD Submittals", icon: FileText },
-                {
-                  key: "changeOrder",
-                  label: "Change Order",
-                  icon: Settings,
-                },
+                { key: "changeOrder", label: "Change Order", icon: Settings },
               ]
                 .filter(
                   (tab) =>
@@ -230,22 +214,87 @@ const GetProjectById = ({ id, onClose }) => {
                   <button
                     key={key}
                     onClick={() => setActiveTab(key)}
-                    className={`flex items-center gap-2 border border-black px-4 py-2 text-[13px] rounded-lg font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === key
-                      ? "bg-green-100 text-black shadow-sm"
-                      : "text-black bg-gray-100 hover:bg-green-100/50"
+                    className={`flex items-center gap-2 border-2 px-4 py-1.5 text-[11px] rounded-lg font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === key
+                      ? "bg-green-100 text-black border-[#6bbd45] shadow-sm"
+                      : "text-black bg-white border-slate-100 hover:border-green-200"
                       }`}
                   >
-                    <TabIcon className="w-4 h-4" />
+                    <TabIcon className="w-3.5 h-3.5" />
                     {label}
                   </button>
                 ))}
             </div>
           </div>
-
         </div>
 
         {/* Tab Content */}
-        <div className="pt-4 p-2">
+        <div className="pt-2 p-1">
+          {/* Overview TabContent */}
+          {activeTab === "overview" && (
+            <div className="space-y-6 animate-in slide-in-from-top-2 duration-500">
+              {/* Summary Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-blue-50/50 p-6 rounded-2xl border-2 border-blue-100 shadow-sm relative overflow-hidden group">
+                  <div className="flex items-center gap-3 mb-4 text-blue-400">
+                    <Clock size={16} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Hours Assigned</span>
+                  </div>
+                  <h3 className="text-3xl font-black text-slate-800 tracking-tight">{projectStats.assigned}h</h3>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">Total Estimated Hours for Project</p>
+                </div>
+
+                <div className="bg-emerald-50/50 p-6 rounded-2xl border-2 border-emerald-100 shadow-sm relative overflow-hidden group">
+                  <div className="flex items-center gap-3 mb-4 text-emerald-400">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Hours Completed</span>
+                  </div>
+                  <h3 className="text-3xl font-black text-slate-800 tracking-tight">{projectStats.completedStr}</h3>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">Total Hours Logged by Team</p>
+                </div>
+
+                <div className={`p-6 rounded-2xl border-2 shadow-sm relative overflow-hidden group ${projectStats.overrun > 0 ? "bg-red-50/50 border-red-200" : "bg-slate-50 border-slate-100"}`}>
+                  <div className={`flex items-center gap-3 mb-4 ${projectStats.overrun > 0 ? "text-red-400" : "text-slate-400"}`}>
+                    <AlertCircle size={16} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Overrun / Delay</span>
+                  </div>
+                  <h3 className={`text-3xl font-black tracking-tight ${projectStats.overrun > 0 ? "text-red-600" : "text-slate-800"}`}>
+                    {projectStats.overrunStr}
+                  </h3>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">
+                    {projectStats.overrun > 0 ? "Project is exceeding estimates" : "Currently within estimates"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress and Milestones */}
+              <div className="bg-white rounded-3xl border-2 border-slate-50 p-6">
+                <ProjectMilestoneMetrics projectId={id} />
+              </div>
+
+              {/* Timeline Overview & Project Status */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-slate-50/30 p-6 rounded-2xl border-2 border-slate-100">
+                  <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2 mb-6">
+                    <Clock className="w-4 h-4 text-blue-500" /> Timeline Overview
+                  </h4>
+                  <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Start Date</span>
+                    <span className="text-xs font-black text-slate-700 tracking-tight italic">{formatDate(project.startDate)}</span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50/30 p-6 rounded-2xl border-2 border-slate-100 flex flex-col items-center justify-center text-center">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100 mb-4">
+                    <TrendingUp className="w-6 h-6 text-[#6bbd45]" />
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Project Status</h4>
+                  <span className="text-sm font-black text-slate-800 uppercase tracking-tighter mb-4 px-4 py-1.5 bg-slate-100 rounded-lg">{project.status}</span>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Current Development Phase: {project.stage || "IFA"}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ✅ Details */}
           {activeTab === "details" && (
             <div className="grid max-sm:grid-cols-1 md:grid-cols-2 gap-6 text-sm">
@@ -303,7 +352,6 @@ const GetProjectById = ({ id, onClose }) => {
                   value={formatDate(project.fabricationDate)}
                 />
                 <InfoRow label="End Date" value={formatDate(project.endDate)} />
-                {/* <InfoRow label="RFQ ID" value={project.rfqId || "—"} /> */}
               </div>
 
               <div className="p-4 bg-green-200 rounded-xl border border-black text-sm">
@@ -384,19 +432,10 @@ const GetProjectById = ({ id, onClose }) => {
             </div>
           )}
 
-          {/* ✅ Timeline */}
-          {activeTab === "timeline" && (
-            <div className="text-gray-700 italic text-center py-10">
-              <Clock className="w-6 h-6 mx-auto mb-2 text-gray-400" />
-              Timeline view will be integrated soon.
-            </div>
-          )}
-
           {/* ✅ Notes */}
           {activeTab === "notes" && <AllNotes projectId={id} />}
           {activeTab === "wbs" && userRole !== "staff" && (
             <div className="text-gray-700 italic text-center">
-              {/* <FolderOpenDot className="w-6 h-6 mx-auto mb-2 text-gray-400" /> */}
               <WBS id={id} stage={project.stage || ""} />
             </div>
           )}
