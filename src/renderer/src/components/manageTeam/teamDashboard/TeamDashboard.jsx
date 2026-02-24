@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
@@ -616,7 +616,7 @@ const TeamDashboard = () => {
 
       {loading && !selectedTeam ? (
         <div className="flex items-center justify-center h-full min-h-[60vh]">
-          <div className="w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border border-green-200 border-t-green-600 rounded-full animate-spin"></div>
         </div>
       ) : (
         <div className="space-y-8">
@@ -628,20 +628,23 @@ const TeamDashboard = () => {
 
           {selectedTeam && (
             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {/* Gradient Header Bar - Matching Uploaded Reference */}
-              <div className="w-full bg-gradient-to-r from-green-400 to-green-300/80 rounded-2xl p-6 shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
+              {/* Team Header Bar */}
+              <div className="w-full bg-green-100 border border-black rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
                 <div>
-                  <h1 className="text-3xl font-extrabold text-white tracking-wide drop-shadow-sm">
+                  <h1 className="text-3xl font-black text-black uppercase tracking-tight">
                     {teams?.find((t) => t.id === selectedTeam)?.name || "Team Detail"}
                   </h1>
                 </div>
 
-                {/* Mock Tabs for Visual Reference if needed, or keeping Action Button styled to match */}
                 <div className="flex items-center gap-3">
-                  <span className="px-4 py-2 bg-white/20 text-white  rounded-lg cursor-pointer hover:bg-white/30 transition-all">Dashboard</span>
+                  <button
+                    className="px-6 py-2.5 bg-white/50 text-black border border-black font-black uppercase tracking-widest text-[11px] rounded-xl hover:bg-white transition-all active:translate-y-[1px] active:shadow-none"
+                  >
+                    Dashboard
+                  </button>
                   <button
                     onClick={() => setIsViewModalOpen(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-white text-green-700 rounded-[1.25rem]  hover:bg-green-50 transition-all shadow-[0_8px_20px_-4px_rgba(0,0,0,0.1)] hover:shadow-md"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-white text-black border border-black font-black uppercase tracking-widest text-[11px] rounded-xl hover:bg-gray-50 transition-all hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] active:translate-x-[0px] active:translate-y-[0px] active:shadow-[2px_2px_0px_#000]"
                   >
                     View Details
                   </button>

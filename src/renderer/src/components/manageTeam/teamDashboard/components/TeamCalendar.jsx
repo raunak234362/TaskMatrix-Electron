@@ -68,8 +68,8 @@ const TeamCalendar = ({
             <button
               onClick={() => setViewMode("user")}
               className={`px-3 py-1.5 rounded-lg text-xs  flex items-center gap-2 transition-all ${viewMode === "user"
-                  ? "bg-white text-green-600 shadow-sm"
-                  : "text-gray-700 hover:text-gray-700"
+                ? "bg-white text-green-600 shadow-sm"
+                : "text-gray-700 hover:text-gray-700"
                 }`}
             >
               <User size={14} />
@@ -78,8 +78,8 @@ const TeamCalendar = ({
             <button
               onClick={() => setViewMode("project")}
               className={`px-3 py-1.5 rounded-lg text-xs  flex items-center gap-2 transition-all ${viewMode === "project"
-                  ? "bg-white text-green-600 shadow-sm"
-                  : "text-gray-700 hover:text-gray-700"
+                ? "bg-white text-green-600 shadow-sm"
+                : "text-gray-700 hover:text-gray-700"
                 }`}
             >
               <Layout size={14} />

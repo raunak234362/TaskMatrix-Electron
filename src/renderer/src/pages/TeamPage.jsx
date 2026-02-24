@@ -54,36 +54,36 @@ const TeamPage = () => {
     <div className="h-full w-full overflow-y-auto overflow-x-hidden">
       <div className="flex flex-col w-full h-full">
         {/* ---------- TOP TABS ---------- */}
-        <div className="px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 rounded-t-2xl flex flex-wrap items-center justify-center md:justify-end gap-3">
+        <div className="px-6 py-4 bg-white/50 backdrop-blur-xl border-b border-gray-100 flex flex-wrap items-center justify-center md:justify-end gap-3">
           <button
             onClick={() => setActiveTab("teamDashboard")}
-            className={`px-4 md:px-6 py-2 md:py-3 rounded-[1.25rem] text-sm md:text-base  transition-all shadow-sm ${activeTab === "teamDashboard"
-              ? "bg-green-50 text-gray-700 border border-black font-semibold"
-              : "bg-white text-gray-700 border border-black font-semibold"
+            className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm border-2 ${activeTab === "teamDashboard"
+              ? "bg-green-100 text-black border-black shadow-[2px_2px_0px_#000]"
+              : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
               }`}
           >
-            TEAM DASHBOARD
+            Team Dashboard
           </button>
 
           <button
             onClick={() => setActiveTab("manageEmployee")}
-            className={`px-4 md:px-6 py-2 md:py-3 rounded-[1.25rem] text-sm md:text-base  transition-all shadow-sm ${activeTab === "manageEmployee"
-              ? "bg-green-50 text-gray-700 border border-black font-semibold"
-              : "bg-white text-gray-700 border border-black font-semibold"
+            className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm border-2 ${activeTab === "manageEmployee"
+              ? "bg-green-100 text-black border-black shadow-[2px_2px_0px_#000]"
+              : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
               }`}
           >
-            MANAGE EMPLOYEE
+            Manage Employee
           </button>
 
           {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
             <button
               onClick={() => setActiveTab("manageDepartment")}
-              className={`px-4 md:px-6 py-2 md:py-3 rounded-[1.25rem] text-sm md:text-base  transition-all shadow-sm ${activeTab === "manageDepartment"
-                ? "bg-green-50 text-gray-700 border border-black font-semibold"
-              : "bg-white text-gray-700 border border-black font-semibold"
+              className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm border-2 ${activeTab === "manageDepartment"
+                ? "bg-green-100 text-black border-black shadow-[2px_2px_0px_#000]"
+                : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
                 }`}
             >
-              MANAGE DEPARTMENT
+              Manage Department
             </button>
           )}
 
@@ -92,12 +92,12 @@ const TeamPage = () => {
             userRole === "HUMAN_RESOURCE") && (
               <button
                 onClick={() => setActiveTab("manageTeam")}
-                className={`px-4 md:px-6 py-2 md:py-3 rounded-[1.25rem] text-sm md:text-base  transition-all shadow-sm ${activeTab === "manageTeam"
-                  ? "bg-green-50 text-gray-700 border border-black font-semibold"
-              : "bg-white text-gray-700 border border-black font-semibold"
+                className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm border-2 ${activeTab === "manageTeam"
+                  ? "bg-green-100 text-black border-black shadow-[2px_2px_0px_#000]"
+                  : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
                   }`}
               >
-                MANAGE TEAM
+                Manage Team
               </button>
             )}
         </div>
