@@ -93,14 +93,14 @@ const AddMileStone = ({
             </p>
           )}
 
-          {/* <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <div>
+            <label className="block text-[11px] font-black text-black/50 uppercase tracking-widest mb-2">
               Description *
             </label>
             <Controller
               name="description"
               control={control}
-              rules={{ required: "Required" }}
+              rules={{ required: "Description is required" }}
               render={({ field }) => (
                 <RichTextEditor
                   value={field.value || ""}
@@ -114,7 +114,7 @@ const AddMileStone = ({
                 {errors.description.message}
               </p>
             )}
-          </div> */}
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             {/* <div>

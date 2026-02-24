@@ -86,7 +86,7 @@ const GetWBSByID = ({
   const columns = [
     {
       accessorKey: "description",
-      header: "Description",
+      header: "",
       cell: ({ row }) => (
         <p className="text-sm font-semibold text-gray-700 line-clamp-2">
           {row.original.name ||

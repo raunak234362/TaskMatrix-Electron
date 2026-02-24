@@ -14,14 +14,7 @@ const DashboardHeader = ({
 }) => {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-      <div>
-        <h1 className="text-2xl  text-gray-700">
-          Team Performance Dashboard
-        </h1>
-        <p className="text-gray-700 text-sm">
-          Monitor and analyze team efficiency and task distribution
-        </p>
-      </div>
+
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative">
@@ -34,11 +27,11 @@ const DashboardHeader = ({
             placeholder="Search teams..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all w-full md:w-64"
+            className="pl-10 pr-4 py-2 bg-white border border-black rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all w-full md:w-64"
           />
         </div>
 
-        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2">
+        <div className="flex items-center gap-2 bg-white border border-black rounded-xl px-3 py-2">
           <Filter size={16} className="text-gray-400" />
           <select
             value={dateFilter.type}
@@ -56,7 +49,7 @@ const DashboardHeader = ({
 
         <Button
           onClick={onAddTeam}
-          className="flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-[1.25rem] font-semibold hover:bg-green-600 transition-all shadow-[0_8px_20px_-4px_rgba(34,197,94,0.4)] hover:shadow-[0_12px_24px_-4px_rgba(34,197,94,0.5)]"
+          className="flex items-center gap-2 px-6 py-3 bg-green-200 text-black rounded-[1.25rem] font-semibold hover:bg-green-600 transition-all shadow-[0_8px_20px_-4px_rgba(34,197,94,0.4)] hover:shadow-[0_12px_24px_-4px_rgba(34,197,94,0.5)]"
         >
           <Plus size={20} />
           <span>Add Team</span>
@@ -64,7 +57,7 @@ const DashboardHeader = ({
 
         <Button
           onClick={onGenerateReport}
-          className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-100 rounded-[1.25rem] text-gray-600 font-semibold hover:bg-green-50 hover:text-green-700 hover:border-green-200 transition-all shadow-sm"
+          className="flex items-center gap-2 px-6 py-3 bg-white border border-black rounded-[1.25rem] text-gray-600 font-semibold hover:bg-green-50 hover:text-green-700 hover:border-green-200 transition-all shadow-sm"
         >
           <FileText size={20} />
           <span>Report</span>
@@ -72,7 +65,7 @@ const DashboardHeader = ({
 
         <Button
           onClick={onDailyReport}
-          className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-100 rounded-[1.25rem] text-gray-600 font-semibold hover:bg-green-50 hover:text-green-700 hover:border-green-200 transition-all shadow-sm"
+          className="flex items-center gap-2 px-6 py-3 bg-white border border-black rounded-[1.25rem] text-gray-600 font-semibold hover:bg-green-50 hover:text-green-700 hover:border-green-200 transition-all shadow-sm"
         >
           <Calendar size={20} />
           <span>Daily Report</span>

@@ -62,7 +62,7 @@ const AllNotes = ({ projectId }) => {
         </h3>
         <Button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+          className="flex items-center gap-2 bg-green-200 hover:bg-green-300 text-black"
         >
           <Plus className="w-4 h-4" /> Add Note
         </Button>
@@ -133,7 +133,7 @@ const AllNotes = ({ projectId }) => {
           <p className="text-gray-500 text-sm mb-4">Start by adding important information here.</p>
           <Button
             onClick={() => setShowAddModal(true)}
-            className="bg-green-600 hover:bg-green-700 text-white px-8"
+            className="bg-green-200 hover:bg-green-300 text-black px-8"
           >
             Create First Note
           </Button>

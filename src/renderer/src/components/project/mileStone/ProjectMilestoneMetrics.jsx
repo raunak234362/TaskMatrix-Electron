@@ -96,8 +96,8 @@ const ProjectMilestoneMetrics = ({ projectId }) => {
         <div className="space-y-8 p-1">
             {/* Milestone Approvals Section */}
             <div>
-                <h4 className="text-lg text-gray-800 mb-4 flex items-center gap-2 uppercase tracking-tight font-black">
-                    <CalendarCheck size={20} className="text-green-600" />
+                <h4 className="text-xs font-black text-black mb-6 flex items-center gap-3 uppercase tracking-widest">
+                    <CalendarCheck size={20} className="text-[#6bbd45]" strokeWidth={3} />
                     Project Progress
                 </h4>
                 {milestoneStats.length > 0 ? (
@@ -105,88 +105,80 @@ const ProjectMilestoneMetrics = ({ projectId }) => {
                         {milestoneStats.map((ms, index) => (
                             <div
                                 key={ms.id || index}
-                                className={`p-4 bg-white border-2 border-slate-100 rounded-xl shadow-none flex flex-col justify-between transition-colors relative`}
+                                className="p-6 bg-white border-2 border-slate-50 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
                             >
                                 <div>
-                                    <h5 className="font-black text-gray-800 mb-1 line-clamp-1 uppercase tracking-tight">
-                                        {ms.subject}
-                                    </h5>
-                                    <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
-                                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Status:</span>
+                                    <div className="flex justify-between items-start mb-4">
+                                        <h5 className="font-black text-black text-lg uppercase tracking-tight leading-tight max-w-[70%]">
+                                            {ms.subject}
+                                        </h5>
                                         <span
-                                            className={`px-2 py-0.5 rounded-full text-xs uppercase font-bold tracking-widest ${ms.status === "APPROVED" || ms.status === "COMPLETED"
-                                                ? " text-[#6bbd45]"
-                                                : " text-amber-500"
+                                            className={`px-3 py-1 rounded-lg text-[10px] uppercase font-black tracking-widest ${ms.status === "APPROVED" || ms.status === "COMPLETED"
+                                                ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                                                : "bg-amber-50 text-amber-600 border border-amber-100"
                                                 }`}
                                         >
                                             {ms.status || "PENDING"}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
-                                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Stage:</span>
-                                        <span
-                                            className={`px-2 py-0.5 rounded-full text-xs uppercase font-bold tracking-widest ${ms.status === "APPROVED" || ms.status === "COMPLETED"
-                                                ? "bg-green-50 text-[#6bbd45]"
-                                                : "bg-slate-50 text-slate-500"
-                                                }`}
-                                        >
-                                            {ms.stage || "PENDING"}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
-                                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Completion Percentage :</span>
-                                        <div className="flex items-center">
-                                            <span
-                                                className={`px-2 py-0.5 rounded-full text-md uppercase font-black tracking-widest text-[#6bbd45]`}
-                                            >
-                                                {ms.completionPercentage || ms.taskPercentage || ms.percentage || 0}%
-                                            </span>
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedMilestoneId(ms.id || ms._id);
-                                                    setIsUpdateModalOpen(true);
-                                                }}
-                                                className="ml-2 text-slate-300 hover:text-green-600 transition-colors"
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width="14"
-                                                    height="14"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
+
+                                    <div className="space-y-3 mb-6">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-black/40">Status:</span>
+                                            <span className="text-[11px] font-black uppercase text-amber-500 tracking-widest">{ms.status || "ACTIVE"}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-black/40">Stage:</span>
+                                            <span className="text-[11px] font-black uppercase text-black tracking-widest">{ms.stage || "IFA"}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-black/40">Completion Percentage :</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-black text-black">{ms.completionPercentage || ms.taskPercentage || ms.percentage || 0}%</span>
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedMilestoneId(ms.id || ms._id);
+                                                        setIsUpdateModalOpen(true);
+                                                    }}
+                                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-50 rounded"
                                                 >
-                                                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                                                    <path d="m15 5 4 4" />
-                                                </svg>
-                                            </button>
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        width="14"
+                                                        height="14"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="3"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        className="text-black/40 hover:text-black"
+                                                    >
+                                                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                                                        <path d="m15 5 4 4" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="w-full bg-slate-100 rounded-full h-2 relative overflow-hidden mt-2">
-                                    {/* Time Progress (background shadow layer) */}
-                                    <div
-                                        className="absolute top-0 left-0 h-2 bg-slate-200 opacity-40 transition-all duration-500"
-                                        style={{ width: `${ms.timePercent}%` }}
-                                    ></div>
-                                    {/* Task Completion (real progress) */}
-                                    <div
-                                        className={`absolute top-0 left-0 h-2 rounded-full transition-all duration-500 ${(ms.taskPercentage || ms.percentage) >= 100 ? 'bg-[#6bbd45]' : 'bg-teal-500'
-                                            }`}
-                                        style={{
-                                            width: `${ms.taskPercentage || ms.percentage}%`,
-                                        }}
-                                    ></div>
-                                </div>
-                                <div className="border-t border-slate-50 pt-2 mt-2">
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-slate-400 uppercase text-[10px] font-black tracking-widest">
+
+                                <div className="space-y-4">
+                                    <div className="w-full bg-slate-100 rounded-full h-3 relative overflow-hidden">
+                                        <div
+                                            className={`absolute top-0 left-0 h-full rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(107,189,69,0.2)] ${(ms.taskPercentage || ms.percentage) >= 100 ? 'bg-[#6bbd45]' : 'bg-[#6bbd45]'
+                                                }`}
+                                            style={{
+                                                width: `${ms.taskPercentage || ms.percentage}%`,
+                                            }}
+                                        ></div>
+                                    </div>
+
+                                    <div className="pt-4 border-t border-slate-50 flex justify-between items-center">
+                                        <span className="text-[10px] font-black text-black/40 uppercase tracking-widest">
                                             Approval Date
                                         </span>
-                                        <span className="font-black text-gray-700 text-xs tracking-tight">
+                                        <span className="font-black text-black text-[11px] tracking-tight">
                                             {formatDate(ms.approvalDate)}
                                         </span>
                                     </div>

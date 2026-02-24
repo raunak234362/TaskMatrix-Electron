@@ -58,34 +58,12 @@ const GetMilestoneByID = ({ row, close }) => {
   };
 
   const getStatusConfig = (status) => {
-    const configs = {
-      APPROVED: {
-        label: "Approved",
-        bg: "bg-emerald-100",
-        text: "text-emerald-700",
-        border: "border-emerald-300",
-      },
-      PENDING: {
-        label: "Pending",
-        bg: "bg-[#6bbd45]/15",
-        text: "text-[#6bbd45]",
-        border: "border-[#6bbd45]",
-      },
-      REJECTED: {
-        label: "Rejected",
-        bg: "bg-red-100",
-        text: "text-red-700",
-        border: "border-red-300",
-      },
+    return {
+      label: status || "PENDING",
+      bg: "bg-emerald-50",
+      text: "text-black",
+      border: "border-black",
     };
-    return (
-      configs[status?.toUpperCase() || ""] || {
-        label: status || "Unknown",
-        bg: "bg-gray-100",
-        text: "text-gray-700",
-        border: "border-gray-300",
-      }
-    );
   };
 
   if (loading) {
@@ -175,28 +153,26 @@ const GetMilestoneByID = ({ row, close }) => {
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-none border-none">
       {/* Header */}
-      <div className="bg-[#6bbd45] px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-            <CheckCircle2 className="w-6 h-6 text-white" />
+      <div className="bg-white border-b-2 border-slate-100 px-6 py-5 flex justify-between items-center relative">
+        <div className="flex items-center gap-4">
+          <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center justify-center">
+            <CheckCircle2 className="w-7 h-7 text-[#6bbd45]" strokeWidth={3} />
           </div>
           <div>
-            <h2 className="text-xl  text-white leading-tight">
+            <h2 className="text-2xl font-black text-black uppercase tracking-tight leading-tight">
               {milestone.subject}
             </h2>
-            <p className="text-white/80 text-xs font-medium">
-              ID: #{milestone.id}
+            <p className="text-black/40 text-[11px] font-black uppercase tracking-widest mt-1">
+              ID: #{milestone.id} — Version: {milestone.versionId || "1.0"}
             </p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
+        <button
           onClick={close}
-          className="p-2 hover:bg-white/10 text-white"
+          className="p-2.5 hover:bg-slate-50 text-slate-400 hover:text-black transition-all rounded-xl border-2 border-transparent hover:border-slate-100"
         >
-          <X className="w-6 h-6" />
-        </Button>
+          <X className="w-6 h-6" strokeWidth={3} />
+        </button>
       </div>
 
       <div className="p-6 space-y-8">
@@ -224,11 +200,11 @@ const GetMilestoneByID = ({ row, close }) => {
             bg="bg-purple-50"
           />
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            <span className="text-[10px] font-black text-black/40 uppercase tracking-widest">
               Status
             </span>
             <div
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs  border-2 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border} w-fit mt-1`}
+              className={`inline-flex items-center px-5 py-2 rounded-lg text-sm font-black uppercase tracking-widest border border-black ${statusConfig.bg} ${statusConfig.text} w-fit mt-1`}
             >
               {statusConfig.label}
             </div>
@@ -312,9 +288,10 @@ const GetMilestoneByID = ({ row, close }) => {
               userRole === "USER") && (
                 <Button
                   onClick={() => setShowResponseModal(true)}
-                  className="bg-green-600 text-white hover:bg-green-700"
+                  className="bg-green-200 text-black border-2 border-black font-black uppercase tracking-widest text-[11px] px-6 py-2.5 rounded-xl shadow-sm hover:bg-green-300 transition-all active:scale-95 flex items-center gap-2"
                 >
-                  + Add Response
+                  <MessageSquare size={14} strokeWidth={3} />
+                  Add Response
                 </Button>
               )}
           </div>
@@ -364,12 +341,12 @@ const InfoCard = ({
   bg,
 }) => (
   <div className="flex flex-col gap-1">
-    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+    <span className="text-[10px] font-black text-black/40 uppercase tracking-widest leading-none mb-1">
       {label}
     </span>
-    <div className="flex items-center gap-2 mt-1">
-      <div className={`p-1.5 ${bg} ${color} rounded-lg`}>{icon}</div>
-      <span className="text-sm  text-gray-700">{value}</span>
+    <div className="flex items-center gap-3">
+      <div className={`p-2.5 ${bg} ${color} rounded-xl border border-black/5`}>{icon}</div>
+      <span className="text-[15px] font-black text-black tracking-tight">{value}</span>
     </div>
   </div>
 );
