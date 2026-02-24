@@ -95,7 +95,7 @@ const GetWBSByIDsHours = ({
 
                 {/* Line Items Table */}
                 <section>
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-4">    
                         <div className="flex items-center gap-2">
                             <div className="w-1 h-6 bg-green-600 rounded-full"></div>
                             <h3 className="text-lg  text-gray-700">WBS Items</h3>
