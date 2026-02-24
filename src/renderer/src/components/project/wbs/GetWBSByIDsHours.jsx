@@ -25,32 +25,30 @@ const GetWBSByIDsHours = ({
         <>
             <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
                 {/* Summary Grid */}
-                <div className="bg-gray-900 rounded-2xl p-2 text-white shadow-xl shadow-gray-200 flex flex-col justify-between">
-                    <div>
+                <div className="bg-green-200 border border-grey-200 rounded-2xl p-2 text-black shadow-xl shadow-gray-200 flex flex-col justify-between mb-4  ">
+                    <div className="space-y-4 text-black">
                         <DetailCard
                             label="Stage"
                             value={wbsData.stage}
-                            icon={<Layers className="w-4 h-4" />}
+                            icon={<Layers className="w-6 h-6" />}
                         />
-                        <p className="text-gray-400 text-xs font-medium uppercase tracking-widest mb-1">
+                        <p className="text-gray-900 text-xl font-medium uppercase tracking-widest">
                             Total Quantity
                         </p>
-                        <h3 className="text-2xl  text-white">
+                        <h3 className="text-2xl  text-black">
                             {wbsData?.totalQtyNo || 0}
                         </h3>
                     </div>
-                    <div className="pt-4 border-t border-gray-800 mt-4 flex justify-between items-end">
+                    <div className="pt-4  mt-4 flex justify-between items-end">
                         <div>
-                            <p className="text-gray-700 text-[10px] uppercase ">
-                                Last Updated
+                            <p className="text-gray-700 text-sm uppercase ">
+                                Last Updated :-
                             </p>
                             <p className="text-xs text-gray-300">
                                 {formatDate(wbsData?.updatedAt)}
                             </p>
                         </div>
-                        <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                            <Clock className="w-4 h-4 text-green-400" />
-                        </div>
+                        
                     </div>
                 </div>
 
@@ -101,9 +99,7 @@ const GetWBSByIDsHours = ({
                         <div className="flex items-center gap-2">
                             <div className="w-1 h-6 bg-green-600 rounded-full"></div>
                             <h3 className="text-lg  text-gray-700">WBS Items</h3>
-                            <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-700 text-[10px]  rounded-full">
-                                {lineItems?.length || 0} Items
-                            </span>
+                            
                             {loading && (
                                 <Loader2 className="w-4 h-4 text-green-600 animate-spin ml-2" />
                             )}
@@ -148,15 +144,15 @@ const GetWBSByIDsHours = ({
 
             {/* Footer Section */}
             <div className="px-8 py-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-4">
-                {/* <Button
+                <Button
                     variant="outline"
                     className="bg-white text-gray-700 border-gray-200 hover:bg-gray-50 shadow-sm"
                 >
                     Download Report
-                </Button> */}
-                {/* <Button className="text-white shadow-lg shadow-green-100">
+                </Button> 
+                 <Button className="text-black shadow-lg shadow-green-100">
                     Add Quantity
-                </Button> */}
+                </Button>
             </div>
         </>
     );

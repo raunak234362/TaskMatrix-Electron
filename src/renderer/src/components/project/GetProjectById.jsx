@@ -10,6 +10,7 @@ import {
   ClipboardList,
   CheckCircle2,
   TrendingUp,
+  Activity,
   X
 } from "lucide-react";
 import Service from "../../api/Service";
@@ -156,30 +157,28 @@ const GetProjectById = ({ id, onClose }) => {
       <div className="w-full relative laptop:fit">
         <div className="sticky top-0 bg-white z-50 pb-2">
           {/* Header */}
-          <div className="flex justify-between items-center pr-4">
-            <div className="flex items-center gap-4">
-              <div>
-                <h2 className="text-xl md:text-2xl font-black text-black uppercase tracking-tight">
-                  {project.name}
-                </h2>
-                <p className="text-black/40 text-[10px] font-black uppercase tracking-widest">
-                  Project No: {project.projectCode || project.serialNo}
-                </p>
-              </div>
+          <div className="flex justify-between items-start pr-4 pt-2">
+            <div className="flex flex-col">
+              <h2 className="text-2xl md:text-3xl font-black text-black uppercase tracking-tight leading-none">
+                {project.name}
+              </h2>
+              <p className="text-black/60 text-[12px] font-bold uppercase tracking-widest mt-1">
+                Project No: {project.projectCode || project.serialNo}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
               <div
-                className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border border-black ${project.status === "ACTIVE"
-                  ? "bg-green-100 text-black"
-                  : "bg-red-100 text-black"
+                className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border-2 transition-all ${project.status === "ACTIVE"
+                  ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                  : "bg-red-50 text-red-600 border-red-100"
                   }`}
               >
                 {project.status}
               </div>
-            </div>
-            <div className="flex items-center gap-2">
               {onClose && (
                 <button
                   onClick={onClose}
-                  className="px-4 py-1.5 bg-white border-2 border-slate-200 text-slate-800 font-bold uppercase tracking-widest rounded-lg hover:bg-slate-50 transition-colors text-xs"
+                  className="px-6 py-2 bg-red-50 border-2 border-red-200 text-red-600 font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-xs shadow-sm hover:shadow-md active:scale-95"
                 >
                   Close
                 </button>
@@ -188,10 +187,10 @@ const GetProjectById = ({ id, onClose }) => {
           </div>
           {/* Tabs */}
           <div className="mb-4 mt-4">
-            <div className="hidden md:flex gap-2 overflow-x-auto custom-scrollbar pb-2">
+            <div className="hidden md:flex gap-3 overflow-x-auto custom-scrollbar pb-3 pt-1">
               {[
                 { key: "overview", label: "Overview", icon: ClipboardList },
-                { key: "analytics", label: "Analytics", icon: ClipboardList },
+                { key: "analytics", label: "Analytics", icon: TrendingUp },
                 { key: "details", label: "Details", icon: FileText },
                 { key: "files", label: "Files", icon: FolderOpenDot },
                 { key: "wbs", label: "WBS", icon: ClipboardList },
@@ -214,12 +213,12 @@ const GetProjectById = ({ id, onClose }) => {
                   <button
                     key={key}
                     onClick={() => setActiveTab(key)}
-                    className={`flex items-center gap-2 border-2 px-4 py-1.5 text-[11px] rounded-lg font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === key
-                      ? "bg-green-100 text-black border-[#6bbd45] shadow-sm"
-                      : "text-black bg-white border-slate-100 hover:border-green-200"
+                    className={`flex items-center gap-2 border-1 px-5 py-2 text-[12px] rounded-lg font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-sm hover:shadow-md active:scale-95 ${activeTab === key
+                      ? "bg-green-50 text-black border-[#6bbd45]"
+                      : "text-black bg-white border-black hover:border-black"
                       }`}
                   >
-                    <TabIcon className="w-3.5 h-3.5" />
+                    <TabIcon className="w-4 h-4" />
                     {label}
                   </button>
                 ))}
@@ -233,63 +232,67 @@ const GetProjectById = ({ id, onClose }) => {
           {activeTab === "overview" && (
             <div className="space-y-6 animate-in slide-in-from-top-2 duration-500">
               {/* Summary Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-blue-50/50 p-6 rounded-2xl border-2 border-blue-100 shadow-sm relative overflow-hidden group">
-                  <div className="flex items-center gap-3 mb-4 text-blue-400">
-                    <Clock size={16} />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Hours Assigned</span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border-1 border-black bg-blue-400 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+                  <div className="flex items-center gap-3 mb-6 text-black">
+                    <Clock size={20} strokeWidth={3} />
+                    <span className="text-sm font-black uppercase tracking-widest opacity-60">Hours Assigned</span>
                   </div>
-                  <h3 className="text-3xl font-black text-slate-800 tracking-tight">{projectStats.assigned}h</h3>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">Total Estimated Hours for Project</p>
+                  <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned}h</h3>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
 
-                <div className="bg-emerald-50/50 p-6 rounded-2xl border-2 border-emerald-100 shadow-sm relative overflow-hidden group">
-                  <div className="flex items-center gap-3 mb-4 text-emerald-400">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Hours Completed</span>
+                <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border-1 border-black bg-emerald-400 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+                  <div className="flex items-center gap-3 mb-6 text-emerald-500">
+                    <CheckCircle2 size={20} strokeWidth={3} />
+                    <span className="textsms font-black uppercase tracking-widest opacity-60">Hours Completed</span>
                   </div>
-                  <h3 className="text-3xl font-black text-slate-800 tracking-tight">{projectStats.completedStr}</h3>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">Total Hours Logged by Team</p>
+                  <h3 className="text-4xl  text-black tracking-tighter">{projectStats.completedStr}</h3>
+
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
 
-                <div className={`p-6 rounded-2xl border-2 shadow-sm relative overflow-hidden group ${projectStats.overrun > 0 ? "bg-red-50/50 border-red-200" : "bg-slate-50 border-slate-100"}`}>
-                  <div className={`flex items-center gap-3 mb-4 ${projectStats.overrun > 0 ? "text-red-400" : "text-slate-400"}`}>
-                    <AlertCircle size={16} />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Overrun / Delay</span>
+                <div className={`flex flex-row items-center justify-between p-6 rounded-2xl border border-black bg-white relative overflow-hidden group hover:shadow-md transition-all ${projectStats.overrun > 0 ? "bg-white border-red-400" : "bg-white"}`}>
+                  <div className={`flex items-center gap-3 mb-6 ${projectStats.overrun > 0 ? "text-red-500" : "text-slate-400"}`}>
+                    <AlertCircle size={20} strokeWidth={3} />
+                    <span className="text-sm font-black text-black uppercase tracking-widest opacity-60">Overrun / Delay</span>
                   </div>
-                  <h3 className={`text-3xl font-black tracking-tight ${projectStats.overrun > 0 ? "text-red-600" : "text-slate-800"}`}>
+                  <h3 className={`text-4xl tracking-tighter ${projectStats.overrun > 0 ? "text-red-600" : "text-black"}`}>
                     {projectStats.overrunStr}
                   </h3>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">
-                    {projectStats.overrun > 0 ? "Project is exceeding estimates" : "Currently within estimates"}
-                  </p>
+                  <div className={`absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500 ${projectStats.overrun > 0 ? "bg-red-500/5" : "bg-slate-500/5"}`}></div>
                 </div>
               </div>
 
               {/* Progress and Milestones */}
-              <div className="bg-white rounded-3xl border-2 border-slate-50 p-6">
+              <div className="bg-white rounded-3xl border-1 border-slate-50 p-6">
                 <ProjectMilestoneMetrics projectId={id} />
               </div>
 
               {/* Timeline Overview & Project Status */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-slate-50/30 p-6 rounded-2xl border-2 border-slate-100">
-                  <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2 mb-6">
-                    <Clock className="w-4 h-4 text-blue-500" /> Timeline Overview
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-white p-8 rounded-2xl border-2 border-slate-50 shadow-sm hover:shadow-md transition-all">
+                  <h4 className="text-[12px] font-black uppercase tracking-widest flex items-center gap-3 mb-8">
+                    <Clock className="w-5 h-5 text-blue-500" strokeWidth={3} /> Timeline Overview
                   </h4>
-                  <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Start Date</span>
-                    <span className="text-xs font-black text-slate-700 tracking-tight italic">{formatDate(project.startDate)}</span>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center py-4 border-b border-slate-100">
+                      <span className="text-[14px] font-black uppercase tracking-widest">Start Date</span>
+                      <span className="text-[14px] font-black tracking-tight">{formatDate(project.startDate)}</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="bg-slate-50/30 p-6 rounded-2xl border-2 border-slate-100 flex flex-col items-center justify-center text-center">
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100 mb-4">
-                    <TrendingUp className="w-6 h-6 text-[#6bbd45]" />
+                <div className="bg-white p-8 rounded-2xl border-2 border-slate-50 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center text-center">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg border border-slate-100 mb-6 group">
+                    <Activity className="w-8 h-8 text-[#6bbd45] group-hover:scale-110 transition-transform" strokeWidth={3} />
                   </div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Project Status</h4>
-                  <span className="text-sm font-black text-slate-800 uppercase tracking-tighter mb-4 px-4 py-1.5 bg-slate-100 rounded-lg">{project.status}</span>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Current Development Phase: {project.stage || "IFA"}</p>
+                  <h4 className="text-[10px] font-black text-black/40 uppercase tracking-widest mb-2">Project Status</h4>
+                  <span className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-6 px-6 py-2 bg-emerald-50 rounded-lg border border-emerald-100 shadow-sm">{project.status}</span>
+                  <p className="text-[10px] font-extrabold text-black/40 uppercase tracking-widest flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#6bbd45] animate-pulse"></span>
+                    Current Phase: <span className="text-black">{project.stage || "IFA"}</span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -299,7 +302,7 @@ const GetProjectById = ({ id, onClose }) => {
           {activeTab === "details" && (
             <div className="grid max-sm:grid-cols-1 md:grid-cols-2 gap-6 text-sm">
               <div className="md:col-span-2 mt-6">
-                <h4 className="font-black text-black uppercase tracking-widest mb-3 flex items-center gap-2 text-md">
+                <h4 className=" text-black uppercase tracking-widest mb-3 flex items-center gap-2 text-">
                   <FolderOpenDot className="w-5 h-5" />
                   Project Scope
                 </h4>

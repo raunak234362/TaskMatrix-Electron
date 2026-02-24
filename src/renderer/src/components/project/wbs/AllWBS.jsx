@@ -148,22 +148,17 @@ const AllWBS = ({ id, stage }) => {
   return (
     <div className="bg-[#fcfdfc] min-h-[400px] p-2 animate-in fade-in duration-700">
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-lg font-black text-gray-900 tracking-tight uppercase">
-            Work Breakdown Structure
-            <span className="text-primary/40 ml-2">{wbsBundles.length}</span>
-          </h2>
-        </div>
+        
 
         {(userRole === "admin" ||
           userRole === "operation_executive" ||
           userRole === "estimation_head") && (
             <Button
               onClick={() => setShowFetchTemplate(true)}
-              className="text-[10px] font-black uppercase tracking-widest py-2 px-4 bg-gray-900 text-white rounded-xl shadow-md hover:bg-gray-800 transition-all border-none"
+              className="text-[10px] font-black uppercase tracking-widest py-2 px-4 bg-green-200 hover:bg-green-300 text-black rounded-xl shadow-md hover:bg-green-500 transition-all border-black border"
             >
               Add New Bundle
-            </Button>
+            </Button> 
           )}
       </div>
 

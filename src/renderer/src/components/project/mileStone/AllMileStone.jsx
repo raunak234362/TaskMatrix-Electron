@@ -62,15 +62,26 @@ const AllMileStone = ({ project, onUpdate }) => {
     {
       accessorKey: "description",
       header: "Description",
-      cell: ({ row }) => (
-        <p className="text-sm font-bold text-gray-600 truncate max-w-[250px]">{row.original.description || "—"}</p>
-      )
+      cell: ({ row }) => {
+        const rawDescription = row.original.description || row.original.Description || "";
+        // If it's the literal dash, treat it as empty
+        const effectiveDescription = (rawDescription === "-" || !rawDescription) ? "No description provided" : rawDescription;
+
+        // Strip HTML tags for table view
+        const plainText = effectiveDescription.replace(/<[^>]*>?/gm, '');
+
+        return (
+          <p className="text-sm font-bold text-black/60 truncate max-w-[300px] italic">
+            {plainText}
+          </p>
+        );
+      }
     },
     {
       accessorKey: "date",
       header: "Target Date",
       cell: ({ row }) => (
-        <span className="text-sm font-bold text-gray-600">
+        <span className="text-[13px] font-black text-black uppercase tracking-tight">
           {row.original.date ? new Date(row.original.date).toLocaleDateString("en-IN", { day: '2-digit', month: 'short', year: 'numeric' }) : "—"}
         </span>
       )
@@ -81,8 +92,7 @@ const AllMileStone = ({ project, onUpdate }) => {
       cell: ({ row }) => {
         const status = row.original.status || 'PENDING';
         return (
-          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${status === 'COMPLETED' ? 'bg-[#6bbd45]/15 text-[#6bbd45]' : 'bg-[#6bbd45]/15 text-[#6bbd45]'
-            }`}>
+          <span className={`px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest border-2 border-black bg-emerald-50 text-black shadow-sm`}>
             {status}
           </span>
         );
@@ -96,13 +106,16 @@ const AllMileStone = ({ project, onUpdate }) => {
   };
 
   return (
-    <div className="bg-[#fcfdfc] min-h-[400px] p-2 animate-in fade-in duration-700">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-black text-gray-900 tracking-tight uppercase">Milestones <span className="text-primary/40 ml-2">{milestones.length}</span></h2>
+    <div className="bg-[#fcfdfc] min-h-[400px] p-4 animate-in fade-in duration-700">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h2 className="text-2xl font-black text-black tracking-tight uppercase leading-none">Milestones</h2>
+          <p className="text-[11px] font-black text-black/40 uppercase tracking-widest mt-2">Managing {milestones.length} project goals</p>
+        </div>
         {!(userRole === "staff" || userRole === "client" || userRole === "vendor") && (
           <Button
             onClick={handleOpenAddMileStone}
-            className="text-[10px] font-black uppercase tracking-widest py-2 px-4 bg-gray-900 text-white rounded-xl shadow-md hover:bg-gray-800 transition-all"
+            className="text-[11px] text-black font-black uppercase tracking-widest py-3 px-6 bg-green-200 hover:bg-green-300 border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.1)] hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm transition-all"
           >
             + Add Milestone
           </Button>
