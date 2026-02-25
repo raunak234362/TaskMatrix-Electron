@@ -12,9 +12,9 @@ const TeamLayout = () => {
           <div className="flex flex-row gap-3 items-end justify-end">
             <button
               onClick={() => setActiveTab("allTeam")}
-              className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "allTeam"
-                  ? "md:text-base text-sm bg-green-700 text-white "
-                  : "text-base md:text-base bg-white/70 backdrop-xl text-gray-700 font-semibold"
+              className={`px-1.5 md:px-4 py-2 border border-black rounded-lg ${activeTab === "allTeam"
+                 ? "bg-green-200 text-black shadow-medium"
+                : "text-black hover:bg-green-50"
                 }`}
             >
               All Team
@@ -23,9 +23,9 @@ const TeamLayout = () => {
             {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
               <button
                 onClick={() => setActiveTab("addTeam")}
-                className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "addTeam"
-                    ? "md:text-base text-sm bg-green-700 text-white "
-                    : "text-base md:text-base bg-white/70 backdrop-xl text-gray-700 font-semibold"
+                className={`px-1.5 md:px-4 py-2 border border-black rounded-lg ${activeTab === "addTeam"
+                    ? "bg-green-200 text-black shadow-medium"
+                    : "text-black hover:bg-green-50"
                   }`}
               >
                 Add Team

@@ -53,7 +53,7 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
             <div className="flex items-center justify-between gap-5">
                 <div className="relative">
                     <button
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100"
+                        className="flex items-center gap-2 px-3 py-2 text-sm bg-green-50 text-green-900 font-semibold rounded-lg hover:bg-green-100"
                         onClick={() => setShowFilterDropdown((prev) => !prev)}
                         type="button"
                     >
@@ -313,7 +313,7 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                 {/* ✅ Apply Button */}
                                 <button
                                     onClick={() => setShowFilterDropdown(false)}
-                                    className="mt-2 w-full bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium py-2 rounded-md"
+                                    className="mt-2 w-full bg-green-200 hover:bg-green-700 text-black text-sm font-semibold py-2 rounded-md"
                                 >
                                     Apply
                                 </button>

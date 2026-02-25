@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 
 import Input from "../../fields/input";
 import Button from "../../fields/Button";
 import Service from "../../../api/Service";
-import { Loader2 } from "lucide-react";
-
-
 
 const EditDepartment = ({
   id,
@@ -28,7 +25,7 @@ const EditDepartment = ({
   } = useForm({
     defaultValues: {
       name: "",
-      managerIds: []
+      managerIds: [],
     },
   });
 
@@ -46,7 +43,7 @@ const EditDepartment = ({
               ? dept.managerIds.map((m) =>
                 typeof m === "string" ? m : m.id
               )
-              : []
+              : [],
           });
         }
       } catch (err) {
@@ -63,7 +60,7 @@ const EditDepartment = ({
   const fetchExecutives = async () => {
     try {
       const response = await Service.FetchEmployeeByRole("OPERATION_EXECUTIVE");
-      const employees = response?.data?.employees || []
+      const employees = response?.data?.employees || [];
       setStaffs(employees);
     } catch (err) {
       console.error("Failed to fetch operation executives:", err);
@@ -77,7 +74,7 @@ const EditDepartment = ({
   }, []);
 
   // ── Build options (OPERATION_EXECUTIVE) ──
-  const executiveOptions = React.useMemo(() => {
+  const executiveOptions = useMemo(() => {
     return staffs.map((user) => ({
       label: `${user.firstName} ${user.lastName}`.trim(),
       value: user.id,
@@ -85,7 +82,7 @@ const EditDepartment = ({
   }, [staffs]);
 
   // ── Watch selected IDs (array) ──
-  const selectedExecutiveIDs = watch("managerIds") || []
+  const selectedExecutiveIDs = watch("managerIds") || [];
 
   // ── Toggle selection ──
   const toggleExecutive = (id) => {
@@ -111,62 +108,83 @@ const EditDepartment = ({
 
   if (fetchingDept) {
     return (
-      <div className="flex items-center justify-center py-8 text-gray-700">
-        <Loader2 className="w-5 h-5 animate-spin mr-2" />
-        Loading department details...
+      <div className="w-full mx-auto bg-white rounded-[2.5rem] shadow-soft p-20 border border-black/5 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-black/5 border-t-black"></div>
+          <span className="text-black font-black uppercase tracking-widest text-[10px]">Loading department details...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-md p-6 mt-6 border border-gray-200">
-      <h2 className="text-xl font-semibold text-gray-700 mb-5">
-        Edit Department
-      </h2>
+    <div className="w-full max-w-2xl mx-auto bg-white rounded-[2.5rem] shadow-soft p-12 mt-10 border border-black/5">
+      <div className="mb-10 text-center">
+        <h2 className="text-3xl font-black text-black uppercase tracking-tight">Edit Department</h2>
+        <p className="text-black/60 text-sm font-bold tracking-wide mt-2">Update organizational unit details</p>
+      </div>
 
       {loading ? (
-        <p className="text-center text-gray-700">Loading executives...</p>
+        <div className="flex flex-col items-center justify-center p-20 gap-4">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-black/5 border-t-black"></div>
+          <span className="text-black font-black uppercase tracking-widest text-[10px]">Loading executives...</span>
+        </div>
       ) : (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* ── Department Name ── */}
-          <div>
+          <div className="space-y-2">
             <Input
               label="Department Name"
               type="text"
               {...register("name", { required: "Department name is required" })}
               placeholder="e.g. Engineering"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+              className="w-full"
             />
             {errors.name && (
-              <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+              <p className="text-red-500 text-[10px] font-black uppercase ml-1">{errors.name.message}</p>
             )}
           </div>
 
-          {/* ── Executive Selection (Multi‑Select Checkbox List) ── */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Operation Executive(s){" "}
-              <span className="text-gray-700">(Optional)</span>
+          {/* ── Executive Selection ── */}
+          <div className="space-y-4">
+            <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
+              Select Operation Executive(s) <span className="text-black/20">(Optional)</span>
             </label>
 
             {executiveOptions.length === 0 ? (
-              <p className="text-sm text-gray-700 italic">
-                No operation executives available
-              </p>
+              <div className="p-8 text-center bg-gray-50 rounded-2xl border border-dashed border-black/10">
+                <p className="text-xs text-black/40 font-bold italic">
+                  No operation executives available
+                </p>
+              </div>
             ) : (
-              <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+              <div className="space-y-1 max-h-56 overflow-y-auto border border-black/5 rounded-2xl p-4 bg-gray-50/50 custom-scrollbar">
                 {executiveOptions.map((option) => (
                   <label
                     key={option.value}
-                    className="flex items-center gap-3 p-2 hover:bg-white rounded cursor-pointer transition"
+                    className="flex items-center gap-4 p-3 hover:bg-white rounded-xl cursor-pointer transition-all group border border-transparent hover:border-black/5 hover:shadow-sm"
                   >
-                    <input
-                      type="checkbox"
-                      checked={selectedExecutiveIDs.includes(option.value)}
-                      onChange={() => toggleExecutive(option.value)}
-                      className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
-                    />
-                    <span className="text-sm text-gray-700">
+                    <div className="relative flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedExecutiveIDs.includes(option.value)}
+                        onChange={() => toggleExecutive(option.value)}
+                        className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-black/10 transition-all checked:bg-black"
+                      />
+                      <svg
+                        className="pointer-events-none absolute left-1/2 top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    </div>
+                    <span className="text-xs font-bold text-black group-hover:text-black transition-colors uppercase tracking-tight">
                       {option.label}
                     </span>
                   </label>
@@ -176,12 +194,12 @@ const EditDepartment = ({
           </div>
 
           {/* ── Action Buttons ── */}
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-wrap gap-4 pt-6 border-t border-black/5">
             {onCancel && (
               <Button
                 type="button"
                 onClick={onCancel}
-                className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition"
+                className="flex-1 px-8 py-4 bg-white border border-black/10 rounded-2xl text-black font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm"
               >
                 Cancel
               </Button>
@@ -189,11 +207,14 @@ const EditDepartment = ({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
+              className={`flex-[2] px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-medium flex items-center justify-center gap-3 ${isSubmitting
+                ? "bg-gray-100 text-black/20 cursor-not-allowed"
+                : "bg-black text-white hover:bg-black/90 active:scale-95"
+                }`}
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="animate-spin w-4 h-4" />
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-black/20 border-t-black"></div>
                   Updating...
                 </>
               ) : (

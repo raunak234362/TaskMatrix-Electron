@@ -1,21 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// components/employee/EditEmployee.tsx
+// components/employee/EditEmployee.jsx
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Service from "../../../api/Service";
-
-import { Loader2, X, Check } from "lucide-react";
+import { X, Check } from "lucide-react";
 import Input from "../../fields/input";
 import Select from "../../fields/Select";
 import { useDispatch, useSelector } from "react-redux";
 import { updateStaffData, setUserData } from "../../../store/userSlice";
 
-
-const EditEmployee = ({
-  employeeData,
-  onClose,
-  onSuccess,
-}) => {
+const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
   const dispatch = useDispatch();
   const currentUser = useSelector((state) => state.userInfo.userDetail);
   const [loading, setLoading] = useState(true);
@@ -27,29 +20,49 @@ const EditEmployee = ({
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm({
     defaultValues: {
       role: "STAFF",
     },
   });
 
-  const roleOptions = [
-    { label: "STAFF", value: "STAFF" },
-    { label: "ADMIN", value: "ADMIN" },
-    { label: "OPERATION_EXECUTIVE", value: "OPERATION_EXECUTIVE" },
-    { label: "PROJECT_MANAGER_OFFICER", value: "PROJECT_MANAGER_OFFICER" },
-    { label: "DEPUTY_MANAGER", value: "DEPUTY_MANAGER" },
-    { label: "DEPT_MANAGER", value: "DEPT_MANAGER" },
-    { label: "PROJECT_MANAGER", value: "PROJECT_MANAGER" },
-    { label: "TEAM_LEAD", value: "TEAM_LEAD" },
-    { label: "SALES_MANAGER", value: "SALES_MANAGER" },
-    { label: "SALES_PERSON", value: "SALES_PERSON" },
-    { label: "SYSTEM_ADMIN", value: "SYSTEM_ADMIN" },
-    { label: "ESTIMATION_HEAD", value: "ESTIMATION_HEAD" },
-    { label: "ESTIMATOR", value: "ESTIMATOR" },
-    { label: "HUMAN_RESOURCE", value: "HUMAN_RESOURCE" },
-  ];
+  const isClientRole = [
+    "CLIENT",
+    "CLIENT_ADMIN",
+    "CLIENT_PROJECT_COORDINATOR",
+    "CLIENT_GENERAL_CONSTRUCTOR",
+  ].includes(employeeData?.role || "");
+
+  const roleOptions = isClientRole
+    ? [
+      { label: "Client", value: "CLIENT" },
+      { label: "Client Administrator", value: "CLIENT_ADMIN" },
+      {
+        label: "Client Project Coordinator",
+        value: "CLIENT_PROJECT_COORDINATOR",
+      },
+      {
+        label: "Client General Constructor",
+        value: "CLIENT_GENERAL_CONSTRUCTOR",
+      },
+    ]
+    : [
+      { label: "STAFF", value: "STAFF" },
+      { label: "ADMIN", value: "ADMIN" },
+      { label: "OPERATION_EXECUTIVE", value: "OPERATION_EXECUTIVE" },
+      { label: "PROJECT_MANAGER_OFFICER", value: "PROJECT_MANAGER_OFFICER" },
+      { label: "DEPUTY_MANAGER", value: "DEPUTY_MANAGER" },
+      { label: "DEPT_MANAGER", value: "DEPT_MANAGER" },
+      { label: "PROJECT_MANAGER", value: "PROJECT_MANAGER" },
+      { label: "TEAM_LEAD", value: "TEAM_LEAD" },
+      { label: "SALES_MANAGER", value: "SALES_MANAGER" },
+      { label: "SALES_PERSON", value: "SALES_PERSON" },
+      { label: "SYSTEM_ADMIN", value: "SYSTEM_ADMIN" },
+      { label: "ESTIMATION_HEAD", value: "ESTIMATION_HEAD" },
+      { label: "ESTIMATOR", value: "ESTIMATOR" },
+      { label: "HUMAN_RESOURCE", value: "HUMAN_RESOURCE" },
+    ];
 
   // Watch current role value (string)
   const selectedRole = watch("role");
@@ -99,7 +112,22 @@ const EditEmployee = ({
       setSubmitting(true);
       setError(null);
 
-      const response = await Service.EditEmployeeByID(employeeData?.id, data);
+      // Create a payload with only dirty fields
+      const dirtyData = Object.keys(dirtyFields).reduce((acc, key) => {
+        acc[key] = data[key];
+        return acc;
+      }, {});
+
+      // If nothing changed, just close the modal
+      if (Object.keys(dirtyData).length === 0) {
+        onClose();
+        return;
+      }
+
+      const response = await Service.EditEmployeeByID(
+        employeeData?.id,
+        dirtyData,
+      );
       const updatedEmployee =
         response?.data?.user || response?.data || response;
 
@@ -128,9 +156,9 @@ const EditEmployee = ({
   if (loading) {
     return (
       <ModalOverlay onClick={onClose}>
-        <ModalContent className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-          <span className="ml-3 text-lg">Loading employee...</span>
+        <ModalContent className="flex flex-col items-center justify-center py-20 gap-4">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-black/5 border-t-black"></div>
+          <span className="text-black font-black uppercase tracking-widest text-[10px]">Loading employee...</span>
         </ModalContent>
       </ModalOverlay>
     );
@@ -140,123 +168,128 @@ const EditEmployee = ({
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="sticky top-0 z-10 flex md:flex-row flex-col items-center justify-between p-2 bg-linear-to-r from-green-400 to-green-100 border-b rounded-md">
-          <h2 className="text-2xl  text-gray-700">Edit Employee</h2>
+        <div className="flex items-center justify-between mb-10 border-b border-black/5 pb-6">
+          <h2 className="text-3xl font-black text-black uppercase tracking-tight">Edit Employee</h2>
           <button
             onClick={onClose}
-            className="text-gray-700 hover:text-gray-700 transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             aria-label="Close"
           >
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6 text-black" />
           </button>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+          <div className="mb-8 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-xs font-bold flex items-center gap-3">
+            <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
             {error}
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* ── Basic Info ── */}
-            <Input
-              label="Username"
-              {...register("username", { required: "Username is required" })}
-            />
-            <Input
-              label="Email"
-              type="email"
-              {...register("email", {
-                required: "Email is required",
-                pattern: {
-                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                  message: "Invalid email address",
-                },
-              })}
-            />
-
-            <Input
-              label="First Name"
-              {...register("firstName", { required: "First name is required" })}
-            />
-            <Input label="Middle Name" {...register("middleName")} />
-            <Input
-              label="Last Name"
-              {...register("lastName", { required: "Last name is required" })}
-            />
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                label="Phone"
-                {...register("phone", {
-                  required: "Phone is required",
-                  pattern: {
-                    value: /^\+?[0-9]{10,15}$/,
-                    message: "Invalid phone (10–15 digits)",
-                  },
-                })}
-              />
-              <Input label="Extension" {...register("extension")} />
+            <div className="space-y-2">
+              <Input label="Username" {...register("username")} className="w-full" />
             </div>
-            <Input label="Alt Phone" {...register("altPhone")} />
-            <Input
-              label="Designation"
-              {...register("designation", {
-                required: "Designation is required",
-              })}
-            />
+            <div className="space-y-2">
+              <Input label="Email" type="email" {...register("email")} className="w-full" />
+            </div>
+
+            <div className="space-y-2">
+              <Input label="First Name" {...register("firstName")} className="w-full" />
+            </div>
+            <div className="space-y-2">
+              <Input label="Middle Name" {...register("middleName")} className="w-full" />
+            </div>
+            <div className="space-y-2">
+              <Input label="Last Name" {...register("lastName")} className="w-full" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Input label="Phone" {...register("phone")} className="w-full" />
+              </div>
+              <div className="space-y-2">
+                <Input label="Extension" {...register("extension")} className="w-full" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Input label="Alt Phone" {...register("altPhone")} className="w-full" />
+            </div>
+            <div className="space-y-2">
+              <Input label="Designation" {...register("designation")} className="w-full" />
+            </div>
 
             {/* Role */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="space-y-2">
+              <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
                 Role
               </label>
               <Select
                 options={roleOptions}
                 {...register("role")}
                 value={selectedRoleOption?.value}
-                onChange={(_, value) => setValue("role", value)}
+                onChange={(_, value) =>
+                  setValue("role", value, { shouldDirty: true })
+                }
                 placeholder="Select role..."
                 className="mt-1"
               />
               {errors.role && (
-                <p className="mt-1 text-xs text-red-600">
+                <p className="mt-1 text-[10px] font-black text-red-600 uppercase ml-1">
                   {errors.role.message}
                 </p>
               )}
             </div>
 
             {/* ── Address ── */}
-            <div className="md:col-span-2">
-              <Input label="Address" {...register("address")} />
+            <div className="md:col-span-2 space-y-2">
+              <Input label="Address" {...register("address")} className="w-full" />
             </div>
-            <Input label="City" {...register("city")} />
-            <Input label="State" {...register("state")} />
-            <Input label="Country" {...register("country")} />
-            <Input label="Zip Code" {...register("zipCode")} />
-            <Input label="Landline" {...register("landline")} />
-            <Input label="Alt Landline" {...register("altLandline")} />
+            <div className="space-y-2">
+              <Input label="City" {...register("city")} className="w-full" />
+            </div>
+            <div className="space-y-2">
+              <Input label="State" {...register("state")} className="w-full" />
+            </div>
+            <div className="space-y-2">
+              <Input label="Country" {...register("country")} className="w-full" />
+            </div>
+            <div className="space-y-2">
+              <Input label="Zip Code" {...register("zipCode")} className="w-full" />
+            </div>
+            <div className="space-y-2">
+              <Input label="Landline" {...register("landline")} className="w-full" />
+            </div>
+            <div className="space-y-2">
+              <Input label="Alt Landline" {...register("altLandline")} className="w-full" />
+            </div>
           </div>
 
           {/* ── Actions ── */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex justify-end gap-4 pt-10 border-t border-black/5">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              className="px-10 py-4 border border-black/10 rounded-2xl text-black font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+              className={`px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-medium flex items-center gap-3 ${submitting
+                ? "bg-gray-100 text-black/20 cursor-not-allowed"
+                : "bg-black text-white hover:bg-black/90 active:scale-95"
+                }`}
             >
               {submitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-black/20 border-t-black"></div>
                   Saving...
                 </>
               ) : (
@@ -274,12 +307,9 @@ const EditEmployee = ({
 };
 
 // ── Modal Wrappers ──
-const ModalOverlay = ({
-  children,
-  onClick,
-}) => (
+const ModalOverlay = ({ children, onClick }) => (
   <div
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 bg-opacity-80 p-4"
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
     onClick={(e) => {
       if (e.target === e.currentTarget) {
         onClick();
@@ -290,16 +320,12 @@ const ModalOverlay = ({
   </div>
 );
 
-const ModalContent = ({
-  children,
-  className = "",
-  ...props
-}) => (
+const ModalContent = ({ children, className = "", ...props }) => (
   <div
-    className={`bg-white w-full max-w-4xl max-h-[85vh] rounded-xl shadow-2xl overflow-y-auto ${className}`}
+    className={`bg-white w-full max-w-5xl max-h-[90vh] rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-black/5 overflow-y-auto ${className} custom-scrollbar`}
     {...props}
   >
-    <div className="p-6">{children}</div>
+    <div className="p-12">{children}</div>
   </div>
 );
 

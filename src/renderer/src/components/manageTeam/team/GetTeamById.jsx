@@ -1,17 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-
 import Service from "../../../api/Service";
 import { AlertCircle, Loader2 } from "lucide-react";
 import Button from "../../fields/Button";
 import TeamMember from "./TeamMember";
-
 
 const GetTeamByID = ({ id }) => {
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [teamMember, setTeamMember] = useState(false);
+
   useEffect(() => {
     const fetchTeam = async () => {
       if (!id) {
@@ -25,9 +23,7 @@ const GetTeamByID = ({ id }) => {
         setError(null);
 
         const response = await Service.GetTeamByID(id);
-        // API returns { "0": { …team } }
         const raw = response?.data;
-        // const teamData = raw ? Object.values(raw)[0] : null;
         setTeam(raw);
       } catch (err) {
         const msg = "Failed to load team details";
@@ -44,6 +40,7 @@ const GetTeamByID = ({ id }) => {
   const handleTeamMember = (teamMemberData) => {
     setTeamMember(teamMemberData);
   };
+
   const handleCloseTeamMember = () => {
     setTeamMember(false);
   };
@@ -83,23 +80,22 @@ const GetTeamByID = ({ id }) => {
   const memberCount = team.members?.length ?? 0;
 
   return (
-    <div className="bg-linear-to-br from-green-50 to-green-50 p-6 rounded-xl shadow-inner">
+    <div className="bg-gray-50/50 p-10 rounded-3xl border border-black/5 shadow-inner">
       {/* Header */}
-      <div className="mb-5">
-        <h3 className="text-xl  text-green-800">{team.name}</h3>
+      <div className="mb-8 border-b border-black/5 pb-4">
+        <h3 className="text-2xl font-black text-black uppercase tracking-tight">{team.name}</h3>
       </div>
 
       {/* Two‑column grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-sm">
         {/* Left */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           <InfoRow label="Team Name" value={team.name} />
-          {/* <InfoRow label="Team ID" value={team.id} /> */}
           <InfoRow label="Department" value={team.department?.name ?? "—"} />
         </div>
 
         {/* Right */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           <InfoRow label="Manager" value={fullManagerName || "No Manager"} />
           {team.manager && (
             <>
@@ -108,7 +104,7 @@ const GetTeamByID = ({ id }) => {
                 value={
                   <a
                     href={`mailto:${team.manager.email}`}
-                    className="text-green-600 hover:underline"
+                    className="text-black font-bold hover:underline"
                   >
                     {team.manager.email}
                   </a>
@@ -119,11 +115,11 @@ const GetTeamByID = ({ id }) => {
                 value={
                   <a
                     href={`tel:${team.manager.phone}`}
-                    className="text-green-600 hover:underline"
+                    className="text-black font-bold hover:underline"
                   >
                     {team.manager.phone}
                     {team.manager.extension && (
-                      <span className="text-gray-700 text-xs ml-1">
+                      <span className="text-black/40 text-xs ml-1 font-bold">
                         (Ext: {team.manager.extension})
                       </span>
                     )}
@@ -140,14 +136,16 @@ const GetTeamByID = ({ id }) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="py-2 flex gap-2 mt-4">
-        <Button className="py-1 px-2 text-lg">Edit Team</Button>
-        <Button className="py-1 px-2 text-lg bg-red-500 hover:bg-red-600">
+      <div className="flex flex-wrap gap-4 mt-8 pt-6 border-t border-black/5">
+        <Button className="flex items-center gap-2 px-8 py-3 bg-white border border-black/10 rounded-2xl text-black font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm">
+          Edit Team
+        </Button>
+        <Button className="flex items-center gap-2 px-8 py-3 bg-red-50 border border-red-100 rounded-2xl text-red-600 font-black text-xs uppercase tracking-widest hover:bg-red-100 transition-all shadow-sm">
           Delete Team
         </Button>
         <Button
           onClick={() => handleTeamMember(team)}
-          className="py-1 px-2 text-lg bg-red-500 hover:bg-red-600"
+          className="flex items-center gap-2 px-8 py-3 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black/90 transition-all shadow-medium"
         >
           Team Members
         </Button>
@@ -159,14 +157,11 @@ const GetTeamByID = ({ id }) => {
   );
 };
 
-// ── Reusable InfoRow (same ) ──
-const InfoRow = ({
-  label,
-  value,
-}) => (
-  <div className="flex justify-between">
-    <span className=" text-gray-700">{label}:</span>
-    <span className="text-gray-700 text-right">{value}</span>
+// ── Reusable InfoRow ──
+const InfoRow = ({ label, value }) => (
+  <div className="flex justify-between items-center py-1">
+    <span className="text-black/40 font-black uppercase tracking-[0.15em] text-[10px]">{label}</span>
+    <span className="text-black font-black text-sm tracking-tight">{value}</span>
   </div>
 );
 
