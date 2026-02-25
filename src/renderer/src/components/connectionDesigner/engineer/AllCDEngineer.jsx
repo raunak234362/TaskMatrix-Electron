@@ -66,7 +66,7 @@ const AllCDEngineer = ({ onClose, designerData }) => {
 
             <button
               onClick={() => setAddEngineerModal(true)}
-              className="px-8 py-3.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-green-100 transition-all flex items-center gap-3 active:scale-95"
+              className="px-8 py-3.5 bg-green-200 hover:bg-green-300 text-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-green-100 transition-all flex items-center gap-3 active:scale-95"
             >
               <Plus size={16} strokeWidth={3} /> Add New Engineer
             </button>
