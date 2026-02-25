@@ -7,7 +7,7 @@ import CDCapacityTable from "./components/CDCapacityTable";
 // import CDInsightsList from "./components/CDInsightsList"; // Removed based on feedback/redundancy
 import GetConnectionDesignerByID from "./designer/GetConnectionDesignerByID";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, ChevronLeft } from "lucide-react";
 
 const DashboardSkeleton = () => (
     <div className="p-6 space-y-6 animate-pulse ">
@@ -152,37 +152,36 @@ const CDdashboard = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
-                className="h-full p-4 sm:p-6 flex flex-col gap-12 sm:gap-8 bg-transparent overflow-y-auto custom-scrollbar relative"
+                className="h-full p-4 sm:p-6 flex flex-col gap-6 bg-transparent overflow-y-auto custom-scrollbar relative"
             >
-                {/* Header if needed */}
+                {/* Header */}
+              
 
                 {/* SECTION B — EXECUTIVE SNAPSHOT */}
                 <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.1 }}
-
                 >
                     <CDSnapshotCards stats={stats} />
                 </motion.div>
 
-                {/* SECTION C — LOCATION INTELLIGENCE (Redesigned) */}
-                {/* New component on Left, Pie on Right */}
-                <CDNetworkOverview
-                    designers={cdData}
-                    stateData={stateDist}
-                    onSelect={(id) => setSelectedDesignerId(id)}
-                />
+                {/* SECTION C — CONNECTION DESIGNER DIRECTORY */}
+                <div className="flex flex-col gap-6">
+                    <CDNetworkOverview
+                        designers={cdData}
+                        onSelect={(id) => setSelectedDesignerId(id)}
+                    />
+                </div>
 
                 {/* SECTION D — RECENT ACTIVITY */}
-                <motion.div
+                {/* <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.3 }}
-                    className="space-y-8"
                 >
                     <CDCapacityTable recentActivity={recentActivity} />
-                </motion.div>
+                </motion.div> */}
 
             </motion.div>
 

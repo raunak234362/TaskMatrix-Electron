@@ -36,9 +36,9 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
   ].filter(action => !action.hidden)
 
   return (
-    <div className="p-0 transition-all duration-500 h-full">
-      <div className="flex items-center justify-between mb-6 px-1">
-        <h2 className="text-base font-black text-black uppercase tracking-[0.15em] flex items-center gap-2">
+    <div className="p-0 transition-all duration-500 h-full border border-gray-200 bg-white p-4 rounded-lg">
+      <div className="flex items-center justify-between mb-6 px-1 ">
+        <h2 className="text-base font-black text-black uppercase tracking-[0.15em] flex items-center gap-2 ">
           <ClipboardList className="w-5 h-5 text-green-600" />
           Pending Actions
         </h2>

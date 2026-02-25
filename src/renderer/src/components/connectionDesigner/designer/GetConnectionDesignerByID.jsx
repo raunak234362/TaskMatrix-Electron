@@ -1,25 +1,21 @@
 import { useEffect, useState } from "react";
 import Service from "../../../api/Service";
-import { Loader2, AlertCircle, Link2, MapPin } from "lucide-react";
-import Button from "../../fields/Button";
+import {
+  Loader2, AlertCircle, Link2, MapPin, Users, Activity, CheckCircle2,
+  MoreHorizontal, Edit, Users2, Archive, FileText, Mail, Phone,
+  Calendar, ClipboardList
+} from "lucide-react";
 import EditConnectionDesigner from "./EditConnectionDesigner";
 import { AllCDEngineer } from "../..";
 import RenderFiles from "../../common/RenderFiles";
-
-
-const truncateText = (text, max = 40) =>
-  text.length > max ? text.substring(0, max) + "..." : text;
 
 const GetConnectionDesignerByID = ({ id }) => {
   const [designer, setDesigner] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editModel, setEditModel] = useState(null);
-  const [engineerModel, setEnginnerModel] = useState(
-    null
-  );
+  const [engineerModel, setEngineerModel] = useState(null);
 
-  // Fetch Connection Designer details
   useEffect(() => {
     const fetchDesigner = async () => {
       if (!id) {
@@ -44,183 +40,193 @@ const GetConnectionDesignerByID = ({ id }) => {
     fetchDesigner();
   }, [id]);
 
-  const handleModel = (designer) => {
-    console.log(designer);
-    setEditModel(designer);
-  };
-  const handleModelClose = () => {
-    setEditModel(null);
-  };
-
-  const handleEngineerModel = () => {
-    setEnginnerModel(designer);
-  };
-  const handleEngineerModelClose = () => {
-    setEnginnerModel(null);
-  };
-
-  const formatDate = (date) =>
-    new Date(date).toLocaleString("en-IN", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-
-  // ---------------- Loading / Error states ----------------
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8 text-gray-700">
-        <Loader2 className="w-5 h-5 animate-spin mr-2" />
-        Loading Connection Designer details...
+      <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+        <Loader2 className="w-10 h-10 animate-spin text-green-600 mb-4" />
+        <p className="text-sm font-black uppercase tracking-widest">Loading Intelligence...</p>
       </div>
     );
   }
 
   if (error || !designer) {
     return (
-      <div className="flex items-center justify-center py-8 text-red-600">
-        <AlertCircle className="w-5 h-5 mr-2" />
-        {error || "Connection Designer not found"}
+      <div className="flex flex-col items-center justify-center py-20 text-red-600">
+        <AlertCircle className="w-10 h-10 mb-4" />
+        <p className="text-sm font-black uppercase tracking-widest">{error || "Connection Designer not found"}</p>
       </div>
     );
   }
 
-  // ---------------- Render Main Content ----------------
+  const sections = [
+    {
+      label: "Total Engineers",
+      value: designer.CDEngineers?.length || 0,
+      icon: Users,
+      color: "blue"
+    },
+    {
+      label: "Active Projects",
+      value: 0, // Placeholder
+      icon: Activity,
+      color: "green"
+    },
+    {
+      label: "Status",
+      value: designer.isDeleted ? "Inactive" : "Active",
+      icon: CheckCircle2,
+      color: designer.isDeleted ? "red" : "green"
+    },
+    {
+      label: "Availability",
+      value: "High", // Placeholder
+      icon: Calendar,
+      color: "purple"
+    }
+  ];
+
   return (
-    <div className="bg-linear-to-br from-green-50 to-green-50 p-4 sm:p-6 rounded-xl shadow-inner text-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-2 mb-5">
-        <h3 className="text-lg sm:text-xl  text-green-800 tracking-tight">{designer.name}</h3>
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-medium ${designer.isDeleted
-            ? "bg-red-100 text-red-700"
-            : "bg-green-100 text-green-800"
-            }`}
-        >
-          {designer.isDeleted ? "Inactive" : "Active"}
-        </span>
-      </div>
-
-      {/* Basic Info Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-        <div className="space-y-2 sm:space-y-3">
-          {designer.websiteLink && (
-            <InfoRow
-              label="Website"
-              value={
-                <a
-                  href={designer.websiteLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  title={designer.websiteLink}
-                  className="text-cyan-700 underline hover:text-cyan-900 break-all"
-                >
-                  {truncateText(designer.websiteLink, 20)}
-                </a>
-              }
-            />
-          )}
-          {designer.email && (
-            <InfoRow
-              label="Email"
-              value={
-                <a
-                  href={`mailto:${designer.email}`}
-                  className="text-cyan-700 hover:text-cyan-900 break-all"
-                >
-                  {designer.email}
-                </a>
-              }
-            />
-          )}
-          {designer.contactInfo && (
-            <InfoRow label="Contact Info" value={designer.contactInfo} />
-          )}
-          {designer.location && (
-            <InfoRow
-              label="Location"
-              value={
-                <span className="flex items-center gap-1 text-gray-700">
-                  <MapPin className="w-3.5 h-3.5 text-green-600 shrink-0" />{" "}
-                  {designer.location}
-                </span>
-              }
-            />
-          )}
-        </div>
-
-        <div className="space-y-2 sm:space-y-3">
-          <InfoRow label="Created" value={formatDate(designer.createdAt)} />
-          <InfoRow label="Updated" value={formatDate(designer.updatedAt)} />
-          <InfoRow
-            label="Total Files"
-            value={Array.isArray(designer.files) ? designer.files.length : 0}
-          />
-          <InfoRow
-            label="States"
-            value={
-              Array.isArray(designer.state) && designer.state.length > 0
-                ? designer.state.join(", ")
-                : "N/A"
-            }
-          />
+    <div className="flex flex-col gap-8">
+      {/* Header Info */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 font-black text-2xl border border-green-100">
+            {designer.name.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-black tracking-tight">{designer.name}</h2>
+            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest flex items-center gap-2 mt-1">
+              <MapPin size={12} /> {designer.location || "Location not set"}
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="mt-6 pt-5 border-t border-green-200">
-        <RenderFiles
-          files={designer.files}
-          table="connection-designer"
-          parentId={id}
-        />
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {sections.map((s, i) => (
+          <div key={i} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col gap-1">
+            <div className={`w-8 h-8 rounded-lg bg-${s.color}-100 flex items-center justify-center text-${s.color}-600 mb-2`}>
+              <s.icon size={16} />
+            </div>
+            <span className="text-[14px] font-black text-black">{s.value}</span>
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{s.label}</span>
+          </div>
+        ))}
       </div>
 
-      {/* Buttons */}
-      <div className="py-3 flex flex-wrap items-center gap-2 sm:gap-3">
-        <Button
-          onClick={() => handleModel(designer)}
-          className="py-1 px-3 text-sm sm:text-base font-semibold"
-        >
-          Edit
-        </Button>
-        <Button className="py-1 px-3 text-sm sm:text-base font-semibold bg-red-200 text-red-700 hover:bg-red-300">
-          Archive
-        </Button>
-        <Button
-          onClick={() => handleEngineerModel()}
-          className="py-1 px-3 text-sm sm:text-base font-semibold"
-        >
-          Connection Designer Engineer
-        </Button>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column: Actions and Admin */}
+        <div className="space-y-8">
+          {/* Pending Actions */}
+          <section>
+            <h3 className="text-xs font-black text-black uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+              <ClipboardList size={14} className="text-green-600" />
+              Pending Actions
+            </h3>
+            <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-xs">
+              <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer group border-b border-gray-50 last:border-none">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                    <FileText size={14} />
+                  </div>
+                  <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Review New RFQ Response</span>
+                </div>
+                <MoreHorizontal size={14} className="text-gray-300 group-hover:text-gray-600" />
+              </div>
+              <div className="flex items-center justify-center py-8">
+                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">No pending critical actions</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Administrative Control */}
+          <section>
+            <h3 className="text-xs font-black text-black uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+              <MoreHorizontal size={14} className="text-green-600" />
+              Administrative Control
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <button
+                onClick={() => setEditModel(designer)}
+                className="p-4 bg-white border border-gray-200 rounded-2xl flex flex-col items-center gap-2 hover:border-green-500 hover:shadow-md transition-all group"
+              >
+                <Edit size={20} className="text-gray-400 group-hover:text-green-600" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">Edit Designer</span>
+              </button>
+              <button
+                onClick={() => setEngineerModel(designer)}
+                className="p-4 bg-white border border-gray-200 rounded-2xl flex flex-col items-center gap-2 hover:border-blue-500 hover:shadow-md transition-all group"
+              >
+                <Users2 size={20} className="text-gray-400 group-hover:text-blue-600" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">Manage Workforce</span>
+              </button>
+              <button className="p-4 bg-white border border-gray-200 rounded-2xl flex flex-col items-center gap-2 hover:border-red-500 hover:shadow-md transition-all group">
+                <Archive size={20} className="text-gray-400 group-hover:text-red-600" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">Archive Profile</span>
+              </button>
+            </div>
+          </section>
+        </div>
+
+        {/* Right Column: Profile Details and Files */}
+        <div className="space-y-8">
+          <section>
+            <h3 className="text-xs font-black text-black uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+              <FileText size={14} className="text-green-600" />
+              Profile Details
+            </h3>
+            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-gray-400 uppercase tracking-widest">Email Address</span>
+                <span className="font-black text-black">{designer.email || "N/A"}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-gray-400 uppercase tracking-widest">Contact Number</span>
+                <span className="font-black text-black">{designer.contactInfo || "N/A"}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-gray-400 uppercase tracking-widest">Service Region</span>
+                <span className="font-black text-black">{Array.isArray(designer.state) ? designer.state.join(", ") : "Global"}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-gray-400 uppercase tracking-widest">Website</span>
+                <a href={designer.websiteLink} target="_blank" className="font-black text-green-600 hover:underline">{designer.websiteLink ? "Visit Link" : "N/A"}</a>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-xs font-black text-black uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+              <Link2 size={14} className="text-green-600" />
+              Compliance & Assets
+            </h3>
+            <div className="bg-white border border-gray-100 rounded-2xl p-2 shadow-xs">
+              <RenderFiles
+                files={designer.files}
+                table="connection-designer"
+                parentId={id}
+              />
+            </div>
+          </section>
+        </div>
       </div>
+
+      {/* Modals */}
       {editModel && (
-        <>
-          <EditConnectionDesigner
-            onClose={handleModelClose}
-            designerData={designer}
-          />
-        </>
+        <EditConnectionDesigner
+          onClose={() => setEditModel(null)}
+          designerData={designer}
+        />
       )}
       {engineerModel && (
-        <>
-          <AllCDEngineer
-            onClose={handleEngineerModelClose}
-            designerData={designer}
-          />
-        </>
+        <AllCDEngineer
+          onClose={() => setEngineerModel(null)}
+          designerData={designer}
+        />
       )}
     </div>
   );
 };
-
-// ✅ Reusable Info Row
-const InfoRow = ({
-  label,
-  value,
-}) => (
-  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 sm:gap-4 border-b border-green-100/50 sm:border-none pb-1 sm:pb-0">
-    <span className=" text-gray-700 shrink-0">{label}:</span>
-    <span className="text-gray-700 sm:text-right overflow-hidden text-ellipsis">{value}</span>
-  </div>
-);
 
 export default GetConnectionDesignerByID;

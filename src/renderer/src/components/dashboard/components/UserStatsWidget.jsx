@@ -9,7 +9,7 @@ const StatCard = ({
   trend,
 }) => (
   <div
-    className="p-3 lg:p-4 rounded-none border border-gray-200 border-l-4 border-l-green-600 shadow-sm transition-all duration-700 group hover:shadow-md hover:-translate-y-1 relative overflow-hidden bg-white"
+    className="p-3 lg:p-4 rounded-none border border-gray-200 border-l-4 border-l-green-600 shadow-sm transition-all duration-700 group hover:shadow-md hover:-translate-y-1 relative overflow-hidden bg-white rounded-xl"
   >
     <div className="flex flex-col h-full justify-between gap-2 lg:gap-3 relative z-10">
       <div className="flex items-start justify-between">
@@ -53,6 +53,7 @@ const UserStatsWidget = ({ stats, loading }) => {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        
         {[...Array(4)].map((_, i) => (
           <div key={i} className="h-32 bg-white border border-gray-200 rounded-none animate-pulse"></div>
         ))}
