@@ -613,7 +613,7 @@ const AddTask = () => {
                       />
                     </div>
 
-                     <div className="space-y-2">
+                    <div className="space-y-2">
                       <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                         <Layers className="w-4 h-4 text-blue-500" /> Status *
                       </label>
@@ -697,7 +697,7 @@ const AddTask = () => {
                         )}
                       />
                     </div>
-                   
+
                   </div>
 
                   {/* WBS Timing Display */}
@@ -797,6 +797,7 @@ const AddTask = () => {
                       <Input
                         label="Start Date *"
                         type="date"
+                        min={new Date().toISOString().split("T")[0]}
                         {...register("start_date", {
                           required: "Start date is required",
                         })}
@@ -811,6 +812,7 @@ const AddTask = () => {
                       <Input
                         label="Due Date *"
                         type="date"
+                        min={new Date().toISOString().split("T")[0]}
                         {...register("due_date", {
                           required: "Due date is required",
                         })}

@@ -16,8 +16,27 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
       try {
         setLoading(true);
         const response = await Service.GetWBSTemplate();
-        // Assuming response.data contains the array based on user's provided JSON structure
-        setTemplates(response.data || []);
+
+        const sortOrder = [
+          "MAIN_STEEL_PLACEMENT",
+          "MAIN_STEEL_CONNECTION",
+          "MISC.STEEL_PLACEMENT_&_CONNECTION",
+          "ERECTION_OF_MAIN_STEEL",
+          "ERECTION_OF_MISC_STEEL",
+          "DETAILING_OF_MAIN_STEEL",
+          "DETAILING_OF_MISC_STEEL",
+          "OTHERS"
+        ];
+
+        const sortedData = (response.data || []).sort((a, b) => {
+          let indexA = sortOrder.indexOf(a.bundleKey);
+          let indexB = sortOrder.indexOf(b.bundleKey);
+          if (indexA === -1) indexA = sortOrder.length;
+          if (indexB === -1) indexB = sortOrder.length;
+          return indexA - indexB;
+        });
+
+        setTemplates(sortedData);
       } catch (error) {
         console.error("Error fetching WBS templates:", error);
       } finally {
