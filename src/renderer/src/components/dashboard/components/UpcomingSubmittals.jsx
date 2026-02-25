@@ -37,7 +37,7 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
   }, [invoices]);
 
   return (
-    <div className="bg-white flex-1 flex flex-col min-h-0 rounded-xl p-4 shadow-sm border border-gray-200">
+    <div className="bg-white flex-1 flex flex-col min-h-0 rounded-none p-4 shadow-sm border border-gray-200">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
         <div className="flex items-center gap-4">
@@ -71,7 +71,7 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
           pendingSubmittals.length > 0 ? (
             <div className="w-full">
               {/* Table Header */}
-              <div className="grid grid-cols-12 gap-4 px-4 py-2 bg-slate-50 rounded-lg mb-2 border border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+              <div className="grid grid-cols-12 gap-4 px-4 py-2 bg-slate-50 rounded-none mb-2 border border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest">
                 <div className="col-span-12 lg:col-span-5">
                   Project / Subject
                 </div>
@@ -88,10 +88,10 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
                 ([projectName, items]) => (
                   <div
                     key={projectName}
-                    className="mb-5 bg-white border border-gray-200 rounded-xl shadow-sm"
+                    className="mb-5 bg-white border border-gray-200 rounded-none shadow-sm"
                   >
                     {/* Project Header */}
-                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/40 rounded-t-xl">
+                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/40 rounded-none">
                       <h3 className="text-xs font-black text-primary uppercase tracking-widest flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
                         {projectName}
@@ -117,11 +117,11 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
                             {/* Subject */}
                             <div className="col-span-12 lg:col-span-5 flex items-center gap-3 min-w-0">
                               {overdue ? (
-                                <div className="p-2 rounded-lg bg-red-50 text-red-500">
+                                <div className="p-2 rounded-none bg-red-50 text-red-500">
                                   <AlertCircle size={14} />
                                 </div>
                               ) : (
-                                <div className="p-2 rounded-lg bg-blue-50 text-blue-500">
+                                <div className="p-2 rounded-none bg-blue-50 text-blue-500">
                                   <ClipboardList size={14} />
                                 </div>
                               )}
@@ -195,7 +195,7 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
                 {invoiceNeedRaise.map((invoice, index) => (
                   <div
                     key={invoice.id || index}
-                    className="flex justify-between px-4 py-3 rounded-lg hover:bg-slate-50"
+                    className="flex justify-between px-4 py-3 rounded-none hover:bg-slate-50"
                   >
                     <span className="text-sm font-medium">
                       {invoice.invoiceNumber || "No Number"}

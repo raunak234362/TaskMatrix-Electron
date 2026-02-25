@@ -14,17 +14,17 @@ const SalesSecondaryStats = ({ data, activeProjects, totalProjects, completedPro
     ];
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
             {items.map((item, index) => (
                 <motion.div
                     key={index}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2 + index * 0.05 }}
-                    className="bg-white py-6 px-3 rounded-[2rem] border border-gray-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center text-center hover:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.06)] transition-all duration-500 group cursor-default border-b-2 hover:border-b-green-500"
+                    className="bg-white py-6 px-4 rounded-xl border border-gray-200 border-l-4 border-l-green-600 shadow-sm flex flex-col items-center justify-center text-center hover:shadow-md transition-all duration-500 group"
                 >
-                    <span className="text-2xl font-black text-gray-900 mb-1 group-hover:scale-110 transition-transform duration-500">{item.value}</span>
-                    <span className="text-gray-400 text-[10px] font-black tracking-[0.2em] uppercase leading-tight">{item.label}</span>
+                    <span className="text-xl font-black text-black mb-1">{item.value}</span>
+                    <span className="text-black/40 text-[9px] font-black tracking-widest uppercase leading-none">{item.label}</span>
                 </motion.div>
             ))}
         </div>

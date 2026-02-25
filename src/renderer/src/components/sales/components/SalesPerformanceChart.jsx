@@ -17,38 +17,40 @@ const SalesPerformanceChart = ({ data }) => {
             >
                 <defs>
                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6bbd45" stopOpacity={0.15} />
-                        <stop offset="95%" stopColor="#6bbd45" stopOpacity={0.01} />
+                        <stop offset="5%" stopColor="#16a34a" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="#16a34a" stopOpacity={0.01} />
                     </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f8fafc" />
                 <XAxis
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                    tick={{ fill: '#000', opacity: 0.4, fontSize: 10, fontWeight: 900 }}
                     dy={10}
                 />
                 <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                    tick={{ fill: '#000', opacity: 0.4, fontSize: 10, fontWeight: 900 }}
                 />
                 <Tooltip
                     contentStyle={{
                         backgroundColor: '#fff',
-                        borderRadius: '16px',
-                        border: '1px solid #f1f5f9',
-                        boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.05)',
+                        borderRadius: '12px',
+                        border: '2px solid #000',
+                        boxShadow: '4px 4px 0px #000',
                         fontSize: '11px',
-                        fontWeight: '800',
-                        color: '#1e293b'
+                        fontWeight: '900',
+                        color: '#000',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em'
                     }}
                 />
                 <Area
                     type="monotone"
                     dataKey="value"
-                    stroke="#6bbd45"
+                    stroke="#16a34a"
                     strokeWidth={4}
                     fillOpacity={1}
                     fill="url(#colorValue)"

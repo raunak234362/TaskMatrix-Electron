@@ -59,23 +59,23 @@ const SalesDashboard = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-[#fcfdfc] p-6 lg:p-8 space-y-8 font-sans">
+        <div className="min-h-screen bg-[#fcfdfc] p-4 lg:p-6 space-y-8 font-sans laptop-fit">
             {/* Optimized Header Area */}
-            <div className="bg-white p-5 rounded-3xl border border-gray-200 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)] flex justify-between items-center transition-all">
+            <div className="bg-white p-5 rounded-3xl border-2 border-black shadow-[4px_4px_0px_#000] flex justify-between items-center transition-all">
                 <div className="flex items-center gap-6">
-                    <button className="p-3 bg-white border border-gray-100 rounded-2xl shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-95 group">
-                        <ChevronLeft size={20} className="text-gray-400 group-hover:text-gray-700 transition-colors" />
+                    <button className="p-2.5 bg-white border border-gray-100 rounded-xl shadow-sm hover:border-black transition-all active:scale-95 group">
+                        <ChevronLeft size={20} className="text-black transition-colors" />
                     </button>
                     <div className="space-y-1">
-                        <h1 className="text-xl font-black text-gray-900 tracking-tighter uppercase leading-none">Sales</h1>
-                        <p className="text-sm font-bold text-gray-400 tracking-wide uppercase">
-                            Welcome Back, <span className="text-gray-800 font-black">{userName}</span>
+                        <h1 className="text-2xl font-black text-black tracking-tight uppercase leading-none">Sales Dashboard</h1>
+                        <p className="text-[11px] font-black text-black/40 tracking-[0.2em] uppercase">
+                            Welcome Back, <span className="text-black">{userName}</span>
                         </p>
                     </div>
                 </div>
-                <div className="p-3 bg-green-50/50 text-green-600 rounded-2xl border border-green-100/50 relative hover:bg-green-100 transition-colors cursor-pointer group">
-                    <Bell size={24} className="group-hover:scale-110 transition-transform" />
-                    <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                <div className="p-3 bg-white text-black rounded-2xl border-2 border-black relative hover:bg-gray-50 transition-all cursor-pointer group shadow-[2px_2px_0px_#000]">
+                    <Bell size={20} strokeWidth={3} className="group-hover:scale-110 transition-transform" />
+                    <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-black animate-pulse"></span>
                 </div>
             </div>
 
@@ -91,13 +91,16 @@ const SalesDashboard = () => {
             />
 
             {/* Performance Visualization Section */}
-            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.03)]">
-                <div className="flex justify-between items-center mb-10 pl-2">
-                    <h3 className="text-lg font-black text-gray-800 uppercase tracking-widest">Monthly Performance</h3>
-                    <div className="flex gap-2.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-green-500/30"></div>
-                        <div className="w-2.5 h-2.5 rounded-full bg-green-500/60"></div>
-                        <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+            <div className="bg-white p-8 rounded-3xl border border-gray-200 border-l-4 border-l-green-600 shadow-sm transition-all duration-500">
+                <div className="flex justify-between items-center mb-10 px-1">
+                    <div>
+                        <h3 className="text-base font-black text-black uppercase tracking-[0.15em]">Monthly Performance</h3>
+                        <p className="text-[11px] font-black text-black/40 uppercase tracking-widest mt-1">RFQ Pipeline & Conversion Analysis</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500/20"></div>
+                        <div className="w-2 h-2 rounded-full bg-green-500/40"></div>
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
                     </div>
                 </div>
                 <div className="h-[400px]">

@@ -2,8 +2,6 @@ import { ClipboardList, FileText, RefreshCw, Search } from 'lucide-react'
 
 const PendingActions = ({ dashboardStats, onActionClick }) => {
 
-  console.log(dashboardStats);
-
   const userRole = sessionStorage.getItem('userRole')
 
   const actions = [
@@ -13,7 +11,6 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
       subcount: dashboardStats?.newRFQ || 0,
       subtitle: 'New RFQ',
       icon: Search,
-      color: 'cyan',
       hidden: userRole?.toUpperCase() === 'PROJECT_MANAGER' || userRole?.toUpperCase() === 'DEPARTMENT_MANAGER'
     },
     {
@@ -22,14 +19,12 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
       subtitle: 'New RFI',
       subcount: dashboardStats?.newRFI || 0,
       icon: FileText,
-      color: 'amber'
     },
     {
       title: 'Submittals',
       count: dashboardStats?.pendingSubmittals || 0,
       subtitle: 'Response Pending',
       icon: ClipboardList,
-      color: 'purple'
     },
     {
       title: 'Change Orders',
@@ -37,38 +32,20 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
       subtitle: 'New Change Orders',
       subcount: dashboardStats?.newChangeOrders || 0,
       icon: RefreshCw,
-      color: 'rose'
     },
   ].filter(action => !action.hidden)
 
-  const colorClasses = {
-    amber: {
-      bg: 'bg-amber-50',
-      text: 'text-amber-700'
-    },
-    purple: {
-      bg: 'bg-indigo-50',
-      text: 'text-indigo-700'
-    },
-    rose: {
-      bg: 'bg-red-50',
-      text: 'text-red-700'
-    },
-    cyan: {
-      bg: 'bg-primary/5',
-      text: 'text-primary'
-    }
-  }
   return (
-    <div className="bg-white p-4 lg:p-6 rounded-3xl border border-gray-200 transition-all duration-500 h-full">
+    <div className="p-0 transition-all duration-500 h-full">
       <div className="flex items-center justify-between mb-6 px-1">
-        <h2 className="text-base font-black text-black uppercase tracking-[0.15em]">Pending Actions</h2>
+        <h2 className="text-base font-black text-black uppercase tracking-[0.15em] flex items-center gap-2">
+          <ClipboardList className="w-5 h-5 text-green-600" />
+          Pending Actions
+        </h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {actions.map((action) => {
-          const colors = colorClasses[action.color]
-
           return (
             <div
               key={action.title}
@@ -83,24 +60,21 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
                   onActionClick(typeMap[action.title])
                 }
               }}
-              className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 bg-green-50/20 hover:bg-green-50/50 hover:border-primary/20 transition-all duration-300 cursor-pointer group hover:shadow-lg hover:-translate-y-0.5"
+              className="flex items-center justify-between p-4 rounded-none border border-gray-200 border-l-4 border-l-green-600 bg-white hover:bg-gray-50 transition-all duration-300 cursor-pointer group hover:shadow-md hover:-translate-y-0.5"
             >
-              <div className="flex flex-row items-center gap-3">
+              <div className="flex flex-row items-center gap-4">
                 <div
-                  className={`p-2.5 rounded-xl ${colors.bg} ${colors.text} shadow-md shrink-0 transition-all group-hover:scale-105`}
+                  className="p-2.5 rounded-none bg-white border border-gray-100 text-black shadow-sm shrink-0 transition-all group-hover:bg-green-600 group-hover:text-white"
                 >
-                  <action.icon size={20} />
+                  <action.icon size={20} strokeWidth={3} />
                 </div>
 
                 <div className="flex flex-col text-left">
-                  <span className="text-[15px] font-black text-gray-500 uppercase tracking-widest">{action.title}</span>
-                  {/* <span className="text-[9px] text-gray-400 font-bold uppercase mt-0.5 tracking-wider">
-                    {action.subtitle}: {action.subcount || 0}
-                  </span> */}
+                  <span className="text-[13px] font-black text-black uppercase tracking-widest leading-none">{action.title}</span>
                 </div>
               </div>
 
-              <span className={`text-3xl font-black tracking-tight ${colors.text}`}>
+              <span className="text-3xl font-black tracking-tight text-black">
                 {action.count}
               </span>
             </div>
