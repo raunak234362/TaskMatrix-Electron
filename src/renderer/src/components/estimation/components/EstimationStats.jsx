@@ -49,9 +49,9 @@ const EstimationStats = ({ stats }) => {
           return (
             <div
               key={card.label}
-              className="flex items-center gap-5 p-5 rounded-2xl border border-black bg-green-100 shadow-sm transition-all hover:shadow-md"
+              className="flex items-center gap-5 p-5 rounded-2xl border border-black  shadow-sm transition-all hover:shadow-md"
             >
-              <div className="p-3.5 rounded-xl bg-black text-green-100 shrink-0 shadow-sm">
+              <div className="p-3.5 rounded-xl bg-green-200 text-black shrink-0 shadow-sm">
                 <card.icon size={22} className="stroke-[2.5]" />
               </div>
 

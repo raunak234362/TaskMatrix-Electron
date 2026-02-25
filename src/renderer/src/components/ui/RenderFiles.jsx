@@ -145,7 +145,7 @@ const RenderFiles = ({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h4 className="text-sm font-medium text-gray-700">Project Files</h4>
+        <h4 className="text-sm font-medium text-black">Project Files</h4>
         {onAddFilesClick && (
           <Button onClick={onAddFilesClick}>Add Document</Button>
         )}
@@ -162,7 +162,7 @@ const RenderFiles = ({
           return (
             <div
               key={description}
-              className="border border-gray-200 rounded-lg p-4 space-y-3 shadow-sm"
+              className="border border-gray-200 bg-white rounded-lg p-4 space-y-3 shadow-sm"
             >
               {/* Description + Stage */}
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1.5">
@@ -178,7 +178,7 @@ const RenderFiles = ({
                       </p>
                     )}
                     {firstFile?.uploadedAt && (
-                      <p className="text-[10px] sm:text-xs text-gray-500">
+                      <p className="text-sm sm:text-xs text-gray-500">
                         {formatDate(firstFile.uploadedAt)}
                       </p>
                     )}

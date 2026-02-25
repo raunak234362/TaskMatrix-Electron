@@ -210,7 +210,7 @@ const GetRFQByID = ({ id }) => {
       <div className="p-0 sm:p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* ---------------- LEFT COLUMN — RFQ DETAILS ---------------- */}
-          <div className="bg-green-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8">
+          <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -236,14 +236,14 @@ const GetRFQByID = ({ id }) => {
                   <>
                     <Button
                       onClick={() => alert("Coming soon RFQ modal")}
-                      className="flex-1 sm:flex-none px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition text-sm"
+                      className="flex-1 sm:flex-none px-3 py-1 bg-[#6bbd45]/15 text-black rounded-md hover:bg-[#6bbd45]/80 transition text-sm"
                     >
                       Edit
                     </Button>
 
                     <Button
                       onClick={() => setShowStatusModal(true)}
-                      className="flex-1 sm:flex-none px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
+                      className="flex-1 sm:flex-none px-3 py-1 bg-[#6bbd45]/15 text-black rounded-md hover:bg-[#6bbd45]/80 transition text-sm"
                     >
                       Change Status
                     </Button>
@@ -348,7 +348,7 @@ const GetRFQByID = ({ id }) => {
               <div className="flex flex-col gap-2 pt-2">
                 <Button
                   onClick={() => setShowEstimationModal(true)}
-                  className="w-full sm:w-auto h-auto py-2.5 px-4 text-sm  bg-green-500 text-white shadow-xs"
+                  className="w-full sm:w-auto h-auto py-2.5 px-4 text-sm  bg-[#6bbd45]/15 text-black rounded-md hover:bg-[#6bbd45]/80 transition text-sm"
                 >
                   Raise For Estimation
                 </Button>
@@ -363,7 +363,7 @@ const GetRFQByID = ({ id }) => {
           </div>
 
           {/* ---------------- RIGHT COLUMN — RESPONSES ---------------- */}
-          <div className="bg-green-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8">
+          <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8">
             {/* Header + Add Response Button */}
             <div className="flex justify-between items-center gap-4">
               <h1 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight">
@@ -376,7 +376,7 @@ const GetRFQByID = ({ id }) => {
                 userRole === "USER") && (
                   <Button
                     onClick={() => setShowResponseModal(true)}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-green-600 text-white rounded-lg shadow-sm hover:bg-green-700 transition text-sm"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#6bbd45]/15 text-black rounded-lg shadow-sm hover:bg-[#6bbd45]/80 transition text-sm"
                   >
                     + Add Response
                   </Button>

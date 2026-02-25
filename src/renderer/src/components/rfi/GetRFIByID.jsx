@@ -133,16 +133,16 @@ const GetRFIByID = ({ id }) => {
       <div className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* LEFT Details */}
-          <div className="bg-white p-6 rounded-xl shadow-none border border-gray-100 space-y-5">
+          <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-5">
             {/* Header */}
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl  text-[#6bbd45]">
+              <h1 className="text-2xl  text-black font-semibold">
                 {rfi.subject}
               </h1>
               <span
                 className={`px-3 py-1 rounded-full text-xs font-semibold ${rfi.isAproovedByAdmin
-                  ? "bg-[#6bbd45]/15 text-[#6bbd45]"
-                  : "bg-[#6bbd45]/15 text-[#6bbd45]"
+                  ? "bg-[#6bbd45]/15 text-black"
+                  : "bg-[#6bbd45]/15 text-black"
                   }`}
               >
                 {rfi.isAproovedByAdmin ? "Approved" : "Pending"}
@@ -161,7 +161,7 @@ const GetRFIByID = ({ id }) => {
             <div>
               <h4 className="font-semibold text-gray-700 mb-1">Description</h4>
               <div
-                className="text-gray-700 bg-gray-50 p-3 rounded-lg border prose prose-sm max-w-none"
+                className="text-gray-700 bg-white p-3 rounded-lg border prose prose-sm max-w-none"
                 dangerouslySetInnerHTML={{
                   __html: rfi.description || "No description provided",
                 }}
@@ -177,7 +177,7 @@ const GetRFIByID = ({ id }) => {
           </div>
 
           {/* RIGHT */}
-          <div className="bg-white p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
+          <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
             {/* Header + Add Response Button */}
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>

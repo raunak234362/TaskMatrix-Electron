@@ -159,9 +159,9 @@ const GetCOByID = ({ id, projectId }) => {
       <div className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* ================= LEFT DETAILS ================= */}
-          <div className="bg-white p-6 rounded-xl shadow-md space-y-5">
+          <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-5">
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl  text-green-700">
+              <h1 className="text-2xl  text-black font-semibold">
                 CO #{co.changeOrderNumber}
               </h1>
 
@@ -209,7 +209,7 @@ const GetCOByID = ({ id, projectId }) => {
 
             <div>
               <h4 className="font-semibold text-gray-700 mb-1">Description</h4>
-              <p className="bg-gray-50 p-3 rounded-lg border">
+              <p className="bg-white p-3 rounded-lg border">
                 {co.description || "—"}
               </p>
             </div>
@@ -249,9 +249,9 @@ const GetCOByID = ({ id, projectId }) => {
           </div>
 
           {/* ================= RIGHT ================= */}
-          <div className="bg-white p-6 rounded-xl shadow-md space-y-6">
+          <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-green-700">
+              <h2 className="text-xl font-semibold text-black">
                 Responses
               </h2>
 

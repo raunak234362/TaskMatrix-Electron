@@ -146,7 +146,7 @@ const GetWBSByIDsHours = ({
             <div className="px-8 py-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-4">
                 <Button
                     variant="outline"
-                    className="bg-white text-gray-700 border-gray-200 hover:bg-gray-50 shadow-sm"
+                    className="bg-green-100 text-black border-gray-200 hover:bg-green-200 shadow-sm"
                 >
                     Download Report
                 </Button> 

@@ -294,7 +294,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
         </div>
         <button
           onClick={handleDownload}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#6bbd45] hover:bg-[#6bbd45]/90 text-white rounded-xl font-bold transition-all shadow-lg shadow-[#6bbd45]/20 active:scale-95"
+          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-green-100 hover:bg-green-200 text-black rounded-xl font-bold transition-all shadow-lg shadow-green-200 active:scale-95"
         >
           <Download size={18} />
           Download Report

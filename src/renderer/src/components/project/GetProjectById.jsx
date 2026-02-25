@@ -169,8 +169,8 @@ const GetProjectById = ({ id, onClose }) => {
             <div className="flex items-center gap-3">
               <div
                 className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border-2 transition-all ${project.status === "ACTIVE"
-                  ? "bg-emerald-50 text-emerald-600 border-emerald-100"
-                  : "bg-red-50 text-red-600 border-red-100"
+                  ? "bg-green-100 text-black"
+                  : "bg-red-100 text-black "
                   }`}
               >
                 {project.status}
@@ -178,7 +178,7 @@ const GetProjectById = ({ id, onClose }) => {
               {onClose && (
                 <button
                   onClick={onClose}
-                  className="px-6 py-2 bg-red-50 border-2 border-red-200 text-red-600 font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-xs shadow-sm hover:shadow-md active:scale-95"
+                  className="px-6 py-2 bg-red-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-xs shadow-sm hover:shadow-md active:scale-95"
                 >
                   Close
                 </button>

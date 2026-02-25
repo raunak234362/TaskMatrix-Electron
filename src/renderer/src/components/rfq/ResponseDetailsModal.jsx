@@ -110,7 +110,7 @@ const ResponseDetailsModal = ({
         <div className="space-y-1">
           <p className="text-sm text-gray-700">Message</p>
           <div
-            className="text-gray-700 bg-gray-50 p-3 rounded-md border prose prose-sm max-w-none"
+            className="text-black p-3 rounded-md border prose prose-sm max-w-none"
             dangerouslySetInnerHTML={{ __html: response.description }}
           />
         </div>

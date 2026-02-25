@@ -19,7 +19,7 @@ const QuickActionsPanel = ({ onRaiseInvoice, onDownloadReport, onSendReminders }
                 </button>
                 <button
                     onClick={onDownloadReport}
-                    className="flex items-center justify-center gap-2 bg-white text-black border border-black px-4 py-3 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-green-100 transition-all shadow-sm cursor-pointer"
+                    className="flex items-center justify-center gap-2 bg-green  -100 text-black border border-black px-4 py-3 rounded-xl font-black uppercase text-xs tracking-widest hover:bg-green-200 transition-all shadow-sm cursor-pointer"
                 >
                     <Download size={16} className="shrink-0" />
                     <span className="truncate">Download Report</span>

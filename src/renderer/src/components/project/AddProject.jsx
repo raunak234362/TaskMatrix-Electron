@@ -462,7 +462,7 @@ const AddProject = () => {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-10 py-4 bg-gray-900 hover:bg-green-700 text-white rounded-xl font-bold transition-all shadow-lg flex items-center gap-3"
+                className="px-10 py-4 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/80 text-black rounded-xl font-bold transition-all shadow-lg flex items-center gap-3"
               >
                 {isSubmitting ? (
                   <>

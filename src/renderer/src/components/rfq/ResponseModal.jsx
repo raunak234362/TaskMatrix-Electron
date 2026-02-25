@@ -434,7 +434,7 @@ const ResponseModal = ({
           <X className="w-5 h-5" />
         </Button>
 
-        <h2 className="text-xl  text-green-700 mb-4">Add Response</h2>
+        <h2 className="text-xl font-bold text-green-700 mb-4">Add Response</h2>
 
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           {/* Estimation Selection */}
@@ -460,7 +460,7 @@ const ResponseModal = ({
               type="button"
               onClick={handlePrint}
               disabled={!selectedEstimationId}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 h-[42px]"
+              className="flex items-center gap-2 px-4 py-2 bg-green-200 text-black rounded-lg hover:bg-green-300 "
             >
               <Printer className="w-4 h-4" />
               Print Proposal
@@ -597,7 +597,7 @@ const ResponseModal = ({
             <Button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-400 rounded-lg hover:bg-gray-200"
+              className="px-4 py-2 bg-green-200 text-black rounded-lg hover:bg-green-300"
             >
               Cancel
             </Button>
@@ -605,7 +605,7 @@ const ResponseModal = ({
             <Button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+              className="px-4 py-2 bg-green-200 text-black rounded-lg hover:bg-green-700 transition disabled:opacity-50"
             >
               {loading ? "Submitting..." : "Submit Response"}
             </Button>

@@ -1,36 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/components/fabricator/AllClients.tsx
 import { useEffect, useState, useMemo } from "react";
-
 import Button from "../../fields/Button";
-import { X } from "lucide-react";
+import { X, Users, UserPlus, Building2 } from "lucide-react";
 import AddClients from "./AddClient";
 import Service from "../../../api/Service";
 import { toast } from "react-toastify";
-import DataTable from "../../ui/table"; // Assuming this is the correct path
-
+import DataTable from "../../ui/table";
 import GetEmployeeByID from "../../manageTeam/employee/GetEmployeeByID";
-
 
 const AllClients = ({ fabricator, onClose }) => {
   const [addClientModal, setAddClientModal] = useState(false);
   const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ── Fetch clients from API ──
   const fetchAllClientsByFabricatorID = async (fabId) => {
     if (!fabId) return;
-
     setIsLoading(true);
     try {
       const response = await Service.FetchAllClientsByFabricatorID(fabId);
-
-      // API returns: { data: [ {...}, ... ], message: "..." }
-      const rawClients = Array.isArray(response.data)
-        ? response.data
-        : [];
-
-      // Map raw → UserData (safe fallback)
+      const rawClients = Array.isArray(response.data) ? response.data : [];
       const mappedClients = rawClients.map((c) => ({
         id: c.id ?? "",
         username: c.username ?? "",
@@ -39,25 +27,17 @@ const AllClients = ({ fabricator, onClose }) => {
         middleName: c.middleName ?? null,
         lastName: c.lastName ?? "",
         phone: c.phone ?? "",
-        landline: c.landline ?? null,
-        altLandline: c.altLandline ?? null,
-        altPhone: c.altPhone ?? null,
         designation: c.designation ?? "",
         city: c.city ?? "",
         zipCode: c.zipCode ?? "",
         state: c.state ?? "",
         country: c.country ?? "",
         address: c.address ?? "",
-        role: c.role ?? "EMPLOYEE",
-        departmentId: c.departmentId ?? "",
-        isActive: c.isActive ?? true,
         branchId: c.branchId,
         extension: c.extensionNumber ?? c.extension ?? "",
-        isFirstLogin: c.isFirstLogin ?? false,
         createdAt: c.createdAt ?? "",
         updatedAt: c.updatedAt ?? "",
       }));
-
       setClients(mappedClients);
     } catch (error) {
       console.error("Failed to fetch clients:", error);
@@ -68,7 +48,6 @@ const AllClients = ({ fabricator, onClose }) => {
     }
   };
 
-  // ── Load on mount & fabricator change ──
   useEffect(() => {
     fetchAllClientsByFabricatorID(fabricator.id);
   }, [fabricator.id]);
@@ -76,110 +55,108 @@ const AllClients = ({ fabricator, onClose }) => {
   const openAddClient = () => setAddClientModal(true);
   const closeAddClient = () => {
     setAddClientModal(false);
-    // Refresh list after adding
     fetchAllClientsByFabricatorID(fabricator.id);
   };
 
-  // ── DataTable Columns Definition ──
   const columns = useMemo(
     () => [
       {
-        accessorFn: (r) =>
-          [r.firstName, r.middleName, r.lastName].filter(Boolean).join(" "),
-        header: "Name",
+        accessorFn: (r) => [r.firstName, r.middleName, r.lastName].filter(Boolean).join(" "),
+        header: "NAME",
         id: "fullName",
       },
-      { accessorKey: "email", header: "Email" },
+      { accessorKey: "email", header: "EMAIL" },
       {
         accessorKey: "phone",
-        header: "Phone",
+        header: "PHONE",
         cell: ({ row }) => (
-          <span>
-            {row.original.phone}
+          <div className="flex flex-col">
+            <span className="font-bold text-gray-900">{row.original.phone}</span>
             {row.original.extension && (
-              <span className="text-gray-700 text-xs ml-1">
-                (Ext: {row.original.extension})
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                EXT: {row.original.extension}
               </span>
             )}
-          </span>
+          </div>
         ),
       },
-      { accessorKey: "designation", header: "Designation" },
+      { accessorKey: "designation", header: "DESIGNATION" },
       {
         accessorFn: (r) => {
           const parts = [];
-          if (r.address) parts.push(r.address);
           if (r.city) parts.push(r.city);
           if (r.state) parts.push(r.state);
-          if (r.zipCode) parts.push(r.zipCode);
           if (r.country) parts.push(r.country);
-          return parts.join(", ");
+          return parts.join(", ") || "—";
         },
-        header: "Address",
-        id: "fullAddress",
-        cell: ({ row }) => (
-          <span className="text-gray-700">{row.getValue("fullAddress")}</span>
-        ),
+        header: "LOCATION",
+        id: "location",
       },
     ],
     []
   );
 
-  const handleRowClick = (row) => {
-    // Optional logic to view/edit client details
-    console.log("Client clicked:", row.id);
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-5xl bg-white rounded-xl shadow-2xl flex flex-col max-h-[90vh]">
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b">
-          <h2 className="text-xl  text-gray-700">
-            Fabricator POCs (Clients)
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-700 hover:text-gray-700 transition"
-            aria-label="Close"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="w-full max-w-6xl bg-white rounded-[2.5rem] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-200">
 
-        {/* Fabricator Name */}
-        <div className="px-5 pt-3">
-          <p className="text-sm font-semibold text-gray-700">
-            Fabricator:{" "}
-            <span className=" text-blue-600">
-              {fabricator.fabName}
-            </span>
-          </p>
-        </div>
-
-        {/* Add Button */}
-        <div className="px-5 pt-3">
-          <Button onClick={openAddClient} className="text-sm">
-            + Add POC
-          </Button>
-        </div>
-
-        {/* Table/Data Area */}
-        <div className="flex-1 overflow-auto mt-4 border-t p-4">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12 text-gray-700">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600 mr-2"></div>
-              Loading clients...
+        {/* Header Section */}
+        <div className="p-8 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 shadow-sm border border-gray-100">
+              <Users size={32} strokeWidth={1.5} />
             </div>
-          ) : (
-            <DataTable
-              columns={columns}
-              data={clients}
-              onRowClick={handleRowClick}
-              detailComponent={({ row }) => <GetEmployeeByID id={row.id} />}
+            <div>
+              <h2 className="text-2xl font-black text-gray-900 tracking-tight uppercase">Fabricator POCs</h2>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
+                  <Building2 size={12} />
+                  {fabricator.fabName}
+                </span>
+                <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                  {clients.length} CONNECTED ENTITIES
+                </span>
+              </div>
+            </div>
+          </div>
 
-            />
-          )}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={openAddClient}
+              className="px-6 py-2.5 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 active:scale-95 shadow-sm"
+            >
+              <UserPlus size={16} />
+              Add POC
+            </button>
+            <button
+              onClick={onClose}
+              className="p-3 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-all active:scale-95 border border-gray-100"
+            >
+              <X size={20} strokeWidth={2.5} />
+            </button>
+          </div>
+        </div>
+
+        {/* Table Area */}
+        <div className="flex-1 overflow-hidden flex flex-col p-8 bg-gray-50/30">
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col flex-1">
+            <div className="flex-1 overflow-auto custom-scrollbar">
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-20">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6bbd45] mb-4"></div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Synchronizing POC Data...</p>
+                </div>
+              ) : (
+                <DataTable
+                  columns={columns}
+                  data={clients}
+                  onRowClick={(row) => console.log("Client clicked:", row.id)}
+                  detailComponent={({ row }) => <GetEmployeeByID id={row.id} />}
+                />
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Add Client Modal */}

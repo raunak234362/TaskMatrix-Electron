@@ -119,7 +119,7 @@ const GetEstimationByID = ({ id, onRefresh }) => {
         : 'bg-blue-100 text-black'
 
   return (
-    <div className="bg-green-100 rounded-3xl p-8 border border-black shadow-sm">
+    <div className="bg-gray-100 rounded-3xl p-8 border border-black shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
