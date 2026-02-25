@@ -103,7 +103,7 @@ const TeamPage = () => {
         </div>
 
         {/* ---------- TAB CONTENT ---------- */}
-        <div className="flex-1 min-h-0 py-2 overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           {activeTab === "manageEmployee" && <EmployeeLayout />}
           {activeTab === "manageDepartment" && <DepartmentLayout />}
           {activeTab === "manageTeam" && <TeamLayout />}

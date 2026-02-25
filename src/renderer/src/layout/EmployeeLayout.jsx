@@ -8,13 +8,13 @@ const EmployeeLayout = () => {
   return (
     <div className="w-full overflow-y-hidden overflow-x-hidden">
       <div className="flex flex-col w-full h-full">
-        <div className="px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 border-b rounded-t-2xl flex flex-col md:flex-row items-center justify-end gap-4">
+        <div className="px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 rounded-t-2xl flex flex-col md:flex-row items-center justify-end gap-4">
           <div className="flex flex-row gap-3 items-end justify-end">
             <button
               onClick={() => setActiveTab("allEmployee")}
-              className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "allEmployee"
-                  ? "md:text-base text-sm bg-green-700 text-white "
-                  : "text-base md:text-base bg-white/70 backdrop-xl text-gray-700 font-semibold"
+              className={`px-1.5 md:px-4 py-2 border border-black rounded-lg ${activeTab === "allEmployee"
+                  ? "bg-green-200 text-black shadow-medium"
+                : "text-black hover:bg-green-50"
                 }`}
             >
               All Employee
@@ -24,8 +24,8 @@ const EmployeeLayout = () => {
               <button
                 onClick={() => setActiveTab("addEmployee")}
                 className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "addEmployee"
-                    ? "md:text-base text-sm bg-green-700 text-white "
-                    : "text-base md:text-base bg-white/70 backdrop-xl text-gray-700 font-semibold"
+                    ? "bg-green-200 text-black shadow-medium"
+                : "text-black hover:bg-green-50"
                   }`}
               >
                 Add Employee
@@ -33,7 +33,7 @@ const EmployeeLayout = () => {
             )}
           </div>
         </div>
-        <div className="flex-1 min-h-0 overflow-y-auto p-2 bg-white rounded-b-2xl">
+        <div className="flex-1 min-h-0 overflow-y-auto p-2 bg-white">
           {activeTab === "allEmployee" && (
             <div>
               <AllEmployee />

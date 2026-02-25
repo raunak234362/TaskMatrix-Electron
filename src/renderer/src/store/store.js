@@ -5,6 +5,7 @@ import RFQReducer from './rfqSlice'
 import projectReducer from './projectSlice'
 import milestoneReducer from './milestoneSlice'
 import wbsReducer from './wbsSlice'
+import uiReducer from './uiSlice'
 
 const store = configureStore({
   reducer: {
@@ -13,7 +14,8 @@ const store = configureStore({
     fabricatorInfo: fabricatorReducer,
     projectInfo: projectReducer,
     milestoneInfo: milestoneReducer,
-    wbsInfo: wbsReducer
+    wbsInfo: wbsReducer,
+    ui: uiReducer
   }
 })
 

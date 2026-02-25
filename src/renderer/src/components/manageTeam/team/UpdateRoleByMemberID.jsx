@@ -1,13 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { X } from "lucide-react";
 import Service from "../../../api/Service";
-
 import Select from "../../fields/Select";
-import Button from "../../fields/Button";
-
 
 const roles = [
   { label: "CHECKER", value: "CHECKER" },
@@ -20,12 +16,7 @@ const roles = [
   { label: "TEAM_LEAD", value: "TEAM_LEAD" },
 ];
 
-const UpdateRoleByMemberID = ({
-  teamId,
-  member,
-  onClose,
-  onSuccess,
-}) => {
+const UpdateRoleByMemberID = ({ teamId, member, onClose, onSuccess }) => {
   const {
     register,
     handleSubmit,
@@ -55,20 +46,25 @@ const UpdateRoleByMemberID = ({
   if (!member) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md bg-white rounded-xl p-6 shadow-xl">
-        <div className="flex items-center justify-between mb-4 border-b pb-2">
-          <h2 className="text-xl font-semibold text-gray-700">
-            Update Role for {member.member.firstName} {member.member.lastName}
-          </h2>
-          <button onClick={onClose} aria-label="Close">
-            <X className="w-6 h-6 text-gray-700 hover:text-gray-700" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 text-left">
+      <div className="w-full max-w-lg bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-black/5 p-10">
+        <div className="flex items-center justify-between mb-8 border-b border-black/5 pb-6">
+          <div className="text-left">
+            <h2 className="text-2xl font-black text-black uppercase tracking-tight">
+              Update Role
+            </h2>
+            <p className="text-black/60 text-[10px] font-black uppercase tracking-widest mt-1">
+              For {member.member.firstName} {member.member.lastName}
+            </p>
+          </div>
+          <button onClick={onClose} aria-label="Close" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <X className="w-6 h-6 text-black" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label className="font-medium">New Role</label>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          <div className="space-y-2">
+            <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">New Role</label>
             <Select
               options={roles}
               {...register("newRole", { required: "A new role is required." })}
@@ -76,23 +72,39 @@ const UpdateRoleByMemberID = ({
               placeholder="Select a new role"
             />
             {errors.newRole && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="text-red-500 text-[10px] font-black uppercase ml-1 mt-1">
                 {errors.newRole.message}
               </p>
             )}
           </div>
 
-          <div className="flex justify-end gap-4 pt-4">
-            <Button type="button" onClick={onClose} disabled={isSubmitting}>
-              Cancel
-            </Button>
-            <Button
+          <div className="flex flex-col gap-3 pt-6 border-t border-black/5">
+            <button
               type="submit"
-              className="bg-blue-600 text-white hover:bg-blue-700"
               disabled={isSubmitting}
+              className={`w-full h-14 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-medium flex items-center justify-center gap-3 ${isSubmitting
+                ? "bg-gray-100 text-black/20 cursor-not-allowed"
+                : "bg-black text-white hover:bg-black/90 active:scale-95 shadow-black/10"
+                }`}
             >
-              {isSubmitting ? "Updating..." : "Update Role"}
-            </Button>
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-black/20 border-t-black"></div>
+                  Processing...
+                </>
+              ) : (
+                "Update Role"
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="w-full h-14 bg-white border border-black/10 rounded-2xl text-black font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all text-center"
+            >
+              Cancel
+            </button>
           </div>
         </form>
       </div>

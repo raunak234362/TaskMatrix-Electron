@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-
 import Service from "../../../api/Service";
 import { AlertCircle, Loader2 } from "lucide-react";
 import Button from "../../fields/Button";
-
+import { formatDate } from "../../../utils/dateUtils";
 
 const GetDepartmentById = ({ id }) => {
   const [department, setDepartment] = useState(null);
@@ -55,52 +54,34 @@ const GetDepartmentById = ({ id }) => {
     );
   }
 
-  //   const formatDate = (dateString) =>
-  //     new Date(dateString).toLocaleString("en-IN", {
-  //       dateStyle: "medium",
-  //       timeStyle: "short",
-  //     });
-
-  const managers = department.managerIds || []
+  const managers = department.managerIds || [];
 
   return (
-    <div className="bg-linear-to-br from-green-50 to-green-50 p-6 rounded-xl shadow-inner">
+    <div className="bg-gray-50/50 p-10 rounded-3xl border border-black/5 shadow-inner">
       {/* Header */}
-      {/* <div className="flex items-center justify-between mb-5">
-        <h3 className="text-xl  text-orange-800">{department.name}</h3>
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-medium ${
-            department.isDeleted
-              ? "bg-red-100 text-red-800"
-              : "bg-green-100 text-green-800"
-          }`}
-        >
-          {department.isDeleted ? "Inactive" : "Active"}
-        </span>
-      </div> */}
+      <div className="flex items-center justify-between mb-8 border-b border-black/5 pb-4">
+        <h3 className="text-2xl font-black text-black uppercase tracking-tight">{department.name}</h3>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-sm">
         {/* Left Column */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           <InfoRow label="Department Name" value={department.name} />
-          {/* <InfoRow label="Created" value={formatDate(department?.createdAt)} />
-          <InfoRow label="Updated" value={formatDate(department?.updatedAt)} /> */}
-          {/* <InfoRow label="Created By" value={department.createdById || "—"} /> */}
+          <InfoRow label="Created" value={formatDate(department?.createdAt)} />
+          <InfoRow label="Updated" value={formatDate(department?.updatedAt)} />
         </div>
 
         {/* Right Column */}
-        <div className="space-y-3">
-          <div className="flex justify-between">
-            <span className=" text-gray-700">Managers:</span>
-            <div className="text-gray-700 text-right">
+        <div className="space-y-4">
+          <div className="flex justify-between items-center py-1">
+            <span className="text-black/40 font-black uppercase tracking-[0.15em] text-[10px]">Managers</span>
+            <div className="text-black font-black text-sm tracking-tight text-right max-w-[200px]">
               {Array.isArray(managers) && managers?.length > 0
                 ? managers
-                  .map(
-                    (m) =>
-                      `${m.firstName || ""} ${m.middleName || ""} ${m.lastName || ""
-                        }`
-                        .replace(/\s+/g, " ")
-                        .trim()
+                  .map((m) =>
+                    `${m.firstName || ""} ${m.middleName || ""} ${m.lastName || ""}`
+                      .replace(/\s+/g, " ")
+                      .trim(),
                   )
                   .join(", ")
                 : "No Managers Assigned"}
@@ -110,22 +91,23 @@ const GetDepartmentById = ({ id }) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="py-2 flex gap-2 mt-4">
-        <Button className="py-1 px-2 text-lg">Edit Department</Button>
-        <Button className="py-1 px-2 text-lg">Archive Department</Button>
+      <div className="flex flex-wrap gap-4 mt-8 pt-6 border-t border-black/5">
+        <Button className="flex items-center gap-2 px-8 py-3 bg-white border border-black/10 rounded-2xl text-black font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm">
+          Edit Department
+        </Button>
+        <Button className="flex items-center gap-2 px-8 py-3 bg-red-50 border border-red-100 rounded-2xl text-red-600 font-black text-xs uppercase tracking-widest hover:bg-red-100 transition-all shadow-sm">
+          Archive Department
+        </Button>
       </div>
     </div>
   );
 };
 
 // Reusable info row
-const InfoRow = ({
-  label,
-  value,
-}) => (
-  <div className="flex justify-between">
-    <span className=" text-gray-700">{label}:</span>
-    <span className="text-gray-700">{value}</span>
+const InfoRow = ({ label, value }) => (
+  <div className="flex justify-between items-center py-1">
+    <span className="text-black/40 font-black uppercase tracking-[0.15em] text-[10px]">{label}</span>
+    <span className="text-black font-black text-sm tracking-tight">{value}</span>
   </div>
 );
 

@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useForm } from "react-hook-form";
-
 import Button from "../../fields/Button";
 import Input from "../../fields/input";
 import { useEffect, useMemo, useState } from "react";
@@ -8,7 +6,6 @@ import Service from "../../../api/Service";
 import Select from "../../fields/Select";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-
 
 const AddTeam = () => {
   const {
@@ -22,7 +19,7 @@ const AddTeam = () => {
   const [staffs, setStaffs] = useState([]);
 
   const departments = useSelector(
-    (state) => state.userInfo.departmentData || []
+    (state) => state.userInfo.departmentData || [],
   );
 
   // ── Safely fetch managers (no errors shown) ──
@@ -116,10 +113,10 @@ const AddTeam = () => {
   // ── Early loading UI ──
   if (loading) {
     return (
-      <div className="w-full mx-auto bg-white rounded-xl shadow-md p-10 border border-gray-200 text-center">
-        <div className="inline-flex items-center gap-3">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
-          <span className="text-gray-700">Loading team setup...</span>
+      <div className="w-full mx-auto bg-white rounded-[2.5rem] shadow-soft p-20 border border-black/5 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-black/5 border-t-black"></div>
+          <span className="text-black font-black uppercase tracking-widest text-[10px]">Loading team setup...</span>
         </div>
       </div>
     );
@@ -129,12 +126,15 @@ const AddTeam = () => {
   const hasDepartments = departmentOptions.some((opt) => opt.value);
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-md p-8 mt-6 border border-gray-200">
-      <h2 className="text-2xl  text-gray-700 mb-6">Create New Team</h2>
+    <div className="w-full max-w-2xl mx-auto bg-white rounded-[2.5rem] shadow-soft p-12 mt-10 border border-black/5">
+      <div className="mb-10 text-center">
+        <h2 className="text-3xl font-black text-black uppercase tracking-tight">Create New Team</h2>
+        <p className="text-black/60 text-sm font-bold tracking-wide mt-2">Initialize a new organizational unit</p>
+      </div>
 
-      <form onSubmit={handleSubmit(addTeam)} className="space-y-6">
+      <form onSubmit={handleSubmit(addTeam)} className="space-y-8">
         {/* Team Name */}
-        <div>
+        <div className="space-y-2">
           <Input
             label="Team Name"
             type="text"
@@ -143,12 +143,12 @@ const AddTeam = () => {
             className="w-full"
           />
           {errors.name && (
-            <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+            <p className="text-red-500 text-[10px] font-black uppercase ml-1">{errors.name.message}</p>
           )}
         </div>
 
         {/* Manager Select */}
-        <div>
+        <div className="space-y-2">
           <Select
             label="Team Manager"
             placeholder={
@@ -157,17 +157,16 @@ const AddTeam = () => {
             options={managerOptions}
             {...register("managerID")}
             onChange={(_, value) => setValue("managerID", value)}
-          // disabled={!hasManagers}
           />
           {!hasManagers && (
-            <p className="text-amber-600 text-xs mt-1">
+            <p className="text-amber-600 font-bold text-xs mt-1 ml-1">
               Managers will appear once added in the system.
             </p>
           )}
         </div>
 
         {/* Department Select */}
-        <div>
+        <div className="space-y-2">
           <Select
             label="Department"
             placeholder={
@@ -176,26 +175,25 @@ const AddTeam = () => {
             options={departmentOptions}
             {...register("departmentID")}
             onChange={(_, value) => setValue("departmentID", value)}
-          // disabled={!hasDepartments}
           />
           {!hasDepartments && (
-            <p className="text-amber-600 text-xs mt-1">
+            <p className="text-amber-600 font-bold text-xs mt-1 ml-1">
               Create departments first to assign teams.
             </p>
           )}
         </div>
 
         {/* Submit */}
-        <div className="flex justify-center w-full pt-4">
+        <div className="pt-6">
           <Button
             type="submit"
             disabled={isSubmitting || !hasManagers || !hasDepartments}
-            className={`w-full px-8 py-3 rounded-lg font-medium transition ${isSubmitting || !hasManagers || !hasDepartments
-                ? "bg-gray-300 text-gray-700 cursor-not-allowed"
-                : "bg-green-600 text-white hover:bg-green-700"
+            className={`w-full px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-medium ${isSubmitting || !hasManagers || !hasDepartments
+              ? "bg-gray-100 text-black/20 cursor-not-allowed"
+              : "bg-black text-white hover:bg-black/90 active:scale-95"
               }`}
           >
-            {isSubmitting ? "Creating..." : "Create Team"}
+            {isSubmitting ? "Processing..." : "Create Team"}
           </Button>
         </div>
       </form>

@@ -1,30 +1,45 @@
-import React from "react";
+import { useEffect } from "react";
 import { X, FileText, Download, User } from "lucide-react";
 import Button from "../../../fields/Button";
-
+import { useDispatch } from "react-redux";
+import {
+  incrementModalCount,
+  decrementModalCount,
+} from "../../../../store/uiSlice";
 
 const DailyWorkReportModal = ({
   isOpen,
   onClose,
   members,
 }) => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (isOpen) {
+      dispatch(incrementModalCount());
+      return () => {
+        dispatch(decrementModalCount());
+      };
+    }
+  }, [isOpen, dispatch]);
+
   if (!isOpen) return null;
 
   const formatWorkedHours = (workingHourTask) => {
-    const totalMinutes = (workingHourTask || []).reduce(
-      (sum, entry) => sum + (entry.duration || 0),
-      0
-    );
+    const totalMinutes = (workingHourTask || []).reduce((sum, entry) => {
+      if (entry.duration_seconds) return sum + entry.duration_seconds / 60;
+      return sum + (entry.duration || 0);
+    }, 0);
     const hrs = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
+    const mins = Math.round(totalMinutes % 60);
     return `${hrs.toString().padStart(2, "0")}:${mins
       .toString()
       .padStart(2, "0")}`;
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white w-fit max-w-[80%] max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-white w-[98%] max-w-[95vw] h-[95vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
         {/* Header */}
         <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div>
@@ -108,8 +123,8 @@ const DailyWorkReportModal = ({
                       </div>
                       <span
                         className={`px-2 py-1 rounded-lg text-[10px]  ${task.status === "COMPLETE"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-blue-100 text-blue-700"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-blue-100 text-blue-700"
                           }`}
                       >
                         {task.status}
