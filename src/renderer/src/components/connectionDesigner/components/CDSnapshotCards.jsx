@@ -1,94 +1,56 @@
-import React from 'react'
-import { Users, Globe, HardHat, FileText } from 'lucide-react'
+import React from "react";
+import { Users, Globe, HardHat, FileText } from "lucide-react";
 
 const CDSnapshotCards = ({ stats }) => {
     const cards = [
         {
-            title: 'PARTNER NETWORK',
+            label: "REGISTERED DESIGNERS",
             value: stats.totalCDs,
-            label: 'REGISTERED DESIGNERS',
             icon: Users,
-            color: 'green',
-            bg: 'bg-green-50/30',
-            iconBg: 'bg-green-100/50',
-            textColor: 'text-green-700'
+            color: "green",
+            type: "simple"
         },
         {
-            title: 'GEOGRAPHIC REACH',
-            value: `${stats.totalCountries} Countries`,
-            label: `${stats.totalStates} OPERATIONAL STATES`,
+            topLabel: `${stats.totalCountries} COUNTRIES`,
+            bottomLabel: `${stats.totalStates} OPERATIONAL STATES`,
             icon: Globe,
-            color: 'blue',
-            bg: 'bg-blue-50/30',
-            iconBg: 'bg-blue-100/50',
-            textColor: 'text-blue-700'
+            color: "blue",
+            type: "double"
         },
         {
-            title: 'ENGINEERING POOL',
-            value: stats.totalEngineers,
-            label: 'TOTAL SKILLED WORKFORCE',
-            trend: `Avg ${stats.totalCDs > 0 ? (stats.totalEngineers / stats.totalCDs).toFixed(1) : 0}/Designer`,
+            label: "TOTAL POC",
+            value: stats.totalEngineers, // Mapping workforce to POC as per image context or placeholder
             icon: HardHat,
-            color: 'purple',
-            bg: 'bg-purple-50/30',
-            iconBg: 'bg-purple-100/50',
-            textColor: 'text-purple-700'
-        },
-        {
-            title: 'LIVE QUOTATIONS',
-            value: stats.activeRFQs,
-            label: 'ACTIVE ENGAGEMENTS',
-            trend: 'Response rate 0%',
-            icon: FileText,
-            color: 'orange',
-            bg: 'bg-orange-50/30',
-            iconBg: 'bg-orange-100/50',
-            textColor: 'text-orange-700'
+            color: "indigo",
+            type: "simple"
         }
-    ]
+    ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {cards.map((card, index) => (
-                <div
-                    key={index}
-                    className={`${card.bg} p-6 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-300 flex items-center min-h-[120px]`}
-                >
-                    <div className="flex items-center justify-between w-full relative z-10">
-                        {/* Left: Numbers */}
-                        <div className="flex flex-col">
-                            <h3 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tighter leading-none">
-                                {card.value}
-                            </h3>
-                        </div>
-
-                        {/* Right: Text and Icon */}
-                        <div className="flex items-center gap-4">
-                            <div className="flex flex-col items-end text-right">
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">
-                                    {card.title}
-                                </span>
-                                <p className="text-[11px] font-bold text-gray-600 uppercase tracking-widest leading-none">
-                                    {card.label}
-                                </p>
-                                {card.trend && (
-                                    <span className={`text-[9px] font-bold ${card.textColor} mt-2 px-2 py-0.5 rounded-full bg-white/50 border border-current/10 whitespace-nowrap`}>
-                                        {card.trend}
-                                    </span>
-                                )}
-                            </div>
-                            <div className={`${card.iconBg} p-3 rounded-2xl text-gray-600 shadow-xs border border-white group-hover:bg-white group-hover:shadow-md group-hover:scale-110 transition-all duration-300 shrink-0`}>
-                                <card.icon size={20} strokeWidth={2.5} />
-                            </div>
-                        </div>
+                <div key={index} className="bg-white p-5 rounded-[2rem] border border-gray-100 flex items-center justify-between shadow-sm group hover:shadow-md transition-all">
+                    <div className={`w-14 h-14 rounded-2xl bg-${card.color}-50 text-${card.color}-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-105`}>
+                        <card.icon size={24} strokeWidth={2} />
                     </div>
 
-                    {/* Subtle Background Pattern or Accent */}
-                    <div className={`absolute -right-4 -bottom-4 w-24 h-24 ${card.iconBg} rounded-full opacity-20 group-hover:opacity-40 transition-opacity blur-2xl`}></div>
+                    <div className="text-right">
+                        {card.type === "simple" ? (
+                            <>
+                                <h3 className="text-2xl font-black text-gray-900 leading-none mb-1">{card.value}</h3>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{card.label}</p>
+                            </>
+                        ) : (
+                            <>
+                                <h3 className="text-lg font-black text-gray-900 leading-none mb-1 uppercase">{card.topLabel}</h3>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{card.bottomLabel}</p>
+                            </>
+                        )}
+                    </div>
                 </div>
             ))}
         </div>
-    )
-}
+    );
+};
 
-export default CDSnapshotCards
+export default CDSnapshotCards;

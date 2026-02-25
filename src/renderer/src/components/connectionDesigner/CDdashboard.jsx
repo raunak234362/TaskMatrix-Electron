@@ -7,7 +7,7 @@ import CDCapacityTable from "./components/CDCapacityTable";
 // import CDInsightsList from "./components/CDInsightsList"; // Removed based on feedback/redundancy
 import GetConnectionDesignerByID from "./designer/GetConnectionDesignerByID";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft } from "lucide-react";
+import { X, ChevronRight } from "lucide-react";
 
 const DashboardSkeleton = () => (
     <div className="p-6 space-y-6 animate-pulse ">
@@ -152,9 +152,28 @@ const CDdashboard = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
-                className="h-full p-4 sm:p-6 flex flex-col gap-6 bg-transparent overflow-y-auto custom-scrollbar relative"
+                className="h-full p-4 sm:p-6 flex flex-col gap-12 sm:gap-8 bg-transparent overflow-y-auto custom-scrollbar relative"
             >
                 {/* Header */}
+             
+                    {/* <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => window.history.back()}
+                            className="p-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all shadow-xs"
+                        >
+                            <ChevronRight size={20} className="rotate-180 text-gray-600" />
+                        </button>
+                        <h1 className="text-xl font-black text-gray-900 uppercase tracking-[0.2em]">Connection Designer</h1>
+                    </div> */}
+
+                    {/* <div className="flex items-center gap-3">
+                        <button className="px-6 py-2.5 bg-green-50 border border-green-200 rounded-xl text-xs font-black text-green-700 uppercase tracking-widest hover:bg-green-100 transition-all shadow-sm">
+                            Connection Designer Home
+                        </button>
+                        <button className="px-6 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-black text-gray-400 uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm">
+                            Add Connection Designer
+                        </button>
+                    </div> */}
               
 
                 {/* SECTION B — EXECUTIVE SNAPSHOT */}
@@ -166,22 +185,23 @@ const CDdashboard = () => {
                     <CDSnapshotCards stats={stats} />
                 </motion.div>
 
-                {/* SECTION C — CONNECTION DESIGNER DIRECTORY */}
-                <div className="flex flex-col gap-6">
-                    <CDNetworkOverview
-                        designers={cdData}
-                        onSelect={(id) => setSelectedDesignerId(id)}
-                    />
-                </div>
+                {/* SECTION C — LOCATION INTELLIGENCE (Redesigned) */}
+                {/* New component on Left, Pie on Right */}
+                <CDNetworkOverview
+                    designers={cdData}
+                    stateData={stateDist}
+                    onSelect={(id) => setSelectedDesignerId(id)}
+                />
 
                 {/* SECTION D — RECENT ACTIVITY */}
-                {/* <motion.div
+                <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.3 }}
+                    className="space-y-8"
                 >
                     <CDCapacityTable recentActivity={recentActivity} />
-                </motion.div> */}
+                </motion.div>
 
             </motion.div>
 
@@ -208,11 +228,14 @@ const CDdashboard = () => {
                                     onClick={() => setSelectedDesignerId(null)}
                                     className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors z-10"
                                 >
-                                    <X size={20} className="text-gray-600" />
+                                    <X size={18} className="text-gray-400" />
                                 </button>
 
-                                <div className="flex-1 overflow-y-auto p-6 mt-8 custom-scrollbar">
-                                    <GetConnectionDesignerByID id={selectedDesignerId} />
+                                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                    <GetConnectionDesignerByID
+                                        id={selectedDesignerId}
+                                        onClose={() => setSelectedDesignerId(null)}
+                                    />
                                 </div>
                             </motion.div>
                         </motion.div>
