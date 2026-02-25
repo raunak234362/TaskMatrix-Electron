@@ -229,9 +229,6 @@ const EditFabricator = ({
               </div>
               Edit Engineering Partner
             </h2>
-            <p className="text-xs text-slate-400 uppercase tracking-widest">
-              Update global fabricator intelligence and credentials
-            </p>
           </div>
           <button
             onClick={onClose}
@@ -255,12 +252,10 @@ const EditFabricator = ({
 
           {/* Section 1: Identity */}
           <section className="space-y-6">
-            <h3 className="text-[10px] text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-              Core Identity & Access
-            </h3>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                <label className="block text-xs text-black font-bold uppercase tracking-widest mb-2">
                   Partner Name
                 </label>
                 <Input
@@ -278,7 +273,7 @@ const EditFabricator = ({
                 )}
               </div>
               <div>
-                <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                <label className="block text-xs text-black font-bold uppercase tracking-widest mb-2">
                   Partner Stage
                 </label>
                 <select
@@ -436,9 +431,7 @@ const EditFabricator = ({
 
           {/* Section 3: Assets */}
           <section className="space-y-6 pt-10 border-t border-slate-100">
-            <h3 className="text-[10px] text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-              Compliance Vault (Files)
-            </h3>
+           
 
             {/* Existing Files */}
             {filesToKeep.length > 0 && (
@@ -488,14 +481,14 @@ const EditFabricator = ({
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="px-8 py-3 text-[10px] uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all active:scale-95 font-bold"
+              className="px-8 py-3 text-[10px] uppercase tracking-widest text-black border border-black rounded-2xl hover:text-slate-600 transition-all active:scale-95 font-bold"
             >
               Cancel Edit
             </button>
             <Button
               type="submit"
               disabled={submitting}
-              className="px-10 py-3 bg-green-600 text-white text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-green-100 transition-all active:scale-95 flex items-center gap-3 border-none font-bold"
+              className="px-10 py-3 bg-green-200 hover:bg-green-300 text-black  text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-green-100 transition-all active:scale-95 flex items-center gap-3 border-none font-bold border-black "
             >
               {submitting ? (
                 <>
@@ -504,7 +497,7 @@ const EditFabricator = ({
                 </>
               ) : (
                 <>
-                  <Check className="w-5 h-5" />
+                  <Check className="w-5 h-5 border " />
                   Commit Changes
                 </>
               )}
