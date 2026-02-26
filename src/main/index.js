@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { app, shell, BrowserWindow, Notification, ipcMain, session } from 'electron'
 import { join } from 'path'
+import { tmpdir } from 'os'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { autoUpdater } from 'electron-updater'
@@ -11,6 +12,12 @@ app.commandLine.appendSwitch('ignore-certificate-errors')
 
 // Disable hardware acceleration on all platforms for better compatibility
 app.disableHardwareAcceleration()
+
+// Fix: Redirect GPU/shader disk cache to a writable temp directory to avoid
+// "Unable to move/create cache: Access is denied (0x5)" errors on Windows.
+const gpuCachePath = join(tmpdir(), 'taskmatrix-gpu-cache')
+app.commandLine.appendSwitch('gpu-disk-cache-dir', gpuCachePath)
+app.commandLine.appendSwitch('disk-cache-dir', join(tmpdir(), 'taskmatrix-disk-cache'))
 
 // Additional flags for better Linux support
 app.commandLine.appendSwitch('no-sandbox')
