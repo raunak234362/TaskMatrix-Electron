@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { formatSeconds } from "../../utils/timeUtils";
 import {
   Loader2,
   AlertCircle,
@@ -81,6 +82,22 @@ const GetProjectById = ({ id, onClose }) => {
       overrunStr: formatSecondsToHHMM(Math.max(0, totalSeconds - (assigned * 3600)))
     };
   }, [project, projectTasks]);
+
+  // Group "others" wbsType tasks by their projectBundle.bundleKey
+  const otherTasksByBundle = useMemo(() => {
+    const grouped = {};
+    projectTasks.forEach((task) => {
+      if (String(task.wbsType || "").toLowerCase() !== "others") return;
+      const key =
+        task.projectBundle?.bundleKey ||
+        task.projectBundle?.bundle?.bundleKey ||
+        task.bundleKey ||
+        "Uncategorised";
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(task);
+    });
+    return grouped;
+  }, [projectTasks]);
 
   const rfiData = useMemo(() => {
     return project?.rfi || [];
@@ -236,7 +253,7 @@ const GetProjectById = ({ id, onClose }) => {
                 <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border-1 border-black bg-blue-400 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
                   <div className="flex items-center gap-3 mb-6 text-black">
                     <Clock size={20} strokeWidth={3} />
-                    <span className="text-sm font-black uppercase tracking-widest opacity-60">Hours Assigned</span>
+                    <span className="text-sm font-black uppercase tracking-widest opacity-60">Hours Estimated</span>
                   </div>
                   <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned}h</h3>
                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
@@ -268,6 +285,130 @@ const GetProjectById = ({ id, onClose }) => {
               <div className="bg-white rounded-3xl border-1 border-slate-50 p-6">
                 <ProjectMilestoneMetrics projectId={id} />
               </div>
+
+              {/* ✅ Other Tasks — Logged Time (grouped by bundleKey) */}
+              {Object.keys(otherTasksByBundle).length > 0 && (
+                <div className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                  {/* Section header */}
+                  <div className="px-5 py-3 bg-slate-50 border-b border-gray-200 flex items-center gap-2">
+                    <ClipboardList className="w-4 h-4 text-slate-500" />
+                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-700">
+                      Other Tasks &mdash; Logged Time
+                    </h4>
+                    <span className="ml-auto text-[10px] text-slate-400 font-semibold uppercase tracking-widest">
+                      {Object.values(otherTasksByBundle).reduce((s, t) => s + t.length, 0)} tasks
+                    </span>
+                  </div>
+
+                  {/* Grouped by bundleKey */}
+                  <div className="divide-y divide-gray-100">
+                    {Object.entries(otherTasksByBundle).map(([bundleKey, tasks]) => {
+                      const bundleTotalSeconds = tasks.reduce(
+                        (sum, t) =>
+                          sum +
+                          (t.workingHourTask || []).reduce(
+                            (s, w) => s + (w.duration_seconds || 0),
+                            0,
+                          ),
+                        0,
+                      );
+
+                      const statusMap = {
+                        completed: "bg-green-100 text-green-700 border-green-200",
+                        complete: "bg-green-100 text-green-700 border-green-200",
+                        validate_complete: "bg-green-100 text-green-700 border-green-200",
+                        complete_other: "bg-green-100 text-green-700 border-green-200",
+                        assigned: "bg-blue-100 text-blue-700 border-blue-200",
+                        in_progress: "bg-yellow-100 text-yellow-700 border-yellow-200",
+                        rework: "bg-orange-100 text-orange-700 border-orange-200",
+                      };
+
+                      return (
+                        <div key={bundleKey}>
+                          {/* Bundle key header row */}
+                          <div className="flex items-center gap-3 px-5 py-2 bg-slate-50/80 border-b border-gray-100">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#6bbd45] shrink-0" />
+                            <span className="flex-1 text-xs font-black uppercase tracking-widest text-slate-600">
+                              {bundleKey}
+                            </span>
+                            <span className="text-xs font-bold text-slate-500">
+                              {tasks.length} task{tasks.length !== 1 ? "s" : ""}
+                            </span>
+                            <span className="text-xs font-black text-[#3a8a1a] min-w-[52px] text-right">
+                              {formatSeconds(bundleTotalSeconds)}
+                            </span>
+                          </div>
+
+                          {/* Task rows */}
+                          <div className="divide-y divide-gray-50">
+                            {tasks.map((task, idx) => {
+                              const assignee = task.user
+                                ? `${task.user.firstName || ""} ${task.user.lastName || ""}`.trim()
+                                : task.assignedTo
+                                  ? `${task.assignedTo.firstName || ""} ${task.assignedTo.lastName || ""}`.trim()
+                                  : "Unassigned";
+
+                              const initials = assignee
+                                .split(" ")
+                                .filter(Boolean)
+                                .map((n) => n[0])
+                                .slice(0, 2)
+                                .join("")
+                                .toUpperCase();
+
+                              const taskSeconds = (task.workingHourTask || []).reduce(
+                                (s, w) => s + (w.duration_seconds || 0),
+                                0,
+                              );
+
+                              const sc =
+                                statusMap[(task.status || "").toLowerCase()] ||
+                                "bg-gray-100 text-gray-500 border-gray-200";
+
+                              return (
+                                <div
+                                  key={task.id || idx}
+                                  className="flex items-center gap-3 px-5 py-2.5 bg-white hover:bg-slate-50 transition-colors"
+                                >
+                                  {/* Avatar */}
+                                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center text-[10px] font-black text-white shrink-0">
+                                    {initials || "?"}
+                                  </div>
+
+                                  {/* Assignee + task name */}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-bold text-gray-800 truncate leading-tight">
+                                      {assignee}
+                                    </p>
+                                    <p className="text-[10px] text-gray-400 truncate leading-tight mt-0.5">
+                                      {task.name || task.title || `Task #${idx + 1}`}
+                                    </p>
+                                  </div>
+
+                                  {/* Status badge */}
+                                  <span
+                                    className={`text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wide shrink-0 ${sc}`}
+                                  >
+                                    {task.status || "—"}
+                                  </span>
+
+                                  {/* Logged time */}
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    <Clock className="w-3 h-3 text-gray-400" />
+                                    <span className="text-xs font-black text-gray-700 min-w-[42px] text-right">
+                                      {taskSeconds > 0 ? formatSeconds(taskSeconds) : "—"}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Timeline Overview & Project Status */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

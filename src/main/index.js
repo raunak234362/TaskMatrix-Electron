@@ -23,6 +23,12 @@ app.commandLine.appendSwitch('disk-cache-dir', join(tmpdir(), 'taskmatrix-disk-c
 app.commandLine.appendSwitch('no-sandbox')
 app.commandLine.appendSwitch('disable-dev-shm-usage')
 
+// CRITICAL for Windows: Set App User Model ID BEFORE app.whenReady()
+// Without this, Windows 10/11 will NOT show notifications in the Action Center.
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.taskmatrix.wbt')
+}
+
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -56,23 +62,75 @@ function createWindow() {
   }
 }
 
-// Handle notifications from renderer
-ipcMain.on('show-notification', (event, { title, body }) => {
-  const notification = new Notification({
-    title,
-    body,
-    icon: join(__dirname, '../../resources/icon.png') // Adjust icon path if needed
-  })
-  notification.show()
+// ─── DESKTOP NOTIFICATION HANDLER ───────────────────────────────────────────
+// Uses ipcMain.handle so the renderer can use invoke() and catch errors.
+// The handler is registered here (outside whenReady) so it is always ready.
+ipcMain.handle('show-notification', async (event, data) => {
+  try {
+    console.log('🔔 [main] show-notification IPC received:', data)
+
+    const title = data?.title || 'TaskMatrix'
+    const body = data?.body || ''
+
+    if (!Notification.isSupported()) {
+      console.warn('[main] Notifications not supported on this platform')
+      return { success: false, reason: 'not_supported' }
+    }
+
+    const notification = new Notification({
+      title,
+      body,
+      icon: join(__dirname, '../../resources/icon.png'),
+      silent: false
+    })
+
+    // When user clicks the desktop notification → restore and focus the app
+    notification.on('click', () => {
+      console.log('🔔 [main] Notification clicked — restoring window')
+      const allWindows = BrowserWindow.getAllWindows()
+      if (allWindows.length > 0) {
+        const win = allWindows[0]
+        if (win.isMinimized()) win.restore()
+        win.show()
+        win.focus()
+      }
+    })
+
+    notification.on('show', () => {
+      console.log('✅ [main] Notification shown successfully')
+    })
+
+    notification.on('failed', (e, err) => {
+      console.error('❌ [main] Notification failed:', err)
+    })
+
+    notification.show()
+    return { success: true }
+  } catch (err) {
+    console.error('❌ [main] show-notification error:', err)
+    return { success: false, reason: err.message }
+  }
 })
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  // Set app user model id for Windows
-  electronApp.setAppUserModelId('taskmatrix-wbt')
+  // Set app user model id for Windows — must match the ID set before app.whenReady()
+  electronApp.setAppUserModelId('com.taskmatrix.wbt')
 
+  // Test: fire a notification immediately on startup to confirm desktop notifications work
+  if (Notification.isSupported()) {
+    setTimeout(() => {
+      const testNotif = new Notification({
+        title: 'TaskMatrix — Notifications Active ✅',
+        body: 'Desktop notifications are working. You will receive alerts even when minimized.',
+        icon: join(__dirname, '../../resources/icon.png'),
+        silent: true
+      })
+      testNotif.show()
+    }, 3000) // delay 3s so window is fully loaded
+  }
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils

@@ -46,19 +46,23 @@ const useNotifications = () => {
           renotify: true
         }
 
-        // 1. Browser/System Notification
-        if ('Notification' in window && Notification.permission === 'granted') {
-          try {
-            if ('serviceWorker' in navigator) {
-              navigator.serviceWorker.ready.then((registration) => {
-                registration.showNotification(title, options)
-              })
-            } else {
-              new Notification(title, options)
-            }
-          } catch (err) {
-            console.error('Notification error:', err)
+        // 1. Native OS Desktop Notification via Electron IPC
+        // This fires a real system notification that appears even when the app is minimized.
+        try {
+          if (window?.electron?.ipcRenderer) {
+            window.electron.ipcRenderer.invoke('show-notification', {
+              title,
+              body: msg.content
+            }).then((result) => {
+              console.log('[useNotifications] Desktop notification result:', result)
+            }).catch((err) => {
+              console.error('[useNotifications] invoke error:', err)
+            })
+          } else {
+            console.warn('[useNotifications] window.electron.ipcRenderer not available')
           }
+        } catch (err) {
+          console.error('[useNotifications] Failed to send desktop notification:', err)
         }
 
         // 2. In-app Toast Notification
