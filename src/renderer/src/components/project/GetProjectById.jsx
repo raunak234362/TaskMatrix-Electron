@@ -19,6 +19,7 @@ import Button from "../fields/Button";
 import AllMileStone from "./mileStone/AllMileStone";
 import AllDocument from "./projectDocument/AllDocument";
 import WBS from "./wbs/WBS";
+import WbsBreakdownPanel from "./wbs/WbsBreakdownPanel";
 import AllRFI from "../rfi/AllRfi";
 import AddRFI from "../rfi/AddRFI";
 import AllSubmittals from "../submittals/AllSubmittals";
@@ -31,6 +32,7 @@ import AddCO from "../co/AddCO";
 import CoTable from "../co/CoTable";
 import ProjectAnalyticsDashboard from "./ProjectAnalyticsDashboard";
 import ProjectMilestoneMetrics from "./mileStone/ProjectMilestoneMetrics";
+import TeamsAnalytics from "./TeamsAnalytics";
 
 const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);
@@ -97,6 +99,90 @@ const GetProjectById = ({ id, onClose }) => {
       grouped[key].push(task);
     });
     return grouped;
+  }, [projectTasks]);
+
+  // Alias map: every possible API spelling → canonical category key
+  // Handles: single/double-l (modeling/modelling), spaces, hyphens, mixed case
+  const WBS_TYPE_ALIAS = {
+    // Modelling
+    "modeling": "modelling",
+    "modelling": "modelling",
+    // Modelling Checking
+    "modeling_checking": "modelling_checking",
+    "modelling_checking": "modelling_checking",
+    "modeling checking": "modelling_checking",
+    "modelling checking": "modelling_checking",
+    "modeling-checking": "modelling_checking",
+    "modelling-checking": "modelling_checking",
+    "modelingchecking": "modelling_checking",
+    "modellingchecking": "modelling_checking",
+    // Detailing
+    "detailing": "detailing",
+    // Detailing Checking
+    "detailing_checking": "detailing_checking",
+    "detailing checking": "detailing_checking",
+    "detailing-checking": "detailing_checking",
+    "detailingchecking": "detailing_checking",
+    // Erection
+    "erection": "erection",
+    "erection_plan": "erection",
+    // Erection Checking
+    "erection_checking": "erection_checking",
+    "erection checking": "erection_checking",
+    "erection-checking": "erection_checking",
+    "erectionchecking": "erection_checking",
+    // Others
+    "others": "others",
+    "other": "others",
+  };
+
+  const normaliseWbsType = (raw) => {
+    if (!raw) return "others";
+    // Collapse whitespace & lowercase
+    const key = String(raw).toLowerCase().trim().replace(/\s+/g, " ");
+    return WBS_TYPE_ALIAS[key] ?? "others";
+  };
+
+  const wbsTasksByBundle = useMemo(() => {
+    const grouped = {};
+    projectTasks.forEach((task) => {
+      const bundleKey =
+        task.projectBundle?.bundleKey ||
+        task.projectBundle?.bundle?.bundleKey ||
+        task.bundleKey ||
+        "Uncategorised";
+      if (!grouped[bundleKey]) grouped[bundleKey] = {};
+
+      const typeKey = normaliseWbsType(task.wbsType);
+
+      if (!grouped[bundleKey][typeKey]) grouped[bundleKey][typeKey] = [];
+      grouped[bundleKey][typeKey].push(task);
+    });
+    return grouped;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectTasks]);
+
+  // Aggregate total seconds for primary WBS categories across the entire project
+  const wbsCategoryTotals = useMemo(() => {
+    const totals = {
+      modelling: 0,
+      modelling_checking: 0,
+      detailing: 0,
+      detailing_checking: 0,
+      erection: 0,
+      erection_checking: 0,
+    };
+
+    projectTasks.forEach((task) => {
+      const typeKey = normaliseWbsType(task.wbsType);
+      if (totals[typeKey] !== undefined) {
+        const taskSeconds = (task.workingHourTask || []).reduce((s, w) => s + (w.duration_seconds || 0), 0);
+        totals[typeKey] += taskSeconds;
+      }
+    });
+
+    return totals;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectTasks]);
 
   const rfiData = useMemo(() => {
@@ -208,6 +294,7 @@ const GetProjectById = ({ id, onClose }) => {
               {[
                 { key: "overview", label: "Overview", icon: ClipboardList },
                 { key: "analytics", label: "Analytics", icon: TrendingUp },
+                { key: "teamAnalytics", label: "Team Analytics", icon: Users },
                 { key: "details", label: "Details", icon: FileText },
                 { key: "files", label: "Files", icon: FolderOpenDot },
                 { key: "wbs", label: "WBS", icon: ClipboardList },
@@ -223,7 +310,7 @@ const GetProjectById = ({ id, onClose }) => {
                   (tab) =>
                     !(
                       userRole === "staff" &&
-                      ["wbs", "changeOrder", "milestones", "analytics", "CDrfi", "CDsubmittals"].includes(tab.key)
+                      ["wbs", "changeOrder", "milestones", "analytics", "teamAnalytics", "CDrfi", "CDsubmittals"].includes(tab.key)
                     )
                 )
                 .map(({ key, label, icon: TabIcon }) => (
@@ -410,6 +497,37 @@ const GetProjectById = ({ id, onClose }) => {
                 </div>
               )}
 
+              {/* ✅ Core WBS Categories — Total Time Overview */}
+              <div className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm bg-white">
+                <div className="px-5 py-3 bg-slate-50 border-b border-gray-200 flex items-center gap-2">
+                  <ClipboardList className="w-4 h-4 text-slate-500" />
+                  <h4 className="text-xs font-black uppercase tracking-widest text-slate-700">
+                    Primary WBS &mdash; Total Logged Time
+                  </h4>
+                </div>
+                <div className="grid grid-cols-2 lg:grid-cols-6 divide-x divide-y lg:divide-y-0 divide-gray-100">
+                  {[
+                    { key: "modelling", label: "Modelling", color: "text-blue-600", bg: "bg-blue-50" },
+                    { key: "modelling_checking", label: "Modeling C.", color: "text-violet-600", bg: "bg-violet-50" },
+                    { key: "detailing", label: "Detailing", color: "text-cyan-600", bg: "bg-cyan-50" },
+                    { key: "detailing_checking", label: "Detailing C.", color: "text-fuchsia-600", bg: "bg-fuchsia-50" },
+                    { key: "erection", label: "Erection", color: "text-amber-600", bg: "bg-amber-50" },
+                    { key: "erection_checking", label: "Erection C.", color: "text-orange-600", bg: "bg-orange-50" },
+                  ].map((cat) => (
+                    <div key={cat.key} className="p-4 flex flex-col items-center justify-center text-center hover:bg-slate-50 transition-colors">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 truncate w-full">
+                        {cat.label}
+                      </span>
+                      <div className={`px-3 py-1.5 rounded-xl ${cat.bg}`}>
+                        <span className={`text-sm font-black ${cat.color}`}>
+                          {wbsCategoryTotals[cat.key] > 0 ? formatSeconds(wbsCategoryTotals[cat.key]) : "00:00"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Timeline Overview & Project Status */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="bg-white p-8 rounded-2xl border-2 border-slate-50 shadow-sm hover:shadow-md transition-all">
@@ -579,8 +697,9 @@ const GetProjectById = ({ id, onClose }) => {
           {/* ✅ Notes */}
           {activeTab === "notes" && <AllNotes projectId={id} />}
           {activeTab === "wbs" && userRole !== "staff" && (
-            <div className="text-gray-700 italic text-center">
+            <div className="space-y-6">
               <WBS id={id} stage={project.stage || ""} />
+              <WbsBreakdownPanel wbsTasksByBundle={wbsTasksByBundle} />
             </div>
           )}
           {activeTab === "rfi" && (
@@ -835,6 +954,13 @@ const GetProjectById = ({ id, onClose }) => {
           {activeTab === "analytics" && (
             <ProjectAnalyticsDashboard projectId={id} />
           )}
+          {activeTab === "teamAnalytics" && (
+            <TeamsAnalytics
+              projectId={id}
+              managerId={project.managerID}
+              tasks={projectTasks}
+            />
+          )}
         </div>
       </div >
       {editModel && (
@@ -852,6 +978,10 @@ const GetProjectById = ({ id, onClose }) => {
   );
 };
 
+/* ─────────────────────────────────────────────
+   WBS Breakdown Panel imported above
+───────────────────────────────────────────── */
+
 // ✅ InfoRow Component
 const InfoRow = ({
   label,
@@ -866,7 +996,7 @@ const InfoRow = ({
 // ✅ ScopeTag Component
 const ScopeTag = ({ label, active }) => (
   <span
-    className={`px-4 py-1.5 text-xs font-black uppercase tracking-widest rounded-full border border-black ${active
+    className={`px-4 py-1.5 text-sm font-black uppercase tracking-widest rounded-full border border-black ${active
       ? "bg-green-100 text-black shadow-sm"
       : "bg-gray-100 text-black/50"
       }`}

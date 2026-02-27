@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client'
 
-const baseURL = import.meta.env.VITE_SOCKET_URL || 'http://192.168.1.26:5156/v1/'
-// const baseURL = import.meta.env.VITE_SOCKET_URL || 'https://project-station.whiteboardtec.com:5160'
+// const baseURL = import.meta.env.VITE_SOCKET_URL || 'http://192.168.1.26:5156/v1/'
+const baseURL = import.meta.env.VITE_SOCKET_URL || 'https://project-station.whiteboardtec.com:5160'
 console.log('Socket Base URL:', baseURL)
 
 const socket = io(baseURL, {

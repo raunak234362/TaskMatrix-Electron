@@ -262,7 +262,7 @@ const DetailCell = ({ label, value }) => (
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-const GetEmployeeByID = ({ id }) => {
+const GetEmployeeByID = ({ id, onClose }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -434,17 +434,6 @@ const GetEmployeeByID = ({ id }) => {
 
         {/* Right: action buttons */}
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          {/* {employee?.role !== "CLIENT" &&
-            employee?.role !== "CLIENT_ADMIN" &&
-            employee?.role !== "CLIENT_PROJECT_COORDINATOR" &&
-            employee?.role !== "CLIENT_GENERAL_CONSTRUCTOR" && (
-              <Button
-                onClick={() => handleModel(employee)}
-                className="flex items-center gap-2 px-5 py-2.5 bg-[#6bbd45] text-white rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-[#5aad35] transition-all shadow-sm"
-              >
-                Update Employee
-              </Button>
-            )} */}
           {userRole === "admin" && (
             <>
               <Button
@@ -453,10 +442,15 @@ const GetEmployeeByID = ({ id }) => {
               >
                 Edit Profile
               </Button>
-              {/* <Button className="flex items-center gap-2 px-5 py-2.5 bg-red-50 border border-red-100 rounded-xl text-red-500 font-black text-[11px] uppercase tracking-widest hover:bg-red-100 transition-all shadow-sm">
-                Archive
-              </Button> */}
             </>
+          )}
+          {onClose && (
+            <Button
+              onClick={onClose}
+              className="flex items-center gap-2 px-5 py-2.5 bg-black text-white border border-black/10 rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-black/80 transition-all shadow-sm"
+            >
+              Close
+            </Button>
           )}
         </div>
       </div>
