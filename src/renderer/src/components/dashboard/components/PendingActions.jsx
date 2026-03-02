@@ -19,6 +19,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
       subtitle: 'New RFI',
       subcount: dashboardStats?.newRFI || 0,
       icon: FileText,
+      hidden: userRole?.toUpperCase() === 'PROJECT_MANAGER_OFFICER'
     },
     {
       title: 'Submittals',
@@ -44,7 +45,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className={`grid grid-cols-1 sm:grid-cols-2 ${actions.length > 2 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-4`}>
         {actions.map((action) => {
           return (
             <div
