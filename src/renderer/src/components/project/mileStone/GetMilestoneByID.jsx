@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Loader2,
   Calendar,
@@ -9,26 +9,32 @@ import {
   ClipboardList,
   User,
   Tag,
-  X,
-  MessageSquare,
+  Edit,
+  Plus,
 } from "lucide-react";
 import Service from "../../../api/Service";
 import { toast } from "react-toastify";
 import { Button } from "../../ui/button";
+import EditMileStone from "./EditMileStone";
+import UpdateCompletionPer from "./UpdateCompletionPer";
 import DataTable from "../../ui/table";
 import MilestoneResponseModal from "./MilestoneResponseModal";
 import MilestoneResponseDetailsModal from "./MilestoneResponseDetailsModal";
-
-
-
+import { formatDateTime } from "../../../utils/dateUtils";
 
 const GetMilestoneByID = ({ row, close }) => {
   const [milestone, setMilestone] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isUpdateProgressModalOpen, setIsUpdateProgressModalOpen] =
+    useState(false);
   const [showResponseModal, setShowResponseModal] = useState(false);
   const [selectedResponse, setSelectedResponse] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const id = row?.id;
-  const userRole = sessionStorage.getItem("userRole")?.toUpperCase() || "";
+  const userRole = sessionStorage.getItem("userRole");
 
   const fetchMilestone = async () => {
     if (!id) return;
@@ -48,6 +54,21 @@ const GetMilestoneByID = ({ row, close }) => {
     fetchMilestone();
   }, [id]);
 
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      await Service.DeleteMilestoneById(id.toString());
+      toast.success("Milestone deleted successfully");
+      close();
+    } catch (error) {
+      console.error("Delete failed:", error);
+      toast.error("Failed to delete milestone");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "—";
     return new Intl.DateTimeFormat("en-IN", {
@@ -58,19 +79,96 @@ const GetMilestoneByID = ({ row, close }) => {
   };
 
   const getStatusConfig = (status) => {
-    return {
-      label: status || "PENDING",
-      bg: "bg-emerald-50",
-      text: "text-black",
-      border: "border-black",
+    const configs = {
+      APPROVED: {
+        label: "Approved",
+        bg: "bg-emerald-100",
+        text: "text-emerald-700",
+        border: "border-emerald-300",
+      },
+      PENDING: {
+        label: "Pending",
+        bg: "bg-yellow-100",
+        text: "text-yellow-700",
+        border: "border-yellow-300",
+      },
+      REJECTED: {
+        label: "Rejected",
+        bg: "bg-red-100",
+        text: "text-red-700",
+        border: "border-red-300",
+      },
     };
+    return (
+      configs[status?.toUpperCase() || ""] || {
+        label: status || "Unknown",
+        bg: "bg-gray-100",
+        text: "text-gray-700",
+        border: "border-gray-300",
+      }
+    );
   };
+
+  const responseColumns = [
+    {
+      accessorKey: "description",
+      header: "Message",
+      cell: ({ row }) => {
+        const plainText =
+          row.original.description?.replace(/<[^>]*>?/gm, "") || "";
+        return (
+          <p className="truncate max-w-[300px] text-xs sm:text-sm">
+            {plainText}
+          </p>
+        );
+      },
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <span
+          className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-tight border ${row.original.status === "APPROVED"
+              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+              : row.original.status === "REJECTED"
+                ? "bg-red-50 text-red-700 border-red-200"
+                : "bg-gray-50 text-gray-700 border-gray-200"
+            }`}
+        >
+          {row.original.status}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "files",
+      header: "Files",
+      cell: ({ row }) => {
+        const count = row.original.files?.length ?? 0;
+        return count > 0 ? (
+          <span className="text-black font-medium text-xs">
+            {count} file(s)
+          </span>
+        ) : (
+          <span className="text-gray-300">—</span>
+        );
+      },
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Date",
+      cell: ({ row }) => (
+        <span className="text-gray-500 text-[10px] sm:text-xs">
+          {formatDateTime(row.original.createdAt)}
+        </span>
+      ),
+    },
+  ];
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex flex-col items-center">
-          <Loader2 className="w-10 h-10 animate-spin text-[#6bbd45]" />
+          <Loader2 className="w-10 h-10 animate-spin text-green-600" />
           <p className="mt-4 text-sm font-medium text-gray-700">
             Loading milestone details...
           </p>
@@ -93,7 +191,7 @@ const GetMilestoneByID = ({ row, close }) => {
         </p>
         <Button
           onClick={close}
-          className="mt-6 px-6 py-2 bg-[#6bbd45] text-white hover:bg-[#6bbd45]/90 transition"
+          className="mt-6 px-6 py-2 bg-green-600 text-white hover:bg-green-700 transition"
         >
           Go Back
         </Button>
@@ -103,88 +201,55 @@ const GetMilestoneByID = ({ row, close }) => {
 
   const statusConfig = getStatusConfig(milestone.status);
 
-  const responseColumns = [
-    {
-      accessorKey: "userRole",
-      header: "From",
-      cell: ({ row }) => {
-        const role = row.original.userRole?.toUpperCase() === "CLIENT" ? "Client" : "Team";
-        return (
-          <span className="font-bold text-gray-900 text-sm">
-            {role}
-          </span>
-        );
-      }
-    },
-    {
-      accessorKey: "description",
-      header: "Message",
-      cell: ({ row }) => {
-        const plainText =
-          row.original.description?.replace(/<[^>]*>?/gm, "") || "No message";
-        return (
-          <div className="flex flex-col max-w-[200px]">
-            <p className="truncate text-sm font-bold text-gray-700">{plainText}</p>
-            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-              {row.original.files?.length || 0} Attachments
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Created",
-      cell: ({ row }) => (
-        <span className="text-gray-500 text-xs font-bold uppercase tracking-widest leading-none">
-          {new Date(row.original.createdAt).toLocaleDateString("en-IN", {
-            day: '2-digit',
-            month: 'short'
-          })}
-          <br />
-          <span className="text-[10px] opacity-60">
-            {new Date(row.original.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </span>
-        </span>
-      ),
-    }
-  ];
-
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-none border-none">
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
       {/* Header */}
-      <div className="bg-white border-b-2 border-slate-100 px-6 py-5 flex justify-between items-center relative">
-        <div className="flex items-center gap-4">
-          <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center justify-center">
-            <CheckCircle2 className="w-7 h-7 text-[#6bbd45]" strokeWidth={3} />
+      <div className=" px-6 py-4 border-b flex justify-between items-center bg-gray-50/30">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-green-100 rounded-lg">
+            <CheckCircle2 className="w-6 h-6 text-green-700" />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-black uppercase tracking-tight leading-tight">
+            <h2 className="text-xl font-bold text-black leading-tight">
               {milestone.subject}
             </h2>
-            <p className="text-black/40 text-[11px] font-black uppercase tracking-widest mt-1">
-              ID: #{milestone.id} — Version: {milestone.versionId || "1.0"}
-            </p>
           </div>
         </div>
-        <button
-          onClick={close}
-          className="p-2.5 hover:bg-slate-50 text-slate-400 hover:text-black transition-all rounded-xl border-2 border-transparent hover:border-slate-100"
-        >
-          <X className="w-6 h-6" strokeWidth={3} />
-        </button>
+        <div className="flex items-center gap-2">
+          {userRole !== "CLIENT" && userRole !== "CLIENT_ADMIN" && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsUpdateProgressModalOpen(true)}
+                className="text-black border border-black bg-white hover:bg-green-50 flex items-center gap-2 h-9"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                Update Progress
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditModalOpen(true)}
+                className="text-black border border-black bg-white hover:bg-green-50 flex items-center gap-2 h-9"
+              >
+                <Edit className="w-4 h-4" />
+                Edit
+              </Button>
+            </>
+          )}
+          <button
+            onClick={close}
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+          >
+            Close
+          </button>
+        </div>
       </div>
 
       <div className="p-6 space-y-8">
         {/* Info Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <InfoCard
-            icon={<Calendar className="w-5 h-5" />}
-            label="Target Date"
-            value={formatDate(milestone.date)}
-            color="text-[#6bbd45]"
-            bg="bg-[#6bbd45]/15"
-          />
           <InfoCard
             icon={<Calendar className="w-5 h-5" />}
             label="Approval Date"
@@ -195,16 +260,16 @@ const GetMilestoneByID = ({ row, close }) => {
           <InfoCard
             icon={<Clock className="w-5 h-5" />}
             label="Created At"
-            value={formatDate(milestone.createdAt)}
+            value={formatDate(milestone.date)}
             color="text-purple-600"
             bg="bg-purple-50"
           />
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-black text-black/40 uppercase tracking-widest">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
               Status
             </span>
             <div
-              className={`inline-flex items-center px-5 py-2 rounded-lg text-sm font-black uppercase tracking-widest border border-black ${statusConfig.bg} ${statusConfig.text} w-fit mt-1`}
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border-2 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border} w-fit mt-1`}
             >
               {statusConfig.label}
             </div>
@@ -213,121 +278,255 @@ const GetMilestoneByID = ({ row, close }) => {
             icon={<Tag className="w-5 h-5" />}
             label="Project"
             value={milestone.project?.name || "—"}
-            color="text-[#6bbd45]"
-            bg="bg-[#6bbd45]/15"
+            color="text-green-600"
+            bg="bg-green-50"
           />
-        </div>
+          <div className="flex flex-col gap-1 w-full col-span-1 md:col-span-2 lg:col-span-1">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Progress
+            </span>
+            <div className="mt-2 w-full">
+              {(() => {
+                const msTasks = milestone.Tasks || milestone.tasks || [];
+                const totalTasks = msTasks.length;
+                let taskProgress = 0;
 
-        {/* Description */}
-        <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
-          <h3 className="text-sm  text-gray-700 mb-3 flex items-center gap-2">
-            <FileText className="w-4 h-4 text-[#6bbd45]" />
-            Description
-          </h3>
-          <div
-            className="text-gray-700 text-sm leading-relaxed prose prose-sm max-w-none"
-            dangerouslySetInnerHTML={{
-              __html:
-                milestone.description ||
-                "No description provided for this milestone.",
-            }}
-          />
-        </div>
+                if (totalTasks > 0) {
+                  const completedStatuses = [
+                    "COMPLETE",
+                    "VALIDATE_COMPLETE",
+                    "COMPLETE_OTHER",
+                    "USER_FAULT",
+                    "COMPLETED",
+                  ];
+                  const completedCount = msTasks.filter((t) =>
+                    completedStatuses.includes(t.status),
+                  ).length;
+                  taskProgress = Math.round(
+                    (completedCount / totalTasks) * 100,
+                  );
+                }
 
-        {/* Tasks Section (Optional - if the API returns tasks) */}
-        {milestone.tasks && milestone.tasks.length > 0 && (
-          <div>
-            <h3 className="text-sm  text-gray-700 mb-4 flex items-center gap-2">
-              <ClipboardList className="w-4 h-4 text-[#6bbd45]" />
-              Associated Tasks ({milestone.tasks.length})
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {milestone.tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl hover:border-green-200 transition-colors shadow-sm"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#6bbd45]/15 flex items-center justify-center">
-                      <ClipboardList className="w-4 h-4 text-[#6bbd45]" />
+                const finalProgress =
+                  milestone.percentage !== undefined &&
+                    milestone.percentage !== null &&
+                    milestone.percentage !== ""
+                    ? Number(milestone.percentage)
+                    : milestone.completionPercentage !== undefined &&
+                      milestone.completionPercentage !== null
+                      ? Number(milestone.completionPercentage)
+                      : milestone.completeionPercentage !== undefined &&
+                        milestone.completeionPercentage !== null
+                        ? Number(milestone.completeionPercentage)
+                        : taskProgress;
+
+                return (
+                  <div className="flex flex-col gap-1">
+                    <div className="flex justify-between text-xs font-bold text-gray-700">
+                      <span>{finalProgress}%</span>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-700">
-                        {task.name}
-                      </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <User className="w-3 h-3 text-gray-400" />
-                        <span className="text-xs text-gray-700">
-                          {task.user
-                            ? `${task.user.firstName} ${task.user.lastName}`
-                            : "Unassigned"}
-                        </span>
-                      </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                      <div
+                        className="bg-green-600 h-2.5 rounded-full transition-all duration-500"
+                        style={{
+                          width: `${Math.min(100, Math.max(0, finalProgress))}%`,
+                        }}
+                      ></div>
                     </div>
                   </div>
-                  <span className="text-[10px]  px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 uppercase">
-                    {task.status}
-                  </span>
-                </div>
-              ))}
+                );
+              })()}
             </div>
           </div>
-        )}
+        </div>
 
-        {/* Responses Section */}
-        <div className="border-t border-gray-100 pt-8 mt-8">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-green-600" />
-              Responses & Discussion
-            </h3>
-
-            {(userRole === "ADMIN" ||
-              userRole === "DEPUTY_MANAGER" ||
-              userRole === "OPERATION_EXECUTIVE" ||
-              userRole === "USER") && (
-                <Button
-                  onClick={() => setShowResponseModal(true)}
-                  className="bg-green-200 text-black border-2 border-black font-black uppercase tracking-widest text-[11px] px-6 py-2.5 rounded-xl shadow-sm hover:bg-green-300 transition-all active:scale-95 flex items-center gap-2"
-                >
-                  <MessageSquare size={14} strokeWidth={3} />
-                  Add Response
-                </Button>
-              )}
-          </div>
-
-          <div className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
-            {milestone.responses?.length > 0 ? (
-              <DataTable
-                columns={responseColumns}
-                data={milestone.responses}
-                onRowClick={(row) => setSelectedResponse(row)}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left side: Description and tasks */}
+          <div className="space-y-8">
+            {/* Description */}
+            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 shadow-sm">
+              <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2 uppercase tracking-widest">
+                <FileText className="w-4 h-4 text-green-600" />
+                Description
+              </h3>
+              <div
+                className="text-gray-700 text-sm leading-relaxed prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    milestone.description ||
+                    "No description provided for this milestone.",
+                }}
               />
-            ) : (
-              <div className="p-8 text-center bg-gray-50/50">
-                <p className="text-gray-500 text-sm">No responses yet. Start the conversation!</p>
+            </div>
+
+            {milestone.reason && (
+              <div className="bg-red-50/50 rounded-2xl p-6 border border-red-100 shadow-sm">
+                <h3 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2 uppercase tracking-widest">
+                  Reason of Delay
+                </h3>
+                <p className="text-sm text-red-700 font-medium">
+                  {milestone.reason}
+                </p>
               </div>
             )}
+
+            {/* Tasks Section */}
+            {milestone.tasks && milestone.tasks.length > 0 && (
+              <div>
+                <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2 uppercase tracking-widest">
+                  <ClipboardList className="w-4 h-4 text-green-600" />
+                  Associated Tasks ({milestone.tasks.length})
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {milestone.tasks.map((task) => (
+                    <div
+                      key={task.id}
+                      className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl hover:border-green-200 transition-all shadow-sm group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center group-hover:bg-green-100 transition-colors">
+                          <ClipboardList className="w-4 h-4 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-gray-700">
+                            {task.name}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <User className="w-3 h-3 text-gray-400" />
+                            <span className="text-[10px] text-gray-500 font-medium">
+                              {task.user
+                                ? `${task.user.firstName} ${task.user.lastName}`
+                                : "Unassigned"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-black  px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 uppercase tracking-tighter">
+                        {task.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right side: Responses */}
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2 uppercase tracking-widest">
+                Responses
+              </h3>
+              <Button
+                onClick={() => setShowResponseModal(true)}
+                size="sm"
+                className="bg-green-600 text-white rounded-xl flex items-center gap-2 h-9 text-xs font-bold px-4"
+              >
+                <Plus className="w-4 h-4" />
+                Add Response
+              </Button>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              {milestone.responses && milestone.responses.length > 0 ? (
+                <DataTable
+                  columns={responseColumns}
+                  data={milestone.responses}
+                  onRowClick={(row) => setSelectedResponse(row)}
+                />
+              ) : (
+                <div className="p-8 text-center text-gray-400 text-sm italic">
+                  No responses yet.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Modals */}
+      {/* Edit Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-2xl h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <EditMileStone
+              milestoneId={id.toString()}
+              mileStoneVersionId={milestone.currentVersionId}
+              onClose={() => setIsEditModalOpen(false)}
+              onSuccess={() => {
+                fetchMilestone();
+                setIsEditModalOpen(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Update Progress Modal */}
+      {isUpdateProgressModalOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg h-auto bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <UpdateCompletionPer
+              milestoneId={id.toString()}
+              onClose={() => setIsUpdateProgressModalOpen(false)}
+              onSuccess={() => {
+                fetchMilestone();
+                setIsUpdateProgressModalOpen(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Response Modal */}
       {showResponseModal && (
         <MilestoneResponseModal
-          milestoneId={milestone.id}
-          versionId={milestone.versionId}
+          milestoneId={id.toString()}
           onClose={() => setShowResponseModal(false)}
           onSuccess={fetchMilestone}
         />
       )}
 
+      {/* Response Details Modal */}
       {selectedResponse && (
         <MilestoneResponseDetailsModal
           response={selectedResponse}
           onClose={() => setSelectedResponse(null)}
           onSuccess={fetchMilestone}
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-in fade-in zoom-in duration-200 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <h3 className="text-xl font-black text-black uppercase tracking-tight mb-2">
+              Delete Milestone
+            </h3>
+            <p className="text-sm text-gray-500 mb-8">
+              Are you sure you want to delete this milestone? This action cannot
+              be undone.
+            </p>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 bg-gray-100 text-gray-700 rounded-xl font-bold uppercase tracking-tight h-12"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                variant="destructive"
+                className="flex-1 rounded-xl font-bold uppercase tracking-tight h-12 shadow-md"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -341,12 +540,12 @@ const InfoCard = ({
   bg,
 }) => (
   <div className="flex flex-col gap-1">
-    <span className="text-[10px] font-black text-black/40 uppercase tracking-widest leading-none mb-1">
+    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
       {label}
     </span>
-    <div className="flex items-center gap-3">
-      <div className={`p-2.5 ${bg} ${color} rounded-xl border border-black/5`}>{icon}</div>
-      <span className="text-[15px] font-black text-black tracking-tight">{value}</span>
+    <div className="flex items-center gap-2 mt-1">
+      <div className={`p-2 ${bg} ${color} rounded-xl shadow-sm`}>{icon}</div>
+      <span className="text-sm font-bold text-gray-800">{value}</span>
     </div>
   </div>
 );
