@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { formatSeconds } from "../../utils/timeUtils";
 import {
   Loader2,
   AlertCircle,
@@ -18,6 +19,7 @@ import Button from "../fields/Button";
 import AllMileStone from "./mileStone/AllMileStone";
 import AllDocument from "./projectDocument/AllDocument";
 import WBS from "./wbs/WBS";
+import WbsBreakdownPanel from "./wbs/WbsBreakdownPanel";
 import AllRFI from "../rfi/AllRfi";
 import AddRFI from "../rfi/AddRFI";
 import AllSubmittals from "../submittals/AllSubmittals";
@@ -30,6 +32,7 @@ import AddCO from "../co/AddCO";
 import CoTable from "../co/CoTable";
 import ProjectAnalyticsDashboard from "./ProjectAnalyticsDashboard";
 import ProjectMilestoneMetrics from "./mileStone/ProjectMilestoneMetrics";
+import TeamsAnalytics from "./TeamsAnalytics";
 
 const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);
@@ -81,6 +84,106 @@ const GetProjectById = ({ id, onClose }) => {
       overrunStr: formatSecondsToHHMM(Math.max(0, totalSeconds - (assigned * 3600)))
     };
   }, [project, projectTasks]);
+
+  // Group "others" wbsType tasks by their projectBundle.bundleKey
+  const otherTasksByBundle = useMemo(() => {
+    const grouped = {};
+    projectTasks.forEach((task) => {
+      if (String(task.wbsType || "").toLowerCase() !== "others") return;
+      const key =
+        task.projectBundle?.bundleKey ||
+        task.projectBundle?.bundle?.bundleKey ||
+        task.bundleKey ||
+        "Uncategorised";
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(task);
+    });
+    return grouped;
+  }, [projectTasks]);
+
+  // Alias map: every possible API spelling → canonical category key
+  // Handles: single/double-l (modeling/modelling), spaces, hyphens, mixed case
+  const WBS_TYPE_ALIAS = {
+    // Modelling
+    "modeling": "modelling",
+    "modelling": "modelling",
+    // Modelling Checking
+    "modeling_checking": "modelling_checking",
+    "modelling_checking": "modelling_checking",
+    "modeling checking": "modelling_checking",
+    "modelling checking": "modelling_checking",
+    "modeling-checking": "modelling_checking",
+    "modelling-checking": "modelling_checking",
+    "modelingchecking": "modelling_checking",
+    "modellingchecking": "modelling_checking",
+    // Detailing
+    "detailing": "detailing",
+    // Detailing Checking
+    "detailing_checking": "detailing_checking",
+    "detailing checking": "detailing_checking",
+    "detailing-checking": "detailing_checking",
+    "detailingchecking": "detailing_checking",
+    // Erection
+    "erection": "erection",
+    "erection_plan": "erection",
+    // Erection Checking
+    "erection_checking": "erection_checking",
+    "erection checking": "erection_checking",
+    "erection-checking": "erection_checking",
+    "erectionchecking": "erection_checking",
+    // Others
+    "others": "others",
+    "other": "others",
+  };
+
+  const normaliseWbsType = (raw) => {
+    if (!raw) return "others";
+    // Collapse whitespace & lowercase
+    const key = String(raw).toLowerCase().trim().replace(/\s+/g, " ");
+    return WBS_TYPE_ALIAS[key] ?? "others";
+  };
+
+  const wbsTasksByBundle = useMemo(() => {
+    const grouped = {};
+    projectTasks.forEach((task) => {
+      const bundleKey =
+        task.projectBundle?.bundleKey ||
+        task.projectBundle?.bundle?.bundleKey ||
+        task.bundleKey ||
+        "Uncategorised";
+      if (!grouped[bundleKey]) grouped[bundleKey] = {};
+
+      const typeKey = normaliseWbsType(task.wbsType);
+
+      if (!grouped[bundleKey][typeKey]) grouped[bundleKey][typeKey] = [];
+      grouped[bundleKey][typeKey].push(task);
+    });
+    return grouped;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectTasks]);
+
+  // Aggregate total seconds for primary WBS categories across the entire project
+  const wbsCategoryTotals = useMemo(() => {
+    const totals = {
+      modelling: 0,
+      modelling_checking: 0,
+      detailing: 0,
+      detailing_checking: 0,
+      erection: 0,
+      erection_checking: 0,
+    };
+
+    projectTasks.forEach((task) => {
+      const typeKey = normaliseWbsType(task.wbsType);
+      if (totals[typeKey] !== undefined) {
+        const taskSeconds = (task.workingHourTask || []).reduce((s, w) => s + (w.duration_seconds || 0), 0);
+        totals[typeKey] += taskSeconds;
+      }
+    });
+
+    return totals;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectTasks]);
 
   const rfiData = useMemo(() => {
     return project?.rfi || [];
@@ -191,6 +294,7 @@ const GetProjectById = ({ id, onClose }) => {
               {[
                 { key: "overview", label: "Overview", icon: ClipboardList },
                 { key: "analytics", label: "Analytics", icon: TrendingUp },
+                { key: "teamAnalytics", label: "Team Analytics", icon: Users },
                 { key: "details", label: "Details", icon: FileText },
                 { key: "files", label: "Files", icon: FolderOpenDot },
                 { key: "wbs", label: "WBS", icon: ClipboardList },
@@ -206,7 +310,7 @@ const GetProjectById = ({ id, onClose }) => {
                   (tab) =>
                     !(
                       userRole === "staff" &&
-                      ["wbs", "changeOrder", "milestones", "analytics", "CDrfi", "CDsubmittals"].includes(tab.key)
+                      ["wbs", "changeOrder", "milestones", "analytics", "teamAnalytics", "CDrfi", "CDsubmittals"].includes(tab.key)
                     )
                 )
                 .map(({ key, label, icon: TabIcon }) => (
@@ -236,7 +340,7 @@ const GetProjectById = ({ id, onClose }) => {
                 <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border-1 border-black bg-blue-400 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
                   <div className="flex items-center gap-3 mb-6 text-black">
                     <Clock size={20} strokeWidth={3} />
-                    <span className="text-sm font-black uppercase tracking-widest opacity-60">Hours Assigned</span>
+                    <span className="text-sm font-black uppercase tracking-widest opacity-60">Hours Estimated</span>
                   </div>
                   <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned}h</h3>
                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
@@ -267,6 +371,161 @@ const GetProjectById = ({ id, onClose }) => {
               {/* Progress and Milestones */}
               <div className="bg-white rounded-3xl border-1 border-slate-50 p-6">
                 <ProjectMilestoneMetrics projectId={id} />
+              </div>
+
+              {/* ✅ Other Tasks — Logged Time (grouped by bundleKey) */}
+              {Object.keys(otherTasksByBundle).length > 0 && (
+                <div className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                  {/* Section header */}
+                  <div className="px-5 py-3 bg-slate-50 border-b border-gray-200 flex items-center gap-2">
+                    <ClipboardList className="w-4 h-4 text-slate-500" />
+                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-700">
+                      Other Tasks &mdash; Logged Time
+                    </h4>
+                    <span className="ml-auto text-[10px] text-slate-400 font-semibold uppercase tracking-widest">
+                      {Object.values(otherTasksByBundle).reduce((s, t) => s + t.length, 0)} tasks
+                    </span>
+                  </div>
+
+                  {/* Grouped by bundleKey */}
+                  <div className="divide-y divide-gray-100">
+                    {Object.entries(otherTasksByBundle).map(([bundleKey, tasks]) => {
+                      const bundleTotalSeconds = tasks.reduce(
+                        (sum, t) =>
+                          sum +
+                          (t.workingHourTask || []).reduce(
+                            (s, w) => s + (w.duration_seconds || 0),
+                            0,
+                          ),
+                        0,
+                      );
+
+                      const statusMap = {
+                        completed: "bg-green-100 text-green-700 border-green-200",
+                        complete: "bg-green-100 text-green-700 border-green-200",
+                        validate_complete: "bg-green-100 text-green-700 border-green-200",
+                        complete_other: "bg-green-100 text-green-700 border-green-200",
+                        assigned: "bg-blue-100 text-blue-700 border-blue-200",
+                        in_progress: "bg-yellow-100 text-yellow-700 border-yellow-200",
+                        rework: "bg-orange-100 text-orange-700 border-orange-200",
+                      };
+
+                      return (
+                        <div key={bundleKey}>
+                          {/* Bundle key header row */}
+                          <div className="flex items-center gap-3 px-5 py-2 bg-slate-50/80 border-b border-gray-100">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#6bbd45] shrink-0" />
+                            <span className="flex-1 text-xs font-black uppercase tracking-widest text-slate-600">
+                              {bundleKey}
+                            </span>
+                            <span className="text-xs font-bold text-slate-500">
+                              {tasks.length} task{tasks.length !== 1 ? "s" : ""}
+                            </span>
+                            <span className="text-xs font-black text-[#3a8a1a] min-w-[52px] text-right">
+                              {formatSeconds(bundleTotalSeconds)}
+                            </span>
+                          </div>
+
+                          {/* Task rows */}
+                          <div className="divide-y divide-gray-50">
+                            {tasks.map((task, idx) => {
+                              const assignee = task.user
+                                ? `${task.user.firstName || ""} ${task.user.lastName || ""}`.trim()
+                                : task.assignedTo
+                                  ? `${task.assignedTo.firstName || ""} ${task.assignedTo.lastName || ""}`.trim()
+                                  : "Unassigned";
+
+                              const initials = assignee
+                                .split(" ")
+                                .filter(Boolean)
+                                .map((n) => n[0])
+                                .slice(0, 2)
+                                .join("")
+                                .toUpperCase();
+
+                              const taskSeconds = (task.workingHourTask || []).reduce(
+                                (s, w) => s + (w.duration_seconds || 0),
+                                0,
+                              );
+
+                              const sc =
+                                statusMap[(task.status || "").toLowerCase()] ||
+                                "bg-gray-100 text-gray-500 border-gray-200";
+
+                              return (
+                                <div
+                                  key={task.id || idx}
+                                  className="flex items-center gap-3 px-5 py-2.5 bg-white hover:bg-slate-50 transition-colors"
+                                >
+                                  {/* Avatar */}
+                                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center text-[10px] font-black text-white shrink-0">
+                                    {initials || "?"}
+                                  </div>
+
+                                  {/* Assignee + task name */}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-bold text-gray-800 truncate leading-tight">
+                                      {assignee}
+                                    </p>
+                                    <p className="text-[10px] text-gray-400 truncate leading-tight mt-0.5">
+                                      {task.name || task.title || `Task #${idx + 1}`}
+                                    </p>
+                                  </div>
+
+                                  {/* Status badge */}
+                                  <span
+                                    className={`text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wide shrink-0 ${sc}`}
+                                  >
+                                    {task.status || "—"}
+                                  </span>
+
+                                  {/* Logged time */}
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    <Clock className="w-3 h-3 text-gray-400" />
+                                    <span className="text-xs font-black text-gray-700 min-w-[42px] text-right">
+                                      {taskSeconds > 0 ? formatSeconds(taskSeconds) : "—"}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* ✅ Core WBS Categories — Total Time Overview */}
+              <div className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm bg-white">
+                <div className="px-5 py-3 bg-slate-50 border-b border-gray-200 flex items-center gap-2">
+                  <ClipboardList className="w-4 h-4 text-slate-500" />
+                  <h4 className="text-xs font-black uppercase tracking-widest text-slate-700">
+                    Primary WBS &mdash; Total Logged Time
+                  </h4>
+                </div>
+                <div className="grid grid-cols-2 lg:grid-cols-6 divide-x divide-y lg:divide-y-0 divide-gray-100">
+                  {[
+                    { key: "modelling", label: "Modelling", color: "text-blue-600", bg: "bg-blue-50" },
+                    { key: "modelling_checking", label: "Modeling C.", color: "text-violet-600", bg: "bg-violet-50" },
+                    { key: "detailing", label: "Detailing", color: "text-cyan-600", bg: "bg-cyan-50" },
+                    { key: "detailing_checking", label: "Detailing C.", color: "text-fuchsia-600", bg: "bg-fuchsia-50" },
+                    { key: "erection", label: "Erection", color: "text-amber-600", bg: "bg-amber-50" },
+                    { key: "erection_checking", label: "Erection C.", color: "text-orange-600", bg: "bg-orange-50" },
+                  ].map((cat) => (
+                    <div key={cat.key} className="p-4 flex flex-col items-center justify-center text-center hover:bg-slate-50 transition-colors">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 truncate w-full">
+                        {cat.label}
+                      </span>
+                      <div className={`px-3 py-1.5 rounded-xl ${cat.bg}`}>
+                        <span className={`text-sm font-black ${cat.color}`}>
+                          {wbsCategoryTotals[cat.key] > 0 ? formatSeconds(wbsCategoryTotals[cat.key]) : "00:00"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Timeline Overview & Project Status */}
@@ -438,8 +697,9 @@ const GetProjectById = ({ id, onClose }) => {
           {/* ✅ Notes */}
           {activeTab === "notes" && <AllNotes projectId={id} />}
           {activeTab === "wbs" && userRole !== "staff" && (
-            <div className="text-gray-700 italic text-center">
+            <div className="space-y-6">
               <WBS id={id} stage={project.stage || ""} />
+              <WbsBreakdownPanel wbsTasksByBundle={wbsTasksByBundle} />
             </div>
           )}
           {activeTab === "rfi" && (
@@ -694,6 +954,13 @@ const GetProjectById = ({ id, onClose }) => {
           {activeTab === "analytics" && (
             <ProjectAnalyticsDashboard projectId={id} />
           )}
+          {activeTab === "teamAnalytics" && (
+            <TeamsAnalytics
+              projectId={id}
+              managerId={project.managerID}
+              tasks={projectTasks}
+            />
+          )}
         </div>
       </div >
       {editModel && (
@@ -711,6 +978,10 @@ const GetProjectById = ({ id, onClose }) => {
   );
 };
 
+/* ─────────────────────────────────────────────
+   WBS Breakdown Panel imported above
+───────────────────────────────────────────── */
+
 // ✅ InfoRow Component
 const InfoRow = ({
   label,
@@ -725,7 +996,7 @@ const InfoRow = ({
 // ✅ ScopeTag Component
 const ScopeTag = ({ label, active }) => (
   <span
-    className={`px-4 py-1.5 text-xs font-black uppercase tracking-widest rounded-full border border-black ${active
+    className={`px-4 py-1.5 text-sm font-black uppercase tracking-widest rounded-full border border-black ${active
       ? "bg-green-100 text-black shadow-sm"
       : "bg-gray-100 text-black/50"
       }`}

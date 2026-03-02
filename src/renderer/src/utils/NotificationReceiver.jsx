@@ -8,15 +8,18 @@ import { toast } from "react-toastify";
 const NotificationReceiver = () => {
     const staffData = useSelector((state) => state?.userData?.staffData);
 
-    const showBrowserNotification = (title, message) => {
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission().then((permission) => {
-                if (permission === "granted") {
-                    new Notification(title, { body: message });
-                }
-            });
-        } else {
-            new Notification(title, { body: message });
+    // Send a native OS desktop notification via Electron main process IPC.
+    // This works even when the app is minimized or not in focus.
+    const sendDesktopNotification = async (title, message) => {
+        try {
+            if (window?.electron?.ipcRenderer) {
+                const result = await window.electron.ipcRenderer.invoke('show-notification', { title, body: message });
+                console.log('[NotificationReceiver] Desktop notification result:', result);
+            } else {
+                console.warn('[NotificationReceiver] window.electron.ipcRenderer not available');
+            }
+        } catch (err) {
+            console.error('[NotificationReceiver] Failed to send desktop notification:', err);
         }
     };
 
@@ -27,7 +30,7 @@ const NotificationReceiver = () => {
             const title = payload.title || "🔔 New Alert";
             const message = payload.message || "You have a new notification.";
 
-            showBrowserNotification(title, message);
+            sendDesktopNotification(title, message);
             toast.info(message, { position: "top-right" });
         });
 
@@ -37,7 +40,7 @@ const NotificationReceiver = () => {
             const title = "📩 Private Message";
             const message = typeof msg === "string" ? msg : msg?.content || "New private message.";
 
-            showBrowserNotification(title, message);
+            sendDesktopNotification(title, message);
             toast.info(message, { position: "top-right" });
             // update your chat UI with this message
         });
@@ -48,8 +51,7 @@ const NotificationReceiver = () => {
             const title = "👥 Group Message";
             const message = msg?.content || "New group message.";
 
-            showBrowserNotification(title, message);
-            // Fixed: changed toast.toString to toast.info
+            sendDesktopNotification(title, message);
             toast.info(message, { position: "top-right" });
             // update your group chat UI
         });

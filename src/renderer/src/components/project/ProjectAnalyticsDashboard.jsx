@@ -114,13 +114,17 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
     return grouped;
   }, [filteredTasks]);
 
-  // Group filtered tasks by WBS Bundle
+  // Group filtered tasks by WBS Bundle (keyed by bundleKey — the shared field)
   const tasksByBundle = useMemo(() => {
     const grouped = {};
     filteredTasks.forEach((task) => {
-      const bundleId = task.project_bundle_id || task.wbs_id || "unassigned";
-      if (!grouped[bundleId]) grouped[bundleId] = [];
-      grouped[bundleId].push(task);
+      const key =
+        task.projectBundle?.bundleKey ||
+        task.projectBundle?.bundle?.bundleKey ||
+        task.bundleKey ||
+        "Uncategorised";
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(task);
     });
     return grouped;
   }, [filteredTasks]);
@@ -512,17 +516,22 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
         <div className="divide-y divide-gray-100">
           {bundles.length > 0 ? (
             bundles.map((bundle) => {
-              const bundleId =
-                bundle.id || bundle._id || (bundle.wbs && bundle.wbs[0]?.id);
+              // Resolve the shared bundleKey — present on both bundle objects and tasks
+              const bundleKey =
+                bundle.bundleKey ||
+                bundle.name ||
+                (bundle.wbs && bundle.wbs[0]?.bundleKey) ||
+                bundle.id;
+              const bundleTasks = tasksByBundle[bundleKey] || [];
               return (
-                <div key={bundleId}>
+                <div key={bundle.id || bundleKey}>
                   <button
-                    onClick={() => toggleSection(`bundle-${bundleId}`)}
+                    onClick={() => toggleSection(`bundle-${bundleKey}`)}
                     className="w-full flex items-center justify-between p-5 hover:bg-gray-50/80 transition-colors group"
                   >
                     <div className="flex items-center gap-4 text-left">
                       <div className="p-2 bg-amber-50 rounded-xl group-hover:scale-110 transition-transform">
-                        {expandedSections[`bundle-${bundleId}`] ? (
+                        {expandedSections[`bundle-${bundleKey}`] ? (
                           <ChevronDown size={18} className="text-amber-600" />
                         ) : (
                           <ChevronRight size={18} className="text-amber-600" />
@@ -530,10 +539,10 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-800 text-lg">
-                          {bundle.name || bundle.bundleKey || "Unnamed Bundle"}
+                          {bundle.bundleKey || bundle.name || "Unnamed Bundle"}
                         </h4>
                         <p className="text-xs text-gray-500 font-medium">
-                          Stage: {bundle.stage || "—"}
+                          Stage: {bundle.stage || "—"} &nbsp;·&nbsp; {bundleTasks.length} task{bundleTasks.length !== 1 ? "s" : ""}
                         </p>
                       </div>
                     </div>
@@ -554,12 +563,10 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                       </div>
                       <div className="flex flex-col items-end justify-center min-w-[100px]">
                         {(() => {
-                          const bundleTasks = tasksByBundle[bundleId] || [];
                           const totalWorkedSeconds = bundleTasks.reduce((sum, t) => sum + calculateWorkedSeconds(t), 0);
                           const totalWorkedHours = totalWorkedSeconds / 3600;
-                          const totalAllocatedHours = (Number(bundle.totalExecHr/60) || 0) + (Number(bundle.totalCheckHr/60) || 0);
+                          const totalAllocatedHours = (Number(bundle.totalExecHr / 60) || 0) + (Number(bundle.totalCheckHr / 60) || 0);
                           const percentage = totalAllocatedHours > 0 ? Math.min(100, (totalWorkedHours / totalAllocatedHours) * 100) : 0;
-
                           return (
                             <>
                               <div className="flex items-center gap-2 mb-1 justify-end">
@@ -582,11 +589,10 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                       </div>
                     </div>
                   </button>
-                  {expandedSections[`bundle-${bundleId}`] && (
+                  {expandedSections[`bundle-${bundleKey}`] && (
                     <div className="bg-gray-50/30 p-2">
                       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-                        {tasksByBundle[bundleId] &&
-                          tasksByBundle[bundleId].length > 0 ? (
+                        {bundleTasks.length > 0 ? (
                           <div>
                             <div className="grid grid-cols-6 gap-4 p-4 bg-slate-50/50 border-b border-gray-100">
                               <p className="col-span-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -605,7 +611,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                                 Status
                               </p>
                             </div>
-                            {tasksByBundle[bundleId].map(renderTaskRow)}
+                            {bundleTasks.map(renderTaskRow)}
                           </div>
                         ) : (
                           <div className="p-8 text-center text-gray-500 text-sm">

@@ -118,7 +118,7 @@ const AllEmployee = () => {
           onRowClick={handleRowClick}
           detailComponent={({ row }) => <GetEmployeeByID id={row.id} />}
           onDelete={handleDelete}
-          pageSizeOptions={[5, 10, 25]}
+          pageSizeOptions={[25]}
         />
       </div>
     </div>

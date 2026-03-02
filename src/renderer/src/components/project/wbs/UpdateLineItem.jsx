@@ -156,7 +156,7 @@ const UpdateLineItem = ({
                 Total Exec
               </p>
               <p className="text-lg  text-green-700">
-                {(formData.qtyNo * formData.unitTime).toFixed(1)}h
+                {(formData.qtyNo * formData.unitTime / 60).toFixed(1)}h
               </p>
             </div>
             <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100/50">
@@ -164,7 +164,7 @@ const UpdateLineItem = ({
                 Total Check
               </p>
               <p className="text-lg  text-blue-700">
-                {(formData.qtyNo * formData.checkUnitTime).toFixed(1)}h
+                {(formData.qtyNo * formData.checkUnitTime / 60).toFixed(1)}h
               </p>
             </div>
           </div>

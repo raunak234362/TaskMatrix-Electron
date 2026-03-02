@@ -76,6 +76,7 @@ const AddTask = () => {
     control,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -385,6 +386,9 @@ const AddTask = () => {
 
       await Promise.all(promises);
       toast.success("Tasks assigned successfully!");
+      // Reset only the task description and assignments — keep project/milestone/WBS context
+      setValue("name", "");
+      setValue("assignments", [{ employeeId: "", hours: "", minutes: "" }]);
     } catch (error) {
       toast.error("Failed to assign tasks");
       console.error(error);
