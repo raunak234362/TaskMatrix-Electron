@@ -444,21 +444,18 @@ const GetEmployeeByID = ({ id, onClose }) => {
               </Button>
             </>
           )}
-          {onClose && (
-            <Button
-              onClick={onClose}
-              className="flex items-center gap-2 px-5 py-2.5 bg-black text-white border border-black/10 rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-black/80 transition-all shadow-sm"
-            >
-              Close
-            </Button>
-          )}
+          <Button
+            onClick={onClose}
+            className="flex items-center gap-2 px-5 py-2.5 border border-black bg-red-200 text-black rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-black/80 transition-all shadow-sm"
+          >
+            Close
+          </Button>
         </div>
       </div>
 
       {/* ── Profile Grid ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-sm">
         <div className="space-y-4">
-          <InfoRow label="Employee ID" value={employee.id} />
           <InfoRow label="Username" value={employee.username} />
           <InfoRow label="Email" value={employee.email} href={`mailto:${employee.email}`} />
           <InfoRow

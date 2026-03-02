@@ -116,7 +116,7 @@ const AllEmployee = () => {
           columns={columns}
           data={filteredEmployees}
           onRowClick={handleRowClick}
-          detailComponent={({ row }) => <GetEmployeeByID id={row.id} />}
+          detailComponent={({ row, close }) => <GetEmployeeByID id={row.id} onClose={close} />}
           onDelete={handleDelete}
           pageSizeOptions={[25]}
         />
