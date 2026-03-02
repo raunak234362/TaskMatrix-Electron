@@ -48,7 +48,6 @@ export const navItems = [
             'department_manager',
             'deputy_manager',
             'operation_executive',
-            'project_manager_officer',
             'system_admin',
             'user',
             'sales_manager',
@@ -129,13 +128,13 @@ export const navItems = [
         label: 'Meeting Calendar',
         to: 'calendar',
         icon: <Calendar />,
-        roles: ['admin', 'project_manager_officer', 'pmo','operation_executive']
+        roles: ['admin', 'pmo','operation_executive']
     },
     {
         label: 'Communication Followup',
         to: 'communication-followup',
         icon: <MessageCircle />,
-        roles: ['admin', 'project_manager_officer', 'deputy_manager', 'department_manager','operation_executive']
+        roles: ['admin', 'deputy_manager', 'department_manager','operation_executive']
     },
     {
         label: 'Notes',
