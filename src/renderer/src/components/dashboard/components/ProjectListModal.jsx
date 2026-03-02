@@ -15,7 +15,7 @@ const ProjectListModal = ({ isOpen, onClose, status, projects, onProjectSelect }
       accessorKey: 'fabricator.name',
       header: 'Fabricator Name',
       cell: ({ row }) => (
-        <span className="text-gray-700">{row.original.fabricator?.name || 'N/A'}</span>
+        <span className="text-gray-700">{row.original.fabricator?.fabName || 'N/A'}</span>
       )
     },
     {

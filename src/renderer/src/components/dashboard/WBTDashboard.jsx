@@ -113,7 +113,7 @@ const WBTDashboard = () => {
   const getGreeting = () => {
     const hour = new Date().getHours()
     if (hour < 12) return 'Good Morning'
-    if (hour < 18) return 'Good Afternoon'
+    if (hour < 16) return 'Good Afternoon'
     return 'Good Evening'
   }
 
@@ -189,11 +189,11 @@ const WBTDashboard = () => {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-1">
           <div>
-            <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+            <h2 className="text-3xl font-semibold text-gray-900 tracking-tight">
               {getGreeting()}, {sessionStorage.getItem('firstName')?.split(' ')[0]}
             </h2>
           </div>
-          <div className="flex items-center gap-3 text-xs font-black text-black bg-green-50 px-4 py-2 rounded-xl border border-primary/10 shadow-sm">
+          <div className="flex items-center gap-3 text-xs font-semibold text-black bg-green-50 px-4 py-2 rounded-xl border border-primary/10 shadow-sm">
             <Calendar className="w-4 h-4 text-black" />
             <span className="uppercase tracking-widest">{format(new Date(), 'MMMM dd, yyyy')}</span>
           </div>
