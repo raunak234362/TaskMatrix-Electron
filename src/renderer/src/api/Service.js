@@ -1075,6 +1075,20 @@ class Service {
     }
   }
 
+  static async DeleteMilestoneById(id) {
+    try {
+      const response = await api.delete(`mileStone/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error deleting milestone:', error)
+      throw error
+    }
+  }
+
   //Fetch WBS-Template
   static async GetWBSTemplate() {
     try {

@@ -20,9 +20,12 @@ import UpdateCompletionPer from "./UpdateCompletionPer";
 import DataTable from "../../ui/table";
 import MilestoneResponseModal from "./MilestoneResponseModal";
 import MilestoneResponseDetailsModal from "./MilestoneResponseDetailsModal";
-import { formatDateTime } from "../../../utils/dateUtils";
+import { formatDateTime, formatDate as genericFormatDate } from "../../../utils/dateUtils";
+import { useDispatch } from "react-redux";
+import { setMilestonesForProject } from "../../../store/milestoneSlice";
 
-const GetMilestoneByID = ({ row, close }) => {
+const GetMilestoneByID = ({ row, close, onUpdate }) => {
+  const dispatch = useDispatch();
   const [milestone, setMilestone] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -54,11 +57,42 @@ const GetMilestoneByID = ({ row, close }) => {
     fetchMilestone();
   }, [id]);
 
+  const refreshReduxStore = async (projId) => {
+    if (!projId) return;
+    try {
+      const response = await Service.GetProjectMilestoneById(projId);
+      if (response && response.data) {
+        dispatch(
+          setMilestonesForProject({
+            projectId: projId,
+            milestones: response.data,
+          }),
+        );
+      }
+    } catch (error) {
+      console.error("Error refreshing milestones in Redux:", error);
+    }
+  };
+
+  const handleSuccess = async () => {
+    await fetchMilestone();
+    const projId = milestone?.project_id || milestone?.project?.id || row?.project_id;
+    if (projId) {
+      await refreshReduxStore(projId);
+    }
+    if (onUpdate) onUpdate();
+  };
+
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
       await Service.DeleteMilestoneById(id.toString());
       toast.success("Milestone deleted successfully");
+      const projId = milestone?.project_id || milestone?.project?.id || row?.project_id;
+      if (projId) {
+        await refreshReduxStore(projId);
+      }
+      if (onUpdate) onUpdate();
       close();
     } catch (error) {
       console.error("Delete failed:", error);
@@ -129,10 +163,10 @@ const GetMilestoneByID = ({ row, close }) => {
       cell: ({ row }) => (
         <span
           className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-tight border ${row.original.status === "APPROVED"
-              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-              : row.original.status === "REJECTED"
-                ? "bg-red-50 text-red-700 border-red-200"
-                : "bg-gray-50 text-gray-700 border-gray-200"
+            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+            : row.original.status === "REJECTED"
+              ? "bg-red-50 text-red-700 border-red-200"
+              : "bg-gray-50 text-gray-700 border-gray-200"
             }`}
         >
           {row.original.status}
@@ -453,7 +487,7 @@ const GetMilestoneByID = ({ row, close }) => {
               mileStoneVersionId={milestone.currentVersionId}
               onClose={() => setIsEditModalOpen(false)}
               onSuccess={() => {
-                fetchMilestone();
+                handleSuccess();
                 setIsEditModalOpen(false);
               }}
             />
@@ -469,7 +503,7 @@ const GetMilestoneByID = ({ row, close }) => {
               milestoneId={id.toString()}
               onClose={() => setIsUpdateProgressModalOpen(false)}
               onSuccess={() => {
-                fetchMilestone();
+                handleSuccess();
                 setIsUpdateProgressModalOpen(false);
               }}
             />

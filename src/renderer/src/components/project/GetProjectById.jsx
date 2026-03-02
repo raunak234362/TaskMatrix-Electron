@@ -31,7 +31,7 @@ import AllCO from "../co/AllCO";
 import AddCO from "../co/AddCO";
 import CoTable from "../co/CoTable";
 import ProjectAnalyticsDashboard from "./ProjectAnalyticsDashboard";
-// import ProjectMilestoneMetrics from "./mileStone/ProjectMilestoneMetrics";
+import MilestoneProgress from "./MilestoneProgress";
 import TeamsAnalytics from "./TeamsAnalytics";
 
 const GetProjectById = ({ id, onClose }) => {
@@ -394,15 +394,31 @@ const GetProjectById = ({ id, onClose }) => {
                   <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned}h</h3>
                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
+                <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+                  <div className="flex items-center gap-3 mb-6 text-gray-700">
+                    <CheckCircle2 size={20} strokeWidth={3} />
+                    <span className="text-sm font-black uppercase tracking-widest opacity-60">Total Hours Estimated for Approval</span>
+                  </div>
+                  <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned*0.8}h</h3>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gray-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
+                </div>
+                <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+                  <div className="flex items-center gap-3 mb-6 text-gray-700">
+                    <CheckCircle2 size={20} strokeWidth={3} />
+                    <span className="text-sm font-black uppercase tracking-widest opacity-60">Total Hours Estimated for Fabrication</span>
+                  </div>
+                  <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned*0.2}h</h3>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gray-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
+                </div>
 
                 {projectStats.ifa.count > 0 && (
                   <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
-                    <div className="flex items-center gap-3 mb-6 text-emerald-500">
+                    <div className="flex items-center gap-3 mb-6 text-gray-700">
                       <CheckCircle2 size={20} strokeWidth={3} />
-                      <span className="text-sm font-black uppercase tracking-widest opacity-60">Actual IFA Completed</span>
+                      <span className="text-sm font-black uppercase tracking-widest opacity-60">Approval Hours Consumed</span>
                     </div>
-                    <h3 className="text-4xl text-black tracking-tighter">{projectStats.ifa.str}</h3>
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
+                    <h3 className="text-4xl text-black tracking-tighter">{projectStats.ifa.str}h</h3>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gray-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                   </div>
                 )}
 
@@ -410,9 +426,9 @@ const GetProjectById = ({ id, onClose }) => {
                   <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
                     <div className="flex items-center gap-3 mb-6 text-blue-500">
                       <CheckCircle2 size={20} strokeWidth={3} />
-                      <span className="text-sm font-black uppercase tracking-widest opacity-60">Actual IFC Completed</span>
+                      <span className="text-sm font-black uppercase tracking-widest opacity-60">Fabrication Hours Consumed</span>
                     </div>
-                    <h3 className="text-4xl text-black tracking-tighter">{projectStats.ifc.str}</h3>
+                    <h3 className="text-4xl text-black tracking-tighter">{projectStats.ifc.str}h</h3>
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                   </div>
                 )}
@@ -422,21 +438,12 @@ const GetProjectById = ({ id, onClose }) => {
                   <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
                     <div className="flex items-center gap-3 mb-6 text-amber-500">
                       <CheckCircle2 size={20} strokeWidth={3} />
-                      <span className="text-sm font-black uppercase tracking-widest opacity-60">Actual CO Completed</span>
+                      <span className="text-sm font-black uppercase tracking-widest opacity-60"> COR Hours Consumed</span>
                     </div>
-                    <h3 className="text-4xl text-black tracking-tighter">{projectStats.co.str}</h3>
+                    <h3 className="text-4xl text-black tracking-tighter">{projectStats.co.str}h</h3>
                     <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                   </div>
                 )}
-
-                <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
-                  <div className="flex items-center gap-3 mb-6 text-green-600">
-                    <CheckCircle2 size={20} strokeWidth={3} />
-                    <span className="text-sm font-black uppercase tracking-widest opacity-60">Total Actual Worked</span>
-                  </div>
-                  <h3 className="text-4xl text-black tracking-tighter">{projectStats.completedStr}</h3>
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
-                </div>
 
                 <div className={`flex flex-row items-center justify-between p-6 rounded-2xl border border-black bg-white relative overflow-hidden group hover:shadow-md transition-all ${projectStats.overrun > 0 ? "border-red-400" : ""}`}>
                   <div className={`flex items-center gap-3 mb-6 ${projectStats.overrun > 0 ? "text-red-500" : "text-slate-400"}`}>
@@ -444,19 +451,15 @@ const GetProjectById = ({ id, onClose }) => {
                     <span className="text-sm font-black text-black uppercase tracking-widest opacity-60">Overrun / Delay</span>
                   </div>
                   <h3 className={`text-4xl tracking-tighter ${projectStats.overrun > 0 ? "text-red-600" : "text-black"}`}>
-                    {projectStats.overrunStr}
+                    {projectStats.overrunStr}h
                   </h3>
                   <div className={`absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500 ${projectStats.overrun > 0 ? "bg-red-500/5" : "bg-slate-500/5"}`}></div>
                 </div>
               </div>
 
               {/* Progress and Milestones */}
-              <div className="bg-white rounded-3xl border-1 border-slate-50 p-6">
-                {/* Milestone Summary Placeholder */}
-                <div className="flex items-center justify-center py-10 text-slate-400 italic">
-                  Milestone metrics summary unavailable
-                </div>
-                {/* <ProjectMilestoneMetrics projectId={id} /> */}
+              <div className="bg-white rounded-3xl border- border-slate-50 p-6">
+                <MilestoneProgress projectId={id} />
               </div>
 
               {/* ✅ Other Tasks — Logged Time (grouped by bundleKey) */}
@@ -633,7 +636,7 @@ const GetProjectById = ({ id, onClose }) => {
                     <Activity className="w-8 h-8 text-[#6bbd45] group-hover:scale-110 transition-transform" strokeWidth={3} />
                   </div>
                   <h4 className="text-[10px] font-black text-black/40 uppercase tracking-widest mb-2">Project Status</h4>
-                  <span className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-6 px-6 py-2 bg-emerald-50 rounded-lg border border-emerald-100 shadow-sm">{project.status}</span>
+                  <span className="text-xs font-black text-gray-600 uppercase tracking-widest mb-6 px-6 py-2 bg-gray-50 rounded-lg border border-gray-100 shadow-sm">{project.status}</span>
                   <p className="text-[10px] font-extrabold text-black/40 uppercase tracking-widest flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-[#6bbd45] animate-pulse"></span>
                     Current Phase: <span className="text-black">{project.stage || "IFA"}</span>

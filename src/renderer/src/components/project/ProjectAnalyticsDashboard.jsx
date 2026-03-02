@@ -327,7 +327,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
         />
         <SummaryCard
           icon={<TrendingUp className="text-[#6bbd45]" size={20} />}
-          label="Success Rate"
+          label="Completion Rate"
           value={`${Math.round((filteredTasks.filter((t) => t.status === "COMPLETED").length / (filteredTasks.length || 1)) * 100)}%`}
           color="green"
         />
@@ -650,14 +650,17 @@ const SummaryCard = ({
 
   return (
     <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-row justify-between items-center gap-4 group hover:shadow-md transition-shadow">
-      <div className="flex flex-col gap-1 items-start">
-        <p className="text-md font-bold text-gray-400 uppercase tracking-widest">
-          {label}
-        </p>
+      <div className="flex flex-row justify-between items-center gap-4">
         <div
           className={`p-3 rounded-2xl ${colorMap[color]} group-hover:scale-110 transition-transform w-fit mt-2`}
         >
           {icon}
+        </div>
+        <div>
+
+        <p className="text-md font-bold text-gray-700 uppercase tracking-widest">
+          {label}
+        </p>
         </div>
       </div>
       <div>

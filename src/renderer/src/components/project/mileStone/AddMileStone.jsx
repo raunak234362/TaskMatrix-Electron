@@ -23,15 +23,17 @@ const AddMileStone = ({
     defaultValues: {
       project_id: projectId,
       fabricator_id: fabricatorId,
-      status: "PENDING",
+      status: "ACTIVE",
     },
   });
 
   const statusOptions = [
     { label: "Pending", value: "PENDING" },
-    { label: "In Progress", value: "IN_PROGRESS" },
-    { label: "Completed", value: "COMPLETED" },
+    { label: "In Progress", value: "ACTIVE" },
+    { label: "Completed", value: "COMPLETE" },
     { label: "Approved", value: "APPROVED" },
+    { label: "On Hold", value: "ONHOLD" },
+    { label: "Delay", value: "DELAY" },
   ];
   const stageOptions = [
     { label: "IFA", value: "IFA" },
@@ -43,9 +45,9 @@ const AddMileStone = ({
   const subjectOptions = [
     { label: "Anchor Bolt", value: "Anchor Bolt" },
     { label: "Main Steel", value: "Main Steel" },
-    { label: "Main Steel Connection Design", value: "Main Steel Connection" },
+    { label: "Main Steel Connection Design", value: "Main Steel Connection Design" },
     { label: "Misc Steel", value: "Misc Steel" },
-    { label: "Misc Steel Connection Design", value: "Misc Steel Connection" },
+    { label: "Misc Steel Connection Design", value: "Misc Steel Connection Design" },
     { label: "Foundation Embeds", value: "Foundation Embeds" },
     { label: "Panel Embeds", value: "Panel Embeds" },
     { label: "Others", value: "Others" },
@@ -55,7 +57,6 @@ const AddMileStone = ({
     try {
       const payload = {
         ...data,
-        status: "ACTIVE",
         stage: data.stage || "IFA",
         date: data.date ? new Date(data.date).toISOString() : undefined,
         approvalDate: data.approvalDate

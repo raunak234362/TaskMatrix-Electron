@@ -1,84 +1,20 @@
-import { useState, useEffect } from "react";
-import { ClipboardList, Clock } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { ClipboardList, User } from "lucide-react";
 
 const WBS_CATEGORY_META = [
-    {
-        key: "modelling",
-        label: "Modelling",
-        color: "#2563eb",
-        bg: "#eff6ff",
-        border: "#bfdbfe",
-        dot: "bg-blue-500",
-        badge: "bg-blue-100 text-blue-700 border-blue-200",
-        isChecking: false,
-    },
-    {
-        key: "modelling_checking",
-        label: "Modelling Checking",
-        color: "#7c3aed",
-        bg: "#f5f3ff",
-        border: "#ddd6fe",
-        dot: "bg-violet-500",
-        badge: "bg-violet-100 text-violet-700 border-violet-200",
-        isChecking: true,
-    },
-    {
-        key: "detailing",
-        label: "Detailing",
-        color: "#0891b2",
-        bg: "#ecfeff",
-        border: "#a5f3fc",
-        dot: "bg-cyan-500",
-        badge: "bg-cyan-100 text-cyan-700 border-cyan-200",
-        isChecking: false,
-    },
-    {
-        key: "detailing_checking",
-        label: "Detailing Checking",
-        color: "#c026d3",
-        bg: "#fdf4ff",
-        border: "#f0abfc",
-        dot: "bg-fuchsia-500",
-        badge: "bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200",
-        isChecking: true,
-    },
-    {
-        key: "erection",
-        label: "Erection",
-        color: "#d97706",
-        bg: "#fffbeb",
-        border: "#fde68a",
-        dot: "bg-amber-500",
-        badge: "bg-amber-100 text-amber-700 border-amber-200",
-        isChecking: false,
-    },
-    {
-        key: "erection_checking",
-        label: "Erection Checking",
-        color: "#ea580c",
-        bg: "#fff7ed",
-        border: "#fed7aa",
-        dot: "bg-orange-500",
-        badge: "bg-orange-100 text-orange-700 border-orange-200",
-        isChecking: true,
-    },
-    {
-        key: "others",
-        label: "Others",
-        color: "#6b7280",
-        bg: "#f9fafb",
-        border: "#e5e7eb",
-        dot: "bg-gray-400",
-        badge: "bg-gray-100 text-gray-600 border-gray-200",
-        isChecking: false,
-    },
+    { key: "modelling", label: "Modelling", color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe", dot: "bg-blue-500", isChecking: false },
+    { key: "modelling_checking", label: "Modelling Checking", color: "#7c3aed", bg: "#f5f3ff", border: "#ddd6fe", dot: "bg-violet-500", isChecking: true },
+    { key: "detailing", label: "Detailing", color: "#0891b2", bg: "#ecfeff", border: "#a5f3fc", dot: "bg-cyan-500", isChecking: false },
+    { key: "detailing_checking", label: "Detailing Checking", color: "#c026d3", bg: "#fdf4ff", border: "#f0abfc", dot: "bg-fuchsia-500", isChecking: true },
+    { key: "erection", label: "Erection", color: "#d97706", bg: "#fffbeb", border: "#fde68a", dot: "bg-amber-500", isChecking: false },
+    { key: "erection_checking", label: "Erection Checking", color: "#ea580c", bg: "#fff7ed", border: "#fed7aa", dot: "bg-orange-500", isChecking: true },
+    { key: "others", label: "Others", color: "#6b7280", bg: "#f9fafb", border: "#e5e7eb", dot: "bg-gray-400", isChecking: false },
 ];
 
 const STATUS_COLORS = {
     completed: "bg-green-100 text-green-700 border-green-200",
     complete: "bg-green-100 text-green-700 border-green-200",
     validate_complete: "bg-green-100 text-green-700 border-green-200",
-    complete_other: "bg-green-100 text-green-700 border-green-200",
     assigned: "bg-blue-100 text-blue-700 border-blue-200",
     in_progress: "bg-yellow-100 text-yellow-700 border-yellow-200",
     rework: "bg-orange-100 text-orange-700 border-orange-200",
@@ -86,32 +22,29 @@ const STATUS_COLORS = {
     in_review: "bg-purple-100 text-purple-700 border-purple-200",
 };
 
-function getStatusBadge(status) {
-    return STATUS_COLORS[(status || "").toLowerCase()] || "bg-gray-100 text-gray-500 border-gray-200";
-}
+// --- HELPERS ---
+const getStatusBadge = (status) => STATUS_COLORS[(status || "").toLowerCase()] || "bg-gray-100 text-gray-500 border-gray-200";
+const fmtSecs = (s) => `${String(Math.floor(s / 3600)).padStart(2, "0")}:${String(Math.floor((s % 3600) / 60)).padStart(2, "0")}`;
 
-function getAssignee(task) {
-    const src = task.user || task.assignedTo || task.assignee || null;
-    if (!src) return "Unassigned";
-    return `${src.firstName || ""} ${src.lastName || ""}`.trim() || "Unassigned";
-}
+const getAssigneeName = (task) => {
+    // Checks multiple common paths for user data
+    const u = task.user || task.assignedTo || task.assignee;
+    if (!u) return "Unassigned";
+    const name = `${u.firstName || ""} ${u.lastName || ""}`.trim();
+    return name || u.username || "Unassigned";
+};
 
-function getTaskSeconds(task) {
-    return (task.workingHourTask || []).reduce((s, w) => s + (Number(w.duration_seconds) || 0), 0);
-}
+const getInitials = (name) => {
+    if (name === "Unassigned") return "?";
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+};
 
-function fmtSecs(totalSecs) {
-    const h = Math.floor(totalSecs / 3600);
-    const m = Math.floor((totalSecs % 3600) / 60);
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-}
-
-function parseAllocSecs(timeStr) {
-    if (!timeStr || typeof timeStr !== "string") return 0;
-    const [h, m] = timeStr.split(":").map(Number);
-    if (isNaN(h) || isNaN(m)) return 0;
-    return h * 3600 + m * 60;
-}
+const getTaskSeconds = (t) => (t.workingHourTask || []).reduce((s, w) => s + (Number(w.duration_seconds) || 0), 0);
+const parseAllocSecs = (str) => {
+    if (!str || typeof str !== "string") return 0;
+    const [h, m] = str.split(":").map(Number);
+    return (h || 0) * 3600 + (m || 0) * 60;
+};
 
 export default function WbsBreakdownPanel({ wbsTasksByBundle }) {
     const bundleKeys = Object.keys(wbsTasksByBundle).sort();
@@ -121,272 +54,147 @@ export default function WbsBreakdownPanel({ wbsTasksByBundle }) {
         if (!selectedBundle && bundleKeys.length > 0) setSelectedBundle(bundleKeys[0]);
     }, [bundleKeys, selectedBundle]);
 
-    if (bundleKeys.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-3 rounded-2xl border border-dashed border-gray-200 bg-gray-50">
-                <ClipboardList className="w-10 h-10 text-gray-300" />
-                <p className="text-xs font-black uppercase tracking-widest">No WBS task data found for this project</p>
-            </div>
-        );
-    }
+    if (bundleKeys.length === 0) return null;
 
-    const bundleData = wbsTasksByBundle[selectedBundle] || {};
-
-    // Stats per bundle
-    const bundleTotals = bundleKeys.map((key) => {
-        const allTasks = Object.values(wbsTasksByBundle[key] || {}).flat();
-        const seconds = allTasks.reduce((s, t) => s + getTaskSeconds(t), 0);
-        const allocSecs = allTasks.reduce((s, t) => s + parseAllocSecs(t.allocationLog?.allocatedHours), 0);
-        const count = allTasks.length;
-        return { key, seconds, allocSecs, count };
-    });
+    const currentBundleData = wbsTasksByBundle[selectedBundle] || {};
 
     return (
-        <div className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm bg-white animate-in fade-in duration-300">
-            {/* Panel Header */}
-            <div className="px-5 py-3 bg-slate-50 border-b border-gray-200 flex items-center gap-3">
-                <ClipboardList className="w-4 h-4 text-[#6bbd45]" />
-                <h4 className="text-xs font-black uppercase tracking-widest text-slate-700 flex-1">
-                    WBS Task Breakdown
-                </h4>
-                <span className="text-sm font-semibold text-slate-400 uppercase tracking-widest">
-                    {Object.values(wbsTasksByBundle).flatMap(Object.values).flat().length} total tasks
+        <div className="flex flex-col h-[750px] rounded-2xl border border-gray-200 bg-white overflow-hidden shadow-sm font-sans">
+            {/* 1. TOP HEADER */}
+            <header className="px-5 py-3 bg-slate-50 border-b border-gray-200 flex items-center justify-between shrink-0 z-20">
+                <div className="flex items-center gap-2">
+                    <ClipboardList className="w-4 h-4 text-black" />
+                    <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-700">WBS Task Breakdown</h4>
+                </div>
+                <span className="text-[11px] font-bold text-slate-400 uppercase">
+                    {Object.values(wbsTasksByBundle).flat().length} Total Tasks
                 </span>
-            </div>
+            </header>
 
-            <div className="flex min-h-[500px]">
-                {/* Left Sidebar — Bundle list */}
-                <div className="w-64 shrink-0 bg-slate-50 border-r border-gray-200 overflow-y-auto">
-                    <div className="px-4 pt-4 pb-2">
-                        <p className="text-sm font-black uppercase tracking-widest text-slate-800">WBS Bundles</p>
+            <div className="flex flex-1 overflow-hidden">
+                {/* 2. STICKY SIDEBAR */}
+                <aside className="w-72 border-r max-h-10/12 border-gray-200 bg-slate-50 overflow-y-auto shrink-0 scrollbar-thin">
+                    <div className="p-4 sticky top-0 bg-slate-50 z-10 border-b border-gray-100">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">WBS Bundles</p>
                     </div>
-                    <ul className="flex flex-col gap-0.5 p-2">
-                        {bundleTotals.map(({ key, seconds, allocSecs, count }) => (
-                            <li key={key}>
+                    <nav className="p-2 space-y-1">
+                        {bundleKeys.map((key) => {
+                            const tasks = Object.values(wbsTasksByBundle[key] || {}).flat();
+                            const wSecs = tasks.reduce((s, t) => s + getTaskSeconds(t), 0);
+                            const aSecs = tasks.reduce((s, t) => s + parseAllocSecs(t.allocationLog?.allocatedHours), 0);
+                            const isActive = selectedBundle === key;
+
+                            return (
                                 <button
+                                    key={key}
                                     onClick={() => setSelectedBundle(key)}
-                                    className={`w-full flex flex-col px-3 py-2.5 rounded-xl text-left transition-all ${selectedBundle === key
-                                        ? "bg-white border border-[#6bbd45]/50 shadow-sm"
-                                        : "hover:bg-white text-slate-600 hover:shadow-sm"
-                                        }`}
+                                    className={`w-full text-left p-3 rounded-xl transition-all border ${
+                                        isActive ? "bg-white border-[#6bbd45] shadow-sm" : "border-transparent hover:bg-white/60 hover:border-gray-200"
+                                    }`}
                                 >
-                                    <span className={`text-sm uppercase tracking-tight ${selectedBundle === key ? "text-black" : "text-slate-600"
-                                        }`}>
-                                        {key}
-                                    </span>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className={`text-sm font-bold px-1.5 py-0.5 rounded-full ${selectedBundle === key
-                                            ? "bg-[#6bbd45]/20 text-[#3a8a1a]"
-                                            : "bg-slate-200 text-slate-500"
-                                            }`}>
-                                            {count} task{count !== 1 ? "s" : ""}
+                                    <p className={`text-[11px] font-black uppercase leading-tight mb-2 ${isActive ? "text-black" : "text-slate-600"}`}>
+                                        {key.replace(/_/g, " ")}
+                                    </p>
+                                    <div className="flex items-center justify-between">
+                                        <span className={`text-[12px] font-bold px-2 py-0.5 rounded-full ${isActive ? "bg-[#6bbd45]/10 text-black" : "bg-slate-200 text-slate-600"}`}>
+                                            {tasks.length} tasks
                                         </span>
-                                        <div className="flex items-center gap-1.5 ml-auto">
-                                            <span className="text-sm text-slate-500 font-bold"><span className="text-sm text-slate-400 pr-0.5">W-</span>{fmtSecs(seconds)}</span>
-                                            <span className="text-sm text-slate-500 font-bold"><span className="text-sm text-slate-400 pr-0.5">A-</span>{fmtSecs(allocSecs)}</span>
+                                        <div className="flex gap-2 text-[12px] font-bold text-slate-500">
+                                            <span><span className="text-slate-400">W-</span>{fmtSecs(wSecs)}h</span>
+                                            <span><span className="text-slate-400">A-</span>{fmtSecs(aSecs)}h</span>
                                         </div>
                                     </div>
                                 </button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                            );
+                        })}
+                    </nav>
+                </aside>
 
-                {/* Right Panel — WBS Type categories */}
-                <div className=" overflow-y-auto p-5 bg-white">
-                    <h3 className="text-sm font-black uppercase tracking-tight text-black mb-5 flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-[#6bbd45] inline-block" />
-                        {selectedBundle}
-                    </h3>
+                {/* 3. SCROLLABLE GRID AREA */}
+                <main className="flex-1 overflow-y-auto bg-white p-6 scroll-smooth">
+                    <div className="sticky top-[-24px] bg-white/95 backdrop-blur-md pb-4 mb-4 z-10 flex items-center gap-2 border-b border-gray-100">
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#6bbd45]" />
+                        <h3 className="text-sm font-black uppercase tracking-tight text-slate-800">{selectedBundle.replace(/_/g, " ")}</h3>
+                    </div>
 
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                         {WBS_CATEGORY_META.map((cat) => {
-                            const tasks = bundleData[cat.key] || [];
-                            const totalSecs = tasks.reduce((s, t) => s + getTaskSeconds(t), 0);
-                            const totalAllocSecs = tasks.reduce((s, t) => s + parseAllocSecs(t.allocationLog?.allocatedHours), 0);
+                            const tasks = currentBundleData[cat.key] || [];
+                            const totalW = tasks.reduce((s, t) => s + getTaskSeconds(t), 0);
+                            const totalA = tasks.reduce((s, t) => s + parseAllocSecs(t.allocationLog?.allocatedHours), 0);
 
                             return (
-                                <div
+                                <section
                                     key={cat.key}
-                                    style={{
-                                        border: `1px solid ${cat.border}`,
-                                        borderRadius: "16px",
-                                        overflow: "hidden",
-                                        background: cat.bg,
-                                    }}
+                                    className="flex flex-col border rounded-2xl overflow-hidden transition-all h-full"
+                                    style={{ backgroundColor: cat.bg, borderColor: cat.border }}
                                 >
-                                    {/* Category Header */}
-                                    <div
-                                        style={{
-                                            padding: "10px 14px",
-                                            borderBottom: `1px solid ${cat.border}`,
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "8px",
-                                        }}
-                                    >
-                                        <span
-                                            style={{
-                                                width: "8px",
-                                                height: "8px",
-                                                borderRadius: "50%",
-                                                background: cat.color,
-                                                flexShrink: 0,
-                                            }}
-                                        />
-                                        <span
-                                            style={{
-                                                fontSize: "10px",
-                                                fontWeight: 800,
-                                                textTransform: "uppercase",
-                                                letterSpacing: "1.5px",
-                                                color: cat.color,
-                                                flex: 1,
-                                            }}
-                                        >
-                                            {cat.label}
-                                            {cat.isChecking && (
-                                                <span
-                                                    style={{
-                                                        marginLeft: "6px",
-                                                        fontSize: "8px",
-                                                        padding: "1px 5px",
-                                                        borderRadius: "999px",
-                                                        background: cat.color,
-                                                        color: "#fff",
-                                                        fontWeight: 800,
-                                                    }}
-                                                >
-                                                    CHECKING
-                                                </span>
-                                            )}
-                                        </span>
-                                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
-                                            <span className="text-sm" style={{ fontWeight: 800, color: cat.color }}>
-                                                {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+                                    {/* Sub-Header */}
+                                    <header className="p-3 border-b flex items-center justify-between bg-white/50" style={{ borderColor: cat.border }}>
+                                        <div className="flex items-center gap-2">
+                                            <div className={`w-2 h-2 rounded-full ${cat.dot}`} />
+                                            <span className="text-sm font-semibold uppercase tracking-widest" style={{ color: cat.color }}>
+                                                {cat.label}
                                             </span>
-                                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                                <span className="text-sm" style={{ fontWeight: 800, color: cat.color, opacity: 0.8 }}><span style={{ opacity: 0.6 }}>W</span> {fmtSecs(totalSecs)}</span>
-                                                <span className="text-sm" style={{ fontWeight: 800, color: cat.color, opacity: 0.8 }}><span style={{ opacity: 0.6 }}>A</span> {fmtSecs(totalAllocSecs)}</span>
-                                            </div>
+                                            {cat.isChecking && (
+                                                <span className="text-xs font-semibold px-1.5 py-0.5 rounded text-inherit uppercase ml-1">Checking</span>
+                                            )}
                                         </div>
-                                    </div>
+                                        <div className="text-right">
+                                            <p className="text-xs font-black" style={{ color: cat.color }}>{tasks.length} tasks</p>
+                                            <p className="text-xs font-bold opacity-70" style={{ color: cat.color }}>
+                                                W {fmtSecs(totalW)}h | A {fmtSecs(totalA)}h
+                                            </p>
+                                        </div>
+                                    </header>
 
-                                    {/* Task rows */}
-                                    <div style={{ maxHeight: "260px", overflowY: "auto" }}>
+                                    {/* Task Row List */}
+                                    <div className="flex-1 max-h-[350px] overflow-y-auto bg-white/40">
                                         {tasks.length === 0 ? (
-                                            <div className="py-4 text-center">
-                                                <span className="text-[10px] font-bold uppercase tracking-widest text-black/30">
-                                                    No {cat.label} tasks
-                                                </span>
-                                            </div>
+                                            <div className="py-10 text-center opacity-30 text-[10px] font-bold uppercase tracking-widest">No Tasks</div>
                                         ) : (
-                                            tasks.map((task, idx) => {
-                                                const assignee = getAssignee(task);
-                                                const initials = assignee
-                                                    .split(" ")
-                                                    .filter(Boolean)
-                                                    .map((n) => n[0])
-                                                    .slice(0, 2)
-                                                    .join("")
-                                                    .toUpperCase();
-                                                const secs = getTaskSeconds(task);
-                                                const sc = getStatusBadge(task.status);
+                                            tasks.map((task, i) => {
+                                                const userName = getAssigneeName(task);
+                                                const initials = getInitials(userName);
+                                                const worked = getTaskSeconds(task);
+                                                const assigned = task.allocationLog?.allocatedHours || "00:00";
 
                                                 return (
-                                                    <div
-                                                        key={task.id || idx}
-                                                        style={{
-                                                            padding: "8px 14px",
-                                                            display: "flex",
-                                                            alignItems: "center",
-                                                            gap: "10px",
-                                                            borderBottom: idx < tasks.length - 1 ? `1px solid ${cat.border}` : "none",
-                                                            background: "rgba(255,255,255,0.7)",
-                                                            transition: "background 0.12s",
-                                                        }}
-                                                        onMouseEnter={(e) => (e.currentTarget.style.background = "#fff")}
-                                                        onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.7)")}
+                                                    <div 
+                                                        key={task.id || i} 
+                                                        className="p-3 flex items-center gap-3 border-b last:border-0 bg-white/60 hover:bg-white transition-colors"
+                                                        style={{ borderColor: cat.border }}
                                                     >
-                                                        {/* Avatar */}
-                                                        <div
-                                                            style={{
-                                                                width: "26px",
-                                                                height: "26px",
-                                                                borderRadius: "50%",
-                                                                background: `linear-gradient(135deg, ${cat.color}33, ${cat.color}66)`,
-                                                                display: "flex",
-                                                                alignItems: "center",
-                                                                justifyContent: "center",
-                                                                fontSize: "9px",
-                                                                fontWeight: 800,
-                                                                color: cat.color,
-                                                                flexShrink: 0,
-                                                                border: `1px solid ${cat.border}`,
+                                                        {/* Circle Initials Avatar */}
+                                                        <div 
+                                                            className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border text-[10px] font-black shadow-sm"
+                                                            style={{ 
+                                                                backgroundColor: `${cat.color}15`, 
+                                                                borderColor: cat.border, 
+                                                                color: cat.color 
                                                             }}
                                                         >
-                                                            {initials || "?"}
+                                                            {initials}
                                                         </div>
 
-                                                        {/* Name + task name */}
-                                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                                            <p className="text-sm text-slate-800"
-                                                                style={{
-                                                                    fontWeight: 700,
-                                                                    overflow: "hidden",
-                                                                    textOverflow: "ellipsis",
-                                                                    whiteSpace: "nowrap",
-                                                                    lineHeight: 1.3,
-                                                                }}
-                                                            >
-                                                                {task.name || task.title || `Task #${idx + 1}`}
+                                                        {/* Task Info */}
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-bold text-slate-800 truncate leading-tight uppercase">
+                                                                {task.name || task.title || "Untitled Task"}
                                                             </p>
-                                                            <p className="text-sm text-slate-600"
-                                                                style={{
-                                                                    marginTop: "1px",
-                                                                    overflow: "hidden",
-                                                                    textOverflow: "ellipsis",
-                                                                    whiteSpace: "nowrap",
-                                                                }}
-                                                            >
-                                                                👤 {assignee}
+                                                            <p className="text-sm text-slate-500 font-bold truncate mt-0.5">
+                                                                👤 {userName}
                                                             </p>
                                                         </div>
 
-                                                        {/* Status */}
-                                                        <span
-                                                            className={`text-sm font-bold px-1.5 py-0.5 rounded-full border uppercase tracking-wide shrink-0 ${sc}`}
-                                                        >
-                                                            {(task.status || "—").replace(/_/g, " ")}
-                                                        </span>
-
-                                                        {/* Logged & Allocated time */}
-                                                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px", flexShrink: 0 }}>
-                                                            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                                                                <span className="text-xs font-bold text-slate-600 uppercase" >Work</span>
-                                                                <Clock className="w-2.5 h-2.5 text-gray-400" />
-                                                                <span
-                                                                    className="text-sm font-bold text-slate-800"
-                                                                    style={{
-                                                                        minWidth: "38px",
-                                                                        textAlign: "right",
-                                                                    }}
-                                                                >
-                                                                    {secs > 0 ? fmtSecs(secs) : "00:00"}
-                                                                </span>
-                                                            </div>
-                                                            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                                                                <span className="text-xs font-bold text-slate-600 uppercase" >Alloc</span>
-                                                                <span
-                                                                    className="text-sm font-bold text-slate-800"
-                                                                    style={{
-                                                                        minWidth: "38px",
-                                                                        textAlign: "right",
-                                                                        paddingRight: "1px" // slight align adjustment with the clock icon above
-                                                                    }}
-                                                                >
-                                                                    {task.allocationLog?.allocatedHours || "00:00"}
-                                                                </span>
+                                                        {/* Status & Time */}
+                                                        <div className="flex flex-col items-end gap-1 shrink-0">
+                                                            <span className={`text-xs px-2 py-0.5 rounded-full border uppercase tracking-tighter shadow-sm ${getStatusBadge(task.status)}`}>
+                                                                {(task.status || "N/A").replace(/_/g, " ")}
+                                                            </span>
+                                                            <div className="flex gap-2 text-[12px] font-black text-slate-700">
+                                                                <span><span className="text-slate-400">W-</span>{fmtSecs(worked)}h</span>
+                                                                <span><span className="text-slate-400">A-</span>{assigned}h</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -394,19 +202,11 @@ export default function WbsBreakdownPanel({ wbsTasksByBundle }) {
                                             })
                                         )}
                                     </div>
-                                </div>
+                                </section>
                             );
                         })}
                     </div>
-
-                    {/* Empty state for this bundle */}
-                    {Object.values(bundleData).flat().length === 0 && (
-                        <div className="flex flex-col items-center justify-center py-16 text-gray-400 gap-3">
-                            <ClipboardList className="w-8 h-8 text-gray-300" />
-                            <p className="text-xs font-black uppercase tracking-widest">No tasks for this bundle</p>
-                        </div>
-                    )}
-                </div>
+                </main>
             </div>
         </div>
     );

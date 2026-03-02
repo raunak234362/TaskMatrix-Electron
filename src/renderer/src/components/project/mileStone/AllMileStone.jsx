@@ -83,7 +83,9 @@ const AllMileStone = ({ project, onUpdate }) => {
           columns={columns}
           data={milestones}
           onRowClick={handleRowClick}
-          detailComponent={GetMilestoneByID}
+          detailComponent={(props) => (
+            <GetMilestoneByID {...props} onUpdate={fetchMileStone} />
+          )}
           pageSizeOptions={[5, 10, 25]}
         />
       ) : (
