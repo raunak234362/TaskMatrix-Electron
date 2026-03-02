@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { ClipboardList, User } from "lucide-react";
 
 const WBS_CATEGORY_META = [
-    { key: "modelling", label: "Modelling", color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe", dot: "bg-blue-500", isChecking: false },
-    { key: "modelling_checking", label: "Modelling Checking", color: "#7c3aed", bg: "#f5f3ff", border: "#ddd6fe", dot: "bg-violet-500", isChecking: true },
+    { key: "modelling", label: "Modeling", color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe", dot: "bg-blue-500", isChecking: false },
+    { key: "modelling_checking", label: "Modeling Checking", color: "#7c3aed", bg: "#f5f3ff", border: "#ddd6fe", dot: "bg-violet-500", isChecking: true },
     { key: "detailing", label: "Detailing", color: "#0891b2", bg: "#ecfeff", border: "#a5f3fc", dot: "bg-cyan-500", isChecking: false },
     { key: "detailing_checking", label: "Detailing Checking", color: "#c026d3", bg: "#fdf4ff", border: "#f0abfc", dot: "bg-fuchsia-500", isChecking: true },
     { key: "erection", label: "Erection", color: "#d97706", bg: "#fffbeb", border: "#fde68a", dot: "bg-amber-500", isChecking: false },
@@ -192,7 +192,7 @@ export default function WbsBreakdownPanel({ wbsTasksByBundle }) {
                                                             <span className={`text-xs px-2 py-0.5 rounded-full border uppercase tracking-tighter shadow-sm ${getStatusBadge(task.status)}`}>
                                                                 {(task.status || "N/A").replace(/_/g, " ")}
                                                             </span>
-                                                            <div className="flex gap-2 text-[12px] font-black text-slate-700">
+                                                            <div className="flex gap-2 text-[13px] font-semibold text-slate-700">
                                                                 <span><span className="text-slate-400">W-</span>{fmtSecs(worked)}h</span>
                                                                 <span><span className="text-slate-400">A-</span>{assigned}h</span>
                                                             </div>
