@@ -42,7 +42,7 @@ const StatCard = ({
   </div>
 );
 
-const UserStatsWidget = ({ stats, loading }) => {
+const UserStatsWidget = ({ stats, loading, userRole }) => {
   const formatHours = (decimalHours) => {
     const totalMinutes = Math.round(decimalHours * 60)
     const hours = Math.floor(totalMinutes / 60)
@@ -50,11 +50,12 @@ const UserStatsWidget = ({ stats, loading }) => {
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
   }
 
+  const isPMO = userRole?.toUpperCase() === 'PROJECT_MANAGER_OFFICER'
+
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-        
-        {[...Array(4)].map((_, i) => (
+      <div className={`grid grid-cols-1 md:grid-cols-2 ${isPMO ? 'lg:grid-cols-1' : 'lg:grid-cols-4'} gap-3 lg:gap-4`}>
+        {[...Array(isPMO ? 0 : 4)].map((_, i) => (
           <div key={i} className="h-32 bg-white border border-gray-200 rounded-none animate-pulse"></div>
         ))}
       </div>
@@ -69,58 +70,46 @@ const UserStatsWidget = ({ stats, loading }) => {
     efficiency = 0
   } = stats || {}
 
+  // If PMO and everything is hidden, return null or an empty div with no height
+  if (isPMO) return null;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
       {/* Active Projects */}
-      <StatCard
-        title="Active Projects"
-        value={projectsCount}
-        subtext={`${totalTasks} Total Tasks`}
-        icon={Briefcase}
-        trend="Active"
-        trendColor="bg-primary"
-      />
-
-      {/* Allocated Hours */}
-      <StatCard
-        title="Allocated Hours"
-        value={formatHours(allocatedHours)}
-        subtext="Total Estimated Time"
-        icon={Hourglass}
-        trend="Planned"
-        trendColor="bg-primary"
-      />
-
-      {/* Worked Hours */}
-      <StatCard
-        title="Worked Hours"
-        value={formatHours(workedHours)}
-        subtext={`${formatHours(Math.max(0, allocatedHours - workedHours))} Remaining`}
-        icon={Clock}
-        trend={workedHours > allocatedHours ? 'Overtime' : 'On Track'}
-        trendColor={workedHours > allocatedHours ? 'bg-red-500' : 'bg-primary'}
-      />
-
-      {/* Efficiency */}
-      {/* {totalTasks > 0 ? (
+      {!isPMO && (
         <StatCard
-          title="Efficiency"
-          value={`${efficiency}%`}
-          subtext="Performance Score"
-          icon={CalendarCheck}
-          trend={efficiency >= 100 ? 'Optimal' : 'Improving'}
+          title="Active Projects"
+          value={projectsCount}
+          subtext={`${totalTasks} Total Tasks`}
+          icon={Briefcase}
+          trend="Active"
           trendColor="bg-primary"
         />
-      ) : (
-        <div className="p-4 rounded-xl shadow-sm border border-dashed border-gray-400 bg-gray-50/50 flex flex-col items-center justify-center text-center gap-2 group hover:border-indigo-300 transition-colors duration-500">
-          <div className="p-2 bg-gray-100 rounded-lg group-hover:bg-indigo-50 transition-colors">
-            <CalendarCheck className="w-5 h-5 text-gray-400 group-hover:text-indigo-500" />
-          </div>
-          <p className="text-[8px] text-gray-500 uppercase tracking-widest leading-relaxed max-w-[120px]">
-            NO ASSIGNED TASKS
-          </p>
-        </div>
-      )} */}
+      )}
+
+      {/* Allocated Hours */}
+      {!isPMO && (
+        <StatCard
+          title="Allocated Hours"
+          value={formatHours(allocatedHours)}
+          subtext="Total Estimated Time"
+          icon={Hourglass}
+          trend="Planned"
+          trendColor="bg-primary"
+        />
+      )}
+
+      {/* Worked Hours */}
+      {!isPMO && (
+        <StatCard
+          title="Worked Hours"
+          value={formatHours(workedHours)}
+          subtext={`${formatHours(Math.max(0, allocatedHours - workedHours))} Remaining`}
+          icon={Clock}
+          trend={workedHours > allocatedHours ? 'Overtime' : 'On Track'}
+          trendColor={workedHours > allocatedHours ? 'bg-red-500' : 'bg-primary'}
+        />
+      )}
     </div>
   )
 }
