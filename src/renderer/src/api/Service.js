@@ -2799,5 +2799,39 @@ class Service {
       throw error
     }
   }
+//vendor dashboard
+static async VendorDashboard() {
+  try{
+    const response = await api.post(`/vendorQuota`)
+    return response.data
+  }catch(error){
+    console.error('Error fetching vendor dashboard:', error)
+    throw error
+  }
+}
+static async GetVendorQuota(){
+  try{
+    const response = await api.get(`/vendorQuota/all`)
+    return response.data
+  }catch(error){
+    console.error('Error fetching vendor quota:', error)
+    throw error
+  }
+}
+static async ApproveVendorQuota(id)
+{
+ try{
+  const response = await api.post(`/vendorQuota/approve/${id}`)
+  return response.data
+ }catch(error){
+  console.error('Error approving vendor quota:', error)
+  throw error
+ } 
+
+  }
+// static async GetVendorQuotaById(id){
+  
+
+// }
 }
 export default Service
