@@ -187,7 +187,7 @@ const EditMileStone = ({
         </h3>
         <button
           onClick={onClose}
-          className="text-gray-700 text-black bg-red-200 hover:bg-red-500 hover:text-white border border-black rounded-md px-2 py-1 "
+          className=" text-black bg-red-200 hover:bg-red-500 hover:text-white border border-black rounded-md px-2 py-1 "
         >
           close
         </button>
@@ -348,7 +348,7 @@ const EditMileStone = ({
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 flex items-center gap-2 h-10 font-bold shadow-sm"
+                className="bg-gray-200 hover:bg-green-500 text-black px-8 flex items-center gap-2 h-10 font-bold shadow-sm"
               >
                 <Save className="w-4 h-4" />
                 {isSubmitting ? "Saving..." : "Save Changes"}
