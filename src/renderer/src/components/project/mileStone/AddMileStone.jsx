@@ -5,9 +5,7 @@ import Service from "../../../api/Service";
 import Input from "../../fields/input";
 import Button from "../../fields/Button";
 import Select from "react-select";
-
 import RichTextEditor from "../../fields/RichTextEditor";
-
 
 const AddMileStone = ({
   projectId,
@@ -25,35 +23,45 @@ const AddMileStone = ({
     defaultValues: {
       project_id: projectId,
       fabricator_id: fabricatorId,
-      status: "ACTIVE",
+      status: "PENDING",
     },
   });
 
   const statusOptions = [
-    { label: "On Hold", value: "ONHOLD" },
-    { label: "In Progress", value: "ACTIVE" },
+    { label: "Pending", value: "PENDING" },
+    { label: "In Progress", value: "IN_PROGRESS" },
     { label: "Completed", value: "COMPLETED" },
     { label: "Approved", value: "APPROVED" },
   ];
-
   const stageOptions = [
     { label: "IFA", value: "IFA" },
     { label: "IFC", value: "IFC" },
+    { label: "RIFA", value: "RIFA" },
+    { label: "RIFC", value: "RIFC" },
     { label: "CO", value: "CO" },
   ];
+  const subjectOptions = [
+    { label: "Anchor Bolt", value: "Anchor Bolt" },
+    { label: "Main Steel", value: "Main Steel" },
+    { label: "Main Steel Connection Design", value: "Main Steel Connection" },
+    { label: "Misc Steel", value: "Misc Steel" },
+    { label: "Misc Steel Connection Design", value: "Misc Steel Connection" },
+    { label: "Foundation Embeds", value: "Foundation Embeds" },
+    { label: "Panel Embeds", value: "Panel Embeds" },
+    { label: "Others", value: "Others" },
+  ];
+
   const onSubmit = async (data) => {
     try {
       const payload = {
         ...data,
-        date: data.date ? new Date(data.date).toISOString() : undefined,
-        description: data.description || "",
+        status: "ACTIVE",
         stage: data.stage || "IFA",
-        status: data.status || "ACTIVE",
+        date: data.date ? new Date(data.date).toISOString() : undefined,
         approvalDate: data.approvalDate
           ? new Date(data.approvalDate).toISOString()
           : undefined,
       };
-      console.log(payload);
       await Service.AddProjectMilestone(payload);
       toast.success("Milestone added successfully!");
       if (onSuccess) onSuccess();
@@ -64,8 +72,8 @@ const AddMileStone = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div className="flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
         <div className="flex justify-between items-center p-5 border-b bg-gray-50">
           <h3 className="text-xl  text-gray-700 flex items-center gap-2">
@@ -81,31 +89,54 @@ const AddMileStone = ({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5 overflow-y-auto">
-          <Input
-            label="Subject *"
-            placeholder="e.g. 50% Submission"
-            {...register("subject", { required: "Required" })}
-          />
-          {errors.subject && (
-            <p className="text-red-500 text-xs mt-1">
-              {errors.subject.message}
-            </p>
-          )}
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Subject *
+            </label>
+            <Controller
+              name="subject"
+              control={control}
+              rules={{ required: "Subject is required" }}
+              defaultValue={subjectOptions[0].value}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  options={subjectOptions}
+                  value={subjectOptions.find((opt) => opt.value === field.value)}
+                  onChange={(opt) => field.onChange(opt?.value || "")}
+                  className="text-sm"
+                  menuPlacement="bottom"
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      borderRadius: "0.5rem",
+                      padding: "2px",
+                    }),
+                  }}
+                />
+              )}
+            />
+            {errors.subject && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.subject.message}
+              </p>
+            )}
+          </div>
 
           <div>
-            <label className="block text-[11px] font-black text-black/50 uppercase tracking-widest mb-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
               Description *
             </label>
             <Controller
               name="description"
               control={control}
-              rules={{ required: "Description is required" }}
+              rules={{ required: "Required" }}
               render={({ field }) => (
                 <RichTextEditor
                   value={field.value || ""}
                   onChange={field.onChange}
-                  placeholder="Describe the milestone deliverables..."
+                  placeholder=""
                 />
               )}
             />
@@ -117,16 +148,6 @@ const AddMileStone = ({
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* <div>
-              <Input
-                label="Target Date *"
-                type="date"
-                {...register("date", { required: "Required" })}
-              />
-              {errors.date && (
-                <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>
-              )}
-            </div> */}
             <Input
               label="Approval Date"
               type="date"
@@ -143,10 +164,8 @@ const AddMileStone = ({
               defaultValue={statusOptions[0]}
               onChange={(opt) => setValue("status", opt?.value || "PENDING")}
               className="text-sm"
-              menuPortalTarget={document.body}
-              menuPosition="fixed"
+              menuPlacement="top"
               styles={{
-                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                 control: (base) => ({
                   ...base,
                   borderRadius: "0.5rem",
@@ -155,6 +174,7 @@ const AddMileStone = ({
               }}
             />
           </div>
+
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Stage
@@ -164,10 +184,8 @@ const AddMileStone = ({
               defaultValue={stageOptions[0]}
               onChange={(opt) => setValue("stage", opt?.value || "IFA")}
               className="text-sm"
-              menuPortalTarget={document.body}
-              menuPosition="fixed"
+              menuPlacement="top"
               styles={{
-                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                 control: (base) => ({
                   ...base,
                   borderRadius: "0.5rem",
@@ -179,13 +197,6 @@ const AddMileStone = ({
 
           {/* Footer */}
           <div className="flex flex-col sm:flex-row justify-center gap-3 pt-4 border-t mt-2">
-            {/* <Button
-              type="button"
-              onClick={onClose}
-              className="w-full sm:w-auto px-5 bg-gray-100 text-gray-700 hover:bg-gray-200"
-            >
-              Cancel
-            </Button> */}
             <Button
               type="submit"
               disabled={isSubmitting}

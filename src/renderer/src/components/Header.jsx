@@ -25,20 +25,51 @@ const Header = ({ isMinimized, toggleSidebar }) => {
   }
 
   const getNotificationContent = (notification) => {
-    // Handle different payload structures
     const payload = notification.payload || {}
-    let title = payload.title || 'Notification'
-    let body = notification.message || payload.message || ''
+    const type = notification.type || payload.type || ''
+    const severity = notification.severity || payload.severity || ''
 
-    if (payload.type === 'DUPLICATE_TASK_ASSIGNMENT' && payload.body) {
-      if (!title) title = 'Duplicate Task'
-      body = payload.body.reason || 'Duplicate task assignment detected.'
-    } else if (payload.body && typeof payload.body === 'object') {
-      // Fallback for other types with body object
-      body = payload.body.message || payload.body.reason || JSON.stringify(payload.body)
+    let title = notification.title || payload.title || ''
+    let body = notification.message || payload.message || ''
+    let color = 'text-primary'
+
+    // 1. Task Conflict / Duplicate Detection
+    if (notification.reason || payload.reason) {
+      const reason = notification.reason || payload.reason
+      const taskName = notification.taskName || payload.taskName
+      const projectName = notification.projectName || payload.projectName
+      const userName = notification.userName || payload.userName
+
+      title = title || (severity === 'HIGH' ? 'Critical conflict' : 'Task Conflict')
+      body = body || `${reason}${projectName ? ` in ${projectName}` : ''}${taskName ? ` (${taskName})` : ''}${userName ? ` assigned to ${userName}` : ''}`
+
+      if (severity === 'HIGH') color = 'text-red-600'
+      else if (severity === 'MEDIUM') color = 'text-orange-500'
+    }
+    // 2. Submittal / RFI Notifications
+    else if (type.includes('SUBMITTAL') || type.includes('RFI')) {
+      title = title || (type.includes('SUBMITTAL') ? 'Submittal Update' : 'RFI Update')
+      body = body || notification.message || payload.message || 'New document activity.'
+      color = 'text-emerald-500'
+    }
+    // 3. Project Timeline Changes
+    else if (type === 'PROJECT_END_DATE_CHANGED') {
+      title = title || 'Schedule Update'
+      body = body || notification.message || payload.message || 'Project end date has been updated.'
+      color = 'text-blue-500'
     }
 
-    return { title, body }
+    // Fallback if body is still missing but exists in a body object nested in payload
+    if (!body && payload.body) {
+      if (typeof payload.body === 'string') body = payload.body
+      else body = payload.body.message || payload.body.reason || JSON.stringify(payload.body)
+    }
+
+    return {
+      title: title || 'Notification',
+      body: body || 'You have a new update.',
+      color
+    }
   }
 
   const fetchNotifications = async () => {
@@ -78,10 +109,10 @@ const Header = ({ isMinimized, toggleSidebar }) => {
         (n) => !prevNotifications.current.some((p) => p.id === n.id)
       )
       newNotifs.forEach((n) => {
-        const { title, body } = getNotificationContent(n)
+        const { title, body, color } = getNotificationContent(n)
         toast.info(
           <div>
-            <p className="font-bold text-sm">{title}</p>
+            <p className={`font-bold text-sm ${color}`}>{title}</p>
             <p className="text-xs">{body}</p>
           </div>,
           {
@@ -114,7 +145,7 @@ const Header = ({ isMinimized, toggleSidebar }) => {
     try {
       await Service.MarkNotificationAsRead(id)
       setNotifications((prev) =>
-        prev ? prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)) : prev
+        prev ? prev.map((n) => (n.id === id ? { ...n, read: true } : n)) : prev
       )
     } catch (error) {
       toast.error('Failed to mark as read')
@@ -122,7 +153,7 @@ const Header = ({ isMinimized, toggleSidebar }) => {
   }
 
   const safeNotifications = notifications || []
-  const unreadCount = safeNotifications.filter((n) => !n.isRead).length
+  const unreadCount = safeNotifications.filter((n) => n.read === false).length
 
   return (
     <header className="flex flex-row justify-between items-center w-full min-h-[72px] px-8 bg-transparent relative z-50">
@@ -184,29 +215,30 @@ const Header = ({ isMinimized, toggleSidebar }) => {
                 ) : (
                   <div className="flex flex-col">
                     {safeNotifications.map((notification) => {
-                      const { title, body } = getNotificationContent(notification)
+                      const { title, body, color } = getNotificationContent(notification)
+                      const isUnread = notification.read === false
                       return (
                         <div
                           key={notification.id}
-                          className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors flex gap-3 group relative ${!notification.isRead ? 'bg-blue-50/30' : ''
+                          className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors flex gap-3 group relative ${isUnread ? 'bg-blue-50/30' : ''
                             }`}
                         >
-                          <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${!notification.isRead ? 'bg-blue-500' : 'bg-transparent'
+                          <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${isUnread ? 'bg-blue-500' : 'bg-transparent'
                             }`} />
 
-                          <div className="flex-1 pr-6">
-                            <p className={`text-xs font-bold uppercase mb-1 ${!notification.isRead ? 'text-primary' : 'text-gray-500'}`}>
+                          <div className="flex-1 pr-6 text-left">
+                            <p className={`text-[10px] font-black uppercase mb-1 ${isUnread ? color : 'text-gray-400'}`}>
                               {title}
                             </p>
-                            <p className={`text-sm ${!notification.isRead ? 'font-semibold text-gray-900' : 'text-gray-600'}`}>
+                            <p className={`text-xs leading-relaxed ${isUnread ? 'font-bold text-gray-900' : 'text-gray-600'}`}>
                               {body}
                             </p>
-                            <span className="text-[10px] text-gray-400 mt-1 block">
+                            <span className="text-[10px] text-gray-400 mt-2 block font-medium">
                               {new Date(notification.createdAt).toLocaleString()}
                             </span>
                           </div>
 
-                          {!notification.isRead && (
+                          {isUnread && (
                             <button
                               onClick={(e) => handleMarkAsRead(notification.id, e)}
                               className="absolute right-2 top-4 p-1.5 text-blue-600 hover:bg-blue-100 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"

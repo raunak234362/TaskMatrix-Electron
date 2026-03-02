@@ -1,19 +1,20 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { toast } from "react-toastify";
 import MultipleFileUpload from "../../fields/MultipleFileUpload";
 import Service from "../../../api/Service";
 import { X } from "lucide-react";
-import { Button } from "../../ui/button";
+import Button from "../../fields/Button";
 import RichTextEditor from "../../fields/RichTextEditor";
-import { toast } from "react-toastify";
 
 const MilestoneResponseModal = ({
     milestoneId,
-    versionId,
     onClose,
     onSuccess,
 }) => {
-    const { handleSubmit, control, reset } = useForm();
+    const { register, handleSubmit, control, reset } =
+        useForm();
+
     const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -22,84 +23,124 @@ const MilestoneResponseModal = ({
             setLoading(true);
 
             const userId = sessionStorage.getItem("userId") || "";
-            const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
 
             const formData = new FormData();
             formData.append("mileStoneId", milestoneId);
-            if (versionId) {
-                formData.append("versionId", versionId);
-            }
             formData.append("description", data.description);
-            formData.append("userRole", userRole);
             formData.append("userId", userId);
+            formData.append("status", data.status || "ON_TIME");
 
-            files.forEach((file) => formData.append("files", file));
+            if (data.link) formData.append("link", data.link);
 
-            await Service.addMilestoneResponse(formData);
+            if (files.length > 0) {
+                files.forEach((file) => formData.append("files", file));
+            }
 
-            toast.success("Milestone response added successfully");
+            await Service.CreateMilestoneResponse(formData);
+            toast.success("Response added successfully!");
             reset();
             setFiles([]);
             onSuccess();
             onClose();
         } catch (err) {
-            console.error("Error submitting Milestone response:", err);
-            toast.error("Failed to add milestone response");
+            console.error("Milestone response submission failed:", err);
+            toast.error("Failed to add response");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40">
-            <div className="bg-white w-full max-w-lg p-6 rounded-xl shadow-lg relative">
-                <button onClick={onClose} className="absolute top-3 right-3">
-                    <X className="text-gray-700 hover:text-red-500" size={18} />
-                </button>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
+            <div className="bg-white shadow-lg rounded-xl w-full max-w-4xl relative flex flex-col max-h-[90vh]">
+                <div className="px-6 py-4 border-b flex justify-between items-center bg-white rounded-t-xl z-10">
+                    <h2 className="text-xl font-bold text-green-700">Add Milestone Response</h2>
+                    <Button
+                        onClick={onClose}
+                        className="text-gray-700 hover:text-red-500 p-1"
+                    >
+                        <X className="w-5 h-5" />
+                    </Button>
+                </div>
 
-                <h2 className="text-xl font-semibold text-green-700">Add Milestone Response</h2>
+                <div className="flex-1 overflow-y-auto p-6">
+                    <form
+                        id="milestone-response-form"
+                        className="space-y-4"
+                        onSubmit={handleSubmit(onSubmit)}
+                    >
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Message *
+                            </label>
+                            <Controller
+                                name="description"
+                                control={control}
+                                rules={{ required: "Message is required" }}
+                                render={({ field }) => (
+                                    <RichTextEditor
+                                        value={field.value || ""}
+                                        onChange={field.onChange}
+                                        placeholder="Type your response..."
+                                    />
+                                )}
+                            />
+                        </div>
 
-                <form className="space-y-4 mt-4" onSubmit={handleSubmit(onSubmit)}>
-                    {/* Message */}
-                    <div className="space-y-1">
-                        <label className="text-sm font-medium text-gray-700">Response Description *</label>
-                        <Controller
-                            name="description"
-                            control={control}
-                            rules={{ required: "Description is required" }}
-                            render={({ field }) => (
-                                <RichTextEditor
-                                    value={field.value || ""}
-                                    onChange={field.onChange}
-                                    placeholder="Write your response..."
-                                />
-                            )}
-                        />
-                    </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Status
+                                </label>
+                                <select
+                                    {...register("status")}
+                                    className="w-full border rounded-md p-2 bg-white"
+                                    defaultValue="ON_TIME"
+                                >
+                                    <option value="">Select Status</option>
+                                    <option value="DELAYED">Delayed</option>
+                                    <option value="ON_TIME">On Time</option>
+                                    <option value="NOT_STARTED">Not Started</option>
+                                    <option value="CLARIFICATION_REQUIRED">Needs Clarification</option>
+                                </select>
+                            </div>
+                        </div>
 
-                    {/* File uploader */}
-                    <div className="space-y-1">
-                        <label className="text-sm font-medium text-gray-700">Attachments</label>
-                        <Controller
-                            name="files"
-                            control={control}
-                            render={() => (
-                                <MultipleFileUpload onFilesChange={(f) => setFiles(f)} />
-                            )}
-                        />
-                    </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Attach Files
+                            </label>
+                            <Controller
+                                name="files"
+                                control={control}
+                                render={() => (
+                                    <MultipleFileUpload
+                                        onFilesChange={(uploadedFiles) => setFiles(uploadedFiles)}
+                                    />
+                                )}
+                            />
+                        </div>
+                    </form>
+                </div>
 
-                    <div className="flex justify-end gap-3 mt-6">
-                        <Button onClick={onClose} variant="outline">Cancel</Button>
-                        <Button
-                            type="submit"
-                            disabled={loading}
-                            className="bg-green-600 text-white hover:bg-green-700"
-                        >
-                            {loading ? "Submitting..." : "Submit Response"}
-                        </Button>
-                    </div>
-                </form>
+                <div className="px-6 py-4 border-t bg-gray-50 rounded-b-xl flex justify-end gap-4">
+                    <Button
+                        type="button"
+                        onClick={onClose}
+                        className="px-4 py-2 border border-gray-400 rounded-lg hover:bg-gray-200"
+                    >
+                        Cancel
+                    </Button>
+
+                    <Button
+                        type="submit"
+                        form="milestone-response-form"
+                        disabled={loading}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+                    >
+                        {loading ? "Submitting..." : "Submit Response"}
+                    </Button>
+                </div>
             </div>
         </div>
     );

@@ -31,7 +31,7 @@ import AllCO from "../co/AllCO";
 import AddCO from "../co/AddCO";
 import CoTable from "../co/CoTable";
 import ProjectAnalyticsDashboard from "./ProjectAnalyticsDashboard";
-import ProjectMilestoneMetrics from "./mileStone/ProjectMilestoneMetrics";
+// import ProjectMilestoneMetrics from "./mileStone/ProjectMilestoneMetrics";
 import TeamsAnalytics from "./TeamsAnalytics";
 
 const GetProjectById = ({ id, onClose }) => {
@@ -60,13 +60,57 @@ const GetProjectById = ({ id, onClose }) => {
   };
 
   const projectStats = useMemo(() => {
-    if (!project) return { assigned: 0, completed: 0, overrun: 0, completedStr: "00:00", overrunStr: "00:00" };
+    if (!project)
+      return {
+        assigned: 0,
+        completed: 0,
+        overrun: 0,
+        completedStr: "0:00",
+        overrunStr: "0:00",
+        totalSeconds: 0,
+        ifaStr: "0:00",
+        ifcStr: "0:00",
+        coStr: "0:00"
+      };
 
     const assigned = Number(project.estimatedHours) || 0;
-    const totalSeconds = projectTasks.reduce((sum, task) => {
-      return sum + (task.workingHourTask || []).reduce((tSum, entry) => tSum + (entry.duration_seconds || 0), 0);
-    }, 0);
 
+    // Stage-wise aggregation
+    const stageStats = projectTasks.reduce(
+      (acc, task) => {
+        const stage = (task.Stage || "").toUpperCase().trim();
+        const taskSecs = (task.workingHourTask || []).reduce(
+          (tSum, entry) => tSum + (entry.duration_seconds || 0),
+          0
+        );
+
+        if (stage === "IFA" || stage === "RE-IFA") {
+          acc.ifa.secs += taskSecs;
+          acc.ifa.count += 1;
+        } else if (stage === "IFC" || stage === "RIFC") {
+          acc.ifc.secs += taskSecs;
+          acc.ifc.count += 1;
+        } else if (stage.startsWith("CO") || stage.includes("CHANGE ORDER")) {
+          acc.co.secs += taskSecs;
+          acc.co.count += 1;
+        } else {
+          acc.other.secs += taskSecs;
+          acc.other.count += 1;
+        }
+
+        acc.totalSecs += taskSecs;
+        return acc;
+      },
+      {
+        ifa: { secs: 0, count: 0 },
+        ifc: { secs: 0, count: 0 },
+        co: { secs: 0, count: 0 },
+        other: { secs: 0, count: 0 },
+        totalSecs: 0
+      }
+    );
+
+    const totalSeconds = stageStats.totalSecs;
     const completedHours = totalSeconds / 3600;
     const overrunHours = Math.max(0, completedHours - assigned);
 
@@ -81,7 +125,11 @@ const GetProjectById = ({ id, onClose }) => {
       completed: completedHours,
       overrun: overrunHours,
       completedStr: formatSecondsToHHMM(totalSeconds),
-      overrunStr: formatSecondsToHHMM(Math.max(0, totalSeconds - (assigned * 3600)))
+      overrunStr: formatSecondsToHHMM(Math.max(0, totalSeconds - assigned * 3600)),
+      totalSeconds,
+      ifa: { str: formatSecondsToHHMM(stageStats.ifa.secs), count: stageStats.ifa.count },
+      ifc: { str: formatSecondsToHHMM(stageStats.ifc.secs), count: stageStats.ifc.count },
+      co: { str: formatSecondsToHHMM(stageStats.co.secs), count: stageStats.co.count }
     };
   }, [project, projectTasks]);
 
@@ -337,26 +385,60 @@ const GetProjectById = ({ id, onClose }) => {
             <div className="space-y-6 animate-in slide-in-from-top-2 duration-500">
               {/* Summary Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border-1 border-black bg-blue-400 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+                {/* Row 1 */}
+                <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
                   <div className="flex items-center gap-3 mb-6 text-black">
                     <Clock size={20} strokeWidth={3} />
-                    <span className="text-sm font-black uppercase tracking-widest opacity-60">Hours Estimated</span>
+                    <span className="text-sm font-black uppercase tracking-widest opacity-60">Total Hours Estimated</span>
                   </div>
                   <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned}h</h3>
                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
 
-                <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border-1 border-black bg-emerald-400 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
-                  <div className="flex items-center gap-3 mb-6 text-emerald-500">
-                    <CheckCircle2 size={20} strokeWidth={3} />
-                    <span className="textsms font-black uppercase tracking-widest opacity-60">Hours Completed</span>
+                {projectStats.ifa.count > 0 && (
+                  <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+                    <div className="flex items-center gap-3 mb-6 text-emerald-500">
+                      <CheckCircle2 size={20} strokeWidth={3} />
+                      <span className="text-sm font-black uppercase tracking-widest opacity-60">Actual IFA Completed</span>
+                    </div>
+                    <h3 className="text-4xl text-black tracking-tighter">{projectStats.ifa.str}</h3>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                   </div>
-                  <h3 className="text-4xl  text-black tracking-tighter">{projectStats.completedStr}</h3>
+                )}
 
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
+                {projectStats.ifc.count > 0 && (
+                  <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+                    <div className="flex items-center gap-3 mb-6 text-blue-500">
+                      <CheckCircle2 size={20} strokeWidth={3} />
+                      <span className="text-sm font-black uppercase tracking-widest opacity-60">Actual IFC Completed</span>
+                    </div>
+                    <h3 className="text-4xl text-black tracking-tighter">{projectStats.ifc.str}</h3>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
+                  </div>
+                )}
+
+                {/* Row 2 */}
+                {projectStats.co.count > 0 && (
+                  <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+                    <div className="flex items-center gap-3 mb-6 text-amber-500">
+                      <CheckCircle2 size={20} strokeWidth={3} />
+                      <span className="text-sm font-black uppercase tracking-widest opacity-60">Actual CO Completed</span>
+                    </div>
+                    <h3 className="text-4xl text-black tracking-tighter">{projectStats.co.str}</h3>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
+                  </div>
+                )}
+
+                <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+                  <div className="flex items-center gap-3 mb-6 text-green-600">
+                    <CheckCircle2 size={20} strokeWidth={3} />
+                    <span className="text-sm font-black uppercase tracking-widest opacity-60">Total Actual Worked</span>
+                  </div>
+                  <h3 className="text-4xl text-black tracking-tighter">{projectStats.completedStr}</h3>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
 
-                <div className={`flex flex-row items-center justify-between p-6 rounded-2xl border border-black bg-white relative overflow-hidden group hover:shadow-md transition-all ${projectStats.overrun > 0 ? "bg-white border-red-400" : "bg-white"}`}>
+                <div className={`flex flex-row items-center justify-between p-6 rounded-2xl border border-black bg-white relative overflow-hidden group hover:shadow-md transition-all ${projectStats.overrun > 0 ? "border-red-400" : ""}`}>
                   <div className={`flex items-center gap-3 mb-6 ${projectStats.overrun > 0 ? "text-red-500" : "text-slate-400"}`}>
                     <AlertCircle size={20} strokeWidth={3} />
                     <span className="text-sm font-black text-black uppercase tracking-widest opacity-60">Overrun / Delay</span>
@@ -370,7 +452,11 @@ const GetProjectById = ({ id, onClose }) => {
 
               {/* Progress and Milestones */}
               <div className="bg-white rounded-3xl border-1 border-slate-50 p-6">
-                <ProjectMilestoneMetrics projectId={id} />
+                {/* Milestone Summary Placeholder */}
+                <div className="flex items-center justify-center py-10 text-slate-400 italic">
+                  Milestone metrics summary unavailable
+                </div>
+                {/* <ProjectMilestoneMetrics projectId={id} /> */}
               </div>
 
               {/* ✅ Other Tasks — Logged Time (grouped by bundleKey) */}
@@ -575,7 +661,7 @@ const GetProjectById = ({ id, onClose }) => {
               <div className="space-y-3">
                 {!["staff", "project_manager", "department_manager"].includes(userRole) && (
                   <InfoRow
-                    label="Estimated Hours"
+                    label="Total Estimated Hours"
                     value={project.estimatedHours || 0}
                   />
                 )}
@@ -613,7 +699,7 @@ const GetProjectById = ({ id, onClose }) => {
                   label="Fabrication Date"
                   value={formatDate(project.fabricationDate)}
                 />
-                <InfoRow label="End Date" value={formatDate(project.endDate)} />
+                {/* <InfoRow label="End Date" value={formatDate(project.endDate)} /> */}
               </div>
 
               <div className="p-4 bg-green-200 rounded-xl border border-black text-sm">
