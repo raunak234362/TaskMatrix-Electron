@@ -61,7 +61,7 @@ const SalesDashboard = () => {
     return (
         <div className="min-h-screen bg-[#fcfdfc] p-4 lg:p-6 space-y-8 font-sans laptop-fit">
             {/* Optimized Header Area */}
-            <div className="bg-white p-5 rounded-3xl border-2 border-black shadow-[4px_4px_0px_#000] flex justify-between items-center transition-all">
+            {/* <div className="bg-white p-5 rounded-3xl border-2 border-black flex justify-between items-center transition-all">
                 <div className="flex items-center gap-6">
                     <button className="p-2.5 bg-white border border-gray-100 rounded-xl shadow-sm hover:border-black transition-all active:scale-95 group">
                         <ChevronLeft size={20} className="text-black transition-colors" />
@@ -77,7 +77,7 @@ const SalesDashboard = () => {
                     <Bell size={20} strokeWidth={3} className="group-hover:scale-110 transition-transform" />
                     <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-black animate-pulse"></span>
                 </div>
-            </div>
+            </div> */}
 
             {/* Top Row KPIs */}
             <SalesStatsCards data={data} />

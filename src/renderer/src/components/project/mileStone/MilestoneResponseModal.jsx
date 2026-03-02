@@ -57,9 +57,9 @@ const MilestoneResponseModal = ({
                     <h2 className="text-xl font-bold text-green-700">Add Milestone Response</h2>
                     <Button
                         onClick={onClose}
-                        className="text-gray-700 hover:text-red-500 p-1"
+                        className="text-gray-700 text-black bg-red-200 hover:bg-red-500 hover:text-white "
                     >
-                        <X className="w-5 h-5" />
+                        close
                     </Button>
                 </div>
 
