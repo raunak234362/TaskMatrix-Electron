@@ -111,8 +111,8 @@ const EditInclusionExclusion = ({ estimationId, onCancel, onSuccess }) => {
     <div className="bg-white p-6 rounded-xl shadow-xs border border-gray-200">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl  text-gray-800">Edit Scope of Work</h2>
-        <button onClick={onCancel} className="text-gray-500 hover:text-gray-700 p-2">
-          <X className="w-6 h-6" />
+        <button onClick={onCancel} className="text-black border border-black hover:text-black bg-red-100 hover:bg-red-200  px-3 py-1 rounded-md text-sm transition-colors">
+         close
         </button>
       </div>
 
@@ -151,7 +151,7 @@ const EditInclusionExclusion = ({ estimationId, onCancel, onSuccess }) => {
         </Button>
         <Button
           onClick={handleSave}
-          className="bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2"
+          className="bg-green-50 text-black hover:bg-green-100 flex items-center gap-2"
           disabled={saving}
         >
           {saving ? (
