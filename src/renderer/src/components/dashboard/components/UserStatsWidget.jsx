@@ -26,13 +26,13 @@ const StatCard = ({
       </div>
 
       <div>
-        <p className="text-[12px] lg:text-[14px] font-black text-black/40 uppercase tracking-[0.15em]">{title}</p>
+        <p className="text-[12px] lg:text-[14px] font-semibold text-black/40 uppercase tracking-[0.15em]">{title}</p>
         <h3 className="text-lg lg:text-xl font-black text-black mt-1 tracking-tighter">
           {value}
         </h3>
         {subtext && (
           <div className="mt-2 pt-2 border-t border-black/10">
-            <p className="text-[11px] lg:text-[12px] text-black font-black uppercase tracking-tight truncate">
+            <p className="text-[11px] lg:text-[12px] text-black uppercase tracking-wider truncate">
               {subtext}
             </p>
           </div>

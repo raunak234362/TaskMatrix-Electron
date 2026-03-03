@@ -1,7 +1,6 @@
 import React, { useMemo, useRef } from "react";
 import JoditEditor from "jodit-react";
 
-
 const RichTextEditor = ({
   value,
   onChange,
@@ -15,6 +14,10 @@ const RichTextEditor = ({
       readonly: false,
       placeholder: placeholder || "Start typing...",
       toolbarAdaptive: false,
+
+      enter: "P",          // ✅ Important
+      enterBlock: "li",    // ✅ Forces new <li> on Enter inside lists
+
       buttons: [
         "bold",
         "italic",

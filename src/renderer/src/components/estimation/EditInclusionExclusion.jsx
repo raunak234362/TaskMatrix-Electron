@@ -1,31 +1,61 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react'
-import { Plus, X, Save, Loader2, ArrowLeft } from 'lucide-react'
+import { X, Save, Loader2, ArrowLeft } from 'lucide-react'
 import { toast } from 'react-toastify'
 import Service from '../../api/Service'
 import Button from '../fields/Button'
+import RichTextEditor from '../fields/RichTextEditor'
 
 const EditInclusionExclusion = ({ estimationId, onCancel, onSuccess }) => {
-  const [inclusions, setInclusions] = useState([])
-  const [exclusions, setExclusions] = useState([])
-  const [newInclusion, setNewInclusion] = useState('')
-  const [newExclusion, setNewExclusion] = useState('')
+  const [inclusions, setInclusions] = useState('')
+  const [exclusions, setExclusions] = useState('')
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  // Helper to safely parse JSON arrays
-  const parseArray = (data) => {
-    if (Array.isArray(data)) return data
+  // Helper to safely parse mixed legacy array / new rich text string
+  const cleanHtmlList = (htmlString) => {
+    if (!htmlString || typeof htmlString !== 'string') return '';
+    let cleaned = htmlString;
+    // Remove span styling that overrides displaying and blocks list items
+    cleaned = cleaned.replace(/<span[^>]*>/gi, '').replace(/<\/span>/gi, '');
+
+    // Convert LIs containing literal newlines into split LIs
+    cleaned = cleaned.replace(/<li>([\s\S]*?)<\/li>/gi, (match, p1) => {
+      const items = p1.split(/\r?\n/).map(i => i.trim()).filter(Boolean);
+      if (items.length > 1) {
+        return items.map(i => `<li>${i}</li>`).join('');
+      }
+      return match;
+    });
+
+    // If it's raw text without any lists but contains newlines, force standard HTML list
+    if (!cleaned.includes('<ul') && !cleaned.includes('<ol')) {
+      const plainLines = cleaned.replace(/<[^>]+>/g, ' ').split(/\r?\n/).map(i => i.trim()).filter(Boolean);
+      if (plainLines.length > 1) {
+        return `<ul>${plainLines.map(l => `<li>${l}</li>`).join('')}</ul>`;
+      }
+    }
+
+    return cleaned;
+  }
+
+  const formatInitialData = (data) => {
+    if (Array.isArray(data)) {
+      return data.length > 0 ? `<ul>${data.map((item) => `<li>${item}</li>`).join('')}</ul>` : ''
+    }
     if (typeof data === 'string') {
       try {
         const parsed = JSON.parse(data)
-        return Array.isArray(parsed) ? parsed : []
+        if (Array.isArray(parsed)) {
+          return parsed.length > 0
+            ? `<ul>${parsed.map((item) => `<li>${item}</li>`).join('')}</ul>`
+            : ''
+        }
       } catch {
-        console.error('Failed to parse array:', data)
-        return []
+        return cleanHtmlList(data);
       }
     }
-    return []
+    return cleanHtmlList(data);
   }
 
   useEffect(() => {
@@ -34,8 +64,8 @@ const EditInclusionExclusion = ({ estimationId, onCancel, onSuccess }) => {
         setLoading(true)
         const response = await Service.GetEstimationById(estimationId)
         if (response?.data) {
-          setInclusions(parseArray(response.data.inclusions))
-          setExclusions(parseArray(response.data.exclusions))
+          setInclusions(formatInitialData(response.data.inclusions))
+          setExclusions(formatInitialData(response.data.exclusions))
         }
       } catch (error) {
         toast.error('Failed to load current data.')
@@ -50,42 +80,12 @@ const EditInclusionExclusion = ({ estimationId, onCancel, onSuccess }) => {
     }
   }, [estimationId])
 
-  const handleAddInclusion = () => {
-    if (newInclusion.trim()) {
-      setInclusions([...inclusions, newInclusion.trim()])
-      setNewInclusion('')
-    }
-  }
-
-  const handleRemoveInclusion = (index) => {
-    const updated = [...inclusions]
-    updated.splice(index, 1)
-    setInclusions(updated)
-  }
-
-  const handleAddExclusion = () => {
-    if (newExclusion.trim()) {
-      setExclusions([...exclusions, newExclusion.trim()])
-      setNewExclusion('')
-    }
-  }
-
-  const handleRemoveExclusion = (index) => {
-    const updated = [...exclusions]
-    updated.splice(index, 1)
-    setExclusions(updated)
-  }
-
-  const cleanArray = (arr) => {
-    return arr.filter((item) => item !== null && item !== undefined && item !== '')
-  }
-
   const handleSave = async () => {
     try {
       setSaving(true)
       const payload = {
-        inclusions: cleanArray(inclusions),
-        exclusions: cleanArray(exclusions)
+        inclusions: cleanHtmlList(inclusions),
+        exclusions: cleanHtmlList(exclusions)
       }
 
       await Service.UpdateEstimationById(estimationId, payload)
@@ -122,38 +122,11 @@ const EditInclusionExclusion = ({ estimationId, onCancel, onSuccess }) => {
           <h3 className="text-md  text-green-700 bg-green-50 px-3 py-2 rounded-lg mb-4 border-l-4 border-green-500">
             Inclusions
           </h3>
-          <div className="flex gap-2 mb-4">
-            <input
-              type="text"
-              value={newInclusion}
-              onChange={(e) => setNewInclusion(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddInclusion()}
-              placeholder="Add new inclusion..."
-              className="flex-1 p-2 border border-blue-200 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              onClick={handleAddInclusion}
-              className="bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
-          </div>
-          <ul className="space-y-2 max-h-60 overflow-y-auto pr-1">
-            {inclusions.map((item, index) => (
-              <li
-                key={index}
-                className="flex items-center justify-between bg-gray-50 p-2 rounded-md border border-gray-100 group"
-              >
-                <span className="text-gray-700 break-all">{item}</span>
-                <button
-                  onClick={() => handleRemoveInclusion(index)}
-                  className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </li>
-            ))}
-          </ul>
+          <RichTextEditor
+            value={inclusions}
+            onChange={setInclusions}
+            placeholder="Add new inclusion..."
+          />
         </div>
 
         {/* Exclusions Input */}
@@ -161,38 +134,11 @@ const EditInclusionExclusion = ({ estimationId, onCancel, onSuccess }) => {
           <h3 className="text-md  text-red-700 bg-red-50 px-3 py-2 rounded-lg mb-4 border-l-4 border-red-500">
             Exclusions
           </h3>
-          <div className="flex gap-2 mb-4">
-            <input
-              type="text"
-              value={newExclusion}
-              onChange={(e) => setNewExclusion(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddExclusion()}
-              placeholder="Add new exclusion..."
-              className="flex-1 p-2 border border-blue-200 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              onClick={handleAddExclusion}
-              className="bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
-          </div>
-          <ul className="space-y-2 max-h-60 overflow-y-auto pr-1">
-            {exclusions.map((item, index) => (
-              <li
-                key={index}
-                className="flex items-center justify-between bg-gray-50 p-2 rounded-md border border-gray-100 group"
-              >
-                <span className="text-gray-700 break-all">{item}</span>
-                <button
-                  onClick={() => handleRemoveExclusion(index)}
-                  className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </li>
-            ))}
-          </ul>
+          <RichTextEditor
+            value={exclusions}
+            onChange={setExclusions}
+            placeholder="Add new exclusion..."
+          />
         </div>
       </div>
 

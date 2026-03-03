@@ -30,15 +30,15 @@ const TeamStatsCards = ({ teamStats }) => {
       bg: "bg-teal-50",
       progress: teamStats.efficiency || 0,
     },
-    {
-      label: "Projects",
-      value: teamStats.projectCount || 0,
-      subValue: "Active Projects",
-      icon: <Layout size={24} />,
-      color: "text-green-700",
-      bg: "bg-green-100",
-      progress: 100,
-    },
+    // {
+    //   label: "Projects",
+    //   value: teamStats.projectCount || 0,
+    //   subValue: "Active Projects",
+    //   icon: <Layout size={24} />,
+    //   color: "text-green-700",
+    //   bg: "bg-green-100",
+    //   progress: 100,
+    // },
   ];
 
   return (
@@ -65,9 +65,9 @@ const TeamStatsCards = ({ teamStats }) => {
 
           <div className="space-y-4 relative z-10">
             <div className="flex justify-between items-end">
-              <span className="text-sm font-black text-black/60 uppercase tracking-tight">{stat.subValue}</span>
+              <span className="text-sm font-semibold text-black/60 uppercase tracking-tight">{stat.subValue}</span>
               {stat.label !== "Projects" && (
-                <span className="text-base font-black text-black">{Math.round(stat.progress)}%</span>
+                <span className="text-base text-black">{Math.round(stat.progress)}%</span>
               )}
             </div>
             <div className="h-3 w-full bg-gray-50 rounded-full border border-black/5 overflow-hidden p-0.5">

@@ -14,8 +14,8 @@ const AllRFQ = ({ rfq }) => {
       header: "Project Name",
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-black text-gray-900">{row.original.projectName}</span>
-          <span className="text-[10px] text-primary font-bold uppercase tracking-widest mt-0.5">
+          <span className="font-semibold text-gray-900">{row.original.projectName}</span>
+          <span className="text-[10px] text-primary font-semibold uppercase tracking-widest mt-0.5">
             RFQ #{row.original.projectNumber || 'N/A'}
           </span>
         </div>
@@ -29,7 +29,7 @@ const AllRFQ = ({ rfq }) => {
       accessorKey: "fabricator",
       header: "Fabricator",
       cell: ({ row }) => (
-        <span className="text-sm font-bold text-gray-600">
+        <span className="text-sm font-semibold text-gray-600">
           {(row.original)?.fabricator?.fabName || "—"}
         </span>
       ),
@@ -45,7 +45,7 @@ const AllRFQ = ({ rfq }) => {
         const name = sender ? `${sender.firstName || ""} ${sender.lastName || ""}` : "—";
         return (
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-gray-700">{name}</span>
+            <span className="text-sm font-semibold text-gray-700">{name}</span>
             <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{sender?.userType || 'N/A'}</span>
           </div>
         );
@@ -60,10 +60,11 @@ const AllRFQ = ({ rfq }) => {
           IN_REVIEW: 'bg-orange-100 text-black shadow-sm border border-black',
           COMPLETED: 'bg-green-100 text-black shadow-sm border border-black',
           PENDING: 'bg-gray-100 text-black/40 shadow-sm border border-black',
-          RECEIVED: 'bg-blue-100 text-black shadow-sm border border-black'
+          RECEIVED: 'bg-blue-100 text-black shadow-sm border border-black',
+          SENT: 'bg-green-100 text-black shadow-sm border border-black'
         };
         return (
-          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${colors[status] || colors.PENDING}`}>
+          <span className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest ${colors[status] || colors.PENDING}`}>
             {status}
           </span>
         );
@@ -76,8 +77,8 @@ const AllRFQ = ({ rfq }) => {
         <span className="text-sm font-bold text-gray-600">
           {row.original.estimationDate
             ? new Date(row.original.estimationDate).toLocaleDateString("en-IN", {
-              day: "2-digit",
               month: "short",
+              day: "2-digit",
               year: "numeric"
             })
             : "—"}
