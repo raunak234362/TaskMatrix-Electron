@@ -232,10 +232,10 @@ const EditFabricator = ({
           </div>
           <button
             onClick={onClose}
-            className="p-3 bg-white shadow-sm border border-slate-100 rounded-2xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all active:scale-90"
+            className="p-2 bg-gray-50 bg-red-50 border border-red-500 hover:bg-red-300 text-black hover:text-black rounded-xl "
             aria-label="Close"
           >
-            <X className="w-6 h-6" />
+            close
           </button>
         </div>
 

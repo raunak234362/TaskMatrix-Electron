@@ -504,9 +504,10 @@ const GetRFQByID = ({ id }) => {
               </h3>
               <button
                 onClick={() => setShowStatusModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="p-2 bg-gray-50 bg-red-50 border border-red-500 hover:bg-red-300 text-black hover:text-black rounded-xl "
+            aria-label="Close"
               >
-                <X size={20} />
+                Close
               </button>
             </div>
             <div className="space-y-4">

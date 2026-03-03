@@ -2800,38 +2800,97 @@ class Service {
     }
   }
 //vendor dashboard
-static async VendorDashboard() {
+static async AddVendor(data) {
   try{
-    const response = await api.post(`/vendorQuota`)
+    const response = await api.post(`/vendors`, data, {
+      headers: { 'Content-Type': 'application/json' }
+    })
     return response.data
   }catch(error){
-    console.error('Error fetching vendor dashboard:', error)
+    console.error('Error adding the vendor:', error)
     throw error
   }
 }
-static async GetVendorQuota(){
+
+// AddVendor with file uploads (multipart/form-data)
+static async AddVendorWithFiles(formData) {
   try{
-    const response = await api.get(`/vendorQuota/all`)
+    const response = await api.post(`/vendors`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
     return response.data
   }catch(error){
-    console.error('Error fetching vendor quota:', error)
+    console.error('Error adding vendor with files:', error)
     throw error
   }
 }
-static async ApproveVendorQuota(id)
-{
+static async GetAllVendors(){
+  try{
+    const response = await api.get(`/vendors/all`)
+    return response.data
+  }catch(error){
+    console.error('Error fetching vendors:', error)
+    throw error
+  }
+}
+static async GetVendorById(id){
  try{
-  const response = await api.post(`/vendorQuota/approve/${id}`)
+  const response = await api.get(`/vendors/${id}`)
   return response.data
  }catch(error){
-  console.error('Error approving vendor quota:', error)
+  console.error('Error fetching vendor by ID:', error)
   throw error
  } 
 
   }
-// static async GetVendorQuotaById(id){
-  
+static async DeleteVendorById(id){
+  try{  
+    const response = await api.delete(`/vendors/id/${id}`)
+    return response.data
+  }catch(error){
+    console.error('Error deleting vendor by ID:', error)
+    throw error
+  }
+ 
+}
+static async UpdateVendorById(id, data){
+  try{
+    const response = await api.put(`/vendors/update/${id}`, data)
+    return response.data
+  }catch(error){
+    console.error('Error updating vendor by ID:', error)
+    throw error
+  }
+}
 
-// }
+static async Getfiles(id,fileid){
+  try{
+    const response = await api.get(`/vendors/file/${id}/${fileid}`)
+    return response.data
+  }catch(error){
+    console.error('Error fetching files:', error)
+    throw error
+  }
+}
+static async DeleteFile(id,fileid){
+  try{
+    const response = await api.delete(`/vendors/file/${id}/${fileid}`)
+    return response.data
+  }catch(error){
+    console.error('Error deleting file:', error)
+    throw error
+  }
+}
+static async ViewFile(id,fileid){
+  try{
+    const response = await api.get(`/vendors/file/${id}/${fileid}`,{
+      responseType: 'blob'
+    })
+    return response.data
+  }catch(error){
+    console.error('Error viewing file:', error)
+    throw error
+  }
+}
 }
 export default Service

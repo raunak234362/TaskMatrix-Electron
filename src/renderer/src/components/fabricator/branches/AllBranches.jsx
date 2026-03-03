@@ -44,9 +44,9 @@ const AllBranches = ({ fabricator, onClose }) => {
             </button>
             <button
               onClick={onClose}
-              className="p-3 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-all active:scale-95 border border-gray-100"
+              className="p-2 bg-gray-50 bg-red-50 border border-red-500 hover:bg-red-300 text-black hover:text-black rounded-xl "
             >
-              <X size={20} strokeWidth={2.5} />
+             Close
             </button>
           </div>
         </div>

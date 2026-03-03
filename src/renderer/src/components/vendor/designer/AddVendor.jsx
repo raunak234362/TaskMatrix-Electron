@@ -1,220 +1,209 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React from "react";
-import { useForm } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import Input from "../../fields/input";
-// import Select from "react-select";
-// import { State, City } from "country-state-city";
-// import Service from "../../../api/Service";
+import Select from "react-select";
 import Button from "../../fields/Button";
-
+import { State } from "country-state-city";
 import { toast } from "react-toastify";
 import Service from "../../../api/Service";
 
 const AddVendor = () => {
-  // const [stateOptions, setStateOptions] = useState<
-  //   { label; value }
-  // >();
-  // const [cityOptions, setCityOptions] = useState<
-  //   { label; value }
-  // >();
+  const [stateOptions, setStateOptions] = useState([]);
 
-  // const countryMap<string, string> = {
-  //   "United States": "US",
-  //   Canada: "CA",
-  //   India: "IN",
-  // };
+  const countryMap = {
+    "United States": "US",
+    "Canada": "CA",
+    "India": "IN"
+  };
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm();
+    control,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting }
+  } = useForm({
+    defaultValues: {
+      headquater: {
+        country: "",
+        states: [],
+        city: ""
+      }
+    }
+  });
 
-  // const country = watch("headquater.country");
-  // const selectedStates = watch("headquater.states");
+  const country = watch("headquater.country");
 
-  // --- Load states when country changes ---
-  // useEffect(() => {
-  //   if (country && countryMap[country]) {
-  //     const countryCode = countryMap[country];
-  //     const statesData = State.getStatesOfCountry(countryCode) || []
-  //     setStateOptions(
-  //       statesData.map((s) => ({ label: s.name, value: s.name }))
-  //     );
+  useEffect(() => {
+    if (country && countryMap[country]) {
+      const countryCode = countryMap[country];
+      const statesData = State.getStatesOfCountry(countryCode) || [];
+      setStateOptions(
+        statesData.map((s) => ({ label: s.name, value: s.name }))
+      );
+      setValue("headquater.states", []);
+      setValue("headquater.city", "");
+    } else {
+      setStateOptions([]);
+      setValue("headquater.states", []);
+      setValue("headquater.city", "");
+    }
+  }, [country, setValue]);
 
-  //     setValue("headquater.states", );
-  //     setValue("headquater.city", "");
-  //     setCityOptions();
-  //   } else {
-  //     setStateOptions();
-  //     setCityOptions();
-  //     setValue("headquater.states", );
-  //     setValue("headquater.city", "");
-  //   }
-  // }, [country, setValue]);
-  // --- Load cities for all selected states ---
-  // useEffect(() => {
-  //   if (selectedStates.length > 0 && country && countryMap[country]) {
-  //     const countryCode = countryMap[country];
-  //     const allCities: { label; value } = ;
-
-  //     selectedStates.forEach((stateName) => {
-  //       const stateObj = State.getStatesOfCountry(countryCode).find(
-  //         (s) => s.name === stateName
-  //       );
-  //       if (stateObj) {
-  //         const cities =
-  //           City.getCitiesOfState(countryCode, stateObj.isoCode) || []
-  //         allCities.push(
-  //           ...cities.map((c) => ({ label: c.name, value: c.name }))
-  //         );
-  //       }
-  //     });
-
-  //     setCityOptions(allCities);
-  //   } else {
-  //     setCityOptions();
-  //   }
-  // }, [selectedStates, country]);
-
-  // --- Submit Form ---
   const onSubmit = async (data) => {
     try {
-      const formData = new FormData();
-      formData.append("name", data.name.trim());
-      formData.append("contactInfo", data.contactInfo || "");
-      formData.append("websiteLink", data.website || "");
-      formData.append("email", data.email || "");
-      // formData.append("insurenceLiability", data.insuranceLiability || "");
+      const location = data.headquater.city
+        ? `${data.headquater.city}, ${data.headquater.country}`
+        : data.headquater.country;
 
-      // Append states  string if backend expects it that way,
-      // or multiple appends if it expects multiple values with same key.
-      // Given the previous payload was { state: data.headquater.states },
-      // and it w, I'll stringify it if it's not handled by FormData automatically.
-      // formData.append("state", JSON.stringify(data.headquater.states));
+      const statesArray = Array.isArray(data.headquater.states) ? data.headquater.states : [];
+      const hasFiles = data.files && data.files.length > 0;
+      const hasCerts = data.certificates && data.certificates.length > 0;
 
-      // const location = data.headquater.city
-      //   ? `${data.headquater.city}, ${data.headquater.country}`
-      //   : data.headquater.country;
-      // formData.append("location", location);
+      let response;
 
-      // if (data.certificate && data.certificate.length > 0) {
-      //   Array.from(data.certificate).forEach((file) => {
-      //     formData.append("files", file);
-      //   });
-      // }
+      if (hasFiles || hasCerts) {
+        // Use multipart/form-data when there are actual file uploads
+        const formData = new FormData();
+        formData.append("name", data.name.trim());
+        formData.append("contactInfo", data.contactInfo || "");
+        formData.append("websiteLink", data.websiteLink || "");
+        formData.append("email", data.email || "");
+        formData.append("insurenceLiability", data.insurenceLiability || "");
+        formData.append("location", location || "");
 
-      console.log("🚀 FormData to send:", formData);
-      await Service.AddVendor(formData); // ✅ Send to backend
-      toast.success("Vendor created successfully!");
-      // reset();
+        // Append each state as state[] so backend parses as array
+        statesArray.forEach((s) => formData.append("state[]", s));
+
+        if (hasFiles) {
+          Array.from(data.files).forEach((file) => formData.append("files", file));
+        }
+        if (hasCerts) {
+          Array.from(data.certificates).forEach((file) => formData.append("certificates", file));
+        }
+
+        response = await Service.AddVendorWithFiles(formData);
+      } else {
+        // No files — send clean JSON so state arrives as a proper array
+        const payload = {
+          name: data.name.trim(),
+          contactInfo: data.contactInfo || "",
+          websiteLink: data.websiteLink || "",
+          email: data.email || "",
+          insurenceLiability: data.insurenceLiability || "",
+          location: location || "",
+          state: statesArray,
+          files: [],
+          certificates: [],
+        };
+        response = await Service.AddVendor(payload);
+      }
+
+      console.log("✅ Vendor created:", response);
+      toast.success("Vendor added successfully!");
+      reset();
     } catch (error) {
-      console.error("❌ Failed to create vendor:", error);
-      toast.error("Failed to create Vendor");
+      console.error("❌ Failed to add vendor:", error);
+      toast.error("Failed to add Vendor");
     }
   };
 
   return (
-    <div className="w-full h-auto mx-auto bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-8 mt-8 border border-gray-200 overflow-visible">
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        {/* Connection Designer Name */}
-        <Input
-          label="Vendor Organization Name *"
-          type="text"
-          {...register("name", {
-            required: "Vendor Oraganization name is required",
-          })}
-          placeholder="Enter Vendor Organization Name"
-        />
-        {errors.name && (
-          <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
-        )}
+    <div className="w-full h-auto mx-auto bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-8 mt-4 border border-gray-200 overflow-visible">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">Add New Vendor</h2>
+        <p className="text-gray-500">Provide vendor details to register them in the system.</p>
+      </div>
 
-        {/* Contact Info & Email */}
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+        <Input
+          label="Vendor Name *"
+          type="text"
+          {...register("name", { required: "Vendor name is required" })}
+          placeholder="Enter Vendor Name"
+        />
+        {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Input
-            label="Contact Info (optional)"
+            label="Contact Info"
             type="text"
             {...register("contactInfo")}
-            placeholder="Please enter contact number with extension"
+            placeholder="+1 234 567 890"
           />
           <Input
-            label="Email (optional)"
+            label="Email Address"
             type="email"
             {...register("email")}
-            placeholder="info@example.com"
+            placeholder="vendor@example.com"
           />
         </div>
 
-        {/* Insurance Liability & Certificate */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* <Input
-            label="Insurance Liability (optional)"
+          <Input
+            label="Website Link"
+            type="url"
+            {...register("websiteLink")}
+            placeholder="https://example.com"
+          />
+          <Input
+            label="Insurance Liability"
             type="text"
-            {...register("insuranceLiability")}
-            placeholder="Enter Insurance Liability"
-          /> */}
-          {/* <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">
-              Certificate (optional)
-            </label>
+            {...register("insurenceLiability")}
+            placeholder="Insurance Details"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Files</label>
             <input
               type="file"
               multiple
               className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 border border-gray-300 rounded-lg p-1"
               onChange={(e) => {
                 if (e.target.files) {
-                  setValue("certificate", Array.from(e.target.files));
+                  setValue("files", Array.from(e.target.files));
                 }
               }}
             />
-          </div> */}
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Certificates</label>
+            <input
+              type="file"
+              multiple
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 border border-gray-300 rounded-lg p-1"
+              onChange={(e) => {
+                if (e.target.files) {
+                  setValue("certificates", Array.from(e.target.files));
+                }
+              }}
+            />
+          </div>
         </div>
 
-        {/* Website & Drive Link */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input
-            label="Website (optional)"
-            type="url"
-            {...register("website")}
-            placeholder="https://example.com"
-          />
-          <Input
-            label="Drive Link (optional)"
-            type="url"
-            {...register("drive")}
-            placeholder="https://drive.google.com/..."
-          />
-        </div>
-
-        {/* Country, Multi-State, City */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Country */}
-          {/* <Controller
+          <Controller
             name="headquater.country"
             control={control}
             rules={{ required: "Country is required" }}
             render={({ field }) => (
               <Select
                 placeholder="Select Country"
-                options={Object.keys(countryMap).map((c) => ({
-                  label: c,
-                  value: c,
-                }))}
-                value={
-                  field.value
-                    ? { label: field.value, value: field.value }
-                    : null
-                }
+                options={Object.keys(countryMap).map((c) => ({ label: c, value: c }))}
+                value={field.value ? { label: field.value, value: field.value } : null}
                 onChange={(option) => field.onChange(option?.value || "")}
                 menuPortalTarget={document.body}
                 styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
               />
             )}
-          /> */}
+          />
 
-          {/* Multi-State */}
-          {/* <Controller
+          <Controller
             name="headquater.states"
             control={control}
             rules={{ required: "Select at least one state" }}
@@ -223,51 +212,32 @@ const AddVendor = () => {
                 isMulti
                 placeholder="Select State(s)"
                 options={stateOptions}
-                value={stateOptions.filter((opt) =>
-                  field.value.includes(opt.value)
-                )}
+                value={(stateOptions || []).filter((opt) => field.value.includes(opt.value))}
                 onChange={(options) => {
-                  const selected = options
-                    ? options.map((opt) => opt.value)
-                    : []
+                  const selected = options ? options.map((opt) => opt.value) : [];
                   field.onChange(selected);
-                  setValue("headquater.city", "");
                 }}
                 menuPortalTarget={document.body}
                 styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
               />
             )}
-          /> */}
+          />
 
-          {/* City (Optional) */}
-          {/* <Controller
-            name="headquater.city"
-            control={control}
-            render={({ field }) => (
-              <Select
-                placeholder="Select City (Optional)"
-                options={cityOptions}
-                value={
-                  field.value
-                    ? { label: field.value, value: field.value }
-                    : null
-                }
-                onChange={(option) => field.onChange(option?.value || "")}
-                menuPortalTarget={document.body}
-                styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-              />
-            )}
-          /> */}
+          <Input
+            label="Location / City"
+            type="text"
+            {...register("headquater.city")}
+            placeholder="Enter City"
+          />
         </div>
 
-        {/* Submit Button */}
-        <div className="flex justify-center mt-6">
+        <div className="flex justify-end mt-6">
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-linear-to-r from-green-600 to-emerald-500 text-white px-8 py-2.5 rounded-lg hover:opacity-90 shadow-md transition"
+            className="bg-green-200 text-black px-12 py-3 rounded-xl font-bold hover:bg-green-300 shadow-lg transition-all"
           >
-            {isSubmitting ? "Creating..." : "Create Connection Designer"}
+            {isSubmitting ? "Processing..." : "ADD VENDOR"}
           </Button>
         </div>
       </form>
@@ -276,3 +246,4 @@ const AddVendor = () => {
 };
 
 export default AddVendor;
+
