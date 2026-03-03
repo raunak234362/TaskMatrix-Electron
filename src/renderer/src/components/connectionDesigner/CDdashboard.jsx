@@ -224,12 +224,7 @@ const CDdashboard = () => {
                                 onClick={(e) => e.stopPropagation()} // Prevent close on content click
                                 className="bg-white rounded-xl shadow-2xl w-[95vw] h-[90vh] overflow-hidden relative flex flex-col"
                             >
-                                <button
-                                    onClick={() => setSelectedDesignerId(null)}
-                                    className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors z-10"
-                                >
-                                    <X size={18} className="text-gray-400" />
-                                </button>
+                          
 
                                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                                     <GetConnectionDesignerByID
