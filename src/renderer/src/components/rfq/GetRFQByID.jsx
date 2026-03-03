@@ -213,8 +213,8 @@ const GetRFQByID = ({ id }) => {
           <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <h3 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight wrap-break-word max-w-full">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <h3 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight break-words overflow-hidden max-w-full">
                   {rfq?.projectName}
                 </h3>
 
@@ -287,7 +287,7 @@ const GetRFQByID = ({ id }) => {
                 Description
               </h4>
               <div
-                className="text-black bg-white p-4 rounded-xl border border-black prose prose-sm max-w-none text-xs sm:text-sm font-medium"
+                className="text-black bg-white p-4 rounded-xl border border-black prose prose-sm max-w-none text-xs sm:text-sm font-medium break-words overflow-hidden"
                 dangerouslySetInnerHTML={{
                   __html: rfq?.description || "No description provided",
                 }}
