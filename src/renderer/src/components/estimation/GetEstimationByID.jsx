@@ -265,7 +265,7 @@ const GetEstimationByID = ({ id, onRefresh }) => {
             <h3 className="text-lg  text-gray-700">Inclusion/Exclusion</h3>
             <button
               onClick={() => setIsInclusionOpen(false)}
-              className="text-gray-700 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-md text-sm transition-colors"
+              className="text-black border border-black hover:text-black bg-red-100 hover:bg-red-200 px-3 py-1 rounded-md text-sm transition-colors"
             >
               Close
             </button>

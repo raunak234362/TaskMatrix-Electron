@@ -19,7 +19,7 @@ const EstimationStatusOptions = [
   { label: 'Approved', value: 'APPROVED' }
 ]
 
-const AddEstimation = ({ initialRfqId = null, onSuccess = () => { } }) => {
+const AddEstimation = ({ initialRfqId = null, onClose, onSuccess = () => { } }) => {
   const dispatch = useDispatch()
   const [files, setFiles] = useState([])
 
@@ -125,6 +125,7 @@ const AddEstimation = ({ initialRfqId = null, onSuccess = () => { } }) => {
       await Service.AddEstimation(formData)
       toast.success('Estimation created successfully!')
       onSuccess?.()
+      if (onClose) onClose()
       reset()
       setFiles([])
     } catch (error) {
@@ -135,127 +136,148 @@ const AddEstimation = ({ initialRfqId = null, onSuccess = () => { } }) => {
   const isRfqLocked = !!initialRfqId
 
   return (
-    <div className="w-full mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 p-8 my-8">
-     
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        {/* RFQ Selection */}
-        <SectionTitle title="Select RFQ" />
-        <Controller
-          name="rfqId"
-          control={control}
-          rules={{ required: 'RFQ is required' }}
-          render={({ field }) => (
-            <Select
-              label="RFQ *"
-              placeholder={isRfqLocked ? 'RFQ pre-selected' : 'Search and select an RFQ...'}
-              options={rfqOptions}
-              value={field.value}
-              onChange={(_, val) => field.onChange(val ?? '')}
-            />
-          )}
-        />
-        {errors.rfqId && <p className="text-red-600 text-sm -mt-6">{errors.rfqId.message}</p>}
-
-        {/* Estimation Details */}
-        <SectionTitle title="Estimation Details" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input
-            label="Estimation Number *"
-            {...register('estimationNumber', { required: 'Required' })}
-            placeholder="e.g. EST-2025-089"
-          />
-          {errors.estimationNumber && (
-            <p className="text-red-500 text-xs">{errors.estimationNumber.message}</p>
-          )}
-
-          <Input
-            label="Project Name"
-            {...register('projectName')}
-            placeholder="Auto-filled from RFQ"
-            disabled={!!selectedRfqId}
-          />
+    <div className="w-full mx-auto bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200">
+      {/* Header */}
+      <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white">
+        <div>
+          <h1 className="text-xl font-black text-black tracking-tight uppercase">
+            Create New Estimation
+          </h1>
+          <p className="text-[10px] font-black text-black uppercase tracking-[0.2em] mt-1">
+            ENTER PROJECT DETAILS TO GENERATE ESTIMATION
+          </p>
         </div>
+        <button
+          onClick={onClose}
+          className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
+        >
+          Close
+        </button>
+      </header>
 
-        <Controller
-          name="fabricatorId"
-          control={control}
-          rules={{ required: 'Fabricator is required' }}
-          render={({ field }) => (
-            <Select
-              label="Fabricator *"
-              options={fabricatorOptions}
-              value={field.value}
-              onChange={(_, val) => field.onChange(val ?? '')}
-            />
-          )}
-        />
-        {errors.fabricatorId && (
-          <p className="text-red-500 text-xs">{errors.fabricatorId.message}</p>
-        )}
-
-        <SectionTitle title="Description" />
-        <Controller
-          name="description"
-          control={control}
-          render={({ field }) => (
-            <RichTextEditor
-              value={field.value || ''}
-              onChange={field.onChange}
-              placeholder="Project scope, special requirements..."
-            />
-          )}
-        />
-
-        <SectionTitle title="Timeline & Tools" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input
-            label="Estimate Date *"
-            type="date"
-            {...register('estimateDate', { required: 'Required' })}
+      <div className="p-8 h-[75vh] overflow-y-auto custom-scrollbar">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          {/* RFQ Selection */}
+          <SectionTitle title="Select RFQ" />
+          <Controller
+            name="rfqId"
+            control={control}
+            rules={{ required: 'RFQ is required' }}
+            render={({ field }) => (
+              <Select
+                label="RFQ *"
+                placeholder={isRfqLocked ? 'RFQ pre-selected' : 'Search and select an RFQ...'}
+                options={rfqOptions}
+                value={field.value}
+                onChange={(_, val) => field.onChange(val ?? '')}
+              />
+            )}
           />
-          <Input
-            label="Tools / Software"
-            {...register('tools')}
-            placeholder="TEKLA, SDS/2, AutoCAD..."
-            disabled={!!selectedRfqId}
-          />
-        </div>
+          {errors.rfqId && <p className="text-red-600 text-sm -mt-6">{errors.rfqId.message}</p>}
 
-        <SectionTitle title="Status" />
-        <Controller
-          name="status"
-          control={control}
-          render={({ field }) => (
-            <Select
-              options={EstimationStatusOptions}
-              value={field.value || 'PENDING'}
-              onChange={(_, val) => field.onChange(val ?? 'PENDING')}
+          {/* Estimation Details */}
+          <SectionTitle title="Estimation Details" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              label="Estimation Number *"
+              {...register('estimationNumber', { required: 'Required' })}
+              placeholder="e.g. EST-2025-089"
             />
+            {errors.estimationNumber && (
+              <p className="text-red-500 text-xs">{errors.estimationNumber.message}</p>
+            )}
+
+            <Input
+              label="Project Name"
+              {...register('projectName')}
+              placeholder="Auto-filled from RFQ"
+              disabled={!!selectedRfqId}
+            />
+          </div>
+
+          <Controller
+            name="fabricatorId"
+            control={control}
+            rules={{ required: 'Fabricator is required' }}
+            render={({ field }) => (
+              <Select
+                label="Fabricator *"
+                options={fabricatorOptions}
+                value={field.value}
+                onChange={(_, val) => field.onChange(val ?? '')}
+              />
+            )}
+          />
+          {errors.fabricatorId && (
+            <p className="text-red-500 text-xs">{errors.fabricatorId.message}</p>
           )}
-        />
 
-        <SectionTitle title="Attach Files" />
-        <MultipleFileUpload onFilesChange={setFiles} />
-        {files.length > 0 && (
-          <p className="text-sm text-gray-700 mt-2">{files.length} file(s) attached</p>
-        )}
+          <SectionTitle title="Description" />
+          <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+              <RichTextEditor
+                value={field.value || ''}
+                onChange={field.onChange}
+                placeholder="Project scope, special requirements..."
+              />
+            )}
+          />
 
-        <div className="flex justify-end gap-4 pt-8 border-t border-gray-200">
-          <Button
-            type="button"
-            onClick={() => {
-              reset()
-              setFiles([])
-            }}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating...' : 'Create Estimation'}
-          </Button>
-        </div>
-      </form>
+          <SectionTitle title="Timeline & Tools" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              label="Estimate Date *"
+              type="date"
+              {...register('estimateDate', { required: 'Required' })}
+            />
+            <Input
+              label="Tools / Software"
+              {...register('tools')}
+              placeholder="TEKLA, SDS/2, AutoCAD..."
+              disabled={!!selectedRfqId}
+            />
+          </div>
+
+          <SectionTitle title="Status" />
+          <Controller
+            name="status"
+            control={control}
+            render={({ field }) => (
+              <Select
+                options={EstimationStatusOptions}
+                value={field.value || 'PENDING'}
+                onChange={(_, val) => field.onChange(val ?? 'PENDING')}
+              />
+            )}
+          />
+
+          <SectionTitle title="Attach Files" />
+          <MultipleFileUpload onFilesChange={setFiles} />
+          {files.length > 0 && (
+            <p className="text-sm text-black font-bold mt-2 uppercase tracking-widest text-[10px]">{files.length} file(s) attached</p>
+          )}
+        </form>
+      </div>
+
+      <footer className="p-6 border-t border-gray-200 bg-white flex justify-end gap-3 shrink-0">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          onClick={handleSubmit(onSubmit)}
+          disabled={isSubmitting}
+          className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all active:scale-95 disabled:opacity-50"
+        >
+          {isSubmitting ? 'Creating...' : 'Create Estimation'}
+        </button>
+      </footer>
     </div>
   )
 }

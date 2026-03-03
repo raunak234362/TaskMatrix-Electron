@@ -253,7 +253,7 @@ const EditFabricator = ({
           {/* Section 1: Identity */}
           <section className="space-y-6">
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border border-gray-200 rounded-2xl p-4 bg-zinc-100">
               <div>
                 <label className="block text-xs text-black font-bold uppercase tracking-widest mb-2">
                   Partner Name
@@ -286,7 +286,7 @@ const EditFabricator = ({
                 </select>
               </div>
             </div>
-            <div className="space-y-4 font-bold">
+            <div className="space-y-4 font-bold border border-gray-200 rounded-2xl p-4 bg-zinc-100">
               <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
                 WBT Point of Contact
               </label>
@@ -304,7 +304,7 @@ const EditFabricator = ({
                 )}
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-bold">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-bold border border-gray-200 rounded-2xl p-4 bg-zinc-100">
               <div>
                 <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
                   Website (URL)
@@ -335,10 +335,10 @@ const EditFabricator = ({
           {/* Section 2: Financials & Compliance */}
           {(userRole === "ADMIN" || userRole === "PROJECT_MANAGER_OFFICER") && (
             <section className="space-y-6 pt-10 border-t border-slate-100">
-              <h3 className="text-[10px] text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+              <h3 className="text-sm text-black font-bold uppercase tracking-[0.2em] flex items-center gap-2">
                 Financial Compliance & Policy
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 border border-gray-200 rounded-2xl p-4 bg-zinc-100">
                 <div>
                   <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
                     SAC Code
@@ -386,7 +386,7 @@ const EditFabricator = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8 border border-gray-200 rounded-2xl p-4 bg-zinc-100">
                 <div>
                   <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
                     Approval %
@@ -435,7 +435,7 @@ const EditFabricator = ({
 
             {/* Existing Files */}
             {filesToKeep.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border border-gray-200 rounded-2xl p-4 bg-zinc-100">
                 {filesToKeep.map((file) => (
                   <div
                     key={file.id || file._id}

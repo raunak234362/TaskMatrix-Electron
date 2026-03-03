@@ -73,14 +73,14 @@ const TeamMember = ({ members, onClose }) => {
         <div className="flex gap-4">
           <button
             onClick={() => setEditingMember(row.original)}
-            className="text-[10px] font-black uppercase tracking-widest text-black/40 hover:text-black transition-colors"
+            className="text-[10px] font-black uppercase tracking-widest text-black/40 hover:text-[#6bbd45] transition-colors"
             title="Edit Role"
           >
             Edit
           </button>
           <button
             onClick={() => console.log("DELETE MEMBER:", row.original.id)}
-            className="text-[10px] font-black uppercase tracking-widest text-red-400 hover:text-red-600 transition-colors"
+            className="text-[10px] font-black uppercase tracking-widest text-red-100/40 hover:text-red-600 transition-colors"
             title="Delete Member"
           >
             Delete
@@ -92,39 +92,45 @@ const TeamMember = ({ members, onClose }) => {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-[1000px] max-w-full bg-white rounded-[2.5rem] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-black/5 overflow-hidden">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 border-b border-black/5 pb-6">
-          <h2 className="text-3xl font-black text-black uppercase tracking-tight">
-            Team Members - <span className="text-black/40">{members.name}</span>
-          </h2>
+        <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
+          <div>
+            <h2 className="text-xl font-black text-black tracking-tight uppercase">
+              Team Members - <span className="text-[#6bbd45]">{members.name}</span>
+            </h2>
+            <p className="text-[10px] font-black text-black uppercase tracking-[0.2em] mt-1">
+              MANAGE ROLES AND TEAM COMPOSITION
+            </p>
+          </div>
           <button
             onClick={onClose}
-            aria-label="Close"
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
           >
-            <X className="w-6 h-6 text-black" />
+            Close
           </button>
-        </div>
+        </header>
 
-        {/* Add Team Member Button */}
-        <div className="flex justify-end mb-6">
-          <Button
-            onClick={handleOpenAddTeam}
-            className="flex items-center gap-2 px-8 py-3 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black/90 transition-all shadow-medium"
-          >
-            + Add Team Member
-          </Button>
-        </div>
+        <div className="p-8 overflow-y-auto custom-scrollbar flex-1 flex flex-col">
+          {/* Add Team Member Button */}
+          <div className="flex justify-end mb-6">
+            <button
+              onClick={handleOpenAddTeam}
+              className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all active:scale-95 flex items-center gap-2"
+            >
+              + Add Team Member
+            </button>
+          </div>
 
-        {/* DataTable */}
-        <div className="rounded-[1.5rem] border border-black/5 overflow-hidden">
-          <DataTable
-            columns={columns}
-            data={teamData?.members || []}
-            pageSizeOptions={[10, 20, 50]}
-          />
+          {/* DataTable */}
+          <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm flex-1">
+            <DataTable
+              columns={columns}
+              data={teamData?.members || []}
+              pageSizeOptions={[10, 20, 50]}
+            />
+          </div>
         </div>
 
         {/* Add Member Modal */}

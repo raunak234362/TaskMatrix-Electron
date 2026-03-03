@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import Service from "../../../api/Service";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Users, Mail, Phone, Shield, Edit2, Trash2, UserPlus } from "lucide-react";
 import Button from "../../fields/Button";
 import TeamMember from "./TeamMember";
 
-const GetTeamByID = ({ id }) => {
+const GetTeamByID = ({ id, onClose }) => {
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,14 +45,12 @@ const GetTeamByID = ({ id }) => {
     setTeamMember(false);
   };
 
-  console.log(team);
-
   // ── Loading ──
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8 text-gray-700">
-        <Loader2 className="w-5 h-5 animate-spin mr-2" />
-        Loading team details...
+      <div className="flex items-center justify-center p-12 text-black bg-white rounded-2xl border border-gray-200 shadow-xl">
+        <Loader2 className="w-8 h-8 animate-spin mr-3 text-[#6bbd45]" />
+        <span className="text-sm font-black uppercase tracking-widest text-[#6bbd45]">Loading team details...</span>
       </div>
     );
   }
@@ -60,9 +58,9 @@ const GetTeamByID = ({ id }) => {
   // ── Error / Not Found ──
   if (error || !team) {
     return (
-      <div className="flex items-center justify-center py-8 text-red-600">
-        <AlertCircle className="w-5 h-5 mr-2" />
-        {error || "Team not found"}
+      <div className="flex items-center justify-center p-12 text-red-600 bg-white rounded-2xl border border-gray-200 shadow-xl">
+        <AlertCircle className="w-8 h-8 mr-3" />
+        <span className="text-sm font-black uppercase tracking-widest">{error || "Team not found"}</span>
       </div>
     );
   }
@@ -80,87 +78,111 @@ const GetTeamByID = ({ id }) => {
   const memberCount = team.members?.length ?? 0;
 
   return (
-    <div className="bg-gray-50/50 p-10 rounded-3xl border border-black/5 shadow-inner">
+    <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-4xl mx-auto flex flex-col max-h-[90vh]">
       {/* Header */}
-      <div className="mb-8 border-b border-black/5 pb-4">
-        <h3 className="text-2xl font-black text-black uppercase tracking-tight">{team.name}</h3>
-      </div>
-
-      {/* Two‑column grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-sm">
-        {/* Left */}
-        <div className="space-y-4">
-          <InfoRow label="Team Name" value={team.name} />
-          <InfoRow label="Department" value={team.department?.name ?? "—"} />
+      <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white sticky top-0 z-10 shrink-0">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-[#6bbd45]/15 rounded-xl text-[#6bbd45]">
+            <Users className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-black tracking-tight uppercase">
+              {team.name}
+            </h2>
+            <p className="text-[10px] font-black text-black uppercase tracking-[0.2em] mt-1">
+              TEAM DETAILS AND MANAGEMENT
+            </p>
+          </div>
         </div>
-
-        {/* Right */}
-        <div className="space-y-4">
-          <InfoRow label="Manager" value={fullManagerName || "No Manager"} />
-          {team.manager && (
-            <>
-              <InfoRow
-                label="Email"
-                value={
-                  <a
-                    href={`mailto:${team.manager.email}`}
-                    className="text-black font-bold hover:underline"
-                  >
-                    {team.manager.email}
-                  </a>
-                }
-              />
-              <InfoRow
-                label="Phone"
-                value={
-                  <a
-                    href={`tel:${team.manager.phone}`}
-                    className="text-black font-bold hover:underline"
-                  >
-                    {team.manager.phone}
-                    {team.manager.extension && (
-                      <span className="text-black/40 text-xs ml-1 font-bold">
-                        (Ext: {team.manager.extension})
-                      </span>
-                    )}
-                  </a>
-                }
-              />
-            </>
-          )}
-          <InfoRow
-            label="Members"
-            value={`${memberCount} member${memberCount === 1 ? "" : "s"}`}
-          />
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex flex-wrap gap-4 mt-8 pt-6 border-t border-black/5">
-        <Button className="flex items-center gap-2 px-8 py-3 bg-white border border-black/10 rounded-2xl text-black font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm">
-          Edit Team
-        </Button>
-        <Button className="flex items-center gap-2 px-8 py-3 bg-red-50 border border-red-100 rounded-2xl text-red-600 font-black text-xs uppercase tracking-widest hover:bg-red-100 transition-all shadow-sm">
-          Delete Team
-        </Button>
-        <Button
-          onClick={() => handleTeamMember(team)}
-          className="flex items-center gap-2 px-8 py-3 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black/90 transition-all shadow-medium"
+        <button
+          onClick={onClose}
+          className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
         >
-          Team Members
-        </Button>
+          Close
+        </button>
+      </header>
+
+      <div className="p-8 overflow-y-auto custom-scrollbar flex-1">
+        <div className="mb-8 p-6 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <InfoRow label="Team Name" value={team.name} icon={<Users className="w-4 h-4 text-[#6bbd45]" />} />
+              <InfoRow label="Department" value={team.department?.name ?? "—"} icon={<Shield className="w-4 h-4 text-[#6bbd45]" />} />
+              <InfoRow label="Total Members" value={`${memberCount} member${memberCount === 1 ? "" : "s"}`} icon={<UserPlus className="w-4 h-4 text-[#6bbd45]" />} />
+            </div>
+
+            <div className="space-y-6">
+              <InfoRow label="Manager" value={fullManagerName || "No Manager"} icon={<Shield className="w-4 h-4 text-[#6bbd45]" />} />
+              {team.manager && (
+                <>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-black/40 font-black uppercase tracking-[0.15em] text-[10px] flex items-center gap-2">
+                      <Mail className="w-3 h-3" /> Email
+                    </span>
+                    <a
+                      href={`mailto:${team.manager.email}`}
+                      className="text-black font-black text-sm tracking-tight hover:text-[#6bbd45] transition-colors"
+                    >
+                      {team.manager.email}
+                    </a>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-black/40 font-black uppercase tracking-[0.15em] text-[10px] flex items-center gap-2">
+                      <Phone className="w-3 h-3" /> Phone
+                    </span>
+                    <a
+                      href={`tel:${team.manager.phone}`}
+                      className="text-black font-black text-sm tracking-tight hover:text-[#6bbd45] transition-colors"
+                    >
+                      {team.manager.phone}
+                      {team.manager.extension && (
+                        <span className="text-black/40 text-[10px] ml-2 font-black">
+                          (EXT: {team.manager.extension})
+                        </span>
+                      )}
+                    </a>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {teamMember && (
+          <div className="mt-8 border-t border-gray-100 pt-8 animate-in fade-in slide-in-from-top-4 duration-300">
+            <TeamMember members={team} onClose={handleCloseTeamMember} />
+          </div>
+        )}
       </div>
-      {teamMember && (
-        <TeamMember members={team} onClose={handleCloseTeamMember} />
-      )}
+
+      {/* Footer */}
+      <footer className="p-6 border-t border-gray-200 bg-white flex flex-wrap justify-end gap-3 shrink-0">
+        <button className="flex items-center gap-2 px-6 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all active:scale-95">
+          <Edit2 className="w-4 h-4 text-[#6bbd45]" />
+          Edit Team
+        </button>
+        <button className="flex items-center gap-2 px-6 py-3 bg-red-50 border border-red-600 hover:bg-red-100 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all active:scale-95">
+          <Trash2 className="w-4 h-4 text-red-600" />
+          Delete Team
+        </button>
+        <button
+          onClick={() => handleTeamMember(team)}
+          className="flex items-center gap-2 px-6 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black text-[10px] font-black uppercase tracking-[0.2em] rounded-lg shadow-sm transition-all active:scale-95"
+        >
+          <Users className="w-4 h-4" />
+          Team Members
+        </button>
+      </footer>
     </div>
   );
 };
 
 // ── Reusable InfoRow ──
-const InfoRow = ({ label, value }) => (
-  <div className="flex justify-between items-center py-1">
-    <span className="text-black/40 font-black uppercase tracking-[0.15em] text-[10px]">{label}</span>
+const InfoRow = ({ label, value, icon }) => (
+  <div className="flex flex-col gap-1">
+    <span className="text-black/40 font-black uppercase tracking-[0.15em] text-[10px] flex items-center gap-2">
+      {icon} {label}
+    </span>
     <span className="text-black font-black text-sm tracking-tight">{value}</span>
   </div>
 );

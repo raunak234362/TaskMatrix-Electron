@@ -81,7 +81,7 @@ const AddFabricator = () => {
     <div className="w-full mx-auto bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-8 mt-8 border border-gray-200">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 gap-6 border border-gray-200 rounded-2xl p-4 bg-zinc-100"
       >
         {/* Fabricator Name */}
         <div>
@@ -168,7 +168,7 @@ const AddFabricator = () => {
 
             <div>
               <label className="block text-gray-700 font-semibold mb-1">
-                FabricatION Percentage (%)
+                Fabrication Percentage (%)
               </label>
               <Input
                 label=""

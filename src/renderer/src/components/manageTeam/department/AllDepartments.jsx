@@ -78,10 +78,7 @@ const AllDepartments = () => {
   return (
     <div className="bg-white rounded-[2.5rem] shadow-soft border border-black/5 overflow-hidden mt-6">
       <div className="p-10 border-b border-black/5 bg-gray-50/30">
-        <h2 className="text-3xl font-black text-black uppercase tracking-tight">All Departments</h2>
-        <p className="text-black/60 text-sm font-bold tracking-wide mt-2">
-          Manage and view all organizational departments
-        </p>
+        
       </div>
 
       <div className="p-8">

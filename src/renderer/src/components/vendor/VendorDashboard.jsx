@@ -162,8 +162,8 @@ const VendorDashboard = () => {
     const vendorRefreshRef = useRef(null);
 
     const tabs = [
-        { key: "home", label: "Vendor Home", icon: LayoutDashboard },
-        { key: "add", label: "Add Vendor", icon: UserPlus },
+        { key: "home", label: "Vendor Home" },
+        { key: "add", label: "Add Vendor" },
     ];
 
     return (
@@ -172,14 +172,13 @@ const VendorDashboard = () => {
             {/* ── Tab Bar ── */}
             <div className="px-6 pt-6 border-b border-gray-200/60 bg-white/30 backdrop-blur-md sticky top-0 z-20">
                 <div className="flex gap-8">
-                    {tabs.map(({ key, label, icon: Icon }) => (
+                    {tabs.map(({ key, label }) => (
                         <button
                             key={key}
                             onClick={() => setActiveTab(key)}
                             className={`flex items-center gap-2 pb-4 text-sm font-semibold transition-all relative ${activeTab === key ? "text-green-600" : "text-gray-500 hover:text-gray-700"
                                 }`}
                         >
-                            <Icon size={17} />
                             {label}
                             {activeTab === key && (
                                 <motion.div layoutId="vendorTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-600 rounded-full" />

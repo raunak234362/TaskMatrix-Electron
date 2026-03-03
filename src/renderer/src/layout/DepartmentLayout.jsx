@@ -11,8 +11,8 @@ const DepartmentLayout = () => {
           <div className="flex flex-row gap-3 items-end justify-end">
             <button
               onClick={() => setActiveTab("alldepartment")}
-              className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "alldepartment"
-                  ? "md:text-base text-sm bg-green-700 text-white "
+              className={`px-1.5 md:px-4 py-2 rounded-lg border border-black ${activeTab === "alldepartment"
+                  ? "md:text-base text-sm bg-green-50 border border-black text-black "
                   : "text-base md:text-base bg-white/70 backdrop-xl text-gray-700 font-semibold"
                 }`}
             >
@@ -22,8 +22,8 @@ const DepartmentLayout = () => {
             {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
               <button
                 onClick={() => setActiveTab("addDepartment")}
-                className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "addDepartment"
-                    ? "md:text-base text-sm bg-green-700 text-white "
+                className={`px-1.5 md:px-4 py-2 rounded-lg border border-black ${activeTab === "addDepartment"
+                    ? "md:text-base text-sm bg-green-50 border border-black text-black "
                     : "text-base md:text-base bg-white/70 backdrop-xl text-gray-700 font-semibold"
                   }`}
               >

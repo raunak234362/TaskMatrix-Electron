@@ -38,24 +38,24 @@ const DailyWorkReportModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white w-[98%] max-w-[95vw] h-[95vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white w-[98%] max-w-[95vw] h-[95vh] rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+        <div className="p-6 border-b border-gray-200 flex items-center justify-between bg-white shrink-0">
           <div>
-            <h2 className="text-xl  text-gray-700 flex items-center gap-2">
-              <FileText className="text-green-600" size={24} />
+            <h2 className="text-xl font-black text-black tracking-tight uppercase flex items-center gap-2">
+              <FileText className="text-[#6bbd45]" size={24} />
               Daily Work Report
             </h2>
-            <p className="text-sm text-gray-700">
-              Summary of activities for the selected period
+            <p className="text-[10px] font-black text-black uppercase tracking-[0.2em] mt-1">
+              SUMMARY OF ACTIVITIES FOR THE SELECTED PERIOD
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+            className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
           >
-            <X size={20} className="text-gray-700" />
+            Close
           </button>
         </div>
 
@@ -143,17 +143,17 @@ const DailyWorkReportModal = ({
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3">
-          <Button
+        <div className="p-6 border-t border-gray-200 bg-white flex justify-end gap-3 shrink-0">
+          <button
             onClick={onClose}
-            className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+            className="px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all"
           >
             Close
-          </Button>
-          <Button className="bg-green-600 text-white hover:bg-green-700 flex items-center gap-2">
+          </button>
+          <button className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all flex items-center gap-2 active:scale-95">
             <Download size={18} />
             Export PDF
-          </Button>
+          </button>
         </div>
       </div>
     </div>

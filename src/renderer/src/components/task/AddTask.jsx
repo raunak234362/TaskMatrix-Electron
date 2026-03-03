@@ -1013,7 +1013,7 @@ const AddTask = () => {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3 bg-[#6bbd45] hover:bg-primary/80 text-white  shadow-lg shadow-indigo-200 transition-all active:scale-95 disabled:opacity-50"
+                    className="w-full py-3 bg-[#6bbd45]/50 hover:bg-primary/80 text-black  shadow-lg shadow-indigo-200 transition-all active:scale-95 disabled:opacity-50"
                   >
                     {isSubmitting ? "Assigning..." : "Confirm & Assign Tasks"}
                   </Button>

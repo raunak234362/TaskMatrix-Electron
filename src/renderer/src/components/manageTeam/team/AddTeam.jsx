@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form";
+import { Loader2 } from "lucide-react";
 import Button from "../../fields/Button";
 import Input from "../../fields/input";
 import { useEffect, useMemo, useState } from "react";
@@ -7,7 +8,7 @@ import Select from "../../fields/Select";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
-const AddTeam = () => {
+const AddTeam = ({ onClose }) => {
   const {
     register,
     handleSubmit,
@@ -105,6 +106,7 @@ const AddTeam = () => {
     try {
       await Service.AddTeam(data);
       toast.success("Team created successfully!");
+      if (onClose) onClose();
     } catch (error) {
       toast.error(error?.message || "Failed to create team");
     }
@@ -113,11 +115,9 @@ const AddTeam = () => {
   // ── Early loading UI ──
   if (loading) {
     return (
-      <div className="w-full mx-auto bg-white rounded-[2.5rem] shadow-soft p-20 border border-black/5 text-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-10 w-10 border-4 border-black/5 border-t-black"></div>
-          <span className="text-black font-black uppercase tracking-widest text-[10px]">Loading team setup...</span>
-        </div>
+      <div className="flex items-center justify-center p-12 text-black bg-white rounded-2xl border border-gray-200 shadow-xl">
+        <Loader2 className="w-8 h-8 animate-spin mr-3 text-[#6bbd45]" />
+        <span className="text-sm font-black uppercase tracking-widest text-[#6bbd45]">Loading team setup...</span>
       </div>
     );
   }
@@ -126,13 +126,26 @@ const AddTeam = () => {
   const hasDepartments = departmentOptions.some((opt) => opt.value);
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white rounded-[2.5rem] shadow-soft p-12 mt-10 border border-black/5">
-      <div className="mb-10 text-center">
-        <h2 className="text-3xl font-black text-black uppercase tracking-tight">Create New Team</h2>
-        <p className="text-black/60 text-sm font-bold tracking-wide mt-2">Initialize a new organizational unit</p>
-      </div>
+    <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-2xl mx-auto flex flex-col">
+      {/* Header */}
+      <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white">
+        <div>
+          <h2 className="text-xl font-black text-black tracking-tight uppercase">
+            Create New Team
+          </h2>
+          <p className="text-[10px] font-black text-black uppercase tracking-[0.2em] mt-1">
+            INITIALIZE A NEW ORGANIZATIONAL UNIT
+          </p>
+        </div>
+        <button
+          onClick={onClose}
+          className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
+        >
+          Close
+        </button>
+      </header>
 
-      <form onSubmit={handleSubmit(addTeam)} className="space-y-8">
+      <form onSubmit={handleSubmit(addTeam)} className="p-8 space-y-8">
         {/* Team Name */}
         <div className="space-y-2">
           <Input
@@ -159,7 +172,7 @@ const AddTeam = () => {
             onChange={(_, value) => setValue("managerID", value)}
           />
           {!hasManagers && (
-            <p className="text-amber-600 font-bold text-xs mt-1 ml-1">
+            <p className="text-amber-600 font-bold text-xs mt-1 ml-1 font-black uppercase tracking-widest text-[10px]">
               Managers will appear once added in the system.
             </p>
           )}
@@ -177,26 +190,31 @@ const AddTeam = () => {
             onChange={(_, value) => setValue("departmentID", value)}
           />
           {!hasDepartments && (
-            <p className="text-amber-600 font-bold text-xs mt-1 ml-1">
+            <p className="text-amber-600 font-bold text-xs mt-1 ml-1 font-black uppercase tracking-widest text-[10px]">
               Create departments first to assign teams.
             </p>
           )}
         </div>
-
-        {/* Submit */}
-        <div className="pt-6">
-          <Button
-            type="submit"
-            disabled={isSubmitting || !hasManagers || !hasDepartments}
-            className={`w-full px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-medium ${isSubmitting || !hasManagers || !hasDepartments
-              ? "bg-gray-100 text-black/20 cursor-not-allowed"
-              : "bg-black text-white hover:bg-black/90 active:scale-95"
-              }`}
-          >
-            {isSubmitting ? "Processing..." : "Create Team"}
-          </Button>
-        </div>
       </form>
+
+      {/* Footer */}
+      <footer className="p-6 border-t border-gray-200 bg-white flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          onClick={handleSubmit(addTeam)}
+          disabled={isSubmitting || !hasManagers || !hasDepartments}
+          className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all active:scale-95 disabled:opacity-50"
+        >
+          {isSubmitting ? "Processing..." : "Create Team"}
+        </button>
+      </footer>
     </div>
   );
 };

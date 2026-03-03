@@ -871,45 +871,20 @@ const TeamDashboard = () => {
 
       {/* Modals */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white w-[98%] max-w-[95vw] h-[95vh] rounded-4xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden relative border border-white/20">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-6 right-6 p-2 hover:bg-red-50 hover:text-red-500 rounded-full z-10 transition-colors"
-            >
-              <XIcon />
-            </button>
-            <div className="max-h-[80vh] overflow-y-auto custom-scrollbar">
-              <AddTeam />
-            </div>
-          </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <AddTeam onClose={() => setIsModalOpen(false)} />
         </div>
       )}
 
       {isViewModalOpen && selectedTeam && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white w-[98%] max-w-[95vw] h-[95vh] rounded-4xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden relative">
-            <button
-              onClick={() => setIsViewModalOpen(false)}
-              className="absolute top-6 right-6 p-2 hover:bg-red-50 hover:text-red-500 rounded-full z-10 transition-colors"
-            >
-              <XIcon />
-            </button>
-            <div className="max-h-[80vh] overflow-y-auto p-8 custom-scrollbar">
-              <GetTeamById id={selectedTeam} />
-            </div>
-          </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <GetTeamById id={selectedTeam} onClose={() => setIsViewModalOpen(false)} />
         </div>
       )}
 
       {selectedEmployee && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white w-[98%] max-w-[95vw] h-[95vh] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden relative">
-
-            <div className="max-h-[95vh] overflow-y-auto custom-scrollbar">
-              <GetEmployeeByID id={selectedEmployee} onClose={handleCloseModal} />
-            </div>
-          </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <GetEmployeeByID id={selectedEmployee} onClose={handleCloseModal} />
         </div>
       )}
 

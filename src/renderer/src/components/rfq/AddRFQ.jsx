@@ -196,14 +196,14 @@ const AddRFQ = ({ onSuccess }) => {
     fabOptions.find((opt) => opt.value === selectedFabricatorId) || null;
 
   return (
-    <div className="w-full mx-auto bg-white/80 backdrop-blur-lg rounded-xl shadow-lg p-3 md:p-5">
+    <div className="w-full mx-auto bg-white/80 backdrop-blur-lg rounded-xl shadow-lg p-3 md:p-5 ">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-4 md:space-y-8"
+        className="space-y-4 md:space-y-8 bg-zinc-100 rounded-xl p-4"
       >
         <SectionTitle title="Project Information" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 ">
           {/* FABRICATOR (HIDDEN FOR CLIENTS) */}
           {(userRole !== "CLIENT" || userRole !== "CLIENT_ADMIN") && (
             <>
