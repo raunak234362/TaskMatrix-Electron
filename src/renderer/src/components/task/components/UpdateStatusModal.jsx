@@ -35,12 +35,15 @@ const UpdateStatusModal = ({ taskId, currentStatus, onClose, refresh }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 p-4 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-                    <h3 className="text-lg  text-slate-800">Update Task Status</h3>
-                    <button onClick={onClose} className="p-1 hover:bg-slate-200 rounded-full transition-colors">
-                        <X className="w-5 h-5 text-slate-500" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200">
+                <div className="bg-white px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 className="text-lg font-black text-black tracking-tight uppercase">Update Task Status</h3>
+                    <button
+                        onClick={onClose}
+                        className="px-3 py-1.5 bg-red-50 border border-red-600 text-black font-black text-[9px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
+                    >
+                        Close
                     </button>
                 </div>
 
@@ -71,10 +74,14 @@ const UpdateStatusModal = ({ taskId, currentStatus, onClose, refresh }) => {
                     </div>
                 </div>
 
-                <div className="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-200">
-                    <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
+                <div className="bg-white px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
+                    <button
+                        onClick={onClose}
+                        disabled={isSubmitting}
+                        className="px-6 py-2 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50"
+                    >
                         Cancel
-                    </Button>
+                    </button>
                 </div>
             </div>
         </div>

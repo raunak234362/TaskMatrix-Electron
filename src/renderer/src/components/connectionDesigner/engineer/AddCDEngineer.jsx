@@ -48,15 +48,12 @@ const AddCDEngineer = ({ designer, onClose }) => {
               <UserPlus className="text-[#6bbd45]" size={28} />
               Onboard Engineer
             </h2>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">
-              EXPAND WORKFORCE INTELLIGENCE FOR {designer.name}
-            </p>
           </div>
           <button
             onClick={onClose}
-            className="p-3 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-all active:scale-95 shadow-sm border border-gray-100"
+            className="p-2 bg-red-100 hover:bg-red-300 text-black hover:text-black rounded-xl shadow-sm border border-black"
           >
-            <X size={20} strokeWidth={2.5} />
+        close
           </button>
         </div>
 
@@ -175,7 +172,7 @@ const AddCDEngineer = ({ designer, onClose }) => {
               <button
                 type="button"
                 onClick={onClose}
-                className="px-8 py-3.5 bg-gray-50 hover:bg-gray-100 text-gray-500 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all"
+                className="px-8 py-3.5 bg-gray-50 hover:bg-gray-100 text-gray-500 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] border border-black"
               >
                 Cancel
               </button>

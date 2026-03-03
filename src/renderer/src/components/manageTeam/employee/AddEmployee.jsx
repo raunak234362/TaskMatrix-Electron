@@ -242,8 +242,8 @@ const AddEmployee = () => {
             type="submit"
             disabled={isSubmitting}
             className={`w-full px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-medium flex items-center justify-center gap-3 ${isSubmitting
-              ? "bg-gray-100 text-black/20 cursor-not-allowed"
-              : "bg-green-500 text-white hover:bg-green-600 active:scale-95"
+              ? "bg-gray-50 text-black cursor-not-allowed"
+              : "bg-green-300 text-black hover:bg-green-600 active:scale-95"
               }`}
           >
             {isSubmitting ? (

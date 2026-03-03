@@ -147,16 +147,16 @@ const EditTask = ({ id, onClose, refresh }) => {
 
   /* ---------------- UI ---------------- */
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden max-w-4xl mx-auto">
-      <div className="bg-slate-50 px-8 py-4 border-b border-slate-200 flex justify-between items-center">
-        <h2 className="text-xl  text-slate-800 flex items-center gap-2">
-          <FileText className="w-5 h-5 text-indigo-500" /> Edit Task
+    <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden max-w-4xl mx-auto animate-in fade-in zoom-in duration-200">
+      <div className="bg-white px-8 py-4 border-b border-gray-200 flex justify-between items-center">
+        <h2 className="text-xl font-black text-black tracking-tight uppercase flex items-center gap-2">
+          <FileText className="w-5 h-5 text-[#6bbd45]" /> Edit Task
         </h2>
         <button
           onClick={onClose}
-          className="p-2 hover:bg-slate-200 rounded-full"
+          className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
         >
-          <X className="w-5 h-5 text-slate-500" />
+          Close
         </button>
       </div>
 
@@ -252,13 +252,21 @@ const EditTask = ({ id, onClose, refresh }) => {
         </section>
 
         {/* Footer */}
-        <div className="flex justify-end gap-4 pt-6">
-          <Button type="button" variant="secondary" onClick={onClose}>
+        <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all"
+          >
             Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50"
+          >
             {isSubmitting ? "Saving..." : "Save Changes"}
-          </Button>
+          </button>
         </div>
       </form>
     </div >

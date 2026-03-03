@@ -271,31 +271,28 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
 
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] overflow-hidden flex flex-col relative">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] border border-gray-200 overflow-hidden flex flex-col relative">
 
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50">
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-white sticky top-0 z-10 shrink-0">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-[#6bbd45]/15 rounded-xl text-[#6bbd45]">
               <ClipboardList className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl md:text-2xl font-bold text-gray-800">{task.name}</h2>
+              <h2 className="text-xl font-black text-black tracking-tight">{task.name}</h2>
               <div className="flex items-center gap-2 mt-1">
-                {/* <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">ID: #{task.id}</span> */}
-                <span className={`px-2 py-0.5 rounded text-sm border border-black font-bold uppercase ${priority.bg} ${priority.color}`}>{priority.label} Priority</span>
+                <span className={`px-2 py-0.5 rounded-lg text-[10px] border border-black font-black uppercase tracking-widest ${priority.bg} ${priority.color}`}>{priority.label} Priority</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 hover:text-gray-700"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
+          >
+            Close
+          </button>
         </div>
 
         {/* Action Bar (Top) */}
@@ -437,26 +434,26 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                               .reverse()
                               .slice(0, showAllSessions ? task.workingHourTask.length : 5)
                               .map((session, idx) => (
-                              <tr key={idx}>
-                                <td className="px-3 py-2 text-slate-600">
-                                  <div className="font-medium">{toIST(session.started_at).split(',')[1]}</div>
-                                  <div className="text-[10px] text-slate-400 capitalize">{toIST(session.started_at).split(',')[0]}</div>
-                                </td>
-                                <td className="px-3 py-2 text-slate-600">
-                                  {session.ended_at ? (
-                                    <>
-                                      <div className="font-medium">{toIST(session.ended_at).split(',')[1]}</div>
-                                      <div className="text-[10px] text-slate-400 capitalize">{toIST(session.ended_at).split(',')[0]}</div>
-                                    </>
-                                  ) : (
-                                    <span className="text-green-500 font-bold uppercase text-[10px] animate-pulse">Active</span>
-                                  )}
-                                </td>
-                                <td className="px-3 py-2 text-right font-mono font-medium text-slate-700">
-                                  {session.duration_seconds ? formatHours(session.duration_seconds / 3600) : '--:--'}
-                                </td>
-                              </tr>
-                            ))}
+                                <tr key={idx}>
+                                  <td className="px-3 py-2 text-slate-600">
+                                    <div className="font-medium">{toIST(session.started_at).split(',')[1]}</div>
+                                    <div className="text-[10px] text-slate-400 capitalize">{toIST(session.started_at).split(',')[0]}</div>
+                                  </td>
+                                  <td className="px-3 py-2 text-slate-600">
+                                    {session.ended_at ? (
+                                      <>
+                                        <div className="font-medium">{toIST(session.ended_at).split(',')[1]}</div>
+                                        <div className="text-[10px] text-slate-400 capitalize">{toIST(session.ended_at).split(',')[0]}</div>
+                                      </>
+                                    ) : (
+                                      <span className="text-green-500 font-bold uppercase text-[10px] animate-pulse">Active</span>
+                                    )}
+                                  </td>
+                                  <td className="px-3 py-2 text-right font-mono font-medium text-slate-700">
+                                    {session.duration_seconds ? formatHours(session.duration_seconds / 3600) : '--:--'}
+                                  </td>
+                                </tr>
+                              ))}
                           </tbody>
                         </table>
                         {task.workingHourTask.length > 5 && (

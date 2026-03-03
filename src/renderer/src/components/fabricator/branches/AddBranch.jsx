@@ -104,7 +104,7 @@ const AddBranch = ({ fabricatorId, onClose, fabricatorName }) => {
         <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-white">
           <div>
             <h2 className="text-2xl font-black text-gray-800 tracking-tight flex items-center gap-3">
-              <PlusCircle className="text-[#6bbd45]" size={28} />
+             
               Add New Branch
             </h2>
             {/* <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">
@@ -121,7 +121,7 @@ const AddBranch = ({ fabricatorId, onClose, fabricatorName }) => {
 
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 border border-gray-200 rounded-2xl p-4 bg-zinc-100">
 
               {/* Name */}
               <div className="space-y-1">
