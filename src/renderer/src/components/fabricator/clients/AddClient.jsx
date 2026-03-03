@@ -31,12 +31,12 @@ const AddClients = ({ fabricator, onClose }) => {
         payload
       );
       dispatch(addStaff(response?.data?.user));
-      toast.success("Employee created successfully!");
+      toast.success("POC created successfully!");
       onClose();
     } catch (error) {
-      console.error("Error creating employee:", error);
+      console.error("Error creating POC:", error);
       toast.error(
-        error?.response?.data?.message || "Failed to create employee"
+        error?.response?.data?.message || "Failed to create POC"
       );
     }
   };

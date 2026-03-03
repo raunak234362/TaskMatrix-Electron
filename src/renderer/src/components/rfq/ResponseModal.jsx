@@ -104,8 +104,8 @@ const ResponseModal = ({
       }
 
       // Add inline styles to ul/ol
-      cleaned = cleaned.replace(/<ul/g, '<ul style="list-style-type: disc; margin: 0; padding-left: 25px; font-size: 12px; line-height: 1.5; color: #444;"');
-      cleaned = cleaned.replace(/<ol/g, '<ol style="list-style-type: decimal; margin: 0; padding-left: 25px; font-size: 12px; line-height: 1.5; color: #444;"');
+      cleaned = cleaned.replace(/<ul/g, '<ul style="list-style-type: disc; margin: 0; padding-left: 25px; font-size: 12px; line-height: 1.5; color: #444; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;"');
+      cleaned = cleaned.replace(/<ol/g, '<ol style="list-style-type: decimal; margin: 0; padding-left: 25px; font-size: 12px; line-height: 1.5; color: #444; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;"');
 
       return cleaned;
     }
@@ -113,7 +113,7 @@ const ResponseModal = ({
     const formatScopeForProposal = (data) => {
       if (Array.isArray(data)) {
         return data.length > 0
-          ? `<ul style="list-style-type: disc; margin: 0; padding-left: 25px; font-size: 12px; line-height: 1.5; color: #444;">${data.map((item) => `<li>${item}</li>`).join('')}</ul>`
+          ? `<ul style="list-style-type: disc; margin: 0; padding-left: 25px; font-size: 12px; line-height: 1.5; color: #444; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">${data.map((item) => `<li style="margin-bottom: 4px; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;">${item}</li>`).join('')}</ul>`
           : '<p style="font-size: 12px; color: #444;">No items specified</p>';
       }
       if (typeof data === 'string') {
@@ -121,7 +121,7 @@ const ResponseModal = ({
           const parsed = JSON.parse(data);
           if (Array.isArray(parsed)) {
             return parsed.length > 0
-              ? `<ul style="list-style-type: disc; margin: 0; padding-left: 25px; font-size: 12px; line-height: 1.5; color: #444;">${parsed.map((item) => `<li>${item}</li>`).join('')}</ul>`
+              ? `<ul style="list-style-type: disc; margin: 0; padding-left: 25px; font-size: 12px; line-height: 1.5; color: #444; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; max-width: 100%;">${parsed.map((item) => `<li style="margin-bottom: 4px; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;">${item}</li>`).join('')}</ul>`
               : '<p style="font-size: 12px; color: #444;">No items specified</p>';
           }
         } catch {
@@ -209,14 +209,14 @@ const ResponseModal = ({
             </table>
 
             <!-- Scope of Work -->
-            <div style="margin-bottom: 35px;">
+            <div style="margin-bottom: 35px; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word;">
               <h3 style="color: #6bbd45; font-size: 16px; margin-bottom: 10px; display: inline-block; padding-bottom: 2px;">Scope of work</h3>
               
-              <div style="margin-top: 10px;margin-bottom: 10px;">
+              <div style="margin-top: 10px;margin-bottom: 10px; max-width: 100%;">
                 <h4 style="color: #6bbd45; text-decoration: underline; margin-bottom: 12px; font-size: 14px;">Inclusions:</h4>
                 ${inclusionsHtml}
               </div>
-              <div style="margin-bottom: 35px;">
+              <div style="margin-bottom: 35px; max-width: 100%;">
                 <h4 style="color: #6bbd45; text-decoration: underline; margin-bottom: 12px; font-size: 14px;">Exclusions:</h4>
                 ${exclusionsHtml}
               </div>

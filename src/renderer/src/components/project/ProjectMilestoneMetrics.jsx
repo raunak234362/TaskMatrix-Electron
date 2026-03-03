@@ -14,6 +14,7 @@ const ProjectMilestoneMetrics = ({
   const dispatch = useDispatch();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedMilestoneId, setSelectedMilestoneId] = useState(null);
+console.log(projectId,"-==============-");
 
   const milestonesByProject = useSelector(
     (state) => state.milestoneInfo?.milestonesByProject || {},
@@ -95,6 +96,8 @@ const ProjectMilestoneMetrics = ({
       };
     });
   }, [milestones]);
+  console.log(ms,"===================");
+  
 
   return (
     <div className="space-y-8 p-1">

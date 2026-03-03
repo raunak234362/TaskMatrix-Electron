@@ -434,7 +434,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
 
         {/* Right: action buttons */}
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          {userRole === "admin" && (
+          {userRole === "admin" || userRole === "deputy_manager" || userRole === "operation_executive" && (
             <>
               <Button
                 onClick={() => handleModel(employee)}
@@ -546,6 +546,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
       )}
 
       {/* ── Task Performance Report ── */}
+      {userRole !=="client" || userRole !== "client_admin" && (
       <div className="pt-8 border-t border-black/5">
 
         {/* Section Header */}
@@ -723,7 +724,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
           </>
         )}
       </div>
-
+      )}
       {/* ── Address ── */}
       {(employee.address || employee.city || employee.state || employee.country || employee.zipCode) && (
         <div className="pt-8 border-t border-black/5">
