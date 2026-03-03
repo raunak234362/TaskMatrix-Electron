@@ -4,24 +4,54 @@ import { Loader2, Pencil } from 'lucide-react'
 import Service from '../../api/Service'
 
 const InclusionExclusion = ({ estimationId, onEdit }) => {
-  const [inclusions, setInclusions] = useState([])
-  const [exclusions, setExclusions] = useState([])
+  const [inclusions, setInclusions] = useState('')
+  const [exclusions, setExclusions] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // Helper to safely parse JSON arrays
-  const parseArray = (data) => {
-    if (Array.isArray(data)) return data
-    if (typeof data === 'string') {
-      try {
-        // Handle cases where data is double-stringified or simple JSON
-        const parsed = JSON.parse(data)
-        return Array.isArray(parsed) ? parsed : []
-      } catch {
-        console.error('Failed to parse array:', data)
-        return []
+  // Helper to safely parse mixed legacy array / new rich text string
+  const cleanHtmlList = (htmlString) => {
+    if (!htmlString || typeof htmlString !== 'string') return '';
+    let cleaned = htmlString;
+    // Remove span styling that overrides displaying and blocks list items
+    cleaned = cleaned.replace(/<span[^>]*>/gi, '').replace(/<\/span>/gi, '');
+
+    // Convert LIs containing literal newlines into split LIs
+    cleaned = cleaned.replace(/<li>([\s\S]*?)<\/li>/gi, (match, p1) => {
+      const items = p1.split(/\r?\n/).map(i => i.trim()).filter(Boolean);
+      if (items.length > 1) {
+        return items.map(i => `<li>${i}</li>`).join('');
+      }
+      return match;
+    });
+
+    // If it's raw text without any lists but contains newlines, force standard HTML list
+    if (!cleaned.includes('<ul') && !cleaned.includes('<ol')) {
+      const plainLines = cleaned.replace(/<[^>]+>/g, ' ').split(/\r?\n/).map(i => i.trim()).filter(Boolean);
+      if (plainLines.length > 1) {
+        return `<ul>${plainLines.map(l => `<li>${l}</li>`).join('')}</ul>`;
       }
     }
-    return []
+
+    return cleaned;
+  }
+
+  const formatData = (data) => {
+    if (Array.isArray(data)) {
+      return data.length > 0 ? `<ul>${data.map((item) => `<li>${item}</li>`).join('')}</ul>` : ''
+    }
+    if (typeof data === 'string') {
+      try {
+        const parsed = JSON.parse(data)
+        if (Array.isArray(parsed)) {
+          return parsed.length > 0
+            ? `<ul>${parsed.map((item) => `<li>${item}</li>`).join('')}</ul>`
+            : ''
+        }
+      } catch {
+        return cleanHtmlList(data);
+      }
+    }
+    return cleanHtmlList(data);
   }
 
   useEffect(() => {
@@ -31,8 +61,8 @@ const InclusionExclusion = ({ estimationId, onEdit }) => {
         setLoading(true)
         const response = await Service.GetEstimationById(estimationId)
         if (response?.data) {
-          setInclusions(parseArray(response.data.inclusions))
-          setExclusions(parseArray(response.data.exclusions))
+          setInclusions(formatData(response.data.inclusions))
+          setExclusions(formatData(response.data.exclusions))
         }
       } catch (error) {
         console.error('Error fetching inclusions/exclusions:', error)
@@ -73,15 +103,11 @@ const InclusionExclusion = ({ estimationId, onEdit }) => {
           <h3 className="text-md  text-green-700 bg-green-50 px-3 py-2 rounded-lg mb-3 border-l-4 border-green-500">
             Inclusions
           </h3>
-          {inclusions.length > 0 ? (
-            <ul className="space-y-2">
-              {inclusions.map((item, index) => (
-                <li key={index} className="flex items-start text-gray-700">
-                  <span className="mr-2 text-green-500 ">•</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+          {inclusions ? (
+            <div
+              className="text-gray-700 text-sm [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5 [&_li]:mb-1 [&_p]:mb-2"
+              dangerouslySetInnerHTML={{ __html: inclusions }}
+            />
           ) : (
             <p className="text-gray-400 italic text-sm pl-3">No inclusions specified.</p>
           )}
@@ -92,15 +118,11 @@ const InclusionExclusion = ({ estimationId, onEdit }) => {
           <h3 className="text-md  text-red-700 bg-red-50 px-3 py-2 rounded-lg mb-3 border-l-4 border-red-500">
             Exclusions
           </h3>
-          {exclusions.length > 0 ? (
-            <ul className="space-y-2">
-              {exclusions.map((item, index) => (
-                <li key={index} className="flex items-start text-gray-700">
-                  <span className="mr-2 text-red-500 ">•</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+          {exclusions ? (
+            <div
+              className="text-gray-700 text-sm [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5 [&_li]:mb-1 [&_p]:mb-2"
+              dangerouslySetInnerHTML={{ __html: exclusions }}
+            />
           ) : (
             <p className="text-gray-400 italic text-sm pl-3">No exclusions specified.</p>
           )}

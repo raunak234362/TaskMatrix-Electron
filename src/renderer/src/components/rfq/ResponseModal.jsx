@@ -79,36 +79,61 @@ const ResponseModal = ({
       </div>
     `;
 
-    // Helper to safely parse JSON arrays
-    const parseArray = (data) => {
-      if (Array.isArray(data)) return data;
-      if (typeof data === "string") {
-        try {
-          const parsed = JSON.parse(data);
-          return Array.isArray(parsed) ? parsed : [];
-        } catch {
-          return [];
+    // Helper to safely parse mixed legacy array / new rich text string
+    const cleanHtmlList = (htmlString) => {
+      if (!htmlString || typeof htmlString !== 'string') return '';
+      let cleaned = htmlString;
+      // Remove span styling that overrides displaying and blocks list items
+      cleaned = cleaned.replace(/<span[^>]*>/gi, '').replace(/<\/span>/gi, '');
+
+      // Convert LIs containing literal newlines into split LIs
+      cleaned = cleaned.replace(/<li>([\s\S]*?)<\/li>/gi, (match, p1) => {
+        const items = p1.split(/\r?\n/).map(i => i.trim()).filter(Boolean);
+        if (items.length > 1) {
+          return items.map(i => `<li>${i}</li>`).join('');
+        }
+        return match;
+      });
+
+      // If it's raw text without any lists but contains newlines, force standard HTML list
+      if (!cleaned.includes('<ul') && !cleaned.includes('<ol')) {
+        const plainLines = cleaned.replace(/<[^>]+>/g, ' ').split(/\r?\n/).map(i => i.trim()).filter(Boolean);
+        if (plainLines.length > 1) {
+          cleaned = `<ul>${plainLines.map(l => `<li>${l}</li>`).join('')}</ul>`;
         }
       }
-      return [];
-    };
 
-    const inclusions = parseArray(est.inclusions);
-    const exclusions = parseArray(est.exclusions);
+      // Add inline styles to ul/ol
+      cleaned = cleaned.replace(/<ul/g, '<ul style="list-style-type: disc; margin: 0; padding-left: 25px; font-size: 12px; line-height: 1.5; color: #444;"');
+      cleaned = cleaned.replace(/<ol/g, '<ol style="list-style-type: decimal; margin: 0; padding-left: 25px; font-size: 12px; line-height: 1.5; color: #444;"');
 
-    const inclusionsHtml =
-      inclusions.length > 0
-        ? inclusions
-          .map((item) => `<li><span>${item}</span></li>`)
-          .join("")
-        : `<li><span>No inclusions specified</span></li>`;
+      return cleaned;
+    }
 
-    const exclusionsHtml =
-      exclusions.length > 0
-        ? exclusions
-          .map((item) => `<li><span>${item}</span></li>`)
-          .join("")
-        : `<li><span>No exclusions specified</span></li>`;
+    const formatScopeForProposal = (data) => {
+      if (Array.isArray(data)) {
+        return data.length > 0
+          ? `<ul style="list-style-type: disc; margin: 0; padding-left: 25px; font-size: 12px; line-height: 1.5; color: #444;">${data.map((item) => `<li>${item}</li>`).join('')}</ul>`
+          : '<p style="font-size: 12px; color: #444;">No items specified</p>';
+      }
+      if (typeof data === 'string') {
+        try {
+          const parsed = JSON.parse(data);
+          if (Array.isArray(parsed)) {
+            return parsed.length > 0
+              ? `<ul style="list-style-type: disc; margin: 0; padding-left: 25px; font-size: 12px; line-height: 1.5; color: #444;">${parsed.map((item) => `<li>${item}</li>`).join('')}</ul>`
+              : '<p style="font-size: 12px; color: #444;">No items specified</p>';
+          }
+        } catch {
+          let cleaned = cleanHtmlList(data);
+          return cleaned || '<p style="font-size: 12px; color: #444;">No items specified</p>';
+        }
+      }
+      return '<p style="font-size: 12px; color: #444;">No items specified</p>';
+    }
+
+    const inclusionsHtml = formatScopeForProposal(est.inclusions);
+    const exclusionsHtml = formatScopeForProposal(est.exclusions);
 
     const selectedItems = items.filter((item) => item.selected);
     const tableRows = selectedItems
@@ -189,16 +214,12 @@ const ResponseModal = ({
               
               <div style="margin-top: 10px;margin-bottom: 10px;">
                 <h4 style="color: #6bbd45; text-decoration: underline; margin-bottom: 12px; font-size: 14px;">Inclusions:</h4>
-                <ul style="list-style-type: disc; margin: 0; padding-left: 25px; font-size: 12px; line-height: 1.5; color: #444;">
-                  ${inclusionsHtml}
-                </ul>
+                ${inclusionsHtml}
               </div>
               <div style="margin-bottom: 35px;">
-              <h4 style="color: #6bbd45; text-decoration: underline; margin-bottom: 12px; font-size: 14px;">Exclusions:</h4>
-              <ul style="list-style-type: disc; margin: 0; padding-left: 25px; font-size: 12px; line-height: 1.5; color: #444;">
+                <h4 style="color: #6bbd45; text-decoration: underline; margin-bottom: 12px; font-size: 14px;">Exclusions:</h4>
                 ${exclusionsHtml}
-              </ul>
-            </div>
+              </div>
 
             </div>
           </div>

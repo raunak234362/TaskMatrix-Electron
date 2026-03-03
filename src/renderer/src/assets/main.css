@@ -1,5 +1,6 @@
 @import './base.css';
 @import 'tailwindcss';
+@plugin "@tailwindcss/typography";
 
 @theme {
   --color-green-50: #f4f9f0;
@@ -12,7 +13,7 @@
   --color-green-700: #447a2d;
   --color-green-800: #315821;
   --color-green-900: #1e3514;
-  
+
   --color-primary: #6bbd45;
 }
 
