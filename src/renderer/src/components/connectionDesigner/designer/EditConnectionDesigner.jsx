@@ -210,34 +210,37 @@ const EditConnectionDesigner = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 bg-opacity-50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white max-w-4xl rounded-xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+        className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-gray-200 animate-in fade-in zoom-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex justify-between items-center p-5 border-b bg-gray-50 shrink-0">
-          <h2 className="text-xl  text-gray-700">
-            Edit Connection Designer
-          </h2>
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 shrink-0 bg-white">
+          <div>
+            <h2 className="text-xl font-black text-black tracking-tight">
+              Edit Connection Designer
+            </h2>
+          
+          </div>
           <button
             onClick={onClose}
-            className="text-gray-700 hover:text-gray-700 transition"
+            className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
             aria-label="Close"
           >
-            <X className="w-5 h-5" />
+            Close
           </button>
         </div>
 
         {/* Body (Scrollable form) */}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="p-5 space-y-5 overflow-y-auto flex-1"
+          className="p-6 space-y-5 overflow-y-auto flex-1 custom-scrollbar"
         >
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+            <div className="p-3 bg-red-50 border border-red-300 text-black rounded-lg text-sm font-bold">
               {error}
             </div>
           )}
@@ -272,7 +275,7 @@ const EditConnectionDesigner = ({
             />
           </div>
 
-          {/* Website & Drive Link */}
+          {/* Website */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
               label="Website (optional)"
@@ -370,27 +373,26 @@ const EditConnectionDesigner = ({
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-3 border-t shrink-0">
-            <Button type="button" onClick={onClose} disabled={submitting}>
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 shrink-0">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={submitting}
+              className="px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50"
+            >
               Cancel
-            </Button>
-            <Button
+            </button>
+            <button
               type="submit"
               disabled={submitting}
-              className="bg-green-600 text-white hover:bg-green-700 flex items-center gap-2 disabled:opacity-70"
+              className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lgn-200 text-[10px] font-black uppercase tracking-[0.2em] shadow-sm disabled:opacity-50 transition-all flex items-center gap-3 active:scale-95"
             >
               {submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving...
-                </>
+                <><Loader2 className="w-4 h-4 animate-spin" />Saving...</>
               ) : (
-                <>
-                  <Check className="w-4 h-4" />
-                  Save Changes
-                </>
+                <><Check className="w-4 h-4" />Save Changes</>
               )}
-            </Button>
+            </button>
           </div>
         </form>
       </div>

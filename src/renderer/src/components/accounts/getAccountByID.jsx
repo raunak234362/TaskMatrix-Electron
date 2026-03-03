@@ -51,7 +51,7 @@ const GetAccountByID = ({ id }) => {
   }
 
   return (
-    <div className="p-4 md:p-6 bg-linear-to-br from-green-50 to-white rounded-xl shadow-sm border border-green-100">
+    <div className="p-4 md:p-6  rounded-xl shadow-sm border border-green-100">
       <div className="flex items-center gap-3 mb-6">
         <div className="p-2 bg-green-100 rounded-lg">
           <Building2 className="w-6 h-6 text-green-700" />

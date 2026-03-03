@@ -61,33 +61,42 @@ const AddConnectionDesigner = () => {
   // --- Submit Form ---
   const onSubmit = async (data) => {
     try {
-      const formData = new FormData();
-      formData.append("name", data.connectionDesignerName.trim());
-      formData.append("contactInfo", data.contactInfo || "");
-      formData.append("websiteLink", data.website || "");
-      formData.append("email", data.email || "");
-      formData.append("insurenceLiability", data.insuranceLiability || "");
-
-      // Append states individually to ensure backend treats it as an array/list
-      if (data.headquater.states && Array.isArray(data.headquater.states)) {
-        data.headquater.states.forEach((s) => {
-          formData.append("state", s);
-        });
-      }
-
+      const statesArray = Array.isArray(data.headquater.states) ? data.headquater.states : [];
       const location = data.headquater.city
         ? `${data.headquater.city}, ${data.headquater.country}`
         : data.headquater.country;
-      formData.append("location", location);
+      const hasCertificates = data.certificate && data.certificate.length > 0;
 
-      if (data.certificate && data.certificate.length > 0) {
-        Array.from(data.certificate).forEach((file) => {
-          formData.append("files", file);
-        });
+      let payload;
+
+      if (hasCertificates) {
+        // Files present — use multipart, state as repeated state[] keys
+        const formData = new FormData();
+        formData.append("name", data.connectionDesignerName.trim());
+        formData.append("contactInfo", data.contactInfo || "");
+        formData.append("websiteLink", data.website || "");
+        formData.append("email", data.email || "");
+        formData.append("insurenceLiability", data.insuranceLiability || "");
+        formData.append("location", location || "");
+        statesArray.forEach((s) => formData.append("state[]", s));
+        Array.from(data.certificate).forEach((file) => formData.append("files", file));
+        payload = formData;
+      } else {
+        // No files — send clean JSON so state arrives as a proper array
+        payload = {
+          name: data.connectionDesignerName.trim(),
+          contactInfo: data.contactInfo || "",
+          websiteLink: data.website || "",
+          email: data.email || "",
+          insurenceLiability: data.insuranceLiability || "",
+          location: location || "",
+          state: statesArray,   // ← real array, Zod ✅
+          files: [],
+        };
       }
 
-      console.log("🚀 FormData to send:", formData);
-      await Service.AddConnectionDesigner(formData); // ✅ Send to backend
+      console.log("🚀 Connection Designer payload:", payload);
+      await Service.AddConnectionDesigner(payload);
       toast.success("Connection Designer created successfully!");
       reset();
     } catch (error) {

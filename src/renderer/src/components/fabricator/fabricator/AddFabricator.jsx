@@ -223,7 +223,7 @@ const AddFabricator = () => {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-linear-to-r from-green-600 to-emerald-500 text-white px-8 py-2.5 rounded-lg hover:opacity-90 shadow-md transition"
+            className="w-full bg-green-200 text-black px-8 py-2.5 rounded-lg hover:opacity-90 shadow-md transition"
           >
             {isSubmitting ? "Creating..." : "Create Fabricator"}
           </Button>

@@ -217,7 +217,7 @@ const EditFabricator = ({
         initial={{ scale: 0.95, opacity: 0, y: 30 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 30 }}
-        className="bg-white w-full max-w-5xl rounded-[40px] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col relative border border-white/20"
+        className="bg-white w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col relative border border-gray-100"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -232,10 +232,10 @@ const EditFabricator = ({
           </div>
           <button
             onClick={onClose}
-            className="p-3 bg-white shadow-sm border border-slate-100 rounded-2xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all active:scale-90"
+            className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
             aria-label="Close"
           >
-            <X className="w-6 h-6" />
+            Close
           </button>
         </div>
 
@@ -252,7 +252,7 @@ const EditFabricator = ({
 
           {/* Section 1: Identity */}
           <section className="space-y-6">
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <label className="block text-xs text-black font-bold uppercase tracking-widest mb-2">
@@ -307,7 +307,7 @@ const EditFabricator = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-bold">
               <div>
                 <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
-                  Digital Hub (URL)
+                  Website (URL)
                 </label>
                 <Input
                   label=""
@@ -319,7 +319,7 @@ const EditFabricator = ({
               </div>
               <div>
                 <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
-                  Shared Repository (Cloud)
+                  Drive link (Cloud)
                 </label>
                 <Input
                   label=""
@@ -431,7 +431,7 @@ const EditFabricator = ({
 
           {/* Section 3: Assets */}
           <section className="space-y-6 pt-10 border-t border-slate-100">
-           
+
 
             {/* Existing Files */}
             {filesToKeep.length > 0 && (
@@ -483,12 +483,12 @@ const EditFabricator = ({
               disabled={submitting}
               className="px-8 py-3 text-[10px] uppercase tracking-widest text-black border border-black rounded-2xl hover:text-slate-600 transition-all active:scale-95 font-bold"
             >
-              Cancel Edit
+              Cancel
             </button>
             <Button
               type="submit"
               disabled={submitting}
-              className="px-10 py-3 bg-green-200 hover:bg-green-300 text-black  text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-green-100 transition-all active:scale-95 flex items-center gap-3 border-none font-bold border-black "
+              className="px-10 py-2 bg-green-200 border border-black hover:bg-green-300 hover:border-green-300 text-black  text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-green-100 transition-all active:scale-95 flex items-center gap-3 font-bold "
             >
               {submitting ? (
                 <>
@@ -497,8 +497,7 @@ const EditFabricator = ({
                 </>
               ) : (
                 <>
-                  <Check className="w-5 h-5 border " />
-                  Commit Changes
+                  Update
                 </>
               )}
             </Button>

@@ -103,24 +103,26 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-all duration-300">
-      <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+      <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-gray-200 max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* HEADER */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-gray-100 bg-gray-50/80 backdrop-blur">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
           <div>
-            <h2 className="text-xl  text-gray-800">Edit Estimation</h2>
-            <p className="text-sm text-gray-500 mt-1">Update estimation details and status</p>
+            <h2 className="text-xl font-black text-black tracking-tight">Edit Estimation</h2>
+            <p className="text-[10px] font-black text-black uppercase tracking-[0.2em] mt-1">
+              UPDATE ESTIMATION DETAILS AND STATUS
+            </p>
           </div>
           <button
             onClick={onCancel}
-            className="p-2 rounded-full hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors"
+            className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
           >
-            <X size={20} />
+            Close
           </button>
         </div>
 
         {/* BODY */}
-        <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-gray-50/30 font-sans">
+        <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-white font-sans custom-scrollbar">
           <form id="edit-estimation-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Card 1 */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
@@ -139,7 +141,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-gray-700">Fabricator *</label>
+                <label className="text-sm font-medium text-black uppercase tracking-widest text-[10px] mb-1">Fabricator *</label>
                 <Controller
                   name="fabricatorId"
                   control={control}
@@ -201,7 +203,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
               <SectionTitle title="Status" />
 
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-gray-700">Status</label>
+                <label className="text-sm font-medium text-black uppercase tracking-widest text-[10px] mb-1">Status</label>
                 <Controller
                   name="status"
                   control={control}
@@ -226,29 +228,30 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
         </div>
 
         {/* FOOTER */}
-        <div className="px-8 py-5 border-t border-gray-100 bg-white flex justify-end gap-3 z-10">
-          <Button
-            variant="outline"
+        <div className="px-8 py-5 border-t border-gray-200 bg-white flex justify-end gap-3 z-10 shrink-0">
+          <button
+            type="button"
             onClick={onCancel}
-            className="border-gray-300 text-gray-700 hover:bg-gray-50"
+            disabled={isSubmitting}
+            className="px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50"
           >
             Cancel
-          </Button>
-          <Button
+          </button>
+          <button
             form="edit-estimation-form"
             type="submit"
             disabled={isSubmitting}
-            className="bg-green-600 hover:bg-green-700 text-white min-w-[140px] shadow-lg shadow-green-100"
+            className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50"
           >
             {isSubmitting ? (
-              <div className="flex items-center gap-2">
+              <>
                 <Loader2 className="animate-spin w-4 h-4" />
                 <span>Updating...</span>
-              </div>
+              </>
             ) : (
               'Update Estimation'
             )}
-          </Button>
+          </button>
         </div>
       </div>
     </div>

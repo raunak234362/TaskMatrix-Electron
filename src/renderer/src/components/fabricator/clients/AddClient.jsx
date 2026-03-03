@@ -53,7 +53,7 @@ const AddClients = ({ fabricator, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[11000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-4xl bg-white rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden relative border border-white/20 animate-in fade-in zoom-in duration-200">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden relative border border-gray-100 animate-in fade-in zoom-in duration-200">
 
         {/* Header Section */}
         <div className="p-8 border-b border-gray-100 flex items-center justify-between">
@@ -62,15 +62,13 @@ const AddClients = ({ fabricator, onClose }) => {
               <UserPlus className="text-[#6bbd45]" size={28} />
               Add New POC
             </h2>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">
-              ESTABLISH POINT OF CONTACT FOR {fabricator.fabName}
-            </p>
+           
           </div>
           <button
             onClick={onClose}
-            className="p-3 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-all active:scale-95 shadow-sm"
+            className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
           >
-            <X size={20} strokeWidth={2.5} />
+            Close
           </button>
         </div>
 
@@ -209,7 +207,7 @@ const AddClients = ({ fabricator, onClose }) => {
               <button
                 type="button"
                 onClick={onClose}
-                className="px-8 py-3.5 bg-gray-50 hover:bg-gray-100 text-gray-500 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all"
+                className="px-8 py-3.5 bg-gray-50 border hover:bg-gray-100 text-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all"
               >
                 Cancel
               </button>
@@ -221,7 +219,7 @@ const AddClients = ({ fabricator, onClose }) => {
                 {isSubmitting ? (
                   <Loader2 className="animate-spin w-4 h-4" />
                 ) : (
-                  "Create Digital POC"
+                  "Add POC"
                 )}
               </button>
             </div>

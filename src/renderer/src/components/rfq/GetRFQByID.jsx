@@ -422,12 +422,12 @@ const GetRFQByID = ({ id }) => {
       {/* Estimation Modal */}
       {showEstimationModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
             <button
               onClick={() => setShowEstimationModal(false)}
-              className="absolute top-4 right-4 text-gray-700 hover:text-gray-700 z-10"
+              className="absolute top-4 right-4 px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all z-10"
             >
-              ✕
+              Close
             </button>
             <AddEstimation
               initialRfqId={id}
@@ -450,9 +450,9 @@ const GetRFQByID = ({ id }) => {
               </h3>
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
               >
-                <X size={20} />
+                Close
               </button>
             </div>
             <p className="text-gray-600 mb-6">
@@ -504,9 +504,10 @@ const GetRFQByID = ({ id }) => {
               </h3>
               <button
                 onClick={() => setShowStatusModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
+                aria-label="Close"
               >
-                <X size={20} />
+                Close
               </button>
             </div>
             <div className="space-y-4">

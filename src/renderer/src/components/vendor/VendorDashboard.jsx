@@ -1,215 +1,221 @@
-import { useEffect, useState } from "react";
+/* eslint-disable react/prop-types */
+import { useEffect, useState, useMemo, useRef } from "react";
 import Service from "../../api/Service";
-import CDSnapshotCards from "./components/CDSnapshotCards";
-import CDNetworkOverview from "./components/CDNetworkOverview";
-import CDCapacityTable from "./components/CDCapacityTable";
-// import CDInsightsList from "./components/CDInsightsList"; // Removed based on feedback/redundancy
-import GetConnectionDesignerByID from "./designer/GetVendorByID";
+import AddVendor from "./designer/AddVendor";
+import GetVendorByID from "./designer/GetVendorByID";
+import DataTable from "../ui/table";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { LayoutDashboard, UserPlus, Building2, MapPin, Globe, Phone } from "lucide-react";
 
-const DashboardSkeleton = () => (
-    <div className="p-6 space-y-6 animate-pulse">
-        {/* Snapshot Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-28 bg-gray-200 rounded-2xl"></div>
-            ))}
-        </div>
-        {/* Network Overview Skeleton */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
-            <div className="lg:col-span-2 bg-gray-200 rounded-2xl"></div>
-            <div className="lg:col-span-1 bg-gray-200 rounded-2xl"></div>
-        </div>
-        {/* Bottom Skeleton */}
-        <div className="h-48 bg-gray-200 rounded-2xl"></div>
+// ═══════════════════════════════════════
+// Skeleton
+// ═══════════════════════════════════════
+const TableSkeleton = () => (
+    <div className="animate-pulse space-y-3 p-4">
+        <div className="h-10 bg-gray-100 rounded-lg w-full" />
+        {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-14 bg-gray-100 rounded-lg w-full" />
+        ))}
     </div>
 );
 
-const VendorDashboard = () => {
+// ═══════════════════════════════════════
+// Stat Card
+// ═══════════════════════════════════════
+const StatCard = ({ icon: Icon, label, value, color }) => (
+    <div className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-4 shadow-sm">
+        <div className={`p-3 rounded-xl ${color}`}>
+            <Icon size={20} className="text-white" />
+        </div>
+        <div>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{label}</p>
+            <p className="text-2xl font-bold text-gray-800">{value}</p>
+        </div>
+    </div>
+);
+
+// ═══════════════════════════════════════
+// Vendor Home
+// ═══════════════════════════════════════
+const VendorHome = ({ onViewVendor, refreshRef }) => {
+    const [vendors, setVendors] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [cdData, setCdData] = useState([]);
-    const [selectedDesignerId, setSelectedDesignerId] = useState(null);
 
-    // Processed Data States
-    const [stats, setStats] = useState({
-        totalCDs: 0,
-        totalCountries: 0,
-        totalStates: 0,
-        totalEngineers: 0,
-        activeRFQs: 0
-    });
-    const [stateDist, setStateDist] = useState([]);
-    const [recentActivity, setRecentActivity] = useState([]);
+    const fetchVendors = async () => {
+        try {
+            setLoading(true);
+            console.log("[VendorHome] Calling Service.GetAllVendors...");
+            const response = await Service.GetAllVendors();
+            console.log("[VendorHome] Raw response:", response);
 
-    // Insights removed from view, but logic kept if needed later
+            let data = [];
+            if (Array.isArray(response)) data = response;
+            else if (Array.isArray(response?.data)) data = response.data;
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await Service.FetchAllConnectionDesigner();
-                const data = Array.isArray(response) ? response : (response?.data || []);
-                setCdData(data);
-                processData(data);
-
-                // Simulate a slight delay for smooth skeleton transition if data is too fast
-                setTimeout(() => setLoading(false), 800);
-            } catch (error) {
-                console.error("Failed to fetch CD data", error);
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
-
-    const processData = (data) => {
-        if (!data) return;
-
-        // 1. Snapshot Stats
-        const totalCDs = data.length;
-        const allCountries = new Set();
-        const allStates = new Set();
-        let totalEngineers = 0;
-        const stateCounts = {};
-
-        data.forEach(cd => {
-            // Location Processing
-            let statesArr = [];
-            if (Array.isArray(cd.state)) {
-                statesArr = cd.state;
-            } else if (typeof cd.state === 'string') {
-                try {
-                    if (cd.state.startsWith('[')) {
-                        statesArr = JSON.parse(cd.state);
-                    } else if (cd.state) {
-                        statesArr = [cd.state];
-                    }
-                } catch {
-                    statesArr = [cd.state];
-                }
-            }
-
-            statesArr.forEach(s => {
-                if (s) {
-                    allStates.add(s);
-                    stateCounts[s] = (stateCounts[s] || 0) + 1;
-                }
-            });
-
-            // Country Processing
-            let country = cd.country || "";
-            if (!country && cd.location && cd.location.includes(',')) {
-                country = cd.location.split(',')[1].trim();
-            } else if (!country && cd.location) {
-                country = cd.location; // Fallback
-            }
-            if (country) {
-                allCountries.add(country);
-            }
-
-            // Engineers
-            const engineers = cd.CDEngineers || []
-            const engCount = engineers.length;
-            totalEngineers += engCount;
-        });
-
-        setStats({
-            totalCDs,
-            totalCountries: allCountries.size,
-            totalStates: allStates.size,
-            totalEngineers,
-            activeRFQs: 0
-        });
-
-        // 2. Charts Data (State)
-        const sortedStates = Object.entries(stateCounts)
-            .map(([name, count]) => ({ name, count }))
-            .sort((a, b) => b.count - a.count);
-
-        setStateDist(sortedStates);
-
-        // 3. Recent Activity (Sort by updatedAt)
-        const sortedByUpdate = [...data].sort((a, b) => {
-            return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-        });
-
-        setRecentActivity(sortedByUpdate.map(cd => ({
-            id: cd._id || cd.id,
-            name: cd.name,
-            updatedAt: cd.updatedAt
-        })));
+            console.log("[VendorHome] Parsed vendors list:", data);
+            setVendors(data);
+        } catch (error) {
+            console.error("[VendorHome] Failed to fetch vendors:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    if (loading) {
-        return <DashboardSkeleton />;
-    }
+    // expose refresh to parent via ref
+    useEffect(() => {
+        if (refreshRef) refreshRef.current = fetchVendors;
+    }, [refreshRef]);
+
+    useEffect(() => { fetchVendors(); }, []);
+
+    const totalStates = useMemo(() => {
+        const s = new Set();
+        vendors.forEach((v) => { if (Array.isArray(v.state)) v.state.forEach((st) => s.add(st)); });
+        return s.size;
+    }, [vendors]);
+
+    const columns = useMemo(() => [
+        {
+            accessorKey: "name", header: "Vendor Name",
+            cell: ({ row }) => <span className="font-semibold text-gray-800">{row.original.name}</span>,
+        },
+        { accessorKey: "email", header: "Email" },
+        { accessorKey: "contactInfo", header: "Contact" },
+        { accessorKey: "location", header: "Location" },
+        {
+            accessorKey: "state", header: "States",
+            cell: ({ row }) => {
+                const states = row.original.state;
+                if (!Array.isArray(states) || states.length === 0) return <span className="text-gray-400">—</span>;
+                return (
+                    <div className="flex flex-wrap gap-1">
+                        {states.slice(0, 2).map((s) => (
+                            <span key={s} className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">{s}</span>
+                        ))}
+                        {states.length > 2 && <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">+{states.length - 2}</span>}
+                    </div>
+                );
+            },
+        },
+        {
+            accessorKey: "websiteLink", header: "Website",
+            cell: ({ row }) => row.original.websiteLink
+                ? <a href={row.original.websiteLink} target="_blank" rel="noreferrer"
+                    className="text-cyan-600 underline hover:text-cyan-800 text-xs truncate max-w-[130px] block"
+                    onClick={(e) => e.stopPropagation()}>{row.original.websiteLink}</a>
+                : <span className="text-gray-400">—</span>,
+        },
+        {
+            accessorKey: "isDeleted", header: "Status",
+            cell: ({ row }) => (
+                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${row.original.isDeleted ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
+                    {row.original.isDeleted ? "Inactive" : "Active"}
+                </span>
+            ),
+        },
+    ], []);
+
+    const handleRowClick = (row) => {
+        const id = row?.id ?? row?.original?.id;
+        console.log("[VendorHome] Row clicked, vendor ID:", id);
+        if (id) onViewVendor(id);
+    };
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="h-full p-4 sm:p-6 space-y-4 sm:space-y-8 bg-transparent overflow-y-auto custom-scrollbar relative"
-        >
-            {/* Header if needed */}
+        <div className="space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <StatCard icon={Building2} label="Total Vendors" value={vendors.length} color="bg-green-500" />
+                <StatCard icon={MapPin} label="States Covered" value={totalStates} color="bg-blue-500" />
+                <StatCard icon={Globe} label="With Website" value={vendors.filter((v) => v.websiteLink).length} color="bg-purple-500" />
+                <StatCard icon={Phone} label="With Contact" value={vendors.filter((v) => v.contactInfo).length} color="bg-orange-500" />
+            </div>
 
-            {/* SECTION B — EXECUTIVE SNAPSHOT */}
-            <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.1 }}
-            >
-                <CDSnapshotCards stats={stats} />
-            </motion.div>
-
-            {/* SECTION C — LOCATION INTELLIGENCE (Redesigned) */}
-            <CDNetworkOverview
-                designers={cdData}
-                stateData={stateDist}
-                onSelect={(id) => setSelectedDesignerId(id)}
-            />
-
-            {/* SECTION D — RECENT ACTIVITY */}
-            <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-            >
-                <CDCapacityTable recentActivity={recentActivity} />
-            </motion.div>
-
-            {/* DETAILS MODAL */}
-            <AnimatePresence>
-                {selectedDesignerId && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-                        onClick={() => setSelectedDesignerId(null)}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.95, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.95, y: 20 }}
-                            onClick={(e) => e.stopPropagation()} // Prevent close on content click
-                            className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative"
-                        >
-                            <button
-                                onClick={() => setSelectedDesignerId(null)}
-                                className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors z-10"
-                            >
-                                <X size={20} className="text-gray-600" />
-                            </button>
-
-                            <div className="p-1">
-                                <GetConnectionDesignerByID id={selectedDesignerId} />
-                            </div>
-                        </motion.div>
-                    </motion.div>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <h3 className="text-base font-bold text-gray-800 uppercase tracking-wide">All Vendors</h3>
+                    <span className="text-xs text-gray-400">{vendors.length} record{vendors.length !== 1 ? "s" : ""}</span>
+                </div>
+                {loading ? (
+                    <TableSkeleton />
+                ) : vendors.length > 0 ? (
+                    <div className="p-4">
+                        <DataTable columns={columns} data={vendors} onRowClick={handleRowClick} />
+                    </div>
+                ) : (
+                    <div className="text-center py-16 text-gray-400">
+                        <Building2 size={42} className="mx-auto mb-3 opacity-25" />
+                        <p className="font-semibold text-gray-500">No vendors found</p>
+                        <p className="text-sm mt-1">Use the &quot;Add Vendor&quot; tab to register one.</p>
+                    </div>
                 )}
-            </AnimatePresence>
-        </motion.div>
+            </div>
+        </div>
+    );
+};
+
+// ═══════════════════════════════════════
+// Main Shell
+// ═══════════════════════════════════════
+const VendorDashboard = () => {
+    const [activeTab, setActiveTab] = useState("home");
+    const [selectedVendorId, setSelectedVendorId] = useState(null);
+    const vendorRefreshRef = useRef(null);
+
+    const tabs = [
+        { key: "home", label: "Vendor Home", icon: LayoutDashboard },
+        { key: "add", label: "Add Vendor", icon: UserPlus },
+    ];
+
+    return (
+        <div className="h-full bg-transparent flex flex-col">
+
+            {/* ── Tab Bar ── */}
+            <div className="px-6 pt-6 border-b border-gray-200/60 bg-white/30 backdrop-blur-md sticky top-0 z-20">
+                <div className="flex gap-8">
+                    {tabs.map(({ key, label, icon: Icon }) => (
+                        <button
+                            key={key}
+                            onClick={() => setActiveTab(key)}
+                            className={`flex items-center gap-2 pb-4 text-sm font-semibold transition-all relative ${activeTab === key ? "text-green-600" : "text-gray-500 hover:text-gray-700"
+                                }`}
+                        >
+                            <Icon size={17} />
+                            {label}
+                            {activeTab === key && (
+                                <motion.div layoutId="vendorTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-600 rounded-full" />
+                            )}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* ── Content ── */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                <AnimatePresence mode="wait">
+                    {activeTab === "home" ? (
+                        <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.18 }}>
+                            <VendorHome onViewVendor={(id) => setSelectedVendorId(id)} refreshRef={vendorRefreshRef} />
+                        </motion.div>
+                    ) : (
+                        <motion.div key="add" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.18 }}>
+                            <AddVendor />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            {/* ── Vendor Detail — self-contained full-screen overlay ── */}
+            {selectedVendorId && (
+                <GetVendorByID
+                    id={selectedVendorId}
+                    onClose={() => setSelectedVendorId(null)}
+                    onDeleted={() => {
+                        setSelectedVendorId(null);
+                        vendorRefreshRef.current?.();
+                    }}
+                />
+            )}
+        </div>
     );
 };
 

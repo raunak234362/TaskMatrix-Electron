@@ -11,7 +11,7 @@ const AllBranches = ({ fabricator, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-200">
+      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-gray-100 animate-in fade-in zoom-in duration-200">
 
         {/* Header Section */}
         <div className="p-8 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white">
@@ -44,9 +44,9 @@ const AllBranches = ({ fabricator, onClose }) => {
             </button>
             <button
               onClick={onClose}
-              className="p-3 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-all active:scale-95 border border-gray-100"
+              className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
             >
-              <X size={20} strokeWidth={2.5} />
+              Close
             </button>
           </div>
         </div>

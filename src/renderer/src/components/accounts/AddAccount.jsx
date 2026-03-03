@@ -47,10 +47,8 @@ const AddAccount = ({ onSuccess }) => {
     <div className="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full mx-auto">
       {/* Header */}
       <header className="mb-6 border-b pb-4 border-green-200">
-        <h1 className="text-3xl font-extrabold text-green-700">
-          Add Bank Account Details
-        </h1>
-        <p className="text-gray-700">Enter details to link a bank account.</p>
+       
+  
       </header>
 
       {/* FORM */}
@@ -197,7 +195,7 @@ const AddAccount = ({ onSuccess }) => {
         {/* Submit */}
         <Button
           type="submit"
-          className="mt-8 bg-green-700 hover:bg-green-800 text-white w-full py-3 text-lg  shadow-lg transition"
+          className="mt-8 bg-green-200 hover:bg-green-400 text-black w-full py-3 text-sm  shadow-xl transition"
         >
           Save Bank Account Details
         </Button>
