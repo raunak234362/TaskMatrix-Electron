@@ -22,7 +22,7 @@ const EstimationStatusOptions = [
 
 const EditEstimation = ({ id, onSuccess, onCancel }) => {
   const [loading, setLoading] = useState(true)
-
+  const userRole = sessionStorage.getItem('userRole')
   const fabricators = useSelector((state) => state.fabricatorInfo?.fabricatorData || [])
 
   const {
@@ -46,7 +46,10 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
             description: d.description,
             estimateDate: d.estimateDate ? String(d.estimateDate).split('T')[0] : '',
             tools: d.tools,
-            status: d.status
+            status: d.status,
+            finalHours: d.finalHours ?? '',
+            finalPrice: d.finalPrice ?? '',
+            finalWeeks: d.finalWeeks ?? ''
           })
         }
       } catch (error) {
@@ -198,7 +201,41 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
               </div>
             </div>
 
-            {/* Card 4 */}
+            {/* Card 4 - Final Values */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
+              <SectionTitle title="Final Values" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Input
+                  label="Final Hours"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  {...register('finalHours', { setValueAs: (v) => v === '' || v === null || v === undefined ? null : Number(v) })}
+                  placeholder="e.g. 320"
+                />
+                {userRole === 'ADMIN' && (
+
+                  <Input
+                    label="Final Price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    {...register('finalPrice', { setValueAs: (v) => v === '' || v === null || v === undefined ? null : Number(v) })}
+                    placeholder="e.g. 15000"
+                  />
+                )}
+                <Input
+                  label="Final Weeks"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  {...register('finalWeeks', { setValueAs: (v) => v === '' || v === null || v === undefined ? null : Number(v) })}
+                  placeholder="e.g. 8"
+                />
+              </div>
+            </div>
+
+            {/* Card 5 */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-4">
               <SectionTitle title="Status" />
 
