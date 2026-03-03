@@ -75,8 +75,8 @@ const LineItemList = ({ id, onClose }) => {
       const payload = {
         name: groupFormData.name,
         description: groupFormData.description,
-        totalHours: groupFormData.totalHours,
-        divisor: groupFormData.divisor
+        totalHours: Number(groupFormData.totalHours),
+        divisor: Number(groupFormData.divisor)
       }
       await Service.UpdateGroupById(id, payload)
 
@@ -131,9 +131,9 @@ const LineItemList = ({ id, onClose }) => {
     try {
       const payload = {
         ...editFormData,
-        quantity: editFormData.quantity,
-        hoursPerQty: editFormData.hoursPerQty,
-        totalHours: editFormData.totalHours
+        quantity: Number(editFormData.quantity),
+        hoursPerQty: Number(editFormData.hoursPerQty),
+        totalHours: Number(editFormData.totalHours)
       }
       await Service.UpdateLineItemById(rowId, payload)
       setEditingRowId(null)
@@ -154,10 +154,9 @@ const LineItemList = ({ id, onClose }) => {
       const newData = { ...prev, [field]: value }
 
       if (field === 'quantity' || field === 'hoursPerQty') {
-        const qty = parseFloat(field === 'quantity' ? value : (newData.quantity || 0)) || 0
-        const hours =
-          parseFloat(field === 'hoursPerQty' ? value : (newData.hoursPerQty || 0)) || 0
-        newData.totalHours = qty * hours
+        const qty = parseFloat(field === 'quantity' ? value : (prev.quantity || 0)) || 0
+        const hours = parseFloat(field === 'hoursPerQty' ? value : (prev.hoursPerQty || 0)) || 0
+        newData.totalHours = qty * hours  // always a Number
       }
       return newData
     })
@@ -207,9 +206,9 @@ const LineItemList = ({ id, onClose }) => {
     return `${hours}h ${minutes}m`
   }
 
-  // Merge pending changes into data so columns can be pure
+  // Merge pending changes into data so columns can be pure, then sort filled rows to top
   const mergedLineItems = useMemo(() => {
-    return lineItem.map(item => {
+    const merged = lineItem.map(item => {
       const pending = pendingChanges[item.id];
       if (pending) {
         return {
@@ -220,7 +219,20 @@ const LineItemList = ({ id, onClose }) => {
         };
       }
       return item;
-    })
+    });
+
+    // Sort: rows with a filled quantity come first, descending by quantity value
+    return merged.sort((a, b) => {
+      const aQty = Number(a.quantity);
+      const bQty = Number(b.quantity);
+      const aFilled = !isNaN(aQty) && a.quantity !== null && a.quantity !== undefined && String(a.quantity).trim() !== '' && aQty > 0;
+      const bFilled = !isNaN(bQty) && b.quantity !== null && b.quantity !== undefined && String(b.quantity).trim() !== '' && bQty > 0;
+
+      if (aFilled && !bFilled) return -1;
+      if (!aFilled && bFilled) return 1;
+      if (aFilled && bFilled) return bQty - aQty; // descending
+      return 0;
+    });
   }, [lineItem, pendingChanges]);
 
   // Memoize columns to prevent regeneration on every render
@@ -488,13 +500,15 @@ const LineItemList = ({ id, onClose }) => {
                     {isEditingGroup ? (
                       <input
                         type="number"
-                        value={groupFormData.totalHours}
+                        min="0"
+                        step="0.01"
+                        value={groupFormData.totalHours || ''}
                         onChange={(e) => handleGroupInputRawChange(e, 'totalHours')}
                         className="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 outline-none text-right  text-gray-700"
                       />
                     ) : (
                       <span className="text-lg  text-gray-700">
-                        {formatDecimalHours(groupData?.totalHours)}
+                        {groupData?.totalHours} hrs
                       </span>
                     )}
                   </div>
