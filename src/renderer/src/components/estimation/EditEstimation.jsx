@@ -68,11 +68,16 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
     value: f.id
   }))
 
+  const toNumberOrNull = (v) => (v === '' || v === null || v === undefined ? null : Number(v))
+
   const onSubmit = async (data) => {
     try {
       await Service.UpdateEstimationById(id, {
         ...data,
-        estimateDate: data.estimateDate ? new Date(data.estimateDate).toISOString() : null
+        finalHours: toNumberOrNull(data.finalHours) || 0,
+        finalWeeks: toNumberOrNull(data.finalWeeks) || 0,
+        finalPrice: toNumberOrNull(data.finalPrice) || 0,
+        estimateDate: data.estimateDate ? new Date(data.estimateDate).toISOString() : 0
       })
       toast.success('Estimation updated successfully')
       onSuccess?.()

@@ -585,7 +585,7 @@ class Service {
     try {
       const response = await api.put(`estimation/estimations/${id}`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'application/json'
         }
       })
       console.log(response)
