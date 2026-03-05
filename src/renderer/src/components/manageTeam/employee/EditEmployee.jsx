@@ -112,21 +112,9 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
       setSubmitting(true);
       setError(null);
 
-      // Create a payload with only dirty fields
-      const dirtyData = Object.keys(dirtyFields).reduce((acc, key) => {
-        acc[key] = data[key];
-        return acc;
-      }, {});
-
-      // If nothing changed, just close the modal
-      if (Object.keys(dirtyData).length === 0) {
-        onClose();
-        return;
-      }
-
       const response = await Service.EditEmployeeByID(
         employeeData?.id,
-        dirtyData,
+        data,
       );
       const updatedEmployee =
         response?.data?.user || response?.data || response;

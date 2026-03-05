@@ -9,6 +9,7 @@ import RichTextEditor from "../../fields/RichTextEditor";
 
 const MilestoneResponseModal = ({
     milestoneId,
+    mileStoneVersionId,
     onClose,
     onSuccess,
 }) => {
@@ -27,6 +28,7 @@ const MilestoneResponseModal = ({
             const formData = new FormData();
             formData.append("mileStoneId", milestoneId);
             formData.append("description", data.description);
+            formData.append("mileStoneVersionId", mileStoneVersionId);
             formData.append("userId", userId);
             formData.append("status", data.status || "ON_TIME");
 
@@ -36,7 +38,7 @@ const MilestoneResponseModal = ({
                 files.forEach((file) => formData.append("files", file));
             }
 
-            await Service.CreateMilestoneResponse(formData);
+            await Service.addMilestoneResponse(formData);
             toast.success("Response added successfully!");
             reset();
             setFiles([]);

@@ -37,6 +37,7 @@ const AddProject = () => {
     (state) => state.userInfo?.departmentData || [],
   );
   const teamDatas = useSelector((state) => state.userInfo?.teamData || []);
+  console.log("teamDatas", teamDatas)
   const rfqData = useSelector((state) => state.RFQInfos?.RFQData || []);
   const managerOption = useSelector((state) =>
     (state.userInfo?.staffData || [])
@@ -370,6 +371,24 @@ const AddProject = () => {
                           <Select
                             options={options.departments}
                             value={options.departments.find((o) => o.value === field.value)}
+                            onChange={(o) => field.onChange(o?.value || "")}
+                            placeholder="Select..."
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase">Team</label>
+                      <Controller
+                        name="teamId"
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field }) => (
+                          <Select
+                            options={options.teams}
+                            value={options.teams.find((o) => o.value === field.value)}
                             onChange={(o) => field.onChange(o?.value || "")}
                             placeholder="Select..."
                             className="text-sm"

@@ -9,18 +9,23 @@ import { toast } from "react-toastify";
 
 const MilestoneResponseDetailsModal = ({
     response,
+    milestoneId,
     onClose,
     onSuccess,
 }) => {
     const [replyMode, setReplyMode] = useState(false);
     const [replyMessage, setReplyMessage] = useState("");
     const [replyFiles, setReplyFiles] = useState([]);
-    const [replyStatus, setReplyStatus] = useState("PENDING");
+    const [replyStatus, setReplyStatus] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleReplySubmit = async () => {
         if (!replyMessage.trim()) {
             toast.error("Please enter a message");
+            return;
+        }
+        if (!replyStatus) {
+            toast.error("Please select a status");
             return;
         }
 
@@ -29,13 +34,14 @@ const MilestoneResponseDetailsModal = ({
             const formData = new FormData();
             formData.append("description", replyMessage);
             formData.append("parentResponseId", response.id);
-            formData.append("milestoneId", response.milestoneId);
+            formData.append("mileStoneId", milestoneId);
+            formData.append("mileStoneVersionId", response.mileStoneVersionId);
             formData.append("userId", sessionStorage.getItem("userId") || "");
-            formData.append("status", replyStatus);
+            if (replyStatus) formData.append("status", replyStatus);
 
             replyFiles.forEach((file) => formData.append("files", file));
 
-            await Service.CreateMilestoneResponse(formData);
+            await Service.addMilestoneResponse(formData);
 
             toast.success("Reply sent successfully");
             setReplyMode(false);
@@ -147,10 +153,11 @@ const MilestoneResponseDetailsModal = ({
                                     onChange={(e) => setReplyStatus(e.target.value)}
                                     className="w-full border rounded-xl p-2.5 text-sm bg-gray-50"
                                 >
-                                    <option value="PENDING">Pending</option>
-                                    <option value="APPROVED">Approved</option>
-                                    <option value="REJECTED">Rejected</option>
-                                    <option value="CLARIFICATION_REQUIRED">Needs Clarification</option>
+                                    <option value="" disabled>Select status...</option>
+                                    <option value="DELAYED">Delayed</option>
+                                    <option value="ON_TIME">On Time</option>
+                                    <option value="NOT_STARTED">Not Started</option>
+                                    <option value="CLARIFICATION_REQUIRED">Clarification Required</option>
                                 </select>
                             </div>
                             <div>
