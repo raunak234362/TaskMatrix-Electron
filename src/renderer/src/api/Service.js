@@ -596,6 +596,55 @@ class Service {
     }
   }
 
+  //estimation response
+  static async AddEstimationResponse(formData, id) {
+    try {
+      const response = await api.post(`estimation/estimations/${id}/responses`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // Get Estimation Response by ID
+  static async GetEstimationResponseById(id) {
+    try {
+      const response = await api.get(`estimation/responses/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // Get file attached to an estimation response (download)
+  static async GetEstimationResponseFile(estimationResId, fileId) {
+    try {
+      const response = await api.get(`estimation/responses/${estimationResId}/files/${fileId}`, {
+        responseType: 'blob'
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // Get inline view URL for an estimation response file
+  static GetEstimationResponseFileViewUrl(estimationResId, fileId) {
+    const baseURL = api.defaults.baseURL || ''
+    return `${baseURL}estimation/response/viewFile/${estimationResId}/${fileId}`
+  }
+
   // Add Estimation Task
   static async AddEstimationTask(formData) {
     try {

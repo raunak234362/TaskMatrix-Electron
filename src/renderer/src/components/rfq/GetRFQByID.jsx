@@ -15,6 +15,7 @@ import { Trash2, X } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { deleteRFQ } from "../../store/rfqSlice";
 import { toast } from "react-toastify";
+import EditRFQByID from "./EditRFQByID";
 
 
 const GetRFQByID = ({ id }) => {
@@ -30,10 +31,13 @@ const GetRFQByID = ({ id }) => {
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [showEditModal, setShowEditModal] = useState(false);
+
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [newStatus, setNewStatus] = useState("");
   const [statusReason, setStatusReason] = useState("");
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [showDescription, setShowDescription] = useState(false);
 
   const dispatch = useDispatch();
   const fetchRfq = async () => {
@@ -235,7 +239,7 @@ const GetRFQByID = ({ id }) => {
                 {userRole !== "CLIENT" && (
                   <>
                     <Button
-                      onClick={() => alert("Coming soon RFQ modal")}
+                      onClick={() => setShowEditModal(true)}
                       className="flex-1 sm:flex-none px-3 py-1 bg-[#6bbd45]/15 text-black rounded-md hover:bg-[#6bbd45]/80 transition text-sm"
                     >
                       Edit
@@ -282,16 +286,21 @@ const GetRFQByID = ({ id }) => {
             </div>
 
             {/* Description */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-black text-black uppercase tracking-widest flex items-center gap-2">
-                Description
-              </h4>
-              <div
-                className="text-black bg-white p-4 rounded-xl border border-black prose prose-sm max-w-none text-xs sm:text-sm font-medium break-words overflow-hidden"
-                dangerouslySetInnerHTML={{
-                  __html: rfq?.description || "No description provided",
-                }}
-              />
+            <div className="space-y-2">
+              <button
+                onClick={() => setShowDescription((prev) => !prev)}
+                className="text-sm font-black text-black/40 uppercase tracking-widest hover:text-black transition-colors flex items-center gap-1"
+              >
+                {showDescription ? 'Hide Description' : 'Show Description'}
+              </button>
+              {showDescription && (
+                <div
+                  className="text-black bg-white p-4 rounded-xl border border-black prose prose-sm max-w-none text-xs sm:text-sm font-medium break-words overflow-hidden"
+                  dangerouslySetInnerHTML={{
+                    __html: rfq?.description || "No description provided",
+                  }}
+                />
+              )}
             </div>
 
             {/* Scopes */}
@@ -373,7 +382,7 @@ const GetRFQByID = ({ id }) => {
               {(userRole === "ADMIN" ||
                 userRole === "DEPUTY_MANAGER" ||
                 userRole === "OPERATION_EXECUTIVE" ||
-                userRole === "USER") && (
+                userRole === "ESTIMATION_HEAD") && (
                   <Button
                     onClick={() => setShowResponseModal(true)}
                     className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#6bbd45]/15 text-black rounded-lg shadow-sm hover:bg-[#6bbd45]/80 transition text-sm"
@@ -559,6 +568,18 @@ const GetRFQByID = ({ id }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Edit RFQ Modal */}
+      {showEditModal && (
+        <EditRFQByID
+          id={id}
+          onSuccess={() => {
+            setShowEditModal(false);
+            fetchRfq();
+          }}
+          onCancel={() => setShowEditModal(false)}
+        />
       )}
     </>
   );

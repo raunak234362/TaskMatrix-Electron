@@ -47,6 +47,7 @@ export const navItems = [
         roles: [
             'admin',
             'department_manager',
+            'project_manager_officer',
             'deputy_manager',
             'operation_executive',
             'system_admin',

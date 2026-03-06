@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { Loader2, AlertCircle, MessageSquare } from 'lucide-react'
 import Service from '../../api/Service'
 import Button from '../fields/Button'
 import AllEstimationTask from './estimationTask/AllEstimationTask'
@@ -9,6 +9,7 @@ import EditEstimation from './EditEstimation'
 import RenderFiles from '../ui/RenderFiles'
 import InclusionExclusion from './InclusionExclusion'
 import EditInclusionExclusion from './EditInclusionExclusion'
+import EstimationResponseModal from './EstimationResponseModal'
 
 const truncateText = (text, max = 40) => (text.length > max ? text.substring(0, max) + '...' : text)
 
@@ -21,6 +22,9 @@ const GetEstimationByID = ({ id, onRefresh }) => {
   const [isInclusionOpen, setIsInclusionOpen] = useState(false)
   const [isEditingInclusion, setIsEditingInclusion] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [showResponseModal, setShowResponseModal] = useState(false)
+  const [isResponsesOpen, setIsResponsesOpen] = useState(false)
+  const [showDescription, setShowDescription] = useState(false)
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const fetchEstimation = async () => {
     if (!id) {
@@ -108,7 +112,8 @@ const GetEstimationByID = ({ id, onRefresh }) => {
     finalPrice,
     createdBy,
     totalAgreatedHours,
-    files
+    files,
+    responses: estimationResponses = []
   } = estimation
 
   const statusColor =
@@ -158,10 +163,6 @@ const GetEstimationByID = ({ id, onRefresh }) => {
           {/* Tools */}
           {tools && <InfoRow label="Tools" value={tools} />}
 
-          {/* Description */}
-          {description && (
-            <InfoRow label="Description" value={<span>{truncateText(description, 60)}</span>} />
-          )}
 
           {/* Created By */}
           {createdBy && (
@@ -193,15 +194,36 @@ const GetEstimationByID = ({ id, onRefresh }) => {
         </div>
       </div>
 
+      {/* Description toggle */}
+      {description && (
+        <div className="mt-6 space-y-2">
+          <button
+            onClick={() => setShowDescription((prev) => !prev)}
+            className="text-sm font-black text-black/40 uppercase tracking-widest hover:text-black transition-colors flex items-center gap-1"
+          >
+            <span className="ml-1">{showDescription ? 'Hide Description' : 'Show Description'}</span>
+          </button>
+          {showDescription && (
+            <div
+              className="text-sm text-black bg-white rounded-xl border border-black/10 p-4 prose prose-sm max-w-none leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: description }}
+            />
+          )}
+        </div>
+      )}
+
       {/* Files Section */}
+      <div className='my-4'>
+
       <RenderFiles files={files || []} table="estimation" parentId={id} formatDate={formatDate} />
+      </div>
 
       {/* Action Buttons (placeholders for future edit/view actions) */}
-      <div className="py-3 flex gap-3">
+      <div className="py-3 flex flex-wrap gap-3">
         {
           userRole === 'admin' || userRole === 'estimation_head' && (
             <Button
-              className="py-1 px-2 text-md rounded-xl"
+              className="py-0 px-1 text-sm rounded-xl"
               onClick={() => setIsEstimationTaskOpen(!isEstimationTaskOpen)}
             >
               Estimation Task
@@ -209,22 +231,33 @@ const GetEstimationByID = ({ id, onRefresh }) => {
           )
         }
         <Button
-          className="py-1 px-2 text-md rounded-xl"
+          className="py-0 px-2 text-sm rounded-xl"
           onClick={() => setIsHoursOpen(!isHoursOpen)}
         >
           Estimated Hours/Weeks
         </Button>
         <Button
-          className="py-1 px-2 text-md rounded-xl"
+          className="py-0 px-2 text-sm rounded-xl"
           onClick={() => setIsInclusionOpen(!isInclusionOpen)}
         >
           Inclusion/Exclusion
         </Button>
-        {/* <Button className="py-1 px-2 text-lg bg-blue-100 text-blue-700">
-          Add To Project
-        </Button> */}
+        <Button
+          className="py-0 px-2 text-sm rounded-xl bg-green-100 text-black border border-black hover:bg-green-200 hover:text-black flex items-center gap-1"
+          onClick={() => setIsResponsesOpen((prev) => !prev)}
+        >
+          <MessageSquare className="w-3.5 h-3.5" />
+          Inclusion/Exclusion Documents ({estimationResponses.length})
+        </Button>
+        <Button
+          className="py-0 px-2 text-sm rounded-xl bg-green-100 text-black border border-black hover:bg-green-200 hover:text-black flex items-center gap-1"
+          onClick={() => setShowResponseModal(true)}
+        >
+          + Add Response
+        </Button>
+
         {(userRole === 'admin' || userRole === 'estimation_head') && (
-          <Button className="py-1 px-2 text-md rounded-xl" onClick={() => setIsEditing(!isEditing)}>
+          <Button className="py-0 px-2 text-sm rounded-xl" onClick={() => setIsEditing(!isEditing)}>
             Edit Estimation
           </Button>
         )}
@@ -297,6 +330,77 @@ const GetEstimationByID = ({ id, onRefresh }) => {
           }}
           onCancel={() => setIsEditing(false)}
         />
+      )}
+      {showResponseModal && (
+        <EstimationResponseModal
+          estimationId={id}
+          onClose={() => setShowResponseModal(false)}
+          onSuccess={fetchEstimation}
+        />
+      )}
+
+      {/* Responses Panel */}
+      {isResponsesOpen && (
+        <div className="mt-6 border-t pt-6 space-y-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-base font-black text-black uppercase tracking-widest flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-black" />
+              Responses
+              <span className="ml-1 px-2 py-0.5 text-[10px] bg-black text-white rounded-full font-black">
+                {estimationResponses.length}
+              </span>
+            </h3>
+          </div>
+
+          {estimationResponses.length === 0 ? (
+            <p className="text-sm text-gray-500 italic">No responses yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {estimationResponses.map((resp, idx) => (
+                <div
+                  key={resp.id}
+                  className="bg-white border border-black/10 rounded-2xl p-4 space-y-3 shadow-sm"
+                >
+                  {/* Header: index + timestamp */}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
+                      Response #{idx + 1}
+                    </span>
+                    <span className="text-[10px] text-gray-400 font-medium">
+                      {resp.createdAt
+                        ? new Date(resp.createdAt).toLocaleString('en-IN', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                        : '—'}
+                    </span>
+                  </div>
+
+                  {/* Message */}
+                  {resp.message && (
+                    <div
+                      className="text-sm text-gray-700 prose prose-sm max-w-none leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: resp.message }}
+                    />
+                  )}
+
+                  {/* Files */}
+                  {resp.files?.length > 0 && (
+                    <RenderFiles
+                      files={resp.files}
+                      table="estimationResponse"
+                      parentId={resp.id}
+                      formatDate={formatDate}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
     </div>
   )
