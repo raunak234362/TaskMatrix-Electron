@@ -13,7 +13,8 @@ export default defineConfig({
   renderer: {
     resolve: {
       alias: {
-        '@renderer': resolve('src/renderer/src')
+        '@renderer': resolve('src/renderer/src'),
+        '@tailwindcss/typography': resolve('node_modules/@tailwindcss/typography')
       }
     },
     server: {

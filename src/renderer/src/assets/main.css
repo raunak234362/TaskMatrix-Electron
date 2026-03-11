@@ -1,6 +1,6 @@
 @import './base.css';
 @import 'tailwindcss';
-@plugin "@tailwindcss/typography";
+@plugin "../../../../node_modules/@tailwindcss/typography";
 
 @theme {
   --color-green-50: #f4f9f0;
@@ -60,14 +60,16 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #166534; /* Darker green (green-800) for better visibility */
+  background: #166534;
+  /* Darker green (green-800) for better visibility */
   border-radius: 9999px;
   border: 1.5px solid rgba(255, 255, 255, 0.2);
   background-clip: padding-box;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #14532d; /* Even darker on hover (green-900) */
+  background: #14532d;
+  /* Even darker on hover (green-900) */
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
