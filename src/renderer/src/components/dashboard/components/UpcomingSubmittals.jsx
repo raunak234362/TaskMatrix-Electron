@@ -143,17 +143,18 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
                                   {submittal.fabricator?.fabName || "No Fab"}
                                 </span>
                               </div>
-                              <div>
-
-                              </div>
                               <span
-                                className={`text-xs font-semibold uppercase ${overdue
+                                className={`text-xs ml-auto font-semibold uppercase lg:hidden ${overdue
                                   ? "text-red-500"
                                   : "text-gray-500"
                                   }`}
                               >
                                 {dueDate
-                                  ? new Date(dueDate).toLocaleDateString()
+                                  ? new Date(dueDate).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })
                                   : "No Date"}
                               </span>
                             </div>
@@ -166,8 +167,21 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
                             </div>
 
                             {/* Due Date */}
-                            <div className="col-span-12 lg:col-span-2 lg:text-right">
-
+                            <div className="hidden lg:block lg:col-span-2 lg:text-right">
+                              <span
+                                className={`text-sm font-semibold ${overdue
+                                  ? "text-red-500"
+                                  : "text-gray-600"
+                                  }`}
+                              >
+                                {dueDate
+                                  ? new Date(dueDate).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })
+                                  : "No Date"}
+                              </span>
                             </div>
 
                             {/* Arrow */}

@@ -105,13 +105,13 @@ const Profile = () => {
             </p>
           </div>
 
-          <div>
+          {/* <div>
             <p className="text-gray-700 text-sm">Role</p>
             <p className="flex items-center gap-2 text-gray-700 font-medium">
               <Shield className="w-4 h-4 text-green-500" />
               {user.role}
             </p>
-          </div>
+          </div> */}
         </div>
 
         {/* Address Section */}
