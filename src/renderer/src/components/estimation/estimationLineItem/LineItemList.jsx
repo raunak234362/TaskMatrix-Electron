@@ -2,7 +2,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react'
 import Service from '../../../api/Service'
 import DataTable from '../../ui/table'
-import { X, Edit2, Save, Layers, AlignLeft, Calculator, Clock, CheckCircle2 } from 'lucide-react'
+import { X, Edit2, Save, Layers, AlignLeft, Calculator, Clock, CheckCircle2, Search } from 'lucide-react'
 import RichTextEditor from '../../fields/RichTextEditor'
 
 const LineItemList = ({ id, onClose }) => {
@@ -50,6 +50,9 @@ const LineItemList = ({ id, onClose }) => {
   // Group Editing State
   const [isEditingGroup, setIsEditingGroup] = useState(false)
   const [groupFormData, setGroupFormData] = useState({})
+
+  // Scope of Work Search
+  const [scopeSearch, setScopeSearch] = useState('')
 
   // Bulk Quantity Edit State
   const [pendingChanges, setPendingChanges] = useState({})
@@ -235,6 +238,16 @@ const LineItemList = ({ id, onClose }) => {
     });
   }, [lineItem, pendingChanges]);
 
+  // Filter merged items by scope-of-work plain text
+  const filteredLineItems = useMemo(() => {
+    const query = scopeSearch.trim().toLowerCase()
+    if (!query) return mergedLineItems
+    return mergedLineItems.filter((item) => {
+      const plain = (item.scopeOfWork || '').replace(/<[^>]*>/g, '').toLowerCase()
+      return plain.includes(query)
+    })
+  }, [mergedLineItems, scopeSearch])
+
   // Memoize columns to prevent regeneration on every render
   const columns = useMemo(() => [
     {
@@ -368,28 +381,56 @@ const LineItemList = ({ id, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       {' '}
-      <div className="bg-white w-full max-w-5xl rounded-xl shadow-2xl overflow-hidden p-5 max-h-[90vh] flex flex-col">
-        <div className="flex justify-between items-center mb-6 border-b pb-4 sticky top-0 bg-white z-10">
-          <h2 className="text-2xl  text-gray-700">Line Items</h2>
-          <div className="flex items-center gap-4">
-            {Object.keys(pendingChanges).length > 0 && (
+      <div className="bg-white w-full max-w-5xl rounded-xl shadow-2xl overflow-hidden p-5 h-[90vh] flex flex-col">
+        <div className="flex flex-col gap-3 mb-6 border-b pb-4 sticky top-0 bg-white z-10">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl text-gray-700">Line Items</h2>
+            <div className="flex items-center gap-4">
+              {Object.keys(pendingChanges).length > 0 && (
+                <button
+                  onClick={handleBulkSave}
+                  disabled={isBulkSaving}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-medium animate-in fade-in"
+                >
+                  {isBulkSaving ? (
+                    <Clock className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="w-4 h-4" />
+                  )}
+                  Save Changes ({Object.keys(pendingChanges).length})
+                </button>
+              )}
+              <button onClick={onClose} className="text-gray-700 hover:text-gray-700">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+
+          {/* Scope of Work Search */}
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <input
+              type="text"
+              value={scopeSearch}
+              onChange={(e) => setScopeSearch(e.target.value)}
+              placeholder="Search scope of work..."
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all placeholder:text-gray-400"
+            />
+            {scopeSearch && (
               <button
-                onClick={handleBulkSave}
-                disabled={isBulkSaving}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-medium animate-in fade-in"
+                onClick={() => setScopeSearch('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
               >
-                {isBulkSaving ? (
-                  <Clock className="w-4 h-4 animate-spin" />
-                ) : (
-                  <CheckCircle2 className="w-4 h-4" />
-                )}
-                Save Changes ({Object.keys(pendingChanges).length})
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
-            <button onClick={onClose} className="text-gray-700 hover:text-gray-700">
-              <X className="w-6 h-6" />
-            </button>
           </div>
+          {scopeSearch && (
+            <p className="text-xs text-gray-500">
+              Showing <span className="font-semibold text-gray-700">{filteredLineItems.length}</span> of{' '}
+              <span className="font-semibold text-gray-700">{mergedLineItems.length}</span> items
+            </p>
+          )}
         </div>
         <div className="mb-6 bg-gray-50 rounded-xl p-5 border border-gray-200 shadow-sm relative group">
           {!isEditingGroup && (
@@ -535,12 +576,14 @@ const LineItemList = ({ id, onClose }) => {
             </div>
           </div>
         </div>
-        <DataTable
-          columns={columns}
-          data={mergedLineItems}
-          searchPlaceholder="Search line items..."
+        <div className="flex-1 overflow-y-auto">
 
-        />
+          <DataTable
+            columns={columns}
+            data={filteredLineItems}
+            searchPlaceholder="Search line items..."
+          />
+        </div>
       </div>
     </div>
   )

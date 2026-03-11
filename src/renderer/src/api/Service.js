@@ -596,6 +596,55 @@ class Service {
     }
   }
 
+  //estimation response
+  static async AddEstimationResponse(formData, id) {
+    try {
+      const response = await api.post(`estimation/estimations/${id}/responses`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // Get Estimation Response by ID
+  static async GetEstimationResponseById(id) {
+    try {
+      const response = await api.get(`estimation/responses/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // Get file attached to an estimation response (download)
+  static async GetEstimationResponseFile(estimationResId, fileId) {
+    try {
+      const response = await api.get(`estimation/responses/${estimationResId}/files/${fileId}`, {
+        responseType: 'blob'
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // Get inline view URL for an estimation response file
+  static GetEstimationResponseFileViewUrl(estimationResId, fileId) {
+    const baseURL = api.defaults.baseURL || ''
+    return `${baseURL}estimation/response/viewFile/${estimationResId}/${fileId}`
+  }
+
   // Add Estimation Task
   static async AddEstimationTask(formData) {
     try {
@@ -1026,6 +1075,21 @@ class Service {
       return response.data
     } catch (error) {
       console.error('Error adding milestone response:', error)
+      throw error
+    }
+  }
+
+  //Milestone response by id
+  static async GetMilestoneResponseById(id) {
+    try {
+      const response = await api.get(`mileStone/responses/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching milestone response:', error)
       throw error
     }
   }
@@ -1649,6 +1713,22 @@ class Service {
       return response.data
     } catch (error) {
       console.error('cannot find sub', error)
+    }
+  }
+
+  //update  submittal version by ID
+  static async updateSubmittalVersionById(id, data) {
+    try {
+      const response = await api.post(`submittal/${id}/versions`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      console.log('Submittal version updated:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot update submittal version', error)
+      throw error
     }
   }
 
@@ -2728,10 +2808,7 @@ class Service {
   // Get Admin analytics for manager dashboard
   static async GetAdminAnalyticsForManagerDashboard(data) {
     try {
-      const response = await api.post(
-        `analytics/scores/admin/analytics/manager/dashboard`,
-        data
-      )
+      const response = await api.post(`analytics/scores/admin/analytics/manager/dashboard`, data)
       return response.data
     } catch (error) {
       console.error('Error fetching admin analytics for manager dashboard:', error)
@@ -2742,10 +2819,7 @@ class Service {
   // Get Admin MEAS analytics trendline
   static async GetAdminMEASAnalyticsTrendline(data) {
     try {
-      const response = await api.post(
-        `analytics/scores/admin/analytics/meas/trendline`,
-        data
-      )
+      const response = await api.post(`analytics/scores/admin/analytics/meas/trendline`, data)
       return response.data
     } catch (error) {
       console.error('Error fetching admin meas analytics trendline:', error)
@@ -2756,10 +2830,7 @@ class Service {
   // Get Employee EPS
   static async GetEmployeeEPS(data) {
     try {
-      const response = await api.post(
-        `analytics/scores/admin/analytics/employee/eps`,
-        data
-      )
+      const response = await api.post(`analytics/scores/admin/analytics/employee/eps`, data)
       return response.data
     } catch (error) {
       console.error('Error fetching employee EPS:', error)
@@ -2799,98 +2870,96 @@ class Service {
       throw error
     }
   }
-//vendor dashboard
-static async AddVendor(data) {
-  try{
-    const response = await api.post(`/vendors`, data, {
-      headers: { 'Content-Type': 'application/json' }
-    })
-    return response.data
-  }catch(error){
-    console.error('Error adding the vendor:', error)
-    throw error
+  //vendor dashboard
+  static async AddVendor(data) {
+    try {
+      const response = await api.post(`/vendors`, data, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error adding the vendor:', error)
+      throw error
+    }
   }
-}
 
-// AddVendor with file uploads (multipart/form-data)
-static async AddVendorWithFiles(formData) {
-  try{
-    const response = await api.post(`/vendors`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-    return response.data
-  }catch(error){
-    console.error('Error adding vendor with files:', error)
-    throw error
+  // AddVendor with file uploads (multipart/form-data)
+  static async AddVendorWithFiles(formData) {
+    try {
+      const response = await api.post(`/vendors`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error adding vendor with files:', error)
+      throw error
+    }
   }
-}
-static async GetAllVendors(){
-  try{
-    const response = await api.get(`/vendors/all`)
-    return response.data
-  }catch(error){
-    console.error('Error fetching vendors:', error)
-    throw error
+  static async GetAllVendors() {
+    try {
+      const response = await api.get(`/vendors/all`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching vendors:', error)
+      throw error
+    }
   }
-}
-static async GetVendorById(id){
- try{
-  const response = await api.get(`/vendors/${id}`)
-  return response.data
- }catch(error){
-  console.error('Error fetching vendor by ID:', error)
-  throw error
- } 
+  static async GetVendorById(id) {
+    try {
+      const response = await api.get(`/vendors/${id}`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching vendor by ID:', error)
+      throw error
+    }
+  }
+  static async DeleteVendorById(id) {
+    try {
+      const response = await api.delete(`/vendors/id/${id}`)
+      return response.data
+    } catch (error) {
+      console.error('Error deleting vendor by ID:', error)
+      throw error
+    }
+  }
+  static async UpdateVendorById(id, data) {
+    try {
+      const response = await api.put(`/vendors/update/${id}`, data)
+      return response.data
+    } catch (error) {
+      console.error('Error updating vendor by ID:', error)
+      throw error
+    }
+  }
 
+  static async Getfiles(id, fileid) {
+    try {
+      const response = await api.get(`/vendors/file/${id}/${fileid}`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching files:', error)
+      throw error
+    }
   }
-static async DeleteVendorById(id){
-  try{  
-    const response = await api.delete(`/vendors/id/${id}`)
-    return response.data
-  }catch(error){
-    console.error('Error deleting vendor by ID:', error)
-    throw error
+  static async DeleteFile(id, fileid) {
+    try {
+      const response = await api.delete(`/vendors/file/${id}/${fileid}`)
+      return response.data
+    } catch (error) {
+      console.error('Error deleting file:', error)
+      throw error
+    }
   }
- 
-}
-static async UpdateVendorById(id, data){
-  try{
-    const response = await api.put(`/vendors/update/${id}`, data)
-    return response.data
-  }catch(error){
-    console.error('Error updating vendor by ID:', error)
-    throw error
+  static async ViewFile(id, fileid) {
+    try {
+      const response = await api.get(`/vendors/file/${id}/${fileid}`, {
+        responseType: 'blob'
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error viewing file:', error)
+      throw error
+    }
   }
-}
-
-static async Getfiles(id,fileid){
-  try{
-    const response = await api.get(`/vendors/file/${id}/${fileid}`)
-    return response.data
-  }catch(error){
-    console.error('Error fetching files:', error)
-    throw error
-  }
-}
-static async DeleteFile(id,fileid){
-  try{
-    const response = await api.delete(`/vendors/file/${id}/${fileid}`)
-    return response.data
-  }catch(error){
-    console.error('Error deleting file:', error)
-    throw error
-  }
-}
-static async ViewFile(id,fileid){
-  try{
-    const response = await api.get(`/vendors/file/${id}/${fileid}`,{
-      responseType: 'blob'
-    })
-    return response.data
-  }catch(error){
-    console.error('Error viewing file:', error)
-    throw error
-  }
-}
 }
 export default Service

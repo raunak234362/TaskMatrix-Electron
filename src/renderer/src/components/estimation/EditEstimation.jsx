@@ -13,11 +13,13 @@ import Service from '../../api/Service'
 import RichTextEditor from '../fields/RichTextEditor'
 
 const EstimationStatusOptions = [
-  { label: 'Pending', value: 'PENDING' },
+  { label: 'Draft', value: 'DRAFT' },
   { label: 'In Progress', value: 'IN_PROGRESS' },
-  { label: 'Completed', value: 'COMPLETED' },
+  { label: 'Pending Review', value: 'PENDING_REVIEW' },
   { label: 'Approved', value: 'APPROVED' },
-  { label: 'Draft', value: 'DRAFT' }
+  { label: 'Rejected', value: 'REJECTED' },
+  { label: 'Re Estimation Required', value: 'RE_ESTIMATION_REQUIRED' },
+  { label: 'Quoted', value: 'QUOTED' },
 ]
 
 const EditEstimation = ({ id, onSuccess, onCancel }) => {

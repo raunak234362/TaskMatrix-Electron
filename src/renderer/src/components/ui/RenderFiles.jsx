@@ -76,6 +76,8 @@ const RenderFiles = ({
         return `${baseURL}/api/Submittals/submittals/${parentId}/${fileId}`;
       case "rFQ":
         return `${baseURL}/rfq/viewFile/${parentId}/${fileId}`;
+      case "estimationResponse":
+        return `${baseURL}/estimation/response/viewFile/${parentId}/${fileId}`;
       case "changeOrders":
       case "cOResponse":
         return `${baseURL}/api/co/viewfile/${parentId}/${fileId}`;
