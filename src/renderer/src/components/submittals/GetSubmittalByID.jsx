@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Service from "../../api/Service";
-import { Loader2, AlertCircle, ChevronDown, ChevronUp, Clock, History } from "lucide-react";
+import { Loader2, AlertCircle, ChevronDown, ChevronUp, Clock, History, X } from "lucide-react";
 import Button from "../fields/Button";
 import DataTable from "../ui/table";
 import RenderFiles from "../common/RenderFiles";
@@ -115,7 +115,7 @@ const VersionRow = ({ version, index, total, isCurrent }) => {
 };
 
 
-const GetSubmittalByID = ({ id }) => {
+const GetSubmittalByID = ({ id, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [submittal, setSubmittal] = useState(null);
   const [error, setError] = useState(null);
@@ -200,9 +200,30 @@ const GetSubmittalByID = ({ id }) => {
 
   return (
     <>
-      <div className="p-6 space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* LEFT PANEL */}
+      <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-5xl flex flex-col max-h-[90vh]">
+          {/* Header */}
+          <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
+            <div>
+              <h2 className="text-xl font-black text-black tracking-tight uppercase">
+                Submittal Details
+              </h2>
+            </div>
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="px-4 py-2 bg-red-50 border border-red-300 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all flex items-center gap-1.5"
+              >
+                <X className="w-3 h-3" />
+                Close
+              </button>
+            )}
+          </header>
+
+          {/* Body */}
+          <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6 bg-gray-50">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* LEFT PANEL */}
           <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-5">
             <div className="flex justify-between items-center">
               <h1 className="text-2xl text-black font-semibold">
@@ -302,6 +323,8 @@ const GetSubmittalByID = ({ id }) => {
             </div>
           </div>
         )}
+          </div>
+        </div>
       </div>
 
       {/* ADD RESPONSE MODAL */}

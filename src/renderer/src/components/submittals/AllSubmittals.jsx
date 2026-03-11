@@ -150,7 +150,7 @@ const AllSubmittals = ({ submittalData }) => {
       <DataTable
         columns={columns}
         data={submittals}
-        detailComponent={({ row }) => <GetSubmittalByID id={row.id} />}
+        detailComponent={({ row, close }) => <GetSubmittalByID id={row.id} onClose={close} />}
       />
 
       {isFollowUpOpen && (
