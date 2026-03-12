@@ -13,6 +13,7 @@ const EditMileStone = ({
   initialData,
   onClose,
   onSuccess,
+  mileStoneVersionId,
 }) => {
   const [loading, setLoading] = useState(false);
   const {
@@ -157,7 +158,11 @@ const EditMileStone = ({
           : null,
       };
 
-      await Service.EditExistingMilestoneByID(milestoneId, payload);
+      if (mileStoneVersionId) {
+        await Service.EditMilestoneById(milestoneId, payload);
+      } else {
+        await Service.EditExistingMilestoneByID(milestoneId, payload);
+      }
       toast.success("Milestone updated successfully!");
       if (onSuccess) onSuccess();
       onClose();
