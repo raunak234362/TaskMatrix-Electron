@@ -67,7 +67,7 @@ const AddRFI = ({
         project_id: project_id,
         fabricator_id: fabricatorID,
         recepient_id: data.recepient_id,
-        sender_id: userDetail?.id, // always user
+        sender_id: userDetail?.id,
         status: true,
         isAproovedByAdmin: "PENDING",
         description,
@@ -119,7 +119,7 @@ const AddRFI = ({
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* <SectionTitle title="Fabrication & Routing" /> */}
 
-        {userRole !== "CLIENT" && (
+        {userRole !== "CLIENT" || userRole !== "CLIENT_ADMIN" && (
           <>
             {/* CLIENT CONTACT */}
             <Controller
@@ -140,8 +140,10 @@ const AddRFI = ({
             />
           </>
         )}
-
         {/* WBT RECIPIENT */}
+        <label className="text-sm font-medium text-gray-700">
+          Select Recipient
+        </label>
         <Controller
           name="recepient_id"
           control={control}
@@ -149,9 +151,9 @@ const AddRFI = ({
           render={({ field }) => (
             <Select
               placeholder="WBT Contact *"
-              options={recipientOptions}
+              options={pocOptions}
               value={
-                recipientOptions.find((o) => o.value === field.value) ?? null
+                pocOptions.find((o) => o.value === field.value) ?? null
               }
               onChange={(option) =>
                 field.onChange(option ? option.value : null)
