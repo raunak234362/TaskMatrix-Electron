@@ -1,13 +1,17 @@
 import axios from 'axios'
 import { getApiUrl } from './backendConfig'
 
-console.log('API Base URL Initializing...')
-
 const instance = axios.create()
 
+// Request interceptor to set the dynamic baseURL for every request
 instance.interceptors.request.use((config) => {
-  // Dynamically set baseURL if not already set or to ensure it uses the latest selected backend
-  config.baseURL = getApiUrl()
+  const currentBaseURL = getApiUrl()
+  config.baseURL = currentBaseURL
+
+  // Update defaults as well so any direct access to instance.defaults.baseURL is accurate
+  instance.defaults.baseURL = currentBaseURL
+
+  console.log(`[API Request] -> ${config.method.toUpperCase()} ${config.baseURL}${config.url}`)
 
   // Ensure headers exists
   config.headers = config.headers ?? {}

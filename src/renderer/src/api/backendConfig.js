@@ -1,16 +1,10 @@
 const PRIMARY_URL =
   import.meta.env.VITE_BASE_URL?.replace('/v1/', '') ||
   'https://project-station.whiteboardtec.com:5160'
-const FALLBACK_URL = import.meta.env.VITE_LOCAL_BACKEND_URL || 'http://192.168.1.157:5160'
 
 let activeBaseURL = PRIMARY_URL
 
 export const getBaseURL = () => activeBaseURL
-
-export const setFallbackURL = () => {
-  activeBaseURL = FALLBACK_URL
-  console.log('Switched to fallback backend:', activeBaseURL)
-}
 
 export const checkBackendHealth = async () => {
   try {
@@ -29,11 +23,7 @@ export const checkBackendHealth = async () => {
     clearTimeout(timeoutId)
     console.log('Primary backend is reachable')
   } catch (error) {
-    console.warn(
-      'Primary backend unreachable or timed out, switching to local fallback:',
-      error.message
-    )
-    setFallbackURL()
+    console.warn('Primary backend check failed:', error.message)
   }
 }
 
