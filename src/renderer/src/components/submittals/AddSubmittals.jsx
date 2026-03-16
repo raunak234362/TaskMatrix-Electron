@@ -118,39 +118,29 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
   return (
     <div className="w-full mx-auto bg-white p-4 rounded-xl shadow">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <SectionTitle title="Fabrication & Routing" />
-
-        {/* Sender (Fabricator POC) */}
-        <Controller
-          name="recepient_id"
-          control={control}
-          render={({ field }) => (
-            <Select
-              placeholder="Fabricator Contact"
-              options={pocOptions}
-              value={pocOptions.find((o) => o.value === field.value) ?? null}
-              onChange={(option) => field.onChange(option?.value || "")}
-            />
-          )}
-        />
-
+        
+<label className="text-sm font-medium text-gray-700">
+          Select Recipient
+        </label>
         {/* Recipient (WBT Team) */}
         <Controller
-          name="sender_id"
+          name="recepient_id"
           control={control}
           rules={{ required: "Recipient required" }}
           render={({ field }) => (
             <Select
-              placeholder="WBT Recipient *"
-              options={recipientOptions}
+              placeholder="Recipient *"
+              options={pocOptions}
               value={
-                recipientOptions.find((o) => o.value === field.value) ?? null
+                pocOptions.find((o) => o.value === field.value) ?? null
               }
               onChange={(option) => field.onChange(option?.value || "")}
             />
           )}
         />
-
+<label className="text-sm font-medium text-gray-700">
+          Select Milestone
+        </label>
         <Controller
           name="mileStoneId"
           control={control}
@@ -165,8 +155,6 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
             />
           )}
         />
-
-        <SectionTitle title="Details" />
 
         <Input
           label="Subject"
@@ -185,7 +173,6 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
           />
         </div>
 
-        <SectionTitle title="Files" />
 
         <MultipleFileUpload onFilesChange={setFiles} />
 

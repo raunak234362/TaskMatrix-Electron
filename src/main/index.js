@@ -90,7 +90,6 @@ ipcMain.handle('show-notification', async (_, data) => {
 
     notification.show()
     return { success: true, mode: 'native' }
-
   } catch (err) {
     console.error('Notification error:', err)
     return { success: false }
@@ -121,7 +120,7 @@ app.whenReady().then(() => {
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const csp = is.dev
       ? "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
-      : "default-src 'self'; script-src 'self'; connect-src 'self' https://project-station.whiteboardtec.com:5160 wss://project-station.whiteboardtec.com:5160; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; object-src 'none';"
+      : "default-src 'self'; script-src 'self'; connect-src 'self' https://project-station.whiteboardtec.com:5160 wss://project-station.whiteboardtec.com:5160 http://192.168.1.157:5160 ws://192.168.1.157:5160; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; object-src 'none';"
 
     callback({
       responseHeaders: {

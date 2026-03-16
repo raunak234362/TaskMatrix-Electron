@@ -1,15 +1,14 @@
 import axios from 'axios'
+import { getApiUrl } from './backendConfig'
 
-const BASE_URL =
-  // import.meta.env.VITE_BASE_URL || 'http://192.168.1.26:5156/v1/'
-  import.meta.env.VITE_BASE_URL || 'https://project-station.whiteboardtec.com:5160/v1/'
+console.log('API Base URL Initializing...')
 
-console.log('API Base URL:', BASE_URL)
+const instance = axios.create()
 
-const instance = axios.create({
-  baseURL: BASE_URL
-})
 instance.interceptors.request.use((config) => {
+  // Dynamically set baseURL if not already set or to ensure it uses the latest selected backend
+  config.baseURL = getApiUrl()
+
   // Ensure headers exists
   config.headers = config.headers ?? {}
 

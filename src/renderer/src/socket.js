@@ -1,13 +1,9 @@
 import { io } from 'socket.io-client'
+import { getSocketUrl } from './api/backendConfig'
 
-// const baseURL = import.meta.env.VITE_SOCKET_URL || 'http://192.168.1.26:5156/v1/'
-const baseURL = import.meta.env.VITE_SOCKET_URL || 'https://project-station.whiteboardtec.com:5160'
-console.log('Socket Base URL:', baseURL)
-
-const socket = io(baseURL, {
+const socket = io(getSocketUrl(), {
   transports: ['websocket'],
   autoConnect: false
-  // reconnectionAttempts: 5,
 })
 
 // Connect socket with userId
@@ -17,6 +13,10 @@ export function connectSocket(userId) {
     return
   }
 
+  // Update URI in case it changed during health check
+  socket.io.uri = getSocketUrl()
+
+  console.log('Connecting to socket at:', socket.io.uri)
   console.log('User ID Passing', userId)
 
   // Update auth before connecting

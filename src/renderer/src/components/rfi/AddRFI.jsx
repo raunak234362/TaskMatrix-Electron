@@ -117,29 +117,6 @@ const AddRFI = ({
   return (
     <div className="w-full mx-auto bg-white p-2 rounded-xl shadow">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* <SectionTitle title="Fabrication & Routing" /> */}
-
-        {userRole !== "CLIENT" || userRole !== "CLIENT_ADMIN" && (
-          <>
-            {/* CLIENT CONTACT */}
-            <Controller
-              name="sender_id"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  placeholder="Fabricator Contact"
-                  options={pocOptions}
-                  value={
-                    pocOptions.find((o) => o.value === field.value) ?? null
-                  }
-                  onChange={(option) =>
-                    field.onChange(option ? option.value : null)
-                  }
-                />
-              )}
-            />
-          </>
-        )}
         {/* WBT RECIPIENT */}
         <label className="text-sm font-medium text-gray-700">
           Select Recipient
@@ -150,7 +127,7 @@ const AddRFI = ({
           rules={{ required: "Recipient required" }}
           render={({ field }) => (
             <Select
-              placeholder="WBT Contact *"
+              placeholder="Recipient *"
               options={pocOptions}
               value={
                 pocOptions.find((o) => o.value === field.value) ?? null
