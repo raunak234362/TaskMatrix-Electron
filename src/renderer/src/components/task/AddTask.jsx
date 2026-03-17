@@ -301,7 +301,7 @@ const AddTask = () => {
       !selectedWbsType ||
       selectedWbsType === "others" ||
       (isCheckingType
-        ? (w.totalCheckHr || 0) > 0 && category === baseType
+        ? category === baseType
         : category === selectedWbsType.toLowerCase());
     const stageOk =
       !selectedStage ||
@@ -403,7 +403,7 @@ const AddTask = () => {
   }));
 
   const milestoneOptions = milestones.map((m) => ({
-    label: m.subject || m.name || "Unnamed Milestone",
+    label: m.subject + " - " + m.stage || m.name - m.stage  || "Unnamed Milestone",
     value: m.id,
   }));
 

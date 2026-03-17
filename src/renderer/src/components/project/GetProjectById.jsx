@@ -737,7 +737,7 @@ const GetProjectById = ({ id, onClose }) => {
                 </div>
               </div>
 
-              {userRole === "admin" && (
+              {(userRole === "admin" || userRole === "operation_executive" || userRole === "dept_manager") && (
                 <div className="pt-2 flex flex-wrap gap-3">
                   <Button
                     className="py-1 px-3 text-sm bg-green-100 text-black border border-black font-black uppercase tracking-widest hover:bg-green-200 transition-all"
