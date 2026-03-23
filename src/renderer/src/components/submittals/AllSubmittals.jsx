@@ -84,7 +84,7 @@ const AllSubmittals = ({ submittalData }) => {
         const isPending = row.original.status === true;
         return (
           <span
-            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-black ${isPending
+            className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest ${isPending
               ? "bg-orange-100 text-black shadow-sm"
               : "bg-green-100 text-black shadow-sm"
               }`}
