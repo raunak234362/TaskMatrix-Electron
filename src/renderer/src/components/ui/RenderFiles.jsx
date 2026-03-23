@@ -81,6 +81,10 @@ const RenderFiles = ({
       case "changeOrders":
       case "cOResponse":
         return `${baseURL}/api/co/viewfile/${parentId}/${fileId}`;
+      case "teamMeetingNotes":
+        return `${baseURL}/team-meeting-notes/viewFile/${parentId}/${fileId}`;
+      case "teamMeetingResponse":
+        return `${baseURL}/team-meeting-notes/responses/viewFile/${parentId}/${fileId}`;
       case "designDrawings":
       default:
         return `${baseURL}/api/${table}/designdrawing/viewfile/${parentId}/${fileId}`;

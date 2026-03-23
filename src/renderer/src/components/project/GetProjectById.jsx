@@ -33,7 +33,7 @@ import CoTable from "../co/CoTable";
 import ProjectAnalyticsDashboard from "./ProjectAnalyticsDashboard";
 import MilestoneProgress from "./MilestoneProgress";
 import TeamsAnalytics from "./TeamsAnalytics";
-
+import AllProjectNotes from "./notes/AllProjectNotes";
 
 const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);
