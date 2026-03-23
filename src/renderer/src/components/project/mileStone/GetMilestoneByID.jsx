@@ -252,10 +252,10 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
 
   return (
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-auto border border-gray-200 overflow-hidden flex flex-col relative">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] border border-gray-200 overflow-y-auto flex flex-col relative">
 
         {/* Header */}
-        <div className=" px-6 py-4 border-b flex justify-between items-center bg-gray-50/30">
+        <div className=" px-6 py-4 flex justify-between items-center bg-gray-50/30">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-100 rounded-lg">
               <CheckCircle2 className="w-6 h-6 text-green-700" />
@@ -298,7 +298,7 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
           </div>
         </div>
 
-        <div className="p-6 space-y-8">
+        <div className="p-6 space-y-8 h-[80vh] overflow-y-auto">
           {/* Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <InfoCard
@@ -466,7 +466,16 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
                                     __html: v.description,
                                   }}
                                 />
+                                  <div>
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 mt-1">
+                                Approval Date
+                              </p>
+                              <p className="text-sm text-gray-700 ">
+                                {formatDate(v.approvalDate)}
+                              </p>
+                            </div>
                               </div>
+
                             )}
                           </div>
                         )}

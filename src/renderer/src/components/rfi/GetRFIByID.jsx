@@ -6,6 +6,7 @@ import Button from "../fields/Button";
 import RenderFiles from "../common/RenderFiles";
 import RFIResponseModal from "./RFIResponseModal";
 import RFIResponseDetailsModal from "./RFIResponseDetailsModal";
+import { useSelector } from "react-redux";
 
 const Info = ({ label, value }) => (
   <div>
@@ -21,7 +22,7 @@ const GetRFIByID = ({ id }) => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedResponse, setSelectedResponse] = useState(null);
-
+ const users = useSelector((state) => state.userInfo?.staffData || []);
   //
   const fetchRfi = async () => {
     try {
@@ -60,14 +61,20 @@ const GetRFIByID = ({ id }) => {
   const userRole = sessionStorage.getItem("userRole");
 
   const responseColumns = [
-    {
+   {
       accessorKey: "createdByRole",
       header: "From",
-      cell: ({ row }) => (
-        <span className="font-medium text-sm">
-          {row.original.createdByRole === "CLIENT" ? "Client" : "WBT Team"}
-        </span>
-      ),
+      cell: ({ row }) => {
+        if (row.original.userRole === "CLIENT" || row.original.userRole === "CLIENT_ADMIN") {
+          return <span className="font-medium text-sm">Client</span>;
+        }
+
+        const responderId = row.original.userId;
+        const user = users.find((u) => String(u.id) === String(responderId));
+        const name = user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : "WBT Team";
+
+        return <span className="font-medium text-sm">{name}</span>;
+      },
     },
     {
       accessorKey: "description",
