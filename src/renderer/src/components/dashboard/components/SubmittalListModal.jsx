@@ -24,8 +24,7 @@ const SubmittalListModal = ({ isOpen, onClose, data }) => {
         const isSubmitted = row.original.status === true
         return (
           <span
-            className={`px-3 py-1 rounded-full text-xs ${isSubmitted ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
-              }`}
+            className={`text-xs`}
           >
             {isSubmitted ? 'Submitted to EOR' : 'Pending'}
           </span>
