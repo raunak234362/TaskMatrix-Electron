@@ -72,43 +72,25 @@ const GetRFIByID = ({ id }) => {
     {
       accessorKey: "description",
       header: "Message",
-      cell: ({ row }) => (
-        <p className="truncate max-w-[180px]">
-          {row.original.reason || row.original.description}
-        </p>
-      ),
-    },
-    {
-      accessorKey: "files",
-      header: "Files",
       cell: ({ row }) => {
-        const count = row.original.files?.length ?? 0;
-        return count > 0 ? (
-          <span className="text-[#6bbd45] font-medium">{count} file(s)</span>
-        ) : (
-          <span className="text-gray-400">—</span>
+        const htmlContent = row.original.reason || row.original.description || "";
+        const plainText = htmlContent.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ");
+        
+        return (
+          <p className="truncate max-w-[180px]" title={plainText}>
+            {plainText}
+          </p>
         );
       },
     },
+   
     {
       accessorKey: "createdAt",
       header: "Created",
       cell: ({ row }) => (
         <span className="text-gray-700 text-sm">
-          {new Date(row.original.date).toLocaleString()}
+          {new Date(row.original.createdAt).toLocaleString()}
         </span>
-      ),
-    },
-
-    {
-      accessorKey: "reason",
-      header: "Message",
-      cell: ({ row }) => (
-        <div
-          style={{ marginLeft: row.original.parentResponseId ? "20px" : "0px" }}
-        >
-          {row.original.reason}
-        </div>
       ),
     },
 
