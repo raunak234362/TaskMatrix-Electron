@@ -417,8 +417,8 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
                       <div
                         key={v.id}
                         className={`rounded-xl border ${isCurrent
-                            ? "bg-green-50 border-green-400"
-                            : "bg-white border-gray-200"
+                          ? "bg-green-50 border-green-400"
+                          : "bg-white border-gray-200"
                           }`}
                       >
                         {/* Version Header */}
@@ -433,8 +433,8 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
                           <div className="flex items-center gap-3">
                             <span
                               className={`text-xs font-bold px-3 py-1 rounded-md ${isCurrent
-                                  ? "bg-green-500 text-white"
-                                  : "bg-gray-200 text-gray-700"
+                                ? "bg-green-500 text-white"
+                                : "bg-gray-200 text-gray-700"
                                 }`}
                             >
                               V{v.versionNumber} {isCurrent && "· CURRENT"}
