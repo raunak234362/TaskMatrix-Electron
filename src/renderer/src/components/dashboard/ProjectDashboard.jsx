@@ -232,63 +232,6 @@ const ProjectDashboard = () => {
 
   return (
     <div className="flex flex-col h-full animate-in fade-in duration-500">
-      {/* Dashboard Top Header */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-6">
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 border-black/10 rounded-lg hover:bg-gray-100"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-xl font-black text-black uppercase tracking-tight ml-2">
-            Projects
-          </h1>
-
-          <div className="flex flex-wrap items-center gap-2 ml-4">
-            <div className="px-4 py-2 bg-white border border-black/10 rounded-xl flex items-center gap-2 shadow-sm">
-              <span className="text-xs font-black text-black/40 uppercase tracking-widest">Total -</span>
-              <span className="text-lg font-black text-black">{projectStats.total}</span>
-            </div>
-            <div className="px-4 py-2 bg-white border border-black/10 rounded-xl flex items-center gap-2 shadow-sm">
-              <span className="text-xs font-black text-black/40 uppercase tracking-widest">Active -</span>
-              <span className="text-lg font-black text-black">{projectStats.active}</span>
-            </div>
-            <div className="px-4 py-2 bg-white border border-black/10 rounded-xl flex items-center gap-2 shadow-sm">
-              <span className="text-xs font-black text-black/40 uppercase tracking-widest">Completed -</span>
-              <span className="text-lg font-black text-black">{projectStats.completed}</span>
-            </div>
-            <div className="px-4 py-2 bg-white border border-black/10 rounded-xl flex items-center gap-2 shadow-sm">
-              <span className="text-xs font-black text-black/40 uppercase tracking-widest">On Hold -</span>
-              <span className="text-lg font-black text-black">{projectStats.onHold}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            onClick={() => navigate("/dashboard")}
-            className="px-6 py-2 bg-[#6bbd45]/20 text-black border border-[#6bbd45] rounded-xl font-bold uppercase tracking-tight hover:bg-[#6bbd45]/30 transition-all shadow-sm"
-          >
-            Project Home
-          </Button>
-          <Button
-            onClick={() => navigate("/dashboard/projects")}
-            className="px-6 py-2 bg-white text-black border border-black/20 rounded-xl font-bold uppercase tracking-tight hover:bg-gray-50 transition-all shadow-sm"
-          >
-            All Projects
-          </Button>
-          <Button
-            onClick={() => navigate("/dashboard/projects/add")}
-            className="px-6 py-2 bg-white text-black border border-black/20 rounded-xl font-bold uppercase tracking-tight hover:bg-gray-50 transition-all shadow-sm"
-          >
-            Add New Project
-          </Button>
-        </div>
-      </div>
-
       {/* Filters Header */}
       <div className="shrink-0 mb-2 bg-white p-2 md:p-3 rounded-xl border border-black/5 shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-2 md:gap-3">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-4 flex-1">
