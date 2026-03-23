@@ -215,7 +215,7 @@ const GetEstimationByID = ({ id, onRefresh }) => {
       {/* Files Section */}
       <div className='my-4'>
 
-      <RenderFiles files={files || []} table="estimation" parentId={id} formatDate={formatDate} />
+        <RenderFiles files={files || []} table="estimation" parentId={id} formatDate={formatDate} />
       </div>
 
       {/* Action Buttons (placeholders for future edit/view actions) */}

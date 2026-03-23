@@ -127,8 +127,8 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
             key={t}
             onClick={() => setSubTab(t)}
             className={`px-5 py-2 rounded-xl font-black text-xs uppercase tracking-widest border-2 transition-all ${subTab === t
-                ? "bg-[#6bbd45] text-white border-[#6bbd45] shadow-md shadow-[#6bbd45]/20"
-                : "bg-white text-black border-black hover:bg-green-50"
+              ? "bg-[#6bbd45] text-white border-[#6bbd45] shadow-md shadow-[#6bbd45]/20"
+              : "bg-white text-black border-black hover:bg-green-50"
               }`}
           >
             {t === "team" ? "👥 Team Analytics" : "📊 Manager Analytics"}
@@ -186,8 +186,8 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                       </span>
                       <span
                         className={`text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full ${managerBias.interpretation === "BALANCED"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-yellow-100 text-yellow-700"
                           }`}
                       >
                         {managerBias.interpretation || "N/A"}
@@ -346,8 +346,8 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                     </span>
                     <span
                       className={`inline-block text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-4 ${adminAnalytics.biasInterpretation === "BALANCED"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-yellow-100 text-yellow-700"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-yellow-100 text-yellow-700"
                         }`}
                     >
                       {adminAnalytics.biasInterpretation || "UNKNOWN"}

@@ -658,9 +658,9 @@ const SummaryCard = ({
         </div>
         <div>
 
-        <p className="text-md font-bold text-gray-700 uppercase tracking-widest">
-          {label}
-        </p>
+          <p className="text-md font-bold text-gray-700 uppercase tracking-widest">
+            {label}
+          </p>
         </div>
       </div>
       <div>

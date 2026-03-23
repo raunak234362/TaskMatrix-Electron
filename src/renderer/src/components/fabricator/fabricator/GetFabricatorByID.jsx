@@ -84,11 +84,10 @@ const GetFabricatorByID = ({ id }) => {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <h3 className="text-xl text-green-800">{fabricator.fabName}</h3>
         <span
-          className={`px-3 py-7 rounded-full text-xs font-medium ${
-            fabricator.isDeleted
+          className={`px-3 py-7 rounded-full text-xs font-medium ${fabricator.isDeleted
               ? "bg-red-100 text-red-700"
               : "bg-green-100 text-green-800"
-          }`}
+            }`}
         >
           {fabricator.isDeleted ? "Inactive" : "Active"}
         </span>
@@ -98,21 +97,19 @@ const GetFabricatorByID = ({ id }) => {
       <div className="flex flex-wrap gap-x-6 gap-y-2 border-b border-green-200">
         <button
           onClick={() => setActiveTab("dashboard")}
-          className={`pb-3 px-2 text-sm font-semibold transition-colors ${
-            activeTab === "dashboard"
+          className={`pb-3 px-2 text-sm font-semibold transition-colors ${activeTab === "dashboard"
               ? "text-green-700 border-b-2 border-green-600"
               : "text-gray-500 hover:text-green-600"
-          }`}
+            }`}
         >
           Dashboard
         </button>
         <button
           onClick={() => setActiveTab("details")}
-          className={`pb-3 px-2 text-sm font-semibold transition-colors ${
-            activeTab === "details"
+          className={`pb-3 px-2 text-sm font-semibold transition-colors ${activeTab === "details"
               ? "text-green-700 border-b-2 border-green-600"
               : "text-gray-500 hover:text-green-600"
-          }`}
+            }`}
         >
           Basic Details
         </button>

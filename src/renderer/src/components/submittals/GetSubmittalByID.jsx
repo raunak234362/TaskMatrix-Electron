@@ -243,7 +243,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
                   value={submittal.sender?.firstName || "—"}
                 />
                 <Info
-                  label="Created On"
+                  label="Created At"
                   value={new Date(submittal.date).toLocaleString()}
                 />
 

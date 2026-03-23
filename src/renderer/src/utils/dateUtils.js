@@ -27,5 +27,5 @@ export const formatMediumDate = (date) => {
 export const formatDateTime = (date) => {
   if (!date) return '—'
   const d = typeof date === 'string' ? parseISO(date) : new Date(date)
-  return isValid(d) ? format(d, 'MM/dd/yyyy hh:mm a') : '—'
+  return isValid(d) ? format(d, 'MM/dd/yyyy hh:mm a') + ' IST' : '—'
 }

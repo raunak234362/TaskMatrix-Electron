@@ -49,7 +49,7 @@ const AllDesignDrawings = ({ projectId }) => {
     },
     {
       accessorKey: "createdAt",
-      header: "Created On",
+      header: "Created At",
       cell: ({ row }) => (
         <span className="text-sm font-bold text-gray-600">
           {new Date(row.original.createdAt).toLocaleDateString("en-IN", {

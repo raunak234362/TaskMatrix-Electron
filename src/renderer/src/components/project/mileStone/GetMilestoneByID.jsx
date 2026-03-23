@@ -466,14 +466,14 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
                                     __html: v.description,
                                   }}
                                 />
-                                  <div>
-                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 mt-1">
-                                Approval Date
-                              </p>
-                              <p className="text-sm text-gray-700 ">
-                                {formatDate(v.approvalDate)}
-                              </p>
-                            </div>
+                                <div>
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 mt-1">
+                                    Approval Date
+                                  </p>
+                                  <p className="text-sm text-gray-700 ">
+                                    {formatDate(v.approvalDate)}
+                                  </p>
+                                </div>
                               </div>
 
                             )}

@@ -22,7 +22,7 @@ const GetRFIByID = ({ id }) => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedResponse, setSelectedResponse] = useState(null);
- const users = useSelector((state) => state.userInfo?.staffData || []);
+  const users = useSelector((state) => state.userInfo?.staffData || []);
   //
   const fetchRfi = async () => {
     try {
@@ -61,17 +61,16 @@ const GetRFIByID = ({ id }) => {
   const userRole = sessionStorage.getItem("userRole");
 
   const responseColumns = [
-   {
+    {
       accessorKey: "createdByRole",
       header: "From",
       cell: ({ row }) => {
         if (row.original.userRole === "CLIENT" || row.original.userRole === "CLIENT_ADMIN") {
-          return <span className="font-medium text-sm">Client</span>;
+          return <span className="font-medium text-sm">WBT Team</span>;
         }
 
-        const responderId = row.original.userId;
-        const user = users.find((u) => String(u.id) === String(responderId));
-        const name = user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : "WBT Team";
+        const recipient = rfi?.recepients;
+        const name = recipient ? `${recipient.firstName || ""} ${recipient.lastName || ""}`.trim() : "Client";
 
         return <span className="font-medium text-sm">{name}</span>;
       },
@@ -82,7 +81,7 @@ const GetRFIByID = ({ id }) => {
       cell: ({ row }) => {
         const htmlContent = row.original.reason || row.original.description || "";
         const plainText = htmlContent.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ");
-        
+
         return (
           <p className="truncate max-w-[180px]" title={plainText}>
             {plainText}
@@ -90,13 +89,13 @@ const GetRFIByID = ({ id }) => {
         );
       },
     },
-   
+
     {
       accessorKey: "createdAt",
       header: "Created",
       cell: ({ row }) => (
         <span className="text-gray-700 text-sm">
-          {new Date(row.original.createdAt).toLocaleString()}
+          {new Date(row.original.createdAt).toLocaleString()} IST
         </span>
       ),
     },
