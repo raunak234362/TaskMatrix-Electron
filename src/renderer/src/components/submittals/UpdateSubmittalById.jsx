@@ -23,10 +23,9 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
             setError(null);
 
             const formData = new FormData();
-            formData.append("subject", subject.trim());
             formData.append("description", description);
             if (file) {
-                formData.append("file", file);
+                formData.append("files", file);
             }
 
             await Service.updateSubmittalVersionById(submittal.id, formData);
@@ -77,19 +76,6 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                         </div>
                     )}
 
-                    {/* Subject */}
-                    <div className="space-y-2">
-                        <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
-                            Subject <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            value={subject}
-                            onChange={(e) => setSubject(e.target.value)}
-                            placeholder="Enter submittal subject..."
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-medium text-black focus:outline-none focus:ring-2 focus:ring-[#6bbd45]/40 focus:border-[#6bbd45] bg-gray-50 transition-all"
-                        />
-                    </div>
 
                     {/* Description */}
                     <div className="space-y-2">
@@ -161,8 +147,8 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                         onClick={handleSubmit}
                         disabled={submitting}
                         className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${submitting
-                                ? "bg-gray-100 text-black/20 cursor-not-allowed"
-                                : "bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black active:scale-95"
+                            ? "bg-gray-100 text-black/20 cursor-not-allowed"
+                            : "bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black active:scale-95"
                             }`}
                     >
                         {submitting ? (

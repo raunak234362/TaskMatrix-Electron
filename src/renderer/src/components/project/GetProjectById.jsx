@@ -34,6 +34,7 @@ import ProjectAnalyticsDashboard from "./ProjectAnalyticsDashboard";
 import MilestoneProgress from "./MilestoneProgress";
 import TeamsAnalytics from "./TeamsAnalytics";
 
+
 const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -306,7 +307,7 @@ const GetProjectById = ({ id, onClose }) => {
   return (
     <>
       <div className="w-full relative laptop:fit">
-        <div className="sticky top-0 bg-white z-50 pb-2">
+        <div className="sticky top-[-1.51rem] bg-white z-[40] pb-2 -mt-6 -mx-6 px-6 pt-6 border-b border-gray-100">
           {/* Header */}
           <div className="flex justify-between items-start pr-4 pt-2">
             <div className="flex flex-col">
@@ -348,6 +349,7 @@ const GetProjectById = ({ id, onClose }) => {
                 { key: "wbs", label: "WBS", icon: ClipboardList },
                 { key: "milestones", label: "Milestones", icon: Clock },
                 { key: "notes", label: "Notes", icon: FileText },
+                { key: "projectNotes", label: "Project Notes", icon: FileText },
                 { key: "rfi", label: "RFI", icon: FileText },
                 { key: "CDrfi", label: "CD RFI", icon: FileText },
                 { key: "submittals", label: "Submittals", icon: FileText },
@@ -355,11 +357,15 @@ const GetProjectById = ({ id, onClose }) => {
                 { key: "changeOrder", label: "Change Order", icon: Settings },
               ]
                 .filter(
-                  (tab) =>
-                    !(
-                      userRole === "staff" &&
-                      ["wbs", "changeOrder", "milestones", "analytics", "teamAnalytics", "CDrfi", "CDsubmittals"].includes(tab.key)
-                    )
+                  (tab) => {
+                    if (userRole === "staff" && ["wbs", "changeOrder", "milestones", "analytics", "teamAnalytics", "CDrfi", "CDsubmittals"].includes(tab.key)) {
+                      return false;
+                    }
+                    if (tab.key === "projectNotes") {
+                      return ["admin", "project_manager", "deputy_manager", "client", "client_admin"].includes(userRole);
+                    }
+                    return true;
+                  }
                 )
                 .map(({ key, label, icon: TabIcon }) => (
                   <button
@@ -399,7 +405,7 @@ const GetProjectById = ({ id, onClose }) => {
                     <CheckCircle2 size={20} strokeWidth={3} />
                     <span className="text-sm font-black uppercase tracking-widest opacity-60">Total Hours Estimated for Approval</span>
                   </div>
-                  <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned*0.8}h</h3>
+                  <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned * 0.8}h</h3>
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gray-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
                 <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
@@ -407,7 +413,7 @@ const GetProjectById = ({ id, onClose }) => {
                     <CheckCircle2 size={20} strokeWidth={3} />
                     <span className="text-sm font-black uppercase tracking-widest opacity-60">Total Hours Estimated for Fabrication</span>
                   </div>
-                  <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned*0.2}h</h3>
+                  <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned * 0.2}h</h3>
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gray-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
 
@@ -1049,6 +1055,9 @@ const GetProjectById = ({ id, onClose }) => {
               managerId={project.managerID}
               tasks={projectTasks}
             />
+          )}
+          {activeTab === "projectNotes" && (
+            <AllProjectNotes projectId={id} />
           )}
         </div>
       </div >

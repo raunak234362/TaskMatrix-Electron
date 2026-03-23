@@ -56,12 +56,7 @@ const AddAccount = ({ onClose, onSuccess }) => {
             ENTER DETAILS TO LINK A BANK ACCOUNT
           </p>
         </div>
-        <button
-          onClick={onClose}
-          className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
-        >
-          Close
-        </button>
+       
       </header>
 
       {/* FORM */}

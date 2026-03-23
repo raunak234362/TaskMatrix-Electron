@@ -37,7 +37,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
   ].filter(action => !action.hidden)
 
   return (
-    <div className="transition-all duration-500 h-full border border-gray-200 bg-white p-4 rounded-lg">
+    <div className="transition-all duration-500 h-full border border-green-200 bg-white p-4 rounded-lg">
       <div className="flex items-center justify-between mb-6 px-1 ">
         <h2 className="text-base font-black text-black uppercase tracking-[0.15em] flex items-center gap-2 ">
           <ClipboardList className="w-5 h-5 text-green-600" />
@@ -61,7 +61,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
                   onActionClick(typeMap[action.title])
                 }
               }}
-              className="flex items-center justify-between p-4 rounded-none border border-gray-200 border-l-4 border-l-green-600 bg-white hover:bg-gray-50 transition-all duration-300 cursor-pointer group hover:shadow-md hover:-translate-y-0.5"
+              className="flex items-center justify-between p-4 rounded-lg border border-black border-l-5 border-l-[#48b614] bg-white hover:bg-gray-50 transition-all duration-300 cursor-pointer group hover:shadow-md hover:-translate-y-0.5"
             >
               <div className="flex flex-row items-center gap-4">
                 <div
@@ -71,7 +71,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
                 </div>
 
                 <div className="flex flex-col text-left">
-                  <span className="text-[13px] font-black text-black uppercase tracking-widest leading-none">{action.title}</span>
+                  <span className="text-xm font-black text-black uppercase tracking-widest leading-none">{action.title}</span>
                 </div>
               </div>
 

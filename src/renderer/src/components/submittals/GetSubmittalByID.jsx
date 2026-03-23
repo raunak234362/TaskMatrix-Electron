@@ -200,8 +200,8 @@ const GetSubmittalByID = ({ id, onClose }) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-5xl flex flex-col max-h-[90vh]">
+      <div className="fixed inset-0 z-[110] flex items-center justify-center p-1 md:p-2 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[98%] flex flex-col h-full max-h-[98vh]">
           {/* Header */}
           <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
             <div>
@@ -224,30 +224,30 @@ const GetSubmittalByID = ({ id, onClose }) => {
           <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6 bg-gray-50">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* LEFT PANEL */}
-          <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-5">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl text-black font-semibold">
-                {submittal.subject}
-              </h1>
-              <Button
-                className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
-                onClick={() => setShowUpdateModal(true)}
-              >
-                Update Submittal
-              </Button>
-            </div>
+              <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-5">
+                <div className="flex justify-between items-center">
+                  <h1 className="text-2xl text-black font-semibold">
+                    {submittal.subject}
+                  </h1>
+                  <Button
+                    className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
+                    onClick={() => setShowUpdateModal(true)}
+                  >
+                    Update Submittal
+                  </Button>
+                </div>
 
-            <Info label="Project" value={submittal.project?.name || "—"} />
-            <Info
-              label="Submitted By"
-              value={submittal.sender?.firstName || "—"}
-            />
-            <Info
-              label="Created On"
-              value={new Date(submittal.date).toLocaleString()}
-            />
+                <Info label="Project" value={submittal.project?.name || "—"} />
+                <Info
+                  label="Submitted By"
+                  value={submittal.sender?.firstName || "—"}
+                />
+                <Info
+                  label="Created On"
+                  value={new Date(submittal.date).toLocaleString()}
+                />
 
-            {/* <div>
+                {/* <div>
               <h4 className="font-semibold text-gray-700">Description</h4>
               <div
                 className="p-3 bg-white border rounded-lg prose prose-sm max-w-none"
@@ -260,69 +260,69 @@ const GetSubmittalByID = ({ id, onClose }) => {
               />
             </div> */}
 
-            {/* Current version attachments (flat file) */}
-            {/* <RenderFiles
+                {/* Current version attachments (flat file) */}
+                {/* <RenderFiles
               files={submittal.versions || []}
               table="submittals"
               parentId={submittal.id}
             /> */}
-          </div>
+              </div>
 
-          {/* RIGHT PANEL */}
-          <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>
-              {userRole === "CLIENT_ADMIN" && (
-                <Button
-                  className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
-                  onClick={() => setShowResponseModal(true)}
-                >
-                  + Add Response
-                </Button>
-              )}
+              {/* RIGHT PANEL */}
+              <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>
+                  {userRole === "CLIENT_ADMIN" && (
+                    <Button
+                      className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
+                      onClick={() => setShowResponseModal(true)}
+                    >
+                      + Add Response
+                    </Button>
+                  )}
+                </div>
+
+                {submittal.submittalsResponse?.length > 0 ? (
+                  <DataTable
+                    columns={responseColumns}
+                    data={submittal.submittalsResponse}
+                    onRowClick={(row) => setSelectedResponse(row)}
+                  />
+                ) : (
+                  <p className="text-gray-700 italic">No responses yet.</p>
+                )}
+              </div>
             </div>
 
-            {submittal.submittalsResponse?.length > 0 ? (
-              <DataTable
-                columns={responseColumns}
-                data={submittal.submittalsResponse}
-                onRowClick={(row) => setSelectedResponse(row)}
-              />
-            ) : (
-              <p className="text-gray-700 italic">No responses yet.</p>
+            {/* ── VERSION HISTORY (only when > 1 versions) ── */}
+            {hasMultipleVersions && (
+              <div className="bg-gray-100 border border-gray-100 rounded-xl p-6 space-y-4">
+                <div className="flex items-center gap-2">
+                  <History className="w-5 h-5 text-[#6bbd45]" />
+                  <h2 className="text-lg font-black text-black uppercase tracking-tight">
+                    Version History
+                  </h2>
+                  <span className="ml-auto text-[10px] font-black text-gray-400 uppercase tracking-widest bg-white border border-gray-200 px-2 py-1 rounded-md">
+                    {sortedVersions.length} versions
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  {sortedVersions.map((version, index) => (
+                    <VersionRow
+                      key={version.id || index}
+                      version={version}
+                      index={index}
+                      total={sortedVersions.length}
+                      isCurrent={
+                        version.id === submittal.currentVersionId ||
+                        index === 0
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
             )}
-          </div>
-        </div>
-
-        {/* ── VERSION HISTORY (only when > 1 versions) ── */}
-        {hasMultipleVersions && (
-          <div className="bg-gray-100 border border-gray-100 rounded-xl p-6 space-y-4">
-            <div className="flex items-center gap-2">
-              <History className="w-5 h-5 text-[#6bbd45]" />
-              <h2 className="text-lg font-black text-black uppercase tracking-tight">
-                Version History
-              </h2>
-              <span className="ml-auto text-[10px] font-black text-gray-400 uppercase tracking-widest bg-white border border-gray-200 px-2 py-1 rounded-md">
-                {sortedVersions.length} versions
-              </span>
-            </div>
-
-            <div className="space-y-2">
-              {sortedVersions.map((version, index) => (
-                <VersionRow
-                  key={version.id || index}
-                  version={version}
-                  index={index}
-                  total={sortedVersions.length}
-                  isCurrent={
-                    version.id === submittal.currentVersionId ||
-                    index === 0
-                  }
-                />
-              ))}
-            </div>
-          </div>
-        )}
           </div>
         </div>
       </div>

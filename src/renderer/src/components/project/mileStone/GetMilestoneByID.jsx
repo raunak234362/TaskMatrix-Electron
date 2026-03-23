@@ -390,94 +390,92 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
               </div>
             </div>
           </div>
-        {/* VERSION HISTORY */}
-{milestone?.versions?.length > 0 && (
-  <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-    <div className="flex items-center justify-between mb-4">
-      <h3 className="text-sm font-bold text-gray-700 uppercase tracking-widest">
-        Version History
-      </h3>
+          {/* VERSION HISTORY */}
+          {milestone?.versions?.length > 0 && (
+            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-gray-700 uppercase tracking-widest">
+                  Version History
+                </h3>
 
-      <span className="text-xs font-bold bg-gray-200 text-gray-600 px-3 py-1 rounded-md">
-        {milestone.versions.length} Versions
-      </span>
-    </div>
-
-    <div className="space-y-3">
-      {[...milestone.versions]
-        .sort((a, b) => b.versionNumber - a.versionNumber)
-        .map((v) => {
-          const isCurrent =
-            String(v.id) === String(milestone.currentVersionId);
-
-          const isExpanded =
-            String(expandedVersionId) === String(v.id);
-
-          return (
-            <div
-              key={v.id}
-              className={`rounded-xl border ${
-                isCurrent
-                  ? "bg-green-50 border-green-400"
-                  : "bg-white border-gray-200"
-              }`}
-            >
-              {/* Version Header */}
-              <div
-                className="flex items-center justify-between px-4 py-3 cursor-pointer"
-                onClick={() =>
-                  setExpandedVersionId(
-                    isExpanded ? null : v.id
-                  )
-                }
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`text-xs font-bold px-3 py-1 rounded-md ${
-                      isCurrent
-                        ? "bg-green-500 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                  >
-                    V{v.versionNumber} {isCurrent && "· CURRENT"}
-                  </span>
-
-                  <span className="text-xs text-gray-500 flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {formatDateTime(v.createdAt)}
-                  </span>
-                </div>
-
-                <span className="text-gray-400 text-lg">
-                  {isExpanded ? "▲" : "▼"}
+                <span className="text-xs font-bold bg-gray-200 text-gray-600 px-3 py-1 rounded-md">
+                  {milestone.versions.length} Versions
                 </span>
               </div>
 
-              {/* Dropdown Content */}
-              {isExpanded && (
-                <div className="px-4 pb-4 pt-2 border-t bg-white">
-                  {v.description && (
-                    <div>
-                      <p className="text-xs font-bold text-gray-500 uppercase mb-2">
-                        Description
-                      </p>
+              <div className="space-y-3">
+                {[...milestone.versions]
+                  .sort((a, b) => b.versionNumber - a.versionNumber)
+                  .map((v) => {
+                    const isCurrent =
+                      String(v.id) === String(milestone.currentVersionId);
 
+                    const isExpanded =
+                      String(expandedVersionId) === String(v.id);
+
+                    return (
                       <div
-                        className="text-sm text-gray-700 prose prose-sm max-w-none"
-                        dangerouslySetInnerHTML={{
-                          __html: v.description,
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
+                        key={v.id}
+                        className={`rounded-xl border ${isCurrent
+                            ? "bg-green-50 border-green-400"
+                            : "bg-white border-gray-200"
+                          }`}
+                      >
+                        {/* Version Header */}
+                        <div
+                          className="flex items-center justify-between px-4 py-3 cursor-pointer"
+                          onClick={() =>
+                            setExpandedVersionId(
+                              isExpanded ? null : v.id
+                            )
+                          }
+                        >
+                          <div className="flex items-center gap-3">
+                            <span
+                              className={`text-xs font-bold px-3 py-1 rounded-md ${isCurrent
+                                  ? "bg-green-500 text-white"
+                                  : "bg-gray-200 text-gray-700"
+                                }`}
+                            >
+                              V{v.versionNumber} {isCurrent && "· CURRENT"}
+                            </span>
+
+                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {formatDateTime(v.createdAt)}
+                            </span>
+                          </div>
+
+                          <span className="text-gray-400 text-lg">
+                            {isExpanded ? "▲" : "▼"}
+                          </span>
+                        </div>
+
+                        {/* Dropdown Content */}
+                        {isExpanded && (
+                          <div className="px-4 pb-4 pt-2 border-t bg-white">
+                            {v.description && (
+                              <div>
+                                <p className="text-xs font-bold text-gray-500 uppercase mb-2">
+                                  Description
+                                </p>
+
+                                <div
+                                  className="text-sm text-gray-700 prose prose-sm max-w-none"
+                                  dangerouslySetInnerHTML={{
+                                    __html: v.description,
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
             </div>
-          );
-        })}
-    </div>
-  </div>
-)}
+          )}
 
           <div className="grid grid-cols-1 gap-8">
             {/* Left side: Description and tasks */}

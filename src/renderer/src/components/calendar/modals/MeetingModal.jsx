@@ -204,7 +204,7 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
                         {isEditing ? <><CalendarIcon className="text-blue-600" size={20} /> Edit Meeting</> : <><CalendarIcon className="text-blue-600" size={20} /> New Meeting</>}
                     </h2>
                     <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
-                        <X size={20} />
+                       
                     </button>
                 </div>
 

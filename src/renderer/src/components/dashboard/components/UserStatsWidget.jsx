@@ -9,7 +9,7 @@ const StatCard = ({
   trend,
 }) => (
   <div
-    className="p-3 lg:p-4 rounded-none border border-gray-200 border-l-4 border-l-green-600 shadow-sm transition-all duration-700 group hover:shadow-md hover:-translate-y-1 relative overflow-hidden bg-white rounded-xl"
+    className="p-3 lg:p-4 rounded-none border border-gray-200 border-l-4 border-l-[#48b614] shadow-sm transition-all duration-700 group hover:shadow-md hover:-translate-y-1 relative overflow-hidden bg-white rounded-xl"
   >
     <div className="flex flex-col h-full justify-between gap-2 lg:gap-3 relative z-10">
       <div className="flex items-start justify-between">
