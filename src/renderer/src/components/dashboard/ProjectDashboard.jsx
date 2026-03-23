@@ -1,7 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import Service from "../../api/Service";
-import { Calendar, Loader2 } from "lucide-react";
+import { Calendar, Loader2, ChevronLeft } from "lucide-react";
 import { setProjectData, updateProject } from "../../store/projectSlice";
 import { setMilestonesForProject } from "../../store/milestoneSlice";
 import ProjectDetailsModal from "./components/ProjectDetailsModal";
@@ -12,6 +13,7 @@ import { Button } from "../ui/button";
 
 const ProjectDashboard = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const projects = useSelector(
     (state) => state.projectInfo?.projectData || [],
   );
@@ -28,6 +30,19 @@ const ProjectDashboard = () => {
   const [isListModalOpen, setIsListModalOpen] = useState(false);
   const [listModalProjects, setListModalProjects] = useState([]);
   const [listModalStatus, setListModalStatus] = useState("");
+
+  const projectStats = useMemo(() => {
+    return projects.reduce(
+      (acc, p) => {
+        acc.total++;
+        if (p.status === "ACTIVE") acc.active++;
+        else if (p.status === "COMPLETED") acc.completed++;
+        else if (p.status === "ONHOLD") acc.onHold++;
+        return acc;
+      },
+      { total: 0, active: 0, completed: 0, onHold: 0 },
+    );
+  }, [projects]);
 
   const months = [
     "Jan",
@@ -136,12 +151,17 @@ const ProjectDashboard = () => {
 
   const filteredProjects = useMemo(() => {
     return projectsWithStats.filter((project) => {
-      if (selectedYear === null) return true;
-
       const projectDate = new Date(project.startDate);
-      const matchesYear = projectDate.getFullYear() === selectedYear;
+
+      const matchesYear =
+        selectedYear === null ||
+        selectedYear === undefined ||
+        projectDate.getFullYear() === selectedYear;
+
       const matchesMonth =
-        selectedMonth === null || projectDate.getMonth() === selectedMonth;
+        selectedMonth === null ||
+        selectedMonth === undefined ||
+        projectDate.getMonth() === selectedMonth;
 
       return matchesYear && matchesMonth;
     });
@@ -149,7 +169,7 @@ const ProjectDashboard = () => {
 
   // Group projects by Team
   const projectsByTeam = useMemo(() => {
-    const stages = ["IFA", "IFC", "CO#"];
+    const stages = ["IFA", "IFC", "COR"];
     const grouped = {};
 
     filteredProjects.forEach((project) => {
@@ -164,7 +184,7 @@ const ProjectDashboard = () => {
           stats: {
             IFA: { active: 0, onHold: 0, completed: 0, total: 0 },
             IFC: { active: 0, onHold: 0, completed: 0, total: 0 },
-            "CO#": { active: 0, onHold: 0, completed: 0, total: 0 },
+            COR: { active: 0, onHold: 0, completed: 0, total: 0 },
           },
         };
       }
@@ -177,7 +197,7 @@ const ProjectDashboard = () => {
         const s = stage;
         grouped[teamId].stats[s].total += 1;
         if (project.status === "ACTIVE") grouped[teamId].stats[s].active += 1;
-        else if (project.status === "ON_HOLD")
+        else if (project.status === "ONHOLD")
           grouped[teamId].stats[s].onHold += 1;
         else if (project.status === "COMPLETED")
           grouped[teamId].stats[s].completed += 1;
@@ -192,7 +212,7 @@ const ProjectDashboard = () => {
     stage,
     status,
   ) => {
-    let filtered = projects.filter((p) => p.stage === stage);
+    let filtered = stage === "ALL" ? projects : projects.filter((p) => p.stage === stage);
     if (status !== "TOTAL") {
       filtered = filtered.filter((p) => p.status === status);
     }
@@ -211,12 +231,69 @@ const ProjectDashboard = () => {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 laptop-fit">
+    <div className="flex flex-col h-full animate-in fade-in duration-500">
+      {/* Dashboard Top Header */}
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 border-black/10 rounded-lg hover:bg-gray-100"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+          <h1 className="text-xl font-black text-black uppercase tracking-tight ml-2">
+            Projects
+          </h1>
+
+          <div className="flex flex-wrap items-center gap-2 ml-4">
+            <div className="px-4 py-2 bg-white border border-black/10 rounded-xl flex items-center gap-2 shadow-sm">
+              <span className="text-xs font-black text-black/40 uppercase tracking-widest">Total -</span>
+              <span className="text-lg font-black text-black">{projectStats.total}</span>
+            </div>
+            <div className="px-4 py-2 bg-white border border-black/10 rounded-xl flex items-center gap-2 shadow-sm">
+              <span className="text-xs font-black text-black/40 uppercase tracking-widest">Active -</span>
+              <span className="text-lg font-black text-black">{projectStats.active}</span>
+            </div>
+            <div className="px-4 py-2 bg-white border border-black/10 rounded-xl flex items-center gap-2 shadow-sm">
+              <span className="text-xs font-black text-black/40 uppercase tracking-widest">Completed -</span>
+              <span className="text-lg font-black text-black">{projectStats.completed}</span>
+            </div>
+            <div className="px-4 py-2 bg-white border border-black/10 rounded-xl flex items-center gap-2 shadow-sm">
+              <span className="text-xs font-black text-black/40 uppercase tracking-widest">On Hold -</span>
+              <span className="text-lg font-black text-black">{projectStats.onHold}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            onClick={() => navigate("/dashboard")}
+            className="px-6 py-2 bg-[#6bbd45]/20 text-black border border-[#6bbd45] rounded-xl font-bold uppercase tracking-tight hover:bg-[#6bbd45]/30 transition-all shadow-sm"
+          >
+            Project Home
+          </Button>
+          <Button
+            onClick={() => navigate("/dashboard/projects")}
+            className="px-6 py-2 bg-white text-black border border-black/20 rounded-xl font-bold uppercase tracking-tight hover:bg-gray-50 transition-all shadow-sm"
+          >
+            All Projects
+          </Button>
+          <Button
+            onClick={() => navigate("/dashboard/projects/add")}
+            className="px-6 py-2 bg-white text-black border border-black/20 rounded-xl font-bold uppercase tracking-tight hover:bg-gray-50 transition-all shadow-sm"
+          >
+            Add New Project
+          </Button>
+        </div>
+      </div>
+
       {/* Filters Header */}
-      <div className="bg-white p-3 md:p-4 rounded-2xl border border-green-500/10 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+      <div className="shrink-0 mb-2 bg-white p-2 md:p-3 rounded-xl border border-black/5 shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-2 md:gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-4 flex-1">
+          <div className="relative min-w-[140px]">
+            <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
             <select
               value={selectedYear === null ? "all" : selectedYear}
               onChange={(e) =>
@@ -224,7 +301,7 @@ const ProjectDashboard = () => {
                   e.target.value === "all" ? null : parseInt(e.target.value),
                 )
               }
-              className="pl-10 pr-8 py-2 bg-white border border-green-500/20 rounded-xl text-sm md:text-lg font-medium text-gray-700 focus:ring-2 focus:ring-green-500 outline-none appearance-none cursor-pointer hover:bg-green-50 transition-colors w-full md:w-auto"
+              className="pl-8 pr-6 py-1.5 bg-white border border-black/10 rounded-lg text-xs md:text-sm font-bold text-black focus:ring-1 focus:ring-green-500 outline-none appearance-none cursor-pointer hover:bg-green-50 transition-colors w-full"
             >
               <option value="all">All Years</option>
               {years.map((year) => (
@@ -233,12 +310,13 @@ const ProjectDashboard = () => {
                 </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 pointer-events-none" />
           </div>
-          <div className="flex-1 w-full md:w-auto min-w-0">
+
+          <div className="flex-1 min-w-0">
             {/* Mobile Month Dropdown */}
             <div className="md:hidden relative w-full">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
               <select
                 value={selectedMonth === null ? "all" : selectedMonth}
                 onChange={(e) =>
@@ -246,7 +324,7 @@ const ProjectDashboard = () => {
                     e.target.value === "all" ? null : parseInt(e.target.value),
                   )
                 }
-                className="pl-10 pr-8 py-2 bg-white border border-green-500/20 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-green-500 outline-none appearance-none cursor-pointer hover:bg-green-50 transition-colors w-full"
+                className="pl-8 pr-6 py-1.5 bg-white border border-black/10 rounded-lg text-xs font-bold text-black focus:ring-1 focus:ring-green-500 outline-none appearance-none cursor-pointer hover:bg-green-50 transition-colors w-full"
               >
                 <option value="all">All Months</option>
                 {months.map((month, index) => (
@@ -255,16 +333,16 @@ const ProjectDashboard = () => {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 pointer-events-none" />
             </div>
 
             {/* Desktop Month Buttons */}
-            <div className="hidden md:flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar">
+            <div className="hidden md:flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
               <Button
                 onClick={() => setSelectedMonth(null)}
-                className={`px-3 md:px-4 py-1 md:py-1.5 rounded-full text-sm md:text-base font-semibold transition-all whitespace-nowrap h-auto ${selectedMonth === null
-                    ? "bg-green-600 text-white shadow-md shadow-green-100 hover:bg-green-700"
-                    : "bg-green-50 text-gray-700 hover:bg-green-100"
+                className={`px-3 py-1 rounded-lg text-xs lg:text-sm font-bold transition-all whitespace-nowrap h-8 ${selectedMonth === null
+                  ? "bg-green-200 text-black border border-black/10"
+                  : "bg-gray-50 text-gray-600 border border-transparent hover:bg-green-50"
                   }`}
               >
                 All Months
@@ -273,9 +351,9 @@ const ProjectDashboard = () => {
                 <Button
                   key={month}
                   onClick={() => setSelectedMonth(index)}
-                  className={`px-3 md:px-4 py-1 md:py-1.5 rounded-full text-sm md:text-base font-semibold transition-all whitespace-nowrap h-auto ${selectedMonth === index
-                      ? "bg-green-600 text-white shadow-md shadow-green-100 hover:bg-green-700"
-                      : "bg-green-50 text-gray-700 hover:bg-green-100"
+                  className={`px-3 py-1 rounded-lg text-xs lg:text-sm font-bold transition-all whitespace-nowrap h-8 ${selectedMonth === index
+                    ? "bg-green-200 text-black border border-black/10"
+                    : "bg-gray-50 text-gray-600 border border-transparent hover:bg-green-50"
                     }`}
                 >
                   {month}
@@ -285,17 +363,18 @@ const ProjectDashboard = () => {
           </div>
         </div>
       </div>
-
-      {/* Monthly Workload Stats */}
-      <MonthlyProjectStats
-        tasks={allTasks}
-        projects={projectsWithStats}
-        selectedMonth={selectedMonth}
-        selectedYear={selectedYear}
-        teams={allTeams}
-        projectsByTeam={projectsByTeam}
-        handleStatClick={handleStatClick}
-      />
+      <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 pb-10">
+        {/* Monthly Workload Stats */}
+        <MonthlyProjectStats
+          tasks={allTasks}
+          projects={projectsWithStats}
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+          teams={allTeams}
+          projectsByTeam={projectsByTeam}
+          handleStatClick={handleStatClick}
+        />
+      </div>
 
       {/* Project Timeline Calendar */}
       {/* <ProjectCalendar projects={projects} tasks={allTasks} /> */}

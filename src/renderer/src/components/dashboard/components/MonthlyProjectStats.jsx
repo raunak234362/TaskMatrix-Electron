@@ -1,231 +1,289 @@
-import { useMemo } from 'react'
-import { Briefcase, Info, AlertCircle } from 'lucide-react'
-import { motion } from 'framer-motion'
+import React, { useMemo } from "react";
+import { Users, Clock, Briefcase } from "lucide-react";
+import { motion } from "framer-motion";
+import { formatSeconds } from "../../../utils/timeUtils";
+
 
 const MonthlyProjectStats = ({
   tasks,
   projects,
   selectedMonth,
   selectedYear,
+  teams = [],
   projectsByTeam,
-  handleStatClick
+  handleStatClick,
 }) => {
   const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ]
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
 
-  const teamSequence = ['TEKLA', 'SDS/2', 'SDS/2 - TEAM 2', 'PEMB', 'PEMB DESIGNING']
+  const isFiltered = selectedMonth !== null || selectedYear !== null;
 
-  const sortedTeams = useMemo(() => {
-    if (!projectsByTeam) return []
-    return Object.entries(projectsByTeam).sort(([, a], [, b]) => {
-      const indexA = teamSequence.indexOf(a.teamName.toUpperCase())
-      const indexB = teamSequence.indexOf(b.teamName.toUpperCase())
+  const teamSummary = useMemo(() => {
+    const summary = {};
 
-      if (indexA !== -1 && indexB !== -1) return indexA - indexB
-      if (indexA !== -1) return -1
-      if (indexB !== -1) return 1
-      return a.teamName.localeCompare(b.teamName)
-    })
-  }, [projectsByTeam])
+    // Initialize with all teams
+    teams.forEach((team) => {
+      summary[team.id] = {
+        teamName: team.name,
+        id: team.id,
+        totalSeconds: 0,
+        projectCount: 0,
+        monthlyBreakdown: {},
+        stats: {
+          IFA: { active: 0, onHold: 0, completed: 0, total: 0 },
+          IFC: { active: 0, onHold: 0, completed: 0, total: 0 },
+          COR: { active: 0, onHold: 0, completed: 0, total: 0 },
+        },
+      };
+    });
 
-  const workloadData = useMemo(() => {
-    if (selectedMonth === null || selectedYear === null) return { projects: [], count: 0 }
-
-    const startOfMonth = new Date(selectedYear, selectedMonth, 1)
-    const endOfMonth = new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59)
-
-    const activeProjectIds = new Set()
-
-    tasks.forEach((task) => {
-      if (!task.start_date || !task.due_date || !task.project_id) return
-
-      const taskStart = new Date(task.start_date)
-      const taskEnd = new Date(task.due_date)
-
-      // Overlap check: task starts before month end AND task ends after month start
-      if (taskStart <= endOfMonth && taskEnd >= startOfMonth) {
-        activeProjectIds.add(task.project_id)
+    // Merge data from projectsByTeam
+    Object.entries(projectsByTeam).forEach(([teamId, data]) => {
+      if (!summary[teamId]) {
+        summary[teamId] = {
+          teamName: data.teamName,
+          id: teamId,
+          totalSeconds: 0,
+          projectCount: 0,
+          monthlyBreakdown: {},
+          stats: data.stats,
+        };
+      } else {
+        summary[teamId].stats = data.stats;
       }
-    })
+      summary[teamId].projectCount = data.projects.length;
+      // We will compute totalSeconds below by filtering tasks dynamically
+      summary[teamId].totalSeconds = 0;
+    });
 
-    const activeProjects = projects.filter((p) => activeProjectIds.has(p.id))
+    // Calculate monthly breakdown and totalSeconds if filtered
+    tasks.forEach((task) => {
+      const project = projects.find((p) => p.id === task.project_id);
+      const teamId = project?.team?.id || "unassigned";
 
-    return {
-      projects: activeProjects,
-      count: activeProjects.length
-    }
-  }, [tasks, projects, selectedMonth, selectedYear])
+      if (summary[teamId] && task.start_date) {
+        const date = new Date(task.start_date);
+        const m = date.getMonth();
+        const y = date.getFullYear();
 
-  if (selectedMonth === null || selectedYear === null) {
-    return (
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-        <div className="p-3 bg-blue-50 rounded-xl">
-          <Info className="w-6 h-6 text-blue-500" />
-        </div>
-        <div>
-          <h3 className="text-sm  text-gray-700">Monthly Workload Insight</h3>
-          <p className="text-xs text-gray-700">
-            Select a specific month to see projects with active tasks during that period.
-          </p>
-        </div>
-      </div>
-    )
-  }
+        const matchesYear =
+          selectedYear === null ||
+          selectedYear === undefined ||
+          y === selectedYear;
+        const matchesMonth =
+          selectedMonth === null ||
+          selectedMonth === undefined ||
+          m === selectedMonth;
+
+        const hours = (task.workingHourTask || []).reduce(
+          (sum, wht) => sum + (wht.duration_seconds || 0),
+          0,
+        );
+
+        if (matchesYear && matchesMonth) {
+          const monthYear = `${months[m]} ${y}`;
+          summary[teamId].monthlyBreakdown[monthYear] =
+            (summary[teamId].monthlyBreakdown[monthYear] || 0) + hours;
+
+          // Add to total seconds for the month!
+          summary[teamId].totalSeconds += hours;
+        }
+      }
+    });
+
+    const teamOrder = [
+      "Tekla",
+      "SDS/2",
+      "SDS/2 Team 2",
+      "PEMB",
+      "PEMB Designing",
+    ];
+
+    const normalizeTeamName = (name) =>
+      name.replace(/-/g, " ").replace(/\s+/g, " ").trim().toUpperCase();
+
+    const normalizedTeamOrder = teamOrder.map(normalizeTeamName);
+
+    const validTeams = Object.values(summary).filter((item) =>
+      normalizedTeamOrder.includes(normalizeTeamName(item.teamName)),
+    );
+
+    return validTeams.sort((a, b) => {
+      return (
+        normalizedTeamOrder.indexOf(normalizeTeamName(a.teamName)) -
+        normalizedTeamOrder.indexOf(normalizeTeamName(b.teamName))
+      );
+    });
+  }, [projects, tasks, teams, projectsByTeam, selectedMonth, selectedYear]);
 
   return (
-    <div className="space-y-6">
-      {/* Team Stats Table */}
-      {sortedTeams.length > 0 && (
+    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4">
+      {teamSummary.map((team) => (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          key={team.teamName}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+          className="bg-white rounded-xl shadow-sm border border-black/5 overflow-hidden hover:border-black/20 transition-all group"
         >
-          <div className="p-4 border-b border-gray-50 bg-gray-50/50">
-            <h3 className="text-sm  text-gray-700 flex items-center gap-2">
-              <Briefcase className="w-4 h-4 text-green-600" />
-              Team-wise Project Statistics
-            </h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead>
-                <tr className="bg-white text-gray-400 text-[10px] uppercase tracking-wider  border-b border-gray-100">
-                  <th className="px-6 py-4">Detailed Team</th>
-                  {['IFA', 'IFC', 'CO#'].map((stage) => (
-                    <th key={stage} className="px-4 py-4 text-center border-l border-gray-50">
-                      {stage}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50 ">
-                {sortedTeams.map(([teamId, teamData]) => (
-                  <tr key={teamId} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 text-gray-700 ">{teamData.teamName}</td>
-                    {['IFA', 'IFC', 'CO#'].map((stage) => (
-                      <td key={stage} className="px-4 py-4 border-l border-gray-50">
-                        <div className="flex items-center justify-center gap-3">
-                          <button
-                            onClick={() => handleStatClick(teamData.projects, stage, 'ACTIVE')}
-                            className="flex flex-col items-center hover:scale-110 transition-transform"
-                            title="Active"
-                          >
-                            <span className="text-blue-600 border-b-2 border-blue-100 px-1">
-                              {teamData.stats[stage].active}
-                            </span>
-                            <span className="text-[8px] text-gray-400 mt-0.5">ACT</span>
-                          </button>
-                          <button
-                            onClick={() => handleStatClick(teamData.projects, stage, 'ON_HOLD')}
-                            className="flex flex-col items-center hover:scale-110 transition-transform"
-                            title="On Hold"
-                          >
-                            <span className="text-orange-600 border-b-2 border-orange-100 px-1">
-                              {teamData.stats[stage].onHold}
-                            </span>
-                            <span className="text-[8px] text-gray-400 mt-0.5">HLD</span>
-                          </button>
-                          <button
-                            onClick={() => handleStatClick(teamData.projects, stage, 'COMPLETED')}
-                            className="flex flex-col items-center hover:scale-110 transition-transform"
-                            title="Completed"
-                          >
-                            <span className="text-green-600 border-b-2 border-green-100 px-1">
-                              {teamData.stats[stage].completed}
-                            </span>
-                            <span className="text-[8px] text-gray-400 mt-0.5">FIN</span>
-                          </button>
-                          <button
-                            onClick={() => handleStatClick(teamData.projects, stage, 'TOTAL')}
-                            className="ml-2 px-2 py-0.5 bg-gray-100 rounded text-gray-600 hover:bg-gray-200"
-                            title="Total"
-                          >
-                            {teamData.stats[stage].total}
-                          </button>
-                        </div>
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Project Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-green-50 rounded-xl">
-              <Briefcase className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <h3 className="text-base  text-gray-700">
-                Workload for {months[selectedMonth]} {selectedYear}
+          {/* Team Header */}
+          <div className="bg-green-100/50 p-2 sm:p-3 text-center border-b border-black/5">
+            <div className="flex items-center justify-center gap-2">
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black/60" />
+              <h3 className="text-sm sm:text-base font-bold text-black uppercase tracking-widest truncate">
+                {team.teamName}
               </h3>
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Projects with active tasks
-              </p>
             </div>
           </div>
-          <div className="flex flex-col items-end">
-            <span className="text-2xl  text-green-600 leading-none">
-              {workloadData.count}
-            </span>
-            <span className="text-[10px]  text-gray-400 uppercase">Active Projects</span>
-          </div>
-        </div>
 
-        {workloadData.count > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {workloadData.projects.map((project) => (
-              <div
-                key={project.id}
-                className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-green-200 hover:bg-green-50/30 transition-all group"
+          <div className="p-3 sm:p-4 space-y-3">
+            {/* Main Stats */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => {
+                  const teamProjects = projectsByTeam[team.id]?.projects || [];
+                  handleStatClick(teamProjects, "ALL", "TOTAL");
+                }}
+                className="p-2 bg-gray-50/50 rounded-lg flex flex-col items-center justify-center border border-black/5 hover:bg-white hover:border-black/10 transition-all cursor-pointer group/projects"
               >
-                <div className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-[10px]  text-green-600 shadow-sm group-hover:scale-110 transition-transform">
-                  {project.projectNumber.slice(-3)}
+                <span className="text-[10px] text-gray-400 uppercase tracking-widest mb-0.5 group-hover/projects:text-gray-600">
+                  Projects
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm sm:text-base font-bold text-gray-800">
+                    {team.projectCount}
+                  </span>
+                  <Briefcase className="w-3.5 h-3.5 text-gray-400 group-hover/projects:text-gray-600" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-sm  text-gray-700 truncate group-hover:text-green-700 transition-colors">
-                    {project.name}
-                  </h4>
-                  <p className="text-[10px] font-medium text-gray-400 truncate">
-                    {project.projectNumber}
-                  </p>
+              </button>
+              <div className="p-2 bg-green-50/50 rounded-lg flex flex-col items-center justify-center border border-black/5">
+                <span className="text-[10px] text-black/40 uppercase tracking-widest mb-0.5">
+                  Work Done
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm sm:text-base font-bold text-black">
+                    {formatSeconds(team.totalSeconds)}
+                  </span>
+                  <Clock className="w-3.5 h-3.5 text-green-500/50" />
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-xl border border-orange-100">
-            <AlertCircle className="w-5 h-5 text-orange-500" />
-            <p className="text-sm font-medium text-orange-700">
-              No projects have tasks assigned for this month.
-            </p>
-          </div>
-        )}
-      </motion.div>
-    </div>
-  )
-}
+            </div>
 
-export default MonthlyProjectStats
+            {/* IFA/IFC/COR Grid */}
+            <div className="border border-black/5 rounded-lg overflow-hidden bg-white">
+              <div className="grid grid-cols-3 divide-x divide-black/5">
+                {["IFA", "IFC", "COR"].map((stage) => (
+                  <div key={stage} className="flex flex-col">
+                    {/* Header */}
+                    <div className="bg-gray-50/80 border-b border-black/5 py-1 text-center text-[10px] font-bold tracking-widest text-black/60 uppercase">
+                      {stage}
+                    </div>
+                    {/* Content */}
+                    <div className="p-1 space-y-0.5">
+                      {[
+                        {
+                          label: "Active",
+                          key: "active",
+                          color: "green",
+                          status: "ACTIVE",
+                        },
+                        {
+                          label: "On-Hold",
+                          key: "onHold",
+                          color: "orange",
+                          status: "ONHOLD",
+                        },
+                        {
+                          label: "Completed",
+                          key: "completed",
+                          color: "blue",
+                          status: "COMPLETED",
+                        },
+                      ].map((item) => (
+                        <button
+                          key={item.key}
+                          onClick={() =>
+                            handleStatClick(
+                              projectsByTeam[team.id]?.projects || [],
+                              stage,
+                              item.status,
+                            )
+                          }
+                          className={`w-full flex items-center justify-between px-1.5 py-0.5 rounded-md hover:bg-gray-50 transition-all cursor-pointer group/btn`}
+                        >
+                          <span className="text-[9px] font-medium text-gray-500 uppercase truncate">
+                            {item.label}
+                          </span>
+                          <span
+                            className={`text-[10px] font-bold ${item.key === "active"
+                              ? "text-green-600"
+                              : item.key === "onHold"
+                                ? "text-orange-500"
+                                : "text-blue-500"
+                              }`}
+                          >
+                            {(team.stats[stage])?.[item.key] || 0}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Monthly Breakdown Section (Only when filtered) */}
+            {isFiltered && (
+              <div className="space-y-1.5 pt-2 border-t border-black/5">
+                <h4 className="text-[9px] font-bold text-black/40 uppercase tracking-widest px-1">
+                  Monthly Breakdown
+                </h4>
+                <div className="space-y-1 max-h-24 overflow-y-auto pr-1 custom-scrollbar">
+                  {Object.entries(team.monthlyBreakdown)
+                    .sort((a, b) => {
+                      const [monthA, yearA] = a[0].split(" ");
+                      const [monthB, yearB] = b[0].split(" ");
+                      const dateA = new Date(`${monthA} 1, ${yearA}`);
+                      const dateB = new Date(`${monthB} 1, ${yearB}`);
+                      return dateB.getTime() - dateA.getTime();
+                    })
+                    .map(([monthYear, seconds]) => (
+                      <div
+                        key={monthYear}
+                        className="flex items-center justify-between py-0.5 px-1.5 rounded-md hover:bg-gray-50 transition-colors"
+                      >
+                        <span className="text-[10px] font-medium text-gray-600">
+                          {monthYear}
+                        </span>
+                        <span className="text-[10px] font-bold text-black">
+                          {formatSeconds(seconds)}
+                        </span>
+                      </div>
+                    ))}
+                  {Object.keys(team.monthlyBreakdown).length === 0 && (
+                    <p className="text-[9px] text-gray-400 italic text-center py-1">
+                      No task data
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
+export default MonthlyProjectStats;
