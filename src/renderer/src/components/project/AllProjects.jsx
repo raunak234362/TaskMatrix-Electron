@@ -3,7 +3,7 @@ import React, { Suspense, useMemo, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import DataTable from "../ui/table";
 import Modal from "../ui/Modal";
-import { Filter } from "lucide-react";
+import { Filter, Search } from "lucide-react";
 import Service from "../../api/Service";
 import DateFilter from "../common/DateFilter";
 import { matchesDateFilter } from "../../utils/dateFilter";
@@ -20,6 +20,7 @@ const AllProjects = () => {
     fabricator: "All Fabricators",
     stage: "All Stages",
     overrunOnly: false,
+    searchTerm: "",
   });
 const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const [dateFilter, setDateFilter] = useState({
@@ -103,6 +104,12 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
       const estHours = Number(project.estimatedHours) || 0;
       const workedHours = Number(project.workedHours) || 0;
       const isOverrun = workedHours > estHours && estHours > 0;
+
+      if (
+        filters.searchTerm &&
+        !project.name?.toLowerCase().includes(filters.searchTerm.toLowerCase())
+      )
+        return false;
 
       if (
         filters.manager !== "All Managers" &&
@@ -250,6 +257,21 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
         </div>
 
         <div className="flex flex-wrap items-end gap-4">
+          {/* Search Project Name */}
+          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[250px]">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Search Project</label>
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by name..."
+                className="w-full text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all placeholder:text-gray-400 placeholder:font-normal"
+                value={filters.searchTerm}
+                onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
+              />
+            </div>
+          </div>
+
           {/* Manager Filter */}
           {userRole !== "project_manager" && (
           <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">

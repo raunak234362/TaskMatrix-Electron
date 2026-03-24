@@ -20,6 +20,7 @@ import Button from "../fields/Button";
 import SectionTitle from "../ui/SectionTitle";
 import Service from "../../api/Service";
 import ToggleField from "../fields/Toggle";
+import RichTextEditor from "../fields/RichTextEditor";
 
 import { updateProject } from "../../store/projectSlice";
 import { showDepartment, showTeam, showStaff } from "../../store/userSlice";
@@ -231,10 +232,19 @@ const EditProject = ({
                 {...register("name")}
               />
               <div className="md:col-span-2">
-                <Input
-                  label="Description"
-                  placeholder="Full structural steel detailing for 40-story commercial building..."
-                  {...register("description")}
+                <label className="text-sm font-semibold text-gray-700 mb-2 block">
+                  Description
+                </label>
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field }) => (
+                    <RichTextEditor
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      placeholder="Full structural steel detailing for 40-story commercial building..."
+                    />
+                  )}
                 />
               </div>
             </div>
