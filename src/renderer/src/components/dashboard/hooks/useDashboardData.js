@@ -15,7 +15,7 @@ export const useDashboardData = () => {
     'dept_manager',
     'operation_executive',
     'project_manager',
-    'department_manager',
+    'deputy_manager',
     'project_manager_officer'
   ].includes(userRole)
 
