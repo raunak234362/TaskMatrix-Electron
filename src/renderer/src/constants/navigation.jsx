@@ -46,7 +46,6 @@ export const navItems = [
         icon: <Hammer />,
         roles: [
             'admin',
-            'department_manager',
             'project_manager_officer',
             'deputy_manager',
             'operation_executive',
@@ -93,7 +92,6 @@ export const navItems = [
             'estimation_head',
             'operation_executive',
             'estimator',
-            'department-manager',
             'deputy_manager',
             'user'
         ]
@@ -130,13 +128,13 @@ export const navItems = [
         label: 'Meeting Calendar',
         to: 'calendar',
         icon: <Calendar />,
-        roles: ['admin', 'pmo','operation_executive']
+        roles: ['admin', 'pmo','operation_executive', 'dept_manager', 'deputy_manager']
     },
     {
         label: 'Communication Followup',
         to: 'communication-followup',
         icon: <MessageCircle />,
-        roles: ['admin', 'deputy_manager', 'department_manager','operation_executive']
+        roles: ['admin', 'deputy_manager', 'dept_manager','operation_executive']
     },
     {
         label: 'Notes',
@@ -146,7 +144,7 @@ export const navItems = [
             'admin',
             'staff',
             'team_lead',
-            'department_manager',
+            'dept_manager',
             'operation_executive',
             'deputy_manager',
             'project_manager',
@@ -190,7 +188,7 @@ export const navItems = [
         roles: [
             'admin',
             'human_resource',
-            'department-manager',
+            'dept_manager',
             'project-manager',
             'operation_executive',
             'deputy_manager',
