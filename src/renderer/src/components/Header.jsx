@@ -5,7 +5,7 @@ import { navItems } from '../constants/navigation'
 import Service from '../api/Service'
 import { toast } from 'react-toastify'
 
-const Header = ({ isMinimized, toggleSidebar }) => {
+const Header = ({ isMinimized, toggleSidebar, isMobileOpen }) => {
   const location = useLocation()
   const [notifications, setNotifications] = useState(null)
   const [showNotifications, setShowNotifications] = useState(false)
@@ -161,6 +161,13 @@ const Header = ({ isMinimized, toggleSidebar }) => {
       <div className="flex items-center gap-6">
         <button
           onClick={toggleSidebar}
+          onMouseEnter={() => {
+            if (window.innerWidth < 768) {
+              if (!isMobileOpen) toggleSidebar()
+            } else {
+              if (isMinimized) toggleSidebar()
+            }
+          }}
           className="p-2.5 text-black bg-[#ebf5ea] hover:bg-[#dcecdb] rounded-xl transition-all shadow-sm border border-black"
         >
           {isMinimized ? (
