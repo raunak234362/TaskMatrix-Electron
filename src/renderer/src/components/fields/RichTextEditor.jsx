@@ -42,7 +42,6 @@ const RichTextEditor = ({
         "|",
         "hr",
         "eraser",
-        "fullsize",
       ],
       height: 300,
     }),

@@ -288,7 +288,7 @@ const AddProject = () => {
                             <RichTextEditor
                               value={field.value || ""}
                               onChange={field.onChange}
-                              placeholder="Describe the project scope..."
+                              placeholder=""
                             />
                           )}
                         />
