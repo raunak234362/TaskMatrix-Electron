@@ -89,7 +89,6 @@ const GetRFIByID = ({ id }) => {
         );
       },
     },
-
     {
       accessorKey: "createdAt",
       header: "Created",
@@ -99,7 +98,6 @@ const GetRFIByID = ({ id }) => {
         </span>
       ),
     },
-
     {
       accessorKey: "status",
       header: "Status",

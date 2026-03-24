@@ -247,25 +247,21 @@ const GetSubmittalByID = ({ id, onClose }) => {
                   value={new Date(submittal.date).toLocaleString()}
                 />
 
-                {/* <div>
-              <h4 className="font-semibold text-gray-700">Description</h4>
-              <div
-                className="p-3 bg-white border rounded-lg prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{
-                  __html:
-                    submittal.description ||
-                    submittal.currentVersion?.description ||
-                    "—",
-                }}
-              />
-            </div> */}
-
-                {/* Current version attachments (flat file) */}
-                {/* <RenderFiles
-              files={submittal.versions || []}
-              table="submittals"
-              parentId={submittal.id}
-            /> */}
+                {/* Single Version File Display */}
+                {!hasMultipleVersions && sortedVersions.length === 1 && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
+                      Attachments
+                    </h4>
+                    <RenderFiles
+                      files={sortedVersions}
+                      table="submittals"
+                      parentId={submittal.id}
+                      versionId={sortedVersions[0]?.id}
+                      hideHeader
+                    />
+                  </div>
+                )}
               </div>
 
               {/* RIGHT PANEL */}
