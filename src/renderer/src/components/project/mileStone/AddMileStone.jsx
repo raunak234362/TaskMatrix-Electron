@@ -74,7 +74,7 @@ const AddMileStone = ({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] border border-gray-200 overflow-hidden flex flex-col relative">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] border border-gray-200 overflow-y-auto flex flex-col relative">
 
         {/* Header */}
         <div className="flex justify-between items-center p-5 border-b bg-gray-50">
@@ -91,7 +91,7 @@ const AddMileStone = ({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5 overflow-y-auto h-[80vh]">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Subject *

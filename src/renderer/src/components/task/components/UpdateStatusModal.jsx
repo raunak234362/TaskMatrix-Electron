@@ -36,7 +36,7 @@ const UpdateStatusModal = ({ taskId, currentStatus, onClose, refresh }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="bg-white h-[50vh] overflow-y-auto rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200">
                 <div className="bg-white px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                     <h3 className="text-lg font-black text-black tracking-tight uppercase">Update Task Status</h3>
                     <button
@@ -47,7 +47,7 @@ const UpdateStatusModal = ({ taskId, currentStatus, onClose, refresh }) => {
                     </button>
                 </div>
 
-                <div className="p-6">
+                <div className="p-6 overflow-y-auto h-[35vh]">
                     <p className="text-sm text-slate-500 mb-6 font-medium uppercase tracking-wider">Select New Status</p>
                     <div className="grid grid-cols-1 gap-3">
                         {statusOptions.map((option) => (

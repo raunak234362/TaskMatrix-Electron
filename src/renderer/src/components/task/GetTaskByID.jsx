@@ -270,7 +270,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
   const priority = getPriorityLabel(task.priority)
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-90 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] border border-gray-200 overflow-hidden flex flex-col relative">
 
         {/* Header */}
@@ -280,7 +280,9 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
               <ClipboardList className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-black tracking-tight">{task.name}</h2>
+              <h2 className="text-xl font-black text-black tracking-tight">
+                {task.wbsType ? `${task.wbsType.replace(/_/g, ' ').toUpperCase()} ` : ''} - {task.name}
+              </h2>
               <div className="flex items-center gap-2 mt-1">
                 <span className={`px-2 py-0.5 rounded-lg text-[10px] border border-black font-black uppercase tracking-widest ${priority.bg} ${priority.color}`}>{priority.label} Priority</span>
               </div>
@@ -300,7 +302,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
           {(userRole === "admin" ||
             userRole === "operation_executive" ||
             userRole === "project_manager" ||
-            userRole === "department_manager" ||
+            userRole === "dept_manager" ||
             userRole === "deputy_manager") && (
               <>
                 <button
@@ -321,16 +323,6 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
-          {isEditing ? (
-            <EditTask
-              id={task.id}
-              onClose={() => setIsEditing(false)}
-              refresh={() => {
-                fetchTask();
-                if (refresh) refresh();
-              }}
-            />
-          ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Left Column: Main Info */}
               <div className="lg:col-span-2 space-y-8">
@@ -470,9 +462,18 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                 )}
               </div>
             </div>
-          )}
         </div>
       </div>
+      {isEditing && (
+        <EditTask
+          id={task.id}
+          onClose={() => setIsEditing(false)}
+          refresh={() => {
+            fetchTask();
+            if (refresh) refresh();
+          }}
+        />
+      )}
       {isUpdatingStatus && (
         <UpdateStatusModal
           taskId={task.id}

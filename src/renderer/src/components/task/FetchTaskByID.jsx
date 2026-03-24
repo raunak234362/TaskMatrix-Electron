@@ -375,16 +375,6 @@ const FetchTaskByID = ({
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto px-8 py-8 space-y-8">
-          {isEditing ? (
-            <EditTask
-              id={task.id}
-              onClose={() => setIsEditing(false)}
-              refresh={() => {
-                fetchTask();
-                if (refresh) refresh();
-              }}
-            />
-          ) : (
             <>
               {/* Task Info Card */}
               <div className="bg-green-50 rounded-2xl p-8 border border-green-200">
@@ -629,9 +619,18 @@ const FetchTaskByID = ({
                 />
               </div>
             </>
-          )}
         </div>
       </div>
+      {isEditing && (
+        <EditTask
+          id={task.id}
+          onClose={() => setIsEditing(false)}
+          refresh={() => {
+            fetchTask();
+            if (refresh) refresh();
+          }}
+        />
+      )}
 
       {/* End Task Comment Modal */}
       {isEndModalOpen && (

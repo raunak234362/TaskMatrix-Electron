@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   FileText,
   AlertCircle,
@@ -18,14 +19,24 @@ import Button from "../fields/Button";
 import Select from "../fields/Select";
 import SectionTitle from "../ui/SectionTitle";
 import RichTextEditor from "../fields/RichTextEditor";
+import { setMilestonesForProject } from "../../store/milestoneSlice";
 
 const EditTask = ({ id, onClose, refresh }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [projectId, setProjectId] = useState(null);
+
+  const dispatch = useDispatch();
 
   const employees = useSelector(
     (state) => state.userInfo?.staffData || []
   );
+
+  const milestonesByProject = useSelector(
+    (state) => state.milestoneInfo?.milestonesByProject || {}
+  );
+
+  const milestones = projectId ? milestonesByProject[projectId] || [] : [];
 
   const {
     register,
@@ -44,6 +55,20 @@ const EditTask = ({ id, onClose, refresh }) => {
 
         if (response?.data) {
           const task = response.data;
+          
+          if (task.project_id) {
+            setProjectId(task.project_id);
+            if (!milestonesByProject[task.project_id]) {
+              Service.GetProjectMilestoneById(task.project_id).then((res) => {
+                dispatch(
+                  setMilestonesForProject({
+                    projectId: task.project_id,
+                    milestones: res?.data || [],
+                  })
+                );
+              });
+            }
+          }
 
           reset({
             name: task.name || "",
@@ -63,6 +88,8 @@ const EditTask = ({ id, onClose, refresh }) => {
               : "",
             Stage: task.Stage || "IFA",
             user_id: task.user_id || task.user?.id || "",
+            wbsType: task.wbsType || "",
+            mileStone_id: task.mileStone_id || "",
           });
         }
       } catch (error) {
@@ -74,7 +101,7 @@ const EditTask = ({ id, onClose, refresh }) => {
     };
 
     if (id) fetchTask();
-  }, [id, reset]);
+  }, [id, reset, dispatch, milestonesByProject]);
 
   /* ---------------- SUBMIT ---------------- */
   const onSubmit = async (data) => {
@@ -137,140 +164,201 @@ const EditTask = ({ id, onClose, refresh }) => {
     { label: "RE-IFA", value: "RE-IFA" },
   ];
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-10">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
+  const milestoneOptions = milestones.map((m) => ({
+    label: m.subject ? m.subject + (m.stage ? " - " + m.stage : "") : m.name ? m.name + (m.stage ? " - " + m.stage : "") : "Unnamed Milestone",
+    value: m.id,
+  }));
+
+  const wbsTypeOptions = [
+    { label: "Modeling", value: "modeling" },
+    { label: "Model Checking", value: "modeling_checking" },
+    { label: "Detailing", value: "detailing" },
+    { label: "Detail Checking", value: "detailing_checking" },
+    { label: "Erection", value: "erection" },
+    { label: "Erection Checking", value: "erection_checking" },
+    { label: "OTHERS", value: "others" },
+  ];
 
   /* ---------------- UI ---------------- */
-  return (
-    <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden max-w-4xl mx-auto animate-in fade-in zoom-in duration-200">
-      <div className="bg-white px-8 py-4 border-b border-gray-200 flex justify-between items-center">
-        <h2 className="text-xl font-black text-black tracking-tight uppercase flex items-center gap-2">
-          <FileText className="w-5 h-5 text-[#6bbd45]" /> Edit Task
-        </h2>
-        <button
-          onClick={onClose}
-          className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
-        >
-          Close
-        </button>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-8">
-        {/* Task Details */}
-        <section className="space-y-6">
-          <SectionTitle title="Task Details" />
-          <div>
-            <label className="text-sm font-medium text-slate-700">Task Name</label>
-            <Input {...register("name")} />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-slate-700">Description</label>
-            <Controller
-              name="description"
-              control={control}
-              render={({ field }) => (
-                <RichTextEditor
-                  value={field.value || ""}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-          </div>
-        </section>
-
-        {/* Assignment & Stage */}
-        <section className="space-y-6">
-          <SectionTitle title="Assignment & Stage" />
-          <div>
-            <label className="text-sm font-medium text-slate-700">Stage</label>
-            <Controller
-              name="Stage"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  options={stageOptions}
-                  value={field.value}
-                  onChange={(_, v) => field.onChange(v)}
-                />
-              )}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-slate-700">Assignee</label>
-            <Controller
-              name="user_id"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  options={employeeOptions}
-                  value={field.value}
-                  onChange={(_, v) => field.onChange(v)}
-                />
-              )}
-            />
-          </div>
-        </section>
-
-        {/* Schedule & Priority */}
-        <section className=" ">
-          <SectionTitle title="Schedule & Priority" />
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-2 py-2">
-              <Input type="datetime-local" label="Start Date" {...register("start_date")} />
-              <Input type="datetime-local" label="Due Date" {...register("due_date")} />
-            </div>
-            <label className="text-sm font-medium text-slate-700">Duration</label>
-            <div className="grid grid-cols-2 gap-2 py-2">
-              <Input type="number" placeholder="HH" {...register("hours")} />
-              <Input type="number" placeholder="MM" {...register("minutes")} />
-            </div>
-            <div className="">
-              <label className="text-sm font-medium text-slate-700">Priority</label>
-              <Controller
-                name="priority"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    options={[
-                      { label: "Low", value: 1 },
-                      { label: "Medium", value: 2 },
-                      { label: "High", value: 3 },
-                      { label: "Critical", value: 4 },
-                    ]}
-                    value={String(field.value)}
-                    onChange={(_, v) => field.onChange(Number(v))}
-                  />
-                )}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
+  const modalContent = (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl h-[90vh] border border-gray-200 overflow-hidden flex flex-col relative mx-auto my-auto py-0">
+        <div className="bg-white px-8 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 shrink-0 z-10">
+          <h2 className="text-xl font-black text-black tracking-tight uppercase flex items-center gap-2">
+            <FileText className="w-5 h-5 text-[#6bbd45]" /> Edit Task
+          </h2>
           <button
-            type="button"
             onClick={onClose}
-            className="px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all"
+            className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
           >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50"
-          >
-            {isSubmitting ? "Saving..." : "Save Changes"}
+            Close
           </button>
         </div>
-      </form>
-    </div >
+
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center p-10">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6bbd45]"></div>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
+            <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-8">
+              {/* Task Details */}
+              <section className="space-y-6">
+                <SectionTitle title="Task Details" />
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Task Name</label>
+                  <Input {...register("name")} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Description</label>
+                  <Controller
+                    name="description"
+                    control={control}
+                    render={({ field }) => (
+                      <RichTextEditor
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                      />
+                    )}
+                  />
+                </div>
+              </section>
+
+              {/* Assignment & Stage */}
+              <section className="space-y-6">
+                <SectionTitle title="Assignment, Stage & Classification" />
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700">Stage</label>
+                    <Controller
+                      name="Stage"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          options={stageOptions}
+                          value={field.value}
+                          onChange={(_, v) => field.onChange(v)}
+                        />
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700">Assignee</label>
+                    <Controller
+                      name="user_id"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          options={employeeOptions}
+                          value={field.value}
+                          onChange={(_, v) => field.onChange(v)}
+                        />
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                      <Flag className="w-4 h-4 text-indigo-500" /> Milestone
+                    </label>
+                    <Controller
+                      name="mileStone_id"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          options={milestoneOptions}
+                          value={field.value}
+                          onChange={(_, v) => field.onChange(v)}
+                          placeholder="Select Milestone"
+                        />
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                      <Layers className="w-4 h-4 text-blue-500" /> WBS Type
+                    </label>
+                    <Controller
+                      name="wbsType"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          options={wbsTypeOptions}
+                          value={field.value}
+                          onChange={(_, v) => field.onChange(v)}
+                          placeholder="Select Type"
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Schedule & Priority */}
+              <section>
+                <SectionTitle title="Schedule & Priority" />
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-6 py-2">
+                    <Input type="datetime-local" label="Start Date" {...register("start_date")} />
+                    <Input type="datetime-local" label="Due Date" {...register("due_date")} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-slate-700">Duration</label>
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        <Input type="number" placeholder="HH" {...register("hours")} />
+                        <Input type="number" placeholder="MM" {...register("minutes")} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-slate-700">Priority</label>
+                      <div className="mt-2">
+                        <Controller
+                          name="priority"
+                          control={control}
+                          render={({ field }) => (
+                            <Select
+                              options={[
+                                { label: "Low", value: 1 },
+                                { label: "Medium", value: 2 },
+                                { label: "High", value: 3 },
+                                { label: "Critical", value: 4 },
+                              ]}
+                              value={String(field.value)}
+                              onChange={(_, v) => field.onChange(Number(v))}
+                            />
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Footer */}
+              <div className="flex justify-end gap-4 pt-6 mt-6">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50"
+                >
+                  {isSubmitting ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default EditTask;
