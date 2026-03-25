@@ -20,7 +20,14 @@ import {
   Tag,
   Layers,
   Edit2,
+  Download,
+  FileSpreadsheet,
+  FileText as FilePdf,
+  X
 } from "lucide-react";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import Button from "../../fields/Button";
 import EditEmployee from "./EditEmployee";
 import { formatDateTime } from "../../../utils/dateUtils";
@@ -332,6 +339,14 @@ const GetEmployeeByID = ({ id, onClose }) => {
   // ── Derived stats (all tasks) ────────────────────────────────────────────────
 
   const stats = useMemo(() => {
+    const projNames = new Set();
+    const projectSet = new Set();
+
+    allTasks.forEach((t) => {
+      if (t.project_id) projectSet.add(t.project_id);
+      if (t.project?.name) projNames.add(t.project.name);
+    });
+
     const totalAssignedSec = allTasks.reduce(
       (s, t) => s + allocToSec(t.allocatedHours || t.allocationLog?.allocatedHours), 0
     );
@@ -351,11 +366,69 @@ const GetEmployeeByID = ({ id, onClose }) => {
       ? Math.round((totalWorkedSec / totalAssignedSec) * 100)
       : 0;
 
-    // Project count
-    const projectSet = new Set(allTasks.map((t) => t.project_id).filter(Boolean));
-
-    return { totalAssignedSec, totalWorkedSec, completed, inProgress, overrunCount, efficiency, projectCount: projectSet.size };
+    return {
+      totalAssignedSec,
+      totalWorkedSec,
+      completed,
+      inProgress,
+      overrunCount,
+      efficiency,
+      projectCount: projectSet.size,
+      projectNames: Array.from(projNames)
+    };
   }, [allTasks]);
+
+  const [showExportMenu, setShowExportMenu] = useState(false);
+
+  const handleExport = (format, scope) => {
+    let dataToExport = [...allTasks];
+    const now = new Date();
+
+    if (scope === "month") {
+      dataToExport = allTasks.filter(t => {
+        const d = new Date(t.created_on || t.createdAt);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      });
+    } else if (scope === "year") {
+      dataToExport = allTasks.filter(t => {
+        const d = new Date(t.created_on || t.createdAt);
+        return d.getFullYear() === now.getFullYear();
+      });
+    }
+
+    if (dataToExport.length === 0) {
+      alert("No data found for the selected period");
+      return;
+    }
+
+    const exportRows = dataToExport.map(t => ({
+      Project: t.project?.name || "—",
+      Task: t.name || t.title || "—",
+      Status: t.status || "—",
+      Estimate: `${Math.floor(allocToSec(t.allocatedHours || t.allocationLog?.allocatedHours) / 3600)}h`,
+      Worked: secToHms(calcWorkedSec(t.workingHourTask)),
+      Date: new Date(t.created_on || t.createdAt).toLocaleDateString()
+    }));
+
+    if (format === "excel") {
+      const ws = XLSX.utils.json_to_sheet(exportRows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Task Report");
+      XLSX.writeFile(wb, `${employee.firstName}_Task_Report_${scope}.xlsx`);
+    } else {
+      const doc = new jsPDF();
+      doc.text(`${employee.firstName} ${employee.lastName} - Task Performance Report (${scope})`, 10, 10);
+      const headers = [["Project", "Task", "Status", "Estimate", "Worked", "Date"]];
+      const body = exportRows.map(r => Object.values(r));
+      doc.autoTable({
+        head: headers,
+        body: body,
+        startY: 20
+      });
+      doc.save(`${employee.firstName}_Task_Report_${scope}.pdf`);
+    }
+    setShowExportMenu(false);
+  };
 
   // ── Filtered tasks ───────────────────────────────────────────────────────────
 
@@ -523,7 +596,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
               </div>
             ) : epsData ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <div className="col-span-2 md:col-span-3 lg:col-span-4 bg-gradient-to-br from-green-50 to-emerald-100/50 p-6 rounded-2xl border border-black/5 shadow-sm">
+                <div className="col-span-2 md:col-span-3 lg:col-span-4 bg-linear-to-br from-green-50 to-emerald-100/50 p-6 rounded-2xl border border-black/5 shadow-sm">
                   <span className="text-[10px] font-black text-black/40 uppercase tracking-widest block mb-2">Overall Score</span>
                   <span className="text-4xl font-black text-green-700">
                     {epsData.score !== undefined ? Number(epsData.score).toFixed(2) : "0.00"}
@@ -554,7 +627,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
         )}
 
         {/* ── Task Performance Report ── */}
-        {userRole !== "client" || userRole !== "client_admin" && (
+        {userRole !== "client" && userRole !== "client_admin" && (
           <div className="pt-8 border-t border-black/5">
 
             {/* Section Header */}
@@ -565,19 +638,56 @@ const GetEmployeeByID = ({ id, onClose }) => {
                 </div>
                 <div>
                   <h3 className="text-xl text-black uppercase tracking-tight">Task Performance Report</h3>
-                  <p className="text-[10px] font-bold text-black/30 uppercase tracking-widest mt-0.5">
-                    {allTasks.length} tasks · {stats.projectCount} projects
+                  <p className="text-[10px] font-bold text-black/30 uppercase tracking-widest mt-0.5" title={(stats.projectNames || []).join(", ")}>
+                    {allTasks.length} tasks · {stats.projectCount} project{stats.projectCount !== 1 ? "s" : ""}
                   </p>
                 </div>
               </div>
-              <button
-                onClick={fetchAllTasks}
-                disabled={tasksLoading}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-black uppercase tracking-widest text-black/40 hover:bg-gray-50 transition-all disabled:opacity-40"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${tasksLoading ? "animate-spin" : ""}`} />
-                Refresh
-              </button>
+              <div className="flex items-center gap-2 relative">
+                <button
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#6bbd45]/10 border border-[#6bbd45]/20 rounded-xl text-xs font-black uppercase tracking-widest text-[#6bbd45] hover:bg-[#6bbd45]/20 transition-all"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Generate Report
+                  <ChevronDown className={`w-3 h-3 transition-transform ${showExportMenu ? "rotate-180" : ""}`} />
+                </button>
+
+                {showExportMenu && (
+                  <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-2xl border border-black/5 shadow-xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                    <div className="px-3 py-2 text-[10px] font-black text-black/20 uppercase tracking-widest border-b border-black/5 flex items-center justify-between">
+                      Format & Period
+                      <X size={10} className="cursor-pointer" onClick={() => setShowExportMenu(false)} />
+                    </div>
+                    {["Excel", "PDF"].map((fmt) => (
+                      <div key={fmt} className="space-y-1 mt-2 mb-2 p-1 border-b border-black/5 last:border-0 pb-2">
+                        <div className="flex items-center gap-2 px-2 py-1">
+                          {fmt === "Excel" ? <FileSpreadsheet size={12} className="text-green-600" /> : <FilePdf size={12} className="text-red-600" />}
+                          <span className="text-[11px] font-black uppercase tracking-widest">{fmt} Report</span>
+                        </div>
+                        {["all", "month", "year"].map((scope) => (
+                          <button
+                            key={scope}
+                            onClick={() => handleExport(fmt.toLowerCase(), scope)}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 text-[10px] font-bold text-black/60 hover:text-black rounded-lg transition-all capitalize"
+                          >
+                            Export by {scope}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <button
+                  onClick={fetchAllTasks}
+                  disabled={tasksLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-black uppercase tracking-widest text-black/40 hover:bg-gray-50 transition-all disabled:opacity-40"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${tasksLoading ? "animate-spin" : ""}`} />
+                  Refresh
+                </button>
+              </div>
             </div>
 
             {tasksLoading ? (
@@ -598,13 +708,6 @@ const GetEmployeeByID = ({ id, onClose }) => {
                   <StatCard icon={Clock} label="Assigned" value={`${Math.floor(stats.totalAssignedSec / 3600)}h`} sub={secToHms(stats.totalAssignedSec)} accent="bg-blue-500" />
                   <StatCard icon={TrendingUp} label="Worked" value={`${Math.floor(stats.totalWorkedSec / 3600)}h`} sub={secToHms(stats.totalWorkedSec)} accent="bg-violet-500" />
                   <StatCard
-                    icon={Zap}
-                    label="Efficiency"
-                    value={`${stats.efficiency}%`}
-                    sub={stats.efficiency > 100 ? "Overrun" : stats.efficiency >= 80 ? "On Track" : "Below Target"}
-                    accent={stats.efficiency > 100 ? "bg-red-500" : stats.efficiency >= 80 ? "bg-green-500" : "bg-yellow-500"}
-                  />
-                  <StatCard
                     icon={CheckCircle2}
                     label="Completed"
                     value={stats.completed}
@@ -619,6 +722,20 @@ const GetEmployeeByID = ({ id, onClose }) => {
                     accent={stats.overrunCount > 0 ? "bg-red-500" : "bg-green-500"}
                   />
                 </div>
+
+                {/* Project Names List */}
+                {stats.projectNames?.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-8">
+                    {stats.projectNames.map((name) => (
+                      <span
+                        key={name}
+                        className="px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-lg border border-indigo-100"
+                      >
+                         📁 {name}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
                 {/* ── Filter Bar ── */}
                 <div className="bg-white rounded-2xl border border-black/5 shadow-sm p-4 mb-5 flex flex-col md:flex-row gap-3 items-start md:items-center flex-wrap">

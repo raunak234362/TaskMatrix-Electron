@@ -37,6 +37,8 @@
     "electron-updater": "^6.3.9",
     "framer-motion": "^12.23.26",
     "jodit-react": "^5.2.38",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.560.0",
     "prop-types": "^15.8.1",
     "react-hook-form": "^7.68.0",
@@ -49,6 +51,7 @@
     "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.16",
+    "xlsx": "^0.18.5",
     "zod": "^4.2.0"
   },
   "devDependencies": {
