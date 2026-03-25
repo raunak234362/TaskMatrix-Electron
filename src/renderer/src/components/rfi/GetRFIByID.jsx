@@ -65,14 +65,20 @@ const GetRFIByID = ({ id }) => {
       accessorKey: "createdByRole",
       header: "From",
       cell: ({ row }) => {
+        const user = row.original.user;
+        if (user) {
+          return (
+            <span className="font-medium text-sm">
+              {`${user.firstName || ""} ${user.lastName || ""}`.trim()}
+            </span>
+          );
+        }
+
         if (row.original.userRole === "CLIENT" || row.original.userRole === "CLIENT_ADMIN") {
           return <span className="font-medium text-sm">WBT Team</span>;
         }
 
-        const recipient = rfi?.recepients;
-        const name = recipient ? `${recipient.firstName || ""} ${recipient.lastName || ""}`.trim() : "Client";
-
-        return <span className="font-medium text-sm">{name}</span>;
+        return <span className="font-medium text-sm">Client</span>;
       },
     },
     {
@@ -138,6 +144,16 @@ const GetRFIByID = ({ id }) => {
             {/* Basic Info */}
             <Info label="Project" value={rfi.project?.name || "—"} />
             <Info label="Fabricator" value={rfi?.fabricator?.fabName || "—"} />
+            <Info
+              label="Recipients"
+              value={
+                rfi.multipleRecipients?.length > 0
+                  ? rfi.multipleRecipients
+                      .map((r) => `${r.firstName} ${r.lastName}`)
+                      .join(", ")
+                  : "—"
+              }
+            />
             <Info
               label="Created At"
               value={new Date(rfi?.date).toLocaleString()}

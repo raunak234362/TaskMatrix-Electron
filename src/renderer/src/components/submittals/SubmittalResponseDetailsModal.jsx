@@ -63,13 +63,24 @@ const SubmittalResponseDetailsModal = ({
         <h2 className="text-xl  text-green-700">Response Details</h2>
 
         {/* Parent Message */}
+        <div className="flex items-center gap-2 text-xs text-gray-700">
+        <p className="text-md ">Reason:</p>  
         <div
-          className="bg-gray-100 p-3 rounded-md border prose prose-sm max-w-none"
+          className="px-4 py-1 rounded-md border prose prose-sm max-w-none"
           dangerouslySetInnerHTML={{
-            __html: response.reason || response.description,
+            __html: response.reason,
           }}
         />
-
+        </div>
+          <div className="flex items-center gap-2 text-xs text-gray-700">
+        <p className="text-md">Description:</p>  
+        <div
+          className="px-4 py-1 rounded-md border prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{
+            __html: response.description,
+          }}
+        />
+        </div>
         <RenderFiles
           files={response.files}
           table="submittalsResponse"

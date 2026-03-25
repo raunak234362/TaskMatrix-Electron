@@ -35,6 +35,8 @@ const EditProject = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [connectionDesigners, setConnectionDesigners] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [clients, setClients] = useState([]);
+  const [isFetchingClients, setIsFetchingClients] = useState(false);
 
   const fabricators = useSelector(
     (state) => state.fabricatorInfo?.fabricatorData || []
@@ -54,6 +56,7 @@ const EditProject = ({
         customerDesign: false,
         detailingMain: false,
         detailingMisc: false,
+        clientProjectManagers: [],
       },
     });
 
@@ -109,6 +112,14 @@ const EditProject = ({
           setValue("customerDesign", project.customerDesign);
           setValue("detailingMain", project.detailingMain);
           setValue("detailingMisc", project.detailingMisc);
+
+          // Handle clientProjectManagers
+          if (project.clientProjectManagers) {
+            const selectedManagers = Array.isArray(project.clientProjectManagers)
+              ? project.clientProjectManagers.map((m) => (m?.id || m))
+              : [];
+            setValue("clientProjectManagers", selectedManagers);
+          }
         }
       } catch (error) {
         console.error("Failed to load data", error);
@@ -119,6 +130,28 @@ const EditProject = ({
     };
     fetchData();
   }, [projectId, setValue]);
+
+  const watchedFabricatorId = watch("fabricatorID");
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      if (watchedFabricatorId) {
+        setIsFetchingClients(true);
+        try {
+          const res = await Service.FetchAllClientsByFabricatorID(watchedFabricatorId);
+          setClients(Array.isArray(res?.data) ? res.data : []);
+        } catch (error) {
+          console.error("Failed to fetch clients", error);
+          setClients([]);
+        } finally {
+          setIsFetchingClients(false);
+        }
+      } else {
+        setClients([]);
+      }
+    };
+    fetchClients();
+  }, [watchedFabricatorId]);
 
   const options = {
     fabricators: (Array.isArray(fabricators) ? fabricators : []).map(
@@ -155,6 +188,12 @@ const EditProject = ({
       { label: "IFC - (Issue for Construction)", value: "IFC" },
       { label: "CO# - (Change Order)", value: "CO#" },
     ],
+    clientProjectManagers: clients
+      .filter((c) => ["CLIENT", "CLIENT_ADMIN"].includes(c.role))
+      .map((c) => ({
+        label: `${c.firstName} ${c.lastName} (${c.role === 'CLIENT_ADMIN' ? 'Admin' : 'Client'})`,
+        value: c.id,
+      })),
   };
 
   const onSubmit = async (data) => {
@@ -166,7 +205,9 @@ const EditProject = ({
         if (value === null || value === undefined) return;
         if (key === "files") return;
 
-        if (typeof value === "boolean") {
+        if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(key, v));
+        } else if (typeof value === "boolean") {
           formData.append(key, value ? "true" : "false");
         } else {
           formData.append(key, String(value));
@@ -307,6 +348,31 @@ const EditProject = ({
                       )}
                       onChange={(o) => field.onChange(o?.value || "")}
                       placeholder="Select dept"
+                    />
+                  )}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
+                  <Users className="w-4 h-4 text-indigo-600" /> Client Project Managers
+                </label>
+                <Controller
+                  name="clientProjectManagers"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      isMulti
+                      options={options.clientProjectManagers}
+                      value={options.clientProjectManagers.filter((o) =>
+                        (Array.isArray(field.value) ? field.value : []).includes(o.value)
+                      )}
+                      onChange={(selectedOptions) =>
+                        field.onChange(selectedOptions ? selectedOptions.map((o) => o.value) : [])
+                      }
+                      placeholder={isFetchingClients ? "Loading clients..." : "Select managers..."}
+                      isLoading={isFetchingClients}
+                      isDisabled={!watchedFabricatorId || isFetchingClients}
+                      isSearchable
                     />
                   )}
                 />

@@ -66,22 +66,26 @@ const AddRFI = ({
         ...data,
         project_id: project_id,
         fabricator_id: fabricatorID,
-        recepient_id: data.recepient_id,
         sender_id: userDetail?.id,
         status: true,
         isAproovedByAdmin: "PENDING",
         description,
-        files,
       };
 
       const formData = new FormData();
       Object.entries(payload).forEach(([key, value]) => {
-        if (key === "files" && Array.isArray(files)) {
-          files.forEach((f) => formData.append("files", f));
-        } else {
+        if (key === "multipleRecipients" && Array.isArray(value)) {
+          value.forEach((v) => formData.append("multipleRecipients[]", v));
+        } else if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(key, v));
+        } else if (value !== null && value !== undefined) {
           formData.append(key, value);
         }
       });
+
+      if (Array.isArray(files)) {
+        files.forEach((f) => formData.append("files", f));
+      }
 
       await Service.addRFI(formData);
       toast.success("RFI Submitted Successfully");
@@ -122,18 +126,19 @@ const AddRFI = ({
           Select Recipient
         </label>
         <Controller
-          name="recepient_id"
+          name="multipleRecipients"
           control={control}
           rules={{ required: "Recipient required" }}
           render={({ field }) => (
             <Select
+              isMulti
               placeholder="Recipient *"
               options={pocOptions}
               value={
-                pocOptions.find((o) => o.value === field.value) ?? null
+                pocOptions.filter((o) => (field.value || []).includes(o.value))
               }
-              onChange={(option) =>
-                field.onChange(option ? option.value : null)
+              onChange={(options) =>
+                field.onChange(options ? options.map((o) => o.value) : [])
               }
             />
           )}

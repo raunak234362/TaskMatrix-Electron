@@ -29,6 +29,8 @@ const AddProject = () => {
   const dispatch = useDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [connectionDesigners, setConnectionDesigners] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [isFetchingClients, setIsFetchingClients] = useState(false);
 
   const fabricators = useSelector(
     (state) => state.fabricatorInfo?.fabricatorData || [],
@@ -66,6 +68,7 @@ const AddProject = () => {
         detailingMain: false,
         detailingMisc: false,
         files: [],
+        clientProjectManagers: [],
       },
     });
 
@@ -74,6 +77,28 @@ const AddProject = () => {
       .then((res) => setConnectionDesigners(res?.data || []))
       .catch(() => toast.error("Failed to load connection designers"));
   }, []);
+
+  const watchedFabricatorId = watch("fabricatorID");
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      if (watchedFabricatorId) {
+        setIsFetchingClients(true);
+        try {
+          const res = await Service.FetchAllClientsByFabricatorID(watchedFabricatorId);
+          setClients(Array.isArray(res?.data) ? res.data : []);
+        } catch (error) {
+          console.error("Failed to fetch clients", error);
+          setClients([]);
+        } finally {
+          setIsFetchingClients(false);
+        }
+      } else {
+        setClients([]);
+      }
+    };
+    fetchClients();
+  }, [watchedFabricatorId]);
 
   const options = {
     rfqs: rfqData.map((r) => ({
@@ -101,6 +126,12 @@ const AddProject = () => {
       { label: "SDS/2", value: "SDS2" },
       { label: "Both (Tekla + SDS/2)", value: "BOTH" },
     ],
+    clientProjectManagers: clients
+      .filter((c) => ["CLIENT", "CLIENT_ADMIN"].includes(c.role))
+      .map((c) => ({
+        label: `${c.firstName} ${c.lastName} (${c.role === "CLIENT_ADMIN" ? "Admin" : "Client"})`,
+        value: c.id,
+      })),
   };
 
   const selectedRfqId = watch("rfqId");
@@ -142,8 +173,8 @@ const AddProject = () => {
 
       Object.entries(data).forEach(([key, value]) => {
         if (value === null || value === undefined) return;
-        if (key === "files" && Array.isArray(value)) {
-          value.forEach((file) => formData.append("files", file));
+        if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(key, v));
         } else if (typeof value === "boolean") {
           formData.append(key, value ? "true" : "false");
         } else {
@@ -167,28 +198,14 @@ const AddProject = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-4 lg:p-8">
+    <div className="min-h-screen bg-white p-2 lg:p-2">
       <div className="w-full mx-auto">
         <div className="bg-green-50/30 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
-          {/* Header */}
-          <div className="px-8 py-10 flex items-center justify-between bg-linear-to-r from-green-50/30 to-transparent border-b border-gray-50">
-            <div>
-              <h1 className="text-3xl font-black text-black tracking-tight uppercase">
-                Create New <span className="text-black border-b-2 border-green-400">Project</span>
-              </h1>
-
-            </div>
-            <div className="hidden md:flex items-center gap-3">
-              <div className="h-10 w-px bg-gray-100" />
-              <div className="text-right">
-
-              </div>
-            </div>
-          </div>
+        
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="px-8 py-12 space-y-12"
+            className="px-2 py-2 space-y-12"
           >
             {/* RFQ Integration */}
             <div className="bg-zinc-100 rounded-2xl p-6 border border-gray-100">
@@ -397,21 +414,45 @@ const AddProject = () => {
                         )}
                       />
                     </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase">Client Project Managers</label>
+                      <Controller
+                        name="clientProjectManagers"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            isMulti
+                            options={options.clientProjectManagers}
+                            value={options.clientProjectManagers.filter((o) =>
+                              (Array.isArray(field.value) ? field.value : []).includes(o.value)
+                            )}
+                            onChange={(selectedOptions) =>
+                              field.onChange(selectedOptions ? selectedOptions.map((o) => o.value) : [])
+                            }
+                            placeholder={isFetchingClients ? "Loading clients..." : "Select..."}
+                            isLoading={isFetchingClients}
+                            isDisabled={!watchedFabricatorId || isFetchingClients}
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
+                          />
+                        )}
+                      />
+                    </div>
                   </div>
                 </section>
 
                 <section className="bg-zinc-100 rounded-2xl border border-gray-50 p-8 space-y-8">
-                  <SectionTitle title="Detailing Scope" className="mb-6" />
+                  <SectionTitle title="Scope" className="mb-6" />
 
                   <div className="space-y-8">
                     {/* Connection Design */}
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 text-green-600">
                         <Layers size={14} />
-                        <h4 className="text-[10px] font-black uppercase tracking-widest">Engineering</h4>
+                        <h4 className="text-[10px] font-black uppercase tracking-widest">Connection Design Scope</h4>
                       </div>
                       <div className="space-y-2">
-                        {["connectionDesign::Connection", "miscDesign::Misc", "customerDesign::Customer"].map((item) => {
+                        {["connectionDesign::Main", "miscDesign::Misc", "customerDesign::Customer"].map((item) => {
                           const [key, label] = item.split("::");
                           return (
                             <Controller
@@ -442,10 +483,10 @@ const AddProject = () => {
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 text-green-600">
                         <Wrench size={14} />
-                        <h4 className="text-[10px] font-black uppercase tracking-widest">Detailing</h4>
+                        <h4 className="text-[10px] font-black uppercase tracking-widest">Detailing Scope</h4>
                       </div>
                       <div className="space-y-2">
-                        {["detailingMain::Main Shop", "detailingMisc::Misc Shop"].map((item) => {
+                        {["detailingMain::Main Steel", "detailingMisc::Misc Steel"].map((item) => {
                           const [key, label] = item.split("::");
                           return (
                             <Controller

@@ -2,6 +2,7 @@ import { useState } from "react";
 import Button from "../fields/Button";
 import Service from "../../api/Service";
 import RichTextEditor from "../fields/RichTextEditor";
+import { toast } from "react-toastify";
 
 
 const SubmittalResponseModal = ({
@@ -19,10 +20,21 @@ const SubmittalResponseModal = ({
   const [files, setFiles] = useState([]);
 
   const handleSubmit = async () => {
+    if (!reason.trim()) {
+      toast.error("Reason is required");
+      return;
+    }
+
+    const strippedDescription = description.replace(/<[^>]+>/g, "").trim();
+    if (!strippedDescription) {
+      toast.error("Description is required");
+      return;
+    }
+
     const formData = new FormData();
 
-    if (reason) formData.append("reason", reason);
-    if (description) formData.append("description", description);
+    formData.append("reason", reason);
+    formData.append("description", description);
 
     formData.append("submittalsId", submittalId);
     formData.append("submittalVersionId", submittalVersionId);
@@ -35,10 +47,12 @@ const SubmittalResponseModal = ({
 
     try {
       await Service.addSubmittalResponse(formData);
+      toast.success("Response submitted successfully");
       if (onSuccess) onSuccess();
       if (onClose) onClose();
     } catch (err) {
       console.error("Submittal response failed:", err);
+      toast.error(err?.response?.data?.message || "Failed to submit response");
     }
   };
 
@@ -56,18 +70,19 @@ const SubmittalResponseModal = ({
 
         {/* REASON */}
         <div>
-          <label className="text-sm font-medium">Reason (Optional)</label>
+          <label className="text-sm font-medium">Reason *</label>
           <input
             type="text"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             className="w-full border rounded-md p-2 mt-1"
+            placeholder="Enter reason..."
           />
         </div>
 
         {/* DESCRIPTION */}
         <div>
-          <label className="text-sm font-medium">Description</label>
+          <label className="text-sm font-medium">Description *</label>
           <RichTextEditor
             value={description}
             onChange={setDescription}

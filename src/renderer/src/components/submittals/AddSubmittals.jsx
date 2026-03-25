@@ -88,9 +88,11 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
 
       const formData = new FormData();
       Object.entries(payload).forEach(([key, value]) => {
-        if (key === "files" && Array.isArray(files)) {
-          files.forEach((file) => formData.append("files", file));
-        } else {
+        if (key === "multipleRecipients" && Array.isArray(value)) {
+          value.forEach((v) => formData.append("multipleRecipients[]", v));
+        } else if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(key, v));
+        } else if (value !== null && value !== undefined) {
           formData.append(key, value);
         }
       });
@@ -124,17 +126,16 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
         </label>
         {/* Recipient (WBT Team) */}
         <Controller
-          name="recepient_id"
+          name="multipleRecipients"
           control={control}
           rules={{ required: "Recipient required" }}
           render={({ field }) => (
             <Select
+              isMulti
               placeholder="Recipient *"
               options={pocOptions}
-              value={
-                pocOptions.find((o) => o.value === field.value) ?? null
-              }
-              onChange={(option) => field.onChange(option?.value || "")}
+              value={pocOptions.filter((o) => (field.value || []).includes(o.value))}
+              onChange={(options) => field.onChange(options ? options.map(o => o.value) : [])}
             />
           )}
         />

@@ -81,7 +81,7 @@ const AllSubmittals = ({ submittalData }) => {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
-        const isPending = row.original.status === true;
+        const isPending = row.original.status === false;
         return (
           <span
             className={`text-[10px] font-black uppercase tracking-widest`}

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { X, Check, Loader2, Upload } from "lucide-react";
 import Service from "../../api/Service";
 import RichTextEditor from "../fields/RichTextEditor";
+import Select from "react-select";
+import { useSelector } from "react-redux";
 
 const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
     const [subject, setSubject] = useState(submittal?.subject || "");
@@ -11,6 +13,19 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
     const [file, setFile] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
+
+    const fabricators = useSelector((state) => state.fabricatorInfo.fabricatorData);
+    const fabricatorID = submittal?.fabricator_id || submittal?.fabricator?.id;
+
+    const selectedFabricator = fabricators?.find((f) => String(f.id) === String(fabricatorID));
+    const pocOptions = selectedFabricator?.pointOfContact?.map((p) => ({
+        label: `${p.firstName} ${p.middleName ?? ""} ${p.lastName}`,
+        value: p.id,
+    })) ?? [];
+
+    const [multipleRecipients, setMultipleRecipients] = useState(
+        submittal?.multipleRecipients?.map((r) => r.id) || []
+    );
 
     const handleSubmit = async () => {
         if (!subject.trim()) {
@@ -26,6 +41,9 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
             formData.append("description", description);
             if (file) {
                 formData.append("files", file);
+            }
+            if (multipleRecipients.length > 0) {
+                multipleRecipients.forEach(id => formData.append("multipleRecipients[]", id));
             }
 
             await Service.updateSubmittalVersionById(submittal.id, formData);
@@ -89,6 +107,29 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                                 placeholder="Write the submittal description..."
                             />
                         </div>
+                    </div>
+
+                    {/* Recipients */}
+                    <div className="space-y-2">
+                        <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
+                            Recipients
+                        </label>
+                        <Select
+                            isMulti
+                            options={pocOptions}
+                            value={pocOptions.filter(opt => multipleRecipients.includes(opt.value))}
+                            onChange={(options) => setMultipleRecipients(options ? options.map(o => o.value) : [])}
+                            placeholder="Assign recipients..."
+                            styles={{
+                                control: (base) => ({
+                                    ...base,
+                                    borderRadius: "12px",
+                                    padding: "2px",
+                                    borderColor: "#d1d5db",
+                                    "&:hover": { borderColor: "#6bbd45" }
+                                })
+                            }}
+                        />
                     </div>
 
                     {/* File Upload (new version) */}

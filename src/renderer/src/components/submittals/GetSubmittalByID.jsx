@@ -169,6 +169,20 @@ const GetSubmittalByID = ({ id, onClose }) => {
 
   const responseColumns = [
     {
+      accessorKey: "user",
+      header: "From",
+      cell: ({ row }) => {
+        const user = row.original.user;
+        return (
+          <span className="font-medium text-sm text-gray-700">
+            {user
+              ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
+              : "—"}
+          </span>
+        );
+      },
+    },
+    {
       accessorKey: "description",
       header: "Message",
       cell: ({ row }) => (
@@ -243,6 +257,16 @@ const GetSubmittalByID = ({ id, onClose }) => {
                   value={submittal.sender?.firstName || "—"}
                 />
                 <Info
+                  label="Recipients"
+                  value={
+                    submittal.multipleRecipients?.length > 0
+                      ? submittal.multipleRecipients
+                          .map((r) => `${r.firstName} ${r.lastName}`)
+                          .join(", ")
+                      : "—"
+                  }
+                />
+                <Info
                   label="Created At"
                   value={new Date(submittal.date).toLocaleString()}
                 />
@@ -268,7 +292,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
               <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>
-                  {userRole === "CLIENT_ADMIN" && (
+                  {(userRole === "CLIENT_ADMIN" || userRole === "CLIENT") && (
                     <Button
                       className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
                       onClick={() => setShowResponseModal(true)}

@@ -972,6 +972,17 @@ class Service {
     }
   }
 
+  // Add Project Manager Assists
+  static async AddProjectManagerAssists(id, data) {
+    try {
+      const response = await api.post(`project/projects/${id}/assists`, data)
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   // Add Project Milestone
   static async AddProjectMilestone(data) {
     try {

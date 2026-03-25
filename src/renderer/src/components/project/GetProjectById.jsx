@@ -34,6 +34,7 @@ import ProjectAnalyticsDashboard from "./ProjectAnalyticsDashboard";
 import MilestoneProgress from "./MilestoneProgress";
 import TeamsAnalytics from "./TeamsAnalytics";
 import AllProjectNotes from "./notes/AllProjectNotes";
+import AddAssistsModal from "./AddAssistsModal";
 
 const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);
@@ -46,6 +47,7 @@ const GetProjectById = ({ id, onClose }) => {
   const [changeOrderView, setChangeOrderView] = useState("list");
   const [selectedCoId, setSelectedCoId] = useState(null);
   const [projectTasks, setProjectTasks] = useState([]);
+  const [showAssistsModal, setShowAssistsModal] = useState(false);
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
 
   const fetchProjectTasks = async () => {
@@ -319,6 +321,27 @@ const GetProjectById = ({ id, onClose }) => {
               </p>
             </div>
             <div className="flex items-center gap-3">
+
+              {(userRole === "admin" || userRole === "operation_executive" || userRole === "dept_manager" || userRole === "deputy_manager" || userRole === "project_manager") && (
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    className="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border-2 transition-all hover:bg-green-300"
+                    onClick={() => setShowAssistsModal(true)}
+                  >
+                    Add Assists
+                  </button>
+                </div>
+              )}
+              {(userRole === "admin" || userRole === "operation_executive" || userRole === "dept_manager" || userRole === "deputy_manager" || userRole === "project_manager") && (
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    className="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border-2 transition-all hover:bg-green-300"
+                    onClick={() => handleEditModel(project)}
+                  >
+                    Edit Project
+                  </button>
+                </div>
+              )}
               <div
                 className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border-2 transition-all ${project.status === "ACTIVE"
                   ? "bg-green-100 text-black"
@@ -743,16 +766,6 @@ const GetProjectById = ({ id, onClose }) => {
                 </div>
               </div>
 
-              {(userRole === "admin" || userRole === "operation_executive" || userRole === "dept_manager" || userRole === "deputy_manager" || userRole === "project_manager") && (
-                <div className="pt-2 flex flex-wrap gap-3">
-                  <Button
-                    className="py-1 px-3 text-sm bg-green-100 text-black border border-black font-black uppercase tracking-widest hover:bg-green-200 transition-all"
-                    onClick={() => handleEditModel(project)}
-                  >
-                    Edit Project
-                  </Button>
-                </div>
-              )}
             </div>
           )}
 
@@ -1072,6 +1085,18 @@ const GetProjectById = ({ id, onClose }) => {
         />
       )
       }
+
+      {showAssistsModal && (
+        <AddAssistsModal
+          projectId={id}
+          currentAssists={project?.assists || []}
+          onClose={() => setShowAssistsModal(false)}
+          onSuccess={() => {
+            setShowAssistsModal(false);
+            fetchProject();
+          }}
+        />
+      )}
     </>
   );
 };
