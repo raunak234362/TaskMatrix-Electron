@@ -362,7 +362,7 @@ const GetProjectById = ({ id, onClose }) => {
                       return false;
                     }
                     if (tab.key === "projectNotes") {
-                      return ["admin", "project_manager", "deputy_manager", "client", "client_admin"].includes(userRole);
+                      return ["admin", "project_manager", "deputy_manager", "client", "client_admin", "operation_executive"].includes(userRole);
                     }
                     return true;
                   }
