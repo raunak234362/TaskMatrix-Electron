@@ -43,11 +43,15 @@ const AddAssistsModal = ({ projectId, onClose, onSuccess, currentAssists = [] })
 
     try {
       setIsSubmitting(true);
-      const payload = {
-        assistIds: selectedAssists,
-      };
+      
+      // Since the backend expects 'userId' as a string per request, 
+      // and we are selecting multiple, we should call the service for each selection.
+      const addPromises = selectedAssists.map(id => 
+        Service.AddProjectManagerAssists(projectId, { userId: id })
+      );
 
-      await Service.AddProjectManagerAssists(projectId, payload);
+      await Promise.all(addPromises);
+      
       toast.success("Assists added successfully");
       if (onSuccess) onSuccess();
       if (onClose) onClose();
