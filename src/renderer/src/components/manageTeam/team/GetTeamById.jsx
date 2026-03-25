@@ -4,11 +4,25 @@ import { AlertCircle, Loader2, Users, Mail, Phone, Shield, Edit2, Trash2, UserPl
 import Button from "../../fields/Button";
 import TeamMember from "./TeamMember";
 
-const GetTeamByID = ({ id, onClose }) => {
+const GetTeamByID = ({ id, onClose, onSuccess }) => {
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [teamMember, setTeamMember] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteTeam = async () => {
+    try {
+      setIsDeleting(true);
+      const response = await Service.DeleteTeam(id);
+      console.log("DELETE TEAM RESPONSE:", response);
+      if (onSuccess) onSuccess();
+    } catch (err) {
+      console.error("Failed to delete team:", err);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   useEffect(() => {
     const fetchTeam = async () => {
@@ -161,9 +175,13 @@ const GetTeamByID = ({ id, onClose }) => {
           <Edit2 className="w-4 h-4 text-[#6bbd45]" />
           Edit Team
         </button>
-        <button className="flex items-center gap-2 px-6 py-3 bg-red-50 border border-red-600 hover:bg-red-100 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all active:scale-95">
+        <button
+          onClick={handleDeleteTeam}
+          disabled={isDeleting}
+          className="flex items-center gap-2 px-6 py-3 bg-red-50 border border-red-600 hover:bg-red-100 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all active:scale-95 disabled:opacity-50"
+        >
           <Trash2 className="w-4 h-4 text-red-600" />
-          Delete Team
+          {isDeleting ? "Deleting..." : "Delete Team"}
         </button>
         <button
           onClick={() => handleTeamMember(team)}

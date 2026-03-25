@@ -21,6 +21,20 @@ const TeamMember = ({ members, onClose }) => {
   const handleOpenAddTeam = () => setAddTeamModal(true);
   const handleCloseAddTeam = () => setAddTeamModal(false);
 
+  const handleDeleteMember = async (userId) => {
+    if (!window.confirm("Are you sure you want to remove this member from the team?")) return;
+    console.log("DELETE MEMBER DATA:", {
+      teamId: members.id,
+      userId
+    });
+    try {
+      await Service.DeleteTeamMember({ teamId: members.id, userId });
+      fetchTeamData();
+    } catch (error) {
+      console.error("Failed to delete member:", error);
+    }
+  };
+
   const columns = [
     {
       accessorKey: "member.firstName",
@@ -79,8 +93,8 @@ const TeamMember = ({ members, onClose }) => {
             Edit
           </button>
           <button
-            onClick={() => console.log("DELETE MEMBER:", row.original.id)}
-            className="text-[10px] font-black uppercase tracking-widest text-red-100/40 hover:text-red-600 transition-colors"
+            onClick={() => handleDeleteMember(row.original.member.id)}
+            className="text-[10px] font-black uppercase tracking-widest text-red-600 hover:text-red-700 transition-colors"
             title="Delete Member"
           >
             Delete
@@ -100,9 +114,6 @@ const TeamMember = ({ members, onClose }) => {
             <h2 className="text-xl font-black text-black tracking-tight uppercase">
               Team Members - <span className="text-[#6bbd45]">{members.name}</span>
             </h2>
-            <p className="text-[10px] font-black text-black uppercase tracking-[0.2em] mt-1">
-              MANAGE ROLES AND TEAM COMPOSITION
-            </p>
           </div>
           <button
             onClick={onClose}

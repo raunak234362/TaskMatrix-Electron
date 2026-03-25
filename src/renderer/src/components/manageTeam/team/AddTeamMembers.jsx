@@ -57,9 +57,6 @@ const AddTeamMembers = ({ teamMember, onClose }) => {
             <h2 className="text-xl font-black text-black tracking-tight uppercase">
               Add Team Member
             </h2>
-            <p className="text-[10px] font-black text-black uppercase tracking-[0.2em] mt-1">
-              APPEND NEW TALENT TO {teamMember?.name}
-            </p>
           </div>
           <button
             onClick={onClose}

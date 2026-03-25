@@ -1,5 +1,5 @@
 import React from 'react'
-import { FileText, Share2, Download, ChevronRight, Plus } from 'lucide-react'
+import { FileText, Share2, Download, ChevronRight, Plus, FileSpreadsheet, File } from 'lucide-react'
 import {
     openFileSecurely,
     downloadFileSecurely,
@@ -7,6 +7,20 @@ import {
 } from '../../utils/openFileSecurely'
 import Button from '../fields/Button'
 import { toast } from 'react-toastify'
+
+const getFileIcon = (filename) => {
+    const ext = filename?.split('.').pop()?.toLowerCase();
+    switch (ext) {
+        case 'pdf':
+            return { icon: FileText, color: 'text-red-500', bgColor: 'bg-red-50' };
+        case 'xlsx':
+        case 'xls':
+        case 'csv':
+            return { icon: FileSpreadsheet, color: 'text-green-600', bgColor: 'bg-green-50' };
+        default:
+            return { icon: File, color: 'text-blue-500', bgColor: 'bg-blue-50' };
+    }
+};
 
 const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, versionId, hideHeader = false }) => {
     // Step 1: Normalize and flatten files
@@ -122,49 +136,53 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, vers
 
                             {/* File List */}
                             <div className="grid grid-cols-1 gap-2 mt-3">
-                                {files.map((file, index) => (
-                                    <div
-                                        key={file.id || `file-${index}`}
-                                        className="flex items-center gap-3 p-3 rounded-xl border border-gray-50 bg-gray-50/30 hover:bg-green-50/20 hover:border-green-100 transition-all group"
-                                    >
+                                {files.map((file, index) => {
+                                    const { icon: Icon, color, bgColor } = getFileIcon(file.originalName);
+                                    return (
                                         <div
-                                            onClick={(e) => handleOpen(e, file)}
-                                            className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+                                            key={file.id || `file-${index}`}
+                                            className="flex items-center gap-3 p-3 rounded-xl border border-gray-50 bg-gray-50/30 hover:bg-[#6bbd45]/10 hover:border-green-100 transition-all group"
+                                            title={file.originalName || `File ${index + 1}`}
                                         >
-                                            <div className="p-2 bg-white rounded-lg shadow-sm">
-                                                <FileText size={18} className="text-green-600" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-gray-700 text-sm  truncate group-hover:text-green-700">
-                                                    {file.originalName || `File ${index + 1}`}
-                                                </p>
-                                                {file.stage && <p className="text-[10px] text-gray-400 font-medium">{file.stage}</p>}
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-1 opacity-1 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button
-                                                onClick={(e) => handleShare(e, file)}
-                                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                                title="Share Link"
+                                            <div
+                                                onClick={(e) => handleOpen(e, file)}
+                                                className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
                                             >
-                                                <Share2 size={16} />
-                                            </button>
-                                            <button
-                                                onClick={(e) => handleDownload(e, file)}
-                                                className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
-                                                title="Download"
-                                            >
-                                                <Download size={16} />
-                                            </button>
-                                        </div>
+                                                <div className={`p-2 rounded-lg shadow-sm ${bgColor}`}>
+                                                    <Icon size={18} className={color} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-gray-700 text-sm  truncate group-hover:text-black">
+                                                        {file.originalName || `File ${index + 1}`}
+                                                    </p>
+                                                    {file.stage && <p className="text-[10px] text-gray-400 font-medium">{file.stage}</p>}
+                                                </div>
+                                            </div>
 
-                                        <ChevronRight size={16} className="text-gray-300 group-hover:text-green-400 transition-colors" />
-                                    </div>
-                                ))}
+                                            <div className="flex items-center gap-1 transition-opacity">
+                                                <button
+                                                    onClick={(e) => handleShare(e, file)}
+                                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                                    title="Share Link"
+                                                >
+                                                    <Share2 size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => handleDownload(e, file)}
+                                                    className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
+                                                    title="Download"
+                                                >
+                                                    <Download size={16} />
+                                                </button>
+                                            </div>
+
+                                            <ChevronRight size={16} className="text-gray-300 group-hover:text-black transition-colors" />
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
-                    )
+                    );
                 })
             ) : (
                 // Empty State
