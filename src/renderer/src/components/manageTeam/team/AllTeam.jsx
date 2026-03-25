@@ -18,9 +18,16 @@ const AllTeam = () => {
         setError(null);
 
         const response = await Service.AllTeam();
-        const fetchedTeams = Object.values(response?.data || response || {});
 
-        setTeams(fetchedTeams);
+        console.log("API RESPONSE:", response);
+
+        // ✅ correct extraction
+        const fetchedTeams = response?.data || [];
+
+        // ✅ correct filtering
+        const activeTeams = fetchedTeams.filter(team => !team.isDeleted);
+
+        setTeams(activeTeams);
       } catch (err) {
         console.error("Failed to fetch teams:", err);
         setError("Failed to load teams. Please try again.");
@@ -38,9 +45,11 @@ const AllTeam = () => {
   const handleDelete = async (selectedRows) => {
     try {
       const ids = selectedRows.map((t) => t.id);
-      console.log("Deleting teams:", ids);
 
       setTeams((prev) => prev.filter((t) => !ids.includes(t.id)));
+
+      setSelectedTeamId(null);
+
       toast.success(`${selectedRows.length} team(s) deleted`);
     } catch (error) {
       toast.error("Failed to delete team(s)");

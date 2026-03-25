@@ -53,14 +53,14 @@ const TeamMembersTable = ({
   );
 
   return (
-    <div className="bg-white rounded-[2.5rem] border border-black/5 shadow-soft overflow-hidden mb-12">
-      <div className="px-8 py-6 border-b border-black/5 bg-gray-50/30">
+    <div className="bg-white rounded-[2.5rem] border border-black/5 shadow-soft overflow-hidden mb-8 sm:mb-12">
+      <div className="px-4 sm:px-8 py-4 sm:py-6 border-b border-black/5 bg-gray-50/30">
         <h3 className="text-2xl text-black uppercase tracking-tight">
           Team Members Performance
         </h3>
 
       </div>
-      <div className="p-6">
+      <div className="p-4 sm:p-6 overflow-x-auto custom-scrollbar">
         <DataTable
           columns={columns}
           data={tableData}

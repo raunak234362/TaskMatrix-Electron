@@ -94,7 +94,7 @@ const DailyWorkReportModal = ({
                 {member.tasks?.map((task, idx) => (
                   <div
                     key={idx}
-                    className="bg-gray-50 rounded-xl p-3 flex items-center justify-between"
+                    className="bg-gray-50 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                   >
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-gray-700">

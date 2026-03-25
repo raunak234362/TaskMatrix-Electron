@@ -260,8 +260,6 @@ class Service {
   }
   //delete team
   static async DeleteTeam(teamId) {
-    console.log(teamId);
-
     try {
       const response = await api.delete(`team/${teamId}`, {
         headers: {

@@ -167,24 +167,24 @@ const TeamCalendar = ({
 
   return (
     <>
-      <div className="bg-white p-8 rounded-[2.5rem] border border-black/5 shadow-soft mb-12">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+      <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-[2.5rem] border border-black/5 shadow-soft mb-8 sm:mb-12">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 sm:mb-10">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-green-200 text-black border border-black/5 rounded-2xl shadow-sm">
               <CalendarIcon size={24} strokeWidth={2.5} />
             </div>
             <div>
-              <h3 className="text-xl font-black text-black uppercase tracking-tight">
+              <h3 className="text-lg sm:text-xl font-black text-black uppercase tracking-tight">
                 Team Calendar - {selectedTeamName}
               </h3>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex bg-gray-100/50 p-1.5 rounded-2xl border border-black/5">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <div className="flex bg-gray-100/50 p-1 rounded-2xl border border-black/5 overflow-x-auto custom-scrollbar">
               <button
                 onClick={() => setViewMode("user")}
-                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all ${viewMode === "user"
+                className={`px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all whitespace-nowrap ${viewMode === "user"
                   ? "bg-white text-black shadow-medium border border-black/5"
                   : "text-black/40 hover:text-black"
                   }`}
@@ -194,7 +194,7 @@ const TeamCalendar = ({
               </button>
               <button
                 onClick={() => setViewMode("project")}
-                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all ${viewMode === "project"
+                className={`px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all whitespace-nowrap ${viewMode === "project"
                   ? "bg-white text-black shadow-medium border border-black/5"
                   : "text-black/40 hover:text-black"
                   }`}
@@ -208,7 +208,7 @@ const TeamCalendar = ({
               <select
                 value={selectedMember}
                 onChange={(e) => setSelectedMember(e.target.value)}
-                className="px-5 py-3 bg-white border border-black/10 rounded-2xl text-xs font-black text-black uppercase tracking-wider focus:outline-none focus:ring-4 focus:ring-green-500/10 transition-all cursor-pointer shadow-sm min-w-[200px]"
+                className="px-4 pr-10 py-2.5 bg-white border border-black/10 rounded-2xl text-[10px] sm:text-xs font-black text-black uppercase tracking-wider focus:outline-none focus:ring-4 focus:ring-green-500/10 transition-all cursor-pointer shadow-sm min-w-[150px] sm:min-w-[200px]"
               >
                 <option value="all">Select Team Member</option>
                 {members.map((m) => {
@@ -230,7 +230,7 @@ const TeamCalendar = ({
               <select
                 value={selectedProject}
                 onChange={(e) => setSelectedProject(e.target.value)}
-                className="px-5 py-3 bg-white border border-black/10 rounded-2xl text-xs font-black text-black uppercase tracking-wider focus:outline-none focus:ring-4 focus:ring-green-500/10 transition-all cursor-pointer shadow-sm min-w-[200px]"
+                className="px-4 pr-10 py-2.5 bg-white border border-black/10 rounded-2xl text-[10px] sm:text-xs font-black text-black uppercase tracking-wider focus:outline-none focus:ring-4 focus:ring-green-500/10 transition-all cursor-pointer shadow-sm min-w-[150px] sm:min-w-[200px]"
               >
                 <option value="all">Select Project</option>
                 {allProjects.map((p) => (
@@ -241,175 +241,178 @@ const TeamCalendar = ({
               </select>
             )}
 
-            <div className="flex items-center gap-3 bg-white border border-black/10 rounded-2xl px-4 py-1.5 shadow-sm">
+            <div className="flex items-center gap-2 sm:gap-3 bg-white border border-black/10 rounded-2xl px-3 sm:px-4 py-1.5 shadow-sm">
               <button
                 onClick={handlePrevMonth}
-                className="p-1.5 hover:bg-gray-100 rounded-xl transition-colors text-black"
+                className="p-1 hover:bg-gray-100 rounded-xl transition-colors text-black"
               >
-                <ChevronLeft size={20} strokeWidth={2.5} />
+                <ChevronLeft size={18} strokeWidth={2.5} />
               </button>
-              <span className="text-sm font-black text-black uppercase tracking-widest min-w-[140px] text-center">
+              <span className="text-[10px] sm:text-sm font-black text-black uppercase tracking-widest min-w-[100px] sm:min-w-[140px] text-center">
                 {monthName} {year}
               </span>
               <button
                 onClick={handleNextMonth}
-                className="p-1.5 hover:bg-gray-100 rounded-xl transition-colors text-black"
+                className="p-1 hover:bg-gray-100 rounded-xl transition-colors text-black"
               >
-                <ChevronRight size={20} strokeWidth={2.5} />
+                <ChevronRight size={18} strokeWidth={2.5} />
               </button>
             </div>
           </div>
         </div>
-        <div className="mb-8 flex flex-wrap items-center gap-6">
+        <div className="mb-8 flex flex-wrap items-center gap-4 sm:gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
-            <span className="text-[10px] font-black text-black/60 uppercase tracking-widest">
+            <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm"></div>
+            <span className="text-[9px] sm:text-[10px] font-black text-black/60 uppercase tracking-widest">
               Normal Hours
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm"></div>
-            <span className="text-[10px] font-black text-black/60 uppercase tracking-widest">
+            <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></div>
+            <span className="text-[9px] sm:text-[10px] font-black text-black/60 uppercase tracking-widest">
               Stretching
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
-            <span className="text-[10px] font-black text-black/60 uppercase tracking-widest">
+            <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm"></div>
+            <span className="text-[9px] sm:text-[10px] font-black text-black/60 uppercase tracking-widest">
               Absent
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-orange-500 shadow-sm"></div>
-            <span className="text-[10px] font-black text-black/60 uppercase tracking-widest">
+            <div className="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm"></div>
+            <span className="text-[9px] sm:text-[10px] font-black text-black/60 uppercase tracking-widest">
               Not Assigned
             </span>
           </div>
         </div>
-        <div className="grid grid-cols-7 gap-px bg-black/20 border-2 border-black/20 rounded-4xl overflow-hidden shadow-inner">
-          {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day) => (
-            <div
-              key={day}
-              className="bg-gray-100 py-3 text-center text-[10px] font-black text-black uppercase tracking-[0.2em]"
-            >
-              {day}
-            </div>
-          ))}
-          {[...padding, ...days].map((day, idx) => {
-            const date = new Date(year, currentDate.getMonth(), day || 1);
-            date.setHours(0, 0, 0, 0);
 
-            let dayTasks = [];
-            let userTotalHoursMapDay = {};
-
-            if (day) {
-              dayTasks = getDayTasks(date);
-              dayTasks.forEach((task) => {
-                const { worked } = getTaskHours(task);
-                const userName = task.userName || "Unknown";
-                if (!userTotalHoursMapDay[userName])
-                  userTotalHoursMapDay[userName] = 0;
-                userTotalHoursMapDay[userName] += worked;
-              });
-            }
-
-            return (
+        <div className="overflow-x-auto custom-scrollbar -mx-2 sm:-mx-0 px-2 sm:px-0">
+          <div className="grid grid-cols-7 gap-px bg-black/20 border-2 border-black/20 rounded-xl sm:rounded-4xl overflow-hidden shadow-inner min-w-[700px]">
+            {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day) => (
               <div
-                key={idx}
-                onClick={() =>
-                  day &&
-                  dayTasks.length > 0 &&
-                  setSelectedDateModal({ date, tasks: dayTasks })
-                }
-                className={`bg-white min-h-[140px] p-2 transition-all duration-300 hover:bg-gray-50 group flex flex-col ${day === null
-                  ? "bg-gray-50/50"
-                  : dayTasks.length > 0
-                    ? "cursor-pointer"
-                    : ""
-                  }`}
+                key={day}
+                className="bg-gray-100 py-3 text-center text-[10px] font-black text-black uppercase tracking-[0.2em]"
               >
-                {day && (
-                  <>
-                    <span className="text-sm font-black text-black/40 group-hover:text-black transition-colors px-2 pt-1">
-                      {day}
-                    </span>
-                    <div className="mt-2 flex flex-col gap-1 overflow-y-auto custom-scrollbar flex-1 max-h-[100px] pb-1">
-                      {dayTasks.map((t, tIdx) => (
-                        <div
-                          key={tIdx}
-                          className={`px-2 py-1.5 rounded-lg border flex flex-col gap-0.5 shadow-sm transition-colors ${userTotalHoursMapDay[t.userName || "Unknown"] > 8.5
-                            ? "bg-blue-100/80 border-blue-200 hover:bg-blue-200/80"
-                            : t.status === "ABSENT" ||
-                              (t.name || t.title || "")
-                                .toUpperCase()
-                                .includes("ABSENT")
-                              ? "bg-red-50 border-red-200 hover:bg-red-100"
-                              : userTotalHoursMapDay[
-                                t.userName || "Unknown"
-                              ] === 0 &&
-                                (t.name || t.title || "")
-                                  .toUpperCase()
-                                  .includes("NOT ASSIGNED")
-                                ? "bg-orange-50 border-orange-200 hover:bg-orange-100"
-                                : "bg-green-50 border-green-200 hover:bg-green-100"
-                            }`}
-                          title={t.name || t.title}
-                        >
-                          <span
-                            className={`text-[10px] font-semibold truncate tracking-tight ${userTotalHoursMapDay[t.userName || "Unknown"] >
-                              8.5
-                              ? "text-blue-900"
-                              : t.status === "ABSENT" ||
-                                (t.name || t.title || "")
-                                  .toUpperCase()
-                                  .includes("ABSENT")
-                                ? "text-red-900"
-                                : userTotalHoursMapDay[
-                                  t.userName || "Unknown"
-                                ] === 0 &&
-                                  (t.name || t.title || "")
-                                    .toUpperCase()
-                                    .includes("NOT ASSIGNED")
-                                  ? "text-orange-900"
-                                  : "text-green-900"
-                              }`}
-                          >
-                            {t.name || t.title || "Task"}
-                          </span>
-                          <span
-                            className={`text-[9px] font-bold truncate tracking-wider uppercase ${userTotalHoursMapDay[t.userName || "Unknown"] >
-                              8.5
-                              ? "text-blue-700/80"
-                              : t.status === "ABSENT" ||
-                                (t.name || t.title || "")
-                                  .toUpperCase()
-                                  .includes("ABSENT")
-                                ? "text-red-700/80"
-                                : userTotalHoursMapDay[
-                                  t.userName || "Unknown"
-                                ] === 0 &&
-                                  (t.name || t.title || "")
-                                    .toUpperCase()
-                                    .includes("NOT ASSIGNED")
-                                  ? "text-orange-700/80"
-                                  : "text-green-700/80"
-                              }`}
-                          >
-                            {t.userName}
-                          </span>
-                        </div>
-                      ))}
-                      {dayTasks.length === 0 && (
-                        <div className="px-2 py-4 bg-gray-50/50 text-black/30 text-[9px] font-black uppercase tracking-widest rounded-lg border border-dashed border-black/5 text-center h-full flex items-center justify-center">
-                          No Tasks
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
+                {day}
               </div>
-            );
-          })}
+            ))}
+            {[...padding, ...days].map((day, idx) => {
+              const date = new Date(year, currentDate.getMonth(), day || 1);
+              date.setHours(0, 0, 0, 0);
+
+              let dayTasks = [];
+              let userTotalHoursMapDay = {};
+
+              if (day) {
+                dayTasks = getDayTasks(date);
+                dayTasks.forEach((task) => {
+                  const { worked } = getTaskHours(task);
+                  const userName = task.userName || "Unknown";
+                  if (!userTotalHoursMapDay[userName])
+                    userTotalHoursMapDay[userName] = 0;
+                  userTotalHoursMapDay[userName] += worked;
+                });
+              }
+
+              return (
+                <div
+                  key={idx}
+                  onClick={() =>
+                    day &&
+                    dayTasks.length > 0 &&
+                    setSelectedDateModal({ date, tasks: dayTasks })
+                  }
+                  className={`bg-white min-h-[140px] p-2 transition-all duration-300 hover:bg-gray-50 group flex flex-col ${day === null
+                    ? "bg-gray-50/50"
+                    : dayTasks.length > 0
+                      ? "cursor-pointer"
+                      : ""
+                    }`}
+                >
+                  {day && (
+                    <>
+                      <span className="text-sm font-black text-black/40 group-hover:text-black transition-colors px-2 pt-1">
+                        {day}
+                      </span>
+                      <div className="mt-2 flex flex-col gap-1 overflow-y-auto custom-scrollbar flex-1 max-h-[100px] pb-1">
+                        {dayTasks.map((t, tIdx) => (
+                          <div
+                            key={tIdx}
+                            className={`px-2 py-1.5 rounded-lg border flex flex-col gap-0.5 shadow-sm transition-colors ${userTotalHoursMapDay[t.userName || "Unknown"] > 8.5
+                              ? "bg-blue-100/80 border-blue-200 hover:bg-blue-200/80"
+                              : t.status === "ABSENT" ||
+                                (t.name || t.title || "")
+                                  .toUpperCase()
+                                  .includes("ABSENT")
+                                ? "bg-red-50 border-red-200 hover:bg-red-100"
+                                : userTotalHoursMapDay[
+                                  t.userName || "Unknown"
+                                ] === 0 &&
+                                  (t.name || t.title || "")
+                                    .toUpperCase()
+                                    .includes("NOT ASSIGNED")
+                                  ? "bg-orange-50 border-orange-200 hover:bg-orange-100"
+                                  : "bg-green-50 border-green-200 hover:bg-green-100"
+                              }`}
+                            title={t.name || t.title}
+                          >
+                            <span
+                              className={`text-[10px] font-semibold truncate tracking-tight ${userTotalHoursMapDay[t.userName || "Unknown"] >
+                                8.5
+                                ? "text-blue-900"
+                                : t.status === "ABSENT" ||
+                                  (t.name || t.title || "")
+                                    .toUpperCase()
+                                    .includes("ABSENT")
+                                  ? "text-red-900"
+                                  : userTotalHoursMapDay[
+                                    t.userName || "Unknown"
+                                  ] === 0 &&
+                                    (t.name || t.title || "")
+                                      .toUpperCase()
+                                      .includes("NOT ASSIGNED")
+                                    ? "text-orange-900"
+                                    : "text-green-900"
+                                }`}
+                            >
+                              {t.name || t.title || "Task"}
+                            </span>
+                            <span
+                              className={`text-[9px] font-bold truncate tracking-wider uppercase ${userTotalHoursMapDay[t.userName || "Unknown"] >
+                                8.5
+                                ? "text-blue-700/80"
+                                : t.status === "ABSENT" ||
+                                  (t.name || t.title || "")
+                                    .toUpperCase()
+                                    .includes("ABSENT")
+                                  ? "text-red-700/80"
+                                  : userTotalHoursMapDay[
+                                    t.userName || "Unknown"
+                                  ] === 0 &&
+                                    (t.name || t.title || "")
+                                      .toUpperCase()
+                                      .includes("NOT ASSIGNED")
+                                    ? "text-orange-700/80"
+                                    : "text-green-700/80"
+                                }`}
+                            >
+                              {t.userName}
+                            </span>
+                          </div>
+                        ))}
+                        {dayTasks.length === 0 && (
+                          <div className="px-2 py-4 bg-gray-50/50 text-black/30 text-[9px] font-black uppercase tracking-widest rounded-lg border border-dashed border-black/5 text-center h-full flex items-center justify-center">
+                            No Tasks
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 

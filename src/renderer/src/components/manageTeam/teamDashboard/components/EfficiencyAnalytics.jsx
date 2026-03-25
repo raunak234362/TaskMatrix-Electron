@@ -80,7 +80,7 @@ const EfficiencyAnalytics = ({
   ];
 
   return (
-    <div className="bg-white p-8 rounded-[2.5rem] border border-black/5 shadow-soft mb-12">
+    <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-[2.5rem] border border-black/5 shadow-soft mb-8 sm:mb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
         <div>
           <h3 className="text-2xl font-black text-black uppercase tracking-tight">

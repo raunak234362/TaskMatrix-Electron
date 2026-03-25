@@ -90,7 +90,7 @@ const TeamDashboard = () => {
     try {
       setLoading(true);
       const response = await Service.AllTeam();
-      const teamsData = response?.data || [];
+      const teamsData = (response?.data || []).filter(team => !team.isDeleted);
       setTeams(teamsData);
       setFilteredTeams(teamsData);
 
@@ -781,7 +781,7 @@ const TeamDashboard = () => {
 
   return (
     <div className="h-full overflow-y-auto custom-scrollbar bg-gray-50/50">
-      <div className="bg-white rounded-md p-10 shadow-sm border border-black/20 min-h-full">
+      <div className="bg-white rounded-md p-4 sm:p-6 lg:p-8 xl:p-10 shadow-sm border border-black/20 min-h-full">
         <DashboardHeader
           onAddTeam={() => setIsModalOpen(true)}
           searchTerm={searchTerm}

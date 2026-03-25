@@ -12,9 +12,9 @@ const DashboardHeader = ({
   onDailyReport,
 }) => {
   return (
-    <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-10">
+    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 sm:mb-10">
 
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
         {/* Search */}
         <div className="relative group">
           <Search

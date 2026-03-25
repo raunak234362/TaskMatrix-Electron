@@ -12,17 +12,19 @@ const GetTeamByID = ({ id, onClose, onSuccess }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDeleteTeam = async () => {
-    try {
-      setIsDeleting(true);
-      const response = await Service.DeleteTeam(id);
-      console.log("DELETE TEAM RESPONSE:", response);
-      if (onSuccess) onSuccess();
-    } catch (err) {
-      console.error("Failed to delete team:", err);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+  try {
+    setIsDeleting(true);
+    const response = await Service.DeleteTeam(id);
+
+    console.log("DELETE TEAM RESPONSE:", response);
+    if (onClose) onClose();
+    if (onSuccess) onSuccess();
+  } catch (err) {
+    console.error("Failed to delete team:", err);
+  } finally {
+    setIsDeleting(false);
+  }
+};
 
   useEffect(() => {
     const fetchTeam = async () => {
@@ -35,10 +37,17 @@ const GetTeamByID = ({ id, onClose, onSuccess }) => {
       try {
         setLoading(true);
         setError(null);
+const response = await Service.GetTeamByID(id);
+const raw = response?.data;
 
-        const response = await Service.GetTeamByID(id);
-        const raw = response?.data;
-        setTeam(raw);
+// ✅ ADD THIS
+if (raw?.isDeleted) {
+  setError("Team not found");
+  setTeam(null);
+  return;
+}
+
+setTeam(raw);
       } catch (err) {
         const msg = "Failed to load team details";
         setError(msg);
