@@ -86,29 +86,28 @@ const TeamDashboard = () => {
   // Cache for fetched team stats to avoid refetching
   const [teamStatsCache, setTeamStatsCache] = useState(new Map());
 
-  // Fetch all teams
-  useEffect(() => {
-    const fetchTeams = async () => {
-      try {
-        setLoading(true);
-        const response = await Service.AllTeam();
-        const teamsData = response?.data || [];
-        setTeams(teamsData);
-        setFilteredTeams(teamsData);
+  const fetchTeams = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await Service.AllTeam();
+      const teamsData = response?.data || [];
+      setTeams(teamsData);
+      setFilteredTeams(teamsData);
 
-        // Auto-select first team if available
-        if (teamsData.length > 0 && !selectedTeam) {
-          // setSelectedTeam(teamsData[0].id); // Optional: Auto select logic
-        }
-
-        setLoading(false);
-      } catch (error) {
-        console.error(error.message);
-        setLoading(false);
+      if (teamsData.length > 0 && !selectedTeam) {
+        // setSelectedTeam(teamsData[0].id);
       }
-    };
+
+      setLoading(false);
+    } catch (error) {
+      console.error(error.message);
+      setLoading(false);
+    }
+  }, [selectedTeam]);
+
+  useEffect(() => {
     fetchTeams();
-  }, []);
+  }, [fetchTeams]);
 
   // useCallback(() => {
   //   const fetchAnalyticsScore = async () => {
@@ -878,7 +877,11 @@ const TeamDashboard = () => {
 
       {isViewModalOpen && selectedTeam && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <GetTeamById id={selectedTeam} onClose={() => setIsViewModalOpen(false)} />
+          <GetTeamById
+            id={selectedTeam}
+            onClose={() => setIsViewModalOpen(false)}
+            onSuccess={fetchTeams}
+          />
         </div>
       )}
 

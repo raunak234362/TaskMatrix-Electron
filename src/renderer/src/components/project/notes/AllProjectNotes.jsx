@@ -116,6 +116,7 @@ const AllProjectNotes = ({ projectId }) => {
         "deputy_manager",
         "client",
         "client_admin",
+        "operation_executive",
     ].includes(userRole);
 
     if (!isAuthorized) {

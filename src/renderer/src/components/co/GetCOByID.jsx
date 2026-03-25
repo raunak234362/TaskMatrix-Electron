@@ -9,6 +9,8 @@ import Button from "../fields/Button";
 import CoResponseModal from "./CoResponseModal";
 import COResponseDetailsModal from "./CoResponseDetailsModal";
 
+import RenderFiles from "../common/RenderFiles";
+
 /* -------------------- Small UI Helper -------------------- */
 const Info = ({ label, value }) => (
   <div>
@@ -215,25 +217,11 @@ const GetCOByID = ({ id, projectId }) => {
             </div>
 
             {(co.files ?? []).length > 0 && (
-              <div>
-                <h4 className="font-semibold text-gray-700 mb-2">
-                  Attachments
-                </h4>
-                <ul className="space-y-1">
-                  {(co.files ?? []).map((file) => (
-                    <li key={file.id}>
-                      <span
-                        className="text-green-700 underline cursor-pointer"
-                        onClick={() =>
-                          openFileSecurely("changeOrder", co.id, file.id)
-                        }
-                      >
-                        {file.originalName}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <RenderFiles
+                files={co.files}
+                table="changeOrders"
+                parentId={co.id}
+              />
             )}
 
             <div className="pt-4 border-t">

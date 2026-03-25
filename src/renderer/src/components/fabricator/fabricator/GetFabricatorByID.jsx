@@ -8,6 +8,7 @@ import EditFabricator from "./EditFabricator";
 import AllBranches from "../branches/AllBranches";
 import AllClients from "../clients/AllClients";
 import FabricatorDashboard from "./FabricatorDashboard";
+import RenderFiles from "../../common/RenderFiles";
 
 const truncateText = (text, max = 40) =>
   text.length > max ? text.substring(0, max) + "..." : text;
@@ -85,8 +86,8 @@ const GetFabricatorByID = ({ id }) => {
         <h3 className="text-xl text-green-800">{fabricator.fabName}</h3>
         <span
           className={`px-3 py-7 rounded-full text-xs font-medium ${fabricator.isDeleted
-              ? "bg-red-100 text-red-700"
-              : "bg-green-100 text-green-800"
+            ? "bg-red-100 text-red-700"
+            : "bg-green-100 text-green-800"
             }`}
         >
           {fabricator.isDeleted ? "Inactive" : "Active"}
@@ -98,8 +99,8 @@ const GetFabricatorByID = ({ id }) => {
         <button
           onClick={() => setActiveTab("dashboard")}
           className={`pb-3 px-2 text-sm font-semibold transition-colors ${activeTab === "dashboard"
-              ? "text-green-700 border-b-2 border-green-600"
-              : "text-gray-500 hover:text-green-600"
+            ? "text-green-700 border-b-2 border-green-600"
+            : "text-gray-500 hover:text-green-600"
             }`}
         >
           Dashboard
@@ -107,8 +108,8 @@ const GetFabricatorByID = ({ id }) => {
         <button
           onClick={() => setActiveTab("details")}
           className={`pb-3 px-2 text-sm font-semibold transition-colors ${activeTab === "details"
-              ? "text-green-700 border-b-2 border-green-600"
-              : "text-gray-500 hover:text-green-600"
+            ? "text-green-700 border-b-2 border-green-600"
+            : "text-gray-500 hover:text-green-600"
             }`}
         >
           Basic Details
@@ -182,37 +183,11 @@ const GetFabricatorByID = ({ id }) => {
             {Array.isArray(fabricator.files) &&
               fabricator.files.length > 0 && (
                 <div className="pt-6 border-t border-green-200">
-                  <h4 className="font-semibold text-green-700 mb-4 flex items-center gap-2">
-                    <FileText className="w-4 h-4" /> Files
-                  </h4>
-
-                  <ul className="space-y-3">
-                    {fabricator.files.map((file) => (
-                      <li
-                        key={file.id}
-                        className="
-                          flex justify-between items-center
-                          bg-white px-4 py-3
-                          rounded-md shadow-sm
-                          border border-gray-100
-                          hover:border-green-200
-                        "
-                      >
-                        <span className="font-medium text-gray-800">
-                          {file.originalName}
-                        </span>
-
-                        <button
-                          className="text-green-600 text-sm flex items-center gap-1 hover:underline"
-                          onClick={() =>
-                            openFileSecurely("fabricator", id, file.id)
-                          }
-                        >
-                          <Link2 className="w-3 h-3" /> Open
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
+                  <RenderFiles
+                    files={fabricator.files}
+                    table="fabricator"
+                    parentId={id}
+                  />
                 </div>
               )}
           </div>

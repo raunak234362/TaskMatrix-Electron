@@ -78,9 +78,11 @@ const ResponseDetailsModal = ({
             />
 
             {child.files?.length > 0 && (
-              <div className="text-sm text-gray-700">
-                {child.files.length} attachment(s)
-              </div>
+              <RenderFiles
+                files={child.files}
+                table="rfqResponse"
+                parentId={child.id}
+              />
             )}
 
             {/* Recursive threading */}

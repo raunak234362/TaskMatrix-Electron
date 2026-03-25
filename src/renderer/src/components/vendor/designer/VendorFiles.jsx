@@ -4,7 +4,7 @@ import Service from '../../../api/Service'
 import { toast } from 'react-toastify'
 import {
     FileText, Eye, Trash2, Loader2, AlertCircle,
-    Files, RefreshCcw, ExternalLink
+    Files, RefreshCcw, FileSpreadsheet, File
 } from 'lucide-react'
 
 // ─── File type helpers ────────────────────────────────────────────────────────
@@ -13,11 +13,16 @@ const getExtension = (name = '') => name.split('.').pop()?.toLowerCase() ?? ''
 
 const FileIcon = ({ name }) => {
     const ext = getExtension(name)
-    const imgExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
-    const pdfExts = ['pdf']
-    if (imgExts.includes(ext)) return <span className="text-blue-500 text-xs font-black uppercase">{ext}</span>
-    if (pdfExts.includes(ext)) return <span className="text-red-500 text-xs font-black uppercase">{ext}</span>
-    return <FileText size={16} className="text-green-600" />
+    switch (ext) {
+        case 'pdf':
+            return { icon: FileText, color: 'text-red-500', bgColor: 'bg-red-50' };
+        case 'xlsx':
+        case 'xls':
+        case 'csv':
+            return { icon: FileSpreadsheet, color: 'text-green-600', bgColor: 'bg-green-50' };
+        default:
+            return { icon: File, color: 'text-blue-500', bgColor: 'bg-blue-50' };
+    }
 }
 
 // ─── Single File Row ──────────────────────────────────────────────────────────
@@ -29,6 +34,7 @@ const FileRow = ({ file, vendorId, onDeleted }) => {
 
     const fileId = file.id ?? file._id ?? file.fileId
     const fileName = file.originalName ?? file.name ?? file.fileName ?? `File ${fileId}`
+    const { icon: Icon, color, bgColor } = FileIcon({ name: fileName })
 
     const handleView = async () => {
         try {
@@ -62,15 +68,15 @@ const FileRow = ({ file, vendorId, onDeleted }) => {
     }
 
     return (
-        <div className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 bg-white hover:shadow-md hover:border-green-200 transition-all group">
+        <div className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 bg-white hover:shadow-md hover:bg-[#6bbd45]/10 group transition-all" title={fileName}>
             {/* Icon */}
-            <div className="p-3 bg-green-50 rounded-xl border border-green-100 flex items-center justify-center shrink-0">
-                <FileIcon name={fileName} />
+            <div className={`p-3 ${bgColor} rounded-xl border border-gray-100 flex items-center justify-center shrink-0`}>
+                <Icon size={18} className={color} />
             </div>
 
             {/* Name */}
             <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-gray-800 truncate group-hover:text-green-800 transition-colors">{fileName}</p>
+                <p className="text-sm font-bold text-gray-800 truncate group-hover:text-black transition-colors" title={fileName}>{fileName}</p>
                 {file.createdAt && (
                     <p className="text-[10px] text-gray-400 font-medium mt-0.5">
                         {new Date(file.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
@@ -80,7 +86,7 @@ const FileRow = ({ file, vendorId, onDeleted }) => {
 
             {/* Actions */}
             {!confirmDelete ? (
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-2 transition-opacity">
                     <button
                         onClick={handleView}
                         disabled={viewing}

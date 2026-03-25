@@ -237,7 +237,44 @@ class Service {
       return response?.data
     } catch (error) {
       console.log(error)
-      console.log('Error Fetching All Team', error)
+      console.log('Error while updating team member role', error)
+    }
+  }
+  //delete team member
+  static async DeleteTeamMember(data) {
+    try {
+      const response = await api.delete(`team/removeMembers`, {
+        data: data,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      toast.success('Successfully deleted team member')
+      console.log(response?.data)
+      return response?.data
+    } catch (error) {
+      console.log(error)
+      console.log('Error while deleting team member', error)
+      toast.error('Error while deleting team member')
+    }
+  }
+  //delete team
+  static async DeleteTeam(teamId) {
+    console.log(teamId);
+
+    try {
+      const response = await api.delete(`team/${teamId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      toast.success('Successfully deleted team')
+
+      return response?.data
+    } catch (error) {
+      console.log(error)
+      console.log('Error while deleting team', error)
+      toast.error('Error while deleting team')
     }
   }
 
