@@ -96,7 +96,7 @@ const GetNoteByID = ({ projectId, noteId, onClose }) => {
                             {/* Attachments */}
                             <RenderFiles
                                 files={note.files}
-                                table="projectNotes"
+                                table="notes"
                                 parentId={note.id}
                             />
                         </div>
