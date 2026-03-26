@@ -7,6 +7,7 @@ import AddCDEngineer from "./AddCDEngineer";
 
 const AllCDEngineer = ({ onClose, designerData }) => {
   const [addEngineerModal, setAddEngineerModal] = useState(false);
+  const [selectedEngineerId, setSelectedEngineerId] = useState(null);
   const [engineers, setEngineers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,11 +45,11 @@ const AllCDEngineer = ({ onClose, designerData }) => {
             </div>
             <button
               onClick={onClose}
-              className="p-2.5 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-all"
+              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
             >
-              <X size={20} />
+              close
             </button>
-          </div>
+          </div>  
         </div>
 
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar min-h-[400px]">
@@ -83,8 +84,7 @@ const AllCDEngineer = ({ onClose, designerData }) => {
               <DataTable
                 columns={columns}
                 data={engineers}
-                onRowClick={(row) => console.log(row)}
-                detailComponent={({ row }) => <GetEmployeeByID id={row.id} />}
+                onRowClick={(row) => setSelectedEngineerId(row.id || row._id)}
               />
             </div>
           ) : (
@@ -105,6 +105,10 @@ const AllCDEngineer = ({ onClose, designerData }) => {
 
         {addEngineerModal && (
           <AddCDEngineer designer={designerData} onClose={() => setAddEngineerModal(false)} />
+        )}
+
+        {selectedEngineerId && (
+          <GetEmployeeByID id={selectedEngineerId} onClose={() => setSelectedEngineerId(null)} />
         )}
       </div>
     </div>

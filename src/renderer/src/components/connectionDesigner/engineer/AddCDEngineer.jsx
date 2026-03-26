@@ -51,7 +51,7 @@ const AddCDEngineer = ({ designer, onClose }) => {
           </div>
           <button
             onClick={onClose}
-            className="p-2 bg-red-100 hover:bg-red-300 text-black hover:text-black rounded-xl shadow-sm border border-black"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
         close
           </button>

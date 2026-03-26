@@ -114,7 +114,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-red-50 border border-red-600 rounded-lg text-[10px] font-black text-black uppercase tracking-widest hover:bg-red-100 transition-all flex items-center gap-2"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
             Close
           </button>
