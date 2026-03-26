@@ -30,6 +30,7 @@ const EditMileStone = ({
       status: "ACTIVE",
       percentage: 0,
       approvalDate: "",
+      CDApprovalDate: "",
       stage: "",
       reason: "",
     },
@@ -88,6 +89,9 @@ const EditMileStone = ({
             data.percentage !== undefined ? Number(data.percentage) : 0,
           approvalDate: data.approvalDate
             ? new Date(data.approvalDate).toISOString().split("T")[0]
+            : "",
+          CDApprovalDate: data.CDApprovalDate
+            ? new Date(data.CDApprovalDate).toISOString().split("T")[0]
             : "",
           stage: data.stage || "",
           reason: data.reason || "",
@@ -155,6 +159,9 @@ const EditMileStone = ({
         percentage: Number(data.percentage),
         approvalDate: data.approvalDate
           ? new Date(data.approvalDate).toISOString()
+          : null,
+        CDApprovalDate: data.CDApprovalDate
+          ? new Date(data.CDApprovalDate).toISOString()
           : null,
       };
 
@@ -294,6 +301,11 @@ const EditMileStone = ({
               label="Approval Date"
               type="date"
               {...register("approvalDate")}
+            />
+            <Input
+              label="CD Approval Date"
+              type="date"
+              {...register("CDApprovalDate")}
             />
 
             <div className="flex flex-col gap-2">
