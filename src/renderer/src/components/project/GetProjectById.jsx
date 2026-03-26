@@ -394,7 +394,7 @@ const GetProjectById = ({ id, onClose }) => {
                   <button
                     key={key}
                     onClick={() => setActiveTab(key)}
-                    className={`flex items-center gap-2 border-1 px-5 py-2 text-[12px] rounded-lg font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-sm hover:shadow-md active:scale-95 ${activeTab === key
+                    className={`flex items-center gap-2 border px-5 py-2 text-[12px] rounded-lg font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-sm hover:shadow-md active:scale-95 ${activeTab === key
                       ? "bg-green-50 text-black border-[#6bbd45]"
                       : "text-black bg-white border-black hover:border-black"
                       }`}
@@ -420,7 +420,7 @@ const GetProjectById = ({ id, onClose }) => {
                     <Clock size={20} strokeWidth={3} />
                     <span className="text-sm font-black uppercase tracking-widest opacity-60">Total Hours Estimated</span>
                   </div>
-                  <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned}h</h3>
+                  <h3 className="text-4xl text-black tracking-tighter">{(projectStats.assigned * 0.8).toFixed(2)}h</h3>
                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
                 <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
@@ -428,7 +428,7 @@ const GetProjectById = ({ id, onClose }) => {
                     <CheckCircle2 size={20} strokeWidth={3} />
                     <span className="text-sm font-black uppercase tracking-widest opacity-60">Total Hours Estimated for Approval</span>
                   </div>
-                  <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned * 0.8}h</h3>
+                  <h3 className="text-4xl text-black tracking-tighter"> {(projectStats.assigned * 0.8).toFixed(2)}h</h3>
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gray-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
                 <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
@@ -436,7 +436,7 @@ const GetProjectById = ({ id, onClose }) => {
                     <CheckCircle2 size={20} strokeWidth={3} />
                     <span className="text-sm font-black uppercase tracking-widest opacity-60">Total Hours Estimated for Fabrication</span>
                   </div>
-                  <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned * 0.2}h</h3>
+                  <h3 className="text-4xl text-black tracking-tighter">{(projectStats.assigned * 0.2).toFixed(2)}h</h3>
                   <div className="absolute top-0 right-0 w-32 h-32 bg-gray-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
 
