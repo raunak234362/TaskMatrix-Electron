@@ -8,7 +8,7 @@ import { useDispatch } from "react-redux";
 import { addStaff } from "../../../store/userSlice";
 import { X, HardHat, UserPlus, Loader2 } from "lucide-react";
 
-const AddCDEngineer = ({ designer, onClose }) => {
+const AddCDEngineer = ({ designer, onClose, onSuccess }) => {
   const dispatch = useDispatch();
   const {
     register,
@@ -28,6 +28,7 @@ const AddCDEngineer = ({ designer, onClose }) => {
       const response = await Service.AddEmployee(payload);
       dispatch(addStaff(response?.data?.user));
       toast.success("Engineer created successfully!");
+      if (onSuccess) onSuccess();
       if (onClose) onClose();
     } catch (error) {
       console.error("Error creating employee:", error);
@@ -53,7 +54,7 @@ const AddCDEngineer = ({ designer, onClose }) => {
             onClick={onClose}
             className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
-        close
+            close
           </button>
         </div>
 

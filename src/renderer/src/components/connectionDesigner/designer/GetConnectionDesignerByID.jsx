@@ -34,19 +34,20 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
   const [engineerModel, setEnginnerModel] = useState(null)
   const [activeTab, setActiveTab] = useState('DASHBOARD')
 
-  useEffect(() => {
-    const fetchDesigner = async () => {
-      if (!id) return
-      try {
-        setLoading(true)
-        const response = await Service.FetchConnectionDesignerByID(id)
-        setDesigner(response?.data || null)
-      } catch (err) {
-        setError('Failed to load details')
-      } finally {
-        setLoading(false)
-      }
+  const fetchDesigner = async () => {
+    if (!id) return
+    try {
+      setLoading(true)
+      const response = await Service.FetchConnectionDesignerByID(id)
+      setDesigner(response?.data || null)
+    } catch (err) {
+      setError('Failed to load details')
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchDesigner()
   }, [id])
 
@@ -240,7 +241,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
         <EditConnectionDesigner onClose={() => setEditModel(null)} designerData={designer} />
       )}
       {engineerModel && (
-        <AllCDEngineer onClose={() => setEnginnerModel(null)} designerData={designer} />
+        <AllCDEngineer onClose={() => setEnginnerModel(null)} designerData={designer} refresh={fetchDesigner} />
       )}
     </div>
   )
