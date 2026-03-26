@@ -115,7 +115,7 @@ const QuotationRaise = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col h-[50vh] overflow-y-auto animate-in fade-in zoom-in duration-200">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
           <h2 className="text-xl font-black text-black tracking-tight">

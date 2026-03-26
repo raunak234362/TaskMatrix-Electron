@@ -32,6 +32,10 @@ const AddRFI = ({
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [cdEngineers, setCdEngineers] = useState([]);
+  const [fetchingEngineers, setFetchingEngineers] = useState(false);
+
+  const connectionDesignerID = project?.connectionDesignerID;
 
   // Match selected fabricator
   const selectedFabricator = fabricators?.find(
@@ -58,6 +62,34 @@ const AddRFI = ({
         label: `${s.firstName} ${s.lastName}`,
         value: s.id,
       })) ?? [];
+
+  const cdEngineerOptions =
+    cdEngineers?.map((e) => ({
+      label: `${e.firstName} ${e.lastName} (CD Engineer)`,
+      value: e.id,
+    })) ?? [];
+
+  const combinedRecipientOptions = [...pocOptions, ...cdEngineerOptions];
+
+  useEffect(() => {
+    const fetchEngineers = async () => {
+      if (connectionDesignerID) {
+        try {
+          setFetchingEngineers(true);
+          const res = await Service.FetchConnectionDesignerByID(connectionDesignerID);
+          setCdEngineers(res?.data?.CDEngineers || []);
+        } catch (err) {
+          console.error("Failed to fetch engineers", err);
+          setCdEngineers([]);
+        } finally {
+          setFetchingEngineers(false);
+        }
+      } else {
+        setCdEngineers([]);
+      }
+    };
+    fetchEngineers();
+  }, [connectionDesignerID]);
 
   const onSubmit = async (data) => {
     try {
@@ -121,28 +153,34 @@ const AddRFI = ({
   return (
     <div className="w-full mx-auto bg-white p-2 rounded-xl shadow">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+
         {/* WBT RECIPIENT */}
-        <label className="text-sm font-medium text-gray-700">
-          Select Recipient
-        </label>
-        <Controller
-          name="multipleRecipients"
-          control={control}
-          rules={{ required: "Recipient required" }}
-          render={({ field }) => (
-            <Select
-              isMulti
-              placeholder="Recipient *"
-              options={pocOptions}
-              value={
-                pocOptions.filter((o) => (field.value || []).includes(o.value))
-              }
-              onChange={(options) =>
-                field.onChange(options ? options.map((o) => o.value) : [])
-              }
-            />
-          )}
-        />
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700">
+            Select Recipients *
+          </label>
+          <Controller
+            name="multipleRecipients"
+            control={control}
+            rules={{ required: "Recipient required" }}
+            render={({ field }) => (
+              <Select
+                isMulti
+                placeholder={fetchingEngineers ? "Fetching engineers..." : "Select recipients..."}
+                options={combinedRecipientOptions}
+                isLoading={fetchingEngineers}
+                value={
+                  combinedRecipientOptions.filter((o) => (field.value || []).includes(o.value))
+                }
+                onChange={(options) =>
+                  field.onChange(options ? options.map((o) => o.value) : [])
+                }
+                className="text-sm"
+              />
+            )}
+          />
+        </div>
 
         {/* <SectionTitle title="Details" /> */}
 

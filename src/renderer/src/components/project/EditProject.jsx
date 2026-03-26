@@ -57,6 +57,7 @@ const EditProject = ({
         detailingMain: false,
         detailingMisc: false,
         clientProjectManagers: [],
+        connectionDesignerID: "",
       },
     });
 
@@ -112,6 +113,7 @@ const EditProject = ({
           setValue("customerDesign", project.customerDesign);
           setValue("detailingMain", project.detailingMain);
           setValue("detailingMisc", project.detailingMisc);
+          setValue("connectionDesignerID", project.connectionDesignerID || "");
 
           // Handle clientProjectManagers
           if (project.clientProjectManagers) {
@@ -252,9 +254,9 @@ const EditProject = ({
             <h2 className="text-2xl  text-gray-700">Edit Project</h2>
             <button
               onClick={onCancel}
-              className="text-gray-700 hover:text-gray-700"
+              className="text-sm tracking-wider text-gray-900 font-semibold px-3 py-1 rounded-lg border-2 border-black bg-red-200 hover:text-gray-700"
             >
-              <X className="w-6 h-6" />
+              CLOSE
             </button>
           </div>
 
@@ -373,6 +375,27 @@ const EditProject = ({
                       isLoading={isFetchingClients}
                       isDisabled={!watchedFabricatorId || isFetchingClients}
                       isSearchable
+                    />
+                  )}
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
+                  <Wrench className="w-4 h-4 text-cyan-600" /> Connection Designer
+                </label>
+                <Controller
+                  name="connectionDesignerID"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      options={options.connectionDesigners}
+                      value={options.connectionDesigners.find(
+                        (o) => o.value === field.value
+                      )}
+                      onChange={(o) => field.onChange(o?.value || "")}
+                      placeholder="Select Designer"
+                      isSearchable
+                      isClearable
                     />
                   )}
                 />
