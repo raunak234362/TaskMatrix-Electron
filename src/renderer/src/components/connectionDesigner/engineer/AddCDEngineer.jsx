@@ -46,7 +46,7 @@ const AddCDEngineer = ({ designer, onClose }) => {
           <div>
             <h2 className="text-2xl font-black text-gray-800 tracking-tight flex items-center gap-3">
               <UserPlus className="text-[#6bbd45]" size={28} />
-              Onboard Engineer
+              Add Engineer
             </h2>
           </div>
           <button
@@ -184,7 +184,7 @@ const AddCDEngineer = ({ designer, onClose }) => {
                 {isSubmitting ? (
                   <Loader2 className="animate-spin w-4 h-4" />
                 ) : (
-                  "Initiate Onboarding"
+                  "Add Engineer"
                 )}
               </button>
             </div>
