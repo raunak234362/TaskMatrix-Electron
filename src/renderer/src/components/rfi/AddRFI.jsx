@@ -69,7 +69,9 @@ const AddRFI = ({
       value: e.id,
     })) ?? [];
 
-  const combinedRecipientOptions = [...pocOptions, ...cdEngineerOptions];
+  const [isCDMode, setIsCDMode] = useState(false);
+
+  const activeRecipientOptions = isCDMode ? cdEngineerOptions : pocOptions;
 
   useEffect(() => {
     const fetchEngineers = async () => {
@@ -152,13 +154,45 @@ const AddRFI = ({
 
   return (
     <div className="w-full mx-auto bg-white p-2 rounded-xl shadow">
+      {/* Recipient Category Toggle */}
+      <div className="flex bg-gray-100/50 p-1 rounded-lg gap-1 mb-4">
+        <button
+          type="button"
+          onClick={() => {
+            setIsCDMode(false);
+            setValue("multipleRecipients", []); // Clear selection when switching modes
+          }}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+            !isCDMode
+              ? "bg-white text-black shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          CLIENT
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setIsCDMode(true);
+            setValue("multipleRecipients", []); // Clear selection when switching modes
+          }}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+            isCDMode
+              ? "bg-white text-black shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          CONNECTION DESIGNER
+        </button>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
 
         {/* WBT RECIPIENT */}
         <div className="space-y-1">
           <label className="text-sm font-medium text-gray-700">
-            Select Recipients *
+            Select {isCDMode ? "CD Engineer" : "Client"} Recipients *
           </label>
           <Controller
             name="multipleRecipients"
@@ -167,11 +201,15 @@ const AddRFI = ({
             render={({ field }) => (
               <Select
                 isMulti
-                placeholder={fetchingEngineers ? "Fetching engineers..." : "Select recipients..."}
-                options={combinedRecipientOptions}
+                placeholder={
+                  fetchingEngineers 
+                    ? "Fetching engineers..." 
+                    : `Select ${isCDMode ? "engineers" : "POCs"}...`
+                }
+                options={activeRecipientOptions}
                 isLoading={fetchingEngineers}
                 value={
-                  combinedRecipientOptions.filter((o) => (field.value || []).includes(o.value))
+                  activeRecipientOptions.filter((o) => (field.value || []).includes(o.value))
                 }
                 onChange={(options) =>
                   field.onChange(options ? options.map((o) => o.value) : [])

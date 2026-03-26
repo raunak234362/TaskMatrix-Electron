@@ -13,15 +13,46 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
     const [file, setFile] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
+    const [cdEngineers, setCdEngineers] = useState([]);
+    const [fetchingEngineers, setFetchingEngineers] = useState(false);
+    const [isCDMode, setIsCDMode] = useState(false);
 
     const fabricators = useSelector((state) => state.fabricatorInfo.fabricatorData);
     const fabricatorID = submittal?.fabricator_id || submittal?.fabricator?.id;
+    const connectionDesignerID = submittal?.project?.connectionDesignerID;
+
+    useEffect(() => {
+        const fetchEngineers = async () => {
+            if (connectionDesignerID) {
+                try {
+                    setFetchingEngineers(true);
+                    const res = await Service.FetchConnectionDesignerByID(connectionDesignerID);
+                    setCdEngineers(res?.data?.CDEngineers || []);
+                } catch (err) {
+                    console.error("Failed to fetch engineers", err);
+                    setCdEngineers([]);
+                } finally {
+                    setFetchingEngineers(false);
+                }
+            } else {
+                setCdEngineers([]);
+            }
+        };
+        fetchEngineers();
+    }, [connectionDesignerID]);
 
     const selectedFabricator = fabricators?.find((f) => String(f.id) === String(fabricatorID));
     const pocOptions = selectedFabricator?.pointOfContact?.map((p) => ({
         label: `${p.firstName} ${p.middleName ?? ""} ${p.lastName}`,
         value: p.id,
     })) ?? [];
+
+    const cdEngineerOptions = cdEngineers?.map((e) => ({
+        label: `${e.firstName} ${e.lastName} (CD Engineer)`,
+        value: e.id,
+    })) ?? [];
+
+    const activeRecipientOptions = isCDMode ? cdEngineerOptions : pocOptions;
 
     const [multipleRecipients, setMultipleRecipients] = useState(
         submittal?.multipleRecipients?.map((r) => r.id) || []
@@ -94,6 +125,35 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                         </div>
                     )}
 
+                    {/* Recipient Category Toggle */}
+                    <div className="flex bg-gray-100/50 p-1 rounded-lg gap-1">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsCDMode(false);
+                                setMultipleRecipients([]); // Clear selection when switching modes
+                            }}
+                            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${!isCDMode
+                                    ? "bg-white text-black shadow-sm"
+                                    : "text-gray-400 hover:text-gray-600"
+                                }`}
+                        >
+                            Client
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsCDMode(true);
+                                setMultipleRecipients([]); // Clear selection when switching modes
+                            }}
+                            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${isCDMode
+                                    ? "bg-white text-black shadow-sm"
+                                    : "text-gray-400 hover:text-gray-600"
+                                }`}
+                        >
+                            Connection Designer
+                        </button>
+                    </div>
 
                     {/* Description */}
                     <div className="space-y-2">
@@ -112,14 +172,15 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                     {/* Recipients */}
                     <div className="space-y-2">
                         <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
-                            Recipients
+                            {isCDMode ? "CD Engineer" : "Client"} Recipients
                         </label>
                         <Select
                             isMulti
-                            options={pocOptions}
-                            value={pocOptions.filter(opt => multipleRecipients.includes(opt.value))}
+                            options={activeRecipientOptions}
+                            isLoading={fetchingEngineers}
+                            value={activeRecipientOptions.filter(opt => multipleRecipients.includes(opt.value))}
                             onChange={(options) => setMultipleRecipients(options ? options.map(o => o.value) : [])}
-                            placeholder="Assign recipients..."
+                            placeholder={fetchingEngineers ? "Fetching engineers..." : "Assign recipients..."}
                             styles={{
                                 control: (base) => ({
                                     ...base,
