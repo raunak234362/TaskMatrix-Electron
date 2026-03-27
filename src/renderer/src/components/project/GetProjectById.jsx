@@ -35,7 +35,7 @@ import MilestoneProgress from "./MilestoneProgress";
 import TeamsAnalytics from "./TeamsAnalytics";
 import AllProjectNotes from "./notes/AllProjectNotes";
 import AddAssistsModal from "./AddAssistsModal";
-import ProjectMilestoneMetrics from "./ProjectMilestoneMetrics.Jsx";
+import ProjectMilestoneMetrics from "./ProjectMilestoneMetrics.jsx";
 
 const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);

@@ -138,20 +138,16 @@ const AddEstimation = ({ initialRfqId = null, onClose, onSuccess = () => { } }) 
   return (
     <div className="w-full mx-auto bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200">
       {/* Header */}
-      <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white">
-        <div>
-          <h1 className="text-xl font-black text-black tracking-tight uppercase">
-            Create New Estimation
-          </h1>
-          <p className="text-[10px] font-black text-black uppercase tracking-[0.2em] mt-1">
-            ENTER PROJECT DETAILS TO GENERATE ESTIMATION
-          </p>
+      <header className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-white gap-4">
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-black text-black">Add Estimation</h2>
         </div>
         <button
+          type="button"
           onClick={onClose}
-          className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
+          className="w-full sm:w-auto px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
         >
-          Close
+          CLOSE
         </button>
       </header>
 
@@ -261,11 +257,11 @@ const AddEstimation = ({ initialRfqId = null, onClose, onSuccess = () => { } }) 
         </form>
       </div>
 
-      <footer className="p-6 border-t border-gray-200 bg-white flex justify-end gap-3 shrink-0">
+      <footer className="p-4 sm:p-6 border-t border-gray-200 bg-white flex flex-col sm:flex-row justify-end gap-3 shrink-0">
         <button
           type="button"
           onClick={onClose}
-          className="px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all"
+          className="w-full sm:w-auto px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all"
         >
           Cancel
         </button>
@@ -273,7 +269,7 @@ const AddEstimation = ({ initialRfqId = null, onClose, onSuccess = () => { } }) 
           type="submit"
           onClick={handleSubmit(onSubmit)}
           disabled={isSubmitting}
-          className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all active:scale-95 disabled:opacity-50"
+          className="w-full sm:w-auto px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all active:scale-95 disabled:opacity-50"
         >
           {isSubmitting ? 'Creating...' : 'Create Estimation'}
         </button>

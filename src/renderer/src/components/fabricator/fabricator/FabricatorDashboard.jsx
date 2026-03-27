@@ -38,22 +38,30 @@ const FabricatorDashboard = ({ fabricator }) => {
     try {
       setLoading(true);
 
-      // Fetch projects for this fabricator
-      const allProjectsResponse = await Service.GetAllProjects();
-      const fabProjects = (allProjectsResponse || []).filter(
-        (p) => p.fabricatorID === fabricator.id
-      );
+      // 1. Get Projects for this fabricator (Prioritize fabricator.project prop if available)
+      let fabProjects = [];
+      if (fabricator.project) {
+        // Handle both Array and Object-with-numeric-keys formats
+        fabProjects = Array.isArray(fabricator.project)
+          ? fabricator.project
+          : Object.values(fabricator.project);
+      } else {
+        const allProjectsResponse = await Service.GetAllProjects();
+        fabProjects = (allProjectsResponse || []).filter(
+          (p) => p.fabricatorID === fabricator.id
+        );
+      }
       setProjects(fabProjects);
 
-      // Fetch RFQs for this fabricator
+      // 2. Fetch RFQs for this fabricator
       const rfqReceived = await Service.RFQRecieved();
-      const fabRfqs = (rfqReceived || []).filter(
+      const fabRfqs = (rfqReceived?.data || rfqReceived || []).filter(
         (r) =>
           r.recipientId === fabricator.id || r.senderId === fabricator.id
       );
       setRfqs(fabRfqs);
 
-      // Calculate Stats
+      // 3. Calculate Stats
       const active = fabProjects.filter(
         (p) => p.status === "ACTIVE"
       ).length;
@@ -126,15 +134,55 @@ const FabricatorDashboard = ({ fabricator }) => {
   const columns = [
     { accessorKey: "serialNo", header: "Serial #" },
     {
+      accessorKey: "projectCode",
+      header: "Project Code",
+      cell: ({ row }) => (
+        <span className="font-mono text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+          {row.original.projectCode || "N/A"}
+        </span>
+      )
+    },
+    {
       accessorKey: "name",
       header: "Project Name",
       cell: ({ row }) => (
-        <div className="max-w-[200px] truncate font-bold text-black uppercase tracking-tight" title={row.original.name}>
+        <div className="max-w-[180px] truncate font-bold text-black uppercase tracking-tight" title={row.original.name}>
           {row.original.name}
         </div>
       ),
     },
+    {
+      accessorKey: "IFAComepletionPercentage",
+      header: "IFA %",
+      cell: ({ row }) => (
+        <div className="flex flex-col gap-1 w-20">
+          <div className="flex justify-between text-[10px] font-black italic">
+            <span>{row.original.IFAComepletionPercentage || 0}%</span>
+          </div>
+          <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden border border-black/5">
+            <div
+              className="h-full bg-green-500 transition-all duration-500"
+              style={{ width: `${Math.min(100, row.original.IFAComepletionPercentage || 0)}%` }}
+            />
+          </div>
+        </div>
+      )
+    },
     { accessorKey: "stage", header: "Stage" },
+    {
+      accessorKey: "dates",
+      header: "Timeline",
+      cell: ({ row }) => (
+        <div className="flex flex-col text-[10px] font-bold text-black/50 uppercase tracking-tighter leading-tight">
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] opacity-40">S:</span> {row.original.startDate ? new Date(row.original.startDate).toLocaleDateString() : "—"}
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-[8px] opacity-40">E:</span> {row.original.endDate ? new Date(row.original.endDate).toLocaleDateString() : "—"}
+          </div>
+        </div>
+      )
+    },
     {
       accessorKey: "status",
       header: "Status",
@@ -341,7 +389,7 @@ const FabricatorDashboard = ({ fabricator }) => {
               <DataTable
                 columns={columns.slice(0, 4)} // Show fewer columns in overview
                 data={projects.slice(0, 5)}
-                detailComponent={({ row }) => <GetProjectById id={row.id} onClose={null} />}
+                detailComponent={({ row, close }) => <GetProjectById id={row.id} onClose={close} />}
               />
             </div>
           </div>
@@ -358,7 +406,7 @@ const FabricatorDashboard = ({ fabricator }) => {
             <DataTable
               columns={columns}
               data={projects}
-              detailComponent={({ row }) => <GetProjectById id={row.id} onClose={null} />}
+              detailComponent={({ row, close }) => <GetProjectById id={row.id} onClose={close} />}
             />
           </div>
         )}

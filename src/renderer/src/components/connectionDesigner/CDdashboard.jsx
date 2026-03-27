@@ -154,27 +154,6 @@ const CDdashboard = () => {
                 transition={{ duration: 0.5 }}
                 className="h-full p-4 sm:p-6 flex flex-col gap-12 sm:gap-8 bg-transparent overflow-y-auto custom-scrollbar relative"
             >
-                {/* Header */}
-
-                {/* <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => window.history.back()}
-                            className="p-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all shadow-xs"
-                        >
-                            <ChevronRight size={20} className="rotate-180 text-gray-600" />
-                        </button>
-                        <h1 className="text-xl font-black text-gray-900 uppercase tracking-[0.2em]">Connection Designer</h1>
-                    </div> */}
-
-                {/* <div className="flex items-center gap-3">
-                        <button className="px-6 py-2.5 bg-green-50 border border-green-200 rounded-xl text-xs font-black text-green-700 uppercase tracking-widest hover:bg-green-100 transition-all shadow-sm">
-                            Connection Designer Home
-                        </button>
-                        <button className="px-6 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-black text-gray-400 uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm">
-                            Add Connection Designer
-                        </button>
-                    </div> */}
-
 
                 {/* SECTION B — EXECUTIVE SNAPSHOT */}
                 <motion.div
@@ -222,7 +201,7 @@ const CDdashboard = () => {
                                 animate={{ scale: 1, y: 0 }}
                                 exit={{ scale: 0.95, y: 20 }}
                                 onClick={(e) => e.stopPropagation()}
-                                className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-6xl h-[90vh] overflow-hidden relative flex flex-col"
+                                className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-9xl h-[90vh] overflow-hidden relative flex flex-col"
                             >
                                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                                     <GetConnectionDesignerByID

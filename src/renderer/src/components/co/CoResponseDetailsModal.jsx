@@ -38,8 +38,8 @@ const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
       <div className="bg-white p-6 w-full max-w-lg rounded-xl relative space-y-4">
-        <button onClick={onClose} className="absolute top-3 right-3">
-          <X size={18} />
+        <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
+          CLOSE
         </button>
 
         <h2 className="text-xl font-semibold text-green-700">

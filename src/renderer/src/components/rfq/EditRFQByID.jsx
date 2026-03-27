@@ -63,7 +63,9 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                         miscDesign: d.miscDesign ?? false,
                         customerDesign: d.customerDesign ?? false,
                         detailingMain: d.detailingMain ?? false,
-                        detailingMisc: d.detailingMisc ?? false
+                        detailingMisc: d.detailingMisc ?? false,
+                        MTOManual: d.MTOManual ?? false,
+                        MTOStickModel: d.MTOStickModel || ""
                     })
                 }
             } catch (error) {
@@ -247,7 +249,7 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                             </div>
 
                             <SectionTitle title="Detailing Scope" />
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <label className="flex items-center gap-3 cursor-pointer select-none group">
                                     <input
                                         type="checkbox"
@@ -268,6 +270,23 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                                         Detailing Misc
                                     </span>
                                 </label>
+                                <label className="flex items-center gap-3 cursor-pointer select-none group">
+                                    <input
+                                        type="checkbox"
+                                        {...register('MTOManual')}
+                                        className="w-4 h-4 rounded border-gray-300 accent-green-500"
+                                    />
+                                    <span className="text-sm font-semibold text-gray-700 group-hover:text-black transition-colors">
+                                        MTO Manual
+                                    </span>
+                                </label>
+                            </div>
+                            <div className="pt-4 border-t border-gray-50">
+                                <Input
+                                    label="MTO Stick Model Details"
+                                    {...register('MTOStickModel')}
+                                    placeholder="Enter details..."
+                                />
                             </div>
                         </div>
 

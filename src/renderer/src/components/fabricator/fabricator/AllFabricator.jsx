@@ -125,10 +125,10 @@ const AllFabricator = () => {
         columns={columns}
         data={filteredFabricators}
         onRowClick={handleRowClick}
-        detailComponent={({ row }) => {
+        detailComponent={({ row, close }) => {
           const fabricatorUniqueId =
             (row).id ?? (row).fabId ?? "";
-          return <GetFabricatorByID id={fabricatorUniqueId} />;
+          return <GetFabricatorByID id={fabricatorUniqueId} onClose={close} />;
         }}
         disablePagination={true}
       />

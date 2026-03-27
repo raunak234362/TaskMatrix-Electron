@@ -50,30 +50,17 @@ const CDNetworkOverview = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-white rounded-3xl shadow-sm border border-gray-100 flex flex-col overflow-hidden"
+        className="bg-white rounded-3xl shadow-sm border border-gray-500 flex flex-col overflow-hidden"
       >
-        <div className="p-6 border-b border-gray-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h3 className="text-lg font-black text-gray-800 uppercase tracking-widest">
-              Connection Designer Directory
-            </h3>
-            <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-tight">
-              Click to view details • Hover to see states
-            </p>
-          </div>
-          <div className="relative w-full sm:w-80">
-            <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-              size={16}
-            />
+        <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <input
               type="text"
-              placeholder="Search by name, email, contact..."
+              placeholder="Search connection designers by name, email, contact..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-12 pr-4 py-3 bg-gray-50/50 border border-gray-100 rounded-xl text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none w-full transition-all"
+              className="pl-12 pr-4 py-3 bg-gray-50/50 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none w-full transition-all"
             />
-          </div>
+         
         </div>
 
         <div className="flex-1 p-4 space-y-3">
@@ -111,13 +98,13 @@ const CDNetworkOverview = ({
                     </h4>
                     <div className="flex flex-wrap items-center gap-4 mt-1">
                       {designer.email && (
-                        <span className="flex items-center gap-2 text-[11px] font-bold text-gray-400 uppercase tracking-tight">
-                          <Mail size={12} className="text-gray-300" /> {designer.email}
+                        <span className="flex items-center gap-2 text-[11px] font-bold text-black uppercase tracking-wide">
+                          <Mail size={12} className="text-gray-500" /> {designer.email}
                         </span>
                       )}
                       {designer.contactInfo && (
-                        <span className="flex items-center gap-2 text-[11px] font-bold text-gray-400 uppercase tracking-tight">
-                          <Phone size={12} className="text-gray-300" /> {designer.contactInfo}
+                        <span className="flex items-center gap-2 text-[11px] font-bold text-black uppercase tracking-wide">
+                          <Phone size={12} className="text-gray-500" /> {designer.contactInfo}
                         </span>
                       )}
                     </div>
@@ -143,7 +130,7 @@ const CDNetworkOverview = ({
                     >
                       <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-50">
                         <MapPin size={14} className="text-green-500" />
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        <span className="text-sm font-bold text-black uppercase tracking-widest">
                           Coverage Area
                         </span>
                       </div>
