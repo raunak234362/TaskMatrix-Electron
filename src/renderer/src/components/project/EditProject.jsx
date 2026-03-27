@@ -13,6 +13,7 @@ import {
   X,
   Save,
   Users,
+  UserPlus,
 } from "lucide-react";
 
 import Input from "../fields/input";
@@ -37,6 +38,8 @@ const EditProject = ({
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState([]);
   const [isFetchingClients, setIsFetchingClients] = useState(false);
+  const [cdEngineers, setCdEngineers] = useState([]);
+  const [isFetchingEngineers, setIsFetchingEngineers] = useState(false);
 
   const fabricators = useSelector(
     (state) => state.fabricatorInfo?.fabricatorData || []
@@ -58,6 +61,7 @@ const EditProject = ({
         detailingMisc: false,
         clientProjectManagers: [],
         connectionDesignerID: "",
+        pocOfConnectionDesigner: "",
       },
     });
 
@@ -114,6 +118,7 @@ const EditProject = ({
           setValue("detailingMain", project.detailingMain);
           setValue("detailingMisc", project.detailingMisc);
           setValue("connectionDesignerID", project.connectionDesignerID || "");
+          setValue("pocOfConnectionDesigner", project.pocOfConnectionDesigner?.id || project.pocOfConnectionDesigner || "");
 
           // Handle clientProjectManagers
           if (project.clientProjectManagers) {
@@ -134,6 +139,7 @@ const EditProject = ({
   }, [projectId, setValue]);
 
   const watchedFabricatorId = watch("fabricatorID");
+  const watchedCdId = watch("connectionDesignerID");
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -154,6 +160,26 @@ const EditProject = ({
     };
     fetchClients();
   }, [watchedFabricatorId]);
+
+  useEffect(() => {
+    const fetchEngineers = async () => {
+      if (watchedCdId) {
+        setIsFetchingEngineers(true);
+        try {
+          const res = await Service.FetchConnectionDesignerByID(watchedCdId);
+          setCdEngineers(Array.isArray(res?.data?.CDEngineers) ? res.data.CDEngineers : []);
+        } catch (error) {
+          console.error("Failed to fetch engineers", error);
+          setCdEngineers([]);
+        } finally {
+          setIsFetchingEngineers(false);
+        }
+      } else {
+        setCdEngineers([]);
+      }
+    };
+    fetchEngineers();
+  }, [watchedCdId]);
 
   const options = {
     fabricators: (Array.isArray(fabricators) ? fabricators : []).map(
@@ -196,6 +222,10 @@ const EditProject = ({
         label: `${c.firstName} ${c.lastName} (${c.role === 'CLIENT_ADMIN' ? 'Admin' : 'Client'})`,
         value: c.id,
       })),
+    pocOfConnectionDesigner: cdEngineers.map((e) => ({
+      label: `${e.firstName} ${e.lastName}`,
+      value: e.id || e._id,
+    })),
   };
 
   const onSubmit = async (data) => {
@@ -396,6 +426,28 @@ const EditProject = ({
                       placeholder="Select Designer"
                       isSearchable
                       isClearable
+                    />
+                  )}
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
+                  <UserPlus className="w-4 h-4 text-cyan-600" /> CD POC
+                </label>
+                <Controller
+                  name="pocOfConnectionDesigner"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      options={options.pocOfConnectionDesigner}
+                      value={options.pocOfConnectionDesigner.find(
+                        (o) => o.value === field.value
+                      )}
+                      onChange={(o) => field.onChange(o?.value || "")}
+                      placeholder={isFetchingEngineers ? "Loading..." : "Select POC"}
+                      isSearchable
+                      isClearable
+                      isDisabled={!watchedCdId || isFetchingEngineers}
                     />
                   )}
                 />

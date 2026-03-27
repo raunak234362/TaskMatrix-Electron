@@ -10,16 +10,18 @@ import UpdateCompletionPer from "./mileStone/UpdateCompletionPer";
 
 const ProjectMilestoneMetrics = ({
   projectId,
+  milestones: milestonesProp,
 }) => {
   const dispatch = useDispatch();
+  const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedMilestoneId, setSelectedMilestoneId] = useState(null);
-console.log(projectId,"-==============-");
+  console.log(projectId, "-==============-");
 
   const milestonesByProject = useSelector(
     (state) => state.milestoneInfo?.milestonesByProject || {},
   );
-  const milestones = milestonesByProject[projectId] || [];
+  const milestones = milestonesProp || milestonesByProject[projectId] || [];
 
   useEffect(() => {
     const fetchMileStone = async () => {
@@ -96,8 +98,7 @@ console.log(projectId,"-==============-");
       };
     });
   }, [milestones]);
-  console.log(ms,"===================");
-  
+
 
   return (
     <div className="space-y-8 p-1">
@@ -203,13 +204,28 @@ console.log(projectId,"-==============-");
                   ></div>
                 </div>
                 <div className="border-t border-gray-100 pt-2 mt-2">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-500 uppercase text-xs font-semibold">
-                      Approval Date
-                    </span>
-                    <span className="font-bold text-gray-700">
-                      {formatDate(ms.approvalDate)}
-                    </span>
+                  <div className="border-t border-gray-100 pt-2 mt-2 space-y-2">
+                    {userRole !== "connection_designer_engineer" && userRole !== "connection_designer_admin" && (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-500 uppercase text-xs font-semibold">
+                          Approval Date----
+                        </span>
+                        <span className="font-bold text-gray-700">
+                          {formatDate(ms.approvalDate)}
+                        </span>
+                      </div>
+                    )}
+
+                    {userRole !== "client" && userRole !== "client_admin" && (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-500 uppercase text-xs font-semibold">
+                          CD Approval Date
+                        </span>
+                        <span className="font-bold text-gray-700">
+                          {formatDate(ms.CDApprovalDate)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
