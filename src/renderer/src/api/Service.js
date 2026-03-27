@@ -572,6 +572,36 @@ class Service {
     }
   }
 
+  // Get Connection Designer Quota by ID
+  static async GetConnectionDesignerQuotaByID(id) {
+    try {
+      const response = await api.get(`connectionDesignerQuota/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+// Connection Designer Quota Approve By ID
+static async ConnectionDesignerQuotaApproveByID(id) {
+  try {
+    const response = await api.put(`connectionDesignerQuota/approve/${id}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    console.log(response)
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
+}
+
   // Add Estimation
   static async AddEstimation(formData) {
     try {

@@ -45,6 +45,31 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
     initialData?.description || "",
   );
   const [files, setFiles] = useState([]);
+  const [cdEngineers, setCdEngineers] = useState([]);
+  const [fetchingEngineers, setFetchingEngineers] = useState(false);
+  const [isCDMode, setIsCDMode] = useState(false);
+
+  const connectionDesignerID = project?.connectionDesignerID;
+
+  useEffect(() => {
+    const fetchEngineers = async () => {
+      if (connectionDesignerID) {
+        try {
+          setFetchingEngineers(true);
+          const res = await Service.FetchConnectionDesignerByID(connectionDesignerID);
+          setCdEngineers(res?.data?.CDEngineers || []);
+        } catch (err) {
+          console.error("Failed to fetch engineers", err);
+          setCdEngineers([]);
+        } finally {
+          setFetchingEngineers(false);
+        }
+      } else {
+        setCdEngineers([]);
+      }
+    };
+    fetchEngineers();
+  }, [connectionDesignerID]);
 
   const selectedFabricator = fabricators?.find(
     (f) => String(f.id) === String(fabricatorId),
@@ -56,6 +81,12 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
       value: p.id,
     })) ?? [];
 
+  const cdEngineerOptions =
+    cdEngineers?.map((e) => ({
+      label: `${e.firstName} ${e.lastName} (CD Engineer)`,
+      value: e.id,
+    })) ?? [];
+
   const recipientOptions =
     staff
       ?.filter((s) => ["ADMIN", "SALES"].includes(s.role))
@@ -63,6 +94,8 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
         label: `${s.firstName} ${s.lastName}`,
         value: s.id,
       })) ?? [];
+
+  const activeRecipientOptions = isCDMode ? cdEngineerOptions : pocOptions;
 
   const mileStoneOptions =
     milestones?.map((m) => ({
@@ -119,26 +152,69 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
 
   return (
     <div className="w-full mx-auto bg-white p-4 rounded-xl shadow">
+      {/* Recipient Category Toggle */}
+      <div className="flex bg-gray-100/50 p-1 rounded-lg gap-1 mb-4">
+        <button
+          type="button"
+          onClick={() => {
+            setIsCDMode(false);
+            setValue("multipleRecipients", []); // Clear selection when switching modes
+          }}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+            !isCDMode
+              ? "bg-white text-black shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          CLIENT
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setIsCDMode(true);
+            setValue("multipleRecipients", []); // Clear selection when switching modes
+          }}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+            isCDMode
+              ? "bg-white text-black shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          CONNECTION DESIGNER
+        </button>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         
-<label className="text-sm font-medium text-gray-700">
-          Select Recipient
-        </label>
-        {/* Recipient (WBT Team) */}
-        <Controller
-          name="multipleRecipients"
-          control={control}
-          rules={{ required: "Recipient required" }}
-          render={({ field }) => (
-            <Select
-              isMulti
-              placeholder="Recipient *"
-              options={pocOptions}
-              value={pocOptions.filter((o) => (field.value || []).includes(o.value))}
-              onChange={(options) => field.onChange(options ? options.map(o => o.value) : [])}
-            />
-          )}
-        />
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-gray-700">
+            Select {isCDMode ? "CD Engineer" : "Client"} Recipients *
+          </label>
+          <Controller
+            name="multipleRecipients"
+            control={control}
+            rules={{ required: "Recipient required" }}
+            render={({ field }) => (
+              <Select
+                isMulti
+                placeholder={
+                  fetchingEngineers 
+                    ? "Fetching engineers..." 
+                    : `Select ${isCDMode ? "engineers" : "POCs"}...`
+                }
+                options={activeRecipientOptions}
+                isLoading={fetchingEngineers}
+                value={
+                  activeRecipientOptions.filter((o) => (field.value || []).includes(o.value))
+                }
+                onChange={(options) =>
+                  field.onChange(options ? options.map((o) => o.value) : [])
+                }
+                className="text-sm"
+              />
+            )}
+          />
+        </div>
 <label className="text-sm font-medium text-gray-700">
           Select Milestone
         </label>

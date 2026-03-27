@@ -62,6 +62,9 @@ const AddMileStone = ({
         approvalDate: data.approvalDate
           ? new Date(data.approvalDate).toISOString()
           : undefined,
+        CDApprovalDate: data.CDApprovalDate
+          ? new Date(data.CDApprovalDate).toISOString()
+          : undefined,
       };
       await Service.AddProjectMilestone(payload);
       toast.success("Milestone added successfully!");
@@ -154,6 +157,11 @@ const AddMileStone = ({
               label="Approval Date/Reapproved Date/Fabrication Date"
               type="date"
               {...register("approvalDate")}
+            />
+            <Input
+              label="CD Approval Date"
+              type="date"
+              {...register("CDApprovalDate")}
             />
           </div>
 

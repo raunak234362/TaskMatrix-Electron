@@ -5,6 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import Select from "react-select";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import Input from "../fields/input";
 
 
 
@@ -14,7 +15,7 @@ const QuotationRaise = ({
   onClose,
   onSuccess,
 }) => {
-  const { handleSubmit, control, watch } = useForm();
+  const { register, handleSubmit, control, watch } = useForm();
 
 
 
@@ -97,6 +98,9 @@ const QuotationRaise = ({
           (cd) => cd.value
         ) || [],
         connectionEngineerIds: data.EngineerIds?.map((eng) => eng.value) || [],
+        CDDescription: data.CDDescription || "",
+        CDDueDate: data.CDDueDate || null,
+        CDTargetDate: data.CDTargetDate || null,
       };
 
       console.log("📦 Final Payload:", payload);
@@ -270,6 +274,27 @@ const QuotationRaise = ({
               />
             </div>
           )}
+
+          {/* Additional CD Fields */}
+          <div className="space-y-4 pt-4 border-t border-gray-100">
+            <div>
+              <Input
+                label="CD Description"
+                type="textarea"
+                {...register("CDDescription")}
+                placeholder="Enter requirements or notes for Connection Designers..."
+                className="bg-gray-50/50"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="RFQ Due Date"
+                type="date"
+                {...register("RFQDueDate")}
+                className="bg-gray-50/50"
+              />
+            </div>
+          </div>
 
           {/* Submit */}
           <div className="flex justify-end pt-4 border-t border-gray-200">

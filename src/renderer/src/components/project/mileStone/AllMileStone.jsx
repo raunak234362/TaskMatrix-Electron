@@ -58,6 +58,11 @@ const AllMileStone = ({ project, onUpdate }) => {
       header: "Approval Date",
       cell: ({ row }) => formatDate(row.original.approvalDate),
     },
+    {
+      accessorKey: "CDApprovalDate",
+      header: "CD Approval Date",
+      cell: ({ row }) => formatDate(row.original.CDApprovalDate),
+    },
     { accessorKey: "status", header: "Status" },
     { accessorKey: "stage", header: "Stage" },
   ];
