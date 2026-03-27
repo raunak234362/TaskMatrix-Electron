@@ -54,9 +54,9 @@ const SubmittalResponseDetailsModal = ({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-700 hover:text-red-600"
+          className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
         >
-          <X size={18} />
+          CLOSE
         </button>
 
         {/* Title */}
@@ -64,22 +64,22 @@ const SubmittalResponseDetailsModal = ({
 
         {/* Parent Message */}
         <div className="flex items-center gap-2 text-xs text-gray-700">
-        <p className="text-md ">Reason:</p>  
-        <div
-          className="px-4 py-1 rounded-md border prose prose-sm max-w-none"
-          dangerouslySetInnerHTML={{
-            __html: response.reason,
-          }}
-        />
+          <p className="text-md ">Reason:</p>
+          <div
+            className="px-4 py-1 rounded-md border prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{
+              __html: response.reason,
+            }}
+          />
         </div>
-          <div className="flex items-center gap-2 text-xs text-gray-700">
-        <p className="text-md">Description:</p>  
-        <div
-          className="px-4 py-1 rounded-md border prose prose-sm max-w-none"
-          dangerouslySetInnerHTML={{
-            __html: response.description,
-          }}
-        />
+        <div className="flex items-center gap-2 text-xs text-gray-700">
+          <p className="text-md">Description:</p>
+          <div
+            className="px-4 py-1 rounded-md border prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{
+              __html: response.description,
+            }}
+          />
         </div>
         <RenderFiles
           files={response.files}

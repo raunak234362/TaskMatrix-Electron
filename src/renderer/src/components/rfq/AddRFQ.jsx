@@ -4,29 +4,20 @@ import { useForm, Controller } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import Input from "../fields/input";
-import Button from "../fields/Button";
 import MultipleFileUpload from "../fields/MultipleFileUpload";
 import Service from "../../api/Service";
-
-
-
-import SectionTitle from "../ui/SectionTitle";
+import { Loader2, Layers, Globe, Percent, Calendar } from "lucide-react";
 import Select from "../fields/Select";
 import Toggle from "../fields/Toggle";
 import RichTextEditor from "../fields/RichTextEditor";
 import { addRFQ } from "../../store/rfqSlice";
-
+import { motion } from "framer-motion";
 
 const AddRFQ = ({ onSuccess }) => {
   const dispatch = useDispatch();
   const fabricators = useSelector(
     (state) => state.fabricatorInfo?.fabricatorData,
   ) || [];
-
-  const staffData = useSelector((state) => state.userInfo?.staffData);
-
-  // const userType =
-  typeof window !== "undefined" ? sessionStorage.getItem("userType") : null;
 
   const {
     register,
@@ -43,6 +34,7 @@ const AddRFQ = ({ onSuccess }) => {
   });
 
   const selectedFabricatorId = watch("fabricatorId");
+  const mtoStickModelEnabled = watch("mtoStickModelEnabled");
 
   const [description, setDescription] = useState("");
 
@@ -58,27 +50,11 @@ const AddRFQ = ({ onSuccess }) => {
     loadStaff();
   }, []);
 
-  // --- WBT RECIPIENT OPTIONS ---
-  const recipientOption =
-    staffData
-      ?.filter(
-        (u) => u.role === "SALES_MANAGER" || u.role === "ADMIN",
-      )
-      .map(
-        (u) => ({
-          label: `${u.firstName} ${u.middleName ?? ""} ${u.lastName}`,
-          value: u.id,
-        }),
-      ) ?? [];
-  // useEffect(() => {
-  //   if (tools !== "OTHER") setValue("otherTool", "");
-  // }, [tools, setValue]);
-
   // --- FABRICATOR OPTIONS ---
   const fabOptions =
     fabricators?.map((fab) => ({
       label: fab.fabName,
-      value: fab.id,
+      value: String(fab.id),
     })) ?? [];
 
   const selectedFabricator = fabricators?.find(
@@ -89,15 +65,12 @@ const AddRFQ = ({ onSuccess }) => {
     selectedFabricator?.pointOfContact?.map((client) => ({
       label: `${client.firstName} ${client.middleName ?? ""} ${client.lastName
         }`,
-      value: client.id,
+      value: String(client.id),
     })) ?? [];
-
-  // selector for the user
 
   const userDetail = useSelector((state) => state.userInfo?.userDetail);
   const userRole = userDetail?.role;
-  const fabricatorId = userDetail?.FabricatorPointOfContacts[0]?.id;
-  console.log(userDetail);
+  const fabricatorId = userDetail?.FabricatorPointOfContacts?.[0]?.id;
 
   // --- SUBMIT ---
   const onSubmit = async (data) => {
@@ -108,6 +81,7 @@ const AddRFQ = ({ onSuccess }) => {
         subject: data.subject || "",
         description,
         tools: data.tools,
+        location: data.location,
         bidPrice: data.bidPrice,
         estimationDate: data.estimationDate
           ? new Date(data.estimationDate).toISOString()
@@ -119,13 +93,15 @@ const AddRFQ = ({ onSuccess }) => {
         customerDesign: data.customerDesign,
         detailingMain: data.detailingMain,
         detailingMisc: data.detailingMisc,
+        MTOManual: !!data.MTOManual,
+        MTOStickModel: data.mtoStickModelEnabled ? (data.MTOStickModel || "") : "",
 
         files: data.files ?? [],
       };
 
       let payload;
 
-      if (userRole === "CLIENT") {
+      if (userRole === "CLIENT" || userRole === "CLIENT_ADMIN") {
         payload = {
           ...basePayload,
           senderId: userDetail?.id,
@@ -143,12 +119,14 @@ const AddRFQ = ({ onSuccess }) => {
         };
       }
 
-      // Convert to FormData
       const formData = new FormData();
       for (const [key, value] of Object.entries(payload)) {
+        if (value === undefined || value === null) continue;
         if (key === "files" && Array.isArray(value)) {
           value.forEach((file) => formData.append("files", file));
-        } else if (value !== undefined && value !== null) {
+        } else if (typeof value === "boolean") {
+          formData.append(key, value ? "true" : "false");
+        } else {
           formData.append(key, value);
         }
       }
@@ -157,7 +135,6 @@ const AddRFQ = ({ onSuccess }) => {
       const createdRFQ = response.data || response.rfq || response;
 
       if (createdRFQ) {
-        // Enrich with form data for immediate display in the table
         const selectedFab = fabricators?.find(
           (f) => String(f.id) === String(data.fabricatorId),
         );
@@ -196,223 +173,300 @@ const AddRFQ = ({ onSuccess }) => {
     fabOptions.find((opt) => opt.value === selectedFabricatorId) || null;
 
   return (
-    <div className="w-full mx-auto bg-white/80 backdrop-blur-lg rounded-xl shadow-lg p-3 md:p-5 ">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-4 md:space-y-8 bg-zinc-100 rounded-xl p-4"
+    <div className="w-full mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="overflow-hidden rounded-2xl md:rounded-[2.5rem] bg-white transition-all duration-500"
       >
-        <SectionTitle title="Project Information" />
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="p-4 sm:p-5 md:p-6 space-y-4 md:space-y-6"
+        >
+          {/* Project Identity Section */}
+          <section className="space-y-3 md:space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              {/* FABRICATOR (HIDDEN FOR CLIENTS) */}
+              {userRole !== "CLIENT" && userRole !== "CLIENT_ADMIN" && (
+                <>
+                  <div className="space-y-2">
+                    <label className="block text-xs text-black font-black uppercase tracking-widest">
+                      Fabricator Partner <span className="text-rose-500">*</span>
+                    </label>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 ">
-          {/* FABRICATOR (HIDDEN FOR CLIENTS) */}
-          {(userRole !== "CLIENT" || userRole !== "CLIENT_ADMIN") && (
-            <>
-              <div>
-                <label className="font-semibold text-gray-700 mb-1 block">
-                  Fabricator *
+                    <Controller
+                      name="fabricatorId"
+                      control={control}
+                      rules={{ required: "Fabricator is required" }}
+                      render={({ field }) => {
+                        const normalizedValue =
+                          field.value ??
+                          selectedFabricatorOption?.value ??
+                          undefined;
+                        const stringValue =
+                          typeof normalizedValue === "number"
+                            ? String(normalizedValue)
+                            : normalizedValue;
+                        return (
+                          <Select
+                            name={field.name}
+                            options={fabOptions}
+                            value={stringValue}
+                            className="border-black rounded-2xl h-14"
+                            onChange={(_, value) => {
+                              const sanitized = value ?? "";
+                              field.onChange(sanitized);
+                              setValue("fabricatorId", sanitized);
+                            }}
+                          />
+                        );
+                      }}
+                    />
+                    {errors.fabricatorId && (
+                      <p className="text-[10px] text-rose-600 uppercase tracking-widest">
+                        {errors.fabricatorId.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-xs text-black font-black uppercase tracking-widest">
+                      Fabricator Contact <span className="text-rose-500">*</span>
+                    </label>
+                    <Controller
+                      name="senderId"
+                      control={control}
+                      rules={{ required: "Fabricator contact is required" }}
+                      render={({ field }) => (
+                        <Select
+                          name={field.name}
+                          options={clientOptions}
+                          className="border-black rounded-2xl h-14"
+                          value={field.value ? String(field.value) : undefined}
+                          onChange={(_, value) => field.onChange(value ?? "")}
+                        />
+                      )}
+                    />
+
+                    {errors.senderId && (
+                      <p className="text-[10px] text-rose-600 uppercase tracking-widest">
+                        {errors.senderId.message}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              <div className="md:col-span-2 space-y-2">
+                <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+                  <Layers size={14} className="text-black/40" />
+                  Project Name <span className="text-rose-500">*</span>
                 </label>
+                <Input
+                  {...register("projectName", {
+                    required: "Project name is required",
+                  })}
+                  placeholder="Enter project name"
+                  className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black placeholder:text-black/20 font-bold"
+                />
+                {errors.projectName && (
+                  <p className="text-[10px] text-rose-600 uppercase tracking-widest">
+                    {errors.projectName.message}
+                  </p>
+                )}
+              </div>
 
-                <Controller
-                  name="fabricatorId"
-                  control={control}
-                  disabled={userRole === "CLIENT"}
-                  rules={{ required: "Fabricator is required" }}
-                  render={({ field }) => {
-                    const normalizedValue =
-                      field.value ??
-                      selectedFabricatorOption?.value ??
-                      undefined;
-                    const stringValue =
-                      typeof normalizedValue === "number"
-                        ? String(normalizedValue)
-                        : normalizedValue;
-                    return (
+              <div className="space-y-2">
+                <label className="block text-sm text-black font-black uppercase tracking-widest">
+                  Project Number
+                </label>
+                <Input
+                  {...register("projectNumber")}
+                  placeholder="Optional"
+                  className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black placeholder:text-black/20"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+                  <Globe size={14} className="text-black/40" />
+                  Location
+                </label>
+                <Input
+                  {...register("location")}
+                  placeholder="Enter location"
+                  className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black placeholder:text-black/20"
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Technical Specs Section */}
+          <section className="space-y-3 md:space-y-4">
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <label className="block text-sm text-black font-black uppercase tracking-widest">
+                  Subject
+                </label>
+                <Input
+                  {...register("subject")}
+                  placeholder="Enter subject"
+                  className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm text-black font-black uppercase tracking-widest">
+                  Project Scope & Detailed Description
+                </label>
+                <div className="border border-black rounded-2xl overflow-hidden min-h-[200px] bg-white">
+                  <RichTextEditor
+                    value={description}
+                    onChange={setDescription}
+                    placeholder="Describe the project scope..."
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <div className="space-y-2">
+                  <label className="block text-sm text-black font-black uppercase tracking-widest">
+                    Preferred Modeling Tools <span className="text-rose-500">*</span>
+                  </label>
+                  <Controller
+                    name="tools"
+                    control={control}
+                    rules={{ required: "Tools selection is required" }}
+                    render={({ field }) => (
                       <Select
                         name={field.name}
-                        options={fabOptions}
-                        value={stringValue}
-                        onChange={(_, value) => {
-                          const sanitized = value ?? "";
-                          field.onChange(sanitized);
-                          setValue("fabricatorId", sanitized);
-                        }}
+                        options={[
+                          { label: "TEKLA", value: "TEKLA" },
+                          { label: "SDS2", value: "SDS2" },
+                          { label: "BOTH", value: "BOTH" },
+                          { label: "NO PREFERENCE", value: "NO_PREFERENCE" },
+                          { label: "OTHER", value: "OTHER" },
+                        ]}
+                        className="border-black rounded-2xl h-14"
+                        value={field.value}
+                        onChange={(_, value) => field.onChange(value ?? "")}
                       />
-                    );
-                  }}
-                />
-                {errors.fabricatorId && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.fabricatorId.message}
-                  </p>
-                )}
+                    )}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+                    <Percent size={14} className="text-black/40" />
+                    Bid Price ({selectedFabricator?.currencyType || "USD"})
+                  </label>
+                  <Input
+                    type="number"
+                    {...register("bidPrice")}
+                    placeholder="0.00"
+                    className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+                    <Calendar size={14} className="text-black/40" />
+                    Response Due Date <span className="text-rose-500">*</span>
+                  </label>
+                  <Input
+                    type="date"
+                    {...register("estimationDate", {
+                      required: "Due date is required",
+                    })}
+                    className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black"
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Service Matrix Section */}
+          <section className="space-y-3 md:space-y-4 pt-4 md:pt-5 border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <div className="space-y-3 border border-black p-4 md:p-6 rounded-2xl">
+                <h3 className="text-sm text-black font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                  Connection Design Scope
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+                  <Toggle label="Main Design" {...register("connectionDesign")} />
+                  <Toggle label="Misc Design" {...register("miscDesign")} />
+                  <Toggle label="Customer Design" {...register("customerDesign")} />
+                </div>
               </div>
 
-              <div>
-                <label className="font-semibold text-gray-700 mb-1 block">
-                  Fabricator Contact *
-                </label>
-                <Controller
-                  name="senderId"
-                  control={control}
-                  disabled={userRole === "CLIENT"}
-                  rules={{ required: "Fabricator contact is required" }}
-                  render={({ field }) => (
-                    <Select
-                      name={field.name}
-                      options={clientOptions}
-                      value={field.value ? String(field.value) : undefined}
-                      onChange={(_, value) => field.onChange(value ?? "")}
+              <div className="space-y-3 border border-black p-4 md:p-6 rounded-2xl">
+                <h3 className="text-sm text-black font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                  Detailing Scope
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+                  <Toggle label="Main Steel" {...register("detailingMain")} />
+                  <Toggle label="Misc Steel" {...register("detailingMisc")} />
+                  <Toggle label="MTO - Manual" {...register("MTOManual")} />
+                  <Toggle
+                    label="MTO - Stick Model"
+                    {...register("mtoStickModelEnabled")}
+                  />
+                </div>
+                {mtoStickModelEnabled && (
+                  <div className="mt-3 space-y-1">
+                    <label className="block text-xs font-black text-black uppercase tracking-widest">
+                      MTO Stick Model Details
+                    </label>
+                    <input
+                      {...register("MTOStickModel")}
+                      placeholder="Enter MTO Stick Model details..."
+                      className="w-full px-4 py-2.5 border border-black rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#6bbd45]/40 focus:border-[#6bbd45] transition-all bg-white"
                     />
-                  )}
-                />
-
-                {errors.senderId && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.senderId.message}
-                  </p>
+                  </div>
                 )}
               </div>
-            </>
-          )}
+            </div>
+          </section>
 
-          {/* CONTACT */}
-          {/* <div className="md:col-span-2">
-            <label className="font-semibold text-gray-700 mb-1 block">
-              WBT Point of Contact *
-            </label>
-
-            <Controller
-              name="recipientId"
-              control={control}
-              rules={{ required: "WBT contact is required" }}
-              render={({ field }) => (
-                <Select
-                  name={field.name}
-                  options={recipientOption}
-                  value={field.value ? String(field.value) : undefined}
-                  onChange={(_, value) => field.onChange(value ?? "")}
-                />
-              )}
-            />
-
-            {errors.recipientId && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.recipientId.message}
-              </p>
-            )}
-          </div> */}
-
-          {/* PROJECT NAME */}
-          <div className="md:col-span-2">
-            <Input
-              label="Project Name *"
-              {...register("projectName", {
-                required: "Project name is required",
-              })}
-              placeholder="Enter project name"
-            />
-          </div>
-
-          <Input
-            label="Project Number"
-            {...register("projectNumber")}
-            placeholder="Optional"
-          />
-        </div>
-
-        {/* DETAILS */}
-        <SectionTitle title="Details" />
-
-        <Input label="Subject" {...register("subject")} />
-
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-gray-700">
-            Description
-          </label>
-          <RichTextEditor
-            value={description}
-            onChange={setDescription}
-            placeholder="Enter description..."
-          />
-        </div>
-
-        {/* TOOLS */}
-        <div>
-          <label className="font-semibold text-gray-700 mb-1 block">
-            Tools *
-          </label>
-
-          <Controller
-            name="tools"
-            control={control}
-            rules={{ required: "Tools selection is required" }}
-            render={({ field }) => (
-              <Select
-                name={field.name}
-                options={[
-                  "TEKLA",
-                  "SDS2",
-                  "BOTH",
-                  "NO_PREFERENCE",
-                  "OTHER",
-                ].map((t) => ({ label: t, value: t }))}
-                value={field.value}
-                onChange={(_, value) => field.onChange(value ?? "")}
+          {/* Assets Section */}
+          <section className="space-y-3 md:space-y-4 pt-4 md:pt-5">
+            <h3 className="text-sm text-black font-black uppercase tracking-[0.2em] flex items-center gap-2">
+              Project Attachments
+            </h3>
+            <div className="bg-white p-3 sm:p-4 md:p-5 rounded-2xl md:rounded-3xl border border-black shadow-sm">
+              <Controller
+                name="files"
+                control={control}
+                render={({ field }) => (
+                  <MultipleFileUpload
+                    onFilesChange={(files) => {
+                      field.onChange(files);
+                    }}
+                  />
+                )}
               />
-            )}
-          />
-        </div>
+            </div>
+          </section>
 
-        <Input
-          label={`Bid Price (${selectedFabricator?.currencyType || "USD"})`}
-          type="number"
-          {...register("bidPrice")}
-        />
-
-        <Input
-          label="Due Date *"
-          type="date"
-          {...register("estimationDate", { required: "Due date is required" })}
-        />
-
-        {/* SCOPES */}
-        <SectionTitle title="Connection Design Scope" />
-
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <Toggle label="Main Design" {...register("connectionDesign")} />
-          <Toggle label="Misc Design" {...register("miscDesign")} />
-          <Toggle label="Customer Design" {...register("customerDesign")} />
-        </div>
-
-        <SectionTitle title="Detailing Scope" />
-
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <Toggle label="Main Steel" {...register("detailingMain")} />
-          <Toggle label="Misc Steel" {...register("detailingMisc")} />
-        </div>
-
-        {/* FILES */}
-        <SectionTitle title="Attach Files" />
-
-        <Controller
-          name="files"
-          control={control}
-          render={({ field }) => (
-            <MultipleFileUpload
-              // When files change, update RHF's state
-              onFilesChange={(files) => {
-                field.onChange(files);
-              }}
-            />
-          )}
-        />
-
-        <div className="flex justify-center w-full mt-6">
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? "Creating..." : "Create RFQ"}
-          </Button>
-        </div>
-      </form>
+          {/* Action Footer */}
+          <div className="pt-5 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-black/10">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full md:w-auto px-12 py-5 bg-green-200 text-black border border-black font-black text-xs uppercase tracking-[0.2em] rounded-2xl hover:bg-green-300 transition-all shadow-md active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Synchronizing RFQ Data...
+                </>
+              ) : (
+                "Initiate rfq"
+              )}
+            </button>
+          </div>
+        </form>
+      </motion.div>
     </div>
   );
 };

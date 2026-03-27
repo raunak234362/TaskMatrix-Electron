@@ -2,8 +2,10 @@
 import { useEffect, useState } from "react";
 import Service from "../../api/Service";
 
-import { Loader2, AlertCircle, Settings } from "lucide-react";
+import { Loader2, AlertCircle, Settings, Paperclip, User, Clock, MessageSquare, Send } from "lucide-react";
 import ResponseModal from "./ResponseModal";
+import RichTextEditor from "../fields/RichTextEditor";
+import MultipleFileUpload from "../fields/MultipleFileUpload";
 import DataTable from "../ui/table";
 
 import ResponseDetailsModal from "./ResponseDetailsModal";
@@ -41,6 +43,10 @@ const GetRFQByID = ({ id, onClose }) => {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
   const [activeTab, setActiveTab] = useState("responses");
+  const [followUpDescription, setFollowUpDescription] = useState("");
+  const [followUpFiles, setFollowUpFiles] = useState([]);
+  const [isSubmittingFollowUp, setIsSubmittingFollowUp] = useState(false);
+  const [showFollowUpForm, setShowFollowUpForm] = useState(false);
 
   const dispatch = useDispatch();
   const fetchRfq = async () => {
@@ -125,6 +131,36 @@ const GetRFQByID = ({ id, onClose }) => {
       toast.error("Failed to update RFQ status");
     } finally {
       setIsUpdatingStatus(false);
+    }
+  };
+  const handleFollowUpSubmit = async (e) => {
+    e.preventDefault();
+    if (!followUpDescription.trim()) {
+      toast.error("Please enter a message");
+      return;
+    }
+
+    try {
+      setIsSubmittingFollowUp(true);
+      const formData = new FormData();
+      formData.append("description", followUpDescription);
+      if (followUpFiles.length > 0) {
+        followUpFiles.forEach((file) => {
+          formData.append("files", file);
+        });
+      }
+
+      await Service.addRFQFollowups(formData, id);
+      toast.success("Follow-up added successfully");
+      setFollowUpDescription("");
+      setFollowUpFiles([]);
+      setShowFollowUpForm(false);
+      fetchRfq(); // Refresh data
+    } catch (err) {
+      console.error("Follow-up submission failed:", err);
+      toast.error("Failed to add follow-up");
+    } finally {
+      setIsSubmittingFollowUp(false);
     }
   };
 
@@ -271,43 +307,42 @@ const GetRFQByID = ({ id, onClose }) => {
     <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[95vw] mx-auto flex flex-col h-[95vh]">
         {/* Header */}
-        <div className="flex-none p-4 sm:p-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-          <div className="flex gap-5 items-center justify-center">
-            <h3 className="text-xl sm:text-2xl font-bold text-black uppercase tracking-tight break-words overflow-hidden max-w-full">
+        <div className="flex-none p-4 sm:p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-5">
+            <h3 className="text-lg sm:text-2xl font-bold text-black uppercase tracking-tight break-words overflow-hidden max-w-[280px] sm:max-w-xl">
               {rfq?.projectName}
             </h3>
             <span
-              className={`px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-widest border border-black ${rfq?.status === "RECEIVED"
+              className={`px-3 py-1 rounded-full text-[9px] sm:text-[11px] font-bold uppercase tracking-widest border border-black shrink-0 ${rfq?.status === "RECEIVED"
                 ? "bg-orange-100 text-black"
                 : "bg-green-100 text-black"
                 }`}
             >
               {rfq?.status}
             </span>
-
           </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             {/* EDIT RFQ */}
             {userRole !== "CLIENT" && (
               <>
                 <button
                   onClick={() => setShowEditModal(true)}
-                  className="px-6 py-2 bg-gray-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-xs shadow-sm hover:shadow-md active:scale-95"
+                  className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-gray-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-[10px] sm:text-xs shadow-sm hover:shadow-md active:scale-95"
                 >
                   Edit
                 </button>
 
                 <button
                   onClick={() => setShowStatusModal(true)}
-                  className="px-6 py-2 bg-green-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-xs shadow-sm hover:shadow-md active:scale-95"
+                  className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-green-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-[10px] sm:text-xs shadow-sm hover:shadow-md active:scale-95"
                 >
-                  Change Status
+                  Status
                 </button>
               </>
             )}
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-red-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-xs shadow-sm hover:shadow-md active:scale-95"
+              className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-red-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-[10px] sm:text-xs shadow-sm hover:shadow-md active:scale-95"
             >
               CLOSE
             </button>
@@ -377,6 +412,133 @@ const GetRFQByID = ({ id, onClose }) => {
                 )}
               </div>
 
+              {/* ---------------- FOLLOW-UPS SECTION ---------------- */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-black text-black flex items-center gap-2 uppercase tracking-widest">
+                    <MessageSquare className="w-4 h-4" /> RFQ Follow-ups
+                  </h4>
+                  <button
+                    onClick={() => setShowFollowUpForm(!showFollowUpForm)}
+                    className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline flex items-center gap-1"
+                  >
+                    {showFollowUpForm ? "Cancel" : "+ Add Follow-up"}
+                  </button>
+                </div>
+
+                {/* Follow-up Form */}
+                {showFollowUpForm && (
+                  <form
+                    onSubmit={handleFollowUpSubmit}
+                    className="bg-white p-4 rounded-2xl border border-black shadow-sm space-y-4 animate-in slide-in-from-top-2 duration-200"
+                  >
+                    <RichTextEditor
+                      value={followUpDescription}
+                      onChange={setFollowUpDescription}
+                      placeholder="Type your follow-up message..."
+                    />
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-black/40 uppercase tracking-widest">
+                        Attachments
+                      </label>
+                      <MultipleFileUpload
+                        onFilesChange={setFollowUpFiles}
+                      />
+                    </div>
+                    <div className="flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={isSubmittingFollowUp}
+                        className="px-6 py-2 bg-green-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-green-300 transition-all text-[10px] flex items-center gap-2 disabled:opacity-50"
+                      >
+                        {isSubmittingFollowUp ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Send className="w-3 h-3" />
+                        )}
+                        {isSubmittingFollowUp ? "Sending..." : "Post Follow-up"}
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {/* Follow-ups List */}
+                <div className="space-y-3">
+                  {rfq?.followUps && rfq.followUps.length > 0 ? (
+                    rfq.followUps.map((fu, idx) => (
+                      <div
+                        key={fu.id || idx}
+                        className="bg-white p-3 sm:p-4 rounded-2xl border border-black shadow-sm space-y-3"
+                      >
+                        <div className="flex items-center justify-between border-b border-black/5 pb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-gray-100 border border-black flex items-center justify-center">
+                              <User className="w-3 h-3 text-black" />
+                            </div>
+                            <span className="text-[10px] font-black text-black uppercase tracking-widest">
+                              {fu.createdByRole === "CLIENT" ? rfq?.sender?.fabricator?.fabName || "Client" : "WBT Team"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 text-[10px] font-bold text-black/40 uppercase tracking-widest">
+                            <Clock className="w-3 h-3" />
+                            {new Date(fu.createdAt).toLocaleString("en-IN", {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                        </div>
+
+                        <div
+                          className="text-xs text-black leading-relaxed prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: fu.description }}
+                        />
+
+                        {fu.files && fu.files.length > 0 && (
+                          <div className="flex flex-wrap gap-2 pt-2 border-t border-black/5">
+                            {fu.files.map((file, fIdx) => (
+                              <button
+                                key={file.id || fIdx}
+                                onClick={async () => {
+                                  try {
+                                    const res = await Service.viewRfqFile(id, file.id);
+                                    if (res) {
+                                      const url = URL.createObjectURL(new Blob([res]));
+                                      const link = document.createElement('a');
+                                      link.href = url;
+                                      link.setAttribute('download', file.fileName || 'attachment');
+                                      document.body.appendChild(link);
+                                      link.click();
+                                      link.parentNode.removeChild(link);
+                                    }
+                                  } catch (err) {
+                                    toast.error("Failed to download file");
+                                  }
+                                }}
+                                className="flex items-center gap-2 px-3 py-1 bg-gray-50 border border-black rounded-full hover:bg-gray-100 transition-all group"
+                              >
+                                <Paperclip className="w-3 h-3 text-black/40 group-hover:text-black" />
+                                <span className="text-[10px] font-black text-black uppercase tracking-widest truncate max-w-[150px]">
+                                  {file.originalName || file.fileName || "File"}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center bg-gray-50 rounded-2xl border-2 border-dashed border-black/10">
+                      <p className="text-[10px] font-black text-black/20 uppercase tracking-[0.2em]">
+                        No follow-ups recorded yet
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Scopes */}
               <div className="space-y-4">
                 <div className="p-4 bg-white rounded-2xl border border-black text-sm">
@@ -415,6 +577,16 @@ const GetRFQByID = ({ id, onClose }) => {
                       label="Detailing Misc"
                       enabled={rfq?.detailingMisc || false}
                     />
+                    <Scope
+                      label="MTO - Manual"
+                      enabled={rfq?.MTOManual || false}
+                    />
+                    {rfq?.MTOStickModel && (
+                      <Scope
+                        label={`MTO - Stick Model: ${rfq.MTOStickModel}`}
+                        enabled={true}
+                      />
+                    )}
                   </div>
                 </div>
               </div>
@@ -549,18 +721,13 @@ const GetRFQByID = ({ id, onClose }) => {
         {showEstimationModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
-              <button
-                onClick={() => setShowEstimationModal(false)}
-                className="absolute top-4 right-4 px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all z-10"
-              >
-                Close
-              </button>
               <AddEstimation
                 initialRfqId={id}
                 onSuccess={() => {
                   setShowEstimationModal(false);
                   // Optionally refresh RFQ or show success message
                 }}
+                onClose={() => setShowEstimationModal(false)}
               />
             </div>
           </div>
