@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Service from "../../../api/Service";
-import { Loader2, AlertCircle, Link2, FileText, Link } from "lucide-react";
+import { Loader2, AlertCircle, Link2, FileText, Link, Building2, Hash, CreditCard, Landmark } from "lucide-react";
 import Button from "../../fields/Button";
 
 import { openFileSecurely } from "../../../utils/openFileSecurely";
@@ -21,6 +21,9 @@ const GetFabricatorByID = ({ id }) => {
   const [branch, setBranch] = useState(null);
   const [poc, setPoc] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [account, setAccount] = useState(null);
+  const [accountLoading, setAccountLoading] = useState(false);
+  const [accountError, setAccountError] = useState(null);
 
   useEffect(() => {
     const fetchFab = async () => {
@@ -45,6 +48,26 @@ const GetFabricatorByID = ({ id }) => {
 
     fetchFab();
   }, [id]);
+
+  useEffect(() => {
+    const fetchAccount = async () => {
+      if (activeTab === "account" && fabricator?.accountId && !account) {
+        try {
+          setAccountLoading(true);
+          setAccountError(null);
+          const response = await Service.GetBankAccountById(fabricator.accountId);
+          setAccount(response?.data || null);
+        } catch (err) {
+          setAccountError("Failed to load account details");
+          console.error("Error fetching account:", err);
+        } finally {
+          setAccountLoading(false);
+        }
+      }
+    };
+
+    fetchAccount();
+  }, [activeTab, fabricator?.accountId, account]);
 
   const formatDate = (date) =>
     new Date(date).toLocaleString("en-IN", {
@@ -114,12 +137,96 @@ const GetFabricatorByID = ({ id }) => {
         >
           Basic Details
         </button>
+        <button
+          onClick={() => setActiveTab("account")}
+          className={`pb-3 px-2 text-sm font-semibold transition-colors ${activeTab === "account"
+            ? "text-green-700 border-b-2 border-green-600"
+            : "text-gray-500 hover:text-green-600"
+            }`}
+        >
+          Account Details
+        </button>
       </div>
 
       {/* Content Wrapper (IMPORTANT FIX) */}
       <div className="pt-2">
         {activeTab === "dashboard" ? (
           <FabricatorDashboard fabricator={fabricator} />
+        ) : activeTab === "account" ? (
+          <div className="py-6">
+            {accountLoading ? (
+              <div className="flex items-center justify-center py-12 text-gray-700">
+                <Loader2 className="w-6 h-6 animate-spin mr-2 text-green-600" />
+                Loading account details...
+              </div>
+            ) : accountError ? (
+              <div className="flex items-center justify-center py-12 text-red-600 bg-red-50 rounded-xl border border-red-100">
+                <AlertCircle className="w-6 h-6 mr-2" />
+                {accountError}
+              </div>
+            ) : account ? (
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                {/* Account Header Card */}
+                <div className="bg-white p-6 rounded-2xl border border-green-100 shadow-sm flex items-center gap-4">
+                  <div className="p-4 bg-green-50 rounded-2xl text-green-700">
+                    <Building2 className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900">{account.accountName}</h4>
+                    <p className="text-sm text-gray-500 font-medium uppercase tracking-wider">{account.bankName}</p>
+                  </div>
+                </div>
+
+                {/* Account Details Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <AccountInfoCard
+                    icon={<Hash className="w-4 h-4 text-green-600" />}
+                    label="Account Number"
+                    value={account.accountNumber}
+                  />
+                  <AccountInfoCard
+                    icon={<CreditCard className="w-4 h-4 text-green-600" />}
+                    label="Account Type"
+                    value={account.accountType}
+                  />
+                  <AccountInfoCard
+                    icon={<Landmark className="w-4 h-4 text-green-600" />}
+                    label="ABA Routing"
+                    value={account.abaRoutingNumber || "—"}
+                  />
+                  <AccountInfoCard
+                    icon={<Hash className="w-4 h-4 text-green-600" />}
+                    label="Institution #"
+                    value={account.institutionNumber || "—"}
+                  />
+                  <AccountInfoCard
+                    icon={<Hash className="w-4 h-4 text-green-600" />}
+                    label="Transit #"
+                    value={account.transitNumber || "—"}
+                  />
+                  <AccountInfoCard
+                    icon={<CreditCard className="w-4 h-4 text-green-600" />}
+                    label="Payment Method"
+                    value={account.paymentMethod || "—"}
+                  />
+                </div>
+
+                {account.bankAddress && (
+                  <div className="p-6 bg-white border border-green-100 rounded-2xl shadow-sm">
+                    <p className="text-[10px] font-black text-green-700 uppercase tracking-[0.2em] mb-3">Bank Address</p>
+                    <p className="text-sm font-semibold text-gray-800 leading-relaxed italic">
+                      {account.bankAddress}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-gray-500 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                <AlertCircle className="w-10 h-10 mb-3 opacity-20" />
+                <p className="font-medium text-gray-400 uppercase tracking-widest text-xs">No account assigned to this fabricator</p>
+              </div>
+            )}
+          </div>
         ) : (
           <div className="flex flex-col gap-8">
             {/* Grid */}
@@ -234,6 +341,16 @@ const InfoRow = ({ label, value }) => (
   <div className="flex justify-between">
     <span className="text-gray-600">{label}:</span>
     <span className="text-gray-800">{value}</span>
+  </div>
+);
+
+const AccountInfoCard = ({ icon, label, value }) => (
+  <div className="bg-white p-5 rounded-2xl border border-green-50 shadow-sm hover:shadow-md transition-all duration-200 border-l-4 border-l-green-400">
+    <div className="flex items-center gap-2 text-gray-500 mb-2">
+      {icon}
+      <span className="text-[10px] uppercase font-bold tracking-widest">{label}</span>
+    </div>
+    <p className="font-bold text-gray-900 break-all">{value}</p>
   </div>
 );
 
