@@ -111,7 +111,7 @@ const AddRFQ = ({ onSuccess }) => {
         bidPrice: data.bidPrice,
         estimationDate: data.estimationDate
           ? new Date(data.estimationDate).toISOString()
-          : null,
+          : "",
         status: "IN_REVIEW",
         wbtStatus: "RECEIVED",
         connectionDesign: data.connectionDesign,
@@ -351,10 +351,9 @@ const AddRFQ = ({ onSuccess }) => {
                 name={field.name}
                 options={[
                   "TEKLA",
-                  "SDS2",
+                  "SDS/2",
                   "BOTH",
                   "NO_PREFERENCE",
-                  "OTHER",
                 ].map((t) => ({ label: t, value: t }))}
                 value={field.value}
                 onChange={(_, value) => field.onChange(value ?? "")}
