@@ -329,7 +329,7 @@ const AddRFQ = ({ onSuccess }) => {
               </div>
 
         {/* TOOLS */}
-        <div>
+        <div className="space-y-2">
           <label className="font-semibold text-gray-700 mb-1 block">
             Tools *
           </label>
@@ -355,35 +355,36 @@ const AddRFQ = ({ onSuccess }) => {
           />
         </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
-                    <Percent size={14} className="text-black/40" />
-                    Bid Price ({selectedFabricator?.currencyType || "USD"})
-                  </label>
-                  <Input
-                    type="number"
-                    {...register("bidPrice")}
-                    placeholder="0.00"
-                    className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black"
-                  />
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div className="space-y-2">
+            <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+              <Percent size={14} className="text-black/40" />
+              Bid Price ({selectedFabricator?.currencyType || "USD"})
+            </label>
+            <Input
+              type="number"
+              {...register("bidPrice")}
+              placeholder="0.00"
+              className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black"
+            />
+          </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
-                    <Calendar size={14} className="text-black/40" />
-                    Response Due Date <span className="text-rose-500">*</span>
-                  </label>
-                  <Input
-                    type="date"
-                    {...register("estimationDate", {
-                      required: "Due date is required",
-                    })}
-                    className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black"
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
+          <div className="space-y-2">
+            <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+              <Calendar size={14} className="text-black/40" />
+              Response Due Date <span className="text-rose-500">*</span>
+            </label>
+            <Input
+              type="date"
+              {...register("estimationDate", {
+                required: "Due date is required",
+              })}
+              className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
 
           {/* Service Matrix Section */}
           <section className="space-y-3 md:space-y-4 pt-4 md:pt-5 border-gray-200">
