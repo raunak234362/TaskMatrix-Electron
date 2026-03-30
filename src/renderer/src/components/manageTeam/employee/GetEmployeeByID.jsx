@@ -473,399 +473,411 @@ const GetEmployeeByID = ({ id, onClose }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8 text-gray-700">
-        <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading employee details...
+      <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="flex items-center justify-center p-12 text-black bg-white rounded-2xl border border-gray-200 shadow-xl">
+          <Loader2 className="w-8 h-8 animate-spin mr-3 text-[#6bbd45]" />
+          <span className="text-sm font-black uppercase tracking-widest text-[#6bbd45]">Loading employee details...</span>
+        </div>
       </div>
     );
   }
   if (error || !employee) {
     return (
-      <div className="flex items-center justify-center py-8 text-red-600">
-        <AlertCircle className="w-5 h-5 mr-2" /> {error || "Employee not found"}
+      <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="flex flex-col items-center justify-center p-12 text-red-600 bg-white rounded-2xl border border-gray-200 shadow-xl gap-4">
+          <div className="flex items-center">
+            <AlertCircle className="w-8 h-8 mr-3" />
+            <span className="text-sm font-black uppercase tracking-widest">{error || "Employee not found"}</span>
+          </div>
+          {onClose && (
+            <button onClick={onClose} className="px-6 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all">Close</button>
+          )}
+        </div>
       </div>
     );
   }
 
   // ── Render ───────────────────────────────────────────────────────────────────
-
   return (
-    <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[95vw] mx-auto flex flex-col h-[95vh]">
-      {/* Header */}
-      <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white sticky top-0 z-10 shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-[#6bbd45]/15 rounded-xl text-[#6bbd45]">
-            <Zap className="w-6 h-6" />
-          </div>
-          <div>
-            <h2 className="text-xl font-black text-black tracking-tight uppercase">
-              {employee.firstName} {employee.middleName} {employee.lastName}
-            </h2>
-            <div className="flex items-center gap-2 mt-1">
-              <p className="text-[10px] font-black text-black uppercase tracking-[0.2em]">
-                {employee.designation || "EMPLOYEE PROFILE"}
-              </p>
-              <span
-                className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${employee.isActive ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-700 border-red-200"
-                  }`}
-              >
-                {employee.isActive ? "Active" : "Inactive"}
-              </span>
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[95vw] mx-auto flex flex-col h-[95vh]">
+        {/* Header */}
+        <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white sticky top-0 z-10 shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-[#6bbd45]/15 rounded-xl text-[#6bbd45]">
+              <Zap className="w-6 h-6" />
             </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          {(userRole === "admin" || userRole === "deputy_manager" || userRole === "operation_executive") && (
-            <button
-              onClick={() => handleModel(employee)}
-              className="flex items-center gap-2 px-6 py-2 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all active:scale-95"
-            >
-              <Edit2 className="w-4 h-4 text-[#6bbd45]" />
-              Edit Profile
-            </button>
-          )}
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
-          >
-            Close
-          </button>
-        </div>
-      </header>
-
-      <div className="p-8 overflow-y-auto custom-scrollbar flex-1 space-y-10">
-        {/* ── Profile Grid ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-6">
-          <div className="space-y-4">
-            <InfoRow label="Username" value={employee.username} />
-            <InfoRow label="Email" value={employee.email} href={`mailto:${employee.email}`} />
-            <InfoRow
-              label="Phone"
-              value={
-                <span>
-                  {employee.phone}
-                  {employee.extension && (
-                    <span className="text-xs ml-1 font-bold">(Ext: {employee.extension})</span>
-                  )}
+            <div>
+              <h2 className="text-xl font-black text-black tracking-tight uppercase">
+                {employee.firstName} {employee.middleName} {employee.lastName}
+              </h2>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-[10px] font-black text-black uppercase tracking-[0.2em]">
+                  {employee.designation || "EMPLOYEE PROFILE"}
+                </p>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${employee.isActive ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-700 border-red-200"
+                    }`}
+                >
+                  {employee.isActive ? "Active" : "Inactive"}
                 </span>
-              }
-              href={`tel:${employee.phone}`}
-            />
-          </div>
-          <div className="space-y-4">
-            <InfoRow label="Alt Phone" value={employee.altPhone || "—"} />
-            <InfoRow label="Landline" value={employee.landline || "—"} />
-            <InfoRow label="Alt Landline" value={employee.altLandline || "—"} />
-          </div>
-          <div className="space-y-4">
-            <InfoRow label="Designation" value={employee.designation} />
-            <InfoRow label="Created" value={formatDateTime(employee.createdAt)} />
-            <InfoRow label="Updated" value={formatDateTime(employee.updatedAt)} />
-          </div>
-        </div>
-
-        {/* ── EPS ── */}
-        {employee?.role !== "CLIENT" && employee?.role !== "CLIENT_ADMIN" && (
-          <div className="pt-8 border-t border-black/5">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-              <h3 className="text-xl text-black uppercase tracking-tight">Employee Performance Score</h3>
-              <div className="flex items-center gap-2">
-                <select
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                  className="px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-black/5"
-                >
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <option key={i + 1} value={i + 1}>
-                      {new Date(0, i).toLocaleString("default", { month: "long" })}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                  className="px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-black/5"
-                >
-                  {[2024, 2025, 2026].map((y) => <option key={y} value={y}>{y}</option>)}
-                </select>
               </div>
             </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {(userRole === "admin" || userRole === "deputy_manager" || userRole === "operation_executive") && (
+              <button
+                onClick={() => handleModel(employee)}
+                className="flex items-center gap-2 px-6 py-2 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all active:scale-95"
+              >
+                <Edit2 className="w-4 h-4 text-[#6bbd45]" />
+                Edit Profile
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+            >
+              Close
+            </button>
+          </div>
+        </header>
 
-            {epsLoading ? (
-              <div className="flex items-center justify-center py-10 bg-white/50 rounded-2xl border border-dashed border-black/5">
-                <Loader2 className="w-6 h-6 animate-spin text-black/20" />
-              </div>
-            ) : epsData ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <div className="col-span-2 md:col-span-3 lg:col-span-4 bg-linear-to-br from-green-50 to-emerald-100/50 p-6 rounded-2xl border border-black/5 shadow-sm">
-                  <span className="text-[10px] font-black text-black/40 uppercase tracking-widest block mb-2">Overall Score</span>
-                  <span className="text-4xl font-black text-green-700">
-                    {epsData.score !== undefined ? Number(epsData.score).toFixed(2) : "0.00"}
+        <div className="p-8 overflow-y-auto custom-scrollbar flex-1 space-y-10">
+          {/* ── Profile Grid ── */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-6">
+            <div className="space-y-4">
+              <InfoRow label="Username" value={employee.username} />
+              <InfoRow label="Email" value={employee.email} href={`mailto:${employee.email}`} />
+              <InfoRow
+                label="Phone"
+                value={
+                  <span>
+                    {employee.phone}
+                    {employee.extension && (
+                      <span className="text-xs ml-1 font-bold">(Ext: {employee.extension})</span>
+                    )}
                   </span>
+                }
+                href={`tel:${employee.phone}`}
+              />
+            </div>
+            <div className="space-y-4">
+              <InfoRow label="Alt Phone" value={employee.altPhone || "—"} />
+              <InfoRow label="Landline" value={employee.landline || "—"} />
+              <InfoRow label="Alt Landline" value={employee.altLandline || "—"} />
+            </div>
+            <div className="space-y-4">
+              <InfoRow label="Designation" value={employee.designation} />
+              <InfoRow label="Created" value={formatDateTime(employee.createdAt)} />
+              <InfoRow label="Updated" value={formatDateTime(employee.updatedAt)} />
+            </div>
+          </div>
+
+          {/* ── EPS ── */}
+          {employee?.role !== "CLIENT" && employee?.role !== "CLIENT_ADMIN" && (
+            <div className="pt-8 border-t border-black/5">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <h3 className="text-xl text-black uppercase tracking-tight">Employee Performance Score</h3>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                    className="px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-black/5"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {new Date(0, i).toLocaleString("default", { month: "long" })}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                    className="px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-black/5"
+                  >
+                    {[2024, 2025, 2026].map((y) => <option key={y} value={y}>{y}</option>)}
+                  </select>
                 </div>
-                {[
-                  ["Completion Score", epsData.components?.completionScore],
-                  ["Discipline Score", epsData.components?.disciplineScore],
-                  ["Session Quality", epsData.components?.sessionQualityScore],
-                  ["Underutilized", epsData.components?.underutilizedScore],
-                  ["Rework Score", epsData.components?.reworkScore],
-                  ["Overrun Score", epsData.components?.overrunScore],
-                ].map(([label, val]) => (
-                  <div key={label} className="bg-white p-6 rounded-2xl border border-black/5 shadow-sm">
-                    <span className="text-[10px] font-black text-black/40 uppercase tracking-widest block mb-2">{label}</span>
-                    <span className="text-2xl font-black text-black">
-                      {val !== undefined ? Number(val).toFixed(2) : "0"}
+              </div>
+
+              {epsLoading ? (
+                <div className="flex items-center justify-center py-10 bg-white/50 rounded-2xl border border-dashed border-black/5">
+                  <Loader2 className="w-6 h-6 animate-spin text-black/20" />
+                </div>
+              ) : epsData ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <div className="col-span-2 md:col-span-3 lg:col-span-4 bg-linear-to-br from-green-50 to-emerald-100/50 p-6 rounded-2xl border border-black/5 shadow-sm">
+                    <span className="text-[10px] font-black text-black/40 uppercase tracking-widest block mb-2">Overall Score</span>
+                    <span className="text-4xl font-black text-green-700">
+                      {epsData.score !== undefined ? Number(epsData.score).toFixed(2) : "0.00"}
                     </span>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="bg-white/50 rounded-2xl border border-dashed border-black/5 p-10 text-center">
-                <p className="text-black/40 font-bold text-sm tracking-tight">No EPS data for selected period</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── Task Performance Report ── */}
-        {userRole !== "client" && userRole !== "client_admin" && (
-          <div className="pt-8 border-t border-black/5">
-
-            {/* Section Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-indigo-50 rounded-xl">
-                  <BarChart3 className="w-5 h-5 text-indigo-600" />
-                </div>
-                <div>
-                  <h3 className="text-xl text-black uppercase tracking-tight">Task Performance Report</h3>
-                  <p className="text-[10px] font-bold text-black/30 uppercase tracking-widest mt-0.5" title={(stats.projectNames || []).join(", ")}>
-                    {allTasks.length} tasks · {stats.projectCount} project{stats.projectCount !== 1 ? "s" : ""}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 relative">
-                <button
-                  onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#6bbd45]/10 border border-[#6bbd45]/20 rounded-xl text-xs font-black uppercase tracking-widest text-[#6bbd45] hover:bg-[#6bbd45]/20 transition-all"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  Generate Report
-                  <ChevronDown className={`w-3 h-3 transition-transform ${showExportMenu ? "rotate-180" : ""}`} />
-                </button>
-
-                {showExportMenu && (
-                  <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-2xl border border-black/5 shadow-xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2">
-                    <div className="px-3 py-2 text-[10px] font-black text-black/20 uppercase tracking-widest border-b border-black/5 flex items-center justify-between">
-                      Format & Period
-                      <X size={10} className="cursor-pointer" onClick={() => setShowExportMenu(false)} />
-                    </div>
-                    {["Excel", "PDF"].map((fmt) => (
-                      <div key={fmt} className="space-y-1 mt-2 mb-2 p-1 border-b border-black/5 last:border-0 pb-2">
-                        <div className="flex items-center gap-2 px-2 py-1">
-                          {fmt === "Excel" ? <FileSpreadsheet size={12} className="text-green-600" /> : <FilePdf size={12} className="text-red-600" />}
-                          <span className="text-[11px] font-black uppercase tracking-widest">{fmt} Report</span>
-                        </div>
-                        {["all", "month", "year"].map((scope) => (
-                          <button
-                            key={scope}
-                            onClick={() => handleExport(fmt.toLowerCase(), scope)}
-                            className="w-full text-left px-4 py-2 hover:bg-gray-50 text-[10px] font-bold text-black/60 hover:text-black rounded-lg transition-all capitalize"
-                          >
-                            Export by {scope}
-                          </button>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <button
-                  onClick={fetchAllTasks}
-                  disabled={tasksLoading}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-black uppercase tracking-widest text-black/40 hover:bg-gray-50 transition-all disabled:opacity-40"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${tasksLoading ? "animate-spin" : ""}`} />
-                  Refresh
-                </button>
-              </div>
-            </div>
-
-            {tasksLoading ? (
-              <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-dashed border-black/5 gap-2">
-                <Loader2 className="w-7 h-7 animate-spin text-indigo-400" />
-                <p className="text-[11px] font-black text-black/20 uppercase tracking-widest">Loading tasks…</p>
-              </div>
-            ) : allTasks.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-dashed border-black/5 p-12 text-center">
-                <ListTodo className="w-10 h-10 text-black/10 mx-auto mb-3" />
-                <p className="text-black/40 font-bold text-sm uppercase tracking-tight">No tasks found for this employee</p>
-              </div>
-            ) : (
-              <>
-                {/* ── Stat Cards ── */}
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-                  <StatCard icon={ListTodo} label="Total Tasks" value={allTasks.length} accent="bg-indigo-500" />
-                  <StatCard icon={Clock} label="Assigned" value={`${Math.floor(stats.totalAssignedSec / 3600)}h`} sub={secToHms(stats.totalAssignedSec)} accent="bg-blue-500" />
-                  <StatCard icon={TrendingUp} label="Worked" value={`${Math.floor(stats.totalWorkedSec / 3600)}h`} sub={secToHms(stats.totalWorkedSec)} accent="bg-violet-500" />
-                  <StatCard
-                    icon={CheckCircle2}
-                    label="Completed"
-                    value={stats.completed}
-                    sub={`${allTasks.length > 0 ? Math.round((stats.completed / allTasks.length) * 100) : 0}% of total`}
-                    accent="bg-green-500"
-                  />
-                  <StatCard
-                    icon={AlertTriangle}
-                    label="Overrun"
-                    value={stats.overrunCount}
-                    sub={stats.overrunCount > 0 ? "needs attention" : "all good"}
-                    accent={stats.overrunCount > 0 ? "bg-red-500" : "bg-green-500"}
-                  />
-                </div>
-
-                {/* Project Names List */}
-                {stats.projectNames?.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-8">
-                    {stats.projectNames.map((name) => (
-                      <span
-                        key={name}
-                        className="px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-lg border border-indigo-100"
-                      >
-                         📁 {name}
+                  {[
+                    ["Completion Score", epsData.components?.completionScore],
+                    ["Discipline Score", epsData.components?.disciplineScore],
+                    ["Session Quality", epsData.components?.sessionQualityScore],
+                    ["Underutilized", epsData.components?.underutilizedScore],
+                    ["Rework Score", epsData.components?.reworkScore],
+                    ["Overrun Score", epsData.components?.overrunScore],
+                  ].map(([label, val]) => (
+                    <div key={label} className="bg-white p-6 rounded-2xl border border-black/5 shadow-sm">
+                      <span className="text-[10px] font-black text-black/40 uppercase tracking-widest block mb-2">{label}</span>
+                      <span className="text-2xl font-black text-black">
+                        {val !== undefined ? Number(val).toFixed(2) : "0"}
                       </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* ── Filter Bar ── */}
-                <div className="bg-white rounded-2xl border border-black/5 shadow-sm p-4 mb-5 flex flex-col md:flex-row gap-3 items-start md:items-center flex-wrap">
-                  {/* Search */}
-                  <div className="relative flex-1 min-w-[200px]">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black/20" />
-                    <input
-                      type="text"
-                      placeholder="Search tasks or projects…"
-                      value={taskSearch}
-                      onChange={(e) => { setTaskSearch(e.target.value); setTaskPage(1); }}
-                      className="w-full pl-9 pr-4 py-2.5 text-xs font-bold rounded-xl border border-black/5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
-                    />
-                  </div>
-
-                  {/* Status */}
-                  <div className="relative">
-                    <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black/20 pointer-events-none" />
-                    <select
-                      value={taskStatusFilter}
-                      onChange={(e) => { setTaskStatusFilter(e.target.value); setTaskPage(1); }}
-                      className="pl-9 pr-4 py-2.5 bg-gray-50 border border-black/5 rounded-xl text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-indigo-200 appearance-none cursor-pointer"
-                    >
-                      {uniqueStatuses.map((s) => (
-                        <option key={s} value={s}>
-                          {s === "ALL" ? "All Statuses" : (STATUS_META[s]?.label || s)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* From */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black text-black/30 uppercase tracking-widest">From</span>
-                    <input
-                      type="date"
-                      value={taskDateFrom}
-                      onChange={(e) => { setTaskDateFrom(e.target.value); setTaskPage(1); }}
-                      className="px-3 py-2.5 bg-gray-50 border border-black/5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                    />
-                  </div>
-
-                  {/* To */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black text-black/30 uppercase tracking-widest">To</span>
-                    <input
-                      type="date"
-                      value={taskDateTo}
-                      onChange={(e) => { setTaskDateTo(e.target.value); setTaskPage(1); }}
-                      className="px-3 py-2.5 bg-gray-50 border border-black/5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                    />
-                  </div>
-
-                  {/* Clear */}
-                  {(taskSearch || taskStatusFilter !== "ALL" || taskDateFrom || taskDateTo) && (
-                    <button
-                      onClick={() => {
-                        setTaskSearch(""); setTaskStatusFilter("ALL");
-                        setTaskDateFrom(""); setTaskDateTo(""); setTaskPage(1);
-                      }}
-                      className="px-4 py-2.5 bg-red-50 text-red-500 border border-red-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-100 transition-colors whitespace-nowrap"
-                    >
-                      Clear
-                    </button>
-                  )}
-
-                  {/* Result count */}
-                  <span className="text-[10px] font-black text-black/20 uppercase tracking-widest ml-auto">
-                    {filteredTasks.length} result{filteredTasks.length !== 1 ? "s" : ""}
-                  </span>
-                </div>
-
-                {/* ── Task List ── */}
-                <div className="space-y-2 mb-5">
-                  {filteredTasks.length === 0 ? (
-                    <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-black/5">
-                      <p className="text-black/30 font-bold text-sm uppercase tracking-tight">No tasks match your filters</p>
                     </div>
-                  ) : (
-                    pagedTasks.map((task, idx) => <TaskRow key={task.id || idx} task={task} />)
-                  )}
+                  ))}
                 </div>
+              ) : (
+                <div className="bg-white/50 rounded-2xl border border-dashed border-black/5 p-10 text-center">
+                  <p className="text-black/40 font-bold text-sm tracking-tight">No EPS data for selected period</p>
+                </div>
+              )}
+            </div>
+          )}
 
-                {/* ── Pagination ── */}
-                {filteredTasks.length > TASKS_PER_PAGE && (
-                  <div className="flex items-center justify-between pt-4 border-t border-black/5">
-                    <p className="text-[10px] font-bold text-black/30 uppercase tracking-widest">
-                      {(taskPage - 1) * TASKS_PER_PAGE + 1}–{Math.min(taskPage * TASKS_PER_PAGE, filteredTasks.length)} of {filteredTasks.length}
+          {/* ── Task Performance Report ── */}
+          {userRole !== "client" && userRole !== "client_admin" && (
+            <div className="pt-8 border-t border-black/5">
+
+              {/* Section Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-indigo-50 rounded-xl">
+                    <BarChart3 className="w-5 h-5 text-indigo-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl text-black uppercase tracking-tight">Task Performance Report</h3>
+                    <p className="text-[10px] font-bold text-black/30 uppercase tracking-widest mt-0.5" title={(stats.projectNames || []).join(", ")}>
+                      {allTasks.length} tasks · {stats.projectCount} project{stats.projectCount !== 1 ? "s" : ""}
                     </p>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setTaskPage((p) => Math.max(1, p - 1))}
-                        disabled={taskPage === 1}
-                        className="px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-black text-black/50 hover:bg-gray-50 disabled:opacity-30 transition-all"
-                      >
-                        ← Prev
-                      </button>
-                      <span className="px-3 py-1.5 bg-black text-white text-xs font-black rounded-lg">
-                        {taskPage} / {totalPages}
-                      </span>
-                      <button
-                        onClick={() => setTaskPage((p) => Math.min(totalPages, p + 1))}
-                        disabled={taskPage === totalPages}
-                        className="px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-black text-black/50 hover:bg-gray-50 disabled:opacity-30 transition-all"
-                      >
-                        Next →
-                      </button>
-                    </div>
                   </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
-        {/* ── Address ── */}
-        {(employee.address || employee.city || employee.state || employee.country || employee.zipCode) && (
-          <div className="pt-8 border-t border-black/5">
-            <h4 className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em] mb-4">Address Information</h4>
-            <div className="text-sm space-y-2 text-black font-bold tracking-tight">
-              {employee.address && <p>{employee.address}</p>}
-              <p>{[employee.city, employee.state, employee.zipCode].filter(Boolean).join(", ") || "—"}</p>
-              {employee.country && <p>{employee.country}</p>}
+                </div>
+                <div className="flex items-center gap-2 relative">
+                  <button
+                    onClick={() => setShowExportMenu(!showExportMenu)}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#6bbd45]/10 border border-[#6bbd45]/20 rounded-xl text-xs font-black uppercase tracking-widest text-[#6bbd45] hover:bg-[#6bbd45]/20 transition-all"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Generate Report
+                    <ChevronDown className={`w-3 h-3 transition-transform ${showExportMenu ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {showExportMenu && (
+                    <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-2xl border border-black/5 shadow-xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                      <div className="px-3 py-2 text-[10px] font-black text-black/20 uppercase tracking-widest border-b border-black/5 flex items-center justify-between">
+                        Format & Period
+                        <X size={10} className="cursor-pointer" onClick={() => setShowExportMenu(false)} />
+                      </div>
+                      {["Excel", "PDF"].map((fmt) => (
+                        <div key={fmt} className="space-y-1 mt-2 mb-2 p-1 border-b border-black/5 last:border-0 pb-2">
+                          <div className="flex items-center gap-2 px-2 py-1">
+                            {fmt === "Excel" ? <FileSpreadsheet size={12} className="text-green-600" /> : <FilePdf size={12} className="text-red-600" />}
+                            <span className="text-[11px] font-black uppercase tracking-widest">{fmt} Report</span>
+                          </div>
+                          {["all", "month", "year"].map((scope) => (
+                            <button
+                              key={scope}
+                              onClick={() => handleExport(fmt.toLowerCase(), scope)}
+                              className="w-full text-left px-4 py-2 hover:bg-gray-50 text-[10px] font-bold text-black/60 hover:text-black rounded-lg transition-all capitalize"
+                            >
+                              Export by {scope}
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={fetchAllTasks}
+                    disabled={tasksLoading}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-black uppercase tracking-widest text-black/40 hover:bg-gray-50 transition-all disabled:opacity-40"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${tasksLoading ? "animate-spin" : ""}`} />
+                    Refresh
+                  </button>
+                </div>
+              </div>
+
+              {tasksLoading ? (
+                <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-dashed border-black/5 gap-2">
+                  <Loader2 className="w-7 h-7 animate-spin text-indigo-400" />
+                  <p className="text-[11px] font-black text-black/20 uppercase tracking-widest">Loading tasks…</p>
+                </div>
+              ) : allTasks.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-dashed border-black/5 p-12 text-center">
+                  <ListTodo className="w-10 h-10 text-black/10 mx-auto mb-3" />
+                  <p className="text-black/40 font-bold text-sm uppercase tracking-tight">No tasks found for this employee</p>
+                </div>
+              ) : (
+                <>
+                  {/* ── Stat Cards ── */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+                    <StatCard icon={ListTodo} label="Total Tasks" value={allTasks.length} accent="bg-indigo-500" />
+                    <StatCard icon={Clock} label="Assigned" value={`${Math.floor(stats.totalAssignedSec / 3600)}h`} sub={secToHms(stats.totalAssignedSec)} accent="bg-blue-500" />
+                    <StatCard icon={TrendingUp} label="Worked" value={`${Math.floor(stats.totalWorkedSec / 3600)}h`} sub={secToHms(stats.totalWorkedSec)} accent="bg-violet-500" />
+                    <StatCard
+                      icon={CheckCircle2}
+                      label="Completed"
+                      value={stats.completed}
+                      sub={`${allTasks.length > 0 ? Math.round((stats.completed / allTasks.length) * 100) : 0}% of total`}
+                      accent="bg-green-500"
+                    />
+                    <StatCard
+                      icon={AlertTriangle}
+                      label="Overrun"
+                      value={stats.overrunCount}
+                      sub={stats.overrunCount > 0 ? "needs attention" : "all good"}
+                      accent={stats.overrunCount > 0 ? "bg-red-500" : "bg-green-500"}
+                    />
+                  </div>
+
+                  {/* Project Names List */}
+                  {stats.projectNames?.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-8">
+                      {stats.projectNames.map((name) => (
+                        <span
+                          key={name}
+                          className="px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-lg border border-indigo-100"
+                        >
+                          📁 {name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* ── Filter Bar ── */}
+                  <div className="bg-white rounded-2xl border border-black/5 shadow-sm p-4 mb-5 flex flex-col md:flex-row gap-3 items-start md:items-center flex-wrap">
+                    {/* Search */}
+                    <div className="relative flex-1 min-w-[200px]">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black/20" />
+                      <input
+                        type="text"
+                        placeholder="Search tasks or projects…"
+                        value={taskSearch}
+                        onChange={(e) => { setTaskSearch(e.target.value); setTaskPage(1); }}
+                        className="w-full pl-9 pr-4 py-2.5 text-xs font-bold rounded-xl border border-black/5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
+                      />
+                    </div>
+
+                    {/* Status */}
+                    <div className="relative">
+                      <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black/20 pointer-events-none" />
+                      <select
+                        value={taskStatusFilter}
+                        onChange={(e) => { setTaskStatusFilter(e.target.value); setTaskPage(1); }}
+                        className="pl-9 pr-4 py-2.5 bg-gray-50 border border-black/5 rounded-xl text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-indigo-200 appearance-none cursor-pointer"
+                      >
+                        {uniqueStatuses.map((s) => (
+                          <option key={s} value={s}>
+                            {s === "ALL" ? "All Statuses" : (STATUS_META[s]?.label || s)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* From */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black text-black/30 uppercase tracking-widest">From</span>
+                      <input
+                        type="date"
+                        value={taskDateFrom}
+                        onChange={(e) => { setTaskDateFrom(e.target.value); setTaskPage(1); }}
+                        className="px-3 py-2.5 bg-gray-50 border border-black/5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                      />
+                    </div>
+
+                    {/* To */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black text-black/30 uppercase tracking-widest">To</span>
+                      <input
+                        type="date"
+                        value={taskDateTo}
+                        onChange={(e) => { setTaskDateTo(e.target.value); setTaskPage(1); }}
+                        className="px-3 py-2.5 bg-gray-50 border border-black/5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                      />
+                    </div>
+
+                    {/* Clear */}
+                    {(taskSearch || taskStatusFilter !== "ALL" || taskDateFrom || taskDateTo) && (
+                      <button
+                        onClick={() => {
+                          setTaskSearch(""); setTaskStatusFilter("ALL");
+                          setTaskDateFrom(""); setTaskDateTo(""); setTaskPage(1);
+                        }}
+                        className="px-4 py-2.5 bg-red-50 text-red-500 border border-red-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-100 transition-colors whitespace-nowrap"
+                      >
+                        Clear
+                      </button>
+                    )}
+
+                    {/* Result count */}
+                    <span className="text-[10px] font-black text-black/20 uppercase tracking-widest ml-auto">
+                      {filteredTasks.length} result{filteredTasks.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+
+                  {/* ── Task List ── */}
+                  <div className="space-y-2 mb-5">
+                    {filteredTasks.length === 0 ? (
+                      <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-black/5">
+                        <p className="text-black/30 font-bold text-sm uppercase tracking-tight">No tasks match your filters</p>
+                      </div>
+                    ) : (
+                      pagedTasks.map((task, idx) => <TaskRow key={task.id || idx} task={task} />)
+                    )}
+                  </div>
+
+                  {/* ── Pagination ── */}
+                  {filteredTasks.length > TASKS_PER_PAGE && (
+                    <div className="flex items-center justify-between pt-4 border-t border-black/5">
+                      <p className="text-[10px] font-bold text-black/30 uppercase tracking-widest">
+                        {(taskPage - 1) * TASKS_PER_PAGE + 1}–{Math.min(taskPage * TASKS_PER_PAGE, filteredTasks.length)} of {filteredTasks.length}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setTaskPage((p) => Math.max(1, p - 1))}
+                          disabled={taskPage === 1}
+                          className="px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-black text-black/50 hover:bg-gray-50 disabled:opacity-30 transition-all"
+                        >
+                          ← Prev
+                        </button>
+                        <span className="px-3 py-1.5 bg-black text-white text-xs font-black rounded-lg">
+                          {taskPage} / {totalPages}
+                        </span>
+                        <button
+                          onClick={() => setTaskPage((p) => Math.min(totalPages, p + 1))}
+                          disabled={taskPage === totalPages}
+                          className="px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-black text-black/50 hover:bg-gray-50 disabled:opacity-30 transition-all"
+                        >
+                          Next →
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
-          </div>
-        )}
+          )}
+          {/* ── Address ── */}
+          {(employee.address || employee.city || employee.state || employee.country || employee.zipCode) && (
+            <div className="pt-8 border-t border-black/5">
+              <h4 className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em] mb-4">Address Information</h4>
+              <div className="text-sm space-y-2 text-black font-bold tracking-tight">
+                {employee.address && <p>{employee.address}</p>}
+                <p>{[employee.city, employee.state, employee.zipCode].filter(Boolean).join(", ") || "—"}</p>
+                {employee.country && <p>{employee.country}</p>}
+              </div>
+            </div>
+          )}
 
 
-        {editModel && (
-          <EditEmployee employeeData={employee} onClose={handleModelClose} onSuccess={fetchEmployee} />
-        )}
+          {editModel && (
+            <EditEmployee employeeData={employee} onClose={handleModelClose} onSuccess={fetchEmployee} />
+          )}
+        </div>
       </div>
     </div>
   );

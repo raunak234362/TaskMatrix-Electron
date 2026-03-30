@@ -2,8 +2,10 @@
 import { useEffect, useState } from "react";
 import Service from "../../api/Service";
 
-import { Loader2, AlertCircle, Settings } from "lucide-react";
+import { Loader2, AlertCircle, Settings, Paperclip, User, Clock, MessageSquare, Send } from "lucide-react";
 import ResponseModal from "./ResponseModal";
+import RichTextEditor from "../fields/RichTextEditor";
+import MultipleFileUpload from "../fields/MultipleFileUpload";
 import DataTable from "../ui/table";
 
 import ResponseDetailsModal from "./ResponseDetailsModal";
@@ -16,15 +18,17 @@ import { useDispatch } from "react-redux";
 import { deleteRFQ } from "../../store/rfqSlice";
 import { toast } from "react-toastify";
 import EditRFQByID from "./EditRFQByID";
+import ConnectionDesignerQuotaByID from "../connectionDesigner/ConnectionDesignerQuotaByID";
 
 
-const GetRFQByID = ({ id }) => {
+const GetRFQByID = ({ id, onClose }) => {
   console.log("GetRFQByID initialized with ID:", id);
   const [rfq, setRfq] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showResponseModal, setShowResponseModal] = useState(false);
   const [selectedResponse, setSelectedResponse] = useState(null);
+  const [selectedCDQuota, setSelectedCDQuota] = useState(null);
   const [showEstimationModal, setShowEstimationModal] = useState(false);
   const [showCDQuotationModal, setShowCDQuotationModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -38,6 +42,11 @@ const GetRFQByID = ({ id }) => {
   const [statusReason, setStatusReason] = useState("");
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
+  const [activeTab, setActiveTab] = useState("responses");
+  const [followUpDescription, setFollowUpDescription] = useState("");
+  const [followUpFiles, setFollowUpFiles] = useState([]);
+  const [isSubmittingFollowUp, setIsSubmittingFollowUp] = useState(false);
+  const [showFollowUpForm, setShowFollowUpForm] = useState(false);
 
   const dispatch = useDispatch();
   const fetchRfq = async () => {
@@ -124,21 +133,57 @@ const GetRFQByID = ({ id }) => {
       setIsUpdatingStatus(false);
     }
   };
+  const handleFollowUpSubmit = async (e) => {
+    e.preventDefault();
+    if (!followUpDescription.trim()) {
+      toast.error("Please enter a message");
+      return;
+    }
+
+    try {
+      setIsSubmittingFollowUp(true);
+      const formData = new FormData();
+      formData.append("description", followUpDescription);
+      if (followUpFiles.length > 0) {
+        followUpFiles.forEach((file) => {
+          formData.append("files", file);
+        });
+      }
+
+      await Service.addRFQFollowups(formData, id);
+      toast.success("Follow-up added successfully");
+      setFollowUpDescription("");
+      setFollowUpFiles([]);
+      setShowFollowUpForm(false);
+      fetchRfq(); // Refresh data
+    } catch (err) {
+      console.error("Follow-up submission failed:", err);
+      toast.error("Failed to add follow-up");
+    } finally {
+      setIsSubmittingFollowUp(false);
+    }
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8 text-gray-700">
-        <Loader2 className="w-5 h-5 animate-spin mr-2" />
-        Loading RFQ details...
+      <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="bg-white rounded-2xl shadow-2xl border flex flex-col items-center justify-center border-gray-100 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-sm mx-auto h-[200px] relative">
+          <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+          <Loader2 className="w-6 h-6 animate-spin mb-2" />
+          <p className="text-gray-700">Loading RFQ details...</p>
+        </div>
       </div>
     );
   }
 
   if (error || !rfq) {
     return (
-      <div className="flex items-center justify-center py-8 text-red-600">
-        <AlertCircle className="w-5 h-5 mr-2" />
-        {error || "RFQ not found"}
+      <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="bg-white rounded-2xl shadow-2xl border flex flex-col items-center justify-center border-gray-100 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-sm mx-auto h-[200px] relative">
+          <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+          <AlertCircle className="w-6 h-6 mb-2 text-red-600" />
+          <p className="text-red-600">{error || "RFQ not found"}</p>
+        </div>
       </div>
     );
   }
@@ -206,56 +251,104 @@ const GetRFQByID = ({ id }) => {
     },
   ];
 
+  const cdQuotasColumns = [
+    {
+      accessorKey: "serialNo",
+      header: "Serial No",
+      cell: ({ row }) => <span className="font-bold text-gray-900 text-sm">{row.original.serialNo}</span>,
+    },
+    {
+      accessorKey: "bidprice",
+      header: "Bid Price",
+      cell: ({ row }) => <span className="font-bold text-gray-700 text-sm">${row.original.bidprice || "0"}</span>,
+    },
+    {
+      accessorKey: "estimatedHours",
+      header: "Est. Hours",
+      cell: ({ row }) => <span className="font-bold text-gray-700 text-sm">{row.original.estimatedHours || "0"}</span>,
+    },
+    {
+      accessorKey: "weeks",
+      header: "Weeks",
+      cell: ({ row }) => <span className="font-bold text-gray-700 text-sm">{row.original.weeks || "0"}</span>,
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Created",
+      cell: ({ row }) => (
+        <span className="text-gray-500 text-xs font-bold uppercase tracking-widest leading-none">
+          {new Date(row.original.createdAt).toLocaleDateString("en-IN", {
+            day: '2-digit',
+            month: 'short'
+          })}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const isApproved = row.original.approvalStatus;
+        return (
+          <span
+            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${isApproved ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
+          >
+            {isApproved ? "Approved" : "Pending"}
+          </span>
+        );
+      },
+    },
+  ];
+
   /* ---------------- TABLE STATE ---------------- */
   // Removed redundant useDataTable hook
 
   return (
-    <>
-      <div className="p-0 sm:p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          {/* ---------------- LEFT COLUMN — RFQ DETAILS ---------------- */}
-          <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                <h3 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight break-words overflow-hidden max-w-full">
-                  {rfq?.projectName}
-                </h3>
-
-                {/* Status tag */}
-                <span
-                  className={`px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-widest border border-black ${rfq?.status === "RECEIVED"
-                    ? "bg-orange-100 text-black"
-                    : "bg-green-100 text-black"
-                    }`}
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[95vw] mx-auto flex flex-col h-[95vh]">
+        {/* Header */}
+        <div className="flex-none p-4 sm:p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-5">
+            <h3 className="text-lg sm:text-2xl font-bold text-black uppercase tracking-tight break-words overflow-hidden max-w-[280px] sm:max-w-xl">
+              {rfq?.projectName}
+            </h3>
+            <span
+              className={`px-3 py-1 rounded-full text-[9px] sm:text-[11px] font-bold uppercase tracking-widest border border-black shrink-0 ${rfq?.status === "RECEIVED"
+                ? "bg-orange-100 text-black"
+                : "bg-green-100 text-black"
+                }`}
+            >
+              {rfq?.status}
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            {/* EDIT RFQ */}
+            {userRole !== "CLIENT" && (
+              <>
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-gray-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-[10px] sm:text-xs shadow-sm hover:shadow-md active:scale-95"
                 >
-                  {rfq?.status}
-                </span>
-              </div>
+                  Edit
+                </button>
 
-              {/* Action buttons */}
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                {/* EDIT RFQ */}
-                {userRole !== "CLIENT" && (
-                  <>
-                    <Button
-                      onClick={() => setShowEditModal(true)}
-                      className="flex-1 sm:flex-none px-3 py-1 bg-[#6bbd45]/15 text-black rounded-md hover:bg-[#6bbd45]/80 transition text-sm"
-                    >
-                      Edit
-                    </Button>
+                <button
+                  onClick={() => setShowStatusModal(true)}
+                  className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-green-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-[10px] sm:text-xs shadow-sm hover:shadow-md active:scale-95"
+                >
+                  Status
+                </button>
+              </>
+            )}
+            <button
+              onClick={onClose}
+              className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-red-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-[10px] sm:text-xs shadow-sm hover:shadow-md active:scale-95"
+            >
+              CLOSE
+            </button>
 
-                    <Button
-                      onClick={() => setShowStatusModal(true)}
-                      className="flex-1 sm:flex-none px-3 py-1 bg-[#6bbd45]/15 text-black rounded-md hover:bg-[#6bbd45]/80 transition text-sm"
-                    >
-                      Change Status
-                    </Button>
-                  </>
-                )}
-
-                {/* DELETE RFQ */}
-                {/* <Button
+            {/* DELETE RFQ */}
+            {/* <Button
                   type="button"
                   variant="destructive"
                   onClick={(e) => {
@@ -266,337 +359,529 @@ const GetRFQByID = ({ id }) => {
                 >
                   Delete
                 </Button> */}
-              </div>
-            </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Info label="Subject" value={rfq?.subject || ""} />
-              <Info label="Project Number" value={rfq?.projectNumber || ""} />
-              <Info label="Status" value={rfq?.status || ""} />
-              <Info label="Tools" value={rfq?.tools || "N/A"} />
-              <Info
-                label="Due Date"
-                value={
-                  rfq?.estimationDate
-                    ? new Date(rfq.estimationDate).toLocaleDateString()
-                    : "N/A"
-                }
-              />
-              <Info label="Bid Amount (USD)" value={rfq?.bidPrice ?? "—"} />
-            </div>
+        </div>
 
-            {/* Description */}
-            <div className="space-y-2">
-              <button
-                onClick={() => setShowDescription((prev) => !prev)}
-                className="text-sm font-black text-black/40 uppercase tracking-widest hover:text-black transition-colors flex items-center gap-1"
-              >
-                {showDescription ? 'Hide Description' : 'Show Description'}
-              </button>
-              {showDescription && (
-                <div
-                  className="text-black bg-white p-4 rounded-xl border border-black prose prose-sm max-w-none text-xs sm:text-sm font-medium break-words overflow-hidden"
-                  dangerouslySetInnerHTML={{
-                    __html: rfq?.description || "No description provided",
-                  }}
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6">
+            {/* ---------------- LEFT COLUMN — RFQ DETAILS ---------------- */}
+            <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8">
+
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Info label="Subject" value={rfq?.subject || ""} />
+                <Info label="Project Number" value={rfq?.projectNumber || ""} />
+                <Info label="Status" value={rfq?.status || ""} />
+                <Info label="Tools" value={rfq?.tools || "N/A"} />
+                <Info
+                  label="Due Date"
+                  value={
+                    rfq?.estimationDate
+                      ? new Date(rfq.estimationDate).toLocaleDateString()
+                      : "N/A"
+                  }
                 />
+                <Info label="Bid Amount (USD)" value={rfq?.bidPrice ?? "—"} />
+                {(() => {
+                  const approvedQuota = rfq?.CDQuotas?.find(q => q.approvalStatus === true);
+                  if (approvedQuota) {
+                    const cdName = rfq?.connectionDesignerRFQ?.find(cd => cd.id === approvedQuota.connectionDesignerId)?.name;
+                    return <Info label="Connection Designer" value={cdName || "N/A"} />;
+                  }
+                  return null;
+                })()}
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <button
+                  onClick={() => setShowDescription((prev) => !prev)}
+                  className="text-sm font-black text-black/40 uppercase tracking-widest hover:text-black transition-colors flex items-center gap-1"
+                >
+                  {showDescription ? 'Hide Description' : 'Show Description'}
+                </button>
+                {showDescription && (
+                  <div
+                    className="text-black bg-white p-4 rounded-xl border border-black prose prose-sm max-w-none text-xs sm:text-sm font-medium break-words overflow-hidden"
+                    dangerouslySetInnerHTML={{
+                      __html: rfq?.description || "No description provided",
+                    }}
+                  />
+                )}
+              </div>
+
+              {/* ---------------- FOLLOW-UPS SECTION ---------------- */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-black text-black flex items-center gap-2 uppercase tracking-widest">
+                    <MessageSquare className="w-4 h-4" /> RFQ Follow-ups
+                  </h4>
+                  <button
+                    onClick={() => setShowFollowUpForm(!showFollowUpForm)}
+                    className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline flex items-center gap-1"
+                  >
+                    {showFollowUpForm ? "Cancel" : "+ Add Follow-up"}
+                  </button>
+                </div>
+
+                {/* Follow-up Form */}
+                {showFollowUpForm && (
+                  <form
+                    onSubmit={handleFollowUpSubmit}
+                    className="bg-white p-4 rounded-2xl border border-black shadow-sm space-y-4 animate-in slide-in-from-top-2 duration-200"
+                  >
+                    <RichTextEditor
+                      value={followUpDescription}
+                      onChange={setFollowUpDescription}
+                      placeholder="Type your follow-up message..."
+                    />
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-black/40 uppercase tracking-widest">
+                        Attachments
+                      </label>
+                      <MultipleFileUpload
+                        onFilesChange={setFollowUpFiles}
+                      />
+                    </div>
+                    <div className="flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={isSubmittingFollowUp}
+                        className="px-6 py-2 bg-green-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-green-300 transition-all text-[10px] flex items-center gap-2 disabled:opacity-50"
+                      >
+                        {isSubmittingFollowUp ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Send className="w-3 h-3" />
+                        )}
+                        {isSubmittingFollowUp ? "Sending..." : "Post Follow-up"}
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {/* Follow-ups List */}
+                <div className="space-y-3">
+                  {rfq?.followUps && rfq.followUps.length > 0 ? (
+                    rfq.followUps.map((fu, idx) => (
+                      <div
+                        key={fu.id || idx}
+                        className="bg-white p-3 sm:p-4 rounded-2xl border border-black shadow-sm space-y-3"
+                      >
+                        <div className="flex items-center justify-between border-b border-black/5 pb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-gray-100 border border-black flex items-center justify-center">
+                              <User className="w-3 h-3 text-black" />
+                            </div>
+                            <span className="text-[10px] font-black text-black uppercase tracking-widest">
+                              {fu.createdByRole === "CLIENT" ? rfq?.sender?.fabricator?.fabName || "Client" : "WBT Team"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 text-[10px] font-bold text-black/40 uppercase tracking-widest">
+                            <Clock className="w-3 h-3" />
+                            {new Date(fu.createdAt).toLocaleString("en-IN", {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                        </div>
+
+                        <div
+                          className="text-xs text-black leading-relaxed prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: fu.description }}
+                        />
+
+                        {fu.files && fu.files.length > 0 && (
+                          <div className="flex flex-wrap gap-2 pt-2 border-t border-black/5">
+                            {fu.files.map((file, fIdx) => (
+                              <button
+                                key={file.id || fIdx}
+                                onClick={async () => {
+                                  try {
+                                    const res = await Service.viewRfqFile(id, file.id);
+                                    if (res) {
+                                      const url = URL.createObjectURL(new Blob([res]));
+                                      const link = document.createElement('a');
+                                      link.href = url;
+                                      link.setAttribute('download', file.fileName || 'attachment');
+                                      document.body.appendChild(link);
+                                      link.click();
+                                      link.parentNode.removeChild(link);
+                                    }
+                                  } catch (err) {
+                                    toast.error("Failed to download file");
+                                  }
+                                }}
+                                className="flex items-center gap-2 px-3 py-1 bg-gray-50 border border-black rounded-full hover:bg-gray-100 transition-all group"
+                              >
+                                <Paperclip className="w-3 h-3 text-black/40 group-hover:text-black" />
+                                <span className="text-[10px] font-black text-black uppercase tracking-widest truncate max-w-[150px]">
+                                  {file.originalName || file.fileName || "File"}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center bg-gray-50 rounded-2xl border-2 border-dashed border-black/10">
+                      <p className="text-[10px] font-black text-black/20 uppercase tracking-[0.2em]">
+                        No follow-ups recorded yet
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Scopes */}
+              <div className="space-y-4">
+                <div className="p-4 bg-white rounded-2xl border border-black text-sm">
+                  <h4 className="text-xs font-black text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
+                    <Settings className="w-4 h-4" /> Connection Design Scope
+                  </h4>
+                  <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
+                    <Scope
+                      label="Connection Design"
+                      enabled={rfq?.connectionDesign || false}
+                    />
+                    <Scope
+                      label="Misc Design"
+                      enabled={rfq?.miscDesign || false}
+                    />
+                    <Scope
+                      label={
+                        !rfq?.customerDesign && rfq?.sender?.fabricator?.fabName
+                          ? `Connection design by ${rfq.sender.fabricator.fabName}`
+                          : "Connection Design by WBT"
+                      }
+                      enabled={true}
+                    />
+                  </div>
+                </div>
+                <div className="p-4 bg-white rounded-2xl border border-black text-sm">
+                  <h4 className="text-xs font-black text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
+                    <Settings className="w-4 h-4" /> Detailing Scope
+                  </h4>
+                  <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
+                    <Scope
+                      label="Detailing Main"
+                      enabled={rfq?.detailingMain || false}
+                    />
+                    <Scope
+                      label="Detailing Misc"
+                      enabled={rfq?.detailingMisc || false}
+                    />
+                    <Scope
+                      label="MTO - Manual"
+                      enabled={rfq?.MTOManual || false}
+                    />
+                    {rfq?.MTOStickModel && (
+                      <Scope
+                        label={`MTO - Stick Model: ${rfq.MTOStickModel}`}
+                        enabled={true}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+
+              {/* Files */}
+              <RenderFiles
+                files={rfq?.files || []}
+                table="rFQ"
+                parentId={rfq?.id}
+                formatDate={(date) => new Date(date).toLocaleDateString()}
+              />
+              {userRole !== "CLIENT" && (
+                <div className="flex flex-col gap-2 pt-2">
+                  <Button
+                    onClick={() => setShowEstimationModal(true)}
+                    className="w-full sm:w-auto h-auto py-2.5 px-4 text-sm  bg-[#6bbd45]/15 text-black rounded-md hover:bg-[#6bbd45]/80 transition text-sm"
+                  >
+                    Raise For Estimation
+                  </Button>
+                  <Button
+                    onClick={() => handleCDQuotationModal()}
+                    className="w-full sm:w-auto h-auto py-2.5 px-4 text-[11px] sm:text-sm bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 whitespace-normal leading-tight "
+                  >
+                    Raise for Connection Designer Quotation
+                  </Button>
+                </div>
               )}
             </div>
 
-            {/* Scopes */}
-            <div className="space-y-4">
-              <div className="p-4 bg-white rounded-2xl border border-black text-sm">
-                <h4 className="text-xs font-black text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
-                  <Settings className="w-4 h-4" /> Connection Design Scope
-                </h4>
-                <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
-                  <Scope
-                    label="Connection Design"
-                    enabled={rfq?.connectionDesign || false}
-                  />
-                  <Scope
-                    label="Misc Design"
-                    enabled={rfq?.miscDesign || false}
-                  />
-                  <Scope
-                    label={
-                      !rfq?.customerDesign && rfq?.sender?.fabricator?.fabName
-                        ? `Connection design by ${rfq.sender.fabricator.fabName}`
-                        : "Connection Design by WBT"
-                    }
-                    enabled={true}
-                  />
-                </div>
-              </div>
-              <div className="p-4 bg-white rounded-2xl border border-black text-sm">
-                <h4 className="text-xs font-black text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
-                  <Settings className="w-4 h-4" /> Detailing Scope
-                </h4>
-                <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
-                  <Scope
-                    label="Detailing Main"
-                    enabled={rfq?.detailingMain || false}
-                  />
-                  <Scope
-                    label="Detailing Misc"
-                    enabled={rfq?.detailingMisc || false}
-                  />
-                </div>
-              </div>
-            </div>
-
-
-            {/* Files */}
-            <RenderFiles
-              files={rfq?.files || []}
-              table="rFQ"
-              parentId={rfq?.id}
-              formatDate={(date) => new Date(date).toLocaleDateString()}
-            />
-            {userRole !== "CLIENT" && (
-              <div className="flex flex-col gap-2 pt-2">
-                <Button
-                  onClick={() => setShowEstimationModal(true)}
-                  className="w-full sm:w-auto h-auto py-2.5 px-4 text-sm  bg-[#6bbd45]/15 text-black rounded-md hover:bg-[#6bbd45]/80 transition text-sm"
-                >
-                  Raise For Estimation
-                </Button>
-                <Button
-                  onClick={() => handleCDQuotationModal()}
-                  className="w-full sm:w-auto h-auto py-2.5 px-4 text-[11px] sm:text-sm bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 whitespace-normal leading-tight "
-                >
-                  Raise for Connection Designer Quotation
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {/* ---------------- RIGHT COLUMN — RESPONSES ---------------- */}
-          <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8">
-            {/* Header + Add Response Button */}
-            <div className="flex justify-between items-center gap-4">
-              <h1 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight">
-                Responses
-              </h1>
-
-              {(userRole === "ADMIN" ||
-                userRole === "DEPUTY_MANAGER" ||
-                userRole === "OPERATION_EXECUTIVE" ||
-                userRole === "ESTIMATION_HEAD") && (
-                  <Button
-                    onClick={() => setShowResponseModal(true)}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#6bbd45]/15 text-black rounded-lg shadow-sm hover:bg-[#6bbd45]/80 transition text-sm"
+            {/* ---------------- RIGHT COLUMN — RESPONSES & CD QUOTAS ---------------- */}
+            <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8 flex flex-col min-h-0">
+              {/* Header + Add Response Button */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-gray-300 pb-2">
+                <div className="flex gap-6 items-center">
+                  <button
+                    onClick={() => setActiveTab("responses")}
+                    className={`text-sm md:text-xl font-bold uppercase tracking-tight transition-all relative ${activeTab === "responses" ? "text-black" : "text-gray-400 hover:text-gray-600"
+                      }`}
                   >
-                    + Add Response
-                  </Button>
+                    Responses
+                    {activeTab === "responses" && <div className="absolute left-0 w-full bg-black rounded-t-full"></div>}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("cdQuotas")}
+                    className={`text-sm md:text-xl font-bold uppercase tracking-tight transition-all relative ${activeTab === "cdQuotas" ? "text-black" : "text-gray-400 hover:text-gray-600"
+                      }`}
+                  >
+                    CD Quotes
+                    {activeTab === "cdQuotas" && <div className="absolute left-0 w-full bg-black rounded-t-full"></div>}
+                  </button>
+                </div>
+
+                {activeTab === "responses" && (userRole === "ADMIN" ||
+                  userRole === "DEPUTY_MANAGER" ||
+                  userRole === "OPERATION_EXECUTIVE" ||
+                  userRole === "ESTIMATION_HEAD") && (
+                    <button
+                      onClick={() => setShowResponseModal(true)}
+                      className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#6bbd45]/15 text-black font-bold rounded-lg shadow-sm hover:bg-[#6bbd45]/80 transition text-sm border-2 border-[#6bbd45]/50 whitespace-nowrap"
+                    >
+                      + Add Response
+                    </button>
+                  )}
+              </div>
+
+              <div className="flex-1 overflow-auto">
+                {activeTab === "responses" && (
+                  <>
+                    {showResponseModal && (
+                      <ResponseModal
+                        rfqId={id}
+                        onClose={() => setShowResponseModal(false)}
+                        onSuccess={fetchRfq}
+                      />
+                    )}
+
+                    {/* ---- RESPONSE TABLE ---- */}
+                    {rfq?.responses?.length ? (
+                      <DataTable
+                        columns={responseColumns}
+                        data={rfq.responses}
+                        onRowClick={(row) => setSelectedResponse(row)}
+                      />
+                    ) : (
+                      <p className="text-gray-700 italic font-medium p-4 text-center">No responses yet.</p>
+                    )}
+                  </>
                 )}
+
+                {activeTab === "cdQuotas" && (
+                  <>
+                    {/* ---- CDQUOTAS TABLE ---- */}
+                    {rfq?.CDQuotas?.length ? (
+                      <DataTable
+                        columns={cdQuotasColumns}
+                        data={rfq.CDQuotas}
+                        onRowClick={(row) => setSelectedCDQuota(row)}
+                      />
+                    ) : (
+                      <p className="text-gray-700 italic font-medium p-4 text-center">No CD Quotas available.</p>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-            {showResponseModal && (
-              <ResponseModal
-                rfqId={id}
-                onClose={() => setShowResponseModal(false)}
-                onSuccess={fetchRfq}
+          </div>
+        </div>
+        {showCDQuotationModal && (
+          <QuotationRaise
+            rfqId={id}
+            onClose={() => handleCDQuotationModalClose()}
+            onSuccess={fetchRfq} // refresh after submit
+          />
+        )}
+
+        {selectedResponse && (
+          <ResponseDetailsModal
+            response={selectedResponse}
+            onClose={() => setSelectedResponse(null)}
+          />
+        )}
+
+        {selectedCDQuota && (
+          <ConnectionDesignerQuotaByID
+            id={selectedCDQuota.id}
+            onClose={() => setSelectedCDQuota(null)}
+          />
+        )}
+
+        {/* Estimation Modal */}
+        {showEstimationModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
+              <AddEstimation
+                initialRfqId={id}
+                onSuccess={() => {
+                  setShowEstimationModal(false);
+                  // Optionally refresh RFQ or show success message
+                }}
+                onClose={() => setShowEstimationModal(false)}
               />
-            )}
-
-            {/* ---- RESPONSE TABLE ---- */}
-            {rfq?.responses?.length ? (
-              <DataTable
-                columns={responseColumns}
-                data={rfq.responses}
-
-                onRowClick={(row) => setSelectedResponse(row)} // 👈 open modal
-              />
-            ) : (
-              <p className="text-gray-700 italic">No responses yet.</p>
-            )}
-          </div>
-        </div>
-      </div>
-      {showCDQuotationModal && (
-        <QuotationRaise
-          rfqId={id}
-          onClose={() => handleCDQuotationModalClose()}
-          onSuccess={fetchRfq} // refresh after submit
-        />
-      )}
-
-      {selectedResponse && (
-        <ResponseDetailsModal
-          response={selectedResponse}
-          onClose={() => setSelectedResponse(null)}
-        />
-      )}
-
-      {/* Estimation Modal */}
-      {showEstimationModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
-            <button
-              onClick={() => setShowEstimationModal(false)}
-              className="absolute top-4 right-4 px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all z-10"
-            >
-              Close
-            </button>
-            <AddEstimation
-              initialRfqId={id}
-              onSuccess={() => {
-                setShowEstimationModal(false);
-                // Optionally refresh RFQ or show success message
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-70 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl  text-red-600 flex items-center gap-2">
-                <Trash2 size={24} /> Delete RFQ
-              </h3>
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
-              >
-                Close
-              </button>
-            </div>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this RFQ? This action cannot be
-              undone.
-              <br />
-              <span className="font-semibold text-sm mt-2 block">
-                Please type <span className="text-red-600">DELETE</span> to
-                confirm:
-              </span>
-            </p>
-            <input
-              type="text"
-              value={deleteConfirmText}
-              onChange={(e) => setDeleteConfirmText(e.target.value)}
-              placeholder="Type DELETE here"
-              className="w-full px-4 py-2 border rounded-lg mb-6 focus:ring-2 focus:ring-red-500 outline-none transition-all"
-            />
-            <div className="flex gap-3">
-              <Button
-                onClick={() => setShowDeleteModal(false)}
-                className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handleDelete}
-                disabled={deleteConfirmText !== "DELETE" || isDeleting}
-                className={`flex-1 ${deleteConfirmText === "DELETE"
-                  ? "bg-red-600 hover:bg-red-700"
-                  : "bg-red-300 cursor-not-allowed"
-                  } text-white`}
-              >
-                {isDeleting ? "Deleting..." : "Confirm Delete"}
-              </Button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Status Change Modal */}
-      {showStatusModal && (
-        <div className="fixed inset-0 z-70 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl  text-blue-600 flex items-center gap-2">
-                Change RFQ Status
-              </h3>
-              <button
-                onClick={() => setShowStatusModal(false)}
-                className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
-                aria-label="Close"
-              >
-                Close
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  New Status
-                </label>
-                <select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-70 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl  text-red-600 flex items-center gap-2">
+                  <Trash2 size={24} /> Delete RFQ
+                </h3>
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
                 >
-                  <option value="">Select Status</option>
-                  <option value="OPEN">OPEN</option>
-                  <option value="IN_PROGRESS">IN_PROGRESS</option>
-                  <option value="CLOSED">CLOSED</option>
-                  <option value="AWARDED">AWARDED</option>
-                  <option value="RE_APPROVED">RE_APPROVED</option>
-                </select>
+                  Close
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Reason for Change
-                </label>
-                <textarea
-                  value={statusReason}
-                  onChange={(e) => setStatusReason(e.target.value)}
-                  placeholder="Enter reason..."
-                  rows={3}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none"
-                />
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to delete this RFQ? This action cannot be
+                undone.
+                <br />
+                <span className="font-semibold text-sm mt-2 block">
+                  Please type <span className="text-red-600">DELETE</span> to
+                  confirm:
+                </span>
+              </p>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="Type DELETE here"
+                className="w-full px-4 py-2 border rounded-lg mb-6 focus:ring-2 focus:ring-red-500 outline-none transition-all"
+              />
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleteConfirmText !== "DELETE" || isDeleting}
+                  className={`flex-1 ${deleteConfirmText === "DELETE"
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-red-300 cursor-not-allowed"
+                    } text-white`}
+                >
+                  {isDeleting ? "Deleting..." : "Confirm Delete"}
+                </Button>
               </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <Button
-                onClick={() => setShowStatusModal(false)}
-                className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handleStatusUpdate}
-                disabled={isUpdatingStatus}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {isUpdatingStatus ? "Updating..." : "Update Status"}
-              </Button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Edit RFQ Modal */}
-      {showEditModal && (
-        <EditRFQByID
-          id={id}
-          onSuccess={() => {
-            setShowEditModal(false);
-            fetchRfq();
-          }}
-          onCancel={() => setShowEditModal(false)}
-        />
-      )}
-    </>
+        {/* Status Change Modal */}
+        {showStatusModal && (
+          <div className="fixed inset-0 z-70 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl  text-blue-600 flex items-center gap-2">
+                  Change RFQ Status
+                </h3>
+                <button
+                  onClick={() => setShowStatusModal(false)}
+                  className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
+                  aria-label="Close"
+                >
+                  Close
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    New Status
+                  </label>
+                  <select
+                    value={newStatus}
+                    onChange={(e) => setNewStatus(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  >
+                    <option value="">Select Status</option>
+                    <option value="OPEN">OPEN</option>
+                    <option value="IN_PROGRESS">IN_PROGRESS</option>
+                    <option value="CLOSED">CLOSED</option>
+                    <option value="AWARDED">AWARDED</option>
+                    <option value="RE_APPROVED">RE_APPROVED</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Reason for Change
+                  </label>
+                  <textarea
+                    value={statusReason}
+                    onChange={(e) => setStatusReason(e.target.value)}
+                    placeholder="Enter reason..."
+                    rows={3}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <Button
+                  onClick={() => setShowStatusModal(false)}
+                  className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleStatusUpdate}
+                  disabled={isUpdatingStatus}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {isUpdatingStatus ? "Updating..." : "Update Status"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit RFQ Modal */}
+        {showEditModal && (
+          <EditRFQByID
+            id={id}
+            onSuccess={() => {
+              setShowEditModal(false);
+              fetchRfq();
+            }}
+            onCancel={() => setShowEditModal(false)}
+          />
+        )}
+      </div>
+    </div>
   );
 };
 
 const Info = ({ label, value }) => (
   <div className="flex justify-between items-center gap-4 py-2 border-b border-black/5 last:border-0">
-    <p className="text-black/40 text-[10px] font-black uppercase tracking-widest ">
+    <p className="text-black/40 text-[10px] font-bold uppercase tracking-widest ">
       {label}:
     </p>
-    <p className="text-black text-xs font-black uppercase tracking-tight text-right">{value}</p>
+    <p className="text-black text-xs font-bold uppercase tracking-tight text-right">{value}</p>
   </div>
 );
 
 const Scope = ({ label, enabled }) => (
   <div
-    className={`px-4 py-1.5 rounded-full border border-black text-[10px] font-black uppercase tracking-widest shadow-sm transition-all ${enabled
+    className={`px-4 py-1.5 rounded-full border border-black text-[10px] font-bold uppercase tracking-widest shadow-sm transition-all ${enabled
       ? "bg-green-100 text-black"
       : "bg-gray-100 text-black/40"
       }`}

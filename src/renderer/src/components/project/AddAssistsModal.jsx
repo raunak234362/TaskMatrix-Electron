@@ -78,9 +78,9 @@ const AddAssistsModal = ({ projectId, onClose, onSuccess, currentAssists = [] })
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
-            <X size={20} />
+            close
           </button>
         </div>
 
@@ -124,22 +124,15 @@ const AddAssistsModal = ({ projectId, onClose, onSuccess, currentAssists = [] })
                 }),
               }}
             />
-            <p className="text-[10px] text-gray-400 mt-2 px-1">
-              * Assign multiple team members to assist with this project.
-            </p>
+           
           </div>
         </div>
 
         {/* Actions */}
         <div className="px-6 py-5 bg-gray-50/50 border-t border-gray-100 flex gap-3">
+         
           <Button
-            className="flex-1 py-3 bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 font-bold uppercase tracking-widest text-[10px]"
-            onClick={onClose}
-          >
-            Cancel
-          </Button>
-          <Button
-            className="flex-1 py-3 bg-[#6bbd45] text-white hover:bg-[#5aa838] font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-green-200"
+            className="flex-1 py-3 bg-[#6bbd45]/50 text-black hover:bg-[#5aa838] font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-green-200"
             onClick={handleSubmit}
             disabled={isSubmitting}
           >

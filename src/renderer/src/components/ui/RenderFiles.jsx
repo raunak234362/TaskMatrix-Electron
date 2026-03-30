@@ -5,9 +5,6 @@ import Service from "../../api/Service";
 import { toast } from "react-toastify";
 import React from "react";
 
-
-
-
 const RenderFiles = ({
   files,
   onAddFilesClick,
@@ -65,6 +62,8 @@ const RenderFiles = ({
     switch (table) {
       case "project":
         return `${baseURL}/project/viewFile/${parentId}/${fileId}`;
+      case "notes":
+        return `${baseURL}/project/notes/viewFile/${parentId}/${fileId}`;
       case "estimation":
         return `${baseURL}/estimation/viewFile/${parentId}/${fileId}`;
       case "rFI":
@@ -85,6 +84,8 @@ const RenderFiles = ({
         return `${baseURL}/team-meeting-notes/viewFile/${parentId}/${fileId}`;
       case "teamMeetingResponse":
         return `${baseURL}/team-meeting-notes/responses/viewFile/${parentId}/${fileId}`;
+      case "connectionDesignerQuota":
+        return `${baseURL}/connectionDesignerQuota/viewFile/${parentId}/${fileId}`;
       case "designDrawings":
       default:
         return `${baseURL}/api/${table}/designdrawing/viewfile/${parentId}/${fileId}`;

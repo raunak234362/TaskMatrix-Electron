@@ -1,25 +1,35 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 import Service from "../../../api/Service";
 import Input from "../../fields/input";
+import Select from "react-select";
 import { useDispatch } from "react-redux";
 import { addStaff } from "../../../store/userSlice";
 import { X, HardHat, UserPlus, Loader2 } from "lucide-react";
 
-const AddCDEngineer = ({ designer, onClose }) => {
+const roleOptions = [
+  { label: "Connection Designer Engineer", value: "CONNECTION_DESIGNER_ENGINEER" },
+  { label: "Connection Designer Admin", value: "CONNECTION_DESIGNER_ADMIN" },
+];
+
+const AddCDEngineer = ({ designer, onClose, onSuccess }) => {
   const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      role: "CONNECTION_DESIGNER_ENGINEER",
+    },
+  });
 
   const onSubmit = async (data) => {
     const payload = {
       ...data,
-      role: "CONNECTION_DESIGNER_ENGINEER",
       connectionDesignerId: designer.id,
       username: data?.username?.toUpperCase(),
     };
@@ -28,6 +38,7 @@ const AddCDEngineer = ({ designer, onClose }) => {
       const response = await Service.AddEmployee(payload);
       dispatch(addStaff(response?.data?.user));
       toast.success("Engineer created successfully!");
+      if (onSuccess) onSuccess();
       if (onClose) onClose();
     } catch (error) {
       console.error("Error creating employee:", error);
@@ -46,14 +57,14 @@ const AddCDEngineer = ({ designer, onClose }) => {
           <div>
             <h2 className="text-2xl font-black text-gray-800 tracking-tight flex items-center gap-3">
               <UserPlus className="text-[#6bbd45]" size={28} />
-              Onboard Engineer
+              Add Engineer
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 bg-red-100 hover:bg-red-300 text-black hover:text-black rounded-xl shadow-sm border border-black"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
-        close
+            close
           </button>
         </div>
 
@@ -150,7 +161,7 @@ const AddCDEngineer = ({ designer, onClose }) => {
               </div>
 
               {/* Designation */}
-              <div className="space-y-1 md:col-span-2">
+              <div className="space-y-1">
                 <Input
                   label="Engineering Role / Designation"
                   type="text"
@@ -162,6 +173,50 @@ const AddCDEngineer = ({ designer, onClose }) => {
                 {errors.designation && (
                   <p className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-1">
                     {errors.designation.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Role */}
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-gray-700">Role</label>
+                <Controller
+                  name="role"
+                  control={control}
+                  rules={{ required: "Role is required" }}
+                  render={({ field }) => (
+                    <Select
+                      options={roleOptions}
+                      value={roleOptions.find((o) => o.value === field.value)}
+                      onChange={(val) => field.onChange(val?.value)}
+                      className="text-sm"
+                      placeholder="Select Role"
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          borderRadius: "0.5rem",
+                          padding: "0.125rem",
+                          borderColor: "#d1d5db",
+                          "&:hover": { borderColor: "#9ca3af" },
+                        }),
+                        option: (base, { isFocused, isSelected }) => ({
+                          ...base,
+                          backgroundColor: isSelected
+                            ? "#6bbd45"
+                            : isFocused
+                            ? "#6bbd4520"
+                            : "white",
+                          color: isSelected ? "white" : "#374151",
+                          cursor: "pointer",
+                          fontSize: "0.875rem",
+                        }),
+                      }}
+                    />
+                  )}
+                />
+                {errors.role && (
+                  <p className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-1">
+                    {errors.role.message}
                   </p>
                 )}
               </div>
@@ -184,7 +239,7 @@ const AddCDEngineer = ({ designer, onClose }) => {
                 {isSubmitting ? (
                   <Loader2 className="animate-spin w-4 h-4" />
                 ) : (
-                  "Initiate Onboarding"
+                  "Add Engineer"
                 )}
               </button>
             </div>

@@ -309,6 +309,13 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
               bg="bg-blue-50"
             />
             <InfoCard
+              icon={<Calendar className="w-5 h-5" />}
+              label="CD Approval Date"
+              value={formatDate(milestone.CDApprovalDate)}
+              color="text-emerald-600"
+              bg="bg-emerald-50"
+            />
+            <InfoCard
               icon={<Clock className="w-5 h-5" />}
               label="Created At"
               value={formatDate(milestone.date)}
@@ -472,6 +479,14 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
                                   </p>
                                   <p className="text-sm text-gray-700 ">
                                     {formatDate(v.approvalDate)}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 mt-1">
+                                    CD Approval Date
+                                  </p>
+                                  <p className="text-sm text-gray-700 ">
+                                    {formatDate(v.CDApprovalDate)}
                                   </p>
                                 </div>
                               </div>

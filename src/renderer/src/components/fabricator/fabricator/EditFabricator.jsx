@@ -366,7 +366,7 @@ const EditFabricator = ({
                 </div>
                 <div>
                   <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
-                    Vault Settlement
+                    Accounts
                   </label>
                   <select
                     {...register("accountId")}

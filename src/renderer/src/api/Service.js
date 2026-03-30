@@ -572,6 +572,36 @@ class Service {
     }
   }
 
+  // Get Connection Designer Quota by ID
+  static async GetConnectionDesignerQuotaByID(id) {
+    try {
+      const response = await api.get(`connectionDesignerQuota/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+// Connection Designer Quota Approve By ID
+static async ConnectionDesignerQuotaApproveByID(id) {
+  try {
+    const response = await api.put(`connectionDesignerQuota/approve/${id}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    console.log(response)
+    return response.data
+  } catch (error) {
+    console.log(error)
+  }
+}
+
   // Add Estimation
   static async AddEstimation(formData) {
     try {
@@ -3129,6 +3159,32 @@ class Service {
     } catch (error) {
       console.error("Error fetching file notes:", error);
       throw error;
+    }
+  }
+  //rfq followups:
+  static async addRFQFollowups(formData, rfqId) {
+    try {
+      const response = await api.post(`rfq/${rfqId}/followups`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("RFQ followups added:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("cannot add RFQ followups", error);
+    }
+  }
+
+  //rfq file
+
+  static async viewRfqFile(Id, fileId) {
+    try {
+      const response = await api.get(`rfq/followups/viewFile/${Id}/${fileId}`);
+      console.log("RFQ file fetched:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("cannot fetch RFQ file", error);
     }
   }
 

@@ -62,6 +62,9 @@ const AddMileStone = ({
         approvalDate: data.approvalDate
           ? new Date(data.approvalDate).toISOString()
           : undefined,
+        CDApprovalDate: data.CDApprovalDate
+          ? new Date(data.CDApprovalDate).toISOString()
+          : undefined,
       };
       await Service.AddProjectMilestone(payload);
       toast.success("Milestone added successfully!");
@@ -84,9 +87,9 @@ const AddMileStone = ({
           </h3>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-200 text-gray-700 transition-colors"
+            className="px-2 py-1 rounded-lg bg-red-200 text-black border-2 border-red-500 transition-colors"
           >
-            <X className="w-5 h-5" />
+            CLOSE
           </button>
         </div>
 
@@ -154,6 +157,16 @@ const AddMileStone = ({
               label="Approval Date/Reapproved Date/Fabrication Date"
               type="date"
               {...register("approvalDate")}
+            />
+            <Input
+              label="CD Submission Date By WBT"
+              type="date"
+              {...register("CDApprovalDate")}
+            />
+            <Input
+              label="CD Approval Submission By"
+              type="date"
+              {...register("CDTargetDate")}
             />
           </div>
 

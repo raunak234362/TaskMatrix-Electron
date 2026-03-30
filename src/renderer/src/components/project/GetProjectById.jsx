@@ -35,9 +35,11 @@ import MilestoneProgress from "./MilestoneProgress";
 import TeamsAnalytics from "./TeamsAnalytics";
 import AllProjectNotes from "./notes/AllProjectNotes";
 import AddAssistsModal from "./AddAssistsModal";
+import ProjectMilestoneMetrics from "./ProjectMilestoneMetrics.jsx";
 
 const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);
+  const [milestones, setMilestones] = useState([]); // Added milestones state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
@@ -248,11 +250,13 @@ const GetProjectById = ({ id, onClose }) => {
     try {
       setLoading(true);
       setError(null);
-      const [projRes] = await Promise.all([
+      const [projRes, mileRes] = await Promise.all([
         Service.GetProjectById(id),
+        Service.GetProjectMilestoneById(id),
         fetchProjectTasks()
       ]);
       setProject(projRes?.data || null);
+      setMilestones(mileRes?.data || []);
     } catch (err) {
       setError("Failed to load project details");
       console.error("Error fetching project:", err);
@@ -488,7 +492,7 @@ const GetProjectById = ({ id, onClose }) => {
 
               {/* Progress and Milestones */}
               <div className="bg-white rounded-3xl border- border-slate-50 p-6">
-                <MilestoneProgress projectId={id} />
+                <ProjectMilestoneMetrics milestones={milestones} projectId={id} />
               </div>
 
               {/* ✅ Other Tasks — Logged Time (grouped by bundleKey) */}

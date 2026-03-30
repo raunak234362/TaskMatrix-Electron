@@ -208,14 +208,14 @@ const AddAccount = ({ onClose, onSuccess }) => {
         <button
           type="button"
           onClick={onClose}
-          className="px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all"
+          className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
         >
           Cancel
         </button>
         <button
           type="submit"
           form="add-account-form"
-          className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all active:scale-95"
+          className="px-6 py-1.5 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all active:scale-95"
           onClick={handleSubmit(onSubmit)}
         >
           Save Bank Details

@@ -13,6 +13,7 @@ import {
   X,
   Save,
   Users,
+  UserPlus,
 } from "lucide-react";
 
 import Input from "../fields/input";
@@ -37,6 +38,8 @@ const EditProject = ({
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState([]);
   const [isFetchingClients, setIsFetchingClients] = useState(false);
+  const [cdEngineers, setCdEngineers] = useState([]);
+  const [isFetchingEngineers, setIsFetchingEngineers] = useState(false);
 
   const fabricators = useSelector(
     (state) => state.fabricatorInfo?.fabricatorData || []
@@ -57,6 +60,8 @@ const EditProject = ({
         detailingMain: false,
         detailingMisc: false,
         clientProjectManagers: [],
+        connectionDesignerID: "",
+        pocOfConnectionDesigner: "",
       },
     });
 
@@ -112,6 +117,8 @@ const EditProject = ({
           setValue("customerDesign", project.customerDesign);
           setValue("detailingMain", project.detailingMain);
           setValue("detailingMisc", project.detailingMisc);
+          setValue("connectionDesignerID", project.connectionDesignerID || "");
+          setValue("pocOfConnectionDesigner", project.pocOfConnectionDesigner?.id || project.pocOfConnectionDesigner || "");
 
           // Handle clientProjectManagers
           if (project.clientProjectManagers) {
@@ -132,6 +139,7 @@ const EditProject = ({
   }, [projectId, setValue]);
 
   const watchedFabricatorId = watch("fabricatorID");
+  const watchedCdId = watch("connectionDesignerID");
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -152,6 +160,26 @@ const EditProject = ({
     };
     fetchClients();
   }, [watchedFabricatorId]);
+
+  useEffect(() => {
+    const fetchEngineers = async () => {
+      if (watchedCdId) {
+        setIsFetchingEngineers(true);
+        try {
+          const res = await Service.FetchConnectionDesignerByID(watchedCdId);
+          setCdEngineers(Array.isArray(res?.data?.CDEngineers) ? res.data.CDEngineers : []);
+        } catch (error) {
+          console.error("Failed to fetch engineers", error);
+          setCdEngineers([]);
+        } finally {
+          setIsFetchingEngineers(false);
+        }
+      } else {
+        setCdEngineers([]);
+      }
+    };
+    fetchEngineers();
+  }, [watchedCdId]);
 
   const options = {
     fabricators: (Array.isArray(fabricators) ? fabricators : []).map(
@@ -194,6 +222,10 @@ const EditProject = ({
         label: `${c.firstName} ${c.lastName} (${c.role === 'CLIENT_ADMIN' ? 'Admin' : 'Client'})`,
         value: c.id,
       })),
+    pocOfConnectionDesigner: cdEngineers.map((e) => ({
+      label: `${e.firstName} ${e.lastName}`,
+      value: e.id || e._id,
+    })),
   };
 
   const onSubmit = async (data) => {
@@ -247,18 +279,18 @@ const EditProject = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Scrollable Content */}
+        <div className="flex p-4 justify-between items-center mb-6 border-b pb-4 sticky top-0 bg-white z-10">
+          <h2 className="text-2xl  text-gray-700">Edit Project</h2>
+          <button
+            onClick={onCancel}
+            className="text-sm tracking-wider text-gray-900 font-semibold px-3 py-1 rounded-lg border-2 border-black bg-red-200 hover:text-gray-700"
+          >
+            CLOSE
+          </button>
+        </div>
         <div className="overflow-y-auto p-6">
-          <div className="flex justify-between items-center mb-6 border-b pb-4 sticky top-0 bg-white z-10">
-            <h2 className="text-2xl  text-gray-700">Edit Project</h2>
-            <button
-              onClick={onCancel}
-              className="text-gray-700 hover:text-gray-700"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-1">
             {/* Project Info */}
             <SectionTitle title="Project Details" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -373,6 +405,49 @@ const EditProject = ({
                       isLoading={isFetchingClients}
                       isDisabled={!watchedFabricatorId || isFetchingClients}
                       isSearchable
+                    />
+                  )}
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
+                  <Wrench className="w-4 h-4 text-cyan-600" /> Connection Designer
+                </label>
+                <Controller
+                  name="connectionDesignerID"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      options={options.connectionDesigners}
+                      value={options.connectionDesigners.find(
+                        (o) => o.value === field.value
+                      )}
+                      onChange={(o) => field.onChange(o?.value || "")}
+                      placeholder="Select Designer"
+                      isSearchable
+                      isClearable
+                    />
+                  )}
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
+                  <UserPlus className="w-4 h-4 text-cyan-600" /> CD POC
+                </label>
+                <Controller
+                  name="pocOfConnectionDesigner"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      options={options.pocOfConnectionDesigner}
+                      value={options.pocOfConnectionDesigner.find(
+                        (o) => o.value === field.value
+                      )}
+                      onChange={(o) => field.onChange(o?.value || "")}
+                      placeholder={isFetchingEngineers ? "Loading..." : "Select POC"}
+                      isSearchable
+                      isClearable
+                      isDisabled={!watchedCdId || isFetchingEngineers}
                     />
                   )}
                 />

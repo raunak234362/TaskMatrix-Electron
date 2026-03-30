@@ -5,6 +5,8 @@ import { useForm, Controller } from "react-hook-form";
 import Select from "react-select";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import Input from "../fields/input";
+import MultipleFileUpload from "../fields/MultipleFileUpload";
 
 
 
@@ -14,7 +16,7 @@ const QuotationRaise = ({
   onClose,
   onSuccess,
 }) => {
-  const { handleSubmit, control, watch } = useForm();
+  const { register, handleSubmit, control, watch } = useForm();
 
 
 
@@ -92,16 +94,37 @@ const QuotationRaise = ({
   // Submit — send IDs
   const RaiseForQuotation = async (data) => {
     try {
-      const payload = {
-        ConnectionDesignerIds: data.ConnectionDesignerIds?.map(
-          (cd) => cd.value
-        ) || [],
-        connectionEngineerIds: data.EngineerIds?.map((eng) => eng.value) || [],
-      };
+      const formData = new FormData();
 
-      console.log("📦 Final Payload:", payload);
+      // Append ConnectionDesignerIds
+      if (Array.isArray(data.ConnectionDesignerIds)) {
+        data.ConnectionDesignerIds.forEach((cd) =>
+          formData.append("ConnectionDesignerIds", cd.value)
+        );
+      }
 
-      const response = await Service.UpdateRFQById(rfqId, payload);
+      // Append connectionEngineerIds
+      if (Array.isArray(data.EngineerIds)) {
+        data.EngineerIds.forEach((eng) =>
+          formData.append("connectionEngineerIds", eng.value)
+        );
+      }
+
+      formData.append("CDDescription", data.CDDescription || "");
+      formData.append("CDDueDate", data.CDDueDate || "");
+      formData.append("CDTargetDate", data.CDTargetDate || "");
+      formData.append("RFQDueDate", data.RFQDueDate || "");
+
+      // Append CDAttachments
+      if (Array.isArray(data.CDAttachments)) {
+        data.CDAttachments.forEach((file) =>
+          formData.append("CDAttachments", file)
+        );
+      }
+
+      console.log("📦 Raising Quotation for RFQ:", rfqId);
+
+      const response = await Service.UpdateRFQById(rfqId, formData);
       console.log("Quotation raised successfully:", response);
 
       toast.success("Quotation raised successfully!");
@@ -123,8 +146,7 @@ const QuotationRaise = ({
           </h2>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
-            aria-label="Close"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
             Close
           </button>
@@ -271,6 +293,45 @@ const QuotationRaise = ({
               />
             </div>
           )}
+
+          {/* Additional CD Fields */}
+          <div className="space-y-4 pt-4 border-t border-gray-100">
+            <div>
+              <Input
+                label="Description"
+                type="textarea"
+                {...register("CDDescription")}
+                placeholder="Enter requirements or notes for Connection Designers..."
+                className="bg-gray-50/50"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="RFQ Due Date"
+                type="date"
+                {...register("RFQDueDate")}
+                className="bg-gray-50/50"
+              />
+            </div>
+          </div>
+
+          {/* CD Attachments */}
+          <div className="pt-4 border-t border-gray-100">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              CD Attachments
+            </label>
+            <div className="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-xl p-4 hover:border-[#6bbd45]/50 transition-all">
+              <Controller
+                name="CDAttachments"
+                control={control}
+                render={({ field }) => (
+                  <MultipleFileUpload
+                    onFilesChange={(files) => field.onChange(files)}
+                  />
+                )}
+              />
+            </div>
+          </div>
 
           {/* Submit */}
           <div className="flex justify-end pt-4 border-t border-gray-200">

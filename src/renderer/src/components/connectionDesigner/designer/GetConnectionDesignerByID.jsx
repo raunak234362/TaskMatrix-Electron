@@ -34,19 +34,20 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
   const [engineerModel, setEnginnerModel] = useState(null)
   const [activeTab, setActiveTab] = useState('DASHBOARD')
 
-  useEffect(() => {
-    const fetchDesigner = async () => {
-      if (!id) return
-      try {
-        setLoading(true)
-        const response = await Service.FetchConnectionDesignerByID(id)
-        setDesigner(response?.data || null)
-      } catch (err) {
-        setError('Failed to load details')
-      } finally {
-        setLoading(false)
-      }
+  const fetchDesigner = async () => {
+    if (!id) return
+    try {
+      setLoading(true)
+      const response = await Service.FetchConnectionDesignerByID(id)
+      setDesigner(response?.data || null)
+    } catch (err) {
+      setError('Failed to load details')
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchDesigner()
   }, [id])
 
@@ -75,9 +76,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
       {/* 1. Header Section */}
       <div className="p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-b border-gray-200">
         <div className="flex items-center gap-5">
-          <div className="w-16 h-16 rounded-xl bg-green-100 flex items-center justify-center text-green-800 text-3xl font-black shadow-sm border border-green-200">
-            {designer.name.charAt(0).toUpperCase()}
-          </div>
+
           <div>
             <h2 className="text-2xl font-black text-black tracking-tight">{designer.name}</h2>
             <div className="flex items-center gap-4 mt-1">
@@ -87,7 +86,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
               </span>
               <span className="flex items-center gap-1.5 text-[10px] font-bold text-black uppercase tracking-widest">
                 <Globe size={12} className="text-green-500" />
-                {designer.location || 'UNITED STATES'}
+                {designer.location}
               </span>
             </div>
           </div>
@@ -114,7 +113,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-red-50 border border-red-600 rounded-lg text-[10px] font-black text-black uppercase tracking-widest hover:bg-red-100 transition-all flex items-center gap-2"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
             Close
           </button>
@@ -129,17 +128,14 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
               <StatBox
                 label="Total Engineers"
                 value={designer.CDEngineers?.length || 0}
-                unit="Engineers"
                 icon={HardHat}
               />
-              <StatBox label="Active Projects" value={0} unit="Projects" icon={RefreshCcw} />
+              <StatBox label="Active Projects" value={0} icon={RefreshCcw} />
               <StatBox label="Status" value="Active" icon={ShieldCheck} isStatus />
               <StatBox
                 label="Availability"
                 value={Array.isArray(designer.state) ? designer.state.length : 0}
-                unit="States"
                 icon={Globe}
-                subtext="UNITED STATES"
               />
             </div>
 
@@ -148,30 +144,30 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
               <div className="lg:col-span-8 space-y-12">
                 {/* Pending Actions Section */}
                 <div>
-                  <h3 className="text-[11px] font-black text-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                  <h3 className="text-sm font-black text-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                     <ClipboardList size={16} className="text-green-600" />
                     Pending Actions
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <ActionCard icon={FileText} label="RFI" count={0} color="green" />
-                    <ActionCard icon={RefreshCcw} label="SUBMITTALS" count={0} color="purple" />
-                    <ActionCard icon={Briefcase} label="CHANGE ORDERS" count={0} color="red" />
-                    <ActionCard icon={Search} label="RFQ" count={0} color="blue" />
+                    <ActionCard icon={RefreshCcw} label="SUBMITTALS" count={0} color="green" />
+                    <ActionCard icon={Briefcase} label="CHANGE ORDERS" count={0} color="green" />
+                    <ActionCard icon={Search} label="RFQ" count={0} color="green" />
                   </div>
                 </div>
 
                 {/* Profile Details Section */}
                 <div>
-                  <h3 className="text-[11px] font-black text-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                  <h3 className="text-sm font-black text-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                     <Users size={16} className="text-green-600" />
                     Profile Details
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12 bg-gray-50/30 p-8 rounded-2xl border border-gray-300">
-                    <DetailItem label="PRINCIPAL EMAIL" value={designer.email} />
-                    <DetailItem label="DIGITAL PRESENCE" value={designer.websiteLink || '-'} />
-                    <DetailItem label="SECURE CONTACT" value={designer.contactInfo || '-'} />
+                    <DetailItem label="Email Address" value={designer.email} />
+                    <DetailItem label="Website Link" value={designer.websiteLink || '-'} />
+                    <DetailItem label="Contact" value={designer.contactInfo || '-'} />
                     <DetailItem
-                      label="COVERAGE"
+                      label="Coverage"
                       value={
                         Array.isArray(designer.state)
                           ? designer.state.join(', ')
@@ -185,7 +181,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
               {/* Right Column: Administrative Control */}
               <div className="lg:col-span-4">
                 <div className="p-8 rounded-2xl border-2 border-gray-300 flex flex-col gap-5 bg-white shadow-sm sticky top-0">
-                  <h3 className="text-[11px] font-black text-black uppercase tracking-[0.2em] mb-2">
+                  <h3 className="text-sm font-black text-black uppercase tracking-wide mb-2">
                     Administrative Control
                   </h3>
 
@@ -240,7 +236,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
         <EditConnectionDesigner onClose={() => setEditModel(null)} designerData={designer} />
       )}
       {engineerModel && (
-        <AllCDEngineer onClose={() => setEnginnerModel(null)} designerData={designer} />
+        <AllCDEngineer onClose={() => setEnginnerModel(null)} designerData={designer} refresh={fetchDesigner} />
       )}
     </div>
   )
@@ -253,11 +249,11 @@ const StatBox = ({ label, value, unit, icon: Icon, isStatus, subtext }) => (
         <Icon size={20} strokeWidth={2.5} />
       </div>
       <div>
-        <p className="text-[10px] font-black text-black uppercase tracking-[0.15em] mb-1.5">
-          {label}
-        </p>
-        <div className="flex items-baseline gap-2">
-          <p className={`text-xl font-black ${isStatus ? 'text-green-600' : 'text-black'}`}>
+        <div className="flex items-baseline gap-2 mb-1">
+          <p className="text-sm font-black text-black uppercase tracking-[0.15em]">
+            {label}:
+          </p>
+          <p className={`text-sm font-black ${isStatus ? 'text-green-600' : 'text-black'}`}>
             {value}
           </p>
           {unit && (
@@ -288,16 +284,18 @@ const ActionCard = ({ icon: Icon, label, count, color }) => {
   }
   const s = styles[color]
   return (
-    <div className="p-6 rounded-2xl bg-white border border-gray-300 flex items-center justify-between group hover:shadow-md hover:border-green-300 transition-all cursor-pointer">
-      <div className="flex items-center gap-5">
+    <div className="p-6 rounded-2xl bg-white border border-gray-300 flex items-center justify-start gap-4 group hover:shadow-md hover:border-green-300 transition-all cursor-pointer">
+      <div className="flex items-center gap-4">
         <div className={`p-4 rounded-2xl border transition-all ${s.bg} ${s.text} ${s.border}`}>
           <Icon size={20} strokeWidth={2.5} />
         </div>
-        <span className="text-[11px] font-black text-black uppercase tracking-[0.15em] transition-colors">
-          {label}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-black text-black uppercase tracking-[0.15em] transition-colors">
+            {label}
+          </span>
+          <span className={`text-sm font-black ${s.text}`}>{count}</span>
+        </div>
       </div>
-      <span className={`text-2xl font-black ${s.text}`}>{count}</span>
     </div>
   )
 }

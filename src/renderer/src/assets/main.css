@@ -103,3 +103,21 @@ body {
   -webkit-text-fill-color: transparent;
   font-weight: 700;
 }
+
+/* Fix Jodit Editor z-index overlapping dropdowns */
+.jodit-container {
+  z-index: 1 !important;
+}
+
+.jodit-placeholder {
+  z-index: 1 !important;
+}
+
+.jodit-status-bar {
+  z-index: 1 !important;
+}
+
+/* Ensure react-select and other dropdowns stay on top */
+div[class*="-menu"] {
+  z-index: 9999 !important;
+}
