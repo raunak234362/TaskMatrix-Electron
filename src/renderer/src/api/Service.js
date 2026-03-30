@@ -470,11 +470,7 @@ class Service {
   // Update RFQ by ID
   static async UpdateRFQById(rfqId, data) {
     try {
-      const response = await api.put(`rfq/update/${rfqId}`, data, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
+      const response = await api.put(`rfq/update/${rfqId}`, data)
       console.log('RFQ updated:', response.data)
       return response.data
     } catch (error) {

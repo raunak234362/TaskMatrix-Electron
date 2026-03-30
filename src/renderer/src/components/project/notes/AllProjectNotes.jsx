@@ -10,19 +10,13 @@ import {
 import Service from "../../../api/Service";
 import { toast } from "react-toastify";
 import AddProjectNote from "./AddProjectNote";
+import FileItem from "../../ui/FileItem";
+import { openFileSecurely } from "../../../utils/openFileSecurely";
 import DataTable from "../../ui/table";
 import NoteResponseModal from "./NoteResponseModal";
 import NoteResponseDetailsModal from "./NoteResponseDetailsModal";
 import { formatDateTime } from "../../../utils/dateUtils";
-import RenderFiles from "../../ui/RenderFiles";
-
-const truncateWords = (html, limit = 25) => {
-    if (!html) return "";
-    const text = html.replace(/<[^>]*>/g, " ").trim();
-    const words = text.split(/\s+/).filter(Boolean);
-    if (words.length <= limit) return text;
-    return words.slice(0, limit).join(" ") + "...";
-};
+import { truncateWords } from "../../../utils/stringUtils";
 
 const AllProjectNotes = ({ projectId }) => {
     const [notes, setNotes] = useState([]);
@@ -116,45 +110,51 @@ const AllProjectNotes = ({ projectId }) => {
         "deputy_manager",
         "client",
         "client_admin",
+        "project_manager_officer",
         "operation_executive",
+        "estimation_head",
+        "connection_designer_engineer",
+        "connection_designer_admin",
     ].includes(userRole);
 
     if (!isAuthorized) {
-        return null; // Or return a message: <div className="p-4 text-red-500 font-bold">Access Denied</div>
+        return null;
     }
 
-    const isClient = userRole === "client" || userRole === "client_admin";
     const currentUserId = sessionStorage.getItem("userId") || "";
 
     const filteredNotes = notes.filter((note) => {
-        if (!isClient) return true;
-        // Always show if the current user is the creator
+        // Admin, internal staff, and Client Admins see everything for the project
+        const hasFullAccess = [
+            "admin",
+            "project_manager",
+            "deputy_manager",
+            "project_manager_officer",
+            "operation_executive",
+            "estimation_head",
+            "client_admin",
+            "client",
+            "connection_designer_engineer",
+            "connection_designer_admin",
+        ].includes(userRole);
+
+        if (hasFullAccess) return true;
+
+        // Users always see their own created notes
         if (note.createdBy?.id === currentUserId) return true;
 
-        // If it's a client, show only EXTERNAL notes if they were added by the internal team (non-clients)
-        const creatorRole = note.createdBy?.role?.toLowerCase() || "";
-        const isInternalCreator = creatorRole !== "client" && creatorRole !== "client_admin";
-
-        if (isInternalCreator) {
-            return note.visibility === "EXTERNAL";
-        }
         return true;
     });
 
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h2 className="text-xl font-black text-black uppercase tracking-tight">
-                        Project Notes
-                    </h2>
 
-                </div>
                 <button
                     onClick={() => setShowAddModal(true)}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-green-100 text-black rounded-xl hover:bg-green-200 transition-all shadow-sm font-black uppercase text-xs tracking-widest border border-black border-2"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-green-200 border border-black font-semibold text-black rounded-xl text-[10px] uppercase shadow-xl hover:bg-green-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
-                    Create Note
+                    + Add New Note
                 </button>
             </div>
 
@@ -182,8 +182,20 @@ const AllProjectNotes = ({ projectId }) => {
                                     className="w-full flex items-center justify-between p-5 text-left transition-colors hover:bg-gray-50/50"
                                 >
                                     <div className="flex-1 min-w-0 pr-4">
-                                        <div className="text-sm font-black text-black pr-4 uppercase tracking-tight mb-2">
-                                            {truncateWords(note.content)}
+                                        <div className="flex items-center gap-2 mb-1">
+                                            {note.serialNo && (
+                                                <span className="text-[9px] font-black bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase">
+                                                    {note.serialNo}
+                                                </span>
+                                            )}
+                                            {note.visibility === "INTERNAL" && (
+                                                <span className="text-[9px] font-black bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase">
+                                                    Internal
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="text-sm font-black text-black truncate pr-4 uppercase tracking-tight mb-2">
+                                            {note.title || truncateWords(note.content?.replace(/<[^>]*>?/gm, "") || "Untitled Note", 10)}
                                         </div>
                                         <div className="flex items-center gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                             {note.createdBy && (
@@ -238,7 +250,7 @@ const AllProjectNotes = ({ projectId }) => {
                                                 Observation / Discussion
                                             </p>
                                             <div
-                                                className="prose prose-sm max-w-none text-gray-700 bg-gray-50/50 p-4 rounded-xl border border-gray-100 font-medium"
+                                                className="prose prose-sm max-w-none text-gray-700 bg-gray-50/50 p-4 rounded-xl border border-gray-100 font-medium whitespace-pre-wrap"
                                                 dangerouslySetInnerHTML={{
                                                     __html: note.content || "No content.",
                                                 }}
@@ -251,11 +263,21 @@ const AllProjectNotes = ({ projectId }) => {
                                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                                                     Attached Intelligence
                                                 </p>
-                                                <RenderFiles
-                                                    files={note.files}
-                                                    table="teamMeetingNotes"
-                                                    parentId={note.id}
-                                                />
+                                                <div className="flex flex-wrap gap-2">
+                                                    {note.files.map((file) => (
+                                                        <FileItem
+                                                            key={file.id}
+                                                            name={file.originalName || file.fileName || file.id}
+                                                            onClick={() =>
+                                                                openFileSecurely(
+                                                                    "team-meeting-notes",
+                                                                    note.id,
+                                                                    file.id,
+                                                                )
+                                                            }
+                                                        />
+                                                    ))}
+                                                </div>
                                             </div>
                                         )}
 
@@ -298,7 +320,7 @@ const AllProjectNotes = ({ projectId }) => {
                                                                 cell: ({ row }) => {
                                                                     const count = row.original.files?.length ?? 0;
                                                                     return count > 0 ? (
-                                                                        <span className="text-black font-medium text-xs font-black">
+                                                                        <span className="text-black font-medium text-xs">
                                                                             {count} file(s)
                                                                         </span>
                                                                     ) : (

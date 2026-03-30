@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Loader2, Paperclip, X, FileText } from "lucide-react";
 import Service from "../../../api/Service";
+import RichTextEditor from "../../fields/RichTextEditor";
 
 const AddProjectNote = ({
     projectId,
@@ -102,13 +103,13 @@ const AddProjectNote = ({
                         <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
                             Content <span className="text-red-500">*</span>
                         </label>
-                        <textarea
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            rows={5}
-                            placeholder="Write note content here..."
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#6bbd45]/40 focus:border-[#6bbd45] transition-all resize-none"
-                        />
+                        <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-[#6bbd45]/40 transition-all">
+                            <RichTextEditor
+                                value={content}
+                                onChange={setContent}
+                                placeholder="Write note content here..."
+                            />
+                        </div>
                     </div>
 
                     {/* Visibility — hidden for client roles */}

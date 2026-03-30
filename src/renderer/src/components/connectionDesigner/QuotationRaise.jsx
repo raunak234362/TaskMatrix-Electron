@@ -96,26 +96,34 @@ const QuotationRaise = ({
     try {
       const formData = new FormData();
 
-      // Append ConnectionDesignerIds
+      // Append ConnectionDesignerIds with [] to ensure array treatment
       if (Array.isArray(data.ConnectionDesignerIds)) {
         data.ConnectionDesignerIds.forEach((cd) =>
-          formData.append("ConnectionDesignerIds", cd.value)
+          formData.append("ConnectionDesignerIds[]", cd.value)
         );
       }
 
-      // Append connectionEngineerIds
+      // Append connectionEngineerIds with [] to ensure array treatment
       if (Array.isArray(data.EngineerIds)) {
         data.EngineerIds.forEach((eng) =>
-          formData.append("connectionEngineerIds", eng.value)
+          formData.append("connectionEngineerIds[]", eng.value)
         );
       }
 
       formData.append("CDDescription", data.CDDescription || "");
-      formData.append("CDDueDate", data.CDDueDate || "");
-      formData.append("CDTargetDate", data.CDTargetDate || "");
-      formData.append("RFQDueDate", data.RFQDueDate || "");
+      
+      // Handle dates precisely — ensuring they are valid and in ISO format
+      if (data.CDDueDate) {
+        formData.append("CDDueDate", new Date(data.CDDueDate).toISOString());
+      }
+      if (data.CDTargetDate) {
+        formData.append("CDTargetDate", new Date(data.CDTargetDate).toISOString());
+      }
+      if (data.RFQDueDate) {
+        formData.append("RFQDueDate", new Date(data.RFQDueDate).toISOString());
+      }
 
-      // Append CDAttachments
+      // Append CDAttachments - multiple appends with the same key
       if (Array.isArray(data.CDAttachments)) {
         data.CDAttachments.forEach((file) =>
           formData.append("CDAttachments", file)
