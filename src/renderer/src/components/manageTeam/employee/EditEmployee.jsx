@@ -1,6 +1,7 @@
 // components/employee/EditEmployee.jsx
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import Service from "../../../api/Service";
 import { X, Check, Loader2 } from "lucide-react";
 import Input from "../../fields/input";
@@ -110,7 +111,6 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
   const onSubmit = async (data) => {
     try {
       setSubmitting(true);
-      setError(null);
 
       const response = await Service.EditEmployeeByID(
         employeeData?.id,
@@ -129,10 +129,11 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
         }
       }
 
+      toast.success("Employee updated successfully!");
       onSuccess?.();
       onClose();
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to update employee");
+      toast.error(err?.response?.data?.message || "Failed to update employee");
       console.error(err);
     } finally {
       setSubmitting(false);
