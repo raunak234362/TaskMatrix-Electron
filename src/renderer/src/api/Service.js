@@ -1823,7 +1823,7 @@ static async ConnectionDesignerQuotaApproveByID(id) {
 // submittalsentbyprojectid:
 static async SubmittalSentByProjectId(projectId) {
   try {
-    const response = await api.get(`submittal/sentByProjectId/${projectId}`, {
+    const response = await api.get(`submittal/sents/${projectId}`, {
       headers: {
         'Content-Type': 'application/json'
       }
