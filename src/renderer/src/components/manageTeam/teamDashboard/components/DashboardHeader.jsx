@@ -31,10 +31,24 @@ const DashboardHeader = ({
         </div>
 
         {/* Date Filter */}
-        <DateFilter
-          dateFilter={dateFilter}
-          setDateFilter={onDateFilterChange}
-        />
+        <div className="flex items-center gap-2">
+          <DateFilter
+            dateFilter={dateFilter}
+            setDateFilter={onDateFilterChange}
+          />
+          <button
+            onClick={() => onDateFilterChange({ type: "specificDate", date: new Date().toISOString() })}
+            className={`
+              px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all border
+              ${dateFilter?.type === "specificDate" && new Date(dateFilter.date).toDateString() === new Date().toDateString()
+                ? "bg-black text-white border-black"
+                : "bg-white text-black border-black/10 hover:border-black/30"
+              }
+            `}
+          >
+            Today
+          </button>
+        </div>
 
         {/* Action Buttons */}
         <Button

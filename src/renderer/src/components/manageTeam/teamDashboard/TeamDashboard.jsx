@@ -17,6 +17,7 @@ import TeamStatsCards from "./components/TeamStatsCards";
 import EfficiencyAnalytics from "./components/EfficiencyAnalytics";
 import TeamMembersTable from "./components/TeamMembersTable";
 import TaskDistribution from "./components/TaskDistribution";
+import WorkloadAlerts from "./components/WorkloadAlerts";
 import DailyWorkReportModal from "./components/DailyWorkReportModal";
 import TeamCalendar from "./components/TeamCalendar";
 import { toast } from "react-toastify";
@@ -34,6 +35,7 @@ const TeamDashboard = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [memberFilter, setMemberFilter] = useState("all");
 
   useEffect(() => {
     const isAnyModal =
@@ -66,7 +68,8 @@ const TeamDashboard = () => {
   });
 
   const [dateFilter, setDateFilter] = useState({
-    type: "all",
+    type: "specificDate",
+    date: new Date().toISOString(),
     year: new Date().getFullYear(),
     month: new Date().getMonth(),
     weekStart: new Date(
@@ -677,15 +680,16 @@ const TeamDashboard = () => {
     return "bg-red-100 text-black border-red-200";
   };
 
-  const tableData = useMemo(() => {
+  const fullTableData = useMemo(() => {
     if (!teamMembers || !teamStats.memberStats) return [];
 
     return teamMembers
       .filter((member) => !member.is_disabled && !member.member?.is_disabled)
       .map((member, index) => {
         const user = member.member || {};
+        const memberId = member.userId || user.id || member.id;
         const memberStat = teamStats.memberStats?.find(
-          (stat) => stat.id === (member.userId || user.id || member.id),
+          (stat) => String(stat.id) === String(memberId),
         );
 
         const assignedHours =
@@ -697,6 +701,11 @@ const TeamDashboard = () => {
                 : parseDurationToMinutes(task.duration || "00:00:00") / 60;
             return sum + h;
           }, 0) || 0;
+
+        const isAbsent = (memberStat?.tasks || []).some(task => 
+          task.status === "ABSENT" || 
+          (task.name || task.title || "").toUpperCase().includes("ABSENT")
+        );
 
         const workedHours =
           (memberStat?.tasks || [])
@@ -713,7 +722,6 @@ const TeamDashboard = () => {
             [
               "COMPLETE",
               "USER_FAULT",
-              "VALIDATE_COMPLETED",
               "VALIDATE_COMPLETED",
             ].includes(task.status?.toUpperCase()),
           ).length || 0;
@@ -750,7 +758,7 @@ const TeamDashboard = () => {
 
         return {
           sno: index + 1,
-          id: member.userId || user.id || member.id,
+          id: memberId,
           name:
             `${user.firstName || ""} ${user.middleName || ""} ${user.lastName || ""
               }`.trim() || "Unknown",
@@ -760,9 +768,35 @@ const TeamDashboard = () => {
           totalTasks,
           completedTasks,
           efficiency,
+          isAbsent,
         };
       });
   }, [teamMembers, teamStats.memberStats]);
+
+  const tableData = useMemo(() => {
+    return fullTableData.filter(item => {
+      if (memberFilter === "not_assigned") return Number(item.assignedHours) === 0;
+      if (memberFilter === "under_assigned") return Number(item.assignedHours) > 0 && Number(item.assignedHours) < 8;
+      if (memberFilter === "absent") return item.isAbsent;
+      return true;
+    });
+  }, [fullTableData, memberFilter]);
+
+  const memberCounts = useMemo(() => {
+    if (fullTableData.length === 0) return { all: 0, not_assigned: 0, under_assigned: 0, absent: 0 };
+    
+    let all = 0, not_assigned = 0, under_assigned = 0, absent = 0;
+    
+    fullTableData.forEach(item => {
+      all++;
+      const assignedHours = Number(item.assignedHours);
+      if (assignedHours === 0) not_assigned++;
+      else if (assignedHours < 8) under_assigned++;
+      if (item.isAbsent) absent++;
+    });
+    
+    return { all, not_assigned, under_assigned, absent };
+  }, [fullTableData]);
 
   const formatToHoursMinutes = (val) => {
     if (!val && val !== 0) return "00 hrs 00 mins";
@@ -831,6 +865,17 @@ const TeamDashboard = () => {
 
                 <TeamStatsCards teamStats={teamStats} />
 
+                {dateFilter.type === "specificDate" && (
+                  <WorkloadAlerts 
+                    memberStats={fullTableData} 
+                    onFilterChange={(f) => {
+                      setMemberFilter(f);
+                      const el = document.getElementById('members-table-section');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }} 
+                  />
+                )}
+
                 <TeamCalendar
                   members={allMemberStats}
                   selectedTeamName={
@@ -856,12 +901,17 @@ const TeamDashboard = () => {
                   </div>
                 </div>
 
-                <TeamMembersTable
-                  tableData={tableData}
-                  onMemberClick={handleMemberClick}
-                  formatToHoursMinutes={formatToHoursMinutes}
-                  getEfficiencyColorClass={getEfficiencyColorClass}
-                />
+                <div id="members-table-section">
+                  <TeamMembersTable
+                    tableData={tableData}
+                    onMemberClick={handleMemberClick}
+                    formatToHoursMinutes={formatToHoursMinutes}
+                    getEfficiencyColorClass={getEfficiencyColorClass}
+                    activeFilter={memberFilter}
+                    onFilterChange={setMemberFilter}
+                    memberCounts={memberCounts}
+                  />
+                </div>
               </div>
             )}
           </div>
