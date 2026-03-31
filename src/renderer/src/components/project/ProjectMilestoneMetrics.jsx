@@ -84,11 +84,19 @@ const ProjectMilestoneMetrics = ({
       }
 
       const finalProgress =
-        ms.percentage !== undefined &&
-          ms.percentage !== null &&
-          ms.percentage !== ""
-          ? Number(ms.percentage)
-          : taskProgress;
+        ms.completeionPercentage !== undefined &&
+          ms.completeionPercentage !== null &&
+          ms.completeionPercentage !== ""
+          ? Number(ms.completeionPercentage)
+          : ms.completionPercentage !== undefined &&
+            ms.completionPercentage !== null &&
+            ms.completionPercentage !== ""
+            ? Number(ms.completionPercentage)
+            : ms.percentage !== undefined &&
+              ms.percentage !== null &&
+              ms.percentage !== ""
+              ? Number(ms.percentage)
+              : taskProgress;
 
       return {
         ...ms,
@@ -160,9 +168,7 @@ const ProjectMilestoneMetrics = ({
                         : " text-green-900"
                         }`}
                     >
-                      {ms.completionPercentage ||
-                        ms.taskPercentage ||
-                        ms.percentage}
+                      {ms.progress}
                       %
                     </span>
                     <button
@@ -199,7 +205,7 @@ const ProjectMilestoneMetrics = ({
                   <div
                     className="absolute top-0 left-0 h-2 rounded-full bg-teal-500 transition-all duration-500"
                     style={{
-                      width: `${ms.taskPercentage || ms.percentage}%`,
+                        width: `${ms.progress}%`,
                     }}
                   ></div>
                 </div>
