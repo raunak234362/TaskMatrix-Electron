@@ -897,7 +897,7 @@ const GetProjectById = ({ id, onClose }) => {
 
               {/* Submittal Content */}
               {submittalView === "list" ? (
-                <AllSubmittals submittalData={submittalData} />
+                <AllSubmittals submittalData={submittalData} projectId={id} />
               ) : (
                 <AddSubmittal
                   project={project}
@@ -993,7 +993,7 @@ const GetProjectById = ({ id, onClose }) => {
 
               {/* Submittal Content */}
               {submittalView === "list" ? (
-                <AllSubmittals submittalData={submittalData} />
+                <AllSubmittals submittalData={submittalData} projectId={id} />
               ) : (
                 <AddSubmittal
                   project={project}

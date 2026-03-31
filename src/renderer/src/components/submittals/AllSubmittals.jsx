@@ -10,7 +10,7 @@ import Modal from "../ui/Modal";
 import AddCommunication from "../communication/AddCommunication";
 
 
-const AllSubmittals = ({ submittalData }) => {
+const AllSubmittals = ({ submittalData, projectId }) => {
   const [submittals, setSubmittals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
@@ -28,7 +28,9 @@ const AllSubmittals = ({ submittalData }) => {
       setLoading(true);
       let result;
 
-      if (userRole === "CLIENT") result = await Service.SubmittalSent();
+      if (projectId) {
+        result = await Service.SubmittalSentByProjectId(projectId);
+      } else if (userRole === "CLIENT") result = await Service.SubmittalSent();
       else result = await Service.SubmittalRecieved();
 
       const data = Array.isArray(result?.data) ? result.data : [];
