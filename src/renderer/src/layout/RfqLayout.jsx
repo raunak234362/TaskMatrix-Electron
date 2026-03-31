@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 const RfqLayout = () => {
   const [activeTab, setActiveTab] = useState("allRFQ");
   const rfq = useSelector((state) => state.RFQInfos?.RFQData);
+  const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   return (
     <div className="w-full overflow-y-hidden overflow-x-hidden">
       <div className="flex flex-col w-full h-full">
@@ -23,15 +24,17 @@ const RfqLayout = () => {
               All RFQ
             </button>
 
-            <button
-              onClick={() => setActiveTab("addRFQ")}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "addRFQ"
-                ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-                : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
-                }`}
-            >
-              Create RFQ
-            </button>
+            {userRole !== "connection_designer_engineer" && userRole !== "connection_designer_admin" && (
+              <button
+                onClick={() => setActiveTab("addRFQ")}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "addRFQ"
+                  ? "bg-[#ebf5ea] text-black border-black shadow-sm"
+                  : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+                  }`}
+              >
+                Create RFQ
+              </button>
+            )}
           </div>
         </div>
       </div>

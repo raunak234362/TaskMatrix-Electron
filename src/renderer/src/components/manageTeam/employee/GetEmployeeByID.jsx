@@ -23,11 +23,13 @@ import {
   Download,
   FileSpreadsheet,
   FileText as FilePdf,
-  X
+  X,
+  FileText
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { toast } from "react-toastify";
 import Button from "../../fields/Button";
 import EditEmployee from "./EditEmployee";
 import { formatDateTime } from "../../../utils/dateUtils";
@@ -397,7 +399,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
     }
 
     if (dataToExport.length === 0) {
-      alert("No data found for the selected period");
+      toast.error("No data found for the selected period");
       return;
     }
 
@@ -415,17 +417,72 @@ const GetEmployeeByID = ({ id, onClose }) => {
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Task Report");
       XLSX.writeFile(wb, `${employee.firstName}_Task_Report_${scope}.xlsx`);
+      toast.success("Excel report generated successfully!");
     } else {
-      const doc = new jsPDF();
-      doc.text(`${employee.firstName} ${employee.lastName} - Task Performance Report (${scope})`, 10, 10);
-      const headers = [["Project", "Task", "Status", "Estimate", "Worked", "Date"]];
-      const body = exportRows.map(r => Object.values(r));
-      doc.autoTable({
-        head: headers,
-        body: body,
-        startY: 20
-      });
-      doc.save(`${employee.firstName}_Task_Report_${scope}.pdf`);
+      try {
+        const doc = new jsPDF();
+        const employeeName = `${employee.firstName || ""} ${employee.lastName || ""}`.trim();
+        const reportTitle = "Employee Task Performance Report";
+        const generatedDate = new Date().toLocaleDateString();
+
+        // Header Section
+        doc.setFontSize(22);
+        doc.setTextColor(20, 184, 166); // Teal-500
+        doc.text(reportTitle, 14, 22);
+
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Employee: ${employeeName}`, 14, 32);
+        doc.text(`Designation: ${employee.designation || "N/A"}`, 14, 38);
+        doc.text(`Generated on: ${generatedDate}`, 14, 44);
+
+        let filterText = `Period: ${scope.charAt(0).toUpperCase() + scope.slice(1)}`;
+        if (scope === "month") {
+          filterText += ` (${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()})`;
+        } else if (scope === "year") {
+          filterText += ` (${new Date().getFullYear()})`;
+        }
+        doc.text(filterText, 14, 50);
+
+        // Table preparation
+        const tableColumn = ["Project Name", "Task Name", "Status", "Estimate", "Worked", "Date"];
+        const tableRows = dataToExport.map(t => [
+          t.project?.name || "N/A",
+          t.name || t.title || "N/A",
+          t.status || "N/A",
+          `${Math.floor(allocToSec(t.allocatedHours || t.allocationLog?.allocatedHours) / 3600)}h`,
+          secToHms(calcWorkedSec(t.workingHourTask)),
+          new Date(t.created_on || t.createdAt).toLocaleDateString()
+        ]);
+
+        doc.autoTable({
+          head: [tableColumn],
+          body: tableRows,
+          startY: 60,
+          theme: "grid",
+          headStyles: {
+            fillColor: [20, 184, 166], // Teal-500
+            textColor: [255, 255, 255],
+            fontSize: 10,
+            fontStyle: "bold",
+          },
+          styles: {
+            fontSize: 9,
+            cellPadding: 3,
+          },
+          alternateRowStyles: {
+            fillColor: [240, 253, 250], // Teal-50
+          },
+        });
+
+        // Save PDF
+        const fileName = `Report_${employeeName.replace(/\s+/g, "_")}_${scope}_${generatedDate.replace(/\//g, "-")}.pdf`;
+        doc.save(fileName);
+        toast.success("PDF report generated successfully!");
+      } catch (error) {
+        console.error("PDF Generation Error:", error);
+        toast.error("Failed to generate PDF report");
+      }
     }
     setShowExportMenu(false);
   };
@@ -657,9 +714,9 @@ const GetEmployeeByID = ({ id, onClose }) => {
                 <div className="flex items-center gap-2 relative">
                   <button
                     onClick={() => setShowExportMenu(!showExportMenu)}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#6bbd45]/10 border border-[#6bbd45]/20 rounded-xl text-xs font-black uppercase tracking-widest text-[#6bbd45] hover:bg-[#6bbd45]/20 transition-all"
+                    className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-sm"
                   >
-                    <Download className="w-3.5 h-3.5" />
+                    <FileText className="w-3.5 h-3.5" />
                     Generate Report
                     <ChevronDown className={`w-3 h-3 transition-transform ${showExportMenu ? "rotate-180" : ""}`} />
                   </button>

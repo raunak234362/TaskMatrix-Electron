@@ -139,6 +139,8 @@ const AddProject = () => {
   const selectedRfq = rfqData.find(
     (r) => String(r.id) === String(selectedRfqId),
   );
+  console.log(selectedRfq,"================");
+  
 
   useEffect(() => {
     if (!selectedRfq) return;

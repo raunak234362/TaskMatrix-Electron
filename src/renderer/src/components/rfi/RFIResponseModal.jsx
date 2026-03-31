@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { toast } from "react-toastify";
 import MultipleFileUpload from "../fields/MultipleFileUpload";
 import Service from "../../api/Service";
 import { X } from "lucide-react";
@@ -40,12 +41,13 @@ const RFIResponseModal = ({
       files.forEach((file) => formData.append("files", file));
 
       await Service.addRFIResponse(formData, rfiId);
-
+      toast.success("Response submitted successfully!");
       reset();
       setFiles([]);
       onSuccess();
       onClose();
     } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to submit response");
       console.error("Error submitting RFI response:", err);
     } finally {
       setLoading(false);

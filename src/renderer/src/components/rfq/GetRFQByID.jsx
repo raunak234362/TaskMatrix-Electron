@@ -635,7 +635,7 @@ const GetRFQByID = ({ id, onClose }) => {
                     className={`text-sm md:text-xl font-bold uppercase tracking-tight transition-all relative ${activeTab === "cdQuotas" ? "text-black" : "text-gray-400 hover:text-gray-600"
                       }`}
                   >
-                    CD Quotas
+                    CD Quotes
                     {activeTab === "cdQuotas" && <div className="absolute left-0 w-full bg-black rounded-t-full"></div>}
                   </button>
                 </div>

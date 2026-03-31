@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import Input from "../../fields/input";
 import Service from "../../../api/Service";
 import { X, Check, Loader2, Layers } from "lucide-react";
@@ -93,8 +94,10 @@ const EditDepartment = ({ id, onSuccess, onCancel }) => {
         name: data.name,
         managerIds: data.managerIds,
       });
+      toast.success("Department updated successfully!");
       if (onSuccess) onSuccess();
     } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to update department");
       console.error("Error updating department:", err);
     }
   };

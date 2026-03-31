@@ -279,18 +279,18 @@ const EditProject = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Scrollable Content */}
+        <div className="flex p-4 justify-between items-center mb-6 border-b pb-4 sticky top-0 bg-white z-10">
+          <h2 className="text-2xl  text-gray-700">Edit Project</h2>
+          <button
+            onClick={onCancel}
+            className="text-sm tracking-wider text-gray-900 font-semibold px-3 py-1 rounded-lg border-2 border-black bg-red-200 hover:text-gray-700"
+          >
+            CLOSE
+          </button>
+        </div>
         <div className="overflow-y-auto p-6">
-          <div className="flex justify-between items-center mb-6 border-b pb-4 sticky top-0 bg-white z-10">
-            <h2 className="text-2xl  text-gray-700">Edit Project</h2>
-            <button
-              onClick={onCancel}
-              className="text-sm tracking-wider text-gray-900 font-semibold px-3 py-1 rounded-lg border-2 border-black bg-red-200 hover:text-gray-700"
-            >
-              CLOSE
-            </button>
-          </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-1">
             {/* Project Info */}
             <SectionTitle title="Project Details" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

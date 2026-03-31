@@ -21,6 +21,13 @@ const RFQ_STATUS_OPTIONS = [
     { label: 'Estimation in Progress', value: 'ESTIMATION_IN_PROGRESS' },
 ]
 
+const TOOLS_OPTIONS = [
+    { label: 'TEKLA', value: 'TEKLA' },
+    { label: 'SDS/2', value: 'SDS/2' },
+    { label: 'BOTH', value: 'BOTH' },
+    { label: 'NO PREFERENCE', value: 'NO_PREFERENCE' },
+]
+
 const selectStyles = {
     control: (base, state) => ({
         ...base,
@@ -85,8 +92,8 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                 ...data,
                 bidPrice: data.bidPrice !== '' && data.bidPrice !== null && data.bidPrice !== undefined
                     ? Number(data.bidPrice)
-                    : null,
-                estimationDate: data.estimationDate ? new Date(data.estimationDate).toISOString() : null
+                    : '',
+                estimationDate: data.estimationDate ? new Date(data.estimationDate).toISOString() : ''
             }
             await Service.UpdateRFQById(id, payload)
             toast.success('RFQ updated successfully')
@@ -163,11 +170,27 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                                     {...register('bidPrice')}
                                     placeholder="e.g. 5000"
                                 />
-                                <Input
-                                    label="Tools / Software"
-                                    {...register('tools')}
-                                    placeholder="TEKLA, SDS/2, AutoCAD..."
-                                />
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-[10px] font-black text-black uppercase tracking-widest mb-1">
+                                        Tools / Software
+                                    </label>
+                                    <Controller
+                                        name="tools"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <ReactSelect
+                                                {...field}
+                                                options={TOOLS_OPTIONS}
+                                                value={TOOLS_OPTIONS.find((op) => op.value === field.value) || null}
+                                                onChange={(val) => field.onChange(val ? val.value : '')}
+                                                styles={selectStyles}
+                                                menuPortalTarget={document.body}
+                                                placeholder="Select Tools..."
+                                                className="text-sm w-full"
+                                            />
+                                        )}
+                                    />
+                                </div>
                             </div>
                         </div>
 

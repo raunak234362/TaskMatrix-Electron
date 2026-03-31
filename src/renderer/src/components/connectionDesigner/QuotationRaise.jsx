@@ -6,6 +6,7 @@ import Select from "react-select";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Input from "../fields/input";
+import MultipleFileUpload from "../fields/MultipleFileUpload";
 
 
 
@@ -93,19 +94,45 @@ const QuotationRaise = ({
   // Submit — send IDs
   const RaiseForQuotation = async (data) => {
     try {
-      const payload = {
-        ConnectionDesignerIds: data.ConnectionDesignerIds?.map(
-          (cd) => cd.value
-        ) || [],
-        connectionEngineerIds: data.EngineerIds?.map((eng) => eng.value) || [],
-        CDDescription: data.CDDescription || "",
-        CDDueDate: data.CDDueDate || null,
-        CDTargetDate: data.CDTargetDate || null,
-      };
+      const formData = new FormData();
 
-      console.log("📦 Final Payload:", payload);
+      // Append ConnectionDesignerIds with [] to ensure array treatment
+      if (Array.isArray(data.ConnectionDesignerIds)) {
+        data.ConnectionDesignerIds.forEach((cd) =>
+          formData.append("ConnectionDesignerIds[]", cd.value)
+        );
+      }
 
-      const response = await Service.UpdateRFQById(rfqId, payload);
+      // Append connectionEngineerIds with [] to ensure array treatment
+      if (Array.isArray(data.EngineerIds)) {
+        data.EngineerIds.forEach((eng) =>
+          formData.append("connectionEngineerIds[]", eng.value)
+        );
+      }
+
+      formData.append("CDDescription", data.CDDescription || "");
+      
+      // Handle dates precisely — ensuring they are valid and in ISO format
+      if (data.CDDueDate) {
+        formData.append("CDDueDate", new Date(data.CDDueDate).toISOString());
+      }
+      if (data.CDTargetDate) {
+        formData.append("CDTargetDate", new Date(data.CDTargetDate).toISOString());
+      }
+      if (data.RFQDueDate) {
+        formData.append("RFQDueDate", new Date(data.RFQDueDate).toISOString());
+      }
+
+      // Append CDAttachments - multiple appends with the same key
+      if (Array.isArray(data.CDAttachments)) {
+        data.CDAttachments.forEach((file) =>
+          formData.append("CDAttachments", file)
+        );
+      }
+
+      console.log("📦 Raising Quotation for RFQ:", rfqId);
+
+      const response = await Service.UpdateRFQById(rfqId, formData);
       console.log("Quotation raised successfully:", response);
 
       toast.success("Quotation raised successfully!");
@@ -279,7 +306,7 @@ const QuotationRaise = ({
           <div className="space-y-4 pt-4 border-t border-gray-100">
             <div>
               <Input
-                label="CD Description"
+                label="Description"
                 type="textarea"
                 {...register("CDDescription")}
                 placeholder="Enter requirements or notes for Connection Designers..."
@@ -292,6 +319,24 @@ const QuotationRaise = ({
                 type="date"
                 {...register("RFQDueDate")}
                 className="bg-gray-50/50"
+              />
+            </div>
+          </div>
+
+          {/* CD Attachments */}
+          <div className="pt-4 border-t border-gray-100">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              CD Attachments
+            </label>
+            <div className="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-xl p-4 hover:border-[#6bbd45]/50 transition-all">
+              <Controller
+                name="CDAttachments"
+                control={control}
+                render={({ field }) => (
+                  <MultipleFileUpload
+                    onFilesChange={(files) => field.onChange(files)}
+                  />
+                )}
               />
             </div>
           </div>

@@ -87,9 +87,9 @@ const AddMileStone = ({
           </h3>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-200 text-gray-700 transition-colors"
+            className="px-2 py-1 rounded-lg bg-red-200 text-black border-2 border-red-500 transition-colors"
           >
-            <X className="w-5 h-5" />
+            CLOSE
           </button>
         </div>
 
@@ -159,9 +159,14 @@ const AddMileStone = ({
               {...register("approvalDate")}
             />
             <Input
-              label="CD Approval Date"
+              label="CD Submission Date By WBT"
               type="date"
               {...register("CDApprovalDate")}
+            />
+            <Input
+              label="CD Approval Submission By"
+              type="date"
+              {...register("CDTargetDate")}
             />
           </div>
 

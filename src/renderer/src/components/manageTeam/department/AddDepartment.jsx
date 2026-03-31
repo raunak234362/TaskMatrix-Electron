@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import Input from "../../fields/input";
 import Service from "../../../api/Service";
 import { Check, Loader2, Plus, Zap } from "lucide-react";
@@ -69,8 +70,9 @@ const AddDepartment = () => {
         name: data.name,
         managerIds: data.managerIds,
       });
-      // Add success notification handling if needed
+      toast.success("Department created successfully!");
     } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to create department");
       console.error("Error creating department:", err);
     }
   };
