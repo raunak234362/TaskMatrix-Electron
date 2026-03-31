@@ -702,8 +702,8 @@ const TeamDashboard = () => {
             return sum + h;
           }, 0) || 0;
 
-        const isAbsent = (memberStat?.tasks || []).some(task => 
-          task.status === "ABSENT" || 
+        const isAbsent = (memberStat?.tasks || []).some(task =>
+          task.status === "ABSENT" ||
           (task.name || task.title || "").toUpperCase().includes("ABSENT")
         );
 
@@ -784,9 +784,9 @@ const TeamDashboard = () => {
 
   const memberCounts = useMemo(() => {
     if (fullTableData.length === 0) return { all: 0, not_assigned: 0, under_assigned: 0, absent: 0 };
-    
+
     let all = 0, not_assigned = 0, under_assigned = 0, absent = 0;
-    
+
     fullTableData.forEach(item => {
       all++;
       const assignedHours = Number(item.assignedHours);
@@ -794,7 +794,7 @@ const TeamDashboard = () => {
       else if (assignedHours < 8) under_assigned++;
       if (item.isAbsent) absent++;
     });
-    
+
     return { all, not_assigned, under_assigned, absent };
   }, [fullTableData]);
 
@@ -866,13 +866,13 @@ const TeamDashboard = () => {
                 <TeamStatsCards teamStats={teamStats} />
 
                 {dateFilter.type === "specificDate" && (
-                  <WorkloadAlerts 
-                    memberStats={fullTableData} 
+                  <WorkloadAlerts
+                    memberStats={fullTableData}
                     onFilterChange={(f) => {
                       setMemberFilter(f);
                       const el = document.getElementById('members-table-section');
                       if (el) el.scrollIntoView({ behavior: 'smooth' });
-                    }} 
+                    }}
                   />
                 )}
 

@@ -76,6 +76,23 @@ const AllSubmittals = ({ submittalData }) => {
         return s ? `${s.firstName ?? ""} ${s.lastName ?? ""}`.trim() : "—";
       },
     },
+    {
+      accessorKey: "multipleRecipients",
+      header: "To",
+      cell: ({ row }) => {
+        const recipients = row.original.multipleRecipients;
+        if (!recipients || recipients.length === 0) return "—";
+        return (
+          <div className="flex flex-col gap-1">
+            {recipients.map((r, i) => (
+              <span key={i} className="text-xs font-medium text-gray-700">
+                {`${r.firstName ?? ""} ${r.lastName ?? ""}`.trim() || r.email || "—"}
+              </span>
+            ))}
+          </div>
+        );
+      },
+    },
 
     {
       accessorKey: "status",
