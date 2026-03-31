@@ -1000,7 +1000,9 @@ static async ConnectionDesignerQuotaApproveByID(id) {
           'Content-Type': 'application/json'
         }
       })
-      console.log(response)
+      if (response && response.data) {
+        response.data.submittals = await this.GetSubmittalByProjectId(id)
+      }
       return response.data
     } catch (error) {
       console.log(error)
@@ -1833,6 +1835,20 @@ static async ConnectionDesignerQuotaApproveByID(id) {
       throw error
     }
   }
+   //submittal by project id :
+  static async GetSubmittalByProjectId(projectId) {
+    try {
+      const response = await api.get(`submittal/project/${projectId}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(" All submittals fetched by project ID:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("cannot find submittal", error);
+    }
+  }
 
   //change Order ---------------------------------------------
   static async ChangeOrder(formData) {
@@ -2104,7 +2120,7 @@ static async ConnectionDesignerQuotaApproveByID(id) {
   //Task Start
   static async TaskStart(id) {
     try {
-      const response = await api.post(`task/start/${id}`, {
+      const response = await api.post(`task/start/${id}`, {}, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -2119,7 +2135,7 @@ static async ConnectionDesignerQuotaApproveByID(id) {
   //Task Resume
   static async TaskResume(id) {
     try {
-      const response = await api.post(`task/resume/${id}`, {
+      const response = await api.post(`task/resume/${id}`, {}, {
         headers: {
           'Content-Type': 'application/json'
         }
