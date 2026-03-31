@@ -1633,6 +1633,22 @@ static async ConnectionDesignerQuotaApproveByID(id) {
       console.error('cannot find rfi', error)
     }
   }
+
+  //get RFI by ProjectId
+  static async GetRFIByProjectId(projectId) {
+    try {
+      const response = await api.get(`rfi/project/${projectId}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(" All rfi fetched by rfi ID:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("cannot find rfi", error);
+    }
+  }
+
   static async EditRFIByID(id, data) {
     try {
       const response = await api.put(`rfi/${id}`, data, {
@@ -1785,6 +1801,20 @@ static async ConnectionDesignerQuotaApproveByID(id) {
       return response.data
     } catch (error) {
       console.error('cannot find sub', error)
+    }
+  }
+    //submittal by project id :
+  static async GetSubmittalByProjectId(projectId) {
+    try {
+      const response = await api.get(`submittal/project/${projectId}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(" All submittals fetched by project ID:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("cannot find submittal", error);
     }
   }
 

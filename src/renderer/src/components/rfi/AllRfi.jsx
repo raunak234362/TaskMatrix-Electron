@@ -25,17 +25,28 @@ const AllRFI = ({ rfiData = [] }) => {
 
 
   useEffect(() => {
-    if (rfiData && rfiData.length > 0) {
-      const normalized = rfiData.map((item) => ({
+    let rfiArray = [];
+    if (Array.isArray(rfiData)) {
+      rfiArray = rfiData;
+    } else if (rfiData && rfiData["show rfi"]) {
+      rfiArray = rfiData["show rfi"];
+    } else if (rfiData && rfiData.data) {
+      rfiArray = rfiData.data;
+    } else if (rfiData && typeof rfiData === "object") {
+      const firstArray = Object.values(rfiData).find(Array.isArray);
+      if (firstArray) rfiArray = firstArray;
+    }
+
+    if (rfiArray.length > 0) {
+      const normalized = rfiArray.map((item) => ({
         ...item,
         createdAt: item.createdAt || item.date || null,
       }));
       setRFIs(normalized);
-      setLoading(false);
     } else {
       setRFIs([]);
-      setLoading(false);
     }
+    setLoading(false);
   }, [rfiData]);
 
   // const handleRowClick = (row) => {
@@ -55,6 +66,23 @@ const AllRFI = ({ rfiData = [] }) => {
           s.username ||
           "—"
           : "—";
+      },
+    },
+    {
+      accessorKey: "multipleRecipients",
+      header: "To",
+      cell: ({ row }) => {
+        const recipients = row.original.multipleRecipients;
+        if (!recipients || recipients.length === 0) return "—";
+        return (
+          <div className="flex flex-col gap-1">
+            {recipients.map((r, i) => (
+              <span key={i} className="text-xs font-medium text-gray-700">
+                {`${r.firstName ?? ""} ${r.lastName ?? ""}`.trim() || r.email || "—"}
+              </span>
+            ))}
+          </div>
+        );
       },
     },
   ];

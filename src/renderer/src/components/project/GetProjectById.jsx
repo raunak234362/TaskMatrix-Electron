@@ -40,6 +40,7 @@ import ProjectMilestoneMetrics from "./ProjectMilestoneMetrics.jsx";
 const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);
   const [milestones, setMilestones] = useState([]); // Added milestones state
+  const [rfiData, setRfiData] = useState([]); // Added rfiData state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
@@ -238,9 +239,7 @@ const GetProjectById = ({ id, onClose }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectTasks]);
 
-  const rfiData = useMemo(() => {
-    return project?.rfi || [];
-  }, [project]);
+  // RFI data is now fetched directly via GetRFIByProjectId instead of using project.rfi
 
   const changeOrderData = useMemo(() => {
     return project?.changeOrders || [];
@@ -250,13 +249,15 @@ const GetProjectById = ({ id, onClose }) => {
     try {
       setLoading(true);
       setError(null);
-      const [projRes, mileRes] = await Promise.all([
+      const [projRes, mileRes, rfiRes] = await Promise.all([
         Service.GetProjectById(id),
         Service.GetProjectMilestoneById(id),
+        Service.GetRFIByProjectId(id),
         fetchProjectTasks()
       ]);
       setProject(projRes?.data || null);
       setMilestones(mileRes?.data || []);
+      setRfiData(rfiRes || []);
     } catch (err) {
       setError("Failed to load project details");
       console.error("Error fetching project:", err);
@@ -378,9 +379,7 @@ const GetProjectById = ({ id, onClose }) => {
                 { key: "notes", label: "Notes", icon: FileText },
                 { key: "projectNotes", label: "Project Notes", icon: FileText },
                 { key: "rfi", label: "RFI", icon: FileText },
-                { key: "CDrfi", label: "CD RFI", icon: FileText },
                 { key: "submittals", label: "Submittals", icon: FileText },
-                { key: "CDsubmittals", label: "CD Submittals", icon: FileText },
                 { key: "changeOrder", label: "Change Order", icon: Settings },
               ]
                 .filter(
@@ -389,7 +388,7 @@ const GetProjectById = ({ id, onClose }) => {
                       return false;
                     }
                     if (tab.key === "projectNotes") {
-                      return ["admin", "project_manager", "deputy_manager", "client", "client_admin", "operation_executive"].includes(userRole);
+                      return ["admin", "project_manager", "deputy_manager", "client", "client_admin", "operation_executive","connection_designer_engineer","connection_designer_admin" ].includes(userRole);
                     }
                     return true;
                   }
@@ -1074,7 +1073,7 @@ const GetProjectById = ({ id, onClose }) => {
             />
           )}
           {activeTab === "projectNotes" && (
-            <AllProjectNotes projectId={id} />
+            <AllProjectNotes projectId={id} project={project} />
           )}
         </div>
       </div >

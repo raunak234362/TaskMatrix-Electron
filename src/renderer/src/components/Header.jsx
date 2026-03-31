@@ -1,12 +1,16 @@
 import { useState, useEffect, useRef } from 'react'
 import { Menu, ChevronLeft, Bell, X, Check } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 import { navItems } from '../constants/navigation'
 import Service from '../api/Service'
 import { toast } from 'react-toastify'
+import { setActiveDetail } from '../store/uiSlice'
+import { setModalOpen } from '../store/userSlice'
 
 const Header = ({ isMinimized, toggleSidebar, isMobileOpen }) => {
   const location = useLocation()
+  const dispatch = useDispatch()
   const [notifications, setNotifications] = useState(null)
   const [showNotifications, setShowNotifications] = useState(false)
   const dropdownRef = useRef(null)
@@ -72,6 +76,57 @@ const Header = ({ isMinimized, toggleSidebar, isMobileOpen }) => {
     }
   }
 
+  // Helper to extract entity info for redirection
+  const extractEntityInfo = (notification) => {
+    const payload = notification.payload || {}
+    let type = notification.type || payload.type || ''
+    let id = notification.id || payload.id || notification.itemId || payload.itemId
+
+    if (notification.submittalId || payload.submittalId) {
+      type = 'submittal'
+      id = notification.submittalId || payload.submittalId
+    } else if (notification.rfiId || payload.rfiId) {
+      type = 'rfi'
+      id = notification.rfiId || payload.rfiId
+    } else if (notification.rfqId || payload.rfqId) {
+      type = 'rfq'
+      id = notification.rfqId || payload.rfqId
+    } else if (notification.taskId || payload.taskId) {
+      type = 'task'
+      id = notification.taskId || payload.taskId
+    } else if (notification.projectId || payload.projectId) {
+      type = 'project'
+      id = notification.projectId || payload.projectId
+    } else if (notification.milestoneId || payload.milestoneId) {
+      type = 'milestone'
+      id = notification.milestoneId || payload.milestoneId
+    } else if (type?.startsWith('SUBMITTAL')) {
+      type = 'submittal'
+    } else if (type?.startsWith('RFI')) {
+      type = 'rfi'
+    } else if (type?.startsWith('RFQ')) {
+      type = 'rfq'
+    } else if (type?.startsWith('TASK')) {
+      type = 'task'
+    } else if (type?.startsWith('PROJECT')) {
+      type = 'project'
+    } else if (type?.startsWith('MILESTONE')) {
+      type = 'milestone'
+    }
+
+    return { type, id }
+  }
+
+  const handleNotificationClick = (notification) => {
+    const { type, id } = extractEntityInfo(notification)
+    console.log('🔗 Redirecting from Header:', type, id)
+    if (type && id) {
+      dispatch(setActiveDetail({ type, id }))
+      dispatch(setModalOpen(true))
+      setShowNotifications(false)
+    }
+  }
+
   const fetchNotifications = async () => {
     try {
       const responseData = await Service.Notifications()
@@ -98,34 +153,10 @@ const Header = ({ isMinimized, toggleSidebar, isMobileOpen }) => {
     return () => clearInterval(interval)
   }, [])
 
-  // Handle Toasts for new notifications
+  // Handle sync of previous notifications for unread count, but don't show toasts here
+  // (NotificationReceiver.jsx handles real-time toasts via socket)
   useEffect(() => {
     if (notifications === null) return
-
-    if (isFirstLoad.current) {
-      isFirstLoad.current = false
-    } else {
-      const newNotifs = notifications.filter(
-        (n) => !prevNotifications.current.some((p) => p.id === n.id)
-      )
-      newNotifs.forEach((n) => {
-        const { title, body, color } = getNotificationContent(n)
-        toast.info(
-          <div>
-            <p className={`font-bold text-sm ${color}`}>{title}</p>
-            <p className="text-xs">{body}</p>
-          </div>,
-          {
-            position: 'top-right',
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true
-          }
-        )
-      })
-    }
     prevNotifications.current = notifications
   }, [notifications])
 
@@ -227,7 +258,8 @@ const Header = ({ isMinimized, toggleSidebar, isMobileOpen }) => {
                       return (
                         <div
                           key={notification.id}
-                          className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors flex gap-3 group relative ${isUnread ? 'bg-blue-50/30' : ''
+                          onClick={() => handleNotificationClick(notification)}
+                          className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors flex gap-3 group relative cursor-pointer ${isUnread ? 'bg-blue-50/30' : ''
                             }`}
                         >
                           <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${isUnread ? 'bg-blue-500' : 'bg-transparent'

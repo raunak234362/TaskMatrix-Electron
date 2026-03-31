@@ -1,23 +1,82 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Loader2, Paperclip, X, FileText } from "lucide-react";
+import Select from "react-select";
 import Service from "../../../api/Service";
 import RichTextEditor from "../../fields/RichTextEditor";
 
 const AddProjectNote = ({
     projectId,
+    project,
     onClose,
     onSuccess,
 }) => {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
-    const [visibility, setVisibility] = useState("INTERNAL");
+    const [taggedUserIds, setTaggedUserIds] = useState([]);
     const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
     const isClient = userRole === "client" || userRole === "client_admin";
     const [files, setFiles] = useState([]);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
     const fileInputRef = useRef(null);
+
+    const [allUsers, setAllUsers] = useState([]);
+    useEffect(() => {
+        const fetchAll = async () => {
+            let combined = [];
+            try {
+                const res = await Service.FetchAllUsers();
+                const d = res?.data?.data || res?.data || res?.users || res || [];
+                combined = [...combined, ...(Array.isArray(d) ? d : [])];
+            } catch(e) { console.error("Error fetching internal users:", e); }
+
+            const cdId = project?.connectionDesignerID || project?.connectionDesigner?.id || project?.connectionDesigner;
+            if (cdId) {
+                try {
+                    const res = await Service.FetchConnectionDesignerByID(cdId.id || cdId);
+                    const cde = res?.data?.CDEngineers || res?.CDEngineers || [];
+                    combined = [...combined, ...(Array.isArray(cde) ? cde : [])];
+                } catch(e) { console.error("Error fetching CD engineers:", e); }
+            }
+
+            const fabId = project?.fabricatorID || project?.fabricator?.id || project?.fabricator;
+            if (fabId) {
+                try {
+                    const res = await Service.FetchAllClientsByFabricatorID(fabId.id || fabId);
+                    const c = res?.data?.data || res?.data || res || [];
+                    combined = [...combined, ...(Array.isArray(c) ? c : [])];
+                } catch(e) { console.error("Error fetching clients:", e); }
+            }
+            // Remove duplicates by ID just in case
+            const uniqueUsers = [];
+            const seen = new Set();
+            for (const u of combined) {
+                const uid = u.id || u._id;
+                if (!uid || !seen.has(uid)) {
+                    if (uid) seen.add(uid);
+                    uniqueUsers.push(u);
+                }
+            }
+            setAllUsers(uniqueUsers);
+        };
+        fetchAll();
+    }, [project]);
+
+    const allowedRoles = [
+        "connection_designer_engineer",
+        "connection_designer_admin",
+        "project_manager",
+        "admin",
+        "deputy_manager",
+        "operation_executive",
+        "client",
+        "client_admin"
+    ];
+
+    const targetUsers = Array.isArray(allUsers) 
+        ? allUsers.filter(u => u && u.role && allowedRoles.includes(String(u.role).toLowerCase()))
+        : [];
 
     const handleFileChange = (e) => {
         const selected = Array.from(e.target.files || []);
@@ -48,7 +107,7 @@ const AddProjectNote = ({
             formData.append("title", title.trim());
             formData.append("content", content.trim());
             formData.append("projectId", projectId);
-            formData.append("visibility", visibility);
+            taggedUserIds.forEach(opt => formData.append("taggedUserIds[]", opt.value));
             files.forEach((file) => formData.append("files", file));
 
             await Service.AddTeamMeetingNotes(formData);
@@ -112,20 +171,23 @@ const AddProjectNote = ({
                         </div>
                     </div>
 
-                    {/* Visibility — hidden for client roles */}
+                    {/* Tag User — hidden for client roles */}
                     {!isClient && (
                         <div>
                             <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
-                                Visibility
+                                Tag User
                             </label>
-                            <select
-                                value={visibility}
-                                onChange={(e) => setVisibility(e.target.value)}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#6bbd45]/40 focus:border-[#6bbd45] transition-all bg-white"
-                            >
-                                <option value="INTERNAL">Internal (Team Only)</option>
-                                <option value="EXTERNAL">External (Visible to Client)</option>
-                            </select>
+                            <Select
+                                isMulti
+                                value={taggedUserIds}
+                                onChange={setTaggedUserIds}
+                                options={targetUsers.map(u => ({
+                                    value: u.id || u._id,
+                                    label: `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.username
+                                }))}
+                                placeholder="Select users to tag..."
+                                className="text-sm"
+                            />
                         </div>
                     )}
 

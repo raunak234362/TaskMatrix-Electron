@@ -4,12 +4,15 @@ import Button from "../fields/Button";
 import Service from "../../api/Service";
 import RichTextEditor from "../fields/RichTextEditor";
 import RenderFiles from "../common/RenderFiles";
+import MultipleFileUpload from "../fields/MultipleFileUpload";
 
 // Status options for submittal
 const STATUS_OPTIONS = [
   { label: "Submitted to EOR", value: "SUBMITTED_TO_EOR" },
   { label: "Revised & Resubmitted", value: "REVISED_RESUBMITTAL" },
   { label: "NOT APPROVED", value: "NOT_APPROVED" },
+  { label: "RELEASE_FOR_FABRICATION", value: "RELEASE_FOR_FABRICATION" },
+  { label: "REVISED_RESUBMIT_FOR_FABRICATION", value: "REVISED_RESUBMIT_FOR_FABRICATION" },
 ];
 
 
@@ -128,16 +131,7 @@ const SubmittalResponseDetailsModal = ({
           </div>
         )}
 
-        {/* Reply Button */}
-        {canReply && !replyMode && (
-          <Button
-            className="bg-blue-600 text-white mt-4"
-            onClick={() => setReplyMode(true)}
-          >
-            Reply
-          </Button>
-        )}
-
+        
         {/* Reply Form */}
         <div className="pt-4 space-y-4 border-t">
           {/* Message */}
@@ -166,13 +160,7 @@ const SubmittalResponseDetailsModal = ({
           </select>
 
           {/* File Upload */}
-          <input
-            type="file"
-            multiple
-            onChange={(e) =>
-              setReplyFiles(e.target.files ? Array.from(e.target.files) : [])
-            }
-          />
+          <MultipleFileUpload onFilesChange={setReplyFiles} />
 
           {/* Actions */}
           <div className="flex justify-end gap-3">

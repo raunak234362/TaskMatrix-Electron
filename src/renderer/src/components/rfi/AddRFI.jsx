@@ -123,7 +123,6 @@ const AddRFI = ({
 
       await Service.addRFI(formData);
       toast.success("RFI Submitted Successfully");
-      reset();
       setDescription("");
       setFiles([]);
       onSuccess?.();

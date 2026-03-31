@@ -18,7 +18,7 @@ import NoteResponseDetailsModal from "./NoteResponseDetailsModal";
 import { formatDateTime } from "../../../utils/dateUtils";
 import { truncateWords } from "../../../utils/stringUtils";
 
-const AllProjectNotes = ({ projectId }) => {
+const AllProjectNotes = ({ projectId, project }) => {
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
@@ -193,6 +193,17 @@ const AllProjectNotes = ({ projectId }) => {
                                                     Internal
                                                 </span>
                                             )}
+                                        </div>
+                                        <div className="flex flex-wrap gap-1 mb-1">
+                                            {note.taggedUserIds && note.taggedUserIds.length > 0 && note.taggedUserIds.map((u, idx) => {
+                                                const name = typeof u === 'string' ? u : `${u.firstName || ""} ${u.lastName || ""}`.trim();
+                                                if (!name) return null;
+                                                return (
+                                                    <span key={u.id || u._id || idx} className="text-[9px] font-black bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase border border-purple-200">
+                                                        @{name}
+                                                    </span>
+                                                );
+                                            })}
                                         </div>
                                         <div className="text-sm font-black text-black truncate pr-4 uppercase tracking-tight mb-2">
                                             {note.title || truncateWords(note.content?.replace(/<[^>]*>?/gm, "") || "Untitled Note", 10)}
@@ -422,6 +433,7 @@ const AllProjectNotes = ({ projectId }) => {
                     <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
                         <AddProjectNote
                             projectId={projectId}
+                            project={project}
                             onClose={() => setShowAddModal(false)}
                             onSuccess={() => {
                                 setShowAddModal(false);

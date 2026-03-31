@@ -11,6 +11,7 @@ import { setRFQData } from './store/rfqSlice'
 import { setProjectData } from './store/projectSlice'
 import useNotifications from './hooks/useNotifications'
 import NotificationReceiver from './utils/NotificationReceiver'
+import GlobalModalManager from './components/common/GlobalModalManager'
 
 const AppContent = () => {
   const dispatch = useDispatch()
@@ -152,6 +153,7 @@ const AppContent = () => {
 
       {/* Main Layout */}
       <Layout />
+      <GlobalModalManager />
 
       {/* IPC Trigger Button */}
       {/* <div className="fixed bottom-6 right-6 flex flex-col items-center z-50">
