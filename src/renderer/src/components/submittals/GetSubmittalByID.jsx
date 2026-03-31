@@ -291,7 +291,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
               <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>
-                  {(userRole === "CLIENT_ADMIN" || userRole === "CLIENT") && (
+                  {(userRole === "CLIENT_ADMIN" || userRole === "CLIENT" || userRole === "ADMIN" || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole== "DEPUTY_MANAGER") && (
                     <Button
                       className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
                       onClick={() => setShowResponseModal(true)}

@@ -107,8 +107,11 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
     setValue("sender_id", String(userDetail?.id));
   }, []);
 
+  const [loading, setLoading] = useState(false);
+
   const onSubmit = async (data) => {
     try {
+      setLoading(true);
       const payload = {
         ...data,
         fabricator_id: fabricatorId,
@@ -117,7 +120,6 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
         description,
         files,
       };
-      console.log(payload);
 
       const formData = new FormData();
       Object.entries(payload).forEach(([key, value]) => {
@@ -129,7 +131,6 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
           formData.append(key, value);
         }
       });
-      console.log(formData);
 
       await Service.AddSubmittal(formData);
       toast.success("Submittal Created Successfully!");
@@ -141,6 +142,8 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
     } catch (err) {
       console.error(err);
       toast.error("Failed to create Submittal");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -254,8 +257,8 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
         <MultipleFileUpload onFilesChange={setFiles} />
 
         <div className="flex justify-center w-full mt-6">
-          <Button type="submit" className="w-full">
-            Submit Submittal
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Submitting..." : "Submit Submittal"}
           </Button>
         </div>
       </form>

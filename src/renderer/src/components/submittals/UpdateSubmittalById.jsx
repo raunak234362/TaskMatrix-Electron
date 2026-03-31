@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Check, Loader2, Upload } from "lucide-react";
 import Service from "../../api/Service";
 import RichTextEditor from "../fields/RichTextEditor";

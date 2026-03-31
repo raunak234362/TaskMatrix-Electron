@@ -104,7 +104,7 @@ const EditDepartment = ({ id, onSuccess, onCancel }) => {
 
   if (fetchingDept) {
     return (
-      <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm shadow-2xl animate-in fade-in duration-200">
         <div className="bg-white rounded-2xl p-12 border border-gray-200 shadow-xl flex items-center gap-4 animate-in fade-in duration-200">
           <Loader2 className="w-8 h-8 animate-spin text-[#6bbd45]" />
           <span className="text-sm font-black uppercase tracking-widest text-black">
@@ -116,7 +116,7 @@ const EditDepartment = ({ id, onSuccess, onCancel }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
@@ -135,7 +135,7 @@ const EditDepartment = ({ id, onSuccess, onCancel }) => {
           </div>
           <button
             onClick={onCancel}
-            className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all font-black"
+            className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
           >
             Close
           </button>
@@ -206,7 +206,7 @@ const EditDepartment = ({ id, onSuccess, onCancel }) => {
                             <polyline points="20 6 9 17 4 12"></polyline>
                           </svg>
                         </div>
-                        <span className="text-xs font-bold text-black uppercase tracking-tight">
+                        <span className="text-xl font-black text-black uppercase tracking-tight">
                           {option.label}
                         </span>
                       </label>

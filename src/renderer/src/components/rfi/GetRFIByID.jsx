@@ -184,7 +184,7 @@ const GetRFIByID = ({ id }) => {
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>
 
-              {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN") && (
+              {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole== "DEPUTY_MANAGER") && (
                 <Button
                   onClick={() => setShowModal(true)}
                   className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
