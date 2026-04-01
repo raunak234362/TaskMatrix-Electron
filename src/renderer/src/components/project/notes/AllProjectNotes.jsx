@@ -261,7 +261,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                 Observation / Discussion
                                             </p>
                                             <div
-                                                className="prose prose-sm max-w-none text-gray-700 bg-gray-50/50 p-4 rounded-xl border border-gray-100 font-medium whitespace-pre-wrap"
+                                                className="prose prose-sm max-w-none text-gray-700 bg-gray-50/50 p-4 rounded-xl border border-gray-100 font-medium [&>p]:mb-1 [&>p]:mt-0"
                                                 dangerouslySetInnerHTML={{
                                                     __html: note.content || "No content.",
                                                 }}

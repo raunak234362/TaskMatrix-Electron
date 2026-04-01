@@ -88,7 +88,7 @@ const GetNoteByID = ({ projectId, noteId, onClose }) => {
                                     Content
                                 </h3>
                                 <div
-                                    className="prose prose-sm max-w-none text-gray-700 bg-gray-50/30 p-4 rounded-lg border border-gray-100"
+                                    className="prose prose-sm max-w-none text-gray-700 bg-gray-50/30 p-4 rounded-lg border border-gray-100 [&>p]:mb-1 [&>p]:mt-0"
                                     dangerouslySetInnerHTML={{ __html: note.content }}
                                 />
                             </div>

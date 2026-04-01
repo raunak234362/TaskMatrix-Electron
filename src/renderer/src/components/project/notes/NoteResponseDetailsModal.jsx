@@ -87,7 +87,7 @@ const NoteResponseDetailsModal = ({
                             </div>
                         </div>
                         <div
-                            className="text-sm prose prose-sm max-w-none text-gray-700 font-medium"
+                            className="text-sm prose prose-sm max-w-none text-gray-700 font-medium [&>p]:mb-1 [&>p]:mt-0"
                             dangerouslySetInnerHTML={{ __html: child.content }}
                         />
 
@@ -138,7 +138,7 @@ const NoteResponseDetailsModal = ({
                         <div className="space-y-2">
                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Message</p>
                             <div
-                                className="text-gray-800 prose prose-sm max-w-none bg-white p-4 rounded-xl border border-gray-100 shadow-inner font-medium"
+                                className="text-gray-800 prose prose-sm max-w-none bg-white p-4 rounded-xl border border-gray-100 shadow-inner font-medium [&>p]:mb-1 [&>p]:mt-0"
                                 dangerouslySetInnerHTML={{ __html: response.content }}
                             />
                         </div>
