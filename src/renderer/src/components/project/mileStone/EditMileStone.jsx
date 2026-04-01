@@ -159,10 +159,10 @@ const EditMileStone = ({
         percentage: Number(data.percentage),
         approvalDate: data.approvalDate
           ? new Date(data.approvalDate).toISOString()
-          : null,
+          : "",
         CDApprovalDate: data.CDApprovalDate
           ? new Date(data.CDApprovalDate).toISOString()
-          : null,
+          : "",
       };
 
       if (mileStoneVersionId) {
