@@ -44,7 +44,7 @@ const CDNetworkOverview = ({
   )
 
   return (
-    <div className="flex flex-col gap-6 mb-8">
+    <div className="flex flex-col gap-6 mb-8" style={{ fontSize: 'clamp(10px, 1.1vw, 16px)' }}>
       {/* LEFT Designer Directory (Interactive List) */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

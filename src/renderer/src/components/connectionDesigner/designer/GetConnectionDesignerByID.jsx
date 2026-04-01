@@ -72,19 +72,19 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
     )
 
   return (
-    <div className="flex flex-col h-full bg-white select-none">
+    <div className="flex flex-col h-full bg-white select-none overflow-x-hidden font-roboto" style={{ fontSize: 'clamp(11px, 1vw, 14px)' }}>
       {/* 1. Header Section */}
-      <div className="p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-b border-gray-200">
+      <div className="p-8 flex flex-row items-center justify-between gap-6 border-b border-gray-200 shrink-0">
         <div className="flex items-center gap-5">
 
           <div>
-            <h2 className="text-2xl font-black text-black tracking-tight">{designer.name}</h2>
+            <h2 className="text-3xl font-black text-black tracking-tight">{designer.name}</h2>
             <div className="flex items-center gap-4 mt-1">
-              <span className="flex items-center gap-1.5 text-[10px] font-bold text-black uppercase tracking-widest">
+              <span className="flex items-center gap-1.5 text-sm font-bold text-black uppercase tracking-widest">
                 <Calendar size={12} className="text-green-500" />
                 SINCE {new Date(designer.createdAt).toLocaleDateString()}
               </span>
-              <span className="flex items-center gap-1.5 text-[10px] font-bold text-black uppercase tracking-widest">
+              <span className="flex items-center gap-1.5 text-sm font-bold text-black uppercase tracking-widest">
                 <Globe size={12} className="text-green-500" />
                 {designer.location}
               </span>
@@ -95,7 +95,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setActiveTab('DASHBOARD')}
-            className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'DASHBOARD'
+            className={`px-6 py-2 rounded-lg text-[1em] font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'DASHBOARD'
               ? 'bg-green-50 border-green-400 text-green-700 shadow-sm'
               : 'bg-white border-gray-300 text-black hover:bg-gray-50'
               }`}
@@ -104,27 +104,27 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
           </button>
           <button
             onClick={() => setActiveTab('FILES')}
-            className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'FILES'
+            className={`px-6 py-2 rounded-lg text-[1em] font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'FILES'
               ? 'bg-green-50 border-green-400 text-green-700 shadow-sm'
               : 'bg-white border-gray-300 text-black hover:bg-gray-50'
               }`}
           >
-            <Files size={14} /> Files
+            <LayoutDashboard size={14} /> Files
           </button>
           <button
             onClick={onClose}
-            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+            className="px-6 py-2 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-black text-[0.9em] uppercase tracking-tight shadow-sm"
           >
             Close
           </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 sm:p-8 pt-6">
+      <div className="flex-1 overflow-y-auto p-8 pt-6 no-scrollbar">
         {activeTab === 'DASHBOARD' ? (
           <>
             {/* 2. Stats Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+            <div className="grid grid-cols-4 gap-4 mb-10 shrink-0">
               <StatBox
                 label="Total Engineers"
                 value={designer.CDEngineers?.length || 0}
@@ -139,16 +139,16 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
               />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div className="grid grid-cols-12 gap-10">
               {/* Left Column: Pending Actions & Profile Details */}
               <div className="lg:col-span-8 space-y-12">
                 {/* Pending Actions Section */}
                 <div>
-                  <h3 className="text-sm font-black text-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                  <h3 className="text-lg font-black uppercase mb-6 flex items-center gap-2">
                     <ClipboardList size={16} className="text-green-600" />
                     Pending Actions
                   </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <ActionCard icon={FileText} label="RFI" count={0} color="green" />
                     <ActionCard icon={RefreshCcw} label="SUBMITTALS" count={0} color="green" />
                     <ActionCard icon={Briefcase} label="CHANGE ORDERS" count={0} color="green" />
@@ -158,11 +158,11 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
 
                 {/* Profile Details Section */}
                 <div>
-                  <h3 className="text-sm font-black text-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                  <h3 className="text-lg font-black uppercase mb-6 flex items-center gap-2">
                     <Users size={16} className="text-green-600" />
                     Profile Details
                   </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12 bg-gray-50/30 p-8 rounded-2xl border border-gray-300">
+                  <div className="grid grid-cols-2 gap-y-8 gap-x-12 bg-gray-50 p-8 rounded-2xl border border-gray-300">
                     <DetailItem label="Email Address" value={designer.email} />
                     <DetailItem label="Website Link" value={designer.websiteLink || '-'} />
                     <DetailItem label="Contact" value={designer.contactInfo || '-'} />
@@ -181,7 +181,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
               {/* Right Column: Administrative Control */}
               <div className="lg:col-span-4">
                 <div className="p-8 rounded-2xl border-2 border-gray-300 flex flex-col gap-5 bg-white shadow-sm sticky top-0">
-                  <h3 className="text-sm font-black text-black uppercase tracking-wide mb-2">
+                  <h3 className="text-lg font-black uppercase tracking-wide mb-2">
                     Administrative Control
                   </h3>
 
@@ -192,7 +192,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
                     <div className="p-2.5 bg-gray-100 rounded-lg text-black group-hover:text-gray-900 transition-colors border border-gray-300">
                       <Edit2 size={16} />
                     </div>
-                    <span className="text-[10px] font-black text-black uppercase tracking-widest">
+                    <span className="text-sm font-black uppercase tracking-widest">
                       Edit Designer Info
                     </span>
                   </button>
@@ -204,7 +204,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
                     <div className="p-2.5 bg-gray-100 rounded-lg text-black group-hover:text-gray-900 transition-colors border border-gray-300">
                       <Users size={16} />
                     </div>
-                    <span className="text-[10px] font-black text-black uppercase tracking-widest">
+                    <span className="text-sm font-black uppercase tracking-widest">
                       Manage Workforce
                     </span>
                   </button>
@@ -213,7 +213,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
                     <div className="p-2.5 bg-white border border-red-300 rounded-lg text-red-500">
                       <X size={16} strokeWidth={3} />
                     </div>
-                    <span className="text-[10px] font-black text-red-600 uppercase tracking-widest">
+                    <span className="text-sm text-red-600 uppercase tracking-widest">
                       Archive Profile
                     </span>
                   </button>
@@ -244,25 +244,23 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
 
 const StatBox = ({ label, value, unit, icon: Icon, isStatus, subtext }) => (
   <div className="bg-white p-6 rounded-2xl border border-gray-300 flex items-center justify-between shadow-sm">
-    <div className="flex items-center gap-5">
-      <div className="p-3 bg-green-50 rounded-xl text-green-600 border border-green-300 flex items-center justify-center">
+    <div className="flex items-center gap-5 flex-1">
+      <div className="p-3 bg-green-50 rounded-xl text-green-600 border border-green-300 flex items-center justify-center shadow-sm">
         <Icon size={20} strokeWidth={2.5} />
       </div>
-      <div>
-        <div className="flex items-baseline gap-2 mb-1">
-          <p className="text-sm font-black text-black uppercase tracking-[0.15em]">
-            {label}:
-          </p>
-          <p className={`text-sm font-black ${isStatus ? 'text-green-600' : 'text-black'}`}>
-            {value}
-          </p>
-          {unit && (
-            <span className="text-[10px] font-black text-black uppercase tracking-widest leading-none">
-              {unit}
-            </span>
-          )}
-        </div>
-      </div>
+      <p className="text-[1.4em] font-black text-gray-800 uppercase tracking-tight">
+        {label}
+      </p>
+    </div>
+    <div className="flex items-baseline gap-1">
+      <p className={`text-[1.4em] font-black ${isStatus ? 'text-green-600' : 'text-gray-900'} tracking-tight`}>
+        {value}
+      </p>
+      {unit && (
+        <span className="text-[0.9em] font-bold text-gray-400 uppercase tracking-widest leading-none">
+          {unit}
+        </span>
+      )}
     </div>
     {subtext && (
       <div className="text-right flex flex-col items-end opacity-70">
@@ -289,11 +287,11 @@ const ActionCard = ({ icon: Icon, label, count, color }) => {
         <div className={`p-4 rounded-2xl border transition-all ${s.bg} ${s.text} ${s.border}`}>
           <Icon size={20} strokeWidth={2.5} />
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-black text-black uppercase tracking-[0.15em] transition-colors">
+        <div className="flex items-center gap-4">
+          <span className="text-[1.05em] font-bold text-gray-700 uppercase tracking-widest transition-colors line-clamp-1">
             {label}
           </span>
-          <span className={`text-sm font-black ${s.text}`}>{count}</span>
+          <span className={`text-[1.1em] font-black ${s.text} bg-white px-2 py-0.5 rounded-md border ${s.border}`}>{count}</span>
         </div>
       </div>
     </div>
@@ -301,9 +299,9 @@ const ActionCard = ({ icon: Icon, label, count, color }) => {
 }
 
 const DetailItem = ({ label, value }) => (
-  <div className="space-y-2">
-    <p className="text-[9px] font-black text-black uppercase tracking-[0.2em]">{label}</p>
-    <p className="text-sm font-bold text-black break-all">{value || '-'}</p>
+  <div className="space-y-1.5">
+    <p className="text-[0.85em] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
+    <p className="text-[1.1em] font-black text-gray-900 break-all">{value || '-'}</p>
   </div>
 )
 

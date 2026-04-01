@@ -146,10 +146,10 @@ const QuotationRaise = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200 font-roboto" style={{ fontSize: 'clamp(11px, 1vw, 14px)' }}>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
-          <h2 className="text-xl font-black text-black tracking-tight">
+          <h2 className="text-[1.25em] font-black text-black tracking-tight">
             Raise Connection Designer Quotation
           </h2>
           <button
@@ -167,7 +167,7 @@ const QuotationRaise = ({
         >
           {/* Multi-State Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[0.875em] font-medium text-gray-700 mb-1">
               Filter by States
             </label>
             <Select
@@ -202,7 +202,7 @@ const QuotationRaise = ({
 
           {/* Connection Designer Select */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[0.875em] font-medium text-gray-700 mb-1">
               Connection Designers
             </label>
             <Controller
@@ -260,7 +260,7 @@ const QuotationRaise = ({
           {/* Engineer Select (Dependent) */}
           {availableEngineers.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-[0.875em] font-medium text-gray-700 mb-1">
                 Select Engineers (Optional)
               </label>
               <Controller
@@ -313,7 +313,7 @@ const QuotationRaise = ({
                 className="bg-gray-50/50"
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <Input
                 label="RFQ Due Date"
                 type="date"
@@ -325,7 +325,7 @@ const QuotationRaise = ({
 
           {/* CD Attachments */}
           <div className="pt-4 border-t border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-[0.875em] font-medium text-gray-700 mb-2">
               CD Attachments
             </label>
             <div className="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-xl p-4 hover:border-[#6bbd45]/50 transition-all">
@@ -345,7 +345,7 @@ const QuotationRaise = ({
           <div className="flex justify-end pt-4 border-t border-gray-200">
             <button
               type="submit"
-              className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all flex items-center gap-2 active:scale-95"
+              className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[0.7em] font-black uppercase tracking-[0.2em] shadow-sm transition-all flex items-center gap-2 active:scale-95"
             >
               Raise for Quotation
             </button>
