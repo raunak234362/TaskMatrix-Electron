@@ -58,7 +58,7 @@ const GetRFIByID = ({ id }) => {
       </div>
     );
   }
-  const userRole = sessionStorage.getItem("userRole");
+  const userRole = sessionStorage.getItem("userRole")?.toUpperCase();
 
   const responseColumns = [
     {
@@ -105,18 +105,31 @@ const GetRFIByID = ({ id }) => {
       ),
     },
     {
-      accessorKey: "status",
+      accessorKey: "wbtStatus",
       header: "Status",
-      cell: ({ row }) => (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${row.original.status === "OPEN"
-            ? "bg-[#6bbd45]/15 text-[#6bbd45]"
-            : "bg-[#6bbd45]/15 text-[#6bbd45]"
-            }`}
-        >
-          {row.original.status}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const status = row.original.wbtStatus || row.original.status || "—";
+        const getStatusStyles = (s) => {
+          switch (s?.toUpperCase()) {
+            case "OPEN":
+              return "bg-blue-100 text-blue-700 border-blue-200";
+            case "PARTIAL":
+              return "bg-orange-100 text-orange-700 border-orange-200";
+            case "COMPLETE":
+              return "bg-green-100 text-green-700 border-green-200";
+            default:
+              return "bg-gray-100 text-gray-700 border-gray-200";
+          }
+        };
+
+        return (
+          <span
+            className={`px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${getStatusStyles(status)}`}
+          >
+            {status}
+          </span>
+        );
+      },
     },
   ];
 
@@ -184,7 +197,7 @@ const GetRFIByID = ({ id }) => {
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>
 
-              {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole== "DEPUTY_MANAGER") && (
+              {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole === "DEPUTY_MANAGER" || userRole === "OPERATION_EXECUTIVE") && (
                 <Button
                   onClick={() => setShowModal(true)}
                   className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"

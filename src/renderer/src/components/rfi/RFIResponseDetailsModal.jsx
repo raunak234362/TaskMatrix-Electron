@@ -23,7 +23,7 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
   console.log(response);
 
   // 🔒 Only Admin/Team can reply (not client)
-  const canReply = ["ADMIN", "STAFF", "MANAGER"].includes(userRole);
+  const canReply = ["ADMIN", "STAFF", "MANAGER", "OPERATION_EXECUTIVE"].includes(userRole);
 
   const handleReplySubmit = async () => {
     if (!replyMessage.trim()) return;
