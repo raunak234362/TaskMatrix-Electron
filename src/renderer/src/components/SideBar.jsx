@@ -4,6 +4,7 @@ import ICON from '../assets/icon.png'
 import { LogOut, X, RefreshCw } from 'lucide-react'
 import { navItems } from '../constants/navigation'
 import { useSelector } from 'react-redux'
+import socket from '../socket'
 
 const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
   const userData = useSelector((state) => state?.userdata?.userDetail)
@@ -20,6 +21,10 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
   const fetchLogout = () => {
     try {
       sessionStorage.clear()
+      if (socket.connected) {
+        socket.disconnect()
+        console.log('🔌 Socket disconnected on logout')
+      }
       navigate('/')
     } catch (error) {
       console.error('Logout failed:', error)

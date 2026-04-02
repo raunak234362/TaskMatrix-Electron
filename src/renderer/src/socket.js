@@ -6,10 +6,11 @@ const socket = io(getSocketUrl(), {
   autoConnect: false
 })
 
-// Connect socket with userId
-export function connectSocket(userId) {
-  if (!userId) {
-    console.warn('User ID missing — socket not connected')
+// Connect socket with token
+export function connectSocket() {
+  const token = sessionStorage.getItem('token')
+  if (!token) {
+    console.warn('Token missing — socket not connected')
     return
   }
 
@@ -17,16 +18,16 @@ export function connectSocket(userId) {
   socket.io.uri = getSocketUrl()
 
   console.log('Connecting to socket at:', socket.io.uri)
-  console.log('User ID Passing', userId)
 
   // Update auth before connecting
-  socket.auth = { userId }
-  console.log(socket)
+  socket.auth = { token }
+  console.log('Socket Auth Set with Token')
 
-  // Avoid multiple connects
-  if (!socket.connected) {
-    socket.connect()
+  // Avoid multiple connects or reconnect with new token
+  if (socket.connected) {
+    socket.disconnect()
   }
+  socket.connect()
 
   // Log socket events (optional but very helpful)
   socket.on('connect', () => {

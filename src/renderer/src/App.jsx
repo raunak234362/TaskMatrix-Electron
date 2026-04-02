@@ -22,7 +22,7 @@ const AppContent = () => {
   // Connect socket when userDetail is available
   useEffect(() => {
     if (userDetail?.id) {
-      connectSocket(userDetail.id)
+      connectSocket()
     }
   }, [userDetail?.id])
 

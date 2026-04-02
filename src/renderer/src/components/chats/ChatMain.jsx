@@ -33,7 +33,6 @@ const ChatMain = ({ activeChat, setActiveChat, onMessageSent }) => {
     if (!content || !groupID) return;
 
     const MessageData = {
-      senderId: userInfo?.id,
       groupId: groupID,
       content,
       taggedUserIds: [],
