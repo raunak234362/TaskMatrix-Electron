@@ -92,7 +92,7 @@ const DesignDrawingDetails = ({ id, onUpdate }) => {
       {drawing.files && drawing.files.length > 0 && (
         <RenderFiles
           files={drawing.files}
-          table="design-drawings"
+          table="designDrawings"
           parentId={id}
         />
       )}

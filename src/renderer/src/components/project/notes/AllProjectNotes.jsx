@@ -10,8 +10,7 @@ import {
 import Service from "../../../api/Service";
 import { toast } from "react-toastify";
 import AddProjectNote from "./AddProjectNote";
-import FileItem from "../../ui/FileItem";
-import { openFileSecurely } from "../../../utils/openFileSecurely";
+import RenderFiles from "../../ui/RenderFiles";
 import DataTable from "../../ui/table";
 import NoteResponseModal from "./NoteResponseModal";
 import NoteResponseDetailsModal from "./NoteResponseDetailsModal";
@@ -274,21 +273,12 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                                                     Attached Intelligence
                                                 </p>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {note.files.map((file) => (
-                                                        <FileItem
-                                                            key={file.id}
-                                                            name={file.originalName || file.fileName || file.id}
-                                                            onClick={() =>
-                                                                openFileSecurely(
-                                                                    "team-meeting-notes",
-                                                                    note.id,
-                                                                    file.id,
-                                                                )
-                                                            }
-                                                        />
-                                                    ))}
-                                                </div>
+                                                <RenderFiles
+                                                    files={note.files}
+                                                    table="teamMeetingNotes"
+                                                    parentId={note.id}
+                                                    formatDate={formatDateTime}
+                                                />
                                             </div>
                                         )}
 

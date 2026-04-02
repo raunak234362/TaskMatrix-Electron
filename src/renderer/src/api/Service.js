@@ -583,20 +583,20 @@ class Service {
     }
   }
 
-// Connection Designer Quota Approve By ID
-static async ConnectionDesignerQuotaApproveByID(id) {
-  try {
-    const response = await api.put(`connectionDesignerQuota/approve/${id}`, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    console.log(response)
-    return response.data
-  } catch (error) {
-    console.log(error)
+  // Connection Designer Quota Approve By ID
+  static async ConnectionDesignerQuotaApproveByID(id) {
+    try {
+      const response = await api.put(`connectionDesignerQuota/approve/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
   }
-}
 
   // Add Estimation
   static async AddEstimation(formData) {
@@ -1655,13 +1655,13 @@ static async ConnectionDesignerQuotaApproveByID(id) {
     try {
       const response = await api.get(`rfi/project/${projectId}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" All rfi fetched by rfi ID:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All rfi fetched by rfi ID:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find rfi", error);
+      console.error('cannot find rfi', error)
     }
   }
 
@@ -1820,33 +1820,33 @@ static async ConnectionDesignerQuotaApproveByID(id) {
     }
   }
 
-// submittalsentbyprojectid:
-static async SubmittalSentByProjectId(projectId) {
-  try {
-    const response = await api.get(`submittal/sents/${projectId}`, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    console.log(' All submittals fetched by project ID:', response.data)
-    return response.data
-  } catch (error) {
-    console.error('cannot find submittal', error)
+  // submittalsentbyprojectid:
+  static async SubmittalSentByProjectId(projectId) {
+    try {
+      const response = await api.get(`submittal/sents/${projectId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All submittals fetched by project ID:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find submittal', error)
+    }
   }
-}
 
-    //submittal by project id :
+  //submittal by project id :
   static async GetSubmittalByProjectId(projectId) {
     try {
       const response = await api.get(`submittal/project/${projectId}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" All submittals fetched by project ID:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All submittals fetched by project ID:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find submittal", error);
+      console.error('cannot find submittal', error)
     }
   }
 
@@ -1865,18 +1865,18 @@ static async SubmittalSentByProjectId(projectId) {
       throw error
     }
   }
-   //submittal by project id :
+  //submittal by project id :
   static async GetSubmittalByProjectId(projectId) {
     try {
       const response = await api.get(`submittal/project/${projectId}`, {
         headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log(" All submittals fetched by project ID:", response.data);
-      return response.data;
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All submittals fetched by project ID:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot find submittal", error);
+      console.error('cannot find submittal', error)
     }
   }
 
@@ -2150,11 +2150,15 @@ static async SubmittalSentByProjectId(projectId) {
   //Task Start
   static async TaskStart(id) {
     try {
-      const response = await api.post(`task/start/${id}`, {}, {
-        headers: {
-          'Content-Type': 'application/json'
+      const response = await api.post(
+        `task/start/${id}`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
-      })
+      )
       // console.log(" All Task fetched by ID:", response.data);
       return response.data
     } catch (error) {
@@ -2165,11 +2169,15 @@ static async SubmittalSentByProjectId(projectId) {
   //Task Resume
   static async TaskResume(id) {
     try {
-      const response = await api.post(`task/resume/${id}`, {}, {
-        headers: {
-          'Content-Type': 'application/json'
+      const response = await api.post(
+        `task/resume/${id}`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
-      })
+      )
       // console.log(" All Task fetched by ID:", response.data);
       return response.data
     } catch (error) {
@@ -2387,7 +2395,7 @@ static async SubmittalSentByProjectId(projectId) {
   // Create new Design Drawing
   static async CreateDesignDrawing(data) {
     try {
-      const response = await api.post(`design-drawings`, data, {
+      const response = await api.post(`designDrawings`, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       return response.data
@@ -2400,7 +2408,7 @@ static async SubmittalSentByProjectId(projectId) {
   // Update stage / description of a Design Drawing
   static async UpdateDesignDrawing(id, data) {
     try {
-      const response = await api.put(`design-drawings/${id}`, data, {
+      const response = await api.put(`designDrawings/${id}`, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       return response.data
@@ -2413,7 +2421,7 @@ static async SubmittalSentByProjectId(projectId) {
   // Get all Design Drawings (Admin)
   static async GetAllDesignDrawings() {
     try {
-      const response = await api.get(`design-drawings`)
+      const response = await api.get(`designDrawings`)
       return response.data
     } catch (error) {
       console.error('Error fetching all design drawings:', error)
@@ -2424,7 +2432,7 @@ static async SubmittalSentByProjectId(projectId) {
   // Get Design Drawings by Project ID
   static async GetDesignDrawingsByProjectId(projectId) {
     try {
-      const response = await api.get(`design-drawings/project/${projectId}`)
+      const response = await api.get(`designDrawings/project/${projectId}`)
       return response.data
     } catch (error) {
       console.error('Error fetching design drawings by project ID:', error)
@@ -2435,7 +2443,7 @@ static async SubmittalSentByProjectId(projectId) {
   // Get a single Design Drawing by ID
   static async GetDesignDrawingById(id) {
     try {
-      const response = await api.get(`design-drawings/${id}`)
+      const response = await api.get(`designDrawings/${id}`)
       return response.data
     } catch (error) {
       console.error('Error fetching design drawing by ID:', error)
@@ -2446,7 +2454,7 @@ static async SubmittalSentByProjectId(projectId) {
   // Delete a Design Drawing
   static async DeleteDesignDrawing(id) {
     try {
-      const response = await api.delete(`design-drawings/${id}`)
+      const response = await api.delete(`designDrawings/${id}`)
       return response.data
     } catch (error) {
       console.error('Error deleting design drawing:', error)
@@ -2457,7 +2465,7 @@ static async SubmittalSentByProjectId(projectId) {
   // Get file metadata (from Design Drawing)
   static async GetDesignDrawingFileMetadata(designId, fileId) {
     try {
-      const response = await api.get(`design-drawings/${designId}/files/${fileId}`)
+      const response = await api.get(`designDrawings/${designId}/files/${fileId}`)
       return response.data
     } catch (error) {
       console.error('Error fetching design drawing file metadata:', error)
@@ -2468,7 +2476,7 @@ static async SubmittalSentByProjectId(projectId) {
   // Stream file (from Design Drawing)
   static async ViewDesignDrawingFile(designId, fileId) {
     try {
-      const response = await api.get(`design-drawings/viewFile/${designId}/${fileId}`)
+      const response = await api.get(`designDrawings/viewFile/${designId}/${fileId}`)
       return response.data
     } catch (error) {
       console.error('Error viewing design drawing file:', error)
@@ -3110,127 +3118,127 @@ static async SubmittalSentByProjectId(projectId) {
     }
   }
 
-//project notes 
+  //project notes
 
- static async AddTeamMeetingNotes(formData) {
+  static async AddTeamMeetingNotes(formData) {
     try {
-      const response = await api.post(`team-meeting-notes`, formData);
-      return response.data;
+      const response = await api.post(`teamMeetingNotes`, formData)
+      return response.data
     } catch (error) {
-      console.error("Error fetching team meeting notes:", error);
-      throw error;
+      console.error('Error fetching team meeting notes:', error)
+      throw error
     }
   }
 
   static async GetTeamMeetingNotesAll() {
     try {
-      const response = await api.get(`team-meeting-notes`);
-      return response;
+      const response = await api.get(`teamMeetingNotes`)
+      return response
     } catch (error) {
-      console.error("Error fetching team meeting notes:", error);
-      throw error;
+      console.error('Error fetching team meeting notes:', error)
+      throw error
     }
   }
 
   static async GetTeamMeetingNotesByProjectId(projectId) {
     try {
-      const response = await api.get(`team-meeting-notes/project/${projectId}`);
-      return response.data;
+      const response = await api.get(`teamMeetingNotes/project/${projectId}`)
+      return response.data
     } catch (error) {
-      console.error("Error fetching team meeting notes by projectId:", error);
-      throw error;
+      console.error('Error fetching team meeting notes by projectId:', error)
+      throw error
     }
   }
   static async GetTeamMeetingNotesById(id) {
     try {
-      const response = await api.get(`team-meeting-notes/${id}`);
-      return response.data;
+      const response = await api.get(`teamMeetingNotes/${id}`)
+      return response.data
     } catch (error) {
-      console.error("Error fetching team meeting notes:", error);
-      throw error;
+      console.error('Error fetching team meeting notes:', error)
+      throw error
     }
   }
   static async UpdateTeamMeetingNotes(id, data) {
     try {
-      const response = await api.put(`team-meeting-notes/${id}`, data);
-      return response.data;
+      const response = await api.put(`teamMeetingNotes/${id}`, data)
+      return response.data
     } catch (error) {
-      console.error("Error updating team meeting notes:", error);
-      throw error;
+      console.error('Error updating team meeting notes:', error)
+      throw error
     }
   }
   static async DeleteTeamMeetingNotes(id) {
     try {
-      const response = await api.delete(`team-meeting-notes/${id}`);
-      return response.data;
+      const response = await api.delete(`teamMeetingNotes/${id}`)
+      return response.data
     } catch (error) {
-      console.error("Error deleting team meeting notes:", error);
-      throw error;
+      console.error('Error deleting team meeting notes:', error)
+      throw error
     }
   }
   static async ViewFileNotesTeamMeeting(noteId, fileId) {
     try {
-      const response = await api.get(`team-meeting-notes/viewFile/${noteId}/${fileId}`);
-      return response.data;
+      const response = await api.get(`teamMeetingNotes/viewFile/${noteId}/${fileId}`)
+      return response.data
     } catch (error) {
-      console.error("Error fetching file notes:", error);
-      throw error;
+      console.error('Error fetching file notes:', error)
+      throw error
     }
   }
   //team meeting respoense routes
   static async AddTeamMeetingResponse(notesId, formData) {
     try {
-      const response = await api.post(`team-meeting-notes/${notesId}/responses`, formData);
-      return response.data;
+      const response = await api.post(`teamMeetingNotes/${notesId}/responses`, formData)
+      return response.data
     } catch (error) {
-      console.error("Error fetching team meeting response:", error);
-      throw error;
+      console.error('Error fetching team meeting response:', error)
+      throw error
     }
   }
 
   static async Getallrepliesforanote(noteId) {
     try {
-      const response = await api.get(`team-meeting-notes/${noteId}/responses`);
-      return response.data;
+      const response = await api.get(`teamMeetingNotes/${noteId}/responses`)
+      return response.data
     } catch (error) {
-      console.error("Error fetching response for note:", error);
-      throw error;
+      console.error('Error fetching response for note:', error)
+      throw error
     }
   }
   static async GetallrepliesforanoteByid(id) {
     try {
-      const response = await api.get(`team-meeting-notes/responses/${id}`);
-      return response.data;
+      const response = await api.get(`teamMeetingNotes/responses/${id}`)
+      return response.data
     } catch (error) {
-      console.error("Error fetching team meeting response:", error);
-      throw error;
+      console.error('Error fetching team meeting response:', error)
+      throw error
     }
   }
   static async UpdateTeamMeetingResponse(id, data) {
     try {
-      const response = await api.put(`team-meeting-notes/responses/${id}`, data);
-      return response.data;
+      const response = await api.put(`teamMeetingNotes/responses/${id}`, data)
+      return response.data
     } catch (error) {
-      console.error("Error updating team meeting response:", error);
-      throw error;
+      console.error('Error updating team meeting response:', error)
+      throw error
     }
   }
   static async DeleteTeamMeetingResponse(id) {
     try {
-      const response = await api.delete(`team-meeting-notes/responses/${id}`);
-      return response.data;
+      const response = await api.delete(`teamMeetingNotes/responses/${id}`)
+      return response.data
     } catch (error) {
-      console.error("Error deleting team meeting response:", error);
-      throw error;
+      console.error('Error deleting team meeting response:', error)
+      throw error
     }
   }
   static async ViewFileNotesTeamMeetingResponse(noteId, fileId) {
     try {
-      const response = await api.get(`team-meeting-notes/responses/viewFile/${noteId}/${fileId}`);
-      return response.data;
+      const response = await api.get(`teamMeetingNotes/responses/viewFile/${noteId}/${fileId}`)
+      return response.data
     } catch (error) {
-      console.error("Error fetching file notes:", error);
-      throw error;
+      console.error('Error fetching file notes:', error)
+      throw error
     }
   }
   //rfq followups:
@@ -3238,13 +3246,13 @@ static async SubmittalSentByProjectId(projectId) {
     try {
       const response = await api.post(`rfq/${rfqId}/followups`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      console.log("RFQ followups added:", response.data);
-      return response.data;
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      console.log('RFQ followups added:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot add RFQ followups", error);
+      console.error('cannot add RFQ followups', error)
     }
   }
 
@@ -3252,13 +3260,12 @@ static async SubmittalSentByProjectId(projectId) {
 
   static async viewRfqFile(Id, fileId) {
     try {
-      const response = await api.get(`rfq/followups/viewFile/${Id}/${fileId}`);
-      console.log("RFQ file fetched:", response.data);
-      return response.data;
+      const response = await api.get(`rfq/followups/viewFile/${Id}/${fileId}`)
+      console.log('RFQ file fetched:', response.data)
+      return response.data
     } catch (error) {
-      console.error("cannot fetch RFQ file", error);
+      console.error('cannot fetch RFQ file', error)
     }
   }
-
 }
 export default Service

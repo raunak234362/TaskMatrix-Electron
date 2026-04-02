@@ -3,15 +3,22 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Service from "../../../api/Service";
 import Button from "../../fields/Button";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import MultipleFileUpload from "../../fields/MultipleFileUpload";
 
 
 const AddDesignDrawing = ({ projectId, onSuccess }) => {
   const [loading, setLoading] = useState(false);
-  const { register, handleSubmit, reset } = useForm();
-  const [files, setFiles] = useState(null);
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const [files, setFiles] = useState([]);
+  const [formKey, setFormKey] = useState(0);
+
+  const onError = (errors) => {
+    console.error("Form Validation Errors:", errors);
+  };
 
   const onSubmit = async (data) => {
+    console.log("Submitting Design Drawing form with data:", data);
     try {
       setLoading(true);
       const formData = new FormData();
@@ -19,15 +26,16 @@ const AddDesignDrawing = ({ projectId, onSuccess }) => {
       formData.append("stage", data.stage);
       formData.append("description", data.description);
 
-      if (files) {
-        for (let i = 0; i < files.length; i++) {
-          formData.append("files", files[i]);
-        }
+      if (files && files.length > 0) {
+        files.forEach((file) => {
+          formData.append("files", file);
+        });
       }
 
       await Service.CreateDesignDrawing(formData);
       reset();
-      setFiles(null);
+      setFiles([]);
+      setFormKey((prev) => prev + 1);
       onSuccess();
     } catch (error) {
       console.error("Error creating design drawing:", error);
@@ -38,7 +46,7 @@ const AddDesignDrawing = ({ projectId, onSuccess }) => {
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit, onError)}
       className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 space-y-6"
     >
       <div className="border-b border-gray-50 pb-4">
@@ -59,6 +67,9 @@ const AddDesignDrawing = ({ projectId, onSuccess }) => {
             <option value="IFC">IFC</option>
             <option value="CO#">CO#</option>
           </select>
+          {errors.stage && (
+            <p className="text-red-500 text-xs mt-1">Stage is required</p>
+          )}
         </div>
 
         <div className="space-y-2 md:col-span-2">
@@ -71,37 +82,13 @@ const AddDesignDrawing = ({ projectId, onSuccess }) => {
             className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all bg-gray-50/50"
             placeholder="Enter drawing description..."
           />
+          {errors.description && (
+            <p className="text-red-500 text-xs mt-1">Description is required</p>
+          )}
         </div>
 
-        <div className="space-y-2 md:col-span-2">
-          <label className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-            Attachments
-          </label>
-          <div className="relative group">
-            <input
-              type="file"
-              multiple
-              className="hidden"
-              id="file-upload"
-              onChange={(e) => setFiles(e.target.files)}
-            />
-            <label
-              htmlFor="file-upload"
-              className="flex flex-col items-center justify-center w-full h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-xl appearance-none cursor-pointer hover:border-green-400 focus:outline-none group-hover:bg-gray-50"
-            >
-              <div className="flex flex-col items-center space-y-2">
-                <Upload className="w-8 h-8 text-gray-400 group-hover:text-green-500 transition-colors" />
-                <span className="font-medium text-gray-600">
-                  {files && files.length > 0
-                    ? `${files.length} files selected`
-                    : "Click to upload or drag and drop"}
-                </span>
-                <span className="text-xs text-gray-400">
-                  PNG, JPG, PDF up to 10MB
-                </span>
-              </div>
-            </label>
-          </div>
+        <div className="md:col-span-2">
+          <MultipleFileUpload key={formKey} onFilesChange={setFiles} />
         </div>
       </div>
 

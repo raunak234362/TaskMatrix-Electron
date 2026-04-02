@@ -3,7 +3,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Service from "../../../api/Service";
 import Button from "../../fields/Button";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import MultipleFileUpload from "../../fields/MultipleFileUpload";
 
 
 const EditDesignDrawing = ({
@@ -18,7 +19,7 @@ const EditDesignDrawing = ({
       description: drawing.description,
     },
   });
-  const [files, setFiles] = useState(null);
+  const [files, setFiles] = useState([]);
 
   const onSubmit = async (data) => {
     try {
@@ -27,10 +28,10 @@ const EditDesignDrawing = ({
       formData.append("stage", data.stage);
       formData.append("description", data.description);
 
-      if (files) {
-        for (let i = 0; i < files.length; i++) {
-          formData.append("files", files[i]);
-        }
+      if (files && files.length > 0) {
+        files.forEach((file) => {
+          formData.append("files", file);
+        });
       }
 
       await Service.UpdateDesignDrawing(drawing.id, formData);
@@ -78,27 +79,7 @@ const EditDesignDrawing = ({
         <label className="block text-sm font-medium text-gray-700">
           Add More Files (Optional)
         </label>
-        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-          <div className="space-y-1 text-center">
-            <Upload className="mx-auto h-8 w-8 text-gray-400" />
-            <div className="flex text-sm text-gray-600">
-              <label className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none">
-                <span>Upload files</span>
-                <input
-                  type="file"
-                  multiple
-                  className="sr-only"
-                  onChange={(e) => setFiles(e.target.files)}
-                />
-              </label>
-            </div>
-            <p className="text-xs text-gray-500">
-              {files
-                ? `${files.length} files selected`
-                : "PNG, JPG, PDF up to 10MB"}
-            </p>
-          </div>
-        </div>
+        <MultipleFileUpload onFilesChange={setFiles} />
       </div>
 
       <div className="flex justify-end gap-2">
