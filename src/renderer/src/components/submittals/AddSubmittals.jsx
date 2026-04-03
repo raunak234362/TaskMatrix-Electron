@@ -99,7 +99,7 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
 
   const mileStoneOptions =
     milestones?.map((m) => ({
-      label: m.subject || m.description || "Unnamed Milestone",
+      label: m.subject + " - " + m.stage || m.description + " - " + m.stage|| "Unnamed Milestone",
       value: m.id,
     })) ?? [];
 

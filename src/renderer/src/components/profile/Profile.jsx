@@ -167,13 +167,25 @@ const Profile = () => {
         </div>
         <div className="border-t border-gray-200 pt-6">
           <div className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            {userRole === "admin" || userRole === "human_resource" && (
+            {[
+              "admin",
+              "human_resource",
+              "connection_designer",
+              "connection_designer_admin",
+              "connection_designer_engineer",
+              "client",
+              "client_admin",
+              "client_project_coordinator",
+              "client_general_constructor",
+            ].includes(userRole) && (
               <>
                 <Edit2 className="w-5 h-5 text-green-600" /> Update Detail{" "}
                 <Button onClick={() => setIsEditModalOpen(true)}>Update </Button>
               </>
             )}
-            <Button onClick={() => setIsChangePasswordModalOpen(true)}>Change Password </Button>
+            <Button onClick={() => setIsChangePasswordModalOpen(true)}>
+              Change Password{" "}
+            </Button>
           </div>
         </div>
 

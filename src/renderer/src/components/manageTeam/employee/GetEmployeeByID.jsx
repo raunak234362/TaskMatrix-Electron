@@ -695,7 +695,12 @@ const GetEmployeeByID = ({ id, onClose }) => {
           )}
 
           {/* ── Task Performance Report ── */}
-          {userRole !== "client" && userRole !== "client_admin" && (
+          {![
+            "client",
+            "client_admin",
+            "connection_designer_engineer",
+            "connection_designer_admin",
+          ].includes(userRole) && (
             <div className="pt-8 border-t border-black/5">
 
               {/* Section Header */}
