@@ -185,15 +185,30 @@ const AddTask = () => {
     }
   }, [selectedProject, setValue]);
 
-  // After milestone selection, reset WBS selections
+  // After milestone selection, reset WBS selections and auto-set Stage
   useEffect(() => {
     if (selectedProjectId && selectedMilestoneId) {
       // Reset WBS selections when milestone changes
       setValue("wbsType", "");
       setValue("project_bundle_id", "");
       setSelectedWbs(null);
+
+      // Auto-set Stage based on milestone stage
+      const milestone = milestones.find(
+        (m) => String(m.id) === String(selectedMilestoneId),
+      );
+      if (milestone) {
+        const msStage = (milestone.stage || "").toUpperCase();
+        if (msStage.includes("RIFA")) {
+          setValue("Stage", "RIFA");
+        } else if (msStage.includes("RIFC")) {
+          setValue("Stage", "RIFC");
+        } else if (msStage === "IFA" || msStage === "IFC") {
+          setValue("Stage", msStage);
+        }
+      }
     }
-  }, [selectedMilestoneId, setValue]);
+  }, [selectedMilestoneId, selectedProjectId, milestones, setValue]);
 
   // Update selected WBS data and fetch details from API
   useEffect(() => {
@@ -303,9 +318,18 @@ const AddTask = () => {
       (isCheckingType
         ? category === baseType
         : category === selectedWbsType.toLowerCase());
+
+    // Normalize selectedStage for comparison (RIFA -> IFA, RIFC -> IFC)
+    const normalizedSelectedStage = (selectedStage || "").toUpperCase();
+    let compareStage = normalizedSelectedStage;
+    if (compareStage.includes("RIFA")) compareStage = "IFA";
+    else if (compareStage.includes("RIFC")) compareStage = "IFC";
+
+    const wStage = (w.stage || "").toUpperCase();
     const stageOk =
       !selectedStage ||
-      (w.stage && w.stage.toLowerCase() === selectedStage.toLowerCase());
+      (wStage === compareStage);
+
     return typeOk && stageOk;
   });
 
@@ -687,7 +711,8 @@ const AddTask = () => {
                             options={[
                               { label: "IFA", value: "IFA" },
                               { label: "IFC", value: "IFC" },
-                              { label: "RE-IFA", value: "RE-IFA" },
+                              { label: "R-IFA", value: "RIFA" },
+                              { label: "R-IFC", value: "RIFC" },
                             ]}
                             value={field.value}
                             onChange={(_, val) => {
