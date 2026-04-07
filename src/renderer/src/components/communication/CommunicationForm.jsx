@@ -226,7 +226,7 @@ const CommunicationForm = ({ initialData, projects = [], fabricators = [], onSub
                 <label className="text-sm font-medium text-gray-700">Subject <span className="text-red-500">*</span></label>
                 <input
                     {...register('subject', { required: true })}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-500"
                     placeholder="Quick summary"
                 />
                 {errors.subject && <span className="text-xs text-red-500">Required</span>}
@@ -238,7 +238,7 @@ const CommunicationForm = ({ initialData, projects = [], fabricators = [], onSub
                     <input
                         type="datetime-local"
                         {...register('communicationDate', { required: true })}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-500"
                     />
                 </div>
                 <div className="space-y-1">
@@ -246,7 +246,7 @@ const CommunicationForm = ({ initialData, projects = [], fabricators = [], onSub
                     <input
                         type="datetime-local"
                         {...register('followUpDate')}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-500"
                     />
                 </div>
             </div>
@@ -256,7 +256,7 @@ const CommunicationForm = ({ initialData, projects = [], fabricators = [], onSub
                 <textarea
                     {...register('notes')}
                     rows={4}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 resize-none"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-green-500 resize-none"
                     placeholder="Detailed notes..."
                 />
             </div>
@@ -266,7 +266,7 @@ const CommunicationForm = ({ initialData, projects = [], fabricators = [], onSub
                     type="checkbox"
                     id="reminderSent"
                     {...register('reminderSent')}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
                 />
                 <label htmlFor="reminderSent" className="text-sm text-gray-700">Send Reminder Notification</label>
             </div>
@@ -281,7 +281,7 @@ const CommunicationForm = ({ initialData, projects = [], fabricators = [], onSub
                 </button>
                 <button
                     type="submit"
-                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
+                    className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
                 >
                     Save Record
                 </button>

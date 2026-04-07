@@ -149,7 +149,7 @@ const CommunicationCalendar = () => {
                 <div className="flex flex-col sm:flex-row items-center justify-between p-6 border-b border-gray-100 bg-gray-50/30 gap-4">
                     <div className="flex items-center gap-4">
                         <h1 className="text-2xl font-black text-gray-800 tracking-tight flex items-center gap-3">
-                            <MessageCircle className="text-blue-600" size={28} />
+                            <MessageCircle className="text-green-600" size={28} />
                             {format(currentDate, 'MMMM yyyy')}
                         </h1>
                         <div className="flex items-center bg-white rounded-xl border border-gray-200 p-1 shadow-sm">
@@ -159,7 +159,7 @@ const CommunicationCalendar = () => {
                             <button onClick={handleNextMonth} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-600">
                                 <ChevronRight size={20} />
                             </button>
-                            <button onClick={handleToday} className="px-3 py-1 text-xs font-bold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors ml-1">
+                            <button onClick={handleToday} className="px-3 py-1 text-xs font-bold text-green-600 hover:bg-green-50 rounded-lg transition-colors ml-1">
                                 Today
                             </button>
                         </div>
@@ -168,7 +168,7 @@ const CommunicationCalendar = () => {
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                         <button
                             onClick={() => handleOpenAdd()}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-200 font-bold text-sm"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 active:scale-95 transition-all shadow-lg shadow-green-200 font-bold text-sm"
                         >
                             <Plus size={18} />
                             Log Communication
@@ -196,14 +196,14 @@ const CommunicationCalendar = () => {
                                 <div
                                     key={idx}
                                     className={`min-h-[120px] border-b border-r border-gray-50 p-2 transition-all hover:bg-gray-50/50 flex flex-col gap-1 cursor-pointer ${!isCurrentMonth ? 'bg-gray-50/20 text-gray-300' :
-                                        isSameDay(day, selectedDate) ? 'bg-blue-50/50' : 'bg-white'
+                                        isSameDay(day, selectedDate) ? 'bg-green-50/50' : 'bg-white'
                                         }`}
                                     onClick={() => setSelectedDate(day)}
                                     onDoubleClick={() => handleOpenAdd(day)}
                                 >
                                     <div className={`text-xs font-black w-7 h-7 flex items-center justify-center rounded-lg mb-1 ${isToday
-                                        ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                                        : isSameDay(day, selectedDate) ? 'bg-blue-100 text-blue-700' : isCurrentMonth ? 'text-gray-700' : 'text-gray-300'
+                                        ? 'bg-green-600 text-white shadow-md shadow-green-200'
+                                        : isSameDay(day, selectedDate) ? 'bg-green-100 text-green-700' : isCurrentMonth ? 'text-gray-700' : 'text-gray-300'
                                         }`}>
                                         {format(day, 'd')}
                                     </div>

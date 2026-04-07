@@ -47,7 +47,7 @@ const MonthView = ({ currentDate, meetings, onSelectDate, onSelectMeeting }) => 
                             onClick={() => onSelectDate(day)}
                         >
                             <div className={`text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full mb-1 transition-colors ${isToday
-                                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-300'
+                                    ? 'bg-primary text-white shadow-sm shadow-primary/30'
                                     : isCurrentMonth
                                         ? 'text-gray-700 group-hover:bg-gray-200'
                                         : 'text-gray-400'
@@ -63,7 +63,7 @@ const MonthView = ({ currentDate, meetings, onSelectDate, onSelectMeeting }) => 
                                                 ? 'bg-red-50 text-red-600 border-red-100 line-through decoration-red-400'
                                                 : meeting.status === 'completed'
                                                     ? 'bg-green-50 text-green-700 border-green-100'
-                                                    : 'bg-blue-50 text-blue-700 border-blue-100'
+                                                    : 'bg-green-50 text-green-700 border-green-100'
                                             }`}
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -76,7 +76,7 @@ const MonthView = ({ currentDate, meetings, onSelectDate, onSelectMeeting }) => 
                                     </div>
                                 ))}
                                 {dayMeetings.length > 4 && (
-                                    <div className="text-[10px] text-gray-400 pl-1 font-medium hover:text-blue-600">
+                                    <div className="text-[10px] text-gray-400 pl-1 font-medium hover:text-green-600">
                                         + {dayMeetings.length - 4} more
                                     </div>
                                 )}

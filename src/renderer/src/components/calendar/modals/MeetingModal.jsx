@@ -201,7 +201,7 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                     <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                        {isEditing ? <><CalendarIcon className="text-blue-600" size={20} /> Edit Meeting</> : <><CalendarIcon className="text-blue-600" size={20} /> New Meeting</>}
+                        {isEditing ? <><CalendarIcon className="text-primary" size={20} /> Edit Meeting</> : <><CalendarIcon className="text-primary" size={20} /> New Meeting</>}
                     </h2>
                     <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
                        
@@ -220,7 +220,7 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
                             <input
                                 {...register('title', { required: true })}
                                 placeholder="Add title"
-                                className="w-full text-lg font-semibold text-gray-800 placeholder-gray-400 border-b-2 border-transparent focus:border-blue-500 outline-none pb-1 transition-colors bg-transparent hover:bg-gray-50 px-2 -mx-2 rounded"
+                                className="w-full text-lg font-semibold text-gray-800 placeholder-gray-400 border-b-2 border-transparent focus:border-b-primary outline-none pb-1 transition-colors bg-transparent hover:bg-gray-50 px-2 -mx-2 rounded"
                                 autoFocus
                             />
                         </div>
@@ -233,7 +233,7 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
                             <input
                                 {...register('agenda')}
                                 placeholder="Meeting agenda..."
-                                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                             />
                         </div>
 
@@ -245,7 +245,7 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
                             <input
                                 {...register('location')}
                                 placeholder="Add location"
-                                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                             />
                         </div>
 
@@ -253,22 +253,22 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
                         <div className="grid grid-cols-2 gap-6">
                             <div className="space-y-1">
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                    <Clock size={16} className="text-blue-500" /> Start
+                                    <Clock size={16} className="text-primary" /> Start
                                 </label>
                                 <input
                                     type="datetime-local"
                                     {...register('startTime', { required: true })}
-                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                 />
                             </div>
                             <div className="space-y-1">
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                    <Clock size={16} className="text-gray-400" /> End
+                                    <Clock size={16} className="text-primary" /> End
                                 </label>
                                 <input
                                     type="datetime-local"
                                     {...register('endTime', { required: true })}
-                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                 />
                             </div>
                         </div>
@@ -281,7 +281,7 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
                             <input
                                 {...register('link')}
                                 placeholder="Meeting link (Zoom, Google Meet, etc.)"
-                                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                             />
                         </div>
 
@@ -294,7 +294,7 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
                                 {...register('description')}
                                 placeholder="Add description"
                                 rows={3}
-                                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none"
+                                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
                             />
                         </div>
 
@@ -315,7 +315,7 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
                                         className="text-sm"
                                         classNames={{
                                             control: () => "!bg-gray-50 !border-gray-200 !rounded-lg !shadow-none",
-                                            option: (state) => state.isSelected ? "!bg-blue-600" : state.isFocused ? "!bg-blue-50" : "",
+                                            option: (state) => state.isSelected ? "!bg-primary" : state.isFocused ? "!bg-primary/50" : "",
                                         }}
                                     />
                                 )}
@@ -338,7 +338,7 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
                                             handleAddFile();
                                         }
                                     }}
-                                    className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                    className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                 />
                                 <button
                                     type="button"
@@ -368,7 +368,7 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
                                 </label>
                                 <select
                                     {...register('status')}
-                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                 >
                                     <option value="SCHEDULED">Scheduled</option>
                                     <option value="COMPLETED">Completed</option>
@@ -401,7 +401,7 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2"
+                                className="px-6 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/80 transition-colors shadow-sm disabled:opacity-70 flex items-center gap-2"
                             >
                                 {loading && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                                 Save

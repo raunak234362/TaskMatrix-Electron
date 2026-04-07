@@ -29,7 +29,7 @@ const WeekView = ({ currentDate, meetings, onSelectSlot, onSelectMeeting }) => {
                 {days.map((day) => (
                     <div
                         key={day.toString()}
-                        className={`py-3 text-center text-xs font-semibold uppercase tracking-wide border-r border-gray-100 ${isSameDay(day, new Date()) ? 'text-blue-600 bg-blue-50/50' : 'text-gray-500'
+                        className={`py-3 text-center text-xs font-semibold uppercase tracking-wide border-r border-gray-100 ${isSameDay(day, new Date()) ? 'text-green-600 bg-green-50/50' : 'text-gray-500'
                             }`}
                     >
                         {format(day, 'EEE d')}
@@ -66,7 +66,7 @@ const WeekView = ({ currentDate, meetings, onSelectSlot, onSelectMeeting }) => {
                                                 key={idx}
                                                 className={`absolute left-0.5 right-0.5 top-0.5 bottom-0.5 p-1 rounded-md text-[10px] font-medium border overflow-hidden cursor-pointer z-10 hover:z-20 shadow-sm transition-all hover:shadow-md ${meeting.status === 'cancelled' ? 'bg-red-100 text-red-700 border-red-200' :
                                                         meeting.status === 'completed' ? 'bg-green-100 text-green-700 border-green-200' :
-                                                            'bg-blue-100 text-blue-700 border-blue-200'
+                                                            'bg-green-100 text-green-700 border-green-200'
                                                     }`}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
@@ -83,7 +83,7 @@ const WeekView = ({ currentDate, meetings, onSelectSlot, onSelectMeeting }) => {
                                         {/* Add button on hover empty slot */}
                                         {slotMeetings.length === 0 && (
                                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <div className="w-6 h-6 rounded-full bg-blue-50 text-blue-400 flex items-center justify-center shadow-sm">
+                                                <div className="w-6 h-6 rounded-full bg-green-50 text-green-400 flex items-center justify-center shadow-sm">
                                                     <span className="text-lg leading-none mb-0.5">+</span>
                                                 </div>
                                             </div>

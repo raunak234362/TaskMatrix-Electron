@@ -268,7 +268,7 @@ const TeamCalendar = ({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-primary shadow-sm"></div>
             <span className="text-[9px] sm:text-[10px] font-black text-black/60 uppercase tracking-widest">
               Stretching
             </span>
@@ -340,7 +340,7 @@ const TeamCalendar = ({
                           <div
                             key={tIdx}
                             className={`px-2 py-1.5 rounded-lg border flex flex-col gap-0.5 shadow-sm transition-colors ${userTotalHoursMapDay[t.userName || "Unknown"] > 8.5
-                              ? "bg-blue-100/80 border-blue-200 hover:bg-blue-200/80"
+                              ? "bg-primary/10 border-primary hover:bg-primary/80"
                               : t.status === "ABSENT" ||
                                 (t.name || t.title || "")
                                   .toUpperCase()
@@ -360,7 +360,7 @@ const TeamCalendar = ({
                             <span
                               className={`text-[10px] font-semibold truncate tracking-tight ${userTotalHoursMapDay[t.userName || "Unknown"] >
                                 8.5
-                                ? "text-blue-900"
+                                ? "text-primary/80"
                                 : t.status === "ABSENT" ||
                                   (t.name || t.title || "")
                                     .toUpperCase()
@@ -381,7 +381,7 @@ const TeamCalendar = ({
                             <span
                               className={`text-[9px] font-bold truncate tracking-wider uppercase ${userTotalHoursMapDay[t.userName || "Unknown"] >
                                 8.5
-                                ? "text-blue-700/80"
+                                ? "text-primary/80"
                                 : t.status === "ABSENT" ||
                                   (t.name || t.title || "")
                                     .toUpperCase()
@@ -454,8 +454,8 @@ const TeamCalendar = ({
                   >
                     <div className="flex justify-between items-start gap-4 mb-4">
                       <div className="flex items-start gap-4">
-                        <div className="p-3 bg-blue-50 shrink-0 rounded-2xl border border-blue-100/50">
-                          <FileText size={20} className="text-blue-600" />
+                        <div className="p-3 bg-primary/10 shrink-0 rounded-2xl border border-primary/50">
+                          <FileText size={20} className="text-primary" />
                         </div>
                         <div>
                           <h4 className="text-base font-black text-black leading-tight mb-1">
@@ -473,7 +473,7 @@ const TeamCalendar = ({
                         className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-xl border ${task.status === "COMPLETE"
                           ? "bg-green-50 text-green-700 border-green-200"
                           : task.status === "IN_PROGRESS"
-                            ? "bg-blue-50 text-blue-700 border-blue-200"
+                            ? "bg-primary/10 text-primary border-primary"
                             : "bg-gray-100 text-gray-600 border-gray-200"
                           }`}
                       >
@@ -484,7 +484,7 @@ const TeamCalendar = ({
                     <div className="flex items-center gap-5 mt-5 pt-5 border-t border-black/5">
                       <div
                         className={`flex items-center gap-3 px-4 py-2 rounded-xl border transition-colors ${userTotalHoursMap[task.userName || "Unknown"] > 8.5
-                          ? "bg-blue-100/80 border-blue-200 shadow-sm"
+                          ? "bg-primary/10 border-primary shadow-sm"
                           : task.status === "ABSENT" ||
                             (task.name || task.title || "")
                               .toUpperCase()
@@ -507,7 +507,7 @@ const TeamCalendar = ({
                       >
                         <div
                           className={`w-6 h-6 rounded-full border flex items-center justify-center ${userTotalHoursMap[task.userName || "Unknown"] > 8.5
-                            ? "bg-white border-blue-200 text-blue-600"
+                            ? "bg-white border-primary text-primary"
                             : task.status === "ABSENT" ||
                               (task.name || task.title || "")
                                 .toUpperCase()
@@ -529,7 +529,7 @@ const TeamCalendar = ({
                           <span
                             className={`text-xs font-black uppercase tracking-wider ${userTotalHoursMap[task.userName || "Unknown"] >
                               8.5
-                              ? "text-blue-900"
+                              ? "text-primary/80"
                               : task.status === "ABSENT" ||
                                 (task.name || task.title || "")
                                   .toUpperCase()
@@ -549,7 +549,7 @@ const TeamCalendar = ({
                           </span>
                           {userTotalHoursMap[task.userName || "Unknown"] >
                             8.5 && (
-                              <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none mt-0.5 animate-pulse">
+                              <span className="text-[9px] font-black text-primary uppercase tracking-widest leading-none mt-0.5 animate-pulse">
                                 Stretching
                               </span>
                             )}

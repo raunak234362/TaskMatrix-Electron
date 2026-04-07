@@ -45,7 +45,7 @@ const GetMeetingById = ({ id, meeting: initialMeeting, onEdit, onDelete, onRefre
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center p-12 text-gray-500">
-                <Loader2 className="w-8 h-8 animate-spin mb-4 text-blue-600" />
+                <Loader2 className="w-8 h-8 animate-spin mb-4 text-green-600" />
                 <p>Loading meeting details...</p>
             </div>
         );
@@ -106,7 +106,7 @@ const GetMeetingById = ({ id, meeting: initialMeeting, onEdit, onDelete, onRefre
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                         <div className="flex items-start gap-3">
-                            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                            <div className="p-2 bg-green-50 text-green-600 rounded-lg">
                                 <Clock size={20} />
                             </div>
                             <div>
@@ -127,7 +127,7 @@ const GetMeetingById = ({ id, meeting: initialMeeting, onEdit, onDelete, onRefre
                                 </div>
                                 <div className="min-w-0">
                                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Meeting Link</h3>
-                                    <a href={meeting.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-medium mt-1 block truncate hover:underline">
+                                    <a href={meeting.link} target="_blank" rel="noopener noreferrer" className="text-green-600 font-medium mt-1 block truncate hover:underline">
                                         {meeting.link}
                                     </a>
                                 </div>

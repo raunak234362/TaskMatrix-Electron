@@ -32,7 +32,7 @@ const ListCommunication = ({
                         placeholder="Search client, subject, or notes..."
                         value={searchTerm}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
                     />
                 </div>
             </div>
@@ -41,7 +41,7 @@ const ListCommunication = ({
             <div className="flex-1 overflow-y-auto bg-white rounded-xl shadow-sm border border-gray-200">
                 {loading ? (
                     <div className="flex justify-center items-center h-40">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
                     </div>
                 ) : filteredCommunications.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-500">
@@ -118,7 +118,7 @@ const ListCommunication = ({
                                         )}
                                         <button
                                             onClick={() => onEdit(comm)}
-                                            className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                                            className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
                                             title="Edit"
                                         >
                                             <Edit2 size={16} />
