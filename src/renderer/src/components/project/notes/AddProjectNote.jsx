@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Loader2, Paperclip, X, FileText } from "lucide-react";
+import { Loader2, Paperclip, X, FileText, Flag, Palette, AlertCircle } from "lucide-react";
 import Select from "react-select";
 import Service from "../../../api/Service";
 import RichTextEditor from "../../fields/RichTextEditor";
@@ -17,6 +17,10 @@ const AddProjectNote = ({
     const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
     const isClient = userRole === "client" || userRole === "client_admin";
     const [files, setFiles] = useState([]);
+    const [priority, setPriority] = useState(0);
+    const [colorCode, setColorCode] = useState("");
+    const [flags, setFlags] = useState([]);
+    const [newFlag, setNewFlag] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
     const fileInputRef = useRef(null);
@@ -88,6 +92,34 @@ const AddProjectNote = ({
         setFiles((prev) => prev.filter((_, i) => i !== index));
     };
 
+    const addFlag = () => {
+        if (newFlag.trim() && !flags.includes(newFlag.trim())) {
+            setFlags([...flags, newFlag.trim()]);
+            setNewFlag("");
+        }
+    };
+
+    const removeFlag = (flagToRemove) => {
+        setFlags(flags.filter(f => f !== flagToRemove));
+    };
+
+    const priorityOptions = [
+        { value: 0, label: "Low" },
+        { value: 1, label: "Medium" },
+        { value: 2, label: "High" },
+        { value: 3, label: "Urgent" },
+        { value: 4, label: "Critical" },
+    ];
+
+    const colorOptions = [
+        { code: "", name: "Default", bg: "bg-white" },
+        { code: "#fee2e2", name: "Red", bg: "bg-red-100" },
+        { code: "#dbeafe", name: "Blue", bg: "bg-blue-100" },
+        { code: "#dcfce7", name: "Green", bg: "bg-green-100" },
+        { code: "#fef9c3", name: "Yellow", bg: "bg-yellow-100" },
+        { code: "#f3e8ff", name: "Purple", bg: "bg-purple-100" },
+    ];
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!title.trim()) {
@@ -107,6 +139,9 @@ const AddProjectNote = ({
             formData.append("title", title.trim());
             formData.append("content", content.trim());
             formData.append("projectId", projectId);
+            formData.append("priority", priority);
+            formData.append("colorCode", colorCode);
+            flags.forEach(flag => formData.append("flags[]", flag));
             taggedUserIds.forEach(opt => formData.append("taggedUserIds[]", opt.value));
             files.forEach((file) => formData.append("files", file));
 
@@ -173,23 +208,124 @@ const AddProjectNote = ({
 
                     {/* Tag User — hidden for client roles */}
                     {!isClient && (
-                        <div>
-                            <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
-                                Tag User
-                            </label>
-                            <Select
-                                isMulti
-                                value={taggedUserIds}
-                                onChange={setTaggedUserIds}
-                                options={targetUsers.map(u => ({
-                                    value: u.id || u._id,
-                                    label: `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.username
-                                }))}
-                                placeholder="Select users to tag..."
-                                className="text-sm"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
+                                    Tag User
+                                </label>
+                                <Select
+                                    isMulti
+                                    value={taggedUserIds}
+                                    onChange={setTaggedUserIds}
+                                    options={targetUsers.map(u => ({
+                                        value: u.id || u._id,
+                                        label: `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.username
+                                    }))}
+                                    placeholder="Select users..."
+                                    className="text-sm"
+                                    styles={{
+                                        control: (base) => ({
+                                            ...base,
+                                            borderRadius: '0.75rem',
+                                            borderColor: '#e5e7eb',
+                                            padding: '2px'
+                                        })
+                                    }}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
+                                    Priority
+                                </label>
+                                <Select
+                                    value={priorityOptions.find(opt => opt.value === priority)}
+                                    onChange={(opt) => setPriority(opt.value)}
+                                    options={priorityOptions}
+                                    placeholder="Select priority..."
+                                    className="text-sm"
+                                    styles={{
+                                        control: (base) => ({
+                                            ...base,
+                                            borderRadius: '0.75rem',
+                                            borderColor: '#e5e7eb',
+                                            padding: '2px'
+                                        })
+                                    }}
+                                />
+                            </div>
                         </div>
                     )}
+
+                    {/* Color and Flags */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
+                                Note Color
+                            </label>
+                            <div className="flex items-center gap-2 flex-wrap p-2 border border-gray-200 rounded-xl bg-gray-50/50">
+                                {colorOptions.map((opt) => (
+                                    <button
+                                        key={opt.name}
+                                        type="button"
+                                        title={opt.name}
+                                        onClick={() => setColorCode(opt.code)}
+                                        className={`w-8 h-8 rounded-full border-2 transition-all ${opt.bg} ${
+                                            colorCode === opt.code 
+                                                ? "border-[#6bbd45] scale-110 shadow-sm" 
+                                                : "border-transparent hover:scale-105"
+                                        }`}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
+                                Flags
+                            </label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={newFlag}
+                                    onChange={(e) => setNewFlag(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            addFlag();
+                                        }
+                                    }}
+                                    placeholder="Add a flag..."
+                                    className="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#6bbd45]/40 focus:border-[#6bbd45] transition-all"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={addFlag}
+                                    className="px-3 py-2 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-all font-bold text-xs"
+                                >
+                                    ADD
+                                </button>
+                            </div>
+                            {flags.length > 0 && (
+                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                    {flags.map((flag) => (
+                                        <span
+                                            key={flag}
+                                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#6bbd45]/10 text-[#6bbd45] border border-[#6bbd45]/20 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                                        >
+                                            <Flag size={10} />
+                                            {flag}
+                                            <button
+                                                type="button"
+                                                onClick={() => removeFlag(flag)}
+                                                className="hover:text-red-500"
+                                            >
+                                                <X size={10} />
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
                     {/* Files */}
                     <div>

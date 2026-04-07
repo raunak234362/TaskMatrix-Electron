@@ -35,35 +35,35 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
     "CLIENT_GENERAL_CONSTRUCTOR",
   ].includes(employeeData?.role || "");
 
-  const roleOptions = isClientRole
+  const roleOptions = [
+    "CONNECTION_DESIGNER_ADMIN",
+    "CONNECTION_DESIGNER_ENGINEER",
+  ].includes(employeeData?.role)
     ? [
-      { label: "Client", value: "CLIENT" },
-      { label: "Client Administrator", value: "CLIENT_ADMIN" },
-      {
-        label: "Client Project Coordinator",
-        value: "CLIENT_PROJECT_COORDINATOR",
-      },
-      {
-        label: "Client General Constructor",
-        value: "CLIENT_GENERAL_CONSTRUCTOR",
-      },
+      { label: "Connection Designer Admin", value: "CONNECTION_DESIGNER_ADMIN" },
+      { label: "Connection Designer Engineer", value: "CONNECTION_DESIGNER_ENGINEER" },
     ]
-    : [
-      { label: "STAFF", value: "STAFF" },
-      { label: "ADMIN", value: "ADMIN" },
-      { label: "OPERATION_EXECUTIVE", value: "OPERATION_EXECUTIVE" },
-      { label: "PROJECT_MANAGER_OFFICER", value: "PROJECT_MANAGER_OFFICER" },
-      { label: "DEPUTY_MANAGER", value: "DEPUTY_MANAGER" },
-      { label: "DEPT_MANAGER", value: "DEPT_MANAGER" },
-      { label: "PROJECT_MANAGER", value: "PROJECT_MANAGER" },
-      { label: "TEAM_LEAD", value: "TEAM_LEAD" },
-      { label: "SALES_MANAGER", value: "SALES_MANAGER" },
-      { label: "SALES_PERSON", value: "SALES_PERSON" },
-      { label: "SYSTEM_ADMIN", value: "SYSTEM_ADMIN" },
-      { label: "ESTIMATION_HEAD", value: "ESTIMATION_HEAD" },
-      { label: "ESTIMATOR", value: "ESTIMATOR" },
-      { label: "HUMAN_RESOURCE", value: "HUMAN_RESOURCE" },
-    ];
+    : isClientRole
+        ? [
+          { label: "Client", value: "CLIENT" },
+          { label: "Client Administrator", value: "CLIENT_ADMIN" },
+        ]
+        : [
+          { label: "STAFF", value: "STAFF" },
+          { label: "ADMIN", value: "ADMIN" },
+          { label: "OPERATION_EXECUTIVE", value: "OPERATION_EXECUTIVE" },
+          { label: "PROJECT_MANAGER_OFFICER", value: "PROJECT_MANAGER_OFFICER" },
+          { label: "DEPUTY_MANAGER", value: "DEPUTY_MANAGER" },
+          { label: "DEPT_MANAGER", value: "DEPT_MANAGER" },
+          { label: "PROJECT_MANAGER", value: "PROJECT_MANAGER" },
+          { label: "TEAM_LEAD", value: "TEAM_LEAD" },
+          { label: "SALES_MANAGER", value: "SALES_MANAGER" },
+          { label: "SALES_PERSON", value: "SALES_PERSON" },
+          { label: "SYSTEM_ADMIN", value: "SYSTEM_ADMIN" },
+          { label: "ESTIMATION_HEAD", value: "ESTIMATION_HEAD" },
+          { label: "ESTIMATOR", value: "ESTIMATOR" },
+          { label: "HUMAN_RESOURCE", value: "HUMAN_RESOURCE" },
+        ];
 
   // Watch current role value (string)
   const selectedRole = watch("role");

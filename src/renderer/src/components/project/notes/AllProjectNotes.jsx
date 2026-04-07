@@ -6,6 +6,8 @@ import {
     ChevronDown,
     ChevronUp,
     Inbox,
+    Flag,
+    AlertCircle
 } from "lucide-react";
 import Service from "../../../api/Service";
 import { toast } from "react-toastify";
@@ -145,6 +147,18 @@ const AllProjectNotes = ({ projectId, project }) => {
         return true;
     });
 
+    const getPriorityBadge = (priority) => {
+        const p = Number(priority);
+        switch (p) {
+            case 4: return <span className="bg-red-50 text-red-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest border border-red-100 flex items-center gap-1"><AlertCircle size={8} />Critical</span>;
+            case 3: return <span className="bg-orange-50 text-orange-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest border border-orange-100">Urgent</span>;
+            case 2: return <span className="bg-yellow-50 text-yellow-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest border border-yellow-100">High</span>;
+            case 1: return <span className="bg-blue-50 text-blue-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest border border-blue-100">Medium</span>;
+            case 0: return <span className="bg-gray-50 text-gray-500 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest border border-gray-100">Low</span>;
+            default: return null;
+        }
+    };
+
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center mb-6">
@@ -172,9 +186,14 @@ const AllProjectNotes = ({ projectId, project }) => {
                             <div
                                 key={note.id}
                                 className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${isExpanded
-                                    ? "border-[#6bbd45] shadow-md scale-[1.01]"
-                                    : "border-gray-100 hover:border-gray-200 shadow-sm"
+                                    ? "shadow-md scale-[1.01]"
+                                    : "hover:border-gray-200 shadow-sm"
                                     }`}
+                                style={{
+                                    borderLeftWidth: note.colorCode ? '6px' : '1px',
+                                    borderLeftColor: note.colorCode || (isExpanded ? '#6bbd45' : '#f3f4f6'),
+                                    borderColor: isExpanded ? '#6bbd45' : undefined
+                                }}
                             >
                                 <button
                                     onClick={() => handleExpandNote(note.id)}
@@ -187,22 +206,37 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                     {note.serialNo}
                                                 </span>
                                             )}
-                                            {note.visibility === "INTERNAL" && (
-                                                <span className="text-[9px] font-black bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase">
-                                                    Internal
-                                                </span>
-                                            )}
+
+                                            {getPriorityBadge(note.priority)}
                                         </div>
-                                        <div className="flex flex-wrap gap-1 mb-1">
-                                            {note.taggedUserIds && note.taggedUserIds.length > 0 && note.taggedUserIds.map((u, idx) => {
-                                                const name = typeof u === 'string' ? u : `${u.firstName || ""} ${u.lastName || ""}`.trim();
-                                                if (!name) return null;
-                                                return (
-                                                    <span key={u.id || u._id || idx} className="text-[9px] font-black bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase border border-purple-200">
-                                                        @{name}
-                                                    </span>
-                                                );
-                                            })}
+                                        <div className="flex flex-wrap gap-1.5 mb-2">
+                                            {note.flags && note.flags.length > 0 && note.flags.map((flag, idx) => (
+                                                <span key={idx} className="text-[8px] font-black bg-gray-50 text-gray-600 px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase border border-gray-200 flex items-center gap-1">
+                                                    <Flag size={8} className="text-[#6bbd45]" />
+                                                    {flag}
+                                                </span>
+                                            ))}
+                                            {(() => {
+                                                const rawList = [...(note.taggedUsers || []), ...(note.taggedUserIds || [])];
+                                                const seenIds = new Set();
+                                                const uniqueList = [];
+                                                for (const u of rawList) {
+                                                    const curId = u.id || u._id || (typeof u === 'string' ? u : JSON.stringify(u));
+                                                    if (!seenIds.has(curId)) {
+                                                        seenIds.add(curId);
+                                                        uniqueList.push(u);
+                                                    }
+                                                }
+                                                return uniqueList.map((u, idx) => {
+                                                    const name = typeof u === 'string' ? u : `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.username;
+                                                    if (!name) return null;
+                                                    return (
+                                                        <span key={u.id || u._id || idx} className="text-[9px] font-black bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase border border-purple-200">
+                                                            @{name}
+                                                        </span>
+                                                    );
+                                                });
+                                            })()}
                                         </div>
                                         <div className="text-sm font-black text-black truncate pr-4 uppercase tracking-tight mb-2">
                                             {note.title || truncateWords(note.content?.replace(/<[^>]*>?/gm, "") || "Untitled Note", 10)}
