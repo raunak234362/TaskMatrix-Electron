@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import DataTable from "../../../ui/table";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { Search, Download } from "lucide-react";
 
 const TeamMembersTable = ({
   tableData,
@@ -20,6 +20,37 @@ const TeamMembersTable = ({
       String(member.name || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [tableData, searchTerm]);
+
+
+  const handleDownloadCSV = () => {
+    const headers = ["S.NO", "NAME", "ROLE", "ASSIGNED HOURS", "WORKED HOURS", "STATUS"];
+    const rows = filteredData.map((member, index) => [
+      index + 1,
+      member.name || "N/A",
+      member.role || "N/A",
+      formatToHoursMinutes(Number(member.assignedHours)),
+      formatToHoursMinutes(Number(member.workedHours)),
+      member.isAbsent ? "ABSENT" : "ACTIVE"
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const timestamp = new Date().toISOString().split('T')[0];
+    const fileName = `team_performance_${activeFilter}_${timestamp}.csv`;
+
+    link.setAttribute("href", url);
+    link.setAttribute("download", fileName);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   console.log(tableData);
 
@@ -117,16 +148,28 @@ const TeamMembersTable = ({
           ))}
         </div>
 
-        {/* Search Bar */}
-        <div className="relative w-full xl:w-64 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-black transition-colors" />
-          <input
-            type="text"
-            placeholder="Search by name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-6 py-3 bg-white border border-black/10 rounded-full text-xs font-bold focus:outline-none focus:border-black/30 transition-all placeholder:text-gray-400 shadow-sm"
-          />
+        {/* Search & Actions */}
+        <div className="flex items-center gap-3 w-full xl:w-auto">
+          {/* Search Bar */}
+          <div className="relative flex-1 xl:w-64 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-black transition-colors" />
+            <input
+              type="text"
+              placeholder="Search by name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-6 py-3 bg-white border border-black/10 rounded-full text-xs font-bold focus:outline-none focus:border-black/30 transition-all placeholder:text-gray-400 shadow-sm"
+            />
+          </div>
+
+          {/* Download Button */}
+          <button
+            onClick={handleDownloadCSV}
+            title="Download CSV"
+            className="p-3 bg-white border border-black/10 rounded-full hover:border-black/30 hover:bg-black group transition-all duration-300 shadow-sm flex-shrink-0"
+          >
+            <Download className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
+          </button>
         </div>
       </div>
       <div className="p-4 sm:p-6 overflow-x-auto custom-scrollbar">
