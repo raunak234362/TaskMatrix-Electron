@@ -23,10 +23,12 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
 
   const fetchMileStone = async () => {
     try {
-      const response = await Service.GetProjectMilestoneById(project.id);
-      if (response && response.data) {
-        setMilestones(response.data);
-      }
+      const response = await Service.GetPendingSubmittal();
+      const allPending = Array.isArray(response) ? response : response?.data || [];
+      const projectMilestones = allPending.filter(
+        (m) => String(m.projectId || m.project?.id) === String(project.id)
+      );
+      setMilestones(projectMilestones);
     } catch (error) {
       console.log(error);
     }
