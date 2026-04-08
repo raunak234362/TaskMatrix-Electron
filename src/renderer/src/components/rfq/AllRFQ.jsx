@@ -127,7 +127,7 @@ const AllRFQ = ({ rfq }) => {
       <DataTable
         columns={columns}
         data={filteredRfq}
-        detailComponent={({ row, close }) => <GetRFQByID id={row.id} onClose={close} />}
+        detailComponent={({ row, close }) => <GetRFQByID id={row.id || row._id} onClose={close} />}
         disablePagination={true}
       />
     </div>

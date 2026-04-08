@@ -102,7 +102,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
                 </div>
 
                 {/* Modal Content */}
-                <div className="flex-1 overflow-hidden p-8 bg-[#fcfcfc]">
+                <div className="flex-1 overflow-y-auto h-[80vh] p-8 bg-[#fcfcfc]">
                     <DataTable
                         columns={columns}
                         data={data}
