@@ -144,6 +144,7 @@ const AddRFQ = ({ onSuccess }) => {
 
         const enrichedRFQ = {
           ...createdRFQ,
+          id: createdRFQ.id || createdRFQ._id, // Ensure id is mapped from _id if needed
           projectName: data.projectName,
           projectNumber: data.projectNumber,
           status: "IN_REVIEW",
