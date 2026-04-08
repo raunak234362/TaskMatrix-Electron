@@ -342,9 +342,9 @@ const GetRFQByID = ({ id, onClose }) => {
             )}
             <button
               onClick={onClose}
-              className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-red-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-[10px] sm:text-xs shadow-sm hover:shadow-md active:scale-95"
+              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
             >
-              CLOSE
+              Close
             </button>
 
             {/* DELETE RFQ */}

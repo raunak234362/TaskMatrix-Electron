@@ -145,7 +145,7 @@ const AddEstimation = ({ initialRfqId = null, onClose, onSuccess = () => { } }) 
         <button
           type="button"
           onClick={onClose}
-          className="w-full sm:w-auto px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+          className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
         >
           CLOSE
         </button>

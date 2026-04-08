@@ -547,7 +547,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
             <span className="text-sm font-black uppercase tracking-widest">{error || "Employee not found"}</span>
           </div>
           {onClose && (
-            <button onClick={onClose} className="px-6 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all">Close</button>
+            <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">Close</button>
           )}
         </div>
       </div>

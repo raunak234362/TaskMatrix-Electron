@@ -68,7 +68,7 @@ const ProjectListModal = ({ isOpen, onClose, status, projects, onProjectSelect }
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-red-100 border border-black text-black font-black uppercase text-[10px] tracking-widest rounded-lg hover:bg-red-200 transition-all shadow-sm"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
             Close
           </button>

@@ -189,7 +189,7 @@ const EditVendorModal = ({ vendorData, onClose, onSuccess }) => {
       <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center p-5 border-b bg-gray-50 shrink-0">
           <h2 className="text-lg font-bold text-gray-800">Edit Vendor</h2>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 transition"><X size={18} className="text-gray-500" /></button>
+          <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">Close</button>
         </div>
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5 overflow-y-auto flex-1">
           {error && <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>}
@@ -325,7 +325,7 @@ const GetVendorByID = ({ id, onClose, onDeleted }) => {
       <div className="bg-white rounded-2xl p-12 flex flex-col items-center gap-4 shadow-2xl">
         <AlertCircle className="w-12 h-12 text-red-500" />
         <p className="font-bold uppercase tracking-widest text-xs text-red-500">{error || 'Vendor not found'}</p>
-        <button onClick={onClose} className="mt-2 px-6 py-2 bg-gray-100 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-200 transition">Close</button>
+        <button onClick={onClose} className="mt-2 px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">Close</button>
       </div>
     </div>
   )
@@ -373,8 +373,8 @@ const GetVendorByID = ({ id, onClose, onDeleted }) => {
                 <Files size={13} /> Files
               </button>
               <button onClick={onClose}
-                className="px-5 py-2 bg-red-50 border border-red-100 rounded-xl text-[10px] font-black text-red-600 uppercase tracking-widest hover:bg-red-100 transition-all flex items-center gap-2">
-                <X size={13} /> Close
+                className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
+                Close
               </button>
             </div>
           </div>

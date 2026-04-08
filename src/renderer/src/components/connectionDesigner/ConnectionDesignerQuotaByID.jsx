@@ -51,7 +51,9 @@ const ConnectionDesignerQuotaByID = ({ id, onClose }) => {
         return (
             <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
                 <div className="bg-white rounded-2xl shadow-2xl border flex flex-col items-center justify-center border-gray-100 overflow-hidden w-full max-w-sm mx-auto h-[200px] relative">
-                    <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                    <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
+                        Close
+                    </button>
                     <Loader2 className="w-6 h-6 animate-spin mb-2" />
                     <p className="text-gray-700 font-medium">Loading quota details...</p>
                 </div>
@@ -63,7 +65,9 @@ const ConnectionDesignerQuotaByID = ({ id, onClose }) => {
         return (
             <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
                 <div className="bg-white rounded-2xl shadow-2xl border flex flex-col items-center justify-center border-gray-100 overflow-hidden w-full max-w-sm mx-auto h-[200px] relative">
-                    <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                    <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
+                        Close
+                    </button>
                     <AlertCircle className="w-6 h-6 mb-2 text-red-600" />
                     <p className="text-red-600 font-medium">{error || "Quota not found"}</p>
                 </div>
@@ -84,9 +88,9 @@ const ConnectionDesignerQuotaByID = ({ id, onClose }) => {
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors shrink-0"
+                        className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                     >
-                        <X className="w-6 h-6" />
+                        Close
                     </button>
                 </div>
 
@@ -128,7 +132,7 @@ const ConnectionDesignerQuotaByID = ({ id, onClose }) => {
                     )}
                     <button
                         onClick={onClose}
-                        className="px-6 py-2 bg-white border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-gray-100 transition-all text-sm shadow-sm hover:shadow-md active:scale-95"
+                        className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                     >
                         Close
                     </button>

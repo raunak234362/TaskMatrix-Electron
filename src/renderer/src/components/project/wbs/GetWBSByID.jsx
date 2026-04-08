@@ -175,7 +175,7 @@ const GetWBSByID = ({
           <p className="text-gray-700">{error || "WBS data not found"}</p>
           <Button
             onClick={onClose}
-            className="mt-2 bg-gray-900 text-white hover:bg-gray-800 shadow-lg shadow-gray-200"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
             Close Window
           </Button>
@@ -215,11 +215,9 @@ const GetWBSByID = ({
           </div>
           <Button
             onClick={onClose}
-            variant="ghost"
-            size="icon"
-            className="text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
-            <X className="w-6 h-6" />
+            Close
           </Button>
         </div>
 

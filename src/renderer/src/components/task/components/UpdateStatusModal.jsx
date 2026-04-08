@@ -41,7 +41,7 @@ const UpdateStatusModal = ({ taskId, currentStatus, onClose, refresh }) => {
                     <h3 className="text-lg font-black text-black tracking-tight uppercase">Update Task Status</h3>
                     <button
                         onClick={onClose}
-                        className="px-3 py-1.5 bg-red-50 border border-red-600 text-black font-black text-[9px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
+                        className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                     >
                         Close
                     </button>

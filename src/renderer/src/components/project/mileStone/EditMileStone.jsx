@@ -199,9 +199,9 @@ const EditMileStone = ({
         </h3>
         <button
           onClick={onClose}
-          className=" text-black bg-red-200 hover:bg-red-500 hover:text-white border border-black rounded-md px-2 py-1 "
+          className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
         >
-          close
+          Close
         </button>
       </div>
 

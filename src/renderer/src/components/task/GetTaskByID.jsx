@@ -256,7 +256,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
           <p className="text-gray-600 mt-2">This task may have been deleted or is inaccessible.</p>
           <button
             onClick={onClose}
-            className="mt-6 px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition"
+            className="mt-6 px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
             Close
           </button>

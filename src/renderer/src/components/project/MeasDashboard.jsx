@@ -740,34 +740,9 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                             marginBottom: "4px",
                         }}
                     >
-                        <div
-                            style={{
-                                background: `linear-gradient(135deg, ${GREEN}, #4ade80)`,
-                                borderRadius: "10px",
-                                width: "38px",
-                                height: "38px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "18px",
-                                flexShrink: 0,
-                                boxShadow: `0 4px 12px ${GREEN}40`,
-                            }}
-                        >
-                            🎯
-                        </div>
+
                         <div>
-                            <div
-                                style={{
-                                    fontSize: "10px",
-                                    letterSpacing: "3px",
-                                    color: GREEN,
-                                    fontWeight: 800,
-                                    textTransform: "uppercase",
-                                }}
-                            >
-                                Manager Estimation Accuracy
-                            </div>
+
                             <div
                                 style={{
                                     fontSize: "22px",

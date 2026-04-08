@@ -358,7 +358,7 @@ const GetProjectById = ({ id, onClose }) => {
               {onClose && (
                 <button
                   onClick={onClose}
-                  className="px-6 py-2 bg-red-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-xs shadow-sm hover:shadow-md active:scale-95"
+                  className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                 >
                   Close
                 </button>
@@ -628,12 +628,12 @@ const GetProjectById = ({ id, onClose }) => {
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-6 divide-x divide-y lg:divide-y-0 divide-gray-100">
                   {[
-                    { key: "modelling", label: "Modelling", color: "text-blue-600", bg: "bg-blue-50" },
-                    { key: "modelling_checking", label: "Modeling C.", color: "text-violet-600", bg: "bg-violet-50" },
-                    { key: "detailing", label: "Detailing", color: "text-cyan-600", bg: "bg-cyan-50" },
-                    { key: "detailing_checking", label: "Detailing C.", color: "text-fuchsia-600", bg: "bg-fuchsia-50" },
-                    { key: "erection", label: "Erection", color: "text-amber-600", bg: "bg-amber-50" },
-                    { key: "erection_checking", label: "Erection C.", color: "text-orange-600", bg: "bg-orange-50" },
+                    { key: "modelling", label: "Modelling", color: "text-green-600", bg: "bg-green-50" },
+                    { key: "modelling_checking", label: "Modeling C.", color: "text-green-600", bg: "bg-green-50" },
+                    { key: "detailing", label: "Detailing", color: "text-green-600", bg: "bg-green-50" },
+                    { key: "detailing_checking", label: "Detailing C.", color: "text-green-600", bg: "bg-green-50" },
+                    { key: "erection", label: "Erection", color: "text-green-600", bg: "bg-green-50" },
+                    { key: "erection_checking", label: "Erection C.", color: "text-green-600", bg: "bg-green-50" },
                   ].map((cat) => (
                     <div key={cat.key} className="p-4 flex flex-col items-center justify-center text-center hover:bg-slate-50 transition-colors">
                       <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 truncate w-full">
@@ -653,7 +653,7 @@ const GetProjectById = ({ id, onClose }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="bg-white p-8 rounded-2xl border-2 border-slate-50 shadow-sm hover:shadow-md transition-all">
                   <h4 className="text-[12px] font-black uppercase tracking-widest flex items-center gap-3 mb-8">
-                    <Clock className="w-5 h-5 text-blue-500" strokeWidth={3} /> Timeline Overview
+                    <Clock className="w-5 h-5 text-green-500" strokeWidth={3} /> Timeline Overview
                   </h4>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center py-4 border-b border-slate-100">

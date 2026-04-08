@@ -57,8 +57,8 @@ const RFIResponseModal = ({
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40">
       <div className="bg-white w-full max-w-lg p-6 rounded-xl shadow-lg relative">
-        <button onClick={onClose} className="absolute top-3 right-3">
-          <X className="text-gray-700 hover:text-red-500" size={18} />
+        <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
+          Close
         </button>
 
         <h2 className="text-xl font-semibold text-green-700">Add Response</h2>

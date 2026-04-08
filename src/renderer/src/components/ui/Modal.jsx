@@ -15,7 +15,7 @@ const Modal = ({ isOpen, onClose, title, children,  hideHeader = false }) => {
             <h3 className="text-lg  text-gray-700">{title}</h3>
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-gray-800 text-white rounded-xl font-semibold hover:bg-gray-700 transition-colors shadow-lg shadow-gray-200"
+              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
             >
               Close
             </button>

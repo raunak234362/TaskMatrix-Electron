@@ -82,7 +82,7 @@ const AllEstimationTask = ({ estimations, onClose, estimationId, onRefresh }) =>
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-3 py-1 text-sm rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors"
+                            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                         >
                             Close
                         </button>

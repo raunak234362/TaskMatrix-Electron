@@ -57,8 +57,8 @@ const UpdateRoleByMemberID = ({ teamId, member, onClose, onSuccess }) => {
               For {member.member.firstName} {member.member.lastName}
             </p>
           </div>
-          <button onClick={onClose} aria-label="Close" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <X className="w-6 h-6 text-black" />
+          <button onClick={onClose} aria-label="Close" className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
+            Close
           </button>
         </div>
 

@@ -57,8 +57,8 @@ const EditLineItem = ({ lineItem, onClose, onUpdate }) => {
       <div className="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden">
         <div className="flex justify-between items-center p-4 border-b bg-gray-50">
           <h3 className="text-lg font-semibold text-gray-700">Edit Line Item</h3>
-          <button onClick={onClose} className="text-gray-700 hover:text-gray-700 transition-colors">
-            <X size={20} />
+          <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
+            Close
           </button>
         </div>
 

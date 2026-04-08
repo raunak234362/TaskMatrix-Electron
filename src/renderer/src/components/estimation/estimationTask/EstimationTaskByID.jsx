@@ -219,7 +219,7 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
           <p className="text-gray-700 mt-2">This task may have been deleted or is inaccessible.</p>
           <button
             onClick={onClose}
-            className="mt-6 px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
             Close
           </button>
@@ -244,7 +244,7 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
           </div>
           <button
             onClick={onClose}
-            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-xl transition"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
             Close
           </button>

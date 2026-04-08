@@ -57,9 +57,9 @@ const NoteResponseModal = ({
                     <h2 className="text-xl font-bold text-black uppercase tracking-tight">Add Response</h2>
                     <Button
                         onClick={onClose}
-                        className="text-black border border-red-600 bg-red-50 hover:text-red-500 hover:bg-red-100 p-1 px-3"
+                        className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                     >
-                        close
+                        Close
                     </Button>
                 </div>
 

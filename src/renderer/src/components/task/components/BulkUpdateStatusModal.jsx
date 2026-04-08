@@ -67,8 +67,8 @@ const BulkUpdateStatusModal = ({ selectedIds, onClose, refresh }) => {
                     <h3 className="text-lg font-semibold text-slate-800 ">
                         Update Status ({selectedIds.length} Tasks)
                     </h3>
-                    <button onClick={onClose} className="p-1 hover:bg-slate-200 rounded-full transition-colors">
-                        <X className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                    <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
+                        Close
                     </button>
                 </div>
 

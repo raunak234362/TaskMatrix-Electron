@@ -308,22 +308,22 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <SummaryCard
-          icon={<Briefcase className="text-blue-600" size={20} />}
+          icon={<Briefcase className="text-green-600" size={20} />}
           label="Filtered Tasks"
           value={filteredTasks.length}
-          color="blue"
+          color="green"
         />
         <SummaryCard
-          icon={<Flag className="text-purple-600" size={20} />}
+          icon={<Flag className="text-green-600" size={20} />}
           label="Active Milestones"
           value={Object.keys(tasksByMilestone).filter(id => id !== "unassigned").length}
-          color="purple"
+          color="green"
         />
         <SummaryCard
-          icon={<Layers className="text-amber-600" size={20} />}
+          icon={<Layers className="text-green-600" size={20} />}
           label="Worked Hours"
           value={`${Math.round(filteredTasks.reduce((sum, t) => sum + calculateWorkedSeconds(t) / 3600, 0))}h`}
-          color="amber"
+          color="green"
         />
         <SummaryCard
           icon={<TrendingUp className="text-[#6bbd45]" size={20} />}
@@ -337,7 +337,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
           <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <TrendingUp size={20} className="text-blue-600" />
+            <TrendingUp size={20} className="text-green-600" />
             Hours by Milestone
           </h3>
           <div className="h-80 w-full">
@@ -390,7 +390,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
       <section className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="bg-slate-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-2 text-slate-800">
-            <Flag size={18} className="text-purple-600" />
+            <Flag size={18} className="text-green-600" />
             <h3 className="text-lg font-bold tracking-tight">
               Tasks by Milestone
             </h3>
@@ -503,7 +503,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
       <section className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="bg-slate-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-2 text-slate-800">
-            <Layers size={18} className="text-amber-600" />
+            <Layers size={18} className="text-green-600" />
             <h3 className="text-lg font-bold tracking-tight">
               Tasks by WBS Bundle
             </h3>
@@ -530,11 +530,11 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                     className="w-full flex items-center justify-between p-5 hover:bg-gray-50/80 transition-colors group"
                   >
                     <div className="flex items-center gap-4 text-left">
-                      <div className="p-2 bg-amber-50 rounded-xl group-hover:scale-110 transition-transform">
+                      <div className="p-2 bg-green-50 rounded-xl group-hover:scale-110 transition-transform">
                         {expandedSections[`bundle-${bundleKey}`] ? (
-                          <ChevronDown size={18} className="text-amber-600" />
+                          <ChevronDown size={18} className="text-green-600" />
                         ) : (
-                          <ChevronRight size={18} className="text-amber-600" />
+                          <ChevronRight size={18} className="text-green-600" />
                         )}
                       </div>
                       <div>
