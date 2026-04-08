@@ -80,15 +80,12 @@ const EfficiencyAnalytics = ({
   ];
 
   return (
-    <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-[2.5rem] border border-black/5 shadow-soft mb-8 sm:mb-12">
+    <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-lg border border-black/5 shadow-soft h-full flex flex-col">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
         <div>
           <h3 className="text-2xl font-black text-black uppercase tracking-tight">
             Efficiency Analytics
           </h3>
-          <p className="text-black/60 text-base font-bold tracking-wide">
-            Comparative performance trends across selected teams
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -148,7 +145,7 @@ const EfficiencyAnalytics = ({
         </div>
       </div>
 
-      <div className="h-[350px] w-full mt-4">
+      <div className="min-h-[400px] flex-1 w-full mt-4">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={data}

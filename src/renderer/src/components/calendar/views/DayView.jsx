@@ -39,7 +39,7 @@ const DayView = ({ currentDate, meetings, onSelectSlot, onSelectMeeting }) => {
 
                                 {/* Content Area */}
                                 <div
-                                    className="flex-1 relative p-2 group-hover:bg-blue-50/10 cursor-pointer"
+                                    className="flex-1 relative p-2 group-hover:bg-primary/10 cursor-pointer"
                                     onClick={() => onSelectSlot(currentDate, hour)}
                                 >
                                     {slotMeetings.map((meeting, idx) => (
@@ -47,7 +47,7 @@ const DayView = ({ currentDate, meetings, onSelectSlot, onSelectMeeting }) => {
                                             key={idx}
                                             className={`mb-2 p-3 rounded-lg border text-sm shadow-sm cursor-pointer hover:shadow-md transition-all relative z-10 ${meeting.status === 'cancelled' ? 'bg-red-50 border-red-100 text-red-700' :
                                                     meeting.status === 'completed' ? 'bg-green-50 border-green-100 text-green-700' :
-                                                        'bg-blue-50 border-blue-100 text-blue-700'
+                                                        'bg-primary/10 border-primary text-primary'
                                                 }`}
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -62,7 +62,7 @@ const DayView = ({ currentDate, meetings, onSelectSlot, onSelectMeeting }) => {
                                                 </div>
                                                 <span className={`text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded border ${meeting.status === 'cancelled' ? 'border-red-200 bg-red-100' :
                                                         meeting.status === 'completed' ? 'border-green-200 bg-green-100' :
-                                                            'border-blue-200 bg-blue-100'
+                                                            'border-primary bg-primary/10'
                                                     }`}>
                                                     {meeting.status}
                                                 </span>
@@ -82,7 +82,7 @@ const DayView = ({ currentDate, meetings, onSelectSlot, onSelectMeeting }) => {
                                     {/* Hover hint */}
                                     {slotMeetings.length === 0 && (
                                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
-                                            <span className="text-sm text-blue-300 font-medium">+ Add/Schedule</span>
+                                            <span className="text-sm text-primary font-medium">+ Add/Schedule</span>
                                         </div>
                                     )}
                                 </div>

@@ -104,7 +104,7 @@ const TeamMembersTable = ({
   );
 
   return (
-    <div className="bg-white rounded-[2.5rem] border border-black/5 shadow-soft overflow-hidden mb-8 sm:mb-12">
+    <div className="bg-white rounded-lg border border-black/5 shadow-soft overflow-hidden mb-8 sm:mb-12">
       <div className="px-4 sm:px-8 py-5 sm:py-6 border-b border-black/5 bg-gray-50/30 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
         <div className="flex-shrink-0">
           <h3 className="text-lg sm:text-xl lg:text-lg xl:text-2xl text-black uppercase tracking-tight font-bold">

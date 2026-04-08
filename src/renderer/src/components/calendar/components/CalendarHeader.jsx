@@ -18,7 +18,7 @@ const CalendarHeader = ({
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-4 px-6 bg-white border-b border-gray-100">
             <div className="flex items-center gap-2 sm:gap-4">
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
-                    <CalendarIcon className="text-blue-600 hidden sm:block" size={28} />
+                    <CalendarIcon className="text-primary hidden sm:block" size={28} />
                     {format(currentDate, 'MMMM yyyy')}
                 </h1>
                 <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 p-0.5 shadow-sm">
@@ -39,7 +39,7 @@ const CalendarHeader = ({
                 <div className="relative">
                     <button
                         onClick={onStatsToggle}
-                        className={`p-2 rounded-lg border transition-colors ${showStats ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'}`}
+                        className={`p-2 rounded-lg border transition-colors ${showStats ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'}`}
                         title="View Statistics"
                     >
                         <PieChart size={20} />
@@ -54,8 +54,8 @@ const CalendarHeader = ({
                                     <span className="font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded-full">{stats.total || 0}</span>
                                 </div>
                                 <div className="flex justify-between text-sm items-center">
-                                    <span className="text-blue-600 font-medium">Scheduled</span>
-                                    <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">{stats.scheduled || 0}</span>
+                                    <span className="text-primary font-medium">Scheduled</span>
+                                    <span className="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{stats.scheduled || 0}</span>
                                 </div>
                                 <div className="flex justify-between text-sm items-center">
                                     <span className="text-green-600 font-medium">Completed</span>
@@ -76,7 +76,7 @@ const CalendarHeader = ({
                             key={v}
                             onClick={() => setView(v)}
                             className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${view === v
-                                    ? 'bg-blue-600 text-white shadow-sm'
+                                    ? 'bg-primary text-white shadow-sm'
                                     : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700'
                                 }`}
                         >
@@ -87,7 +87,7 @@ const CalendarHeader = ({
 
                 <button
                     onClick={onCreateMeeting}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:scale-95 transition-all shadow-md shadow-blue-600/20 font-semibold text-sm"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 active:scale-95 transition-all shadow-md shadow-primary/20 font-semibold text-sm"
                 >
                     <Plus size={18} />
                     <span className="hidden sm:inline">Schedule</span>
@@ -102,7 +102,7 @@ const CalendarHeader = ({
                         key={v}
                         onClick={() => setView(v)}
                         className={`flex-1 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${view === v
-                                ? 'bg-blue-600 text-white shadow-sm'
+                                ? 'bg-primary text-white shadow-sm'
                                 : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700'
                             }`}
                     >

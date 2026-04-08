@@ -21,7 +21,7 @@ const CommunicationListSidebar = ({ communications, onSelectComm, selectedDate }
         <div className="w-80 bg-white border-r border-gray-200 h-full shadow-sm hidden lg:flex flex-col">
             <div className="p-4 border-b border-gray-100 bg-gray-50/50">
                 <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                    <MessageCircle size={18} className="text-blue-600" />
+                    <MessageCircle size={18} className="text-green-600" />
                     {selectedDate ? `Logs for ${format(selectedDate, 'MMM d')}` : 'Recent Communications'}
                 </h3>
             </div>
@@ -42,14 +42,14 @@ const CommunicationListSidebar = ({ communications, onSelectComm, selectedDate }
                             <div
                                 key={comm.id || comm._id}
                                 onClick={() => onSelectComm(comm)}
-                                className="group p-3 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:shadow-md transition-all cursor-pointer relative"
+                                className="group p-3 rounded-xl border border-gray-100 bg-white hover:border-green-200 hover:shadow-md transition-all cursor-pointer relative"
                             >
-                                <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r-full ${isFollowup ? 'bg-amber-500' : 'bg-blue-500'
+                                <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r-full ${isFollowup ? 'bg-amber-500' : 'bg-green-500'
                                     }`} />
 
                                 <div className="pl-3">
                                     <div className="flex items-center justify-between mb-1">
-                                        <span className={`text-[9px] font-black uppercase tracking-widest ${isFollowup ? 'text-amber-600' : 'text-blue-600'
+                                        <span className={`text-[9px] font-black uppercase tracking-widest ${isFollowup ? 'text-amber-600' : 'text-green-600'
                                             }`}>
                                             {isFollowup ? 'Follow-up' : 'Communication'}
                                         </span>

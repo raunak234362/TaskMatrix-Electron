@@ -20,7 +20,7 @@ const MeetingListSidebar = ({ meetings, onSelectMeeting, selectedDate }) => {
         <div className="w-80 bg-white border-l border-gray-200 flex flex-col h-full shadow-sm hidden lg:flex">
             <div className="p-4 border-b border-gray-100 bg-gray-50/50">
                 <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                    <CalendarIcon size={18} className="text-blue-600" />
+                    <CalendarIcon size={18} className="text-primary-600" />
                     {selectedDate ? `Meetings for ${format(selectedDate, 'MMM d')}` : 'All Upcoming Meetings'}
                 </h3>
             </div>
@@ -38,10 +38,10 @@ const MeetingListSidebar = ({ meetings, onSelectMeeting, selectedDate }) => {
                         <div
                             key={meeting.id || meeting._id}
                             onClick={() => onSelectMeeting(meeting)}
-                            className="group p-3 rounded-xl border border-gray-100 bg-white hover:border-blue-200 hover:shadow-md transition-all cursor-pointer relative"
+                            className="group p-3 rounded-xl border border-gray-100 bg-white hover:border-primary-200 hover:shadow-md transition-all cursor-pointer relative"
                         >
                             <div className={`absolute left-0 top-3 bottom-3 w-1 rounded-r-full ${meeting.status === 'COMPLETED' ? 'bg-green-500' :
-                                    meeting.status === 'CANCELLED' ? 'bg-red-500' : 'bg-blue-500'
+                                    meeting.status === 'CANCELLED' ? 'bg-red-500' : 'bg-primary-500'
                                 }`} />
 
                             <div className="pl-3">
@@ -51,7 +51,7 @@ const MeetingListSidebar = ({ meetings, onSelectMeeting, selectedDate }) => {
 
                                 <div className="space-y-1.5">
                                     <div className="flex items-center gap-2 text-xs text-gray-500">
-                                        <Clock size={12} className="text-blue-500" />
+                                        <Clock size={12} className="text-primary-500" />
                                         <span>
                                             {meeting.startTime && format(parseISO(meeting.startTime), 'MMM d, h:mm a')}
                                             {' - '}
