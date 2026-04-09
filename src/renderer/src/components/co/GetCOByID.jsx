@@ -114,9 +114,15 @@ const GetCOByID = ({ id, projectId }) => {
     {
       accessorKey: "reason",
       header: "Message",
-      cell: ({ row }) => (
-        <p className="truncate max-w-[220px]">{row.original.reason}</p>
-      ),
+      cell: ({ row }) => {
+        const htmlContent = row.original.reason || row.original.description || "";
+        const plainText = htmlContent.replace(/<[^>]*>?/gm, "") || "—";
+        return (
+          <p className="truncate max-w-[220px]" title={plainText}>
+            {plainText}
+          </p>
+        );
+      },
     },
     {
       accessorKey: "files",
@@ -211,9 +217,10 @@ const GetCOByID = ({ id, projectId }) => {
 
             <div>
               <h4 className="font-semibold text-gray-700 mb-1">Description</h4>
-              <p className="bg-white p-3 rounded-lg border">
-                {co.description || "—"}
-              </p>
+              <div
+                className="bg-white p-3 rounded-lg border"
+                dangerouslySetInnerHTML={{ __html: co.description || "—" }}
+              ></div>
             </div>
 
             {(co.files ?? []).length > 0 && (
