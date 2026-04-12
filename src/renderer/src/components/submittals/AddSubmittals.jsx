@@ -26,7 +26,9 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
       const response = await Service.GetPendingSubmittal();
       const allPending = Array.isArray(response) ? response : response?.data || [];
       const projectMilestones = allPending.filter(
-        (m) => String(m.projectId || m.project?.id) === String(project.id)
+        (m) =>
+          String(m.projectId || m.project_id || m.project?.id) ===
+          String(project.id || project._id),
       );
       setMilestones(projectMilestones);
     } catch (error) {
@@ -36,7 +38,7 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
 
   useEffect(() => {
     fetchMileStone();
-  }, [project.id]);
+  }, [project.id, project._id]);
 
   const { register, handleSubmit, control, setValue, reset } = useForm({
     defaultValues: {
@@ -100,10 +102,22 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
   const activeRecipientOptions = isCDMode ? cdEngineerOptions : pocOptions;
 
   const mileStoneOptions =
-    milestones?.map((m) => ({
-      label: m.subject + " - " + m.stage || m.description + " - " + m.stage|| "Unnamed Milestone",
-      value: m.id,
-    })) ?? [];
+    milestones?.map((m) => {
+      const labelParts = [];
+      if (m.subject) labelParts.push(m.subject);
+      else if (m.description) {
+        // Strip HTML tags from description for label
+        const plainDesc = m.description.replace(/<[^>]*>?/gm, "");
+        labelParts.push(plainDesc.substring(0, 30) + (plainDesc.length > 30 ? "..." : ""));
+      }
+
+      if (m.stage) labelParts.push(m.stage);
+
+      return {
+        label: labelParts.join(" - ") || "Unnamed Milestone",
+        value: m.id || m._id,
+      };
+    }) ?? [];
 
   useEffect(() => {
     setValue("sender_id", String(userDetail?.id));
@@ -151,7 +165,8 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
 
   useEffect(() => {
     if (milestones.length > 0) {
-      setValue("mileStoneId", String(milestones[0].id));
+      const firstId = milestones[0].id || milestones[0]._id;
+      if (firstId) setValue("mileStoneId", String(firstId));
     }
   }, [milestones]);
 
@@ -165,11 +180,10 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
             setIsCDMode(false);
             setValue("multipleRecipients", []); // Clear selection when switching modes
           }}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
-            !isCDMode
-              ? "bg-white text-black shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${!isCDMode
+            ? "bg-white text-black shadow-sm"
+            : "text-gray-500 hover:text-gray-700"
+            }`}
         >
           CLIENT
         </button>
@@ -179,18 +193,17 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
             setIsCDMode(true);
             setValue("multipleRecipients", []); // Clear selection when switching modes
           }}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
-            isCDMode
-              ? "bg-white text-black shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${isCDMode
+            ? "bg-white text-black shadow-sm"
+            : "text-gray-500 hover:text-gray-700"
+            }`}
         >
           CONNECTION DESIGNER
         </button>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        
+
         <div className="space-y-1">
           <label className="text-sm font-medium text-gray-700">
             Select {isCDMode ? "CD Engineer" : "Client"} Recipients *
@@ -203,8 +216,8 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
               <Select
                 isMulti
                 placeholder={
-                  fetchingEngineers 
-                    ? "Fetching engineers..." 
+                  fetchingEngineers
+                    ? "Fetching engineers..."
                     : `Select ${isCDMode ? "engineers" : "POCs"}...`
                 }
                 options={activeRecipientOptions}
@@ -220,7 +233,7 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
             )}
           />
         </div>
-<label className="text-sm font-medium text-gray-700">
+        <label className="text-sm font-medium text-gray-700">
           Select Milestone
         </label>
         <Controller
