@@ -74,7 +74,7 @@ const VersionRow = ({ version, index, total, isCurrent }) => {
       {open && (
         <div className="px-4 pb-4 space-y-3 border-t border-gray-100">
           {/* Description */}
-          {(version.description) && (
+          {/* {(version.description) && (
             <div className="pt-3">
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">
                 Description
@@ -84,7 +84,7 @@ const VersionRow = ({ version, index, total, isCurrent }) => {
                 dangerouslySetInnerHTML={{ __html: version.description }}
               />
             </div>
-          )}
+          )} */}
 
           {/* Attached files for this version */}
           {(version.files?.length > 0 || version.file) && (
