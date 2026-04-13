@@ -118,8 +118,8 @@ const EditFabricator = ({
       paymenTDueDate: fabricatorData.paymenTDueDate || 0,
       currencyType: fabricatorData.currencyType || "",
       wbtFabricatorPointOfContact: Array.isArray(fabricatorData.wbtFabricatorPointOfContact)
-        ? fabricatorData.wbtFabricatorPointOfContact[0] || ""
-        : fabricatorData.wbtFabricatorPointOfContact || "",
+        ? fabricatorData.wbtFabricatorPointOfContact[0]?._id || fabricatorData.wbtFabricatorPointOfContact[0]?.id || fabricatorData.wbtFabricatorPointOfContact[0] || ""
+        : fabricatorData.wbtFabricatorPointOfContact?._id || fabricatorData.wbtFabricatorPointOfContact?.id || fabricatorData.wbtFabricatorPointOfContact || "",
       files: null,
     });
     setFilesToKeep(fabricatorData.files || []);
@@ -149,11 +149,13 @@ const EditFabricator = ({
       if (data.fabName) formData.append("fabName", data.fabName);
       if (data.website) formData.append("website", data.website);
       if (data.drive) formData.append("drive", data.drive);
-      if (data.wbtFabricatorPointOfContact)
-        formData.append(
-          "wbtFabricatorPointOfContact",
-          JSON.stringify(Array.isArray(data.wbtFabricatorPointOfContact) ? data.wbtFabricatorPointOfContact : [data.wbtFabricatorPointOfContact])
-        );
+      if (data.wbtFabricatorPointOfContact) {
+        const contact = data.wbtFabricatorPointOfContact;
+        const contactIds = Array.isArray(contact)
+          ? contact.map((c) => (typeof c === "object" ? c?._id || c?.id : c))
+          : [typeof contact === "object" ? contact?._id || contact?.id : contact];
+        formData.append("wbtFabricatorPointOfContact", JSON.stringify(contactIds));
+      }
       if (data.fabStage) formData.append("fabStage", data.fabStage);
       if (data.accountId) formData.append("accountId", data.accountId);
       if (data.SAC) formData.append("SAC", data.SAC);
