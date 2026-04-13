@@ -45,6 +45,13 @@ const AllCO = ({ changeOrderData = [] }) => {
     {
       accessorKey: "changeOrderNumber",
       header: "CO Number",
+      cell: ({ row }) => {
+        const num = row.original.changeOrderNumber;
+        if (!num) return "—";
+        // Extract last 3 digits
+        const lastThree = num.slice(-3);
+        return `COR-${lastThree}`;
+      },
     },
     {
       accessorKey: "remarks",
@@ -103,11 +110,12 @@ const AllCO = ({ changeOrderData = [] }) => {
           onClick={(e) => {
             e.stopPropagation();
             const item = row.original;
+            const shortCO = item.changeOrderNumber ? `COR-${item.changeOrderNumber.slice(-3)}` : "";
             setPrefilledData({
               projectId: item.project?.id || item.project || "",
               fabricatorId: item.fabricator?.id || item.fabricator || "",
               clientId: item.client?.id || item.client || "",
-              subject: `Follow-up: CO ${item.changeOrderNumber || ""}`,
+              subject: `Follow-up: ${shortCO}`,
               notes: `Ref: Change Order ${item.changeOrderNumber || ""}`
             });
             setIsFollowUpOpen(true);

@@ -169,8 +169,8 @@ const GetCOByID = ({ id, projectId }) => {
           {/* ================= LEFT DETAILS ================= */}
           <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-5">
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl  text-black font-semibold">
-                CO #{co.changeOrderNumber}
+              <h1 className="text-2xl text-black font-semibold">
+                COR-{co.changeOrderNumber?.slice(-3) || "—"}
               </h1>
 
               <span

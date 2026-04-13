@@ -29,7 +29,7 @@ const CoTablePage = () => {
               Change Order Reference Table
             </h1>
             <p className="text-sm text-gray-700">
-              CO #{co.changeOrderNumber}
+              COR-{co.changeOrderNumber?.slice(-3) || "—"}
             </p>
           </div>
 
