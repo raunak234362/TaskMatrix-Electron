@@ -234,7 +234,7 @@ const GetCOByID = ({ id, projectId }) => {
             <div className="pt-4 border-t">
               <button
                 onClick={() =>
-                  window.open(`/co-table?coData=${encodedCO}`, "_blank")
+                  window.open(`/#/co-table?coData=${encodedCO}`, "_blank")
                 }
                 className="text-green-600 underline"
               >

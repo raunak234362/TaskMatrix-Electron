@@ -10,7 +10,24 @@ const CoTablePage = () => {
     return <div className="p-6 text-red-500">No Change Order data found</div>;
   }
 
-  const co = JSON.parse(decodeURIComponent(encodedData));
+  let co;
+  try {
+    co = JSON.parse(encodedData);
+  } catch (err) {
+    console.error("Failed to parse CO data:", err);
+    return (
+      <div className="p-8 text-center bg-white rounded-3xl mt-10 shadow-xl border-4 border-red-50 max-w-xl mx-auto">
+        <h2 className="text-xl font-black text-red-600 uppercase tracking-widest mb-4">Data Error</h2>
+        <p className="text-gray-600 mb-6">The Change Order data is too large for the browser to transfer via URL, or the link is corrupted.</p>
+        <button 
+          onClick={() => window.close()}
+          className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 uppercase font-black tracking-widest text-[10px]"
+        >
+          Close Tab
+        </button>
+      </div>
+    );
+  }
 
   const rows = co.CoRefersTo || [];
 
