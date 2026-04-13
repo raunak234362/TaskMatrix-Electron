@@ -52,16 +52,21 @@ const AllRFQ = ({ rfq }) => {
       },
     },
     {
-      accessorKey: "status",
+      accessorKey: "wbtStatus",
       header: "Status",
       cell: ({ row }) => {
-        const status = row.original.status || 'PENDING';
+        const status = row.original.wbtStatus || row.original.status || 'PENDING';
         const colors = {
           IN_REVIEW: 'bg-orange-100 text-black shadow-sm border border-black',
           COMPLETED: 'bg-green-100 text-black shadow-sm border border-black',
           PENDING: 'bg-gray-100 text-black/40 shadow-sm border border-black',
           RECEIVED: 'bg-blue-100 text-black shadow-sm border border-black',
-          SENT: 'bg-green-100 text-black shadow-sm border border-black'
+          SENT: 'bg-green-100 text-black shadow-sm border border-black',
+          AWARDED: 'bg-green-200 text-black shadow-sm border border-black',
+          OPEN: 'bg-blue-50 text-blue-800 shadow-sm border border-black',
+          CLOSED: 'bg-red-100 text-red-800 shadow-sm border border-black',
+          RE_APPROVAL: 'bg-yellow-100 text-yellow-800 shadow-sm border border-black',
+          REJECTED: 'bg-red-200 text-red-900 shadow-sm border border-black',
         };
         return (
           <span className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest ${colors[status] || colors.PENDING}`}>

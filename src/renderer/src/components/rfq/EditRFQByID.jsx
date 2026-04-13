@@ -11,6 +11,7 @@ import Service from '../../api/Service'
 import RichTextEditor from '../fields/RichTextEditor'
 
 const RFQ_STATUS_OPTIONS = [
+    { label: 'Received', value: 'RECEIVED' },
     { label: 'Open', value: 'OPEN' },
     { label: 'Awarded', value: 'AWARDED' },
     { label: 'In Review', value: 'IN_REVIEW' },
@@ -62,6 +63,7 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                         subject: d.subject || '',
                         projectNumber: d.projectNumber || '',
                         status: d.status || 'OPEN',
+                        wbtStatus: d.wbtStatus || 'RECEIVED',
                         tools: d.tools || '',
                         estimationDate: d.estimationDate ? String(d.estimationDate).split('T')[0] : '',
                         bidPrice: d.bidPrice ?? '',
@@ -95,6 +97,11 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                     : '',
                 estimationDate: data.estimationDate ? new Date(data.estimationDate).toISOString() : ''
             }
+
+            if (payload.wbtStatus && payload.wbtStatus !== 'RECEIVED') {
+                payload.status = payload.wbtStatus;
+            }
+
             await Service.UpdateRFQById(id, payload)
             toast.success('RFQ updated successfully')
             onSuccess?.()
@@ -202,7 +209,7 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                                     WBT Status
                                 </label>
                                 <Controller
-                                    name="status"
+                                    name="wbtStatus"
                                     control={control}
                                     render={({ field }) => (
                                         <ReactSelect
