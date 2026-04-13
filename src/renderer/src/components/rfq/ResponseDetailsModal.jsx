@@ -9,6 +9,7 @@ import RenderFiles from "../common/RenderFiles";
 const ResponseDetailsModal = ({
   response,
   onClose,
+  onSuccess
 }) => {
   console.log(response);
   const [replyMode, setReplyMode] = useState(false);
@@ -61,7 +62,7 @@ const ResponseDetailsModal = ({
       setReplyMessage("");
       setReplyFiles([]);
       setReplyStatus("PENDING");
-      onClose();
+      if (onSuccess) onSuccess();
     } catch (err) {
       console.error("Reply failed:", err);
     }

@@ -77,6 +77,14 @@ const GetRFQByID = ({ id, onClose }) => {
     }
   }, [id]);
 
+  // Sync selected response for real-time updates in modal
+  useEffect(() => {
+    if (selectedResponse && rfq?.responses) {
+      const updated = rfq.responses.find(r => r.id === selectedResponse.id);
+      if (updated) setSelectedResponse(updated);
+    }
+  }, [rfq?.responses]);
+
   const handleDelete = async () => {
     console.log(
       "handleDelete called with text:",
@@ -711,6 +719,7 @@ const GetRFQByID = ({ id, onClose }) => {
           <ResponseDetailsModal
             response={selectedResponse}
             onClose={() => setSelectedResponse(null)}
+            onSuccess={fetchRfq}
           />
         )}
 
