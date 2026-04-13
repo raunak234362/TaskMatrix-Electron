@@ -96,17 +96,18 @@ const ResponseDetailsModal = ({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white h-[90vh] overflow-y-auto w-fit p-6 rounded-xl shadow-xl space-y-4 relative">
-        {/* Close Button */}
-        <Button
-          onClick={onClose}
-          className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
-        >
-          Close
-        </Button>
-
-        <h2 className="text-xl font-semibold text-green-700">
-          Response Details
-        </h2>
+        {/* Header */}
+        <div className="flex items-center justify-between pb-3">
+          <h2 className="text-xl font-semibold text-green-700">
+            Response Details
+          </h2>
+          <Button
+            onClick={onClose}
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+          >
+            Close
+          </Button>
+        </div>
 
         {/* Message */}
         <div className="space-y-1">
@@ -202,7 +203,16 @@ const ResponseDetailsModal = ({
 
         {/* Future  actions */}
         <div className="flex justify-end gap-3 pt-3">
-          {userRole === "client" ? (
+          {[
+            "client",
+            "client_admin",
+            "admin",
+            "operation_executive",
+            "dept_manager",
+            "deputy_manager",
+            "project_manager",
+            "estimation_head"
+          ].includes(userRole) ? (
             <Button
               onClick={() => setReplyMode(true)}
               className="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
