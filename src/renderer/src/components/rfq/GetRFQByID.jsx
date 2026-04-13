@@ -19,10 +19,10 @@ import { deleteRFQ } from "../../store/rfqSlice";
 import { toast } from "react-toastify";
 import EditRFQByID from "./EditRFQByID";
 import ConnectionDesignerQuotaByID from "../connectionDesigner/ConnectionDesignerQuotaByID";
+import { truncateWords } from "../../utils/stringUtils";
 
 
 const GetRFQByID = ({ id, onClose }) => {
-  console.log("GetRFQByID initialized with ID:", id);
   const [rfq, setRfq] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -212,8 +212,7 @@ const GetRFQByID = ({ id, onClose }) => {
       accessorKey: "description",
       header: "Message",
       cell: ({ row }) => {
-        const plainText =
-          row.original.description?.replace(/<[^>]*>?/gm, "") || "No message";
+        const plainText = truncateWords(row.original.description, 20);
         return (
           <div className="flex flex-col max-w-[200px]">
             <p className="truncate text-sm font-bold text-gray-700">{plainText}</p>

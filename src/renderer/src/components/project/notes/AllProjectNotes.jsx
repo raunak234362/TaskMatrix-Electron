@@ -239,7 +239,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                                             })()}
                                         </div>
                                         <div className="text-sm font-black text-black truncate pr-4 uppercase tracking-tight mb-2">
-                                            {note.title || truncateWords(note.content?.replace(/<[^>]*>?/gm, "") || "Untitled Note", 10)}
+                                            {note.title || truncateWords(note.content?.replace(/<[^>]*>?/gm, "").replace(/&nbsp;/g, " ") || "Untitled Note", 10)}
                                         </div>
                                         <div className="flex items-center gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                             {note.createdBy && (
@@ -339,7 +339,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                                 accessorKey: "content",
                                                                 header: "Message",
                                                                 cell: ({ row }) => {
-                                                                    const plainText = row.original.content?.replace(/<[^>]*>?/gm, "") || "";
+                                                                    const plainText = row.original.content?.replace(/<[^>]*>?/gm, "").replace(/&nbsp;/g, " ") || "";
                                                                     return (
                                                                         <div className="space-y-1">
                                                                             <p className="truncate max-w-[300px] text-xs sm:text-sm font-medium">

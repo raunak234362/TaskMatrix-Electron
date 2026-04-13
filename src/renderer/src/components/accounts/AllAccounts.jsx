@@ -79,7 +79,7 @@ const AllAccounts = ({ accounts, loading }) => {
       <DataTable
         columns={columns}
         data={accounts}
-        detailComponent={({ row }) => <GetAccountByID id={row.id} />}
+        detailComponent={({ row, close }) => <GetAccountByID id={row.id} onClose={close} />}
       />
     </div>
   );

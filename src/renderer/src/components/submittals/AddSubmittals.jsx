@@ -10,6 +10,7 @@ import SectionTitle from "../ui/SectionTitle";
 import Service from "../../api/Service";
 
 import RichTextEditor from "../fields/RichTextEditor";
+import { truncateWords } from "../../utils/stringUtils";
 
 const AddSubmittal = ({ project, initialData, onSuccess }) => {
   const userDetail = useSelector((state) => state.userInfo.userDetail);
@@ -107,8 +108,8 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
       if (m.subject) labelParts.push(m.subject);
       else if (m.description) {
         // Strip HTML tags from description for label
-        const plainDesc = m.description.replace(/<[^>]*>?/gm, "");
-        labelParts.push(plainDesc.substring(0, 30) + (plainDesc.length > 30 ? "..." : ""));
+        const plainDesc = truncateWords(m.description, 10);
+        labelParts.push(plainDesc);
       }
 
       if (m.stage) labelParts.push(m.stage);

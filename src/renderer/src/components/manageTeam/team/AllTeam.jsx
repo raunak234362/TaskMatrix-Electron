@@ -137,7 +137,7 @@ const AllTeam = () => {
           onRowClick={handleRowClick}
           onDelete={handleDelete}
           pageSizeOptions={[10, 20, 50]}
-          detailComponent={({ row }) => <GetTeamById id={row.id} />}
+          detailComponent={({ row, close }) => <GetTeamById id={row.id} onClose={close} />}
         />
       </div>
 

@@ -542,7 +542,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                           {bundle.bundleKey || bundle.name || "Unnamed Bundle"}
                         </h4>
                         <p className="text-xs text-gray-500 font-medium">
-                          Stage: {bundle.stage || "—"} &nbsp;·&nbsp; {bundleTasks.length} task{bundleTasks.length !== 1 ? "s" : ""}
+                          Stage: {bundle.stage || "—"} {"\u00A0"}·{"\u00A0"} {bundleTasks.length} task{bundleTasks.length !== 1 ? "s" : ""}
                         </p>
                       </div>
                     </div>

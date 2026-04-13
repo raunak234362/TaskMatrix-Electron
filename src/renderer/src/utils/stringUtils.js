@@ -6,7 +6,7 @@
  */
 export const truncateWords = (html, limit = 25) => {
     if (!html) return "";
-    const text = html.replace(/<[^>]*>/g, " ").trim();
+    const text = html.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").trim();
     const words = text.split(/\s+/).filter(Boolean);
     if (words.length <= limit) return text;
     return words.slice(0, limit).join(" ") + "...";

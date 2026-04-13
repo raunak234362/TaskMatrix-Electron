@@ -23,6 +23,7 @@ import MilestoneResponseDetailsModal from "./MilestoneResponseDetailsModal";
 import { formatDateTime, formatDate as genericFormatDate } from "../../../utils/dateUtils";
 import { useDispatch } from "react-redux";
 import { setMilestonesForProject } from "../../../store/milestoneSlice";
+import { truncateWords } from "../../../utils/stringUtils";
 
 const GetMilestoneByID = ({ row, close, onUpdate }) => {
   const dispatch = useDispatch();
@@ -150,8 +151,7 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
       accessorKey: "description",
       header: "Message",
       cell: ({ row }) => {
-        const plainText =
-          row.original.description?.replace(/<[^>]*>?/gm, "") || "";
+        const plainText = truncateWords(row.original.description, 30);
         return (
           <p className="truncate max-w-[260px] text-xs sm:text-sm">
             {plainText}
@@ -592,7 +592,7 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
 
         {/* Edit Modal */}
         {isEditModalOpen && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <div className="w-full max-w-2xl h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
               <EditMileStone
                 milestoneId={id.toString()}
@@ -610,7 +610,7 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
 
         {/* Update Progress Modal */}
         {isUpdateProgressModalOpen && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <div className="w-full max-w-lg h-auto bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
               <UpdateCompletionPer
                 milestoneId={id.toString()}
@@ -646,7 +646,7 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
 
         {/* Tasks Popup Modal */}
         {showTasksModal && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+          <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-gray-200 animate-in zoom-in duration-150">
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
@@ -753,7 +753,7 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
 
         {/* Delete Confirmation Modal */}
         {showDeleteModal && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-in fade-in zoom-in duration-200 text-center">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AlertCircle className="w-8 h-8 text-red-600" />

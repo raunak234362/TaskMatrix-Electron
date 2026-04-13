@@ -152,7 +152,7 @@ const AllClients = ({ fabricator, onClose }) => {
                   columns={columns}
                   data={clients}
                   onRowClick={(row) => console.log("Client clicked:", row.id)}
-                  detailComponent={({ row }) => <GetEmployeeByID id={row.id} />}
+                  detailComponent={({ row, close }) => <GetEmployeeByID id={row.id} onClose={close} />}
                 />
               )}
             </div>
