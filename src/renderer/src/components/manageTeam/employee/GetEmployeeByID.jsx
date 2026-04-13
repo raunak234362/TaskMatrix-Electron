@@ -33,6 +33,20 @@ import { toast } from "react-toastify";
 import Button from "../../fields/Button";
 import EditEmployee from "./EditEmployee";
 import { formatDateTime } from "../../../utils/dateUtils";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Cell,
+  AreaChart,
+  Area
+} from "recharts";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -284,6 +298,11 @@ const GetEmployeeByID = ({ id, onClose }) => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [epsLoading, setEpsLoading] = useState(false);
 
+  // EPS Trend
+  const [trendData, setTrendData] = useState([]);
+  const [showTrend, setShowTrend] = useState(false);
+  const [trendLoading, setTrendLoading] = useState(false);
+
   // Tasks
   const [allTasks, setAllTasks] = useState([]);
   const [tasksLoading, setTasksLoading] = useState(false);
@@ -320,6 +339,47 @@ const GetEmployeeByID = ({ id, onClose }) => {
       console.error(err); setEpsData(null);
     } finally { setEpsLoading(false); }
   }, [id, selectedYear, selectedMonth]);
+
+  const fetchMonthlyTrend = useCallback(async () => {
+    if (!id) return;
+    try {
+      setTrendLoading(true);
+      setShowTrend(true);
+
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1;
+
+      let monthsToFetch = 12;
+      if (selectedYear === currentYear) {
+        monthsToFetch = currentMonth;
+      } else if (selectedYear > currentYear) {
+        monthsToFetch = 0;
+      }
+
+      const months = Array.from({ length: monthsToFetch }, (_, i) => i + 1);
+
+      const promises = months.map(m =>
+        Service.GetEmployeeEPS({ employeeId: id, year: selectedYear, month: m })
+          .then(res => ({
+            month: new Date(0, m - 1).toLocaleString("default", { month: "short" }),
+            score: Number(res?.score || res?.data?.score || 0)
+          }))
+          .catch(() => ({
+            month: new Date(0, m - 1).toLocaleString("default", { month: "short" }),
+            score: 0
+          }))
+      );
+
+      const results = await Promise.all(promises);
+      setTrendData(results);
+    } catch (err) {
+      console.error("Trend fetch error:", err);
+      toast.error("Failed to fetch efficiency trend");
+    } finally {
+      setTrendLoading(false);
+    }
+  }, [id, selectedYear]);
 
   const fetchAllTasks = useCallback(async () => {
     if (!id) return;
@@ -655,8 +715,85 @@ const GetEmployeeByID = ({ id, onClose }) => {
                   >
                     {[2024, 2025, 2026].map((y) => <option key={y} value={y}>{y}</option>)}
                   </select>
+
+                  <button
+                    onClick={fetchMonthlyTrend}
+                    className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-black/80 transition-all shadow-md active:scale-95 ml-2"
+                  >
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    Generate Efficiency Graph
+                  </button>
                 </div>
               </div>
+
+              {trendLoading || showTrend ? (
+                <div className="mt-8 mb-8 bg-white p-8 rounded-4xl border border-black/5 shadow-sm animate-in slide-in-from-top-2 fade-in">
+                  <div className="flex items-center justify-between mb-8">
+                    <div>
+                      <h4 className="text-lg font-black text-black uppercase tracking-tight">Efficiency Trendline</h4>
+                      <p className="text-[10px] font-bold text-black/30 uppercase tracking-widest mt-1">
+                        Monthly Performance Score for {selectedYear}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowTrend(false)}
+                      className="p-2 hover:bg-gray-100 rounded-lg text-gray-400"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+
+                  {trendLoading ? (
+                    <div className="h-64 flex flex-col items-center justify-center gap-3">
+                      <Loader2 className="w-8 h-8 animate-spin text-[#6bbd45]" />
+                      <span className="text-[10px] font-black text-black/20 uppercase tracking-widest">Analyzing Trend Data...</span>
+                    </div>
+                  ) : (
+                    <div className="h-80 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={trendData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                          <XAxis
+                            dataKey="month"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fontSize: 10, fontWeight: 800, fill: "#00000040" }}
+                            dy={10}
+                          />
+                          <YAxis
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fontSize: 10, fontWeight: 800, fill: "#00000040" }}
+                            domain={[0, 100]}
+                            dx={-10}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              borderRadius: '16px',
+                              border: '1px solid rgba(0,0,0,0.05)',
+                              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                              fontSize: '11px',
+                              fontWeight: '900',
+                              textTransform: 'uppercase',
+                              padding: '12px'
+                            }}
+                            cursor={{ stroke: '#6bbd45', strokeWidth: 1, strokeDasharray: '4 4' }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="score"
+                            stroke="#6bbd45"
+                            strokeWidth={4}
+                            dot={{ r: 6, fill: "#6bbd45", strokeWidth: 3, stroke: "#fff" }}
+                            activeDot={{ r: 8, fill: "#000", strokeWidth: 0 }}
+                            animationDuration={1500}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                </div>
+              ) : null}
 
               {epsLoading ? (
                 <div className="flex items-center justify-center py-10 bg-white/50 rounded-2xl border border-dashed border-black/5">

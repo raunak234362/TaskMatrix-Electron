@@ -420,7 +420,7 @@ const TeamDashboard = () => {
         const taskDate = new Date(task.start_date || task.startDate);
 
         if (taskDate >= periodStart && taskDate <= periodEnd) {
-          if (["COMPLETE", "VALIDATE_COMPLETED"].includes(task.status)) {
+          if (["COMPLETED", "VALIDATE_COMPLETED"].includes(task.status)) {
             // Only completed tasks count for efficiency? usually yes
             // --- Support for both old and new data structures ---
             const assigned = task.allocationLog?.allocatedHours
@@ -591,7 +591,7 @@ const TeamDashboard = () => {
       const completedTasks = filteredStats.reduce(
         (total, member) =>
           total +
-          (member.tasks || []).filter((task) => task.status === "COMPLETE")
+          (member.tasks || []).filter((task) => task.status === "COMPLETED")
             .length,
         0,
       );
@@ -606,7 +606,7 @@ const TeamDashboard = () => {
       );
 
       const completedTasksList = filteredStats.flatMap((m) =>
-        (m.tasks || []).filter((task) => task.status === "COMPLETE"),
+        (m.tasks || []).filter((task) => task.status === "COMPLETED"),
       );
 
       const efficiencyAssignedHours = completedTasksList.reduce((sum, task) => {
@@ -720,14 +720,14 @@ const TeamDashboard = () => {
         const completedTasks =
           (memberStat?.tasks || []).filter((task) =>
             [
-              "COMPLETE",
+              "COMPLETED",
               "USER_FAULT",
               "VALIDATE_COMPLETED",
             ].includes(task.status?.toUpperCase()),
           ).length || 0;
 
         const memberCompletedTasks = (memberStat?.tasks || []).filter(
-          (task) => task.status === "COMPLETE",
+          (task) => task.status === "COMPLETED",
         );
 
         const efficiencyAssigned =
@@ -910,6 +910,7 @@ const TeamDashboard = () => {
                     activeFilter={memberFilter}
                     onFilterChange={setMemberFilter}
                     memberCounts={memberCounts}
+                    dateFilter={dateFilter}
                   />
                 </div>
               </div>

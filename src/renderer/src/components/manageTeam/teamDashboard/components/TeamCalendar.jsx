@@ -340,7 +340,7 @@ const TeamCalendar = ({
                           <div
                             key={tIdx}
                             className={`px-2 py-1.5 rounded-lg border flex flex-col gap-0.5 shadow-sm transition-colors ${userTotalHoursMapDay[t.userName || "Unknown"] > 8.5
-                              ? "bg-primary/10 border-primary hover:bg-primary/80"
+                              ? "bg-primary/10 border-primary hover:bg-primary/50"
                               : t.status === "ABSENT" ||
                                 (t.name || t.title || "")
                                   .toUpperCase()
@@ -358,9 +358,9 @@ const TeamCalendar = ({
                             title={t.name || t.title}
                           >
                             <span
-                              className={`text-[10px] font-semibold truncate tracking-tight ${userTotalHoursMapDay[t.userName || "Unknown"] >
+                              className={`text-[11px] font-semibold truncate tracking-tight ${userTotalHoursMapDay[t.userName || "Unknown"] >
                                 8.5
-                                ? "text-primary/80"
+                                ? "text-black"
                                 : t.status === "ABSENT" ||
                                   (t.name || t.title || "")
                                     .toUpperCase()
@@ -379,9 +379,9 @@ const TeamCalendar = ({
                               {t.name || t.title || "Task"}
                             </span>
                             <span
-                              className={`text-[9px] font-bold truncate tracking-wider uppercase ${userTotalHoursMapDay[t.userName || "Unknown"] >
+                              className={`text-[10px] font-bold truncate tracking-wider uppercase ${userTotalHoursMapDay[t.userName || "Unknown"] >
                                 8.5
-                                ? "text-primary/80"
+                                ? "text-gray-800"
                                 : t.status === "ABSENT" ||
                                   (t.name || t.title || "")
                                     .toUpperCase()

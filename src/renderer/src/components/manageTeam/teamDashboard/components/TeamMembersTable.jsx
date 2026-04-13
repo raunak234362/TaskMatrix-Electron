@@ -11,6 +11,7 @@ const TeamMembersTable = ({
   activeFilter,
   onFilterChange,
   memberCounts,
+  dateFilter,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -73,7 +74,7 @@ const TeamMembersTable = ({
             <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold uppercase tracking-widest rounded-full bg-gray-100 text-black border border-black/5">
               {row.original.role}
             </span>
-            {row.original.isAbsent && (
+            {dateFilter?.type === "specificDate" && row.original.isAbsent && (
               <span className="px-3 py-1 inline-flex text-[10px] leading-5 font-black uppercase tracking-widest rounded-full bg-red-100 text-red-600 border border-red-200 shadow-sm animate-pulse">
                 Absent
               </span>
@@ -100,7 +101,7 @@ const TeamMembersTable = ({
         ),
       }
     ],
-    [formatToHoursMinutes]
+    [formatToHoursMinutes, dateFilter]
   );
 
   return (

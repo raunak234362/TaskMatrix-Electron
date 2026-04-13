@@ -57,8 +57,8 @@ const EditMileStone = ({
   const stageOptions = [
     { label: "IFA", value: "IFA" },
     { label: "IFC", value: "IFC" },
-    { label: "OFC", value: "OFC" },
-    { label: "RIF", value: "RIF" },
+    { label: "RIFA", value: "RIFA" },
+    { label: "RIFC", value: "RIFC" },
   ];
 
   useEffect(() => {

@@ -24,7 +24,7 @@ const TeamStatsCards = ({ teamStats }) => {
     {
       label: "Efficiency",
       value: `${teamStats.efficiency || 0}%`,
-      subValue: "Performance Score",
+      subValue: "Performance Score based on completion of Tasks",
       icon: <Zap size={24} />,
       color: "text-green-600",
       bg: "bg-green-50",
