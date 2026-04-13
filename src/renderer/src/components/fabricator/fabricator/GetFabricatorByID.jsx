@@ -252,74 +252,74 @@ const GetFabricatorByID = ({ id, onClose }) => {
               </div>
             ) : (
               <div className="flex flex-col gap-8">
-                {/* Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-6">
-                  <div className="space-y-5">
+                  {/* Identification & Assignments */}
+                  <div className="space-y-5 bg-white p-6 rounded-2xl border border-green-50 shadow-sm">
+                    <p className="text-[10px] font-black text-green-700 uppercase tracking-[0.2em] mb-4">Partner Details</p>
+                    <InfoRow label="Partner Stage" value={fabricator.fabStage || "—"} />
+                    <InfoRow 
+                      label="WBT Contact" 
+                      value={
+                        Array.isArray(fabricator.wbtFabricatorPointOfContact)
+                          ? fabricator.wbtFabricatorPointOfContact.map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : c).join(", ")
+                          : "—"
+                      } 
+                    />
+                    <InfoRow 
+                      label="Point of Contact" 
+                      value={
+                        Array.isArray(fabricator.pointOfContact)
+                          ? fabricator.pointOfContact.map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : c).join(", ")
+                          : "—"
+                      } 
+                    />
                     {fabricator.website && (
                       <InfoRow
                         label="Website"
                         value={
-                          <a
-                            href={fabricator.website}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-cyan-700 underline hover:text-cyan-900"
-                          >
-                            {truncateText(fabricator.website, 20)}
+                          <a href={fabricator.website} target="_blank" rel="noreferrer" className="text-cyan-700 underline hover:text-cyan-900">
+                            {truncateText(fabricator.website, 25)}
                           </a>
                         }
                       />
                     )}
-
                     {fabricator.drive && (
                       <InfoRow
                         label="Drive Link"
                         value={
-                          <a
-                            href={fabricator.drive}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-cyan-700 underline hover:text-cyan-900 flex gap-1"
-                          >
-                            <Link className="w-4 h-4" />
-                            {truncateText(fabricator.drive, 20)}
+                          <a href={fabricator.drive} target="_blank" rel="noreferrer" className="text-cyan-700 underline hover:text-cyan-900 flex items-center gap-1">
+                            <Link2 className="w-3.5 h-3.5" />
+                            {truncateText(fabricator.drive, 25)}
                           </a>
                         }
                       />
                     )}
                   </div>
 
-                  <div className="space-y-5">
-                    <InfoRow
-                      label="Created"
-                      value={formatDate(fabricator.createdAt)}
-                    />
-                    <InfoRow
-                      label="Updated"
-                      value={formatDate(fabricator.updatedAt)}
-                    />
-                    <InfoRow
-                      label="Total Files"
-                      value={
-                        Array.isArray(fabricator.files)
-                          ? fabricator.files.length
-                          : 0
-                      }
-                    />
+                  {/* Financial Terms & Metadata */}
+                  <div className="space-y-5 bg-white p-6 rounded-2xl border border-green-50 shadow-sm">
+                    <p className="text-[10px] font-black text-green-700 uppercase tracking-[0.2em] mb-4">Terms & Activity</p>
+                    <InfoRow label="Approval %" value={<span className="font-bold text-green-600">{fabricator.approvalPercentage || 0}%</span>} />
+                    <InfoRow label="Fabrication %" value={<span className="font-bold text-green-600">{fabricator.fabricatPercentage || 0}%</span>} />
+                    <InfoRow label="Settlement Cycle" value={<span className="font-bold">{fabricator.paymenTDueDate || 0} Days</span>} />
+                    <div className="pt-4 mt-4 border-t border-slate-50 space-y-4">
+                      <InfoRow label="Created" value={formatDate(fabricator.createdAt)} />
+                      <InfoRow label="Updated" value={formatDate(fabricator.updatedAt)} />
+                      <InfoRow label="Total Files" value={Array.isArray(fabricator.files) ? fabricator.files.length : 0} />
+                    </div>
                   </div>
                 </div>
 
-                {/* Files */}
-                {Array.isArray(fabricator.files) &&
-                  fabricator.files.length > 0 && (
-                    <div className="pt-6 border-t border-green-200">
-                      <RenderFiles
-                        files={fabricator.files}
-                        table="fabricator"
-                        parentId={id}
-                      />
+                {/* Files Section */}
+                {Array.isArray(fabricator.files) && fabricator.files.length > 0 && (
+                  <div className="pt-8 border-t border-green-100">
+                    <div className="flex items-center gap-2 mb-6 text-green-700">
+                      <FileText className="w-4 h-4" />
+                      <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">Resource Documents</h4>
                     </div>
-                  )}
+                    <RenderFiles files={fabricator.files} table="fabricator" parentId={id} />
+                  </div>
+                )}
               </div>
             )}
           </div>
