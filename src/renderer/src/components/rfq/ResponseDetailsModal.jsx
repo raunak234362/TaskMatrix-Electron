@@ -74,9 +74,16 @@ const ResponseDetailsModal = ({
         {res.childResponses?.map((child) => (
           <div key={child.id} className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 shadow-sm relative">
             <div className="flex justify-between items-center mb-3">
-              <span className="text-[10px] font-black text-black uppercase tracking-[0.2em] bg-green-50 px-2 py-0.5 rounded">
-                {child.user ? `${child.user.firstName} ${child.user.lastName}` : "User"} 
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black text-black uppercase tracking-[0.2em] bg-green-50 px-2 py-0.5 rounded">
+                  {child.user ? `${child.user.firstName} ${child.user.lastName}` : "User"}
+                </span>
+                <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${child.status === "APPROVED" ? "bg-green-100 text-green-700" :
+                  child.status === "REJECTED" ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-600"
+                  }`}>
+                  {child.status}
+                </span>
+              </div>
               <span className="text-[10px] font-bold text-gray-400">
                 {new Date(child.createdAt).toLocaleString()}
               </span>
@@ -104,7 +111,7 @@ const ResponseDetailsModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white h-[90vh] overflow-y-auto w-fit p-6 rounded-xl shadow-xl space-y-4 relative">
+      <div className="bg-white h-[90vh] overflow-y-auto max-w-4xl w-full p-6 rounded-xl shadow-xl space-y-4 relative">
         {/* Header */}
         <div className="flex items-center justify-between pb-3">
           <h2 className="text-xl font-semibold text-green-700">
@@ -121,7 +128,14 @@ const ResponseDetailsModal = ({
         {/* Message */}
         <div className="space-y-1">
           <div className="flex justify-between items-center mb-1">
-            <p className="text-sm text-gray-700 font-bold uppercase tracking-widest text-[10px]">Main Message</p>
+            <div className="flex items-center gap-3">
+              <p className="text-sm text-gray-700 font-bold uppercase tracking-widest text-[10px]">Main Message</p>
+              <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${response.status === "APPROVED" ? "bg-green-100 text-green-700" :
+                response.status === "REJECTED" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"
+                }`}>
+                {response.status}
+              </span>
+            </div>
             <span className="text-[10px] font-black text-blue-700 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded">
               {response.user ? `${response.user.firstName} ${response.user.lastName}` : "Sender"} · {response.user?.role?.replace("_", " ") || "N/A"}
             </span>
