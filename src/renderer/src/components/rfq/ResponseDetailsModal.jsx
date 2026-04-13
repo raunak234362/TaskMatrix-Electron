@@ -71,9 +71,17 @@ const ResponseDetailsModal = ({
     return (
       <div className="ml-4 border-l pl-4 space-y-4">
         {res.childResponses?.map((child) => (
-          <div key={child.id} className="bg-gray-50 p-3 rounded-md">
+          <div key={child.id} className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 shadow-sm relative">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-[10px] font-black text-black uppercase tracking-[0.2em] bg-green-50 px-2 py-0.5 rounded">
+                {child.user ? `${child.user.firstName} ${child.user.lastName}` : "User"} 
+              </span>
+              <span className="text-[10px] font-bold text-gray-400">
+                {new Date(child.createdAt).toLocaleString()}
+              </span>
+            </div>
             <div
-              className="font-medium prose prose-sm max-w-none"
+              className="font-medium text-gray-700 prose prose-sm max-w-none mb-3"
               dangerouslySetInnerHTML={{ __html: child.description }}
             />
 
@@ -111,9 +119,14 @@ const ResponseDetailsModal = ({
 
         {/* Message */}
         <div className="space-y-1">
-          <p className="text-sm text-gray-700">Message</p>
+          <div className="flex justify-between items-center mb-1">
+            <p className="text-sm text-gray-700 font-bold uppercase tracking-widest text-[10px]">Main Message</p>
+            <span className="text-[10px] font-black text-blue-700 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded">
+              {response.user ? `${response.user.firstName} ${response.user.lastName}` : "Sender"} · {response.user?.role?.replace("_", " ") || "N/A"}
+            </span>
+          </div>
           <div
-            className="text-black p-3 rounded-md border prose prose-sm max-w-none"
+            className="text-black p-4 rounded-xl border border-gray-200 bg-gray-50/30 prose prose-sm max-w-none shadow-xs"
             dangerouslySetInnerHTML={{ __html: response.description }}
           />
         </div>
