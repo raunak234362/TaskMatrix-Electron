@@ -80,15 +80,15 @@ const InvoiceAnalytics = ({ invoices }) => {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* 1. Trends Line Chart */}
-            <div className="lg:col-span-2 bg-green-100 p-6 rounded-3xl border border-black shadow-sm">
+            <div className="lg:col-span-2 bg-[#f4f9f1] p-6 rounded-3xl border border-black shadow-sm h-[400px]">
                 <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-sm font-black text-black uppercase tracking-widest">Invoices & Payments Trend</h3>
+                    <h3 className="text-sm font-bold text-black uppercase tracking-widest">Invoices & Payments Trend</h3>
                     <select className="text-sm border-none bg-gray-50 rounded-lg px-3 py-1 focus:ring-1 focus:ring-green-500 text-gray-600 outline-hidden cursor-pointer">
                         <option>Last 6 Months</option>
                         <option>This Year</option>
                     </select>
                 </div>
-                <div className="h-[200px] sm:h-[300px] w-full">
+                <div className="h-[280px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={lineData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                             <defs>
@@ -115,65 +115,38 @@ const InvoiceAnalytics = ({ invoices }) => {
                 </div>
             </div>
 
-            {/* 2. Status Donut Chart & Payment Breakdown */}
-            <div className="lg:col-span-1 space-y-6">
-                {/* Status Breakdown */}
-                <div className="bg-green-100 p-6 rounded-3xl border border-black shadow-sm flex flex-col h-[300px]">
-                    <h3 className="text-sm font-black text-black uppercase tracking-widest mb-4">Invoice Status</h3>
-                    <div className="flex-1 relative">
-                        <ResponsiveContainer width="100%" height="100%">
-
-                            <PieChart>
-                                <Pie
-                                    data={pieData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={80}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                >
-                                    {pieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                                <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                                {/* Center Text */}
-                                <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle">
-                                    <tspan x="50%" dy="-0.5em" fontSize="20" fontWeight="bold" fill="#374151">
-                                        {invoices.length || 17}
-                                    </tspan>
-                                    <tspan x="50%" dy="1.5em" fontSize="12" fill="#9ca3af">
-                                        Total
-                                    </tspan>
-                                </text>
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-
-                {/* Payment Method Breakdown (Mini List) */}
-                <div className="bg-green-100 p-6 rounded-3xl border border-black shadow-sm">
-                    <h3 className="text-sm font-black text-black uppercase tracking-widest mb-6">Payment Methods</h3>
-                    <div className="space-y-4">
-                        {paymentMethods.map((pm, i) => (
-                            <div key={i} className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-lg ${pm.color}`}>
-                                        <pm.icon size={16} />
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-700">{pm.method}</span>
-                                </div>
-                                <div className="text-right">
-                                    <span className="block text-sm  text-gray-800">{pm.percentage}%</span>
-                                    <div className="w-16 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
-                                        <div className="h-full bg-green-500 rounded-full" style={{ width: `${pm.percentage}%` }}></div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+            {/* 2. Status Donut Chart */}
+            <div className="lg:col-span-1 bg-[#f4f9f1] p-6 rounded-3xl border border-black shadow-sm flex flex-col h-[400px]">
+                <h3 className="text-sm font-bold text-black uppercase tracking-widest mb-4">Invoice Status</h3>
+                <div className="flex-1 relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={pieData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={80}
+                                paddingAngle={5}
+                                dataKey="value"
+                            >
+                                {pieData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                            {/* Center Text */}
+                            <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle">
+                                <tspan x="50%" dy="-0.5em" fontSize="20" fontWeight="bold" fill="#374151">
+                                    {invoices.length || 17}
+                                </tspan>
+                                <tspan x="50%" dy="1.5em" fontSize="12" fill="#9ca3af">
+                                    Total
+                                </tspan>
+                            </text>
+                        </PieChart>
+                    </ResponsiveContainer>
                 </div>
             </div>
         </div>

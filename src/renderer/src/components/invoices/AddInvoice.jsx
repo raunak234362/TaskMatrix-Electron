@@ -264,9 +264,7 @@ const AddInvoice = ({
           <h1 className="text-2xl  text-green-700">
             Create New Invoice
           </h1>
-          <p className="text-gray-700">
-            Enter details to generate a new invoice.
-          </p>
+         
         </div>
         <div className="flex flex-wrap gap-4 w-full md:w-auto">
           <div className="w-full md:w-64">

@@ -1,11 +1,12 @@
+import { useState } from "react";
 import DataTable from "../ui/table";
-
 import { Loader2, Inbox } from "lucide-react";
-
 import GetAccountByID from "./getAccountByID";
-
+import Modal from "../ui/Modal";
 
 const AllAccounts = ({ accounts, loading }) => {
+  const [selectedAccountId, setSelectedAccountId] = useState(null);
+
   const truncateWords = (text, maxWords) => {
     if (!text) return "—";
     const words = text.split(/\s+/);
@@ -19,7 +20,11 @@ const AllAccounts = ({ accounts, loading }) => {
     {
       accessorKey: "accountName",
       header: "Account Name",
-      cell: ({ row }) => truncateWords(row.original.accountName, 20),
+      cell: ({ row }) => (
+        <span className="text-[#6bbd45] font-bold hover:underline cursor-pointer">
+          {truncateWords(row.original.accountName, 20)}
+        </span>
+      ),
     },
     {
       accessorKey: "accountNumber",
@@ -79,8 +84,19 @@ const AllAccounts = ({ accounts, loading }) => {
       <DataTable
         columns={columns}
         data={accounts}
-        detailComponent={({ row, close }) => <GetAccountByID id={row.id} onClose={close} />}
+        onRowClick={(row) => setSelectedAccountId(row.id)}
       />
+
+      <Modal
+        isOpen={!!selectedAccountId}
+        onClose={() => setSelectedAccountId(null)}
+        hideHeader={true}
+      >
+        <GetAccountByID 
+          id={selectedAccountId} 
+          onClose={() => setSelectedAccountId(null)} 
+        />
+      </Modal>
     </div>
   );
 };

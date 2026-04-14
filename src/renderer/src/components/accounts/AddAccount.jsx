@@ -49,12 +49,9 @@ const AddAccount = ({ onClose, onSuccess }) => {
       {/* Header */}
       <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white">
         <div>
-          <h1 className="text-xl font-black text-black tracking-tight uppercase">
+          <h1 className="text-xl font-bold text-black tracking-tight uppercase">
             Add Bank Account Details
           </h1>
-          <p className="text-[10px] font-black text-black uppercase tracking-[0.2em] mt-1">
-            ENTER DETAILS TO LINK A BANK ACCOUNT
-          </p>
         </div>
        
       </header>
@@ -64,7 +61,7 @@ const AddAccount = ({ onClose, onSuccess }) => {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* Account Details Section */}
           <fieldset className="border border-gray-200 p-6 rounded-xl bg-gray-50/30">
-            <legend className="text-xs font-black text-black uppercase tracking-widest px-3 bg-white border border-gray-200 rounded-full">
+            <legend className="text-xs font-bold text-black uppercase tracking-widest px-3 bg-white border border-gray-200 rounded-full">
               Account Details
             </legend>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
@@ -129,7 +126,7 @@ const AddAccount = ({ onClose, onSuccess }) => {
 
           {/* Bank Details Section */}
           <fieldset className="border border-gray-200 p-6 rounded-xl bg-gray-50/30">
-            <legend className="text-xs font-black text-black uppercase tracking-widest px-3 bg-white border border-gray-200 rounded-full">
+            <legend className="text-xs font-bold text-black uppercase tracking-widest px-3 bg-white border border-gray-200 rounded-full">
               Bank Details
             </legend>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
@@ -180,7 +177,7 @@ const AddAccount = ({ onClose, onSuccess }) => {
 
           {/* Beneficiary Details Section */}
           <fieldset className="border border-gray-200 p-6 rounded-xl bg-gray-50/30">
-            <legend className="text-xs font-black text-black uppercase tracking-widest px-3 bg-white border border-gray-200 rounded-full">
+            <legend className="text-xs font-bold text-black uppercase tracking-widest px-3 bg-white border border-gray-200 rounded-full">
               Beneficiary Details
             </legend>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">

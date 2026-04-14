@@ -1,7 +1,6 @@
 
 import DataTable from "../../ui/table";
 import GetInvoiceById from "../GetInvoiceById";
-import { Eye, Send } from "lucide-react";
 
 
 const PendingInvoiceList = ({ invoices }) => {
@@ -87,34 +86,13 @@ const PendingInvoiceList = ({ invoices }) => {
         );
       },
     },
-    {
-      id: "actions",
-      header: "",
-      cell: () => {
-        return (
-          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              className="p-1.5 hover:bg-gray-100 rounded-md text-gray-500"
-              title="View"
-            >
-              <Eye size={16} />
-            </button>
-            <button
-              className="p-1.5 hover:bg-green-50 rounded-md text-green-600"
-              title="Send"
-            >
-              <Send size={16} />
-            </button>
-          </div>
-        );
-      },
-    },
+
   ];
 
   return (
     <div className="bg-green-100 p-6 rounded-3xl border border-black shadow-sm h-full">
       <div className="flex items-center justify-between mb-8">
-        <h3 className="text-sm font-black text-black uppercase tracking-widest">Pending Invoices</h3>
+        <h3 className="text-sm font-bold text-black uppercase tracking-widest">Pending Invoices</h3>
         <button className="text-xs font-black text-black/40 uppercase tracking-widest hover:text-black transition-colors">
           View All
         </button>

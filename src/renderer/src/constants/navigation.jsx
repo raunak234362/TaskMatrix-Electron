@@ -156,12 +156,7 @@ export const navItems = [
             'sales'
         ]
     },
-    {
-        label: 'Accounts',
-        to: 'accounts',
-        icon: <Landmark />,
-        roles: ['admin', 'project_manager_officer', 'pmo']
-    },
+
     {
         label: 'Tasks',
         to: 'tasks',

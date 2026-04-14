@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AddInvoice, AllInvoices, InvoiceDashboard } from "../components";
+import AccountLayout from "./AccountLayout";
 
 const InvoiceLayout = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -37,6 +38,16 @@ const InvoiceLayout = () => {
           >
             Add Invoice
           </button>
+
+          <button
+            onClick={() => setActiveTab("accounts")}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "accounts"
+              ? "bg-[#ebf5ea] text-black border-black shadow-sm"
+              : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+              }`}
+          >
+            Accounts
+          </button>
         </div>
       </div>
       <div className="flex-1 min-h-0 bg-white p-2 rounded-b-2xl overflow-y-auto laptop-fit">
@@ -53,6 +64,11 @@ const InvoiceLayout = () => {
         {activeTab === "addInvoice" && (
           <div>
             <AddInvoice />
+          </div>
+        )}
+        {activeTab === "accounts" && (
+          <div>
+            <AccountLayout />
           </div>
         )}
       </div>

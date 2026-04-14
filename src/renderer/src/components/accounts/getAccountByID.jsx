@@ -51,7 +51,7 @@ const GetAccountByID = ({ id, onClose }) => {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-4xl mx-auto">
+    <div className="w-full">
       {/* Header */}
       <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white sticky top-0 z-10">
         <div className="flex items-center gap-4">

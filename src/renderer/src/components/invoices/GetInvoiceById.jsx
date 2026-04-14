@@ -374,7 +374,7 @@ const GetInvoiceById = ({ id, onClose, close }) => {
 
       <div className="modal-root fixed inset-0 z-1000 flex items-start justify-center overflow-auto bg-black/80 backdrop-blur-xl pt-0 pb-0">
         {/* Action Header */}
-        <div className="fixed top-6 right-10 z-110 flex gap-4 no-print">
+        <div className="fixed top-6 right-10 z-110 flex gap-8 no-print">
           <button
             onClick={handleHtmlPrint}
             className="flex items-center gap-2 px-8 py-3 bg-green-600 text-white rounded-full shadow-2xl hover:bg-green-700 transition-all font-bold group scale-110"
@@ -386,9 +386,9 @@ const GetInvoiceById = ({ id, onClose, close }) => {
           {handleClose && (
             <button
               onClick={handleClose}
-              className="flex items-center gap-2 px-3 py-3 bg-white text-gray-900 rounded-full shadow-2xl hover:bg-red-50 hover:text-red-600 transition-all border border-gray-100 scale-110 "
+              className="flex items-center gap-2 px-8 py-3 bg-red-50 text-red-600 border-2 border-red-600 rounded-full shadow-2xl hover:bg-red-100 transition-all font-bold scale-110"
             >
-              <X className="w-5 h-3" />
+              <X className="w-5 h-5" />
               Close
             </button>
           )}

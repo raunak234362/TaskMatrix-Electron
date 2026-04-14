@@ -81,26 +81,28 @@ const InvoiceStatsCards = ({ invoices }) => {
       {stats.map((stat, index) => (
         <div
           key={index}
-          className="bg-green-100 p-4 sm:p-6 rounded-3xl shadow-sm border border-black hover:shadow-md transition-shadow group"
+          className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-between relative overflow-hidden group hover:border-green-500 transition-all"
         >
-          <div className="flex items-start justify-between mb-4">
-            <div className={`p-3 rounded-xl ${stat.color}`}>
-              <stat.icon size={22} />
+          {/* Left indicator bar */}
+          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-green-500"></div>
+          
+          <div className="flex items-center gap-4">
+            {/* Icon in light circle */}
+            <div className={`p-2.5 rounded-full ${stat.color} bg-opacity-20 flex items-center justify-center`}>
+              <stat.icon size={20} className="shrink-0" />
             </div>
-            {/* Trend Label (Mocked for UI) */}
-            <span
-              className={`text-xs font-medium px-2 py-1 rounded-full ${stat.title === 'Overdue Invoices'
-                ? 'bg-red-100 text-red-600'
-                : 'bg-green-100 text-green-600'
-                }`}
-            >
-              {stat.trend}
-            </span>
+            
+            {/* Title / Label */}
+            <div>
+              <p className="text-[11px] font-bold text-BLACK uppercase tracking-wider">{stat.title}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-[10px] font-black text-black/40 uppercase tracking-widest mb-1.5">{stat.title}</p>
-            <h3 className="text-2xl font-black text-black tracking-tight mb-1">{stat.value}</h3>
-            <p className="text-xs font-black text-black/50 uppercase tracking-tight">{stat.subValue}</p>
+
+          {/* Value / Number */}
+          <div className="text-right">
+            <h3 className="text-xl font-extrabold text-gray-900 tracking-tight">
+              {stat.value}
+            </h3>
           </div>
         </div>
       ))}
