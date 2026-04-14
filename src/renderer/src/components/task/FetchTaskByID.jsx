@@ -136,6 +136,16 @@ const FetchTaskByID = ({
     }).format(new Date(dateString));
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "—";
+    return new Intl.DateTimeFormat("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(dateString));
+  };
+
   const handleAction = async (action) => {
     if (!task?.id) return;
     try {
@@ -411,7 +421,7 @@ const FetchTaskByID = ({
                   <InfoItem
                     icon={<Calendar />}
                     label="Due Date"
-                    value={toIST(task.due_date)}
+                    value={formatDate(task.due_date)}
                   />
                   <InfoItem
                     icon={<Clock />}

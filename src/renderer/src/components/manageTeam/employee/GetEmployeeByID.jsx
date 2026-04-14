@@ -718,7 +718,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
 
                   <button
                     onClick={fetchMonthlyTrend}
-                    className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-black/80 transition-all shadow-md active:scale-95 ml-2"
+                    className="flex items-center gap-2 px-4 py-2 bg-green-200 text-black rounded-xl text-xs font-black uppercase tracking-widest hover:bg-green-300 transition-all shadow-md active:scale-95 ml-2"
                   >
                     <TrendingUp className="w-3.5 h-3.5" />
                     Generate Efficiency Graph

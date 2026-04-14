@@ -42,7 +42,7 @@ const TeamMember = ({ members, onClose }) => {
       cell: ({ row }) => {
         const m = row.original.member;
         return (
-          <span className="font-black text-black uppercase tracking-tight text-sm">
+          <span className=" text-black uppercase tracking-tight text-sm">
             {m.firstName} {m.middleName || ""} {m.lastName}
           </span>
         );
@@ -75,7 +75,7 @@ const TeamMember = ({ members, onClose }) => {
       accessorKey: "role",
       header: "Role",
       cell: ({ row }) => (
-        <span className="px-5 py-1.5 bg-gray-100 text-black font-black uppercase tracking-widest rounded-full text-[10px] border border-black/5 shadow-sm">
+        <span className="px-5 py-1.5 bg-gray-100 text-black uppercase tracking-widest rounded-full text-[10px] border border-black/5 shadow-sm">
           {row.original.role}
         </span>
       ),
@@ -135,11 +135,11 @@ const TeamMember = ({ members, onClose }) => {
           </div>
 
           {/* DataTable */}
-          <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm flex-1">
+          <div className="rounded-xl border h-[80vh] overflow-y-auto border-gray-200 shadow-sm flex-1">
             <DataTable
               columns={columns}
               data={teamData?.members || []}
-              pageSizeOptions={[10, 20, 50]}
+              pageSizeOptions={[20]}
             />
           </div>
         </div>

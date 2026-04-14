@@ -83,8 +83,8 @@ const UpdateRoleByMemberID = ({ teamId, member, onClose, onSuccess }) => {
               type="submit"
               disabled={isSubmitting}
               className={`w-full h-14 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-medium flex items-center justify-center gap-3 ${isSubmitting
-                ? "bg-gray-100 text-black/20 cursor-not-allowed"
-                : "bg-black text-white hover:bg-black/90 active:scale-95 shadow-black/10"
+                ? "bg-green-100 text-black cursor-pointer"
+                : "bg-green-200 text-black hover:bg-green-300 active:scale-95 shadow-black/10"
                 }`}
             >
               {isSubmitting ? (
