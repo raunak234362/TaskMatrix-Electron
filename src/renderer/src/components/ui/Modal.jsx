@@ -1,13 +1,13 @@
 import { X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 
-const Modal = ({ isOpen, onClose, title, children,  hideHeader = false, maxWidth = 'max-w-4xl' }) => {
+const Modal = ({ isOpen, onClose, title, children,  hideHeader = false }) => {
   if (!isOpen) return null
 
   return createPortal(
     <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div
-        className={`bg-white w-full ${maxWidth} max-h-[90vh] rounded-xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in fade-in zoom-in duration-200`}
+        className={`bg-white w-full max-h-[90vh] rounded-xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in fade-in zoom-in duration-200 p-4`}
       >
         {/* Modal Header */}
         {!hideHeader && (
