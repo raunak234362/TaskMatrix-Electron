@@ -1,16 +1,21 @@
-// Standardizing Invoice Modal and Print Logic
 import { useEffect, useState, useRef } from "react";
-import { Loader2, AlertCircle, X, Download } from "lucide-react";
+import { Loader2, AlertCircle, X, Download, Edit3 } from "lucide-react";
 import Service from "../../api/Service";
 import logo from "../../assets/logo.png";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { incrementModalCount, decrementModalCount } from "../../store/uiSlice";
+import UpdateInvoice from "./UpdateInvoice";
 
 const GetInvoiceById = ({ id, onClose, close }) => {
   const handleClose = onClose || close;
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Auth check for PMO/Admin
+  const userRole = useSelector((state) => state.userInfo?.userDetail?.role);
+  const canEdit = userRole && ["admin", "PMO", "Admin", "pmo", "ADMIN"].includes(userRole);
 
   const componentRef = useRef(null);
   const dispatch = useDispatch();
@@ -374,10 +379,20 @@ const GetInvoiceById = ({ id, onClose, close }) => {
 
       <div className="modal-root fixed inset-0 z-1000 flex items-start justify-center overflow-auto bg-black/80 backdrop-blur-xl pt-0 pb-0">
         {/* Action Header */}
-        <div className="fixed top-6 right-10 z-110 flex gap-8 no-print">
+        <div className="fixed top-6 right-10 z-110 flex gap-2 no-print">
+          {canEdit && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="flex items-center gap-2 px-8 py-3 bg-blue-200 text-black rounded-lg shadow-2xl hover:bg-blue-700 transition-all font-bold"
+            >
+              <Edit3 className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              Update Invoice
+            </button>
+          )}
+
           <button
             onClick={handleHtmlPrint}
-            className="flex items-center gap-2 px-8 py-3 bg-green-600 text-white rounded-full shadow-2xl hover:bg-green-700 transition-all font-bold group scale-110"
+            className="flex items-center gap-2 px-8 py-3 bg-green-200 text-black rounded-lg shadow-2xl hover:bg-green-700 transition-all font-bold"
           >
             <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
             Download PDF
@@ -386,7 +401,7 @@ const GetInvoiceById = ({ id, onClose, close }) => {
           {handleClose && (
             <button
               onClick={handleClose}
-              className="flex items-center gap-2 px-8 py-3 bg-red-50 text-red-600 border-2 border-red-600 rounded-full shadow-2xl hover:bg-red-100 transition-all font-bold scale-110"
+              className="flex items-center gap-2 px-3 py-1 bg-red-50 text-black border-2 border-red-500/60 rounded-lg hover:bg-red-100 transition-all font-bold"
             >
               <X className="w-5 h-5" />
               Close
@@ -667,6 +682,20 @@ const GetInvoiceById = ({ id, onClose, close }) => {
           </div>
         </div>
       </div>
+
+      {isEditing && (
+        <div className="fixed inset-0 z-[5000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm no-print">
+          <div className="w-full max-w-5xl max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in fade-in zoom-in duration-200">
+            <UpdateInvoice 
+              invoiceId={id} 
+              onClose={() => setIsEditing(false)} 
+              onSuccess={() => {
+                window.location.reload();
+              }}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };

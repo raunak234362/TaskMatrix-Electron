@@ -2302,6 +2302,22 @@ class Service {
     }
   }
 
+  //Update invoice by invoice Id
+  static async UpdateInvoiceById(id, data) {
+    try {
+      const response = await api.put(`invoice/update/${id}`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Invoice updated:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error updating invoice:', error)
+      throw error
+    }
+  }
+
   // all Invoice
   static async GetAllInvoice() {
     try {
