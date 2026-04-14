@@ -98,6 +98,8 @@ const AllActiveTask = () => {
       (task) =>
         task.status !== "VALIDATE_COMPLETE" &&
         task.status !== "COMPLETE_OTHER" &&
+        task.status !== "WRONG_ALLOCATION" &&
+        task.status !== "ABSENT" &&
         task.status !== "USER_FAULT" &&
         matchesDateFilter(task.created_on, dateFilter)
     );
