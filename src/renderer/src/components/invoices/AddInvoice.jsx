@@ -106,6 +106,13 @@ const AddInvoice = ({
       setValue("customerName", selectedFabricator.fabName || "");
       setValue("address", selectedFabricator.website || "");
       setContacts(selectedFabricator.pointOfContact || []);
+      
+      // Set default SAC code for all current items
+      const sacCode = selectedFabricator.SAC || "";
+      const currentItems = watch("invoiceItems") || [];
+      currentItems.forEach((_, index) => {
+        setValue(`invoiceItems.${index}.sacCode`, sacCode);
+      });
     }
 
     const projects = allProjects.filter(
@@ -554,16 +561,17 @@ const AddInvoice = ({
             ))}
             <Button
               type="button"
-              onClick={() =>
+              onClick={() => {
+                const selectedFab = fabricators.find(f => f.id === selectedFabricatorId || f._id === selectedFabricatorId);
                 append({
                   description: "",
                   unit: 1,
                   rateUSD: 0,
                   totalUSD: 0,
-                  sacCode: 0,
+                  sacCode: selectedFab?.SAC || "",
                   remarks: "",
-                })
-              }
+                });
+              }}
               className="flex items-center gap-2 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200"
             >
               <Plus size={18} /> Add Item
