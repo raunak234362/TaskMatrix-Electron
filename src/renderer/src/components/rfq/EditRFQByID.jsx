@@ -93,7 +93,7 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
             const payload = {
                 ...data,
                 bidPrice: data.bidPrice !== '' && data.bidPrice !== null && data.bidPrice !== undefined
-                    ? Number(data.bidPrice)
+                    ? String(data.bidPrice)
                     : '',
                 estimationDate: data.estimationDate ? new Date(data.estimationDate).toISOString() : ''
             }
