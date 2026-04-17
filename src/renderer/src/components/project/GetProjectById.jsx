@@ -776,13 +776,6 @@ const GetProjectById = ({ id, onClose }) => {
           {activeTab === "files" && (
             <div className="space-y-4">
               <AllDocument projectId={id} />
-              <RenderFiles
-                files={project.files || []}
-                table="project"
-                parentId={id}
-                formatDate={formatDate}
-              />
-              <AllDocument />
             </div>
           )}
           {activeTab === "milestones" && (

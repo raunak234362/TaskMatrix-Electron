@@ -1,12 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import DataTable from "../../ui/table";
-
 
 import Service from "../../../api/Service";
 import { Loader2, Inbox } from "lucide-react";
 import DesignDrawingDetails from "./DesignDrawingDetails";
-
 
 const AllDesignDrawings = ({ projectId }) => {
   const [drawings, setDrawings] = useState([]);
@@ -48,17 +45,23 @@ const AllDesignDrawings = ({ projectId }) => {
       ),
     },
     {
-      accessorKey: "createdAt",
-      header: "Created At",
-      cell: ({ row }) => (
-        <span className="text-sm font-bold text-gray-600">
-          {new Date(row.original.createdAt).toLocaleDateString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          })}
-        </span>
-      ),
+      accessorKey: "uploadedAt",
+      header: "Uploaded At",
+      cell: ({ row }) => {
+        const dateStr = row.original.uploadedAt || row.original.createdAt;
+        return (
+          <span className="text-sm font-bold text-gray-600">
+            {dateStr ? new Date(dateStr).toLocaleString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true
+            }) : "—"}
+          </span>
+        );
+      },
     },
   ];
 
