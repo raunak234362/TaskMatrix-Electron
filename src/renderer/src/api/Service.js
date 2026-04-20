@@ -1981,6 +1981,21 @@ class Service {
     return response.data
   }
 
+  //change order response by id
+  static async UpdateCOTableById(ID,data) {
+    try {
+      const response = await api.put(`changeOrder/table/${ID}`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' All Co fetched by ID:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find CO', error)
+    }
+  }
+
   // Change Order Table Methods
   static async GetAllCOTableRows(coId) {
     try {
