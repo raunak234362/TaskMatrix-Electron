@@ -38,7 +38,7 @@ const ProjectStats = ({ stats, onCardClick }) => {
   return (
     <div className="p-0 transition-all duration-500 h-full border border-green-200 bg-white p-4 rounded-lg">
       <div className="flex items-center justify-between mb-6 px-1">
-        <h2 className="text-base font-black text-black uppercase tracking-[0.15em] flex items-center gap-2">
+        <h2 className="text-base font-bold text-black uppercase tracking-[0.15em] flex items-center gap-2">
           <Files className="w-5 h-5 text-green-600" />
           Project Overview
         </h2>
@@ -64,12 +64,12 @@ const ProjectStats = ({ stats, onCardClick }) => {
                 <div className="p-2.5 rounded-none bg-white border border-gray-100 text-black shadow-sm shrink-0 transition-all group-hover:bg-green-600 group-hover:text-white">
                   <card.icon size={20} strokeWidth={3} />
                 </div>
-                <span className="text-xm font-black text-black uppercase tracking-widest leading-none">
+                <span className="text-xm font-bold text-black uppercase tracking-widest leading-none">
                   {card.label}
                 </span>
               </div>
 
-              <span className="text-3xl font-black tracking-tight text-black">
+              <span className="text-3xl font-bold tracking-tight text-black">
                 {card.value}
               </span>
             </div>

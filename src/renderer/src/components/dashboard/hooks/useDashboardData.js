@@ -99,7 +99,7 @@ export const useDashboardData = () => {
     try {
       if (isAdminRole) {
         // Fetch Admin Data
-        let projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes
+        let projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes, invoicesRes, allRfqsRes
 
         if (
           userRole === 'project_manager' ||
@@ -115,7 +115,9 @@ export const useDashboardData = () => {
             coRes,
             rfqRes,
             pmDashboardRes,
-            myTasksRes
+            myTasksRes,
+            invoicesRes,
+            allRfqsRes
           ] = await Promise.all([
             Service.GetAllProjects(),
             Service.pendingRFIsForProjectManager(), // Specialized
@@ -124,11 +126,13 @@ export const useDashboardData = () => {
             Service.PendingCoForProjectManager(), // Specialized
             Service.RFQRecieved(),
             Service.GetPMDashboard(),
-            Service.GetMyTask()
+            Service.GetMyTask(),
+            Service.GetAllInvoice(),
+            Service.FetchAllRFQ()
           ])
         } else {
           // Use Standard Admin APIs
-          ;[projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes] =
+          ;[projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes, invoicesRes, allRfqsRes] =
             await Promise.all([
               Service.GetAllProjects(),
               Service.pendingRFIs(),
@@ -137,7 +141,9 @@ export const useDashboardData = () => {
               Service.PendingCo(),
               Service.RFQRecieved(),
               Promise.resolve(null),
-              Service.GetMyTask()
+              Service.GetMyTask(),
+              Service.GetAllInvoice(),
+              Service.FetchAllRFQ()
             ])
         }
 
@@ -155,6 +161,8 @@ export const useDashboardData = () => {
         const pendingSubmittals = extractData(pendingSubRes)
         const cos = extractData(coRes)
         const rfqs = extractData(rfqRes)
+        const invoices = extractData(invoicesRes)
+        const allRfqs = extractData(allRfqsRes)
 
         // Merge pmDashboard root stats (like completedTasks) with nested .data stats
         const pmDashboard =
@@ -170,6 +178,7 @@ export const useDashboardData = () => {
           cos,
           pmDashboard,
           rfqs,
+          allRfqs,
           projectStats: {
             totalProjects: pmDashboard?.totalProjects ?? projects.length,
             activeProjects:
@@ -191,7 +200,7 @@ export const useDashboardData = () => {
             pendingRFQ: pmDashboard?.pendingRFQ ?? rfqs.length ?? 0,
             newRFQ: pmDashboard?.newRFQ || 0
           },
-          invoices: []
+          invoices: invoices
         })
 
         // Process Personal Tasks for Admin

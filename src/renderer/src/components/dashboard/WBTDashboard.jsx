@@ -26,6 +26,7 @@ const GetSubmittalByID = lazy(() => import('../submittals/GetSubmittalByID'))
 const GetCOByID = lazy(() => import('../co/GetCOByID'))
 const GetRFQByID = lazy(() => import('../rfq/GetRFQByID'))
 const GetMilestoneByID = lazy(() => import('../project/mileStone/GetMilestoneByID'))
+const GetInvoiceById = lazy(() => import('../invoices/GetInvoiceById'))
 
 const DashboardSkeleton = () => (
   <div className="animate-pulse space-y-8 p-6 bg-white min-h-screen">
@@ -215,7 +216,8 @@ const WBTDashboard = () => {
               setDetailTaskId,
               setShowSubmittalsPopup,
               setShowDeadlinesPopup,
-              setShowNotesPopup
+              setShowNotesPopup,
+              handleInvoiceClick: (id) => setDetailModal({ isOpen: true, type: 'INVOICE', id })
             }}
           />
         ) : (
@@ -362,6 +364,7 @@ const WBTDashboard = () => {
                   {detailModal.type === 'RFI' && 'RFI Details'}
                   {detailModal.type === 'SUBMITTAL' && 'Submittal Details'}
                   {detailModal.type === 'CO' && 'Change Order Details'}
+                  {detailModal.type === 'INVOICE' && 'Invoice Details'}
                 </h3>
                 <button
                   onClick={() => setDetailModal({ isOpen: false, type: null, id: null })}
@@ -375,6 +378,7 @@ const WBTDashboard = () => {
                   {detailModal.type === 'RFI' && <GetRFIByID id={detailModal.id} />}
                   {detailModal.type === 'SUBMITTAL' && <GetSubmittalByID id={detailModal.id} onClose={() => setDetailModal({ isOpen: false, type: null, id: null })} />}
                   {detailModal.type === 'CO' && <GetCOByID id={detailModal.id} projectId={detailModal.projectId} />}
+                  {detailModal.type === 'INVOICE' && <GetInvoiceById id={detailModal.id} onClose={() => setDetailModal({ isOpen: false, type: null, id: null })} />}
                 </Suspense>
               </div>
             </div>

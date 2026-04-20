@@ -20,6 +20,10 @@ const AddInvoice = ({
   const [fabricators, setFabricators] = useState([]);
   const [allProjects, setAllProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
+  const [allRfqs, setAllRfqs] = useState([]);
+  const [allInvoices, setAllInvoices] = useState([]);
+  const [availableRfqs, setAvailableRfqs] = useState([]);
+  const [projectChangeOrders, setProjectChangeOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [selectedFabricatorId, setSelectedFabricatorId] = useState("");
@@ -63,10 +67,12 @@ const AddInvoice = ({
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [accountsRes, fabricatorsRes, projectsRes] = await Promise.all([
+        const [accountsRes, fabricatorsRes, projectsRes, rfqsRes, invoicesRes] = await Promise.all([
           Service.GetBankAccounts(),
           Service.GetAllFabricators(),
           Service.GetAllProjects(),
+          Service.FetchAllRFQ(),
+          Service.GetAllInvoice()
         ]);
 
         const accountsData = accountsRes?.data || accountsRes || []
@@ -77,6 +83,12 @@ const AddInvoice = ({
 
         const projectsData = projectsRes?.data || projectsRes || []
         setAllProjects(Array.isArray(projectsData) ? projectsData : []);
+
+        const rfqsData = rfqsRes?.data || rfqsRes || []
+        setAllRfqs(Array.isArray(rfqsData) ? rfqsData : []);
+
+        const invoicesData = invoicesRes?.data || invoicesRes || []
+        setAllInvoices(Array.isArray(invoicesData) ? invoicesData : []);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -121,6 +133,14 @@ const AddInvoice = ({
     );
     setFilteredProjects(projects);
 
+    const raisedRfqIds = allInvoices.map(inv => inv.rfqId).filter(Boolean);
+    const fbRfqs = allRfqs.filter(rfq => {
+      const fabId = rfq.fabricatorId || (rfq.fabricator && (rfq.fabricator.id || rfq.fabricator._id)) || rfq.clientId || rfq.senderId || (rfq.sender && (rfq.sender.id || rfq.sender._id));
+      return fabId === fabricatorId;
+    });
+    const unbilledRfqs = fbRfqs.filter(rfq => !raisedRfqIds.includes(rfq._id) && !raisedRfqIds.includes(rfq.id));
+    setAvailableRfqs(unbilledRfqs);
+
     if (selectedFabricator?.accountId) {
       const selectedAccount = accounts.find(
         (a) =>
@@ -151,7 +171,17 @@ const AddInvoice = ({
     setSelectedProjectId(projectId);
     setValue("projectId", projectId);
 
-    if (!projectId) return;
+    if (!projectId) {
+      setProjectChangeOrders([]);
+      return;
+    }
+
+    try {
+      const coRes = await Service.GetChangeOrder(projectId);
+      setProjectChangeOrders(coRes?.data || []);
+    } catch (e) {
+      setProjectChangeOrders([]);
+    }
 
     const project = allProjects.find(
       (p) => p.id === projectId || p._id === projectId
@@ -236,6 +266,19 @@ const AddInvoice = ({
     selectFabricator(e.target.value);
   };
 
+  const handleRfqSelect = (e) => {
+    const rfqId = e.target.value;
+    setValue("rfqId", rfqId);
+    
+    if (rfqId) {
+      // Find project having this rfqId
+      const matchedProject = allProjects.find(p => p.rfqId === rfqId || p.rfqID === rfqId || p.rfq_id === rfqId || (p.rfq && (p.rfq.id || p.rfq._id) === rfqId));
+      if (matchedProject) {
+         selectProject(matchedProject.id || matchedProject._id);
+      }
+    }
+  };
+
   const handleProjectSelect = async (e) => {
     selectProject(e.target.value);
   };
@@ -244,6 +287,7 @@ const AddInvoice = ({
     const formattedData = {
       ...data,
       totalInvoiceValue: Number(data.totalInvoiceValue),
+      changeOrderId: !data.changeOrderId || data.changeOrderId.trim() === "" ? null : data.changeOrderId,
       invoiceItems: data.invoiceItems?.map((item) => ({
         ...item,
         rateUSD: Number(item.rateUSD),
@@ -293,6 +337,26 @@ const AddInvoice = ({
             </select>
           </div>
 
+          {selectedFabricatorId && availableRfqs.length > 0 && (
+            <div className="w-full md:w-64">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Select RFQ
+              </label>
+              <select
+                {...register("rfqId")}
+                onChange={handleRfqSelect}
+                className="w-full p-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all bg-green-50/30"
+              >
+                <option value="">-- Choose an RFQ --</option>
+                {availableRfqs.map((rfq) => (
+                   <option key={rfq.id || rfq._id} value={rfq.id || rfq._id}>
+                     {rfq.projectName || rfq.rfqNumber || rfq.id || rfq._id}
+                   </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {selectedFabricatorId && (
             <div className="w-full md:w-64">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -316,6 +380,41 @@ const AddInvoice = ({
               </select>
             </div>
           )}
+
+          {selectedProjectId && projectChangeOrders.length > 0 && (
+            <div className="w-full md:w-64">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Select Change Order
+              </label>
+              <select
+                {...register("changeOrderId")}
+                className="w-full p-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all bg-green-50/30"
+              >
+                <option value="">-- Choose a Change Order --</option>
+                {projectChangeOrders.map((co) => (
+                  <option key={co.id || co._id} value={co.id || co._id}>
+                    {co.coNumber || co.title || co.id || co._id}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="w-full md:w-64">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Invoice Type
+            </label>
+            <select
+              {...register("invoiceType")}
+              className="w-full p-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all bg-green-50/30"
+            >
+              <option value="">-- Select Type --</option>
+              <option value="APPROVAL">Approval</option>
+              <option value="FABRICATION">Fabrication</option>
+              <option value="CHANGE_ORDER">Change Order</option>
+            </select>
+          </div>
+
           <div className="w-full md:w-64">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Select Existing Account

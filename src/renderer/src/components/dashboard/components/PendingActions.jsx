@@ -39,7 +39,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
   return (
     <div className="transition-all duration-500 h-full border border-green-200 bg-white p-4 rounded-lg">
       <div className="flex items-center justify-between mb-6 px-1 ">
-        <h2 className="text-base font-black text-black uppercase tracking-[0.15em] flex items-center gap-2 ">
+        <h2 className="text-base font-bold text-black uppercase tracking-[0.15em] flex items-center gap-2 ">
           <ClipboardList className="w-5 h-5 text-green-600" />
           Pending Actions
         </h2>
@@ -71,11 +71,11 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
                 </div>
 
                 <div className="flex flex-col text-left">
-                  <span className="text-xm font-black text-black uppercase tracking-widest leading-none">{action.title}</span>
+                  <span className="text-xm font-bold text-black uppercase tracking-widest leading-none">{action.title}</span>
                 </div>
               </div>
 
-              <span className="text-3xl font-black tracking-tight text-black">
+              <span className="text-3xl font-bold tracking-tight text-black">
                 {action.count}
               </span>
             </div>
