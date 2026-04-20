@@ -2305,7 +2305,7 @@ class Service {
   //Update invoice by invoice Id
   static async UpdateInvoiceById(id, data) {
     try {
-      const response = await api.put(`invoice/update/${id}`, data, {
+      const response = await api.put(`invoice/${id}`, data, {
         headers: {
           'Content-Type': 'application/json'
         }

@@ -18,23 +18,32 @@ const AdminInvoiceGraph = ({ invoices = [], onInvoiceClick = () => {} }) => {
       return true
     })
 
-    // 2. Group by jobName
+    // 2. Group by jobName and type
     const jobMap = {}
     filteredInvoices.forEach((inv) => {
       const jobName = inv.jobName || 'Unknown Job'
-      if (!jobMap[jobName]) {
-        jobMap[jobName] = { name: jobName, raised: 0, paid: 0, pending: 0, invoices: [] }
+      const invoiceType = inv.invoiceType || 'Unknown Type'
+      const groupKey = `${jobName}_${invoiceType}`
+      
+      if (!jobMap[groupKey]) {
+        jobMap[groupKey] = { name: `${jobName} (${invoiceType})`, raised: 0, paid: 0, pending: 0, bidPrice: 0, invoices: [] }
       }
       
-      jobMap[jobName].invoices.push(inv)
+      jobMap[groupKey].invoices.push(inv)
+      
+      // Determine bidPrice
+      const bidPrice = parseFloat(inv.rfq?.bidPrice) || parseFloat(inv.project?.rfq?.bidPrice) || parseFloat(inv.rfqId?.bidPrice) || 0;
+      if (bidPrice > jobMap[groupKey].bidPrice) {
+        jobMap[groupKey].bidPrice = bidPrice;
+      }
       
       const amount = parseFloat(inv.totalInvoiceValue) || 0
-      jobMap[jobName].raised += amount
+      jobMap[groupKey].raised += amount
       
       if (inv.paymentStatus === true || String(inv.paymentStatus).toLowerCase() === 'paid') {
-        jobMap[jobName].paid += amount
+        jobMap[groupKey].paid += amount
       } else {
-        jobMap[jobName].pending += amount
+        jobMap[groupKey].pending += amount
       }
     })
 
@@ -122,26 +131,35 @@ const AdminInvoiceGraph = ({ invoices = [], onInvoiceClick = () => {} }) => {
                 <div className="flex justify-between items-end mb-3">
                   <div className="flex-1 pr-4">
                     <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-widest line-clamp-1 group-hover:text-green-700 transition-colors">{job.name}</h3>
+                    <p className="text-[10px] font-bold text-gray-500 mt-1 line-clamp-1">
+                      {job.invoices.map((inv) => `#${inv.invoiceNumber || 'N/A'}`).join(', ')}
+                    </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Total Raised</span>
-                    <span className="text-lg font-semibold text-gray-900">${job.raised.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Total Raised {job.bidPrice > 0 && '/ Bid Price'}</span>
+                    <span className="text-lg font-semibold text-gray-900">
+                      ${job.raised.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {job.bidPrice > 0 && <span className="text-sm text-gray-500 ml-1">/ ${job.bidPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>}
+                    </span>
                   </div>
                 </div>
                 
-                <div className="flex justify-between mb-1.5">
-                  <span className="text-xs font-bold uppercase tracking-widest text-green-600">Paid: ${job.paid.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                <div className="flex justify-between items-center mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-widest text-green-600">Paid: ${job.paid.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">({job.invoices.length} Invoices)</span>
+                  </div>
                   <span className="text-xs font-bold uppercase tracking-widest text-red-500">Pending: ${job.pending.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                 </div>
 
                 <div className="w-full h-2 rounded-full overflow-hidden flex bg-gray-200 shadow-inner">
                    <div 
                      className="bg-green-500 h-full transition-all duration-1000 ease-out" 
-                     style={{ width: `${job.raised > 0 ? (job.paid / job.raised) * 100 : 0}%` }}
+                     style={{ width: `${(job.raised > 0 || job.bidPrice > 0) ? (job.paid / Math.max(job.raised, job.bidPrice || job.raised)) * 100 : 0}%` }}
                    />
                    <div 
                      className="bg-red-500 h-full transition-all duration-1000 ease-out" 
-                     style={{ width: `${job.raised > 0 ? (job.pending / job.raised) * 100 : 0}%` }}
+                     style={{ width: `${(job.raised > 0 || job.bidPrice > 0) ? (job.pending / Math.max(job.raised, job.bidPrice || job.raised)) * 100 : 0}%` }}
                    />
                 </div>
               </div>
