@@ -50,39 +50,45 @@ const EditDepartment = ({ id, onSuccess, onCancel }) => {
     if (id) fetchDepartment();
   }, [id, reset]);
 
-  // ── Fetch Operation Executives ──
-  const fetchExecutives = async () => {
+  // ── Fetch Staff Members for Selection ──
+  const fetchStaffsData = async () => {
     try {
-      const response = await Service.FetchEmployeeByRole("OPERATION_EXECUTIVE");
-      const employees = response?.data?.employees || [];
-      setStaffs(employees);
+      const roles = ["PROJECT_MANAGER", "DEPT_MANAGER", "OPERATION_EXECUTIVE", "ADMIN", "DEPUTY_MANAGER"];
+      const responses = await Promise.all(roles.map(role => Service.FetchEmployeeByRole(role)));
+      
+      const allEmployees = responses.flatMap(response => response?.data?.employees || []);
+      
+      // Remove duplicates by ID
+      const uniqueEmployees = Array.from(new Map(allEmployees.map(emp => [emp.id, emp])).values());
+      
+      setStaffs(uniqueEmployees);
     } catch (err) {
-      console.error("Failed to fetch operation executives:", err);
+      console.error("Failed to fetch staff members:", err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchExecutives();
+    fetchStaffsData();
   }, []);
 
-  // ── Build options (OPERATION_EXECUTIVE) ──
-  const executiveOptions = useMemo(() => {
+  // ── Build options (Staff Selection) ──
+  const staffOptions = useMemo(() => {
     return staffs.map((user) => ({
-      label: `${user.firstName} ${user.lastName}`.trim(),
+      label: `${user.firstName} ${user.lastName} (${user.role?.replace(/_/g, " ") || ""})`.trim(),
       value: user.id,
     }));
   }, [staffs]);
 
   // ── Watch selected IDs (array) ──
-  const selectedExecutiveIDs = watch("managerIds") || [];
+  const selectedIDs = watch("managerIds") || [];
 
   // ── Toggle selection ──
-  const toggleExecutive = (id) => {
-    const updated = selectedExecutiveIDs.includes(id)
-      ? selectedExecutiveIDs.filter((x) => x !== id)
-      : [...selectedExecutiveIDs, id];
+  const toggleStaffMember = (id) => {
+    const updated = selectedIDs.includes(id)
+      ? selectedIDs.filter((x) => x !== id)
+      : [...selectedIDs, id];
 
     setValue("managerIds", updated, { shouldValidate: true });
   };
@@ -90,7 +96,7 @@ const EditDepartment = ({ id, onSuccess, onCancel }) => {
   // ── Submit handler ──
   const onSubmit = async (data) => {
     try {
-      await Service.EditDepartment(id, {
+      await Service.UpdateDepartmentByID(id, {
         name: data.name,
         managerIds: data.managerIds,
       });
@@ -167,21 +173,21 @@ const EditDepartment = ({ id, onSuccess, onCancel }) => {
                 )}
               </div>
 
-              {/* ── Executive Selection ── */}
+              {/* ── Manager/Executive Selection ── */}
               <div className="space-y-4">
-                <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
-                  Select Operation Executive(s) <span className="text-black/20">(Optional)</span>
+                <label className="block text-md font-semibold text-black uppercase tracking-[0.15em] ml-1">
+                  Select Department Manager(s) / Executive(s)
                 </label>
 
-                {executiveOptions.length === 0 ? (
+                {staffOptions.length === 0 ? (
                   <div className="p-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                     <p className="text-xs text-black/40 font-bold italic">
-                      No operation executives available
+                      No staff members available for selection
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-1 max-h-56 overflow-y-auto border border-gray-100 rounded-2xl p-4 bg-gray-50/50 custom-scrollbar">
-                    {executiveOptions.map((option) => (
+                    {staffOptions.map((option) => (
                       <label
                         key={option.value}
                         className="flex items-center gap-4 p-3 hover:bg-white rounded-xl cursor-pointer transition-all group border border-transparent hover:border-gray-200 hover:shadow-sm"
@@ -189,8 +195,8 @@ const EditDepartment = ({ id, onSuccess, onCancel }) => {
                         <div className="relative flex items-center">
                           <input
                             type="checkbox"
-                            checked={selectedExecutiveIDs.includes(option.value)}
-                            onChange={() => toggleExecutive(option.value)}
+                            checked={selectedIDs.includes(option.value)}
+                            onChange={() => toggleStaffMember(option.value)}
                             className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-gray-300 transition-all checked:bg-black"
                           />
                           <svg
@@ -206,7 +212,7 @@ const EditDepartment = ({ id, onSuccess, onCancel }) => {
                             <polyline points="20 6 9 17 4 12"></polyline>
                           </svg>
                         </div>
-                        <span className="text-xl font-black text-black uppercase tracking-tight">
+                        <span className="text-xl\\lg font-medium text-black uppercase tracking-tight">
                           {option.label}
                         </span>
                       </label>

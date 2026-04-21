@@ -171,6 +171,23 @@ class Service {
     }
   }
 
+  //update department by ID
+  static async UpdateDepartmentByID(id, data) {
+    try {
+      const response = await api.put(`department/update/${id}`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      //alert(error);
+      console.log('Error fetching Employee by ID', error)
+      console.log('Error fetching Employee by ID', error)
+    }
+  }
+
   // Add team
   static async AddTeam(teamDataPayload) {
     try {
