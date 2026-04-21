@@ -145,7 +145,12 @@ const AdminDashboardView = ({
                 (userRole === 'admin' || userRole === 'project_manager_officer') && (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-2">
-                            <AdminInvoiceGraph invoices={adminData.invoices} onInvoiceClick={handleInvoiceClick} />
+                            <AdminInvoiceGraph 
+                                invoices={adminData.invoices} 
+                                projects={adminData.projects} 
+                                rfqs={adminData.allRfqs} 
+                                onInvoiceClick={handleInvoiceClick} 
+                            />
                         </div>
                         <div className="lg:col-span-1">
                             <AdminRFQGraph rfqs={adminData.allRfqs || []} />
