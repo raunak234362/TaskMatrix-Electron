@@ -10,6 +10,7 @@ import CoResponseModal from "./CoResponseModal";
 import COResponseDetailsModal from "./CoResponseDetailsModal";
 
 import RenderFiles from "../common/RenderFiles";
+import UpdateCO from "./UpdateCO";
 
 /* -------------------- Small UI Helper -------------------- */
 const Info = ({ label, value }) => (
@@ -32,6 +33,7 @@ const GetCOByID = ({ id, projectId }) => {
   const [error, setError] = useState(null);
 
   const [showResponseModal, setShowResponseModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedResponse, setSelectedResponse] = useState(null);
 
   const userRole = sessionStorage.getItem("userRole");
@@ -173,20 +175,31 @@ const GetCOByID = ({ id, projectId }) => {
                 COR-{co.changeOrderNumber?.slice(-3) || "—"}
               </h1>
 
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${co.isAproovedByAdmin === true
-                  ? "bg-green-100 text-green-700"
-                  : co.isAproovedByAdmin === false
-                    ? "bg-red-100 text-red-700"
-                    : "bg-yellow-100 text-yellow-700"
-                  }`}
-              >
-                {co.isAproovedByAdmin === true
-                  ? "Approved"
-                  : co.isAproovedByAdmin === false
-                    ? "Rejected"
-                    : "Pending"}
-              </span>
+              <div className="flex items-center gap-2">
+                {userRole !== "CLIENT" && (
+                  <Button
+                    variant="outline"
+                    className="border-green-600 text-green-600 hover:bg-green-50"
+                    onClick={() => setShowUpdateModal(true)}
+                  >
+                    Edit
+                  </Button>
+                )}
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${co.isAproovedByAdmin === true
+                    ? "bg-green-100 text-green-700"
+                    : co.isAproovedByAdmin === false
+                      ? "bg-red-100 text-red-700"
+                      : "bg-yellow-100 text-yellow-700"
+                    }`}
+                >
+                  {co.isAproovedByAdmin === true
+                    ? "Approved"
+                    : co.isAproovedByAdmin === false
+                      ? "Rejected"
+                      : "Pending"}
+                </span>
+              </div>
             </div>
 
             <Info
@@ -278,6 +291,15 @@ const GetCOByID = ({ id, projectId }) => {
         <CoResponseModal
           CoId={id}
           onClose={() => setShowResponseModal(false)}
+          onSuccess={fetchCO}
+        />
+      )}
+
+      {showUpdateModal && (
+        <UpdateCO
+          coData={co}
+          projectId={projectId}
+          onClose={() => setShowUpdateModal(false)}
           onSuccess={fetchCO}
         />
       )}

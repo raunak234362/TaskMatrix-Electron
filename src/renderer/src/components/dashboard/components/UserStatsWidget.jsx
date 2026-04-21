@@ -50,7 +50,7 @@ const UserStatsWidget = ({ stats, loading, userRole }) => {
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
   }
 
-  const isPMO = userRole?.toUpperCase() === 'PROJECT_MANAGER_OFFICER'
+  const isPMO = userRole?.toUpperCase() === 'PROJECT_MANAGER_OFFICER' || userRole?.toUpperCase() === 'ADMIN'
 
   if (loading) {
     return (

@@ -75,6 +75,7 @@ export const navItems = [
             'admin',
             'sales_manager',
             'operation_executive',
+            'project_manager_officer',
             'estimation_head',
             'deputy_manager',
             'client_admin',

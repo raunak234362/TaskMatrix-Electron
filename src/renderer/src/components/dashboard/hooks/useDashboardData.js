@@ -103,8 +103,7 @@ export const useDashboardData = () => {
 
         if (
           userRole === 'project_manager' ||
-          userRole === 'assistant_project_manager' ||
-          userRole === 'project_manager_officer'
+          userRole === 'assistant_project_manager'
         ) {
           // Use specialized PM APIs
           ;[
