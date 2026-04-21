@@ -1061,6 +1061,21 @@ class Service {
     }
   }
 
+//dashboard data Project Manager
+static async DashboardDataProjectManager(id) {
+    try {
+      const response = await api.get(`dashBoardData/departmentManager`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('🚀 API Response: Department Manager Dashboard Data', response.data)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   // Get Project Milestone By ID
   static async GetProjectMilestoneById(id) {
     try {
@@ -3002,6 +3017,8 @@ class Service {
       throw error
     }
   }
+
+  
 
   // Get Admin MEAS analytics trendline
   static async GetAdminMEASAnalyticsTrendline(data) {

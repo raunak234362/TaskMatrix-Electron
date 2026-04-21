@@ -130,6 +130,20 @@ export const useDashboardData = () => {
             Service.GetAllInvoice(),
             Service.FetchAllRFQ()
           ])
+        } else if (userRole === 'dept_manager') {
+          ;[projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes, invoicesRes, allRfqsRes] =
+            await Promise.all([
+              Service.GetAllProjects(),
+              Service.pendingRFIs(),
+              Service.GetPendingSubmittal(),
+              Service.PendingSubmittal(),
+              Service.PendingCo(),
+              Service.RFQRecieved(),
+              Service.DashboardDataProjectManager(),
+              Service.GetMyTask(),
+              Service.GetAllInvoice(),
+              Service.FetchAllRFQ()
+            ])
         } else {
           // Use Standard Admin APIs
           ;[projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes, invoicesRes, allRfqsRes] =
@@ -202,6 +216,24 @@ export const useDashboardData = () => {
           },
           invoices: invoices
         })
+
+        if (userRole === 'dept_manager') {
+          console.log('📊 DEPT_MANAGER Dashboard Data:', {
+            pmDashboard,
+            projectStats: {
+              totalProjects: pmDashboard?.totalProjects ?? projects.length,
+              activeProjects: pmDashboard?.totalActiveProjects,
+              completedProjects: pmDashboard?.totalCompleteProject,
+              onHoldProjects: pmDashboard?.totalOnHoldProject
+            },
+            dashboardStats: {
+              pendingRFI: pmDashboard?.pendingRFI,
+              pendingSubmittals: pmDashboard?.pendingSubmittals,
+              pendingChangeOrders: pmDashboard?.pendingChangeOrders,
+              pendingRFQ: pmDashboard?.pendingRFQ
+            }
+          })
+        }
 
         // Process Personal Tasks for Admin
         const myTasksData = myTasksRes?.data ?? myTasksRes
