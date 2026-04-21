@@ -29,7 +29,7 @@ const CoTablePage = () => {
     );
   }
 
-  const rows = co.CoRefersTo || [];
+  const rows = co.changeOrderTables || co.CoRefersTo || [];
 
   const totalQty = rows.reduce((s, r) => s + (r.QtyNo || 0), 0);
   const totalHours = rows.reduce((s, r) => s + (r.hours || 0), 0);
