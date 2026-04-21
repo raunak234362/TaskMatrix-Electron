@@ -159,7 +159,7 @@ const AdminDashboardView = ({
             <UserStatsWidget stats={userStats} loading={loading} userRole={userRole} />
 
 
-            {userRole === 'project_manager' && (
+            {(userRole === 'project_manager' || userRole === 'dept_manager') && (
                 <div className="bg-white p-6 rounded-3xl border border-gray-200">
                     <h3 className="text-sm font-black text-gray-500 uppercase tracking-widest mb-6">
                         Team & Task Overview
