@@ -35,7 +35,7 @@ export const useDashboardData = () => {
     rfis: [],
     submittals: [],
     pendingSubmittals: [],
-    cos: [],
+    pendingChangeOrders: [],
     rfqs: [],
     pmDashboard: [],
     projectStats: {
@@ -153,7 +153,7 @@ export const useDashboardData = () => {
               Service.PendingSubmittal(),
               Service.PendingCo(),
               Service.RFQRecieved(),
-              Promise.resolve(null),
+              Service.GetDashboardData(),
               Service.GetMyTask(),
               Service.GetAllInvoice(),
               Service.FetchAllRFQ()
@@ -172,7 +172,7 @@ export const useDashboardData = () => {
         const rfis = extractData(rfiRes)
         const submittals = extractData(subRes)
         const pendingSubmittals = extractData(pendingSubRes)
-        const cos = extractData(coRes)
+        const pendingChangeOrders = extractData(coRes)
         const rfqs = extractData(rfqRes)
         const invoices = extractData(invoicesRes)
         const allRfqs = extractData(allRfqsRes)
@@ -188,7 +188,7 @@ export const useDashboardData = () => {
           rfis,
           submittals,
           pendingSubmittals,
-          cos,
+          pendingChangeOrders,
           pmDashboard,
           rfqs,
           allRfqs,
@@ -208,7 +208,7 @@ export const useDashboardData = () => {
             pendingRFI: userRole === 'dept_manager' ? rfis.length : (pmDashboard?.pendingRFI ?? rfis.length ?? 0),
             newRFI: pmDashboard?.newRFI || 0,
             pendingSubmittals: userRole === 'dept_manager' ? pendingSubmittals.length : (pmDashboard?.pendingSubmittals ?? pendingSubmittals.length ?? 0),
-            pendingChangeOrders: userRole === 'dept_manager' ? cos.length : (pmDashboard?.pendingChangeOrders ?? cos.length ?? 0),
+            pendingChangeOrders: userRole === 'dept_manager' ? pendingChangeOrders.length : (pmDashboard?.pendingChangeOrders ?? pendingChangeOrders.length ?? 0),
             newChangeOrders: pmDashboard?.newChangeOrders || 0,
             pendingRFQ: pmDashboard?.pendingRFQ ?? rfqs.length ?? 0,
             newRFQ: pmDashboard?.newRFQ || 0

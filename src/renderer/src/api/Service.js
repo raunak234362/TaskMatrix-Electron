@@ -3382,6 +3382,61 @@ static async DashboardDataProjectManager(id) {
     }
   }
 
+//dashboard data operation executive
+
+  //dashboard route :
+  static async getOperationExecutiveDashboard() {
+    try {
+      const response = await api.get(`dashboardData/operationExecutive`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching operation executive dashboard:', error)
+      throw error
+    }
+  }
+  //pending submittal operation executive
+  static async GetPendingSubmittalOperationExecutive() {
+    try {
+      const response = await api.get(`submittal/pending/operationExecutive`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending submittals:', error)
+      throw error
+    }
+  }
+
+  //pending rfi operation executive
+  static async GetPendingRfiOperationExecutive() {
+    try {
+      const response = await api.get(`rfi/pending/operationExecutive`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending rfi:', error)
+      throw error
+    }
+  }
+
+  //pending change orders operation executive
+  static async GetPendingChangeOrdersOperationExecutive() {
+    try {
+      const response = await api.get(`changeOrder/pending/operationExecutive`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending change orders:', error)
+      throw error
+    }
+  }
+//pending rfq operation executive
+static async GetPendingRfqOperationExecutive() {
+    try {
+      const response = await api.get(`rfq/pending/operationExecutive`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending rfq:', error)
+      throw error
+    }
+  }
+
 }
 
 export default Service
