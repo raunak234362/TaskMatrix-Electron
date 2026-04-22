@@ -24,9 +24,10 @@ const getDownloadUrl = (table, parentId, fileId, versionId) => {
     case 'rfq/response':
       return `${baseURL}/rfq/response/viewFile/${parentId}/${fileId}`
     case 'changeOrders':
+      return `${baseURL}/changeOrder/viewFile/${parentId}/${fileId}`
     case 'changeOrder/response':
     case 'cOResponse':
-      return `${baseURL}/co/viewfile/${parentId}/${fileId}`
+      return `${baseURL}/changeOrder/viewFile/${parentId}/files/${fileId}`
     case 'notes':
       return `${baseURL}/project/notes/viewFile/${parentId}/${fileId}`
     case 'connectionDesignerQuota':

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Service from "../../api/Service";
 
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, ChevronDown, ChevronUp, Clock, History, Loader2 } from "lucide-react";
 import { openFileSecurely } from "../../utils/openFileSecurely";
 
 import DataTable from "../ui/table";
@@ -35,15 +35,41 @@ const GetCOByID = ({ id, projectId }) => {
   const [showResponseModal, setShowResponseModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedResponse, setSelectedResponse] = useState(null);
+  const [viewingVersionId, setViewingVersionId] = useState(null);
 
   const userRole = sessionStorage.getItem("userRole");
   console.log(id);
 
   /* -------------------- SAFE DERIVED VALUES -------------------- */
+  const sortedVersions = useMemo(() => {
+    if (!co?.versions) return [];
+    return [...co.versions].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+  }, [co?.versions]);
+
+  const hasMultipleVersions = sortedVersions.length > 1;
+
+  const currentVersion = useMemo(() => {
+    if (!co) return null;
+    const targetId = viewingVersionId || co.currentVersionId;
+    return co.versions?.find(v => v.id === targetId) || sortedVersions[0] || co;
+  }, [co, sortedVersions, viewingVersionId]);
+
+  const isViewingCurrent = useMemo(() => {
+    return currentVersion?.id === co?.currentVersionId || (!co?.versions?.length);
+  }, [currentVersion, co]);
+
   const encodedCO = useMemo(() => {
-    if (!co) return "";
-    return encodeURIComponent(JSON.stringify(co));
-  }, [co]);
+    if (!co || !currentVersion) return "";
+    // We want to pass the current version's table data and files
+    const dataToEncode = {
+      ...co,
+      ...currentVersion,
+      changeOrderTables: currentVersion.changeOrderTables || co.CoRefersTo || []
+    };
+    return encodeURIComponent(JSON.stringify(dataToEncode));
+  }, [co, currentVersion]);
 
   const responses = useMemo(() => {
     try {
@@ -71,6 +97,9 @@ const GetCOByID = ({ id, projectId }) => {
       console.log(response);
 
       setCO(response.data);
+      if (response.data?.currentVersionId) {
+        setViewingVersionId(response.data.currentVersionId);
+      }
     } catch (err) {
       console.error(err);
       setError("Failed to load Change Order");
@@ -202,6 +231,24 @@ const GetCOByID = ({ id, projectId }) => {
               </div>
             </div>
 
+            {hasMultipleVersions && (
+              <div className="flex flex-wrap gap-2 pb-4 border-b border-gray-200">
+                {sortedVersions.map((v, idx) => (
+                  <button
+                    key={v.id}
+                    onClick={() => setViewingVersionId(v.id)}
+                    className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${viewingVersionId === v.id
+                      ? "bg-green-600 text-white border-green-600 shadow-sm"
+                      : "bg-white text-gray-400 border-gray-200 hover:border-gray-400"
+                      }`}
+                  >
+                    v{v.versionNumber || sortedVersions.length - idx}
+                    {v.id === co.currentVersionId && " (Current)"}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <Info
               label="Sender"
               value={
@@ -224,7 +271,7 @@ const GetCOByID = ({ id, projectId }) => {
             <div>
               <h4 className="font-semibold text-gray-700 mb-1">Remarks</h4>
               <p className="bg-gray-50 p-3 rounded-lg border">
-                {co.remarks || "—"}
+                {currentVersion?.remarks || co.remarks || "—"}
               </p>
             </div>
 
@@ -232,11 +279,11 @@ const GetCOByID = ({ id, projectId }) => {
               <h4 className="font-semibold text-gray-700 mb-1">Description</h4>
               <div
                 className="bg-white p-3 rounded-lg border"
-                dangerouslySetInnerHTML={{ __html: co.description || "—" }}
+                dangerouslySetInnerHTML={{ __html: currentVersion?.description || co.description || "—" }}
               ></div>
             </div>
 
-            {(co.files ?? []).length > 0 && (
+            {isViewingCurrent && (co.files ?? []).length > 0 && (
               <RenderFiles
                 files={co.files}
                 table="changeOrders"
@@ -244,16 +291,24 @@ const GetCOByID = ({ id, projectId }) => {
               />
             )}
 
-            <div className="pt-4 border-t">
-              <button
-                onClick={() =>
-                  window.open(`/#/co-table?coData=${encodedCO}`, "_blank")
-                }
-                className="text-green-600 underline"
-              >
-                View Change Order Reference Table
-              </button>
-            </div>
+            {isViewingCurrent && (
+              <div className="pt-4 border-t">
+                <button
+                  onClick={() =>
+                    window.open(`/#/co-table?coData=${encodedCO}`, "_blank")
+                  }
+                  className="text-green-600 underline font-semibold"
+                >
+                  View Change Order Reference Table
+                </button>
+              </div>
+            )}
+
+            {!isViewingCurrent && (
+              <div className="pt-4 border-t text-sm text-gray-400 italic">
+                Only the current version files and table data are available for viewing.
+              </div>
+            )}
           </div>
 
           {/* ================= RIGHT ================= */}
