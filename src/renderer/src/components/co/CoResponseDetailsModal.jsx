@@ -43,54 +43,54 @@ const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
         </button>
 
         <h2 className="text-xl font-semibold text-green-700">
-          Response Details
-        </h2>
+              Response Details
+            </h2>
 
         <div
           className="bg-gray-100 p-3 rounded border"
           dangerouslySetInnerHTML={{ __html: response.description || "—" }}
         ></div>
 
-        <RenderFiles
-          files={response.files}
-          table="cOResponse"
-          parentId={response.id}
-        />
+                <RenderFiles
+                  files={response.files}
+                  table="cOResponse"
+                  parentId={response.id}
+                />
 
         {/* Reply */}
-        <textarea
-          value={replyMessage}
-          onChange={(e) => setReplyMessage(e.target.value)}
-          rows={3}
+              <textarea
+                value={replyMessage}
+                onChange={(e) => setReplyMessage(e.target.value)}
+                rows={3}
           className="w-full border rounded p-2"
           placeholder="Reply..."
-        />
+              />
 
-        <select
-          value={replyStatus}
-          onChange={(e) => setReplyStatus(e.target.value)}
+                  <select
+                    value={replyStatus}
+                    onChange={(e) => setReplyStatus(e.target.value)}
           className="w-full border rounded p-2"
-        >
-          {STATUS_OPTIONS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+                  >
+                    {STATUS_OPTIONS.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
 
-        <input
-          type="file"
-          multiple
-          onChange={(e) =>
-            setReplyFiles(e.target.files ? Array.from(e.target.files) : [])
-          }
-        />
+                  <input
+                    type="file"
+                    multiple
+                    onChange={(e) =>
+                      setReplyFiles(e.target.files ? Array.from(e.target.files) : [])
+                    }
+                  />
 
         <div className="flex justify-end gap-3">
           <Button onClick={onClose}>Cancel</Button>
           <Button className="bg-green-600 text-white" onClick={handleReply}>
-            Send Reply
-          </Button>
+                Send Reply
+              </Button>
         </div>
       </div>
     </div>

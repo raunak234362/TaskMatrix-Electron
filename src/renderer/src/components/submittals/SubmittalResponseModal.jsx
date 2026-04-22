@@ -20,6 +20,9 @@ const SubmittalResponseModal = ({
   const [files, setFiles] = useState([]);
 
   const handleSubmit = async () => {
+    const userId = sessionStorage.getItem("userId") || "";
+    const userRole = sessionStorage.getItem("userRole") || "";
+
     if (!reason.trim()) {
       toast.error("Reason is required");
       return;
@@ -37,7 +40,9 @@ const SubmittalResponseModal = ({
     formData.append("description", description);
 
     formData.append("submittalsId", submittalId);
-    formData.append("submittalVersionId", submittalVersionId);
+    formData.append("submittalVersionId", submittalVersionId || "");
+    formData.append("userId", userId);
+    formData.append("userRole", userRole);
 
     if (parentResponseId) {
       formData.append("parentResponseId", parentResponseId);
@@ -57,7 +62,7 @@ const SubmittalResponseModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[200]">
       <div className="bg-white p-6 rounded-xl w-full max-w-lg shadow-lg relative space-y-4">
         {/* CLOSE BUTTON */}
         {/* <button onClick={onClose} className="absolute top-3 right-3">

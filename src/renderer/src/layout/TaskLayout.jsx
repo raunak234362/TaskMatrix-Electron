@@ -9,7 +9,7 @@ import AllActiveTask from "../components/task/AllActiveTask";
 const TaskLayout = () => {
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const [activeTab, setActiveTab] = useState(
-    userRole === "connection_designer_engineer" || userRole === "estimation_head" || userRole === "project_manager"
+    userRole === "connection_designer_engineer" || userRole === "estimation_head" || userRole === "project_manager" || userRole === "dept_manager"
       ? "allTask"
       : "activeTask",
   );
@@ -36,7 +36,7 @@ const TaskLayout = () => {
           >
             All Task
           </button>
-          {userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" ? (
+          {userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" || userRole === "dept_manager" ? (
             <button
               onClick={() => setActiveTab("addTask")}
               className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "addTask"

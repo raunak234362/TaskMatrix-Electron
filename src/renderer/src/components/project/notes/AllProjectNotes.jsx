@@ -116,6 +116,7 @@ const AllProjectNotes = ({ projectId, project }) => {
         "estimation_head",
         "connection_designer_engineer",
         "connection_designer_admin",
+        "dept_manager",
     ].includes(userRole);
 
     if (!isAuthorized) {
@@ -137,6 +138,7 @@ const AllProjectNotes = ({ projectId, project }) => {
             "client",
             "connection_designer_engineer",
             "connection_designer_admin",
+            "dept_manager",
         ].includes(userRole);
 
         if (hasFullAccess) return true;

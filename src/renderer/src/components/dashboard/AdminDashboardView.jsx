@@ -49,7 +49,7 @@ const AdminDashboardView = ({
             <div className="relative">
                 <div className="bg-linear-to-br from-gray-50/50 to-white/50 p-6 rounded-3xl border border-gray-200 shadow-sm relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                    <div className={`grid grid-cols-1 sm:grid-cols-2 ${userRole === 'project_manager_officer' ? 'lg:grid-cols-2' : 'lg:grid-cols-4'} gap-4 lg:gap-6 relative z-10`}>
+                    <div className={`grid grid-cols-1 sm:grid-cols-2 ${userRole === 'project_manager_officer' ? 'lg:grid-cols-2' : 'lg:grid-cols-2 2xl:grid-cols-4'} gap-4 lg:gap-6 relative z-10`}>
                         {/* 1. Priority Focus - Hidden for PMO */}
                         {userRole !== 'project_manager_officer' && (
                             <div

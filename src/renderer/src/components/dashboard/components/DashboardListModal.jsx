@@ -17,7 +17,83 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
 
     const headerInfo = getTitle()
 
-    const columns = [
+    const changeOrderColumns = [
+        {
+            accessorKey: 'serialNo',
+            header: 'Serial No',
+            cell: ({ row }) => (
+                <span className="font-semibold text-blue-700 text-xs tracking-wide">
+                    {row.original.serialNo || '—'}
+                </span>
+            )
+        },
+        {
+            accessorKey: 'changeOrderNumber',
+            header: 'CO Number',
+            cell: ({ row }) => (
+                <span className="font-bold text-gray-800">
+                    {row.original.changeOrderNumber || '—'}
+                </span>
+            )
+        },
+        {
+            accessorKey: 'remarks',
+            header: 'Remarks',
+            cell: ({ row }) => (
+                <span className="text-gray-600 font-medium">
+                    {row.original.remarks || '—'}
+                </span>
+            )
+        },
+        {
+            accessorKey: 'project',
+            header: 'Project',
+            cell: ({ row }) => (
+                <span className="text-gray-600 font-medium truncate max-w-[150px] inline-block">
+                    {row.original.project?.name || row.original.project || '—'}
+                </span>
+            )
+        },
+        {
+            accessorKey: 'stage',
+            header: 'Stage',
+            cell: ({ row }) => (
+                <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-100">
+                    {row.original.stage || '—'}
+                </span>
+            )
+        },
+        {
+            accessorKey: 'status',
+            header: 'Status',
+            cell: ({ row }) => {
+                const status = row.original.status || 'PENDING'
+                const colorMap = {
+                    'NOT_REPLIED': 'bg-amber-100 text-amber-700',
+                    'PENDING': 'bg-amber-100 text-amber-700',
+                    'APPROVED': 'bg-green-100 text-green-700',
+                    'REJECTED': 'bg-red-100 text-red-700',
+                    'COMPLETED': 'bg-green-100 text-green-700',
+                }
+                return (
+                    <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${colorMap[status] || 'bg-blue-100 text-blue-700'}`}>
+                        {status.replace(/_/g, ' ')}
+                    </span>
+                )
+            }
+        },
+        {
+            accessorKey: 'createdAt',
+            header: 'Date',
+            cell: ({ row }) => (
+                <span className="text-xs text-gray-500">
+                    {row.original.createdAt ? new Date(row.original.createdAt).toLocaleDateString() : '—'}
+                </span>
+            )
+        }
+    ]
+
+    const defaultColumns = [
         {
             accessorKey: 'subject',
             header: 'Subject / Title',
@@ -32,7 +108,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
             header: 'Project',
             cell: ({ row }) => (
                 <span className="text-gray-600 font-medium">
-                    {row.original.project?.name || 'N/A'}
+                    {row.original.project?.name || row.original.project || 'N/A'}
                 </span>
             )
         },
@@ -72,14 +148,16 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
         }
     ]
 
+    const columns = type === 'CHANGE_ORDERS' ? changeOrderColumns : defaultColumns
+
     return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="bg-white w-full max-w-5xl max-h-[85vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in zoom-in-95 duration-200">
+            <div className="bg-white w-full max-w-7xl max-h-[85vh] rounded-xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in zoom-in-95 duration-200">
 
                 {/* Modal Header */}
                 <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between bg-white">
                     <div className="flex items-center gap-4">
-                        <div className={`p-3 rounded-2xl ${headerInfo.iconBg} ${headerInfo.color}`}>
+                        <div className={`p-3 rounded-lg ${headerInfo.iconBg} ${headerInfo.color}`}>
                             <headerInfo.icon size={24} />
                         </div>
                         <div>

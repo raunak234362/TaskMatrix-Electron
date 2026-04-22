@@ -350,7 +350,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
       {showResponseModal && (
         <SubmittalResponseModal
           submittalId={submittal.id}
-          submittalVersionId={submittal.currentVersionId}
+          submittalVersionId={submittal.currentVersionId || sortedVersions[0]?.id}
           onClose={() => setShowResponseModal(false)}
           onSuccess={() => {
             setShowResponseModal(false);

@@ -63,19 +63,19 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
               }}
               className="flex items-center justify-between p-4 rounded-lg border border-black border-l-5 border-l-[#48b614] bg-white hover:bg-gray-50 transition-all duration-300 cursor-pointer group hover:shadow-md hover:-translate-y-0.5"
             >
-              <div className="flex flex-row items-center gap-4">
+              <div className="flex flex-row items-center gap-3 flex-1 min-w-0">
                 <div
                   className="p-2.5 rounded-none bg-white border border-gray-100 text-black shadow-sm shrink-0 transition-all group-hover:bg-green-600 group-hover:text-white"
                 >
                   <action.icon size={20} strokeWidth={3} />
                 </div>
 
-                <div className="flex flex-col text-left">
-                  <span className="text-xm font-bold text-black uppercase tracking-widest leading-none">{action.title}</span>
+                <div className="flex flex-col text-left min-w-0">
+                  <span className="text-sm font-bold text-black uppercase tracking-wide leading-none truncate">{action.title}</span>
                 </div>
               </div>
 
-              <span className="text-3xl font-bold tracking-tight text-black">
+              <span className="text-3xl font-bold tracking-tight text-black shrink-0 ml-2">
                 {action.count}
               </span>
             </div>

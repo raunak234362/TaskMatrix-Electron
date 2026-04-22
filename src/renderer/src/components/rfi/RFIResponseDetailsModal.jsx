@@ -50,7 +50,7 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-[200]">
       <div className="bg-white w-full max-w-lg p-6 rounded-xl space-y-5 relative">
         {/* Close Button */}
         <button onClick={onClose}

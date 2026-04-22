@@ -388,7 +388,7 @@ const GetProjectById = ({ id, onClose }) => {
                       return false;
                     }
                     if (tab.key === "projectNotes") {
-                      return ["admin", "project_manager", "deputy_manager", "client", "client_admin", "operation_executive","connection_designer_engineer","connection_designer_admin" ].includes(userRole);
+                      return ["admin", "project_manager", "deputy_manager", "client", "client_admin", "operation_executive","connection_designer_engineer","connection_designer_admin", "dept_manager" ].includes(userRole);
                     }
                     return true;
                   }
@@ -694,7 +694,7 @@ const GetProjectById = ({ id, onClose }) => {
                 />
               </div>
               <div className="space-y-3">
-                {!["staff", "project_manager", "department_manager"].includes(userRole) && (
+                {!["staff", "project_manager", "department_manager", "dept_manager"].includes(userRole) && (
                   <InfoRow
                     label="Total Estimated Hours"
                     value={project.estimatedHours || 0}

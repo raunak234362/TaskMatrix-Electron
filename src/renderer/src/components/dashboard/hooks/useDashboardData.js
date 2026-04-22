@@ -133,10 +133,10 @@ export const useDashboardData = () => {
           ;[projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes, invoicesRes, allRfqsRes] =
             await Promise.all([
               Service.GetAllProjects(),
-              Service.pendingRFIs(),
-              Service.GetPendingSubmittal(),
-              Service.PendingSubmittal(),
-              Service.PendingCo(),
+              Service.GetPendingRfiDeptManager(),
+              Service.GetPendingSubmittalDeptManager(),
+              Service.GetPendingSubmittalDeptManager(),
+              Service.GetPendingChangeOrdersDeptManager(),
               Service.RFQRecieved(),
               Service.DashboardDataProjectManager(),
               Service.GetMyTask(),
@@ -205,10 +205,10 @@ export const useDashboardData = () => {
               projects.filter((p) => p.status?.toUpperCase() === 'ON_HOLD').length
           },
           dashboardStats: {
-            pendingRFI: pmDashboard?.pendingRFI ?? rfis.length ?? 0,
+            pendingRFI: userRole === 'dept_manager' ? rfis.length : (pmDashboard?.pendingRFI ?? rfis.length ?? 0),
             newRFI: pmDashboard?.newRFI || 0,
-            pendingSubmittals: pmDashboard?.pendingSubmittals ?? pendingSubmittals.length ?? 0,
-            pendingChangeOrders: pmDashboard?.pendingChangeOrders ?? cos.length ?? 0,
+            pendingSubmittals: userRole === 'dept_manager' ? pendingSubmittals.length : (pmDashboard?.pendingSubmittals ?? pendingSubmittals.length ?? 0),
+            pendingChangeOrders: userRole === 'dept_manager' ? cos.length : (pmDashboard?.pendingChangeOrders ?? cos.length ?? 0),
             newChangeOrders: pmDashboard?.newChangeOrders || 0,
             pendingRFQ: pmDashboard?.pendingRFQ ?? rfqs.length ?? 0,
             newRFQ: pmDashboard?.newRFQ || 0

@@ -50,7 +50,7 @@ const AllTasks = () => {
       try {
         setLoading(true);
         const response =
-          userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" || userRole === "deputy_manager"
+          userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" || userRole === "deputy_manager" || userRole === "dept_manager"
             ? await Service.GetAllTask()
             : await Service.GetMyTask();
 
@@ -78,7 +78,7 @@ const AllTasks = () => {
     try {
       setLoading(true);
       const response =
-        userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" || userRole === "deputy_manager"
+        userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" || userRole === "deputy_manager" || userRole === "dept_manager"
           ? await Service.GetAllTask()
           : await Service.GetMyTask();
 
@@ -435,7 +435,7 @@ const AllTasks = () => {
               className="font-semibold text-gray-700 bg-gray-50"
             />
           </div>
-          {["admin", "project_manager", "operation_executive", "department_manager", "human_resource", "deputy_manager"].includes(userRole) && (
+          {["admin", "project_manager", "operation_executive", "department_manager", "human_resource", "deputy_manager", "dept_manager"].includes(userRole) && (
             <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Assigned User</label>
               <Select

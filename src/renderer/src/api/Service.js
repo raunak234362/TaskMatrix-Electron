@@ -3347,5 +3347,41 @@ static async DashboardDataProjectManager(id) {
       console.error('cannot fetch RFQ file', error)
     }
   }
+  // dashboard routes for the department manager (dept_manager)
+
+  // submittals
+  static async GetPendingSubmittalDeptManager() {
+    try {
+      const response = await api.get(`submittal/pending/departmentManager`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending submittals:', error)
+      throw error
+    }
+  }
+
+  // rfis
+  static async GetPendingRfiDeptManager() {
+    try {
+      const response = await api.get(`rfi/pending/departmentManager`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending rfi:', error)
+      throw error
+    }
+  }
+
+  // changeorders
+  static async GetPendingChangeOrdersDeptManager() {
+    try {
+      const response = await api.get(`changeOrder/pending/departmentManager`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending change orders:', error)
+      throw error
+    }
+  }
+
 }
+
 export default Service
