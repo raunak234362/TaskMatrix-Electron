@@ -65,7 +65,18 @@ const AddCO = ({ project, onSuccess }) => {
       const formData = new FormData();
       formData.append("project", project?.id);
       formData.append("sender", userDetail.id);
-      formData.append("recipients", data.recipients);
+      
+      // Handle multiple recipients
+      if (Array.isArray(data.recipients) && data.recipients.length > 0) {
+        if (data.recipients.length > 1) {
+          data.recipients.forEach((r) => formData.append("multipleRecipients[]", r));
+        } else {
+          formData.append("recipients", data.recipients[0]);
+        }
+      } else if (data.recipients) {
+        formData.append("recipients", data.recipients);
+      }
+
       formData.append("changeOrderNumber", data.changeOrderNumber);
       formData.append("remarks", data.remarks);
       formData.append("reason", data.reason || "");
@@ -103,32 +114,20 @@ const AddCO = ({ project, onSuccess }) => {
 
         {/* Fabricator Contact */}
         <Controller
-          name="recepient_id"
+          name="recipients"
           control={control}
           render={({ field }) => (
             <Select
+              isMulti
               placeholder="Fabricator Contact"
               options={pocOptions}
-              value={pocOptions.find((o) => o.value === field.value) ?? null}
-              onChange={(option) => field.onChange(option?.value || "")}
+              value={pocOptions.filter((o) => (field.value || []).includes(o.value))}
+              onChange={(options) => field.onChange(options ? options.map((o) => o.value) : [])}
             />
           )}
         />
 
-        {/* WBT Recipient */}
-        <Controller
-          name="recipients"
-          control={control}
-          rules={{ required: "Recipient is required" }}
-          render={({ field }) => (
-            <Select
-              placeholder="Select Recipient *"
-              options={recipientOptions}
-              value={recipientOptions.find((o) => o.value === field.value)}
-              onChange={(option) => field.onChange(option?.value)}
-            />
-          )}
-        />
+       
 
         <SectionTitle title="Details" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

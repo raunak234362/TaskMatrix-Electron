@@ -1078,8 +1078,8 @@ class Service {
     }
   }
 
-//dashboard data Project Manager
-static async DashboardDataProjectManager(id) {
+  //dashboard data Project Manager
+  static async DashboardDataProjectManager(id) {
     try {
       const response = await api.get(`dashBoardData/departmentManager`, {
         headers: {
@@ -2014,7 +2014,7 @@ static async DashboardDataProjectManager(id) {
   }
 
   //change order response by id
-  static async UpdateCOTableById(ID,data) {
+  static async UpdateCOTableById(ID, data) {
     try {
       const response = await api.put(`changeOrder/table/${ID}`, data, {
         headers: {
@@ -2492,7 +2492,7 @@ static async DashboardDataProjectManager(id) {
     }
   }
 
-   // Get All Documents by Project ID
+  // Get All Documents by Project ID
   static async GetAllDocumentsByProjectId(projectId) {
     try {
       const response = await api.get(`project/getAllDocuments/${projectId}`, {
@@ -3050,7 +3050,7 @@ static async DashboardDataProjectManager(id) {
     }
   }
 
-  
+
 
   // Get Admin MEAS analytics trendline
   static async GetAdminMEASAnalyticsTrendline(data) {
@@ -3382,7 +3382,7 @@ static async DashboardDataProjectManager(id) {
     }
   }
 
-//dashboard data operation executive
+  //dashboard data operation executive
 
   //dashboard route :
   static async getOperationExecutiveDashboard() {
@@ -3426,8 +3426,53 @@ static async DashboardDataProjectManager(id) {
       throw error
     }
   }
-//pending rfq operation executive
-static async GetPendingRfqOperationExecutive() {
+
+  //pending change order clientSide
+  static async GetPendingChangeOrdersClientSide() {
+    try {
+      const response = await api.get(`changeOrder/pending/clientSide`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending change orders:', error)
+      throw error
+    }
+  }
+
+  //pendig rfi clientSide
+  static async GetPendingRfiClientSide() {
+    try {
+      const response = await api.get(`rfi/pending/clientSide`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending rfi:', error)
+      throw error
+    }
+  }
+
+  //pending submittal clientSide
+  static async GetPendingSubmittalClientSide() {
+    try {
+      const response = await api.get(`submittal/pending/clientSide`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending submittals:', error)
+      throw error
+    }
+  }
+
+  //pending rfq clientSide
+  static async GetPendingRfqClientSide() {
+    try {
+      const response = await api.get(`rfq/pending/clientSide`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending rfq:', error)
+      throw error
+    }
+  }
+
+  //pending rfq operation executive
+  static async GetPendingRfqOperationExecutive() {
     try {
       const response = await api.get(`rfq/pending/operationExecutive`)
       return response.data

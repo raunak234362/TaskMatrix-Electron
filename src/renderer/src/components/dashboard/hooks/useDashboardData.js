@@ -143,16 +143,30 @@ export const useDashboardData = () => {
               Service.GetAllInvoice(),
               Service.FetchAllRFQ()
             ])
+        } else if (userRole === 'operation_executive') {
+          ;[projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes, invoicesRes, allRfqsRes] =
+            await Promise.all([
+              Service.GetAllProjects(),
+              Service.GetPendingRfiOperationExecutive(),
+              Service.GetPendingSubmittalOperationExecutive(),
+              Service.GetPendingSubmittalOperationExecutive(),
+              Service.GetPendingChangeOrdersOperationExecutive(),
+              Service.GetPendingRfqOperationExecutive(),
+              Service.getOperationExecutiveDashboard(),
+              Service.GetMyTask(),
+              Service.GetAllInvoice(),
+              Service.FetchAllRFQ()
+            ])
         } else {
           // Use Standard Admin APIs
           ;[projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes, invoicesRes, allRfqsRes] =
             await Promise.all([
               Service.GetAllProjects(),
-              Service.pendingRFIs(),
-              Service.GetPendingSubmittal(),
-              Service.PendingSubmittal(),
-              Service.PendingCo(),
-              Service.RFQRecieved(),
+              Service.GetPendingRfiClientSide(),
+              Service.GetPendingSubmittalClientSide(),
+              Service.GetPendingSubmittalClientSide(),
+              Service.GetPendingChangeOrdersClientSide(),
+              Service.GetPendingRfqClientSide(),
               Service.GetDashboardData(),
               Service.GetMyTask(),
               Service.GetAllInvoice(),
@@ -205,10 +219,10 @@ export const useDashboardData = () => {
               projects.filter((p) => p.status?.toUpperCase() === 'ON_HOLD').length
           },
           dashboardStats: {
-            pendingRFI: userRole === 'dept_manager' ? rfis.length : (pmDashboard?.pendingRFI ?? rfis.length ?? 0),
+            pendingRFI: (userRole === 'dept_manager' || userRole === 'operation_executive') ? (pmDashboard?.pendingRFI ?? rfis.length ?? 0) : (pmDashboard?.pendingRFI ?? rfis.length ?? 0),
             newRFI: pmDashboard?.newRFI || 0,
-            pendingSubmittals: userRole === 'dept_manager' ? pendingSubmittals.length : (pmDashboard?.pendingSubmittals ?? pendingSubmittals.length ?? 0),
-            pendingChangeOrders: userRole === 'dept_manager' ? pendingChangeOrders.length : (pmDashboard?.pendingChangeOrders ?? pendingChangeOrders.length ?? 0),
+            pendingSubmittals: (userRole === 'dept_manager' || userRole === 'operation_executive') ? (pmDashboard?.pendingSubmittals ?? pendingSubmittals.length ?? 0) : (pmDashboard?.pendingSubmittals ?? pendingSubmittals.length ?? 0),
+            pendingChangeOrders: (userRole === 'dept_manager' || userRole === 'operation_executive') ? (pmDashboard?.pendingChangeOrders ?? pendingChangeOrders.length ?? 0) : (pmDashboard?.pendingChangeOrders ?? pendingChangeOrders.length ?? 0),
             newChangeOrders: pmDashboard?.newChangeOrders || 0,
             pendingRFQ: pmDashboard?.pendingRFQ ?? rfqs.length ?? 0,
             newRFQ: pmDashboard?.newRFQ || 0
@@ -216,8 +230,8 @@ export const useDashboardData = () => {
           invoices: invoices
         })
 
-        if (userRole === 'dept_manager') {
-          console.log('📊 DEPT_MANAGER Dashboard Data:', {
+        if (userRole === 'dept_manager' || userRole === 'operation_executive' || userRole === 'admin') {
+          console.log(`📊 ${userRole.toUpperCase()} Dashboard Data:`, {
             pmDashboard,
             projectStats: {
               totalProjects: pmDashboard?.totalProjects ?? projects.length,
@@ -226,10 +240,10 @@ export const useDashboardData = () => {
               onHoldProjects: pmDashboard?.totalOnHoldProject
             },
             dashboardStats: {
-              pendingRFI: pmDashboard?.pendingRFI,
-              pendingSubmittals: pmDashboard?.pendingSubmittals,
-              pendingChangeOrders: pmDashboard?.pendingChangeOrders,
-              pendingRFQ: pmDashboard?.pendingRFQ
+              pendingRFI: pmDashboard?.pendingRFI ?? rfis.length,
+              pendingSubmittals: pmDashboard?.pendingSubmittals ?? pendingSubmittals.length,
+              pendingChangeOrders: pmDashboard?.pendingChangeOrders ?? pendingChangeOrders.length,
+              pendingRFQ: pmDashboard?.pendingRFQ ?? rfqs.length
             }
           })
         }
