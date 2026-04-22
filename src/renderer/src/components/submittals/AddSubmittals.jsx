@@ -44,6 +44,7 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
   const { register, handleSubmit, control, setValue, reset } = useForm({
     defaultValues: {
       subject: initialData?.subject || "",
+      stage: initialData?.stage || "",
     },
   });
   const [description, setDescription] = useState(
@@ -166,8 +167,12 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
 
   useEffect(() => {
     if (milestones.length > 0) {
-      const firstId = milestones[0].id || milestones[0]._id;
-      if (firstId) setValue("mileStoneId", String(firstId));
+      const firstMilestone = milestones[0];
+      const firstId = firstMilestone.id || firstMilestone._id;
+      if (firstId) {
+        setValue("mileStoneId", String(firstId));
+        setValue("stage", firstMilestone.stage || "");
+      }
     }
   }, [milestones]);
 
@@ -247,16 +252,31 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
               value={
                 mileStoneOptions.find((o) => o.value === field.value) ?? null
               }
-              onChange={(option) => field.onChange(option?.value || null)}
+              onChange={(option) => {
+                field.onChange(option?.value || null);
+                const selectedMilestone = milestones.find(
+                  (m) => String(m.id || m._id) === String(option?.value),
+                );
+                if (selectedMilestone) {
+                  setValue("stage", selectedMilestone.stage || "");
+                }
+              }}
             />
           )}
         />
 
-        <Input
-          label="Subject"
-          placeholder="Enter Submittal Subject"
-          {...register("subject", { required: true })}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Stage"
+            placeholder="Stage"
+            {...register("stage", { required: true })}
+          />
+          <Input
+            label="Subject"
+            placeholder="Enter Submittal Subject"
+            {...register("subject", { required: true })}
+          />
+        </div>
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-gray-700">
