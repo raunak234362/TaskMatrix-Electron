@@ -11,7 +11,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
       subcount: dashboardStats?.newRFQ || 0,
       subtitle: 'New RFQ',
       icon: Search,
-      hidden: userRole?.toUpperCase() === 'PROJECT_MANAGER' || userRole?.toUpperCase() === 'DEPARTMENT_MANAGER'
+      hidden: userRole?.toUpperCase() === 'PROJECT_MANAGER' || userRole?.toUpperCase() === 'DEPT_MANAGER'
     },
     {
       title: 'RFI',
