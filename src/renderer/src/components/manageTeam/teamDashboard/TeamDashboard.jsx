@@ -17,7 +17,7 @@ import TeamStatsCards from "./components/TeamStatsCards";
 import EfficiencyAnalytics from "./components/EfficiencyAnalytics";
 import TeamMembersTable from "./components/TeamMembersTable";
 import TaskDistribution from "./components/TaskDistribution";
-import WorkloadAlerts from "./components/WorkloadAlerts";
+import WorkloadAlerts from "../../dashboard/components/WorkloadAlerts";
 import DailyWorkReportModal from "./components/DailyWorkReportModal";
 import TeamCalendar from "./components/TeamCalendar";
 import { toast } from "react-toastify";

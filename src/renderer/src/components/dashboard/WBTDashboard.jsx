@@ -61,7 +61,8 @@ const WBTDashboard = () => {
     isAdminRole,
     userStats,
     adminData,
-    fetchData
+    fetchData,
+    memberStats
   } = useDashboardData()
 
   // Modal States
@@ -210,6 +211,7 @@ const WBTDashboard = () => {
             projectNotes={projectNotes}
             userRole={userRole}
             currentTask={currentTask}
+            memberStats={memberStats}
             handlers={{
               handleProjectStatClick,
               handleActionClick,

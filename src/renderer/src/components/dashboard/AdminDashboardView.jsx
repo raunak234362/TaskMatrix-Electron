@@ -13,6 +13,7 @@ import InvoiceTrends from './components/InvoiceTrends'
 import LiveTaskTimer from './components/LiveTaskTimer'
 import AdminInvoiceGraph from './components/AdminInvoiceGraph'
 import AdminRFQGraph from './components/AdminRFQGraph'
+import WorkloadAlerts from './components/WorkloadAlerts'
 
 const AdminDashboardView = ({
     adminData,
@@ -22,7 +23,8 @@ const AdminDashboardView = ({
     projectNotes,
     userRole,
     currentTask,
-    handlers
+    handlers,
+    memberStats = []
 }) => {
     const {
         handleProjectStatClick,
@@ -34,9 +36,10 @@ const AdminDashboardView = ({
         handleInvoiceClick
     } = handlers
 
+    const showWorkloadAlerts = ['dept_manager', 'project_manager', 'deputy_manager'].includes(userRole?.toLowerCase())
+
     return (
         <div className="flex flex-col gap-4 lg:gap-6 transition-all duration-300 ease-in-out">
-
             {/* Row 1: Project Overview & Pending Actions */}
             <div className={`grid grid-cols-1 ${userRole === 'project_manager_officer' ? 'lg:grid-cols-1' : 'lg:grid-cols-2'} gap-4 lg:gap-5 transition-all duration-300`}>
                 {userRole !== 'project_manager_officer' && (
@@ -44,6 +47,16 @@ const AdminDashboardView = ({
                 )}
                 <PendingActions dashboardStats={adminData.dashboardStats} onActionClick={handleActionClick} />
             </div>
+
+            {/* Workload Alerts Section */}
+            {showWorkloadAlerts && memberStats.length > 0 && (
+                <div className="mt-4">
+                    <WorkloadAlerts
+                        memberStats={memberStats}
+                        onFilterChange={() => { }} // Navigation or filtering logic can be added here
+                    />
+                </div>
+            )}
 
             {/* Row 2: Priority Header Row */}
             <div className="relative">
@@ -119,8 +132,6 @@ const AdminDashboardView = ({
                             </div>
                         </div>
 
-
-
                         {/* 4. Notes & Updates Trigger */}
                         <div
                             className="bg-green-50/60 p-4 rounded-2xl border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
@@ -145,11 +156,11 @@ const AdminDashboardView = ({
                 (userRole === 'admin' || userRole === 'project_manager_officer') && (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-2">
-                            <AdminInvoiceGraph 
-                                invoices={adminData.invoices} 
-                                projects={adminData.projects} 
-                                rfqs={adminData.allRfqs} 
-                                onInvoiceClick={handleInvoiceClick} 
+                            <AdminInvoiceGraph
+                                invoices={adminData.invoices}
+                                projects={adminData.projects}
+                                rfqs={adminData.allRfqs}
+                                onInvoiceClick={handleInvoiceClick}
                             />
                         </div>
                         <div className="lg:col-span-1">
@@ -164,7 +175,7 @@ const AdminDashboardView = ({
             <UserStatsWidget stats={userStats} loading={loading} userRole={userRole} />
 
 
-            {(userRole === 'project_manager') && (
+            {(userRole === 'project_manager' || userRole === 'dept_manager') && (
                 <div className="bg-white p-6 rounded-3xl border border-gray-200">
                     <h3 className="text-sm font-black text-gray-500 uppercase tracking-widest mb-6">
                         Team & Task Overview

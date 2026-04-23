@@ -94,91 +94,209 @@ export const useDashboardData = () => {
     return { allocated, worked }
   }
 
+  const [memberStats, setMemberStats] = useState([])
+  const [memberLoading, setMemberLoading] = useState(false)
+
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
       if (isAdminRole) {
         // Fetch Admin Data
+        let pmDashboardFromAPI = {}
+        let computedPMStats = {}
         let projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes, invoicesRes, allRfqsRes
 
-        if (
-          userRole === 'project_manager' ||
-          userRole === 'assistant_project_manager'
-        ) {
-          // Use specialized PM APIs
-          ;[
-            projectsRes,
-            rfiRes,
-            subRes,
-            pendingSubRes,
-            coRes,
-            rfqRes,
-            pmDashboardRes,
-            myTasksRes,
-            invoicesRes,
-            allRfqsRes
-          ] = await Promise.all([
-            Service.GetAllProjects(),
-            Service.pendingRFIsForProjectManager(), // Specialized
-            Service.GetPendingSubmittalForPM(), // Specialized
-            Service.PendingSubmittalForProjectManager(), // Specialized
-            Service.PendingCoForProjectManager(), // Specialized
+        const requests = [
+          Service.GetAllProjects(),
+          Service.FetchAllRFQ(),
+          Service.GetAllInvoice(),
+          Service.GetMyTask()
+        ]
+
+        if (userRole === 'project_manager' || userRole === 'assistant_project_manager') {
+          requests.push(
+            Service.pendingRFIsForProjectManager(),
+            Service.GetPendingSubmittalForPM(),
+            Service.PendingSubmittalForProjectManager(),
+            Service.PendingCoForProjectManager(),
             Service.RFQRecieved(),
-            Service.GetPMDashboard(),
-            Service.GetMyTask(),
-            Service.GetAllInvoice(),
-            Service.FetchAllRFQ()
-          ])
+            Service.GetPMDashboard()
+          )
         } else if (userRole === 'dept_manager') {
-          ;[projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes, invoicesRes, allRfqsRes] =
-            await Promise.all([
-              Service.GetAllProjects(),
-              Service.GetPendingRfiDeptManager(),
-              Service.GetPendingSubmittalDeptManager(),
-              Service.GetPendingSubmittalDeptManager(),
-              Service.GetPendingChangeOrdersDeptManager(),
-              Service.RFQRecieved(),
-              Service.DashboardDataProjectManager(),
-              Service.GetMyTask(),
-              Service.GetAllInvoice(),
-              Service.FetchAllRFQ()
-            ])
+          requests.push(
+            Service.GetPendingRfiDeptManager(),
+            Service.GetPendingSubmittalDeptManager(),
+            Service.GetPendingSubmittalDeptManager(),
+            Service.GetPendingChangeOrdersDeptManager(),
+            Service.RFQRecieved(),
+            Service.DashboardDataProjectManager()
+          )
         } else if (userRole === 'operation_executive') {
-          ;[projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes, invoicesRes, allRfqsRes] =
-            await Promise.all([
-              Service.GetAllProjects(),
-              Service.GetPendingRfiOperationExecutive(),
-              Service.GetPendingSubmittalOperationExecutive(),
-              Service.GetPendingSubmittalOperationExecutive(),
-              Service.GetPendingChangeOrdersOperationExecutive(),
-              Service.GetPendingRfqOperationExecutive(),
-              Service.getOperationExecutiveDashboard(),
-              Service.GetMyTask(),
-              Service.GetAllInvoice(),
-              Service.FetchAllRFQ()
-            ])
+          requests.push(
+            Service.GetPendingRfiOperationExecutive(),
+            Service.GetPendingSubmittalOperationExecutive(),
+            Service.GetPendingSubmittalOperationExecutive(),
+            Service.GetPendingChangeOrdersOperationExecutive(),
+            Service.GetPendingRfqOperationExecutive(),
+            Service.getOperationExecutiveDashboard()
+          )
         } else {
-          // Use Standard Admin APIs
-          ;[projectsRes, rfiRes, subRes, pendingSubRes, coRes, rfqRes, pmDashboardRes, myTasksRes, invoicesRes, allRfqsRes] =
-            await Promise.all([
-              Service.GetAllProjects(),
-              Service.GetPendingRfiClientSide(),
-              Service.GetPendingSubmittalClientSide(),
-              Service.GetPendingSubmittalClientSide(),
-              Service.GetPendingChangeOrdersClientSide(),
-              Service.GetPendingRfqClientSide(),
-              Service.GetDashboardData(),
-              Service.GetMyTask(),
-              Service.GetAllInvoice(),
-              Service.FetchAllRFQ()
+          requests.push(
+            Service.GetPendingRfiClientSide(),
+            Service.GetPendingSubmittalClientSide(),
+            Service.GetPendingSubmittalClientSide(),
+            Service.GetPendingChangeOrdersClientSide(),
+            Service.GetPendingRfqClientSide(),
+            Service.GetDashboardData()
+          )
+        }
+
+        const responses = await Promise.all(requests)
+        
+        // Map responses based on the order they were added
+        projectsRes = responses[0]
+        allRfqsRes = responses[1]
+        invoicesRes = responses[2]
+        myTasksRes = responses[3]
+        
+        if (userRole === 'project_manager' || userRole === 'assistant_project_manager' || userRole === 'dept_manager' || userRole === 'operation_executive') {
+          rfiRes = responses[4]
+          subRes = responses[5]
+          pendingSubRes = responses[6]
+          coRes = responses[7]
+          rfqRes = responses[8]
+          pmDashboardRes = responses[9]
+        } else {
+          rfiRes = responses[4]
+          subRes = responses[5]
+          pendingSubRes = responses[6]
+          coRes = responses[7]
+          rfqRes = responses[8]
+          pmDashboardRes = responses[9]
+        }
+
+        // Fetch member workload if needed
+        if (['dept_manager', 'project_manager', 'deputy_manager', 'admin'].includes(userRole)) {
+          setMemberLoading(true)
+          try {
+            const [employeesRes, allTasksRes] = await Promise.all([
+              Service.FetchAllEmployee(),
+              Service.GetAllTask()
             ])
+
+            // Robust data extraction for nested structures
+            const employees = employeesRes?.data?.employees || employeesRes?.employees || employeesRes?.data || employeesRes || []
+            const allGlobalTasks = allTasksRes?.data?.tasks || allTasksRes?.tasks || allTasksRes?.data || allTasksRes || []
+            
+            // Filter employees based on role (exclude admins and management roles from workload alerts)
+            const excludedRoles = ['admin', 'operation_executive', 'project_manager_officer', 'dept_manager', 'deputy_manager']
+            let filteredEmployees = Array.isArray(employees) 
+              ? employees.filter(e => !e.is_disabled && !excludedRoles.includes((e.role || '').toLowerCase())) 
+              : []
+            
+            if (userRole === 'project_manager') {
+              const myTeamName = (user?.team?.name || sessionStorage.getItem('teamName') || '').toLowerCase().trim()
+              if (myTeamName) {
+                filteredEmployees = filteredEmployees.filter(e => 
+                  (e.team?.name || '').toLowerCase().trim() === myTeamName
+                )
+              }
+            } else if (userRole === 'dept_manager') {
+              const myDeptName = (user?.department?.name || sessionStorage.getItem('deptName') || '').toLowerCase().trim()
+              if (myDeptName) {
+                filteredEmployees = filteredEmployees.filter(e => 
+                  (e.department?.name || '').toLowerCase().trim() === myDeptName
+                )
+              }
+            }
+            // deputy_manager and admin see all
+
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+            const tomorrow = new Date(today)
+            tomorrow.setDate(today.getDate() + 1)
+
+            const stats = filteredEmployees.map(emp => {
+              const empTasks = allGlobalTasks.filter(t => {
+                const tUserId = t.user_id || t.user?.id || t.userId || t.assignedToId
+                if (String(tUserId) !== String(emp.id)) return false
+                
+                // Filter for today
+                const tDateStr = t.start_date || t.startDate || t.date
+                if (!tDateStr) return false
+                const tDate = new Date(tDateStr)
+                return tDate >= today && tDate < tomorrow
+              })
+
+              const assignedHours = empTasks.reduce((sum, task) => {
+                const { allocated } = calculateHours(task)
+                return sum + allocated
+              }, 0)
+
+              return {
+                id: emp.id,
+                name: `${emp.firstName || ''} ${emp.lastName || ''}`.trim() || emp.username || 'Unknown',
+                assignedHours
+              }
+            })
+
+            setMemberStats(stats)
+
+            // Compute aggregate team stats for the dashboard overview
+            if (['dept_manager', 'project_manager'].includes(userRole)) {
+              const teamMemberIds = new Set(filteredEmployees.map(e => String(e.id)))
+              const teamTasks = allGlobalTasks.filter(t => {
+                const tUserId = t.user_id || t.user?.id || t.userId || t.assignedToId
+                return teamMemberIds.has(String(tUserId))
+              })
+
+              const completed = teamTasks.filter(t => 
+                ['COMPLETED', 'VALIDATE_COMPLETED'].includes((t.status || '').toUpperCase())
+              ).length
+              
+              const overdue = teamTasks.filter(t => {
+                if (['COMPLETED', 'VALIDATE_COMPLETED'].includes((t.status || '').toUpperCase())) return false
+                const endDate = new Date(t.end_date || t.endDate || t.deadline)
+                return endDate < today
+              }).length
+
+              const total = teamTasks.length
+              const pending = total - completed
+              const rate = total > 0 ? Math.round((completed / total) * 100) : 0
+
+              computedPMStats = {
+                completedTasks: completed,
+                overdueTasks: overdue,
+                pendingTasks: pending,
+                totalTasks: total,
+                taskCompletionRate: `${rate}%`,
+                totalTeamMembers: filteredEmployees.length
+              }
+            }
+          } catch (err) {
+            console.error('Error fetching member workload:', err)
+          } finally {
+            setMemberLoading(false)
+          }
         }
 
         // Robust data extraction helper
         const extractData = (res) => {
           if (!res) return []
           if (Array.isArray(res)) return res
-          if (res?.data && Array.isArray(res.data)) return res.data
+          if (res?.data) {
+            if (Array.isArray(res.data)) return res.data
+            // Handle { data: { someKey: [...] } }
+            const keys = Object.keys(res.data)
+            for (const key of keys) {
+              if (Array.isArray(res.data[key])) return res.data[key]
+            }
+          }
+          // Handle { someKey: [...] }
+          const keys = Object.keys(res)
+          for (const key of keys) {
+            if (Array.isArray(res[key])) return res[key]
+          }
           return []
         }
 
@@ -191,11 +309,17 @@ export const useDashboardData = () => {
         const invoices = extractData(invoicesRes)
         const allRfqs = extractData(allRfqsRes)
 
-        // Merge pmDashboard root stats (like completedTasks) with nested .data stats
-        const pmDashboard =
-          pmDashboardRes?.data && typeof pmDashboardRes.data === 'object'
-            ? { ...pmDashboardRes, ...pmDashboardRes.data }
-            : pmDashboardRes || {}
+        // Merge pmDashboard root stats with nested .data stats
+        const pmDataObj = pmDashboardRes?.data || pmDashboardRes || {}
+        pmDashboardFromAPI = {
+          ...(typeof pmDataObj === 'object' ? pmDataObj : {}),
+          ...(typeof pmDataObj.data === 'object' ? pmDataObj.data : {})
+        }
+
+        const pmDashboard = {
+          ...pmDashboardFromAPI,
+          ...computedPMStats
+        }
 
         setAdminData({
           projects,
@@ -335,7 +459,7 @@ export const useDashboardData = () => {
     } finally {
       setLoading(false)
     }
-  }, [isAdminRole])
+  }, [isAdminRole, user?.team?.name, user?.department?.name, userRole])
 
   useEffect(() => {
     fetchData()
@@ -350,6 +474,8 @@ export const useDashboardData = () => {
     isAdminRole,
     userStats,
     adminData,
-    fetchData
+    fetchData,
+    memberStats,
+    memberLoading
   }
 }

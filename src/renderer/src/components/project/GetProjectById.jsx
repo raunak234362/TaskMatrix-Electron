@@ -133,8 +133,16 @@ const GetProjectById = ({ id, onClose }) => {
       completedStr: formatSecondsToHHMM(totalSeconds),
       overrunStr: formatSecondsToHHMM(Math.max(0, totalSeconds - assigned * 3600)),
       totalSeconds,
-      ifa: { str: formatSecondsToHHMM(stageStats.ifa.secs), count: stageStats.ifa.count },
-      ifc: { str: formatSecondsToHHMM(stageStats.ifc.secs), count: stageStats.ifc.count },
+      ifa: { 
+        str: formatSecondsToHHMM(stageStats.ifa.secs), 
+        count: stageStats.ifa.count,
+        hours: stageStats.ifa.secs / 3600
+      },
+      ifc: { 
+        str: formatSecondsToHHMM(stageStats.ifc.secs), 
+        count: stageStats.ifc.count,
+        hours: stageStats.ifc.secs / 3600
+      },
       co: { str: formatSecondsToHHMM(stageStats.co.secs), count: stageStats.co.count }
     };
   }, [project, projectTasks]);
@@ -423,7 +431,7 @@ const GetProjectById = ({ id, onClose }) => {
                     <Clock size={20} strokeWidth={3} />
                     <span className="text-sm font-black uppercase tracking-widest opacity-60">Total Hours Estimated</span>
                   </div>
-                  <h3 className="text-4xl text-black tracking-tighter">{(projectStats.assigned * 0.8).toFixed(2)}h</h3>
+                  <h3 className="text-4xl text-black tracking-tighter">{projectStats.assigned.toFixed(2)}h</h3>
                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                 </div>
                 <div className="flex flex-row items-center justify-between bg-white p-6 rounded-2xl border border-black shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
@@ -449,7 +457,14 @@ const GetProjectById = ({ id, onClose }) => {
                       <CheckCircle2 size={20} strokeWidth={3} />
                       <span className="text-sm font-black uppercase tracking-widest opacity-60">Approval Hours Consumed</span>
                     </div>
-                    <h3 className="text-4xl text-black tracking-tighter">{projectStats.ifa.str}h</h3>
+                    <div className="flex flex-col items-end">
+                      <h3 className="text-4xl text-black tracking-tighter">{projectStats.ifa.str}h</h3>
+                      {projectStats.assigned > 0 && (
+                        <span className="text-xs font-black text-gray-500 mt-1">
+                          {((projectStats.ifa.hours / (projectStats.assigned * 0.8)) * 100).toFixed(1)}% of Estimate
+                        </span>
+                      )}
+                    </div>
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gray-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                   </div>
                 )}
@@ -460,7 +475,14 @@ const GetProjectById = ({ id, onClose }) => {
                       <CheckCircle2 size={20} strokeWidth={3} />
                       <span className="text-sm font-black uppercase tracking-widest opacity-60">Fabrication Hours Consumed</span>
                     </div>
-                    <h3 className="text-4xl text-black tracking-tighter">{projectStats.ifc.str}h</h3>
+                    <div className="flex flex-col items-end">
+                      <h3 className="text-4xl text-black tracking-tighter">{projectStats.ifc.str}h</h3>
+                      {projectStats.assigned > 0 && (
+                        <span className="text-xs font-black text-gray-500 mt-1">
+                          {((projectStats.ifc.hours / (projectStats.assigned * 0.2)) * 100).toFixed(1)}% of Estimate
+                        </span>
+                      )}
+                    </div>
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
                   </div>
                 )}
