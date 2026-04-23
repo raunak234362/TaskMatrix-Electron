@@ -57,11 +57,12 @@ const RFIResponseModal = ({
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40">
       <div className="bg-white w-full max-w-lg p-6 rounded-xl shadow-lg relative">
-        <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
-          Close
-        </button>
-
-        <h2 className="text-xl font-semibold text-green-700">Add Response</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-green-700">Add Response</h2>
+          <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
+            Close
+          </button>
+        </div>
 
         <form className="space-y-4 mt-4" onSubmit={handleSubmit(onSubmit)}>
           {/* Message */}

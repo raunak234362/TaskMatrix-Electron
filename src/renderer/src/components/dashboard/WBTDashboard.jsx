@@ -284,7 +284,7 @@ const WBTDashboard = () => {
                 <div className="sticky top-0 right-0 p-3 flex justify-end z-20 bg-white/80 backdrop-blur-sm">
                   <button
                     onClick={() => setShowSubmittalsPopup(false)}
-                    className="px-4 py-1.5 bg-red-100 border border-red-600 text-black font-bold rounded-xl transition-all hover:bg-red-200 active:scale-95 uppercase text-[10px] tracking-widest shadow-sm"
+                    className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                   >
                     Close
                   </button>
@@ -312,7 +312,7 @@ const WBTDashboard = () => {
                 <div className="sticky top-0 right-0 p-3 flex justify-end z-20 bg-white/80 backdrop-blur-sm">
                   <button
                     onClick={() => setShowDeadlinesPopup(false)}
-                    className="px-4 py-1.5 bg-red-100 border border-red-600 text-black font-bold rounded-xl transition-all hover:bg-red-200 active:scale-95 uppercase text-[10px] tracking-widest shadow-sm"
+                    className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                   >
                     Close
                   </button>
@@ -333,7 +333,7 @@ const WBTDashboard = () => {
                 <div className="sticky top-0 right-0 p-3 flex justify-end z-20 bg-white/80 backdrop-blur-sm">
                   <button
                     onClick={() => setShowNotesPopup(false)}
-                    className="px-4 py-1.5 bg-red-100 border border-red-600 text-black font-bold rounded-xl transition-all hover:bg-red-200 active:scale-95 uppercase text-[10px] tracking-widest shadow-sm"
+                    className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                   >
                     Close
                   </button>
@@ -368,7 +368,7 @@ const WBTDashboard = () => {
                 </h3>
                 <button
                   onClick={() => setDetailModal({ isOpen: false, type: null, id: null })}
-                  className="px-4 py-2 bg-red-100 border border-red-600 text-black font-bold rounded-xl transition-all hover:bg-red-200 active:scale-95 uppercase text-xs tracking-widest"
+                  className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                 >
                   Close
                 </button>

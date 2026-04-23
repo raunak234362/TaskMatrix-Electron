@@ -193,7 +193,7 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
         const isOverrun = worked > est && est > 0;
         return (
           <span
-            className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-sm ${isOverrun ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-400"
+            className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-sm ${isOverrun ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-700"
               }`}
           >
             {isOverrun ? "OVERRUN" : "NORMAL"}

@@ -198,7 +198,7 @@ const GetCOByID = ({ id, projectId }) => {
       <div className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* ================= LEFT DETAILS ================= */}
-          <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-5">
+          <div className="bg-gray-100 p-6 rounded-lg shadow-none border border-gray-100 space-y-5">
             <div className="flex justify-between items-center">
               <h1 className="text-2xl text-black font-semibold">
                 COR-{co.changeOrderNumber?.slice(-3) || "—"}
@@ -208,7 +208,7 @@ const GetCOByID = ({ id, projectId }) => {
                 {userRole !== "CLIENT" && (
                   <Button
                     variant="outline"
-                    className="border-green-600 text-green-600 hover:bg-green-50"
+                    className="border-green-600 px-4 bg-green-50 text-black rounded-lg "
                     onClick={() => setShowUpdateModal(true)}
                   >
                     Edit
@@ -223,7 +223,7 @@ const GetCOByID = ({ id, projectId }) => {
                     }`}
                 >
                   {co.isAproovedByAdmin === true
-                    ? "Approved"
+                    ? "Approved By Admin"
                     : co.isAproovedByAdmin === false
                       ? "Rejected"
                       : "Pending"}
@@ -292,12 +292,12 @@ const GetCOByID = ({ id, projectId }) => {
             )}
 
             {isViewingCurrent && (
-              <div className="pt-4 border-t">
+              <div className="pt-2">
                 <button
                   onClick={() =>
                     window.open(`/#/co-table?coData=${encodedCO}`, "_blank")
                   }
-                  className="text-green-600 underline font-semibold"
+                  className="px-6 py-2 bg-green-50 text-green-700 border border-green-600 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-green-100 transition-all shadow-sm"
                 >
                   View Change Order Reference Table
                 </button>

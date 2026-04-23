@@ -50,7 +50,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
             header: 'Project',
             cell: ({ row }) => (
                 <span className="text-gray-600 font-medium truncate max-w-[150px] inline-block">
-                    {row.original.project?.name || row.original.project || '—'}
+                    {row.original.Project?.name || row.original.project?.name || row.original.project || '—'}
                 </span>
             )
         },
@@ -108,7 +108,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
             header: 'Project',
             cell: ({ row }) => (
                 <span className="text-gray-600 font-medium">
-                    {row.original.project?.name || row.original.project || 'N/A'}
+                    {row.original.Project?.name || row.original.project?.name || row.original.project || 'N/A'}
                 </span>
             )
         },
@@ -116,8 +116,10 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
             accessorKey: 'status',
             header: 'Status',
             cell: ({ row }) => {
+                const rawStatus = row.original.status
+
                 if (type === 'PENDING_SUBMITTALS') {
-                    const isSubmitted = row.original.status === true
+                    const isSubmitted = rawStatus === true
                     return (
                         <span className={`text-[10px] uppercase font-bold tracking-wider`}>
                             {isSubmitted ? 'Pending' : 'Submitted to EOR'}
@@ -125,7 +127,16 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
                     )
                 }
 
-                const status = row.original.status || 'PENDING'
+                if (type === 'PENDING_RFI') {
+                    const isAnswered = rawStatus === true
+                    return (
+                        <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${isAnswered ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                            {isAnswered ? 'Answered' : 'Pending'}
+                        </span>
+                    )
+                }
+
+                const status = rawStatus || 'PENDING'
                 return (
                     <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
                         status === 'COMPLETED' ? 'bg-green-100 text-green-700' :

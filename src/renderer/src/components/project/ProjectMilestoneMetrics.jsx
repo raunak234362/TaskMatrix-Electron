@@ -191,28 +191,30 @@ const ProjectMilestoneMetrics = ({
                         </div>
                         <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
                           <span>Completion Percentage :</span>
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-md uppercase font-bold tracking-widest ${ms.status === "APPROVED" ||
-                              ms.status === "COMPLETED"
-                              ? " text-green-700"
-                              : " text-green-900"
-                              }`}
-                          >
-                            {ms.progress}%
-                          </span>
-                          {userRole !== "client" &&
-                            userRole !== "client_admin" && userRole !== "connection_designer_admin" && userRole !== "connection_designer_engineer" && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedMilestoneId(ms.id || ms._id);
-                                  setIsUpdateModalOpen(true);
-                                }}
-                                className="ml-2 text-gray-400 hover:text-blue-600"
-                              >
-                                <Pencil size={14} />
-                              </button>
-                            )}
+                          <div className="flex items-center">
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-md uppercase font-bold tracking-widest ${ms.status === "APPROVED" ||
+                                ms.status === "COMPLETED"
+                                ? " text-green-700"
+                                : " text-green-900"
+                                }`}
+                            >
+                              {ms.progress}%
+                            </span>
+                            {userRole !== "client" &&
+                              userRole !== "client_admin" && userRole !== "connection_designer_admin" && userRole !== "connection_designer_engineer" && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedMilestoneId(ms.id || ms._id);
+                                    setIsUpdateModalOpen(true);
+                                  }}
+                                  className="ml-2 text-gray-400 hover:text-blue-600"
+                                >
+                                  <Pencil size={14} />
+                                </button>
+                              )}
+                          </div>
                         </div>
                       </div>
                       <div className="w-full bg-red-500 rounded-full h-2 relative overflow-hidden">

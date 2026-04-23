@@ -96,11 +96,11 @@ const AllRFI = ({ rfiData = [] }) => {
       cell: ({ row }) => (
         <span
           className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border border-black ${row.original.status === true
-            ? "bg-orange-100 text-black shadow-sm"
-            : "bg-green-100 text-black shadow-sm"
+            ? "bg-green-100 text-black shadow-sm"
+            : "bg-orange-100 text-black shadow-sm"
             }`}
         >
-          {row.original.status ? "PENDING" : "RESPONDED"}
+          {row.original.status ? "ANSWERED" : "PENDING"}
         </span>
       ),
     },
