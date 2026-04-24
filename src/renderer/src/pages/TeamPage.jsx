@@ -65,15 +65,17 @@ const TeamPage = () => {
             Team Dashboard
           </button>
 
-          <button
-            onClick={() => setActiveTab("manageEmployee")}
-            className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm border-2 ${activeTab === "manageEmployee"
-              ? "bg-green-100 text-black border-black shadow-[2px_2px_0px_#000]"
-              : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
-              }`}
-          >
-            Manage Employee
-          </button>
+          {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
+            <button
+              onClick={() => setActiveTab("manageEmployee")}
+              className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm border-2 ${activeTab === "manageEmployee"
+                ? "bg-green-100 text-black border-black shadow-[2px_2px_0px_#000]"
+                : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
+                }`}
+            >
+              Manage Employee
+            </button>
+          )}
 
           {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
             <button
@@ -87,19 +89,17 @@ const TeamPage = () => {
             </button>
           )}
 
-          {(userRole === "ADMIN" ||
-            userRole === "DEPT_MANAGER" ||
-            userRole === "HUMAN_RESOURCE") && (
-              <button
-                onClick={() => setActiveTab("manageTeam")}
-                className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm border-2 ${activeTab === "manageTeam"
-                  ? "bg-green-100 text-black border-black shadow-[2px_2px_0px_#000]"
-                  : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
-                  }`}
-              >
-                Manage Team
-              </button>
-            )}
+          {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
+            <button
+              onClick={() => setActiveTab("manageTeam")}
+              className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm border-2 ${activeTab === "manageTeam"
+                ? "bg-green-100 text-black border-black shadow-[2px_2px_0px_#000]"
+                : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
+                }`}
+            >
+              Manage Team
+            </button>
+          )}
         </div>
 
         {/* ---------- TAB CONTENT ---------- */}
