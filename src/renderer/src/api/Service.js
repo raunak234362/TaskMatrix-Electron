@@ -3382,6 +3382,17 @@ class Service {
     }
   }
 
+  //pending CO
+  static async GetPendingChangeOrders() {
+    try {
+      const response = await api.get(`changeOrder/pendingCOs`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending change orders:', error)
+      throw error
+    }
+  }
+
   //dashboard data operation executive
 
   //dashboard route :
@@ -3456,6 +3467,17 @@ class Service {
       return response.data
     } catch (error) {
       console.error('Error fetching pending submittals:', error)
+      throw error
+    }
+  }
+
+  //pending rfq
+  static async GetPendingRfq() {
+    try {
+      const response = await api.get(`rfq/pendingRFQs`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending rfq:', error)
       throw error
     }
   }

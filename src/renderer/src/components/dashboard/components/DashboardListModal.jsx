@@ -1,8 +1,13 @@
+import { useState } from 'react'
 import { X, FileText, ClipboardList, RefreshCw, Search } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import DataTable from '../../ui/table'
 
-const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) => {
+const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSide: [] }, onItemSelect }) => {
+    const [activeTab, setActiveTab] = useState('wbt')
+    const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
+    const showTabs = ['admin', 'deputy_manager', 'operation_executive', 'dept_manager', 'project_manager'].includes(userRole)
+
     if (!isOpen) return null
 
     const getTitle = () => {
@@ -16,6 +21,11 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
     }
 
     const headerInfo = getTitle()
+
+    // Handle both old array format and new object format
+    const isSegmented = showTabs && !Array.isArray(data) && (data.wbt || data.clientSide)
+    const effectiveData = isSegmented ? (data[activeTab] || []) : (data || [])
+    const totalCount = isSegmented ? (data.wbt.length + data.clientSide.length) : data.length
 
     const changeOrderColumns = [
         {
@@ -119,7 +129,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
                 const rawStatus = row.original.status
 
                 if (type === 'PENDING_SUBMITTALS') {
-                    const isSubmitted = rawStatus === true
+                    const isSubmitted = rawStatus === false
                     return (
                         <span className={`text-[10px] uppercase font-bold tracking-wider`}>
                             {isSubmitted ? 'Pending' : 'Submitted to EOR'}
@@ -128,7 +138,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
                 }
 
                 if (type === 'PENDING_RFI') {
-                    const isAnswered = rawStatus === true
+                    const isAnswered = rawStatus === false
                     return (
                         <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${isAnswered ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
                             {isAnswered ? 'Answered' : 'Pending'}
@@ -172,11 +182,11 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
                             <headerInfo.icon size={24} />
                         </div>
                         <div>
-                            <h3 className="text-2xl  text-gray-800 tracking-tight">
+                            <h3 className="text-2xl font-black text-gray-800 tracking-tight">
                                 {headerInfo.title}
                             </h3>
                             <p className="text-sm font-medium text-gray-500">
-                                You have <span className="text-gray-800 ">{data.length}</span> items requiring attention
+                                Total <span className="text-gray-800 font-bold">{totalCount}</span> items requiring attention
                             </p>
                         </div>
                     </div>
@@ -190,22 +200,41 @@ const DashboardListModal = ({ isOpen, onClose, type, data = [], onItemSelect }) 
                     </div>
                 </div>
 
+                {/* Tabs */}
+                {isSegmented && (
+                    <div className="flex px-8 pt-4 bg-white border-b border-gray-50">
+                        <button
+                            onClick={() => setActiveTab('wbt')}
+                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${activeTab === 'wbt'
+                                ? 'border-green-600 text-green-700'
+                                : 'border-transparent text-gray-400 hover:text-gray-600'
+                                }`}
+                        >
+                            WBT Side ({data.wbt.length})
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('clientSide')}
+                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${activeTab === 'clientSide'
+                                ? 'border-green-600 text-green-700'
+                                : 'border-transparent text-gray-400 hover:text-gray-600'
+                                }`}
+                        >
+                            Client Side ({data.clientSide.length})
+                        </button>
+                    </div>
+                )}
+
                 {/* Modal Content */}
-                <div className="flex-1 overflow-y-auto h-[80vh] p-8 bg-[#fcfcfc]">
+                <div className="flex-1 overflow-y-auto min-h-[50vh] p-8 bg-[#fcfcfc]">
                     <DataTable
                         columns={columns}
-                        data={data}
+                        data={effectiveData}
                         searchPlaceholder={`Filter ${headerInfo.title.toLowerCase()}...`}
-
                         onRowClick={(row) => {
-                            // Pass the full row data to the parent
                             if (onItemSelect) onItemSelect(row);
                         }}
                     />
                 </div>
-
-                {/* Modal Footer */}
-                
             </div>
         </div>,
         document.body

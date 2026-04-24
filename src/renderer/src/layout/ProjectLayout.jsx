@@ -23,8 +23,9 @@ const ProjectLayout = () => {
   const stats = {
     total: projects.length,
     active: projects.filter((p) => p.status === "ACTIVE").length,
-    completed: projects.filter((p) => p.status === "COMPLETED").length,
-    onHold: projects.filter((p) => p.status === "ON_HOLD").length,
+    completed: projects.filter((p) => p.status === "COMPLETE").length,
+    onHold: projects.filter((p) => p.status === "ONHOLD").length,
+    inActive: projects.filter((p) => p.status === "INACTIVE").length,
   };
   // ✅ Fetch Departments only when data is null or empty
   const fetchDepartment = async () => {
@@ -92,6 +93,14 @@ const ProjectLayout = () => {
               </span>
               <span className="text-sm md:text-xl animate-in  text-orange-700">
                 {stats.onHold}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 px-2 md:px-3 py-1 bg-orange-50 rounded-lg border border-orange-100">
+              <span className="text-sm md:text-xl animate-in font-medium text-orange-600 uppercase tracking-wider">
+                In-Active -
+              </span>
+              <span className="text-sm md:text-xl animate-in  text-orange-700">
+                {stats.inActive}
               </span>
             </div>
           </div>

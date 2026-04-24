@@ -153,7 +153,7 @@ const AdminDashboardView = ({
                 </div>
             </div>
             {
-                (userRole === 'admin' || userRole === 'project_manager_officer') && (
+                (userRole === 'admin' || userRole === 'project_manager_officer' || userRole === 'deputy_manager') && (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-2">
                             <AdminInvoiceGraph
@@ -209,7 +209,7 @@ const AdminDashboardView = ({
                 </div>
             )}
 
-            {(userRole === 'project_manager_officer' || userRole === 'admin') && (
+            {(userRole === 'project_manager_officer' || userRole === 'admin' || userRole === 'deputy_manager') && (
                 <div className="grid grid-cols-1 gap-6">
                     <InvoiceTrends invoices={adminData.invoices} />
                 </div>

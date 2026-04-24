@@ -23,7 +23,7 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
   console.log(response);
 
   // 🔒 Only Admin/Team can reply (not client)
-  const canReply = ["ADMIN", "STAFF", "MANAGER", "OPERATION_EXECUTIVE"].includes(userRole);
+  const canReply = ["ADMIN", "PROJECT_MANAGER", "OPERATION_EXECUTIVE", "DEPT_MANAGER", "DEPUTY_MANAGER"].includes(userRole);
 
   const handleReplySubmit = async () => {
     if (!replyMessage.trim()) return;
@@ -51,62 +51,64 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-[200]">
-      <div className="bg-white w-full max-w-lg p-6 rounded-xl space-y-5 relative">
+      <div className="bg-white w-full max-w-4xl p-6 rounded-xl space-y-5 relative">
         {/* Close Button */}
-        <button onClick={onClose}
-          className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
-          Close
-        </button>
-
-        <h2 className="text-xl  text-green-700">Response Details</h2>
-
-        {/* Main message */}
-        <div
-          className="bg-gray-100 p-3 rounded-md border prose prose-sm max-w-none"
-          dangerouslySetInnerHTML={{ __html: response.reason }}
-        />
-
-        <RenderFiles
-          files={response.files}
-          table="rFIResponse"
-          parentId={response.id}
-        />
-
-        {/* Timestamp */}
-        <div className="flex gap-2 items-center text-gray-700 text-xs">
-          <CalendarDays size={14} />
-          {new Date(response.createdAt).toLocaleString()}
+        <div className="flex justify-between">
+          <h2 className="text-xl  text-green-700">Response Details</h2>
+          <button onClick={onClose}
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
+            Close
+          </button>
         </div>
 
-        {/* Child Responses (Thread) */}
-        {response.childResponses?.length > 0 && (
-          <div className="mt-4 space-y-4 border-t pt-4 max-h-60 overflow-y-auto">
-            <h4 className="text-sm font-semibold text-gray-700">History</h4>
-            {response.childResponses.map((child) => (
-              <div
-                key={child.id}
-                className="bg-gray-50 p-3 rounded border text-sm"
-              >
-                <div className="flex justify-between text-xs text-gray-700 mb-1">
-                  <span className="font-medium text-gray-700">
-                    {child.user?.name || "User"} ({child.user?.role || "N/A"})
-                  </span>
-                  <span>{new Date(child.createdAt).toLocaleString()}</span>
-                </div>
-                <div
-                  className="text-gray-700 mb-2 prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: child.reason }}
-                />
+        <div className="h-[70vh] overflow-y-auto">
+          {/* Main message */}
+          <div
+            className="bg-gray-100 p-3 rounded-md border prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: response.reason }}
+          />
 
-                <RenderFiles
-                  files={child.files}
-                  table="rFIResponse"
-                  parentId={child.id}
-                />
-              </div>
-            ))}
+          <RenderFiles
+            files={response.files}
+            table="rFIResponse"
+            parentId={response.id}
+          />
+
+          {/* Timestamp */}
+          <div className="flex gap-2 items-center text-gray-700 text-xs">
+            <CalendarDays size={14} />
+            {new Date(response.createdAt).toLocaleString()}
           </div>
-        )}
+
+          {/* Child Responses (Thread) */}
+          {response.childResponses?.length > 0 && (
+            <div className="mt-4 space-y-4 border-t pt-4 max-h-60 overflow-y-auto">
+              <h4 className="text-sm font-semibold text-gray-700">History</h4>
+              {response.childResponses.map((child) => (
+                <div
+                  key={child.id}
+                  className="bg-gray-50 p-3 rounded border text-sm"
+                >
+                  <div className="flex justify-between text-xs text-gray-700 mb-1">
+                    <span className="font-medium text-gray-700">
+                      {child.user?.name || "User"} ({child.user?.role || "N/A"})
+                    </span>
+                    <span>{new Date(child.createdAt).toLocaleString()}</span>
+                  </div>
+                  <div
+                    className="text-gray-700 mb-2 prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: child.reason }}
+                  />
+
+                  <RenderFiles
+                    files={child.files}
+                    table="rFIResponse"
+                    parentId={child.id}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
 
         {/* Reply Button — only internal side */}
         {canReply && !replyMode && (
@@ -172,6 +174,8 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
             </div>
           </div>
         )}
+        </div>
+
       </div>
     </div>
   );

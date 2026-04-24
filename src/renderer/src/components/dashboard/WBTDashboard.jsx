@@ -129,13 +129,34 @@ const WBTDashboard = () => {
   }
 
   const handleActionClick = (type) => {
-    let data = []
+    let data = { wbt: [], clientSide: [] }
     switch (type) {
-      case 'PENDING_RFQ': data = adminData.rfqs; break;
-      case 'PENDING_RFI': data = adminData.rfis; break;
-      case 'PENDING_SUBMITTALS': data = adminData.pendingSubmittals; break;
-      case 'CHANGE_ORDERS': data = adminData.pendingChangeOrders; break;
-      default: data = [];
+      case 'PENDING_RFQ':
+        data = {
+          wbt: adminData.pendingRFQ || [],
+          clientSide: adminData.clientSidePendingRFQ || []
+        }
+        break
+      case 'PENDING_RFI':
+        data = {
+          wbt: adminData.pendingRFI || [],
+          clientSide: adminData.clientSidePendingRFI || []
+        }
+        break
+      case 'PENDING_SUBMITTALS':
+        data = {
+          wbt: adminData.pendingSubmittals || [],
+          clientSide: adminData.clientSidePendingSubmittals || []
+        }
+        break
+      case 'CHANGE_ORDERS':
+        data = {
+          wbt: adminData.pendingCO || [],
+          clientSide: adminData.clientSidePendingCO || []
+        }
+        break
+      default:
+        data = { wbt: [], clientSide: [] }
     }
     setActionModal({ isOpen: true, type, data })
   }

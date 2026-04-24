@@ -208,10 +208,15 @@ const GetRFQByID = ({ id, onClose }) => {
             accessorKey: "createdByRole",
             header: "From",
             cell: ({ row }) => {
-                const role = row.original.createdByRole === "CLIENT" ? "Client" : "WBT Team";
+                const user = row.original.user;
+                const displayName = user
+                    ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username
+                    : row.original.createdByRole === "CLIENT"
+                    ? "Client"
+                    : "WBT Team";
                 return (
                     <span className="font-bold text-gray-900 text-sm">
-                        {role}
+                        {displayName}
                     </span>
                 );
             }
@@ -488,7 +493,11 @@ const GetRFQByID = ({ id, onClose }) => {
                                                             <User className="w-3 h-3 text-black" />
                                                         </div>
                                                         <span className="text-[10px] font-black text-black uppercase tracking-widest">
-                                                            {fu.createdByRole === "CLIENT" ? rfq?.sender?.fabricator?.fabName || "Client" : "WBT Team"}
+                                                            {fu.createdByRole === "CLIENT"
+                                                                ? rfq?.sender?.fabricator?.fabName || "Client"
+                                                                : fu.user
+                                                                ? `${fu.user.firstName || ""} ${fu.user.lastName || ""}`.trim() || fu.user.username
+                                                                : "WBT Team"}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center gap-1 text-[10px] font-bold text-black/40 uppercase tracking-widest">

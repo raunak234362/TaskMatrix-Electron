@@ -183,6 +183,23 @@ const Header = ({ isMinimized, toggleSidebar, isMobileOpen }) => {
     }
   }
 
+  const handleMarkAllAsRead = async () => {
+    try {
+      const unreadNotifications = safeNotifications.filter((n) => n.read === false)
+      if (unreadNotifications.length === 0) return
+
+      // Hit the single mark as read route for each unread notification as requested
+      await Promise.all(unreadNotifications.map((n) => Service.MarkNotificationAsRead(n.id)))
+
+      setNotifications((prev) =>
+        prev ? prev.map((n) => ({ ...n, read: true })) : prev
+      )
+      toast.success('All notifications marked as read')
+    } catch (error) {
+      toast.error('Failed to mark all as read')
+    }
+  }
+
   const safeNotifications = notifications || []
   const unreadCount = safeNotifications.filter((n) => n.read === false).length
 
@@ -236,9 +253,19 @@ const Header = ({ isMinimized, toggleSidebar, isMobileOpen }) => {
             <div className="absolute right-0 mt-3 w-80 md:w-96 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
               <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <h3 className="font-bold text-gray-900">Notifications</h3>
-                <span className="text-xs font-medium text-gray-500 bg-white px-2 py-1 rounded-md border border-gray-200">
-                  {unreadCount} unread
-                </span>
+                <div className="flex items-center gap-3">
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={handleMarkAllAsRead}
+                      className="text-[10px] font-black text-blue-600 hover:text-blue-800 uppercase tracking-widest bg-blue-50 px-2 py-1 rounded-md border border-blue-100 transition-all hover:bg-blue-100"
+                    >
+                      Mark all as read
+                    </button>
+                  )}
+                  <span className="text-xs font-medium text-gray-500 bg-white px-2 py-1 rounded-md border border-gray-200">
+                    {unreadCount} unread
+                  </span>
+                </div>
               </div>
 
               <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
