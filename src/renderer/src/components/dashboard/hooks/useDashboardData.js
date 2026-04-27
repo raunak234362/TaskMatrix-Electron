@@ -169,10 +169,12 @@ export const useDashboardData = () => {
             Service.PendingSubmittal(),
             Service.GetPendingChangeOrders(),
             Service.GetPendingRfq(),
-            Service.GetPendingRfiClientSide(),
-            Service.GetPendingSubmittalClientSide(),
-            Service.GetPendingChangeOrdersClientSide(),
-            Service.GetPendingRfqClientSide(),
+
+            // Skip client-side APIs for PMO
+            userRole === 'project_manager_officer' ? Promise.resolve(null) : Service.GetPendingRfiClientSide(),
+            userRole === 'project_manager_officer' ? Promise.resolve(null) : Service.GetPendingSubmittalClientSide(),
+            userRole === 'project_manager_officer' ? Promise.resolve(null) : Service.GetPendingChangeOrdersClientSide(),
+            userRole === 'project_manager_officer' ? Promise.resolve(null) : Service.GetPendingRfqClientSide(),
 
             Service.GetDashboardData()
           )
