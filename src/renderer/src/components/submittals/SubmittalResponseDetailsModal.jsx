@@ -86,7 +86,7 @@ const SubmittalResponseDetailsModal = ({
         <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-8 bg-gray-50">
           {/* Main Details Panel */}
           <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               <Info label="Reason" value={response.reason} />
               <Info label="Description" value={response.description} />
             </div>

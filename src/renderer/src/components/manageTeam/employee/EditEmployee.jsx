@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import Service from "../../../api/Service";
-import { X, Check, Loader2 } from "lucide-react";
+import { X, Check, Loader2, Trash2 } from "lucide-react";
 import Input from "../../fields/input";
 import Select from "../../fields/Select";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,6 +14,7 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
   const currentUser = useSelector((state) => state.userInfo.userDetail);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState(null);
 
   const {
@@ -140,6 +141,35 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
     }
   };
 
+  // ── Delete handler ──
+  const handleDelete = async () => {
+    if (!employeeData?.id) return;
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${employeeData.firstName} ${employeeData.lastName}? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeleting(true);
+      const res = await Service.DeleteEmployeeByID(employeeData.id);
+      
+      if (res && res.success !== false) {
+        toast.success("Employee deleted successfully");
+        onSuccess?.();
+        onClose();
+      } else {
+        toast.error(res?.message || "Failed to delete employee");
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Error deleting employee");
+      console.error(err);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   // ── Loading UI ──
   if (loading) {
     return (
@@ -233,7 +263,30 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
         </div>
 
         {/* Footer */}
-        <footer className="p-6 border-t border-gray-200 bg-white flex justify-end gap-3 shrink-0">
+        <footer className="p-6 border-t border-gray-200 bg-white flex justify-end items-center gap-3 shrink-0">
+          <div className="mr-auto">
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting || submitting}
+              className={`px-6 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center gap-2 ${deleting
+                ? "bg-red-50 text-red-300 cursor-not-allowed"
+                : "bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 active:scale-95 shadow-sm"
+                }`}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4" />
+                  Delete Employee
+                </>
+              )}
+            </button>
+          </div>
           <button
             type="button"
             onClick={onClose}

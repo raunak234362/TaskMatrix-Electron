@@ -122,6 +122,22 @@ class Service {
     }
   }
 
+  //delete employee by id
+  static async DeleteEmployeeByID(id) {
+    try {
+      const response = await api.delete(`employee/id/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      //alert(error);
+      console.log('Error deleting Employee by ID', error)
+    }
+  }
+
   //Add Department
   static async AddDepartment(departmentData) {
     try {
