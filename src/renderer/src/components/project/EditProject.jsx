@@ -120,7 +120,8 @@ const EditProject = ({
           setValue("detailingMain", project.detailingMain);
           setValue("detailingMisc", project.detailingMisc);
           setValue("connectionDesignerID", project.connectionDesignerID || "");
-          setValue("pocOfConnectionDesigner", project.pocOfConnectionDesigner?.id || project.pocOfConnectionDesigner || "");
+          const pocId = project.pocOfConnectionDesigner?.id || project.pocOfConnectionDesigner?._id || (typeof project.pocOfConnectionDesigner === 'string' ? project.pocOfConnectionDesigner : "");
+          setValue("pocOfConnectionDesigner", pocId);
 
           // Handle clientProjectManagers
           if (project.clientProjectManagers) {
@@ -248,20 +249,35 @@ const EditProject = ({
         if (key === "files") return;
 
         if (Array.isArray(value)) {
-          value.forEach((v) => formData.append(key, v));
+          value.forEach((v) => {
+            const val = (v && typeof v === "object") ? (v.id || v._id || v.value) : v;
+            if (val !== undefined && val !== null) formData.append(key, String(val));
+          });
         } else if (typeof value === "boolean") {
           formData.append(key, value ? "true" : "false");
         } else {
-          formData.append(key, String(value));
+          const val = (value && typeof value === "object") ? (value.id || value._id || value.value) : value;
+          if (val !== undefined && val !== null && typeof val !== "object") {
+            formData.append(key, String(val));
+          }
         }
       });
+      console.log(formData);
+      console.log(data,"=========");
+      
 
       const res = await Service.EditProjectById(projectId, formData);
-      if (res?.data) {
-        dispatch(updateProject(res.data));
+      if (res && res.success !== false) {
+        if (res?.data) {
+          dispatch(updateProject(res.data));
+        } else {
+          dispatch(updateProject(res));
+        }
+        toast.success("Project updated successfully!");
+        onSuccess();
+      } else {
+        toast.error(res?.message || "Failed to update project");
       }
-      toast.success("Project updated successfully!");
-      onSuccess();
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to update project");
     } finally {

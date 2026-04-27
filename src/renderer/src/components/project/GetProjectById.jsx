@@ -41,6 +41,7 @@ const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);
   const [milestones, setMilestones] = useState([]); // Added milestones state
   const [rfiData, setRfiData] = useState([]); // Added rfiData state
+  const [submittalData, setSubmittalData] = useState([]); // Added submittalData state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
@@ -272,15 +273,17 @@ const GetProjectById = ({ id, onClose }) => {
     try {
       setLoading(true);
       setError(null);
-      const [projRes, mileRes, rfiRes] = await Promise.all([
+      const [projRes, mileRes, rfiRes, subRes] = await Promise.all([
         Service.GetProjectById(id),
         Service.GetProjectMilestoneById(id),
         Service.GetRFIByProjectId(id),
+        Service.GetSubmittalByProjectId(id),
         fetchProjectTasks()
       ]);
       setProject(projRes?.data || null);
       setMilestones(mileRes?.data || []);
       setRfiData(rfiRes || []);
+      setSubmittalData(subRes?.data || (Array.isArray(subRes) ? subRes : []));
     } catch (err) {
       setError("Failed to load project details");
       console.error("Error fetching project:", err);
@@ -293,9 +296,7 @@ const GetProjectById = ({ id, onClose }) => {
     setEditModel(project);
   };
 
-  const submittalData = useMemo(() => {
-    return project?.submittals || [];
-  }, [project]);
+
 
   useEffect(() => {
     if (id) fetchProject();
