@@ -185,26 +185,59 @@ const GetSubmittalByID = ({ id, onClose }) => {
     {
       accessorKey: "description",
       header: "Message",
-      cell: ({ row }) => (
-        <div
-          className="prose prose-sm max-w-none text-gray-700"
-          style={{
-            marginLeft: row.original.parentResponseId ? "20px" : "0px",
-          }}
-          dangerouslySetInnerHTML={{
-            __html: row.original.description || "—",
-          }}
-        />
-      ),
-    },
-    {
-      accessorKey: "files",
-      header: "Files",
       cell: ({ row }) => {
-        const count = row.original.files?.length ?? 0;
-        return count > 0 ? `${count} file(s)` : "—";
+        const description = row.original.description || "—";
+        const stripHtml = (html) => html.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ");
+        const words = stripHtml(description).trim().split(/\s+/);
+        const truncated =
+          words.length > 20 ? words.slice(0, 20).join(" ") + "..." : stripHtml(description);
+
+        return (
+          <div
+            className="prose prose-sm max-w-none text-gray-700"
+            style={{
+              marginLeft: row.original.parentResponseId ? "20px" : "0px",
+            }}
+          >
+            {truncated}
+          </div>
+        );
       },
     },
+    // {
+    //   accessorKey: "status",
+    //   header: "Status",
+    //   cell: ({ row }) => {
+    //     const status = row.original.status || "—";
+    //     const formatStatus = (s) => s.replace(/_/g, " ");
+
+    //     const getStatusStyles = (s) => {
+    //       switch (s) {
+    //         case "RELEASE_FOR_FABRICATION":
+    //           return "bg-green-100 text-green-700 border-green-200";
+    //         case "NOT_APPROVED":
+    //           return "bg-red-100 text-red-700 border-red-200";
+    //         case "REVISED_RESUBMITTAL":
+    //         case "REVISED_RESUBMIT_FOR_FABRICATION":
+    //           return "bg-orange-100 text-orange-700 border-orange-200";
+    //         case "SUBMITTED_TO_EOR":
+    //           return "bg-blue-100 text-blue-700 border-blue-200";
+    //         default:
+    //           return "bg-gray-100 text-gray-600 border-gray-200";
+    //       }
+    //     };
+
+    //     return (
+    //       <span
+    //         className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tight border ${getStatusStyles(
+    //           status
+    //         )}`}
+    //       >
+    //         {formatStatus(status)}
+    //       </span>
+    //     );
+    //   },
+    // },
     {
       accessorKey: "createdAt",
       header: "Created",
@@ -235,7 +268,30 @@ const GetSubmittalByID = ({ id, onClose }) => {
 
           {/* Body */}
           <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6 bg-gray-50">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
+               <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>
+                  {(userRole === "CLIENT_ADMIN" || userRole === "CLIENT" || userRole === "ADMIN" || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole== "DEPUTY_MANAGER") && (
+                    <Button
+                      className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
+                      onClick={() => setShowResponseModal(true)}
+                    >
+                      + Add Response
+                    </Button>
+                  )}
+                </div>
+
+                {submittal.submittalsResponse?.length > 0 ? (
+                  <DataTable
+                    columns={responseColumns}
+                    data={submittal.submittalsResponse}
+                    onRowClick={(row) => setSelectedResponse(row)}
+                  />
+                ) : (
+                  <p className="text-gray-700 italic">No responses yet.</p>
+                )}
+              </div>
               {/* LEFT PANEL */}
               <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-5">
                 <div className="flex justify-between items-center">
@@ -288,29 +344,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
               </div>
 
               {/* RIGHT PANEL */}
-              <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>
-                  {(userRole === "CLIENT_ADMIN" || userRole === "CLIENT" || userRole === "ADMIN" || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole== "DEPUTY_MANAGER") && (
-                    <Button
-                      className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
-                      onClick={() => setShowResponseModal(true)}
-                    >
-                      + Add Response
-                    </Button>
-                  )}
-                </div>
-
-                {submittal.submittalsResponse?.length > 0 ? (
-                  <DataTable
-                    columns={responseColumns}
-                    data={submittal.submittalsResponse}
-                    onRowClick={(row) => setSelectedResponse(row)}
-                  />
-                ) : (
-                  <p className="text-gray-700 italic">No responses yet.</p>
-                )}
-              </div>
+             
             </div>
 
             {/* ── VERSION HISTORY (only when > 1 versions) ── */}

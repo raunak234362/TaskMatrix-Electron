@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   incrementModalCount,
   decrementModalCount,
@@ -24,6 +24,11 @@ import { toast } from "react-toastify";
 
 const TeamDashboard = () => {
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.userInfo?.userDetail);
+  const userRole = (sessionStorage.getItem("userRole") || "").toLowerCase().trim();
+  const userDeptId = user?.departmentId || user?.department?.id;
+  const userDeptName = (user?.department?.name || sessionStorage.getItem("deptName") || "").toLowerCase().trim();
+
   const [loading, setLoading] = useState(true);
   const [teams, setTeams] = useState([]);
   const [filteredTeams, setFilteredTeams] = useState([]);
@@ -93,20 +98,37 @@ const TeamDashboard = () => {
     try {
       setLoading(true);
       const response = await Service.AllTeam();
-      const teamsData = (response?.data || []).filter(team => !team.isDeleted);
+
+      // Robust extraction of team data
+      const rawTeams = response?.data || (Array.isArray(response) ? response : []);
+      let teamsData = rawTeams.filter((team) => !team.isDeleted);
+
+      // Role-based filtering: Dept Managers should only see teams in their department
+      if ((userRole === "dept_manager" || userRole === "department_manager") && (userDeptId || userDeptName)) {
+        teamsData = teamsData.filter((team) => {
+          const teamDeptId = String(team.departmentID || team.department?.id || "");
+          const teamDeptName = (team.department?.name || "").toLowerCase().trim();
+
+          return (
+            (userDeptId && teamDeptId === String(userDeptId)) ||
+            (userDeptName && (teamDeptName.includes(userDeptName) || userDeptName.includes(teamDeptName)))
+          );
+        });
+      }
+
       setTeams(teamsData);
       setFilteredTeams(teamsData);
 
       if (teamsData.length > 0 && !selectedTeam) {
-        // setSelectedTeam(teamsData[0].id);
+        setSelectedTeam(teamsData[0].id);
       }
 
       setLoading(false);
     } catch (error) {
-      console.error(error.message);
+      console.error("Error fetching teams:", error.message);
       setLoading(false);
     }
-  }, [selectedTeam]);
+  }, [selectedTeam, userRole, userDeptId, userDeptName]);
 
   useEffect(() => {
     fetchTeams();
@@ -817,7 +839,7 @@ const TeamDashboard = () => {
     <div className="h-full overflow-y-auto custom-scrollbar bg-gray-50/50">
       <div className="bg-white rounded-md p-4 sm:p-6 lg:p-8 xl:p-10 shadow-sm border border-black/20 min-h-full">
         <DashboardHeader
-          onAddTeam={() => setIsModalOpen(true)}
+          onAddTeam={(userRole === "admin" || userRole === "deputy_manager") ? () => setIsModalOpen(true) : null}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           dateFilter={dateFilter}

@@ -30,7 +30,7 @@ const AllSubmittals = ({ submittalData, projectId }) => {
       let result;
 
       if (projectId) {
-        result = await Service.SubmittalSentByProjectId(projectId);
+        result = await Service.GetSubmittalByProjectId(projectId);
       } else if (userRole === "CLIENT") result = await Service.SubmittalSent();
       else result = await Service.SubmittalRecieved();
 

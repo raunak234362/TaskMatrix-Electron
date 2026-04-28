@@ -51,13 +51,15 @@ const DashboardHeader = ({
         </div>
 
         {/* Action Buttons */}
-        <Button
-          onClick={onAddTeam}
-          className="flex items-center gap-2 px-6 py-3 bg-green-200 text-black border border-black rounded-full font-black text-xs uppercase tracking-wider hover:bg-[#6bbd45]/90 transition-all shadow-sm active:scale-95"
-        >
-          <Plus size={20} strokeWidth={3} />
-          <span>Add Team</span>
-        </Button>
+        {onAddTeam && (
+          <Button
+            onClick={onAddTeam}
+            className="flex items-center gap-2 px-6 py-3 bg-green-200 text-black border border-black rounded-full font-black text-xs uppercase tracking-wider hover:bg-[#6bbd45]/90 transition-all shadow-sm active:scale-95"
+          >
+            <Plus size={20} strokeWidth={3} />
+            <span>Add Team</span>
+          </Button>
+        )}
 
         <Button
           onClick={onGenerateReport}

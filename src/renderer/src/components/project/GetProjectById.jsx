@@ -41,6 +41,7 @@ const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);
   const [milestones, setMilestones] = useState([]); // Added milestones state
   const [rfiData, setRfiData] = useState([]); // Added rfiData state
+  const [submittalData, setSubmittalData] = useState([]); // Added submittalData state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
@@ -52,6 +53,21 @@ const GetProjectById = ({ id, onClose }) => {
   const [projectTasks, setProjectTasks] = useState([]);
   const [showAssistsModal, setShowAssistsModal] = useState(false);
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+  const currentUserId = sessionStorage.getItem("userId");
+
+  // Check if current user is an assist for this project
+  const isAssist = useMemo(() => {
+    if (!project?.assists || !currentUserId) return false;
+    return project.assists.some(assist => 
+      String(assist.userId) === String(currentUserId) || 
+      String(assist.user?.id) === String(currentUserId)
+    );
+  }, [project, currentUserId]);
+
+  const canCreate = useMemo(() => {
+    if (isAssist) return true;
+    return !["client", "staff", "estimator"].includes(userRole);
+  }, [isAssist, userRole]);
 
   const fetchProjectTasks = async () => {
     try {
@@ -257,15 +273,17 @@ const GetProjectById = ({ id, onClose }) => {
     try {
       setLoading(true);
       setError(null);
-      const [projRes, mileRes, rfiRes] = await Promise.all([
+      const [projRes, mileRes, rfiRes, subRes] = await Promise.all([
         Service.GetProjectById(id),
         Service.GetProjectMilestoneById(id),
         Service.GetRFIByProjectId(id),
+        Service.GetSubmittalByProjectId(id),
         fetchProjectTasks()
       ]);
       setProject(projRes?.data || null);
       setMilestones(mileRes?.data || []);
       setRfiData(rfiRes || []);
+      setSubmittalData(subRes?.data || (Array.isArray(subRes) ? subRes : []));
     } catch (err) {
       setError("Failed to load project details");
       console.error("Error fetching project:", err);
@@ -278,9 +296,7 @@ const GetProjectById = ({ id, onClose }) => {
     setEditModel(project);
   };
 
-  const submittalData = useMemo(() => {
-    return project?.submittals || [];
-  }, [project]);
+
 
   useEffect(() => {
     if (id) fetchProject();
@@ -392,7 +408,7 @@ const GetProjectById = ({ id, onClose }) => {
               ]
                 .filter(
                   (tab) => {
-                    if (userRole === "staff" && ["wbs", "changeOrder", "milestones", "analytics", "teamAnalytics", "CDrfi", "CDsubmittals"].includes(tab.key)) {
+                    if (userRole === "staff" && !isAssist && ["wbs", "changeOrder", "milestones", "analytics", "teamAnalytics", "CDrfi", "CDsubmittals"].includes(tab.key)) {
                       return false;
                     }
                     if (tab.key === "projectNotes") {
@@ -735,6 +751,14 @@ const GetProjectById = ({ id, onClose }) => {
                       : "—"
                   }
                 />
+                {project.assists && project.assists.length > 0 && (
+                  <InfoRow
+                    label="Assists"
+                    value={project.assists.map(assist =>
+                      `${assist.user?.firstName || ''} ${assist.user?.middleName || ''} ${assist.user?.lastName || ''}`.trim()
+                    ).join(", ")}
+                  />
+                )}
                 <InfoRow
                   label="Fabricator"
                   value={project.fabricator?.fabName || "—"}
@@ -817,12 +841,20 @@ const GetProjectById = ({ id, onClose }) => {
                   ? `${project.manager.firstName} ${project.manager.lastName} (${project.manager.username})`
                   : "Not assigned."}
               </p>
+              {project.assists && project.assists.length > 0 && (
+                <p>
+                  Assists:{" "}
+                  {project.assists.map(assist =>
+                    `${assist.user?.firstName || ''} ${assist.user?.middleName || ''} ${assist.user?.lastName || ''}`.trim()
+                  ).join(", ")}
+                </p>
+              )}
             </div>
           )}
 
           {/* ✅ Notes */}
           {activeTab === "notes" && <AllNotes projectId={id} />}
-          {activeTab === "wbs" && userRole !== "staff" && (
+          {activeTab === "wbs" && (userRole !== "staff" || isAssist) && (
             <div className="space-y-6">
               <WBS id={id} stage={project.stage || ""} />
               <WbsBreakdownPanel wbsTasksByBundle={wbsTasksByBundle} />
@@ -845,7 +877,7 @@ const GetProjectById = ({ id, onClose }) => {
                   >
                     All RFIs
                   </button>
-                  {!["client", "staff", "estimator"].includes(userRole) && (
+                  {canCreate && (
                     <button
                       onClick={() => setRfiView("add")}
                       className={`
@@ -893,7 +925,7 @@ const GetProjectById = ({ id, onClose }) => {
                   >
                     All Submittals
                   </button>
-                  {!["client", "staff", "estimator"].includes(userRole) && (
+                  {canCreate && (
                     <button
                       onClick={() => setSubmittalView("add")}
                       className={`
@@ -924,7 +956,7 @@ const GetProjectById = ({ id, onClose }) => {
               )}
             </div>
           )}
-          {activeTab === "CDrfi" && userRole !== "staff" && (
+          {activeTab === "CDrfi" && (userRole !== "staff" || isAssist) && (
             <div className="space-y-4">
               {/* Sub-tabs for RFI */}
               <div className="flex justify-start mb-4">
@@ -941,7 +973,7 @@ const GetProjectById = ({ id, onClose }) => {
                   >
                     All RFIs
                   </button>
-                  {!["client", "staff", "estimator"].includes(userRole) && (
+                  {canCreate && (
                     <button
                       onClick={() => setRfiView("add")}
                       className={`
@@ -972,7 +1004,7 @@ const GetProjectById = ({ id, onClose }) => {
               )}
             </div>
           )}
-          {activeTab === "CDsubmittals" && userRole !== "staff" && (
+          {activeTab === "CDsubmittals" && (userRole !== "staff" || isAssist) && (
             <div className="space-y-4">
               {/* Sub-tabs for RFI */}
               <div className="flex justify-start mb-4">
@@ -989,7 +1021,7 @@ const GetProjectById = ({ id, onClose }) => {
                   >
                     All Submittals
                   </button>
-                  {!["client", "staff", "estimator"].includes(userRole) && (
+                  {canCreate && (
                     <button
                       onClick={() => setSubmittalView("add")}
                       className={`
@@ -1020,7 +1052,7 @@ const GetProjectById = ({ id, onClose }) => {
               )}
             </div>
           )}
-          {activeTab === "changeOrder" && userRole !== "staff" && (
+          {activeTab === "changeOrder" && (userRole !== "staff" || isAssist) && (
             <div className="space-y-4">
               {/* Sub-tabs for RFI */}
               <div className="flex justify-start mb-4">
@@ -1037,7 +1069,7 @@ const GetProjectById = ({ id, onClose }) => {
                   >
                     All Change Order
                   </button>
-                  {!["client", "staff", "estimator"].includes(userRole) && (
+                  {canCreate && (
                     <button
                       onClick={() => setChangeOrderView("add")}
                       className={`

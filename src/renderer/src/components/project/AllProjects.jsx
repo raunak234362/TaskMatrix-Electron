@@ -19,6 +19,7 @@ const AllProjects = () => {
     manager: "All Managers",
     fabricator: "All Fabricators",
     stage: "All Stages",
+    status: "All Statuses",
     overrunOnly: false,
     searchTerm: "",
   });
@@ -74,6 +75,13 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
     return ["All Stages", ...new Set(list)];
   }, [projects]);
 
+  const statuses = useMemo(() => {
+    const list = projects
+      .map((p) => p.status || "Unknown")
+      .filter(Boolean);
+    return ["All Statuses", ...new Set(list)];
+  }, [projects]);
+
   // --- Filter Logic ---
   const filteredProjects = useMemo(() => {
     return projects.map(project => {
@@ -122,6 +130,11 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
       )
         return false;
       if (filters.stage !== "All Stages" && stage !== filters.stage)
+        return false;
+      if (
+        filters.status !== "All Statuses" &&
+        project.status !== filters.status
+      )
         return false;
       if (filters.overrunOnly && !isOverrun) return false;
 
@@ -306,6 +319,22 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
               onChange={(e) => setFilters(prev => ({ ...prev, stage: e.target.value }))}
             >
               {stages.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+
+          {/* Status Filter */}
+          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Status</label>
+            <select
+              className="w-full text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+              value={filters.status}
+              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+            >
+              {statuses.map(status => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
             </select>
           </div>
 

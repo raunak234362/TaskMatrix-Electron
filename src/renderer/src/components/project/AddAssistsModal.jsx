@@ -85,7 +85,7 @@ const AddAssistsModal = ({ projectId, onClose, onSuccess, currentAssists = [] })
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 h-fit overflow-y-auto">
           <div className="space-y-2">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
               Select Assistants
@@ -97,7 +97,9 @@ const AddAssistsModal = ({ projectId, onClose, onSuccess, currentAssists = [] })
               onChange={(opts) => setSelectedAssists(opts ? opts.map((o) => o.value) : [])}
               placeholder="Search and select team members..."
               className="text-sm"
+              menuPortalTarget={document.body}
               styles={{
+                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                 control: (base) => ({
                   ...base,
                   borderRadius: "12px",

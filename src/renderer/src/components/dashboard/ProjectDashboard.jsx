@@ -36,7 +36,7 @@ const ProjectDashboard = () => {
       (acc, p) => {
         acc.total++;
         if (p.status === "ACTIVE") acc.active++;
-        else if (p.status === "COMPLETED") acc.completed++;
+        else if (p.status === "COMPLETE") acc.completed++;
         else if (p.status === "ONHOLD") acc.onHold++;
         return acc;
       },
@@ -199,7 +199,7 @@ const ProjectDashboard = () => {
         if (project.status === "ACTIVE") grouped[teamId].stats[s].active += 1;
         else if (project.status === "ONHOLD")
           grouped[teamId].stats[s].onHold += 1;
-        else if (project.status === "COMPLETED")
+        else if (project.status === "COMPLETE")
           grouped[teamId].stats[s].completed += 1;
       }
     });

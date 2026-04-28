@@ -62,6 +62,7 @@ const EditProject = ({
         clientProjectManagers: [],
         connectionDesignerID: "",
         pocOfConnectionDesigner: "",
+        status: "ACTIVE",
       },
     });
 
@@ -98,6 +99,7 @@ const EditProject = ({
           setValue("teamID", project.team?.id);
           setValue("tools", project.tools);
           setValue("stage", project.stage);
+          setValue("status", project.status || "ACTIVE");
           setValue("estimatedHours", project.estimatedHours);
           setValue(
             "startDate",
@@ -118,7 +120,8 @@ const EditProject = ({
           setValue("detailingMain", project.detailingMain);
           setValue("detailingMisc", project.detailingMisc);
           setValue("connectionDesignerID", project.connectionDesignerID || "");
-          setValue("pocOfConnectionDesigner", project.pocOfConnectionDesigner?.id || project.pocOfConnectionDesigner || "");
+          const pocId = project.pocOfConnectionDesigner?.id || project.pocOfConnectionDesigner?._id || (typeof project.pocOfConnectionDesigner === 'string' ? project.pocOfConnectionDesigner : "");
+          setValue("pocOfConnectionDesigner", pocId);
 
           // Handle clientProjectManagers
           if (project.clientProjectManagers) {
@@ -214,7 +217,15 @@ const EditProject = ({
     stage: [
       { label: "IFA - (Issue for Approval)", value: "IFA" },
       { label: "IFC - (Issue for Construction)", value: "IFC" },
-      { label: "CO# - (Change Order)", value: "CO#" },
+      { label: "COR - (Change Order)", value: "CO" },
+    ],
+    status: [
+      { label: "Active", value: "ACTIVE" },
+      { label: "On Hold", value: "ONHOLD" },
+      { label: "Inactive", value: "INACTIVE" },
+      { label: "Delay", value: "DELAY" },
+      { label: "Complete", value: "COMPLETE" },
+      { label: "Assigned", value: "ASSIGNED" },
     ],
     clientProjectManagers: clients
       .filter((c) => ["CLIENT", "CLIENT_ADMIN"].includes(c.role))
@@ -238,20 +249,35 @@ const EditProject = ({
         if (key === "files") return;
 
         if (Array.isArray(value)) {
-          value.forEach((v) => formData.append(key, v));
+          value.forEach((v) => {
+            const val = (v && typeof v === "object") ? (v.id || v._id || v.value) : v;
+            if (val !== undefined && val !== null) formData.append(key, String(val));
+          });
         } else if (typeof value === "boolean") {
           formData.append(key, value ? "true" : "false");
         } else {
-          formData.append(key, String(value));
+          const val = (value && typeof value === "object") ? (value.id || value._id || value.value) : value;
+          if (val !== undefined && val !== null && typeof val !== "object") {
+            formData.append(key, String(val));
+          }
         }
       });
+      console.log(formData);
+      console.log(data,"=========");
+      
 
       const res = await Service.EditProjectById(projectId, formData);
-      if (res?.data) {
-        dispatch(updateProject(res.data));
+      if (res && res.success !== false) {
+        if (res?.data) {
+          dispatch(updateProject(res.data));
+        } else {
+          dispatch(updateProject(res));
+        }
+        toast.success("Project updated successfully!");
+        onSuccess();
+      } else {
+        toast.error(res?.message || "Failed to update project");
       }
-      toast.success("Project updated successfully!");
-      onSuccess();
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to update project");
     } finally {
@@ -590,6 +616,22 @@ const EditProject = ({
                       options={options.stage}
                       value={options.stage.find((o) => o.value === field.value)}
                       onChange={(o) => field.onChange(o?.value || "IFA")}
+                    />
+                  )}
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
+                  <Layers className="w-4 h-4 text-emerald-600" /> Status
+                </label>
+                <Controller
+                  name="status"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      options={options.status}
+                      value={options.status.find((o) => o.value === field.value)}
+                      onChange={(o) => field.onChange(o?.value || "ACTIVE")}
                     />
                   )}
                 />

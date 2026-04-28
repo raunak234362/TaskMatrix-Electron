@@ -122,6 +122,22 @@ class Service {
     }
   }
 
+  //delete employee by id
+  static async DeleteEmployeeByID(id) {
+    try {
+      const response = await api.delete(`employee/id/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      //alert(error);
+      console.log('Error deleting Employee by ID', error)
+    }
+  }
+
   //Add Department
   static async AddDepartment(departmentData) {
     try {
@@ -1017,8 +1033,13 @@ class Service {
           'Content-Type': 'application/json'
         }
       })
-      if (response && response.data) {
-        response.data.submittals = await this.GetSubmittalByProjectId(id)
+      if (response && response.data && response.data.data) {
+        const [submittals, assists] = await Promise.all([
+          this.GetSubmittalByProjectId(id),
+          this.GetProjectManagerAssists(id)
+        ])
+        response.data.data.submittals = submittals || []
+        response.data.data.assists = assists || []
       }
       return response.data
     } catch (error) {
@@ -1056,6 +1077,51 @@ class Service {
   static async AddProjectManagerAssists(id, data) {
     try {
       const response = await api.post(`project/projects/${id}/assists`, data)
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // Get Project Manager Assists
+  static async GetProjectManagerAssists(id) {
+    try {
+      const response = await api.get(`project/projects/${id}/assists`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data?.data || []
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // Update Project Manager Assists User
+  static async UpdateProjectManagerAssistsUser(id, userId, data) {
+    try {
+      const response = await api.put(`project/projects/${id}/assists/${userId}`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // Delete Project Manager Assists User
+  static async DeleteProjectManagerAssistsUser(id, userId) {
+    try {
+      const response = await api.delete(`project/projects/${id}/assists/${userId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
       console.log(response)
       return response.data
     } catch (error) {
@@ -1876,7 +1942,7 @@ class Service {
         }
       })
       console.log(' All submittals fetched by project ID:', response.data)
-      return response.data
+      return response.data?.data || []
     } catch (error) {
       console.error('cannot find submittal', error)
     }
@@ -3382,6 +3448,17 @@ class Service {
     }
   }
 
+  //pending CO
+  static async GetPendingChangeOrders() {
+    try {
+      const response = await api.get(`changeOrder/pendingCOs`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending change orders:', error)
+      throw error
+    }
+  }
+
   //dashboard data operation executive
 
   //dashboard route :
@@ -3456,6 +3533,17 @@ class Service {
       return response.data
     } catch (error) {
       console.error('Error fetching pending submittals:', error)
+      throw error
+    }
+  }
+
+  //pending rfq
+  static async GetPendingRfq() {
+    try {
+      const response = await api.get(`rfq/pendingRFQs`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending rfq:', error)
       throw error
     }
   }

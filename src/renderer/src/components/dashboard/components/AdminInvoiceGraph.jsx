@@ -159,7 +159,7 @@ const AdminInvoiceGraph = ({
       </div>
 
       {/* Jobs List */}
-      <div className="flex flex-col gap-6 overflow-y-auto max-h-[600px] pr-2 scrollbar-hide">
+      <div className="flex flex-col gap-6 overflow-y-auto max-h-[28vh] pr-2">
         {jobSummaries.map((job) => {
           const maxVal = Math.max(job.totalRaised, job.bidPrice || 0);
           const paidWidth = maxVal > 0 ? (job.paid / maxVal) * 100 : 0;
@@ -173,7 +173,7 @@ const AdminInvoiceGraph = ({
 
                   <div className="flex flex-wrap gap-2 mt-1">
                     {job.invoices.map((inv, idx) => (
-                      <span 
+                      <span
                         key={inv.id || idx}
                         onClick={(e) => {
                           e.stopPropagation();

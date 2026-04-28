@@ -287,13 +287,15 @@ const AddInvoice = ({
     const formattedData = {
       ...data,
       totalInvoiceValue: Number(data.totalInvoiceValue),
-      changeOrderId: !data.changeOrderId || data.changeOrderId.trim() === "" ? null : data.changeOrderId,
+      changeOrderId: data.changeOrderId || "",
+      rfqId: data.rfqId || "",
       invoiceItems: data.invoiceItems?.map((item) => ({
         ...item,
         rateUSD: Number(item.rateUSD),
         totalUSD: Number(item.totalUSD),
         unit: Number(item.unit),
-        sacCode: item.sacCode ? String(item.sacCode) : 0,
+        sacCode: item.sacCode ? String(item.sacCode) : "",
+        remarks: item.remarks || "",
       })),
     };
 
