@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Input from "../fields/input";
 import MultipleFileUpload from "../fields/MultipleFileUpload";
+import RichTextEditor from "../fields/RichTextEditor";
 
 
 
@@ -304,13 +305,20 @@ const QuotationRaise = ({
 
           {/* Additional CD Fields */}
           <div className="space-y-4 pt-4 border-t border-gray-100">
-            <div>
-              <Input
-                label="Description"
-                type="textarea"
-                {...register("CDDescription")}
-                placeholder="Enter requirements or notes for Connection Designers..."
-                className="bg-gray-50/50"
+            <div className="space-y-1">
+              <label className="text-[0.875em] font-medium text-gray-700">
+                Description
+              </label>
+              <Controller
+                name="CDDescription"
+                control={control}
+                render={({ field }) => (
+                  <RichTextEditor
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    placeholder="Enter requirements or notes for Connection Designers..."
+                  />
+                )}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
