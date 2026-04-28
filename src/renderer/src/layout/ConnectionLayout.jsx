@@ -31,6 +31,15 @@ const ConnectionLayout = () => {
               Add Connection Designer
             </button>
           )}
+          <button
+            onClick={() => setActiveTab("moreInfo")}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "moreInfo"
+              ? "bg-[#ebf5ea] text-black border-black shadow-sm"
+              : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+              }`}
+          >
+            More Info
+          </button>
         </div>
         <div className="grow p-2 bg-white rounded-b-2xl">
           {activeTab === "dashboard" && (
@@ -42,6 +51,12 @@ const ConnectionLayout = () => {
             <div>
               {" "}
               <AddConnectionDesigner />
+            </div>
+          )}
+          {activeTab === "moreInfo" && (
+            <div className="p-4">
+              <h2 className="text-xl font-bold">More Info</h2>
+              <p>More information content goes here.</p>
             </div>
           )}
         </div>
