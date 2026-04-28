@@ -217,7 +217,7 @@ const EditProject = ({
     stage: [
       { label: "IFA - (Issue for Approval)", value: "IFA" },
       { label: "IFC - (Issue for Construction)", value: "IFC" },
-      { label: "CO# - (Change Order)", value: "CO#" },
+      { label: "COR - (Change Order)", value: "CO" },
     ],
     status: [
       { label: "Active", value: "ACTIVE" },
