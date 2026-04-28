@@ -12,13 +12,13 @@ const getFileIcon = (filename) => {
     const ext = filename?.split('.').pop()?.toLowerCase();
     switch (ext) {
         case 'pdf':
-            return { icon: FileText, color: 'text-red-500', bgColor: 'bg-red-50' };
+            return { icon: File, color: 'text-red-500', bgColor: 'bg-red-50', text: 'pdf', textColor: 'text-red-500' };
         case 'xlsx':
         case 'xls':
         case 'csv':
-            return { icon: FileSpreadsheet, color: 'text-green-600', bgColor: 'bg-green-50' };
+            return { icon: File, color: 'text-green-600', bgColor: 'bg-green-50', text: '.exe', textColor: 'text-green-600' };
         default:
-            return { icon: File, color: 'text-blue-500', bgColor: 'bg-blue-50' };
+            return { icon: FileText, color: 'text-blue-500', bgColor: 'bg-blue-50', text: null, textColor: null };
     }
 };
 
@@ -137,7 +137,7 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, vers
                             {/* File List */}
                             <div className="grid grid-cols-1 gap-2 mt-3">
                                 {files.map((file, index) => {
-                                    const { icon: Icon, color, bgColor } = getFileIcon(file.originalName);
+                                    const { icon: Icon, color, bgColor, text, textColor } = getFileIcon(file.originalName);
                                     return (
                                         <div
                                             key={file.id || `file-${index}`}
@@ -148,8 +148,13 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, vers
                                                 onClick={(e) => handleOpen(e, file)}
                                                 className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
                                             >
-                                                <div className={`p-2 rounded-lg shadow-sm ${bgColor}`}>
-                                                    <Icon size={18} className={color} />
+                                                <div className={`p-2 rounded-lg shadow-sm ${bgColor} relative flex items-center justify-center`}>
+                                                    <Icon size={18} className={color} strokeWidth={2} />
+                                                    {text && (
+                                                        <span className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[7px] font-bold mt-[2px] ${textColor}`}>
+                                                            {text}
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-gray-700 text-sm  truncate group-hover:text-black">
