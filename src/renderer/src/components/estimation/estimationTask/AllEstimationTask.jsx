@@ -13,14 +13,6 @@ const AllEstimationTask = ({ estimations, onClose, estimationId, onRefresh }) =>
     // ─────────────── Columns ───────────────
     const columns = [
         {
-            header: 'Project Name',
-            accessorFn: (row) => row.estimation?.projectName || '—'
-        },
-        {
-            header: 'Fabricator Name',
-            accessorFn: (row) => row.estimation?.fabricators?.fabName || '—'
-        },
-        {
             header: 'Assigned To',
             accessorFn: (row) =>
                 `${row.assignedTo?.firstName ?? ''} ${row.assignedTo?.middleName ?? ''
