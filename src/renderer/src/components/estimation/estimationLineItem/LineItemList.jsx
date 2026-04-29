@@ -551,7 +551,7 @@ const LineItemList = ({ id, onClose }) => {
                       />
                     ) : (
                       <span className="text-lg  text-gray-700">
-                        {groupData?.totalHours} hrs
+                        {Number(groupData?.totalHours || 0).toFixed(2)} hrs
                       </span>
                     )}
                   </div>
