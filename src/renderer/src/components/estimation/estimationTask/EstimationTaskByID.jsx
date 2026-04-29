@@ -239,7 +239,6 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
             </div>
             <div>
               <h2 className="text-2xl  text-gray-700">Estimation Task Details</h2>
-              <p className="text-sm text-gray-700">ID: #{task.id}</p>
             </div>
           </div>
           <button

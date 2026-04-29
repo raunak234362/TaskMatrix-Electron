@@ -13,7 +13,7 @@ import EstimationResponseModal from './EstimationResponseModal'
 
 const truncateText = (text, max = 40) => (text.length > max ? text.substring(0, max) + '...' : text)
 
-const GetEstimationByID = ({ id, onRefresh }) => {
+const GetEstimationByID = ({ id, onRefresh, onClose }) => {
   const [estimation, setEstimation] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -78,18 +78,29 @@ const GetEstimationByID = ({ id, onRefresh }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8 text-gray-700">
-        <Loader2 className="w-5 h-5 animate-spin mr-2" />
-        Loading estimation details...
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-2xl flex items-center">
+          <Loader2 className="w-6 h-6 animate-spin mr-3 text-green-600" />
+          <span className="text-lg font-medium text-gray-700">Loading estimation details...</span>
+        </div>
       </div>
     )
   }
 
   if (error || !estimation) {
     return (
-      <div className="flex items-center justify-center py-8 text-red-600">
-        <AlertCircle className="w-5 h-5 mr-2" />
-        {error || 'Estimation not found'}
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center">
+          <div className="flex items-center text-red-600 mb-4">
+            <AlertCircle className="w-6 h-6 mr-2" />
+            <span className="text-lg font-medium">{error || 'Estimation not found'}</span>
+          </div>
+          {onClose && (
+            <button onClick={onClose} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium">
+              Close
+            </button>
+          )}
+        </div>
       </div>
     )
   }
@@ -124,9 +135,26 @@ const GetEstimationByID = ({ id, onRefresh }) => {
         : 'bg-blue-100 text-black'
 
   return (
-    <div className="bg-gray-100 rounded-3xl p-8 border border-black shadow-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-2 animate-in fade-in duration-200">
+      <div className="bg-gray-100 rounded-3xl w-[98vw] max-w-none h-[98vh] flex flex-col overflow-hidden border border-black shadow-2xl">
+        {/* Sticky Modal Header */}
+        <div className="sticky top-0 z-10 bg-gray-100 border-b border-black/10 px-8 py-5 flex justify-between items-center shrink-0">
+          <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tight">Estimation Details</h2>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+            >
+              Close
+            </button>
+          )}
+        </div>
+        
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-8 space-y-6">
+          <div className="bg-white rounded-2xl p-8 border border-black/10 shadow-sm">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
         <div>
           <h3 className="text-xl font-black text-black uppercase tracking-tight">Estimation #{estimationNumber}</h3>
           <p className="text-black/60 text-xs font-black uppercase tracking-widest">Project: {projectName}</p>
@@ -400,8 +428,11 @@ const GetEstimationByID = ({ id, onRefresh }) => {
               ))}
             </div>
           )}
+            </div>
+          )}
         </div>
-      )}
+        </div>
+      </div>
     </div>
   )
 }

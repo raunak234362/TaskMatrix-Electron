@@ -34,7 +34,13 @@ const LineItemGroup = ({ estimationId, refreshTrigger }) => {
     },
     {
       header: 'Group Description',
-      accessorKey: 'description'
+      accessorKey: 'description',
+      cell: ({ row }) => (
+        <div
+          className="prose prose-sm max-w-none text-gray-700"
+          dangerouslySetInnerHTML={{ __html: row.original.description || '' }}
+        />
+      )
     }
   ]
   const [selectedGroupId, setSelectedGroupId] = useState(null)

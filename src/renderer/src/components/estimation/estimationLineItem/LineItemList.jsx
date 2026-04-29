@@ -167,14 +167,14 @@ const LineItemList = ({ id, onClose }) => {
 
   // --- Bulk Quantity Logic ---
   const handleQuantityChange = useCallback((id, newQuantity, hoursPerQty) => {
-    const qty = parseFloat(newQuantity) || 0;
+    const qty = newQuantity === '' ? 0 : parseFloat(newQuantity) || 0;
     const hours = parseFloat(hoursPerQty) || 0;
     const totalHours = qty * hours;
 
     setPendingChanges(prev => ({
       ...prev,
       [id]: {
-        quantity: qty,
+        quantity: newQuantity,
         totalHours: totalHours
       }
     }));
@@ -209,9 +209,24 @@ const LineItemList = ({ id, onClose }) => {
     return `${hours}h ${minutes}m`
   }
 
-  // Merge pending changes into data so columns can be pure, then sort filled rows to top
+  // Sort initially based on original lineItem data to prevent jumping while editing
+  const sortedLineItems = useMemo(() => {
+    return [...lineItem].sort((a, b) => {
+      const aQty = Number(a.quantity);
+      const bQty = Number(b.quantity);
+      const aFilled = !isNaN(aQty) && a.quantity !== null && a.quantity !== undefined && String(a.quantity).trim() !== '' && aQty > 0;
+      const bFilled = !isNaN(bQty) && b.quantity !== null && b.quantity !== undefined && String(b.quantity).trim() !== '' && bQty > 0;
+
+      if (aFilled && !bFilled) return -1;
+      if (!aFilled && bFilled) return 1;
+      if (aFilled && bFilled) return bQty - aQty; // descending
+      return 0;
+    });
+  }, [lineItem]);
+
+  // Merge pending changes into data so columns can be pure
   const mergedLineItems = useMemo(() => {
-    const merged = lineItem.map(item => {
+    return sortedLineItems.map(item => {
       const pending = pendingChanges[item.id];
       if (pending) {
         return {
@@ -223,20 +238,7 @@ const LineItemList = ({ id, onClose }) => {
       }
       return item;
     });
-
-    // Sort: rows with a filled quantity come first, descending by quantity value
-    return merged.sort((a, b) => {
-      const aQty = Number(a.quantity);
-      const bQty = Number(b.quantity);
-      const aFilled = !isNaN(aQty) && a.quantity !== null && a.quantity !== undefined && String(a.quantity).trim() !== '' && aQty > 0;
-      const bFilled = !isNaN(bQty) && b.quantity !== null && b.quantity !== undefined && String(b.quantity).trim() !== '' && bQty > 0;
-
-      if (aFilled && !bFilled) return -1;
-      if (!aFilled && bFilled) return 1;
-      if (aFilled && bFilled) return bQty - aQty; // descending
-      return 0;
-    });
-  }, [lineItem, pendingChanges]);
+  }, [sortedLineItems, pendingChanges]);
 
   // Filter merged items by scope-of-work plain text
   const filteredLineItems = useMemo(() => {
@@ -276,7 +278,7 @@ const LineItemList = ({ id, onClose }) => {
       cell: ({ row }) => {
         const isEditing = editingRowId === row.original.id;
         // Use merged value from row.original
-        const val = isEditing ? (editFormData.quantity || 0) : row.original.quantity;
+        const val = isEditing ? (editFormData.quantity ?? '') : (row.original.quantity ?? '');
         const isPending = row.original.isPending;
 
         if (isEditing) {

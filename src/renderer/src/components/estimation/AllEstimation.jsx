@@ -28,9 +28,9 @@ const AllEstimation = ({ estimations, onRefresh }) => {
         columns={columns}
         data={estimations || []}
         onRowClick={handleRowClick}
-        detailComponent={({ row }) => {
+        detailComponent={({ row, close }) => {
           const estimationUniqueId = row.id ?? row.fabId ?? ''
-          return <GetEstimationByID id={estimationUniqueId} onRefresh={onRefresh} />
+          return <GetEstimationByID id={estimationUniqueId} onRefresh={onRefresh} onClose={close} />
         }}
         searchPlaceholder="Search estimations..."
 
