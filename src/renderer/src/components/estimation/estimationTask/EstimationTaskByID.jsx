@@ -101,11 +101,24 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
     return task?.workinghours?.find((wh) => wh.ended_at === null)?.id
   }
 
-  const formatDecimalHours = (decimalHours) => {
-    const num = Number(decimalHours)
-    if (isNaN(num)) return '0h 0m'
-    const hours = Math.floor(num)
-    const minutes = Math.round((num - hours) * 60)
+  const calculateTotalTime = () => {
+    if (!task?.workinghours || !Array.isArray(task.workinghours)) return '0h 0m'
+    
+    let totalSeconds = 0
+    task.workinghours.forEach((wh) => {
+      if (wh.duration_seconds) {
+        totalSeconds += wh.duration_seconds
+      } else if (wh.started_at && !wh.ended_at) {
+        const start = new Date(wh.started_at).getTime()
+        if (!isNaN(start)) {
+          const now = new Date().getTime()
+          totalSeconds += Math.floor((now - start) / 1000)
+        }
+      }
+    })
+
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
     return `${hours}h ${minutes}m`
   }
 
@@ -361,7 +374,7 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
           </div>
 
           {/* Work Summary */}
-          {summary && (
+          {task && (
             <div className="bg-green-50 rounded-2xl p-6 border border-green-200">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl  text-indigo-900 flex items-center gap-3">
@@ -380,7 +393,7 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
                   <SummaryCard
                     icon={<Clock4 />}
                     label="Total Time"
-                    value={formatDecimalHours(summary?.totalHours)}
+                    value={calculateTotalTime()}
                   />
                   <SummaryCard
                     icon={<Users />}

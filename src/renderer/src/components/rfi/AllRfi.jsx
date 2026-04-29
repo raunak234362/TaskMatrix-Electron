@@ -100,7 +100,7 @@ const AllRFI = ({ rfiData = [] }) => {
             : "bg-orange-100 text-black shadow-sm"
             }`}
         >
-          {row.original.status ? "ANSWERED" : "PENDING"}
+          {row.original.status ? "PENDING" : "ANSWERED"}
         </span>
       ),
     },
