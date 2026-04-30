@@ -3800,6 +3800,51 @@ class Service {
     }
   }
 
+  // Project Progress Reports
+  static async createProjectProgressReport(data) {
+    try {
+      const response = await api.post('projectProgressReport', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error creating progress report:', error)
+      throw error
+    }
+  }
+
+  static async getProjectProgressReportsByProjectId(projectId) {
+    try {
+      const response = await api.get(`projectProgressReport/project/${projectId}`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching progress reports by project ID:', error)
+      throw error
+    }
+  }
+
+  static async getProjectProgressReportById(id) {
+    try {
+      const response = await api.get(`projectProgressReport/${id}`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching progress report by ID:', error)
+      throw error
+    }
+  }
+
+  static async createProjectProgressReportResponse(data) {
+    try {
+      const response = await api.post('projectProgressReport/response', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error creating progress report response:', error)
+      throw error
+    }
+  }
+
 }
 
 export default Service

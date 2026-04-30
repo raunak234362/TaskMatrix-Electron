@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import RichTextEditor from '../../fields/RichTextEditor';
 import MultipleFileUpload from '../../fields/MultipleFileUpload';
 
-const AddCoordinationDrawingResponse = ({ drawingId, parentResponseId, onCancel, onSuccess }) => {
+const AddProjectProgressReportResponse = ({ reportId, parentResponseId, onCancel, onSuccess }) => {
   const [description, setDescription] = useState('');
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,7 @@ const AddCoordinationDrawingResponse = ({ drawingId, parentResponseId, onCancel,
     try {
       setLoading(true);
       const data = new FormData();
-      data.append('drawingId', drawingId);
+      data.append('reportId', reportId);
       data.append('description', description);
       if (parentResponseId) {
         data.append('parentResponseId', parentResponseId);
@@ -29,11 +29,11 @@ const AddCoordinationDrawingResponse = ({ drawingId, parentResponseId, onCancel,
         data.append('files', file);
       });
 
-      await Service.createCoordinationDrawingResponse(data);
+      await Service.createProjectProgressReportResponse(data);
       toast.success('Response added successfully');
       onSuccess();
     } catch (error) {
-      console.error('Error creating drawing response:', error);
+      console.error('Error creating report response:', error);
       toast.error('Failed to add response');
     } finally {
       setLoading(false);
@@ -41,7 +41,7 @@ const AddCoordinationDrawingResponse = ({ drawingId, parentResponseId, onCancel,
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-black shadow-xl overflow-hidden">
+    <div className="bg-white rounded-lg border border-black shadow-xl overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-slate-50">
         <h3 className="text-sm font-black uppercase tracking-widest text-slate-700">
           {parentResponseId ? 'Reply to Response' : 'Add Response'}
@@ -69,14 +69,14 @@ const AddCoordinationDrawingResponse = ({ drawingId, parentResponseId, onCancel,
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-2 border-2 border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-all"
+            className="px-6 py-2 border-2 border-slate-200 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-all"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-6 py-2 bg-[#6bbd45] text-black rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:bg-green-500 transition-all disabled:opacity-50"
+            className="px-6 py-2 bg-[#6bbd45] text-black rounded-lg text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:bg-green-500 transition-all disabled:opacity-50 border border-black shadow-sm"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             Submit Response
@@ -87,4 +87,4 @@ const AddCoordinationDrawingResponse = ({ drawingId, parentResponseId, onCancel,
   );
 };
 
-export default AddCoordinationDrawingResponse;
+export default AddProjectProgressReportResponse;

@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, ArrowLeft, MessageSquare, Download, Clock, User, Paperclip, Share2, Reply } from 'lucide-react';
-import Service from '../../../api/Service';
+import { Activity, Clock, Download, User, ArrowLeft, Loader2, MessageSquare, Reply } from 'lucide-react';
 import { format } from 'date-fns';
-import AddCoordinationDrawingResponse from './AddCoordinationDrawingResponse';
-import { getBaseURL } from '../../../api/backendConfig';
-import { toast } from 'react-toastify';
-import RenderFiles from '../../ui/RenderFiles';
+import Service from '../../api/Service';
+import RenderFiles from '../ui/RenderFiles';
+import AddProjectProgressReportResponse from './AddProjectProgressReportResponse';
 
 const ResponseItem = ({ response, isChild = false, onReply }) => {
   const [showChildren, setShowChildren] = useState(false);
@@ -68,7 +66,7 @@ const ResponseItem = ({ response, isChild = false, onReply }) => {
           <div className="mt-8 pt-8 border-t border-black/5">
             <RenderFiles 
               files={response.files} 
-              table="coordinationDrawingResponse" 
+              table="projectProgressReportResponse" 
               parentId={response.id} 
               hideHeader={true}
             />
@@ -87,123 +85,61 @@ const ResponseItem = ({ response, isChild = false, onReply }) => {
   );
 };
 
-const CoordinationDrawingDetails = ({ drawingId, onBack }) => {
-  const [drawing, setDrawing] = useState(null);
+const ProjectProgressReportDetails = ({ reportId, onBack }) => {
+  const [report, setReport] = useState(null);
   const [responses, setResponses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddResponse, setShowAddResponse] = useState(false);
   const [selectedParentId, setSelectedParentId] = useState(null);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [drawingRes, responsesRes] = await Promise.all([
-        Service.getCoordinationDrawingById(drawingId),
-        Service.getResponsesByDrawingId(drawingId)
-      ]);
-      
-      setDrawing(Array.isArray(drawingRes) ? drawingRes[0] : (drawingRes?.data || drawingRes));
-      setResponses(Array.isArray(responsesRes) ? responsesRes : (responsesRes?.data || []));
-    } catch (error) {
-      console.error('Error fetching drawing details:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDownload = async (e, parentId, fileId, originalName, type = 'drawing') => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const baseURL = getBaseURL();
-    const endpoint = type === 'drawing' 
-      ? `coordinationDrawing/viewfile/${parentId}/${fileId}`
-      : `coordinationDrawing/response/viewfile/${parentId}/${fileId}`;
-    
-    const downloadUrl = `${baseURL}/v1/${endpoint}`;
-
-    try {
-      const token = sessionStorage.getItem("token");
-      const response = await fetch(downloadUrl, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error("Download failed");
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = originalName || "download";
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error("Error downloading file:", error);
-      toast.error("Error downloading file");
-    }
-  };
-
-  const handleShare = async (e, parentId, fileId, type = 'coordinationDrawing') => {
-    e.preventDefault();
-    e.stopPropagation();
-    try {
-      const response = await Service.createShareLink(
-        type,
-        parentId,
-        fileId
-      );
-      if (response.shareUrl) {
-        await navigator.clipboard.writeText(response.shareUrl);
-        toast.success("Link copied to clipboard!");
-      } else {
-        toast.error("Failed to generate link");
-      }
-    } catch (error) {
-      console.error("Error sharing file:", error);
-      toast.error("Error generating share link");
-    }
-  };
-
   useEffect(() => {
-    if (drawingId) {
-      fetchData();
-    }
-  }, [drawingId]);
+    const fetchDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await Service.getProjectProgressReportById(reportId);
+        const reportData = response?.data || response;
+        setReport(reportData);
+        setResponses(reportData?.responses || []);
+      } catch (error) {
+        console.error('Error fetching progress report details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (reportId) fetchDetails();
+  }, [reportId]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6bbd45]"></div>
+        <Loader2 className="w-10 h-10 animate-spin text-[#6bbd45]" />
       </div>
     );
   }
 
-  if (!drawing) {
+  if (!report) {
     return (
       <div className="p-8 text-center text-red-500 font-bold">
-        Drawing not found.
+        Report not found.
       </div>
     );
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-6xl rounded-lg overflow-hidden shadow-2xl flex flex-col h-[90vh] border border-black">
+      <div className="bg-white w-full max-w-5xl rounded-lg overflow-hidden shadow-2xl flex flex-col h-[85vh] border border-black">
         {/* Header */}
         <div className="px-10 py-6 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
           <div className="flex flex-col">
-            <h2 className="text-xl font-black uppercase tracking-tight text-black">{drawing.title}</h2>
+            <h2 className="text-xl font-black uppercase tracking-tight text-black">{report.title}</h2>
             <div className="flex items-center gap-3 mt-1">
               <span className="px-3 py-1 rounded-lg bg-green-50 text-black border border-black font-black uppercase text-[10px] tracking-widest">
-                {drawing.stage}
+                {report.stage}
               </span>
               <span className="text-[10px] text-black font-black uppercase tracking-widest flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5" />
-                {format(new Date(drawing.createdAt), 'dd MMM yyyy, hh:mm a')}
+                {format(new Date(report.createdAt), 'dd MMM yyyy, hh:mm a')}
               </span>
             </div>
           </div>
@@ -233,12 +169,12 @@ const CoordinationDrawingDetails = ({ drawingId, onBack }) => {
             <div className="lg:col-span-2 space-y-10">
               <div className="bg-white rounded-lg border border-black p-8 shadow-sm">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-6 flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" />
-                  Message / Details
+                  <Activity className="w-4 h-4" />
+                  Report Details
                 </h3>
                 <div 
                   className="prose prose-sm max-w-none text-black font-bold leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: drawing.description }}
+                  dangerouslySetInnerHTML={{ __html: report.message }}
                 />
               </div>
 
@@ -275,32 +211,32 @@ const CoordinationDrawingDetails = ({ drawingId, onBack }) => {
               <div className="bg-white rounded-lg border border-black p-8 shadow-sm">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-6 flex items-center gap-2">
                   <User className="w-4 h-4" />
-                  Creator Details
+                  Reporter Details
                 </h3>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-black text-black uppercase tracking-widest opacity-60">Created By:</span>
                     <span className="text-xs font-black text-black uppercase">
-                      {drawing.createdBy?.firstName} {drawing.createdBy?.lastName}
+                      {report.createdBy?.firstName} {report.createdBy?.lastName}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-black text-black uppercase tracking-widest opacity-60">Username:</span>
-                    <span className="text-xs font-black text-black uppercase">{drawing.createdBy?.username}</span>
+                    <span className="text-xs font-black text-black uppercase">{report.createdBy?.username}</span>
                   </div>
                 </div>
               </div>
 
-              {drawing.files && drawing.files.length > 0 && (
+              {report.files && report.files.length > 0 && (
                 <div className="bg-white rounded-lg border border-black p-8 shadow-sm">
                   <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-6 flex items-center gap-2">
                     <Download className="w-4 h-4" />
                     Attachments
                   </h3>
                   <RenderFiles 
-                    files={drawing.files} 
-                    table="coordinationDrawing" 
-                    parentId={drawing.id} 
+                    files={report.files} 
+                    table="projectProgressReport" 
+                    parentId={report.id} 
                     hideHeader={true}
                   />
                 </div>
@@ -313,13 +249,19 @@ const CoordinationDrawingDetails = ({ drawingId, onBack }) => {
       {showAddResponse && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-2xl">
-            <AddCoordinationDrawingResponse
-              drawingId={drawingId}
+            <AddProjectProgressReportResponse
+              reportId={reportId}
               parentResponseId={selectedParentId}
               onCancel={() => setShowAddResponse(false)}
               onSuccess={() => {
                 setShowAddResponse(false);
-                fetchData();
+                const fetchDetails = async () => {
+                  const response = await Service.getProjectProgressReportById(reportId);
+                  const reportData = response?.data || response;
+                  setReport(reportData);
+                  setResponses(reportData?.responses || []);
+                };
+                fetchDetails();
               }}
             />
           </div>
@@ -329,4 +271,4 @@ const CoordinationDrawingDetails = ({ drawingId, onBack }) => {
   );
 };
 
-export default CoordinationDrawingDetails;
+export default ProjectProgressReportDetails;
