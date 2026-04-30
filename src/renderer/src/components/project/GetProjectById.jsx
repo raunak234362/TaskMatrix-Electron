@@ -530,16 +530,18 @@ const GetProjectById = ({ id, onClose }) => {
                 </div>
               </div>
 
+ {/* Project Progress Reports */}
+              <div className="bg-white rounded-3xl border border-slate-50 p-6">
+                <ProjectProgress projectId={id} />
+              </div>
+
+
               {/* Progress and Milestones */}
               <div className="bg-white rounded-3xl border border-slate-50 p-6">
                 <ProjectMilestoneMetrics milestones={milestones} projectId={id} onUpdate={fetchProject} />
               </div>
 
-              {/* Project Progress Reports */}
-              <div className="bg-white rounded-3xl border border-slate-50 p-6">
-                <ProjectProgress projectId={id} />
-              </div>
-
+             
               {/* ✅ Other Tasks — Logged Time (grouped by bundleKey) */}
               {Object.keys(otherTasksByBundle).length > 0 && (
                 <div className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
