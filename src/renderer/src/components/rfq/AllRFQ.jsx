@@ -1,11 +1,30 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import DataTable from "../ui/table";
-import { Search, X } from "lucide-react";
+import { Search, X, Filter } from "lucide-react";
 
 import GetRFQByID from "./GetRFQByID";
 
 const AllRFQ = ({ rfq }) => {
   const userType = localStorage.getItem("userType");
+
+  // Dynamic filter options extraction
+  const statusOptions = useMemo(() => {
+    const statuses = new Set();
+    rfq?.forEach(item => {
+      const status = item.wbtStatus || item.status || 'PENDING';
+      statuses.add(status);
+    });
+    return Array.from(statuses).map(s => ({ label: s, value: s }));
+  }, [rfq]);
+
+  const fabricatorOptions = useMemo(() => {
+    const fabs = new Set();
+    rfq?.forEach(item => {
+      const name = item.fabricator?.fabName;
+      if (name) fabs.add(name);
+    });
+    return Array.from(fabs).map(f => ({ label: f, value: f }));
+  }, [rfq]);
 
   // Premium styled columns
   let columns = [
@@ -28,6 +47,13 @@ const AllRFQ = ({ rfq }) => {
     columns.push({
       accessorKey: "fabricator",
       header: "Fabricator",
+      enableColumnFilter: true,
+      filterType: "select",
+      filterOptions: fabricatorOptions,
+      filterFn: (row, columnId, filterValue) => {
+        const fabName = row.original?.fabricator?.fabName;
+        return fabName === filterValue;
+      },
       cell: ({ row }) => (
         <span className="text-sm font-semibold text-gray-600">
           {(row.original)?.fabricator?.fabName || "—"}
@@ -54,6 +80,13 @@ const AllRFQ = ({ rfq }) => {
     {
       accessorKey: "wbtStatus",
       header: "Status",
+      enableColumnFilter: true,
+      filterType: "select",
+      filterOptions: statusOptions,
+      filterFn: (row, columnId, filterValue) => {
+        const status = row.original.wbtStatus || row.original.status || 'PENDING';
+        return status === filterValue;
+      },
       cell: ({ row }) => {
         const status = row.original.wbtStatus || row.original.status || 'PENDING';
         const colors = {

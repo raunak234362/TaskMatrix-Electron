@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { X, Send, Loader2 } from 'lucide-react';
-import Service from '../../../api/Service';
+import Service from '../../api/Service';
 import { toast } from 'react-toastify';
-import RichTextEditor from '../../fields/RichTextEditor';
-import MultipleFileUpload from '../../fields/MultipleFileUpload';
+import RichTextEditor from '../fields/RichTextEditor';
+import MultipleFileUpload from '../fields/MultipleFileUpload';
 
 const AddProjectProgressReportResponse = ({ reportId, parentResponseId, onCancel, onSuccess }) => {
   const [description, setDescription] = useState('');
