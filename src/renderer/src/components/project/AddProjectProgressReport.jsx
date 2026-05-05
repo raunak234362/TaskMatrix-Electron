@@ -44,15 +44,15 @@ const AddProjectProgressReport = ({ projectId, onCancel, onSuccess }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-black shadow-sm overflow-hidden animate-in fade-in zoom-in duration-300">
+    <div className="bg-white rounded-2xl h-[90vh] border border-black shadow-sm overflow-hidden animate-in fade-in zoom-in duration-300">
       <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-slate-50">
-        <h3 className="text-sm font-black uppercase tracking-widest text-slate-700">Add Progress Report</h3>
-        <button onClick={onCancel} className="text-slate-400 hover:text-slate-600 transition-colors">
-          <X className="w-5 h-5" />
+        <h3 className="text-sm font-black uppercase tracking-widest text-slate-700">Add Weekly Progress Report</h3>
+        <button onClick={onCancel} className="text-slate-900 font-semibold bg-red-200 px-2 py-1 rounded-lg border border-red-500 shadow-sm hover:bg-red-500 hover:text-white transition-colors">
+          CLOSE
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="p-6 space-y-6 h-[80vh] overflow-y-auto">
         <div className="space-y-4">
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Title *</label>

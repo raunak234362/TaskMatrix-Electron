@@ -80,7 +80,7 @@ const ProjectProgress = ({ projectId }) => {
           <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-black/5">
             <Activity className="w-5 h-5 text-black" />
           </div>
-          <h2 className="text-lg font-black text-black uppercase tracking-tight">Progress Reports</h2>
+          <h2 className="text-lg font-black text-black uppercase tracking-tight">Weekly Progress Reports</h2>
         </div>
         <button
           onClick={() => setIsAdding(true)}
