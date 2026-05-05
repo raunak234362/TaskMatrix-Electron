@@ -178,7 +178,16 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                             options={activeRecipientOptions}
                             isLoading={fetchingEngineers}
                             value={activeRecipientOptions.filter(opt => multipleRecipients.includes(opt.value))}
-                            onChange={(options) => setMultipleRecipients(options ? options.map(o => o.value) : [])}
+                            onChange={(options) => {
+                                const values = options ? options.map(o => o.value) : [];
+                                setMultipleRecipients(values);
+                                if (options && options.length > 0) {
+                                    const names = options.map((o) => o.label.split(" (")[0]).join(", ");
+                                    setDescription(`<p>Dear ${names},</p><br/>`);
+                                } else {
+                                    setDescription("");
+                                }
+                            }}
                             placeholder={fetchingEngineers ? "Fetching engineers..." : "Assign recipients..."}
                             styles={{
                                 control: (base) => ({
