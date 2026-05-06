@@ -83,7 +83,7 @@ const AddCO = ({ project, onSuccess }) => {
       formData.append("link", data.link || "");
       formData.append("description", description);
       formData.append("sentOn", new Date().toISOString());
-      formData.append("isAproovedByAdmin", "PENDING");
+      formData.append("isAproovedByAdmin", data.isAproovedByAdmin || false);
 
       files.forEach((file) => formData.append("files", file));
 
@@ -149,6 +149,17 @@ const AddCO = ({ project, onSuccess }) => {
           />
           <Input label="Reason" {...register("reason")} />
           <Input label="Reference Link" {...register("link")} />
+          <div className="flex items-center gap-2 pt-6">
+            <input
+              type="checkbox"
+              id="isAproovedByAdmin"
+              {...register("isAproovedByAdmin")}
+              className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+            />
+            <label htmlFor="isAproovedByAdmin" className="text-sm font-medium text-gray-700">
+              Approved By Admin
+            </label>
+          </div>
         </div>
 
         <div className="space-y-1">

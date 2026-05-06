@@ -388,42 +388,64 @@ const AddRFQ = ({ onSuccess }) => {
     </section>
 
           {/* Service Matrix Section */}
-          <section className="space-y-3 md:space-y-4 pt-4 md:pt-5 border-gray-200">
+          <section className="space-y-4 md:space-y-6 pt-4 md:pt-5">
+            {/* Row 1: Scopes */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <div className="space-y-3 border border-black p-4 md:p-6 rounded-2xl">
+              {/* CONNECTION DESIGN SCOPE */}
+              <div className="space-y-4 border border-black p-5 md:p-8 rounded-[2rem] bg-white shadow-sm">
                 <h3 className="text-sm text-black font-black uppercase tracking-[0.2em] flex items-center gap-2">
                   Connection Design Scope
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-                  <Toggle label="Main Design" {...register("connectionDesign")} />
-                  <Toggle label="Misc Design" {...register("miscDesign")} />
-                  <Toggle label="Customer Design" {...register("customerDesign")} />
+                <div className="grid grid-cols-1 gap-y-4">
+                  <Toggle label="MAIN DESIGN" {...register("connectionDesign")} />
+                  <Toggle label="MISC DESIGN" {...register("miscDesign")} />
+                  <Toggle label="CUSTOMER DESIGN" {...register("customerDesign")} />
                 </div>
               </div>
 
-              <div className="space-y-3 border border-black p-4 md:p-6 rounded-2xl">
-                <h3 className="text-sm text-black font-black uppercase tracking-[0.2em] flex items-center gap-2">
+              {/* DETAILING SCOPE */}
+              <div className="space-y-4 border border-black p-5 md:p-8 rounded-[2rem] bg-white shadow-sm">
+                <h3 className="text-sm text-black font-black uppercase tracking-[0.2em] flex items-center gap-2 ">
                   Detailing Scope
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-                  <Toggle label="Main Steel" {...register("detailingMain")} />
-                  <Toggle label="Misc Steel" {...register("detailingMisc")} />
-                  <Toggle label="MTO - Manual" {...register("MTOManual")} />
+                <div className="grid grid-cols-1 gap-y-4">
+                  <Toggle label="MAIN STEEL" {...register("detailingMain")} />
+                  <Toggle label="MISC STEEL" {...register("detailingMisc")} />
+                </div>
+              </div>
+            </div>
+
+            {/* Row 2: MTO */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <div className="space-y-4 border border-black p-5 md:p-8 rounded-[2rem] bg-white shadow-sm">
+                <h3 className="text-sm text-black font-black uppercase tracking-[0.2em] flex items-center gap-2 ">
+                  Material Take Off
+                </h3>
+                <div className="grid grid-cols-1 gap-y-4">
+                  <Toggle label="MTO - MANUAL" {...register("MTOManual")} />
                   <Toggle
-                    label="MTO - Stick Model"
+                    label="MTO - STICK MODEL"
                     {...register("mtoStickModelEnabled")}
                   />
                 </div>
                 {mtoStickModelEnabled && (
-                  <div className="mt-3 space-y-1">
-                    <label className="block text-xs font-black text-black uppercase tracking-widest">
+                  <div className="mt-4 space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <label className="block text-[10px] font-black text-black uppercase tracking-widest opacity-40">
                       MTO Stick Model Details
                     </label>
-                    <input
-                      {...register("MTOStickModel")}
-                      placeholder="Enter MTO Stick Model details..."
-                      className="w-full px-4 py-2.5 border border-black rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#6bbd45]/40 focus:border-[#6bbd45] transition-all bg-white"
-                    />
+                    <div className="border border-black rounded-2xl overflow-hidden bg-white min-h-[150px]">
+                      <Controller
+                        name="MTOStickModel"
+                        control={control}
+                        render={({ field }) => (
+                          <RichTextEditor
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            placeholder="Enter MTO Stick Model details..."
+                          />
+                        )}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
