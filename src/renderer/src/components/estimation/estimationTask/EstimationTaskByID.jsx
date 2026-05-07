@@ -19,10 +19,15 @@ import {
   Hash,
   FolderOpen,
   Timer,
-  Users
+  Users,
+  Edit2,
+  Settings,
+  MessageSquare
 } from 'lucide-react'
 import CreateLineItemGroup from '../estimationLineItem/CreateLineItemGroup'
 import LineItemGroup from '../estimationLineItem/LineItemGroup'
+import EditEstimationTaskByID from './EditEstimationTaskByID'
+import ReviewEstimationTaskModal from './ReviewEstimationTaskModal'
 
 // Helper Components
 const InfoItem = ({ icon, label, value }) => (
@@ -75,6 +80,13 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
   const [summary, setSummary] = useState(null)
   const [showWorkSummary, setShowWorkSummary] = useState(true)
   const [refreshGroups, setRefreshGroups] = useState(0)
+  const [isEditing, setIsEditing] = useState(false)
+  const [showStatusModal, setShowStatusModal] = useState(false)
+  const [showReviewModal, setShowReviewModal] = useState(false)
+
+  const userRole = sessionStorage.getItem('userRole')
+  const canEdit = ['ESTIMATION_HEAD', 'OPERATION_EXECUTIVE', 'DEPUTY_MANAGER'].includes(userRole)
+
   const fetchTask = async () => {
     if (!id) return
     try {
@@ -254,12 +266,33 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
               <h2 className="text-2xl  text-gray-700">Estimation Task Details</h2>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
-          >
-            Close
-          </button>
+          <div className="flex items-center gap-3">
+            {canEdit && (
+              <>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="px-6 py-1.5 bg-indigo-50 text-indigo-700 border-2 border-indigo-700/80 rounded-lg hover:bg-indigo-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm flex items-center gap-2"
+                >
+                  <Edit2 size={16} />
+                  Edit
+                </button>
+               
+                <button
+                  onClick={() => setShowReviewModal(true)}
+                  className="px-6 py-1.5 bg-amber-50 text-amber-700 border-2 border-amber-700/80 rounded-lg hover:bg-amber-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm flex items-center gap-2"
+                >
+                  <MessageSquare size={16} />
+                  Review
+                </button>
+              </>
+            )}
+            <button
+              onClick={onClose}
+              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+            >
+              Close
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Content */}
@@ -427,6 +460,43 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
             </div>
           </div>
         </div>
+
+        {/* Edit Modal */}
+        {isEditing && (
+          <EditEstimationTaskByID
+            task={task}
+            onClose={() => setIsEditing(false)}
+            onSuccess={() => {
+              fetchTask()
+              if (refresh) refresh()
+            }}
+          />
+        )}
+
+        {/* Status Modal */}
+        {showStatusModal && (
+          <UpdateEstimationTaskStatusModal
+            taskId={task.id}
+            currentStatus={task.status}
+            onClose={() => setShowStatusModal(false)}
+            refresh={() => {
+              fetchTask()
+              if (refresh) refresh()
+            }}
+          />
+        )}
+
+        {/* Review Modal */}
+        {showReviewModal && (
+          <ReviewEstimationTaskModal
+            task={task}
+            onClose={() => setShowReviewModal(false)}
+            refresh={() => {
+              fetchTask()
+              if (refresh) refresh()
+            }}
+          />
+        )}
       </div>
     </div>
   )

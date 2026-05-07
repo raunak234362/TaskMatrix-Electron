@@ -784,6 +784,36 @@ class Service {
     }
   }
 
+  // Update Estimation Task By ID
+  static async UpdateEstimationTaskById(id, data) {
+    try {
+      const response = await api.patch(`estimation/estimation-tasks/${id}`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // Review Estimation Task By ID
+  static async ReviewEstimationTaskById(id, data) {
+    try {
+      const response = await api.patch(`estimation/estimation-tasks/${id}/review`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   // Get Estimation Task By ID
   static async GetEstimationTaskById(id) {
     try {

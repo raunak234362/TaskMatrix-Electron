@@ -13,20 +13,22 @@ const AllEstimationTask = ({ estimations, onClose, estimationId, onRefresh }) =>
     // ─────────────── Columns ───────────────
     const columns = [
         {
+            header: 'Project Name',
+            accessorFn: (row) => row.estimation?.projectName || '—'
+        },
+        {
             header: 'Assigned To',
             accessorFn: (row) =>
                 `${row.assignedTo?.firstName ?? ''} ${row.assignedTo?.middleName ?? ''
                     } ${row.assignedTo?.lastName ?? ''}`.trim() || '—'
         },
         {
-            header: 'Assigned By',
-            accessorFn: (row) =>
-                `${row.assignedBy?.firstName ?? ''} ${row.assignedBy?.middleName ?? ''
-                    } ${row.assignedBy?.lastName ?? ''}`.trim() || '—'
+            header: 'Created At',
+            accessorFn: (row) => (row.createdAt ? format(new Date(row.createdAt), 'dd MMM yyyy') : '—')
         },
         {
-            header: 'End Date',
-            accessorFn: (row) => (row.endDate ? format(new Date(row.endDate), 'dd MMM yyyy') : '—')
+            header: 'Estimate Date',
+            accessorFn: (row) => (row.estimation?.estimateDate ? format(new Date(row.estimation.estimateDate), 'dd MMM yyyy') : '—')
         },
         {
             header: 'Status',
