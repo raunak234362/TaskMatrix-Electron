@@ -38,6 +38,7 @@ export const navItems = [
             'client_admin',
             'system_admin',
             'user',
+            'estimation_head'
         ]
     },
     {

@@ -56,7 +56,18 @@ function ColumnFilter({ column }) {
         value={column.getFilterValue()}
         onChange={(_, val) => column.setFilterValue(val || undefined)}
         placeholder={`All ${header}`}
-        className="py-1! text-xs!"
+        className="py-2! text-base!"
+      />
+    );
+  }
+
+  if (filterType === "date") {
+    return (
+      <input
+        type="date"
+        value={column.getFilterValue() ?? ""}
+        onChange={(e) => column.setFilterValue(e.target.value || undefined)}
+        className="w-full px-3 py-2 bg-gray-50 border-2 border-transparent focus:border-green-500/20 focus:bg-white rounded-xl text-base font-medium text-gray-700 outline-none transition-all shadow-sm focus:ring-2 focus:ring-green-500/10"
       />
     );
   }
@@ -67,7 +78,7 @@ function ColumnFilter({ column }) {
       <input
         value={column.getFilterValue() ?? ""}
         onChange={(e) => column.setFilterValue(e.target.value || undefined)}
-        className="w-full pl-10 pr-4 py-2 bg-gray-50 border-2 border-transparent focus:border-green-500/20 focus:bg-white rounded-xl text-sm font-bold text-gray-700 outline-none transition-all shadow-sm focus:ring-2 focus:ring-green-500/10 placeholder:text-gray-400 placeholder:font-medium"
+        className="w-full pl-10 pr-4 py-2 bg-gray-50 border-2 border-transparent focus:border-green-500/20 focus:bg-white rounded-xl text-base font-bold text-gray-700 outline-none transition-all shadow-sm focus:ring-2 focus:ring-green-500/10 placeholder:text-gray-400 placeholder:font-medium"
         placeholder={`Search ${header}...`}
       />
     </div>
@@ -266,7 +277,7 @@ export default function DataTable({
                   key={column.id}
                   className="flex flex-col gap-2 min-w-[240px]"
                 >
-                  <label className="text-[11px] font-black text-black/40 uppercase tracking-widest ml-1">
+                  <label className="text-sm font-black text-black/40 uppercase tracking-widest ml-1">
                     {column.columnDef.header}
                   </label>
                   <ColumnFilter column={column} />
@@ -300,7 +311,7 @@ export default function DataTable({
                     {hg.headers.map((header) => (
                       <th
                         key={header.id}
-                        className="px-4 py-3 text-left text-[10px] md:text-xs font-black uppercase tracking-widest bg-gray-200 text-gray-700 border-b border-black/5"
+                        className="px-4 py-4 text-left text-sm md:text-base font-black uppercase tracking-widest bg-gray-200 text-gray-700 border-b border-black/5"
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         <div className="flex items-center gap-1 cursor-pointer">
@@ -342,7 +353,7 @@ export default function DataTable({
                       }}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id} className="px-4 py-3 text-sm md:text-md text-gray-800">
+                        <td key={cell.id} className="px-4 py-4 text-base md:text-lg font-medium text-gray-800">
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext(),

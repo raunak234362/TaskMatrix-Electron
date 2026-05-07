@@ -13,12 +13,6 @@ const EstimationStats = ({ stats }) => {
       value: stats.totalAwarded,
       icon: Trophy,
       color: 'green'
-    },
-    {
-      label: 'Total Number of hours Worked',
-      value: stats.totalHours,
-      icon: Clock,
-      color: 'purple'
     }
   ]
 
@@ -41,24 +35,21 @@ const EstimationStats = ({ stats }) => {
   }
 
   return (
-    <div className="bg-white p-6 rounded-3xl border border-black shadow-sm h-full">
-      <h2 className="text-xl font-black text-black uppercase tracking-tight mb-8">Estimation Stats</h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="w-full h-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
         {cards.map((card) => {
           return (
             <div
               key={card.label}
-              className="flex items-center gap-5 p-5 rounded-2xl border border-black  shadow-sm transition-all hover:shadow-md"
+              className="flex items-center justify-between p-6 rounded-lg border border-black shadow-sm transition-all hover:shadow-md bg-white"
             >
-              <div className="p-3.5 rounded-xl bg-green-200 text-black shrink-0 shadow-sm">
-                <card.icon size={22} className="stroke-[2.5]" />
+              <div className="flex items-center gap-5">
+                <div className="p-3.5 rounded-lg bg-green-200 text-black shrink-0 shadow-sm">
+                  <card.icon size={32} className="stroke-[2.5]" />
+                </div>
+                <span className="text-base font-black text-black uppercase tracking-widest leading-none">{card.label}</span>
               </div>
-
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black text-black/40 uppercase tracking-widest leading-none mb-1.5">{card.label}</span>
-                <span className="text-2xl font-black text-black tracking-tight">{card.value}</span>
-              </div>
+              <span className="text-5xl font-black text-black tracking-tight">{card.value}</span>
             </div>
           )
         })}
