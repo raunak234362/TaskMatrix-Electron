@@ -231,9 +231,15 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
                 value={
                   activeRecipientOptions.filter((o) => (field.value || []).includes(o.value))
                 }
-                onChange={(options) =>
-                  field.onChange(options ? options.map((o) => o.value) : [])
-                }
+                onChange={(options) => {
+                  field.onChange(options ? options.map((o) => o.value) : []);
+                  if (options && options.length > 0) {
+                    const names = options.map((o) => o.label.split(" (")[0]).join(", ");
+                    setDescription(`<p>Dear ${names},</p><br/>`);
+                  } else {
+                    setDescription("");
+                  }
+                }}
                 className="text-sm"
               />
             )}

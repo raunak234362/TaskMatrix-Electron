@@ -83,7 +83,7 @@ const AddCO = ({ project, onSuccess }) => {
       formData.append("link", data.link || "");
       formData.append("description", description);
       formData.append("sentOn", new Date().toISOString());
-      formData.append("isAproovedByAdmin", "PENDING");
+      formData.append("isAproovedByAdmin", data.isAproovedByAdmin || false);
 
       files.forEach((file) => formData.append("files", file));
 
@@ -122,7 +122,15 @@ const AddCO = ({ project, onSuccess }) => {
               placeholder="Fabricator Contact"
               options={pocOptions}
               value={pocOptions.filter((o) => (field.value || []).includes(o.value))}
-              onChange={(options) => field.onChange(options ? options.map((o) => o.value) : [])}
+              onChange={(options) => {
+                field.onChange(options ? options.map((o) => o.value) : []);
+                if (options && options.length > 0) {
+                  const names = options.map((o) => o.label.split(" (")[0]).join(", ");
+                  setDescription(`<p>Dear ${names},</p><br/>`);
+                } else {
+                  setDescription("");
+                }
+              }}
             />
           )}
         />
@@ -141,6 +149,17 @@ const AddCO = ({ project, onSuccess }) => {
           />
           <Input label="Reason" {...register("reason")} />
           <Input label="Reference Link" {...register("link")} />
+          <div className="flex items-center gap-2 pt-6">
+            <input
+              type="checkbox"
+              id="isAproovedByAdmin"
+              {...register("isAproovedByAdmin")}
+              className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+            />
+            <label htmlFor="isAproovedByAdmin" className="text-sm font-medium text-gray-700">
+              Approved By Admin
+            </label>
+          </div>
         </div>
 
         <div className="space-y-1">

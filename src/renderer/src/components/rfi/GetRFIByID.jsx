@@ -7,6 +7,7 @@ import RenderFiles from "../common/RenderFiles";
 import RFIResponseModal from "./RFIResponseModal";
 import RFIResponseDetailsModal from "./RFIResponseDetailsModal";
 import { useSelector } from "react-redux";
+import EditRFI from "./EditRFI";
 
 const Info = ({ label, value }) => (
   <div>
@@ -21,6 +22,7 @@ const GetRFIByID = ({ id }) => {
   const [rfi, setRfi] = useState(null);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedResponse, setSelectedResponse] = useState(null);
   const users = useSelector((state) => state.userInfo?.staffData || []);
   //
@@ -144,14 +146,23 @@ const GetRFIByID = ({ id }) => {
               <h1 className="text-2xl  text-black font-semibold">
                 {rfi.subject}
               </h1>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${rfi.isAproovedByAdmin
-                  ? "bg-[#6bbd45]/15 text-black"
-                  : "bg-[#6bbd45]/15 text-black"
-                  }`}
-              >
-                {rfi.isAproovedByAdmin ? "Approved" : "Pending"}
-              </span>
+              <div className="flex gap-5">
+                <Button
+                  onClick={() => setShowEditModal(true)}
+                  className="bg-white text-black border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-all duration-200 flex items-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pencil"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
+                  Edit RFI
+                </Button>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${rfi.isAproovedByAdmin
+                    ? "bg-[#6bbd45]/15 text-black"
+                    : "bg-[#6bbd45]/15 text-black"
+                    }`}
+                >
+                  {rfi.isAproovedByAdmin ? "Approved" : "Pending"}
+                </span>
+              </div>
             </div>
 
             {/* Basic Info */}
@@ -162,8 +173,8 @@ const GetRFIByID = ({ id }) => {
               value={
                 rfi.multipleRecipients?.length > 0
                   ? rfi.multipleRecipients
-                      .map((r) => `${r.firstName} ${r.lastName}`)
-                      .join(", ")
+                    .map((r) => `${r.firstName} ${r.lastName}`)
+                    .join(", ")
                   : "—"
               }
             />
@@ -197,13 +208,16 @@ const GetRFIByID = ({ id }) => {
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>
 
-              {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole?.includes("MANAGER")|| userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole === "DEPUTY_MANAGER") && (
-                <Button
-                  onClick={() => setShowModal(true)}
-                  className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
-                >
-                  + Add Response
-                </Button>
+              {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole?.includes("MANAGER") || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole === "DEPUTY_MANAGER") && (
+                <div className="flex gap-2">
+
+                  <Button
+                    onClick={() => setShowModal(true)}
+                    className="bg-[#6bbd45]/10 text-black border border-[#6bbd45] hover:bg-[#6bbd45]/20 shadow-sm transition-all duration-200"
+                  >
+                    + Add Response
+                  </Button>
+                </div>
               )}
             </div>
 
@@ -227,6 +241,23 @@ const GetRFIByID = ({ id }) => {
               onClose={() => setShowModal(false)}
               onSuccess={fetchRfi}
             />
+          )}
+
+          {/* Edit RFI Modal */}
+          {showEditModal && (
+            <div className="fixed inset-0 z-1000 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+              <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden w-full max-w-2xl max-h-[90vh] flex flex-col relative">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                  <EditRFI
+                    id={id}
+                    onSuccess={() => {
+                      setShowEditModal(false);
+                      fetchRfi();
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Details Modal */}

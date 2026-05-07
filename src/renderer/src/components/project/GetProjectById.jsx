@@ -36,6 +36,8 @@ import TeamsAnalytics from "./TeamsAnalytics";
 import AllProjectNotes from "./notes/AllProjectNotes";
 import AddAssistsModal from "./AddAssistsModal";
 import ProjectMilestoneMetrics from "./ProjectMilestoneMetrics.jsx";
+import ProjectProgress from "./ProjectProgress";
+import CoordinationDrawings from "./coordinationDrawings/CoordinationDrawings";
 
 const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);
@@ -405,6 +407,7 @@ const GetProjectById = ({ id, onClose }) => {
                 { key: "rfi", label: "RFI", icon: FileText },
                 { key: "submittals", label: "Submittals", icon: FileText },
                 { key: "changeOrder", label: "Change Order", icon: Settings },
+                { key: "coordinationDrawings", label: "Coordination Drawings", icon: FileText },
               ]
                 .filter(
                   (tab) => {
@@ -527,11 +530,18 @@ const GetProjectById = ({ id, onClose }) => {
                 </div>
               </div>
 
+ {/* Project Progress Reports */}
+              <div className="bg-white rounded-3xl border border-slate-50 p-6">
+                <ProjectProgress projectId={id} />
+              </div>
+
+
               {/* Progress and Milestones */}
-              <div className="bg-white rounded-3xl border- border-slate-50 p-6">
+              <div className="bg-white rounded-3xl border border-slate-50 p-6">
                 <ProjectMilestoneMetrics milestones={milestones} projectId={id} onUpdate={fetchProject} />
               </div>
 
+             
               {/* ✅ Other Tasks — Logged Time (grouped by bundleKey) */}
               {Object.keys(otherTasksByBundle).length > 0 && (
                 <div className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
@@ -1121,6 +1131,9 @@ const GetProjectById = ({ id, onClose }) => {
           )}
           {activeTab === "projectNotes" && (
             <AllProjectNotes projectId={id} project={project} />
+          )}
+          {activeTab === "coordinationDrawings" && (
+            <CoordinationDrawings projectId={id} />
           )}
         </div>
       </div >

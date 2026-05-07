@@ -102,7 +102,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
       formData.append("reason", data.reason || "");
       formData.append("link", data.link || "");
       formData.append("description", description);
-      
+
       const status = data.isAproovedByAdmin === "APPROVED" ? true : data.isAproovedByAdmin === "REJECTED" ? false : "PENDING";
       formData.append("isAproovedByAdmin", status);
 
@@ -150,7 +150,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
               />
               <Input label="Reason" {...register("reason")} />
               <Input label="Reference Link" {...register("link")} />
-              
+
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700">Status</label>
                 <select
@@ -226,43 +226,43 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                       <td className="p-2">
                         <input
                           {...register(`rows.${index}.referenceDoc`)}
-                           className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
+                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
                           placeholder="Ref..."
                         />
                       </td>
                       <td className="p-2">
                         <input
                           {...register(`rows.${index}.elements`)}
-                           className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
-                           placeholder="Elements..."
+                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
+                          placeholder="Elements..."
                         />
                       </td>
                       <td className="p-2">
                         <input
                           {...register(`rows.${index}.QtyNo`)}
                           type="number"
-                           className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
+                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
                         />
                       </td>
                       <td className="p-2">
                         <input
                           {...register(`rows.${index}.hours`)}
                           type="number"
-                           className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
+                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
                         />
                       </td>
                       <td className="p-2">
                         <input
                           {...register(`rows.${index}.cost`)}
                           type="number"
-                           className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
+                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
                         />
                       </td>
                       <td className="p-2">
                         <input
                           {...register(`rows.${index}.remarks`)}
-                           className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
-                           placeholder="Remarks..."
+                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
+                          placeholder="Remarks..."
                         />
                       </td>
                       <td className="p-2 text-center">
@@ -277,11 +277,11 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                     </tr>
                   ))}
                   {fields.length === 0 && (
-                     <tr>
-                        <td colSpan={9} className="p-8 text-center text-slate-400 italic bg-slate-50/30">
-                           No rows added. Click "Add Row" to contribute to the table.
-                        </td>
-                     </tr>
+                    <tr>
+                      <td colSpan={9} className="p-8 text-center text-slate-400 italic bg-slate-50/30">
+                        No rows added. Click "Add Row" to contribute to the table.
+                      </td>
+                    </tr>
                   )}
                 </tbody>
                 {fields.length > 0 && (

@@ -34,6 +34,7 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
     "CLIENT_ADMIN",
     "CLIENT_PROJECT_COORDINATOR",
     "CLIENT_GENERAL_CONSTRUCTOR",
+    "CLIENT_ESTIMATOR",
   ].includes(employeeData?.role || "");
 
   const roleOptions = [
@@ -48,6 +49,7 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
         ? [
           { label: "Client", value: "CLIENT" },
           { label: "Client Administrator", value: "CLIENT_ADMIN" },
+          { label: "Client Estimator", value: "CLIENT_ESTIMATOR" },
         ]
         : [
           { label: "STAFF", value: "STAFF" },

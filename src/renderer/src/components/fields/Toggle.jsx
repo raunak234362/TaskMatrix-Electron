@@ -14,12 +14,12 @@ const Toggle = forwardRef(
     const isChecked = props.checked;
 
     return (
-      <div className={`flex flex-row items-center w-full ${className}`}>
+      <div className={`flex flex-row items-center justify-between w-full group ${className}`}>
         {/* LABEL */}
         {label && (
           <label
             htmlFor={id}
-            className={`block mb-1 w-fit min-w-28 font-normal text-sm text-gray-700 cursor-pointer ${isChecked ? "font-semibold" : ""
+            className={`block text-[10px] font-black uppercase tracking-[0.15em] cursor-pointer transition-all ${isChecked ? "text-black" : "text-black/40 group-hover:text-black/60"
               }`}
           >
             {label}
@@ -34,11 +34,8 @@ const Toggle = forwardRef(
           onChange={onChange}
           ref={ref}
           {...props}
-          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+          className="w-4 h-4 accent-black border-2 border-black rounded cursor-pointer"
         />
-
-        {/* SELECTED TEXT */}
-        {isChecked && <span className="ml-2  text-green-500 animate-in fade-in zoom-in duration-200">Selected</span>}
       </div>
     );
   }
