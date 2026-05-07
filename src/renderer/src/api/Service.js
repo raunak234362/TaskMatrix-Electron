@@ -784,6 +784,21 @@ class Service {
     }
   }
 
+  //get all estimation tasks
+  static async GetAllEstimationTasks() {
+    try {
+      const response = await api.get(`estimation/estimation-tasks`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   // Update Estimation Task By ID
   static async UpdateEstimationTaskById(id, data) {
     try {

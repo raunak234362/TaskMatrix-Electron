@@ -1,5 +1,4 @@
-/* eslint-disable react/prop-types */
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import DataTable from '../../ui/table'
 import { format } from 'date-fns'
 import { X } from 'lucide-react'
@@ -10,35 +9,65 @@ const AllEstimationTask = ({ estimations, onClose, estimationId, onRefresh }) =>
     const [isAddingTask, setIsAddingTask] = useState(false)
     console.log(estimations)
 
+    const statusOptions = useMemo(() => {
+        const statuses = new Set((estimations || []).map((e) => e.status).filter(Boolean))
+        const dynamicOptions = Array.from(statuses).map((status) => ({
+            label: status,
+            value: status
+        }))
+        return [{ label: 'All Status', value: '' }, ...dynamicOptions]
+    }, [estimations])
+
     // ─────────────── Columns ───────────────
     const columns = [
         {
             header: 'Project Name',
-            accessorFn: (row) => row.estimation?.projectName || '—'
+            accessorFn: (row) => row.projectName || row.estimation?.projectName || '—',
+            id: 'projectName',
+            enableColumnFilter: true
         },
         {
             header: 'Assigned To',
-            accessorFn: (row) =>
-                `${row.assignedTo?.firstName ?? ''} ${row.assignedTo?.middleName ?? ''
-                    } ${row.assignedTo?.lastName ?? ''}`.trim() || '—'
+            accessorFn: (row) => {
+                const user = row.assignedTo || row.assignee;
+                if (!user) return '—';
+                return `${user.firstName ?? ''} ${user.middleName ?? ''} ${user.lastName ?? ''}`.trim() || user.username || '—';
+            },
+            id: 'assignedTo',
+            enableColumnFilter: true
         },
         {
             header: 'Created At',
-            accessorFn: (row) => (row.createdAt ? format(new Date(row.createdAt), 'dd MMM yyyy') : '—')
+            accessorFn: (row) => row.createdAt,
+            id: 'createdAt',
+            enableColumnFilter: true,
+            filterType: 'date',
+            cell: ({ row }) =>
+                row.original.createdAt ? format(new Date(row.original.createdAt), 'dd MMM yyyy') : '—'
         },
         {
             header: 'Estimate Date',
-            accessorFn: (row) => (row.estimation?.estimateDate ? format(new Date(row.estimation.estimateDate), 'dd MMM yyyy') : '—')
+            accessorFn: (row) => row.estimateDate || row.estimation?.estimateDate,
+            id: 'estimateDate',
+            enableColumnFilter: true,
+            filterType: 'date',
+            cell: ({ row }) => {
+                const date = row.original.estimateDate || row.original.estimation?.estimateDate;
+                return date ? format(new Date(date), 'dd MMM yyyy') : '—';
+            }
         },
         {
             header: 'Status',
-            accessorFn: (row) => row.status,
+            accessorKey: 'status',
+            enableColumnFilter: true,
+            filterType: 'select',
+            filterOptions: statusOptions,
             cell: ({ getValue }) => {
                 const status = getValue()
                 const color =
                     status === 'COMPLETED'
                         ? 'bg-green-100 text-green-800'
-                        : status === 'ASSIGNED'
+                        : status === 'ASSIGNED' || status === 'ASSIGN'
                             ? 'bg-yellow-100 text-yellow-800'
                             : status === 'BREAK'
                                 ? 'bg-orange-100 text-orange-800'

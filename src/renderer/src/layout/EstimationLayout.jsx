@@ -3,26 +3,41 @@ import { AddEstimation, AllEstimation } from "../components";
 import EstimationDashboard from "../components/estimation/EstimationDashboard";
 import Service from "../api/Service";
 import AllEstimationTask from "../components/estimation/estimationTask/AllEstimationTask";
+import AllAssignedTask from "../components/estimation/estimationTask/AllAssignedTask";
 
 const EstimationLayout = () => {
   const [activeTab, setActiveTab] = useState("dashboard"); // Default to dashboard
   const [estmation, setEstimation] = useState([]);
+  const [myTasks, setMyTasks] = useState([]);
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+
+  const managementRoles = ['estimation_head', 'admin', 'operation_executive', 'deputy_manager', 'operation-executive'];
+  const isManagement = managementRoles.includes(userRole);
+
   const fetchAllEstimation = async () => {
     try {
-      const estimationTask = await Service.GetEstimationTaskForAssignee();
-      console.log(estimationTask?.data);
-      setEstimation(estimationTask?.data);
+      const response = await Service.GetAllEstimationTasks()
+
+      const data = Array.isArray(response) ? response : response?.data || []
+      setEstimation(data)
     } catch (error) {
-      console.log(error);
+      console.error('Error fetching estimation tasks:', error)
     }
-  };
+  }
+
+  const fetchMyTasks = async () => {
+    try {
+      const response = await Service.GetEstimationTaskForAssignee()
+      const data = Array.isArray(response) ? response : response?.data || []
+      setMyTasks(data)
+    } catch (error) {
+      console.error('Error fetching my tasks:', error)
+    }
+  }
 
   useEffect(() => {
-    // We might not need to fetch all estimations here for the dashboard if the dashboard fetches its own data,
-    // but if we want to share data, we can pass it down.
-    // For now, let's keep it as is for AllEstimation tab.
     fetchAllEstimation();
+    fetchMyTasks();
   }, []);
 
   return (
@@ -38,6 +53,18 @@ const EstimationLayout = () => {
           >
             Estimation Home
           </button>
+          {isManagement && (
+              <button
+                onClick={() => setActiveTab("myTask")}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "myTask"
+                  ? "bg-[#ebf5ea] text-black border-black shadow-sm"
+                  : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+                  }`}
+              >
+                My Task
+              </button>
+            )
+          }
           <button
             onClick={() => setActiveTab("allEstimation")}
             className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "allEstimation"
@@ -47,22 +74,32 @@ const EstimationLayout = () => {
           >
             Estimation Task
           </button>
-
-          <button
-            onClick={() => setActiveTab("addEstimation")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "addEstimation"
-              ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-              : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
-              }`}
-          >
-            Add Estimation
-          </button>
+          {isManagement && (
+              <button
+                onClick={() => setActiveTab("addEstimation")}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "addEstimation"
+                  ? "bg-[#ebf5ea] text-black border-black shadow-sm"
+                  : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+                  }`}
+              >
+                Add Estimation
+              </button>
+            )
+          }
         </div>
       </div>
       <div className="flex-1 min-h-0 bg-white p-2 rounded-b-2xl overflow-y-auto">
         {activeTab === "dashboard" && (
           <div className="h-full">
             <EstimationDashboard />
+          </div>
+        )}
+        {activeTab === "myTask" && (
+          <div className="h-full">
+            <AllAssignedTask
+              estimations={myTasks}
+              onRefresh={fetchMyTasks}
+            />
           </div>
         )}
         {activeTab === "allEstimation" && (
