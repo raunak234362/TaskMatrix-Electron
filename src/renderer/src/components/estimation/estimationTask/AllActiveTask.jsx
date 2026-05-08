@@ -5,24 +5,24 @@ import { format } from 'date-fns'
 import DataTable from '../../ui/table'
 import EstimationTaskByID from './EstimationTaskByID'
 
-const AllAssignedTask = ({ 
-  estimations: externalEstimations, 
-  onRefresh: externalOnRefresh, 
-  isLoading: externalIsLoading 
+const AllAssignedTask = ({
+  estimations: externalEstimations,
+  onRefresh: externalOnRefresh,
+  isLoading: externalIsLoading
 }) => {
   const [internalLoading, setInternalLoading] = useState(false)
   const [internalEstimations, setInternalEstimations] = useState([])
-  
+
   const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalLoading
   const estimations = externalEstimations !== undefined ? externalEstimations : internalEstimations
   const onRefresh = externalOnRefresh || fetchEstimations
 
   const fetchEstimations = async () => {
     if (externalOnRefresh) return externalOnRefresh()
-    
+
     setInternalLoading(true)
     try {
-      const response = await Service.GetEstimationTaskForAssignee()
+      const response = await Service.GetEstimationTaskForME()
       const data = Array.isArray(response) ? response : response?.data || []
       setInternalEstimations(data)
     } catch (error) {
@@ -46,7 +46,7 @@ const AllAssignedTask = ({
       header: 'Project Name',
       accessorFn: (row) => row.estimation?.projectName || '—'
     },
-   
+
     {
       header: 'Assigned To',
       accessorFn: (row) =>

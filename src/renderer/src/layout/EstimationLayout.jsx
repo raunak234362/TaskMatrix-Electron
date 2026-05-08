@@ -3,7 +3,7 @@ import { AddEstimation, AllEstimation } from "../components";
 import EstimationDashboard from "../components/estimation/EstimationDashboard";
 import Service from "../api/Service";
 import AllEstimationTask from "../components/estimation/estimationTask/AllEstimationTask";
-import AllAssignedTask from "../components/estimation/estimationTask/AllAssignedTask";
+import AllAssignedTask from "../components/estimation/estimationTask/AllActiveTask";
 
 const EstimationLayout = () => {
   const [activeTab, setActiveTab] = useState("dashboard"); // Default to dashboard
@@ -16,8 +16,12 @@ const EstimationLayout = () => {
 
   const fetchAllEstimation = async () => {
     try {
-      const response = await Service.GetAllEstimationTasks()
-
+      let response
+      if (userRole === 'estimator') {
+        response = await Service.GetAllAssignedEstimationTaskForME()
+      } else {
+        response = await Service.GetAllEstimationTasks()
+      }
       const data = Array.isArray(response) ? response : response?.data || []
       setEstimation(data)
     } catch (error) {
@@ -27,7 +31,7 @@ const EstimationLayout = () => {
 
   const fetchMyTasks = async () => {
     try {
-      const response = await Service.GetEstimationTaskForAssignee()
+      const response = await Service.GetEstimationTaskForME()
       const data = Array.isArray(response) ? response : response?.data || []
       setMyTasks(data)
     } catch (error) {
@@ -53,18 +57,15 @@ const EstimationLayout = () => {
           >
             Estimation Home
           </button>
-          {isManagement && (
-              <button
-                onClick={() => setActiveTab("myTask")}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "myTask"
-                  ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-                  : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
-                  }`}
-              >
-                My Task
-              </button>
-            )
-          }
+          <button
+            onClick={() => setActiveTab("myTask")}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "myTask"
+              ? "bg-[#ebf5ea] text-black border-black shadow-sm"
+              : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+              }`}
+          >
+            Active Task
+          </button>
           <button
             onClick={() => setActiveTab("allEstimation")}
             className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "allEstimation"
@@ -72,19 +73,19 @@ const EstimationLayout = () => {
               : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
               }`}
           >
-            Estimation Task
+            All  Estimation Task
           </button>
           {isManagement && (
-              <button
-                onClick={() => setActiveTab("addEstimation")}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "addEstimation"
-                  ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-                  : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
-                  }`}
-              >
-                Add Estimation
-              </button>
-            )
+            <button
+              onClick={() => setActiveTab("addEstimation")}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "addEstimation"
+                ? "bg-[#ebf5ea] text-black border-black shadow-sm"
+                : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+                }`}
+            >
+              Add Estimation
+            </button>
+          )
           }
         </div>
       </div>

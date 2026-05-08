@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import DataTable from '../../ui/table'
 import { format } from 'date-fns'
 import { X } from 'lucide-react'
-import EstimationTaskByID from './EstimationTaskByID'
+import EstTaskByID from './EstTaskByID'
 import AddEstimationTask from './AddEstimationTask'
 
 const AllEstimationTask = ({ estimations, onClose, estimationId, onRefresh }) => {
@@ -151,7 +151,7 @@ const AllEstimationTask = ({ estimations, onClose, estimationId, onRefresh }) =>
                             detailComponent={({ row, close }) => {
                                 console.log('Detail Component Row:', row.id)
                                 const estimationUniqueId = row.id ?? row.estimationId ?? ''
-                                return <EstimationTaskByID id={estimationUniqueId} onClose={close} />
+                                return <EstTaskByID id={estimationUniqueId} onClose={close} />
                             }}
                             searchPlaceholder="Search tasks..."
 

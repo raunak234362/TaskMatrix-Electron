@@ -755,7 +755,7 @@ class Service {
   }
 
   // Estimation Task For Assignee
-  static async GetEstimationTaskForAssignee() {
+  static async GetEstimationTaskForME() {
     try {
       const response = await api.get(`estimation/estimation-tasks/my`, {
         headers: {
@@ -770,7 +770,7 @@ class Service {
   }
 
   // Get all assigned estimation task
-  static async GetAllAssignedEstimationTask() {
+  static async GetAllAssignedEstimationTaskForME() {
     try {
       const response = await api.get(`estimation/estimation-tasks/my/all`, {
         headers: {
