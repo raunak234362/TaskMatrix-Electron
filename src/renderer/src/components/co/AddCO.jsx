@@ -54,7 +54,7 @@ const AddCO = ({ project, onSuccess }) => {
 
   const recipientOptions =
     staff
-      ?.filter((s) => ["ADMIN", "SALES"].includes(s.role))
+      ?.filter((s) => s && ["ADMIN", "SALES"].includes(s.role))
       .map((s) => ({
         label: `${s.firstName} ${s.lastName}`,
         value: s.id,

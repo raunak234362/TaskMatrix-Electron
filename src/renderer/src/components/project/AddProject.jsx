@@ -44,7 +44,7 @@ const AddProject = () => {
   const managerOption = useSelector((state) =>
     (state.userInfo?.staffData || [])
       .filter((user) =>
-        [
+        user && [
           "PROJECT_MANAGER",
           "DEPUTY_MANAGER",
           "ESTIMATION_HEAD",
@@ -127,7 +127,7 @@ const AddProject = () => {
       { label: "Both (Tekla + SDS/2)", value: "BOTH" },
     ],
     clientProjectManagers: clients
-      .filter((c) => ["CLIENT", "CLIENT_ADMIN"].includes(c.role))
+      .filter((c) => c && ["CLIENT", "CLIENT_ADMIN"].includes(c.role))
       .map((c) => ({
         label: `${c.firstName} ${c.lastName} (${c.role === "CLIENT_ADMIN" ? "Admin" : "Client"})`,
         value: c.id,

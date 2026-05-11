@@ -44,8 +44,7 @@ const AddClients = ({ fabricator, onClose }) => {
   const roleOptions = [
     { label: "CLIENT", value: "CLIENT" },
     { label: "CLIENT ADMIN", value: "CLIENT_ADMIN" },
-    { label: "CLIENT PROJECT COORDINATOR", value: "CLIENT_PROJECT_COORDINATOR" },
-    { label: "CLIENT GENERAL CONSTRUCTOR", value: "CLIENT_GENERAL_CONSTRUCTOR" },
+    { label: "Client Estimator", value: "CLIENT_ESTIMATOR" },
   ];
 
   const selectedRole = watch("role");

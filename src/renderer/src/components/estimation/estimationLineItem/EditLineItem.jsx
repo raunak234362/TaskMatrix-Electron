@@ -91,6 +91,7 @@ const EditLineItem = ({ lineItem, onClose, onUpdate }) => {
                 type="number"
                 step="any"
                 {...register('quantity', {
+                  valueAsNumber: true,
                   min: { value: 0, message: 'Quantity must be positive' },
                   onChange: (e) => {
                     const hours = watch('hoursPerQty')
@@ -113,6 +114,7 @@ const EditLineItem = ({ lineItem, onClose, onUpdate }) => {
                 type="number"
                 step="any"
                 {...register('hoursPerQty', {
+                  valueAsNumber: true,
                   min: {
                     value: 0,
                     message: 'Hours per quantity must be positive'
@@ -137,6 +139,7 @@ const EditLineItem = ({ lineItem, onClose, onUpdate }) => {
                 type="number"
                 step="any"
                 {...register('totalHours', {
+                  valueAsNumber: true,
                   min: { value: 0, message: 'Total hours must be positive' }
                 })}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none transition-all ${

@@ -229,7 +229,7 @@ export const useDashboardData = () => {
             // Filter employees based on role (exclude admins and management roles from workload alerts)
             const excludedRoles = ['admin', 'operation_executive', 'project_manager_officer', 'dept_manager', 'deputy_manager']
             let filteredEmployees = Array.isArray(employees)
-              ? employees.filter(e => !e.is_disabled && !excludedRoles.includes((e.role || '').toLowerCase()))
+              ? employees.filter(e => e && !e.is_disabled && !excludedRoles.includes((e.role || '').toLowerCase()))
               : []
 
             if (userRole === 'project_manager') {

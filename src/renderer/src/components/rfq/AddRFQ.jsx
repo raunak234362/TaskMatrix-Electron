@@ -6,12 +6,63 @@ import { toast } from "react-toastify";
 import Input from "../fields/input";
 import MultipleFileUpload from "../fields/MultipleFileUpload";
 import Service from "../../api/Service";
-import { Loader2, Layers, Globe, Percent, Calendar } from "lucide-react";
+
+import { 
+  Loader2, 
+  Layers, 
+  Globe, 
+  Percent, 
+  Calendar, 
+  Sparkles, 
+  Building2, 
+  User, 
+  Hash, 
+  Mail, 
+  FileText, 
+  Wrench, 
+  DollarSign, 
+  Layout, 
+  Flag 
+} from "lucide-react";
+
 import Select from "../fields/Select";
 import Toggle from "../fields/Toggle";
 import RichTextEditor from "../fields/RichTextEditor";
 import { addRFQ } from "../../store/rfqSlice";
 import { motion } from "framer-motion";
+
+const STATES = {
+  "USA": [
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", 
+    "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", 
+    "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", 
+    "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", 
+    "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+  ],
+  "US": [
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", 
+    "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", 
+    "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", 
+    "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", 
+    "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+  ],
+  "UNITED STATES": [
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", 
+    "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", 
+    "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", 
+    "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", 
+    "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+  ],
+  "CANADA": [
+    "Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador", "Nova Scotia", "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan", 
+    "Northwest Territories", "Nunavut", "Yukon"
+  ],
+  "INDIA": [
+    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", 
+    "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
+    "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"
+  ]
+};
 
 const AddRFQ = ({ onSuccess }) => {
   const dispatch = useDispatch();
@@ -61,6 +112,46 @@ const AddRFQ = ({ onSuccess }) => {
     (fab) => String(fab.id) === String(selectedFabricatorId),
   );
 
+  const fabricatorCountry = selectedFabricator?.branches?.find(b => b.isHeadquarters)?.country || selectedFabricator?.branches?.[0]?.country;
+
+  const countryOptions = React.useMemo(() => [
+    { label: "US", value: "US" },
+    { label: "Canada", value: "CANADA" },
+    { label: "India", value: "INDIA" },
+  ], []);
+
+  const selectedCountry = watch("country");
+  const selectedState = watch("state");
+
+  const stateOptions = React.useMemo(() => {
+    const countryToUse = selectedCountry || fabricatorCountry;
+    if (!countryToUse) return [];
+    const countryKey = countryToUse.toUpperCase();
+    const states = STATES[countryKey];
+    if (states) {
+      return states.map((s) => ({ label: s, value: s }));
+    }
+    return [];
+  }, [selectedCountry, fabricatorCountry]);
+
+  // Sync country from fabricator if available
+  useEffect(() => {
+    if (fabricatorCountry) {
+      setValue("country", fabricatorCountry.toUpperCase());
+    }
+  }, [fabricatorCountry, setValue]);
+
+  // Combine state and country into location
+  useEffect(() => {
+    if (stateOptions.length > 0) {
+      if (selectedCountry && selectedState) {
+        setValue("location", `${selectedState}, ${selectedCountry}`);
+      } else if (selectedCountry) {
+        setValue("location", selectedCountry);
+      }
+    }
+  }, [selectedCountry, selectedState, setValue, stateOptions.length]);
+
   const clientOptions =
     selectedFabricator?.pointOfContact?.map((client) => ({
       label: `${client.firstName} ${client.middleName ?? ""} ${client.lastName
@@ -70,7 +161,81 @@ const AddRFQ = ({ onSuccess }) => {
 
   const userDetail = useSelector((state) => state.userInfo?.userDetail);
   const userRole = userDetail?.role;
-  const fabricatorId = userDetail?.FabricatorPointOfContacts?.[0]?.id;
+
+  // Auto-populate form fields for client roles
+  useEffect(() => {
+    if (userDetail && (userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "CLIENT_ESTIMATOR")) {
+      if (userDetail.country && !selectedCountry) {
+        setValue("country", userDetail.country.toUpperCase());
+      }
+      
+      const clientFabId = userDetail?.FabricatorPointOfContacts?.[0]?.fabricatorId || userDetail?.FabricatorPointOfContacts?.[0]?.id;
+      if (clientFabId) {
+        setValue("fabricatorId", String(clientFabId));
+      }
+      
+      if (userDetail.id) {
+        setValue("senderId", userDetail.id);
+      }
+    }
+  }, [userDetail, userRole, selectedCountry, setValue]);
+
+  // --- REAL-TIME MTO DESCRIPTION SYNC ---
+  const mainSteel = watch("mainSteel");
+  const mainSteelMiscAttachments = watch("mainSteelMiscAttachments");
+  const mainSteelConnections = watch("mainSteelConnections");
+  const miscSteel = watch("miscSteel");
+  const miscSteelConnection = watch("miscSteelConnection");
+  const miscSteelAttachments = watch("miscSteelAttachments");
+  const mto3dModel = watch("mto3dModel");
+  const mtoTeklaSDS2 = watch("mtoTeklaSDS2");
+  const mtoIFC = watch("mtoIFC");
+  const mtoEJE = watch("mtoEJE");
+  const mtoKss = watch("mtoKss");
+  const mtoBoltList = watch("mtoBoltList");
+  const mtoMaterialSummary = watch("mtoMaterialSummary");
+
+  useEffect(() => {
+    if (!mtoStickModelEnabled) return;
+
+    const sections = [];
+
+    const mainSteelList = [];
+    if (mainSteel) mainSteelList.push("Main Steel");
+    if (mainSteelMiscAttachments) mainSteelList.push("Main steel Misc Attachments");
+    if (mainSteelConnections) mainSteelList.push("Main Steel Connections");
+    if (mainSteelList.length > 0) {
+      sections.push(`<p><strong>Main Steel Scope:</strong></p><ul>${mainSteelList.map(item => `<li>${item}</li>`).join("")}</ul>`);
+    }
+
+    const miscSteelList = [];
+    if (miscSteel) miscSteelList.push("Misc steel");
+    if (miscSteelConnection) miscSteelList.push("Misc Steel Connection");
+    if (miscSteelAttachments) miscSteelList.push("Misc steel attachments");
+    if (miscSteelList.length > 0) {
+      sections.push(`<p><strong>Miscellaneous Steel Scope:</strong></p><ul>${miscSteelList.map(item => `<li>${item}</li>`).join("")}</ul>`);
+    }
+
+    const mtoFileList = [];
+    if (mto3dModel) mtoFileList.push("3d Model");
+    if (mtoTeklaSDS2) mtoFileList.push("Tekla/SDS-2");
+    if (mtoIFC) mtoFileList.push("IFC files");
+    if (mtoEJE) mtoFileList.push("EJE files");
+    if (mtoKss) mtoFileList.push("Kss files");
+    if (mtoBoltList) mtoFileList.push("bolt List");
+    if (mtoMaterialSummary) mtoFileList.push("Material Summary Report");
+    if (mtoFileList.length > 0) {
+      sections.push(`<p><strong>MTO Files Requirements:</strong></p><ul>${mtoFileList.map(item => `<li>${item}</li>`).join("")}</ul>`);
+    }
+
+    setValue("MTOStickModel", sections.join(""));
+  }, [
+    mtoStickModelEnabled,
+    mainSteel, mainSteelMiscAttachments, mainSteelConnections,
+    miscSteel, miscSteelConnection, miscSteelAttachments,
+    mto3dModel, mtoTeklaSDS2, mtoIFC, mtoEJE, mtoKss, mtoBoltList, mtoMaterialSummary,
+    setValue
+  ]);
 
   // --- SUBMIT ---
   const onSubmit = async (data) => {
@@ -85,7 +250,7 @@ const AddRFQ = ({ onSuccess }) => {
         bidPrice: data.bidPrice,
         estimationDate: data.estimationDate
           ? new Date(data.estimationDate).toISOString()
-          : "",
+          : null,
         status: "IN_REVIEW",
         wbtStatus: "RECEIVED",
         connectionDesign: data.connectionDesign,
@@ -95,17 +260,30 @@ const AddRFQ = ({ onSuccess }) => {
         detailingMisc: data.detailingMisc,
         MTOManual: !!data.MTOManual,
         MTOStickModel: data.mtoStickModelEnabled ? (data.MTOStickModel || "") : "",
+        mainSteel: !!data.mainSteel,
+        mainSteelMiscAttachments: !!data.mainSteelMiscAttachments,
+        mainSteelConnections: !!data.mainSteelConnections,
+        miscSteel: !!data.miscSteel,
+        miscSteelConnection: !!data.miscSteelConnection,
+        miscSteelAttachments: !!data.miscSteelAttachments,
+        mto3dModel: !!data.mto3dModel,
+        mtoTeklaSDS2: !!data.mtoTeklaSDS2,
+        mtoIFC: !!data.mtoIFC,
+        mtoEJE: !!data.mtoEJE,
+        mtoKss: !!data.mtoKss,
+        mtoBoltList: !!data.mtoBoltList,
+        mtoMaterialSummary: !!data.mtoMaterialSummary,
 
         files: data.files ?? [],
       };
 
       let payload;
 
-      if (userRole === "CLIENT" || userRole === "CLIENT_ADMIN") {
+      if (userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "CLIENT_ESTIMATOR") {
         payload = {
           ...basePayload,
           senderId: userDetail?.id,
-          fabricatorId: fabricatorId,
+          fabricatorId: data.fabricatorId || (userDetail?.FabricatorPointOfContacts?.[0]?.fabricatorId || userDetail?.FabricatorPointOfContacts?.[0]?.id),
           recipientId: data.recipientId || "", // must exist
           salesPersonId: null, // client doesn't assign
         };
@@ -135,6 +313,7 @@ const AddRFQ = ({ onSuccess }) => {
       const createdRFQ = response.data || response.rfq || response;
 
       if (createdRFQ) {
+        // Enrich with form data for immediate display in the table
         const selectedFab = fabricators?.find(
           (f) => String(f.id) === String(data.fabricatorId),
         );
@@ -144,7 +323,7 @@ const AddRFQ = ({ onSuccess }) => {
 
         const enrichedRFQ = {
           ...createdRFQ,
-          id: createdRFQ.id || createdRFQ._id, // Ensure id is mapped from _id if needed
+          id: createdRFQ.id || createdRFQ._id,
           projectName: data.projectName,
           projectNumber: data.projectNumber,
           status: "IN_REVIEW",
@@ -184,15 +363,17 @@ const AddRFQ = ({ onSuccess }) => {
           onSubmit={handleSubmit(onSubmit)}
           className="p-4 sm:p-5 md:p-6 space-y-4 md:space-y-6"
         >
-          {/* Project Identity Section */}
+          {/* Identity & Presence */}
           <section className="space-y-3 md:space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {/* FABRICATOR (HIDDEN FOR CLIENTS) */}
-              {userRole !== "CLIENT" && userRole !== "CLIENT_ADMIN" && (
+              {userRole !== "CLIENT" && userRole !== "CLIENT_ADMIN" && userRole !== "CLIENT_ESTIMATOR" && (
                 <>
                   <div className="space-y-2">
-                    <label className="block text-xs text-black font-black uppercase tracking-widest">
-                      Fabricator Partner <span className="text-rose-500">*</span>
+                    <label className="block text-xs text-black font-black uppercase tracking-widest flex items-center gap-2">
+                      <Building2 size={14} className="text-black/40" />
+                      Fabricator Partner{" "}
+                      <span className="text-rose-500">*</span>
                     </label>
 
                     <Controller
@@ -231,8 +412,10 @@ const AddRFQ = ({ onSuccess }) => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-xs text-black font-black uppercase tracking-widest">
-                      Fabricator Contact <span className="text-rose-500">*</span>
+                    <label className="block text-xs text-black font-black uppercase tracking-widest flex items-center gap-2">
+                      <User size={14} className="text-black/40" />
+                      Fabricator Contact{" "}
+                      <span className="text-rose-500">*</span>
                     </label>
                     <Controller
                       name="senderId"
@@ -259,7 +442,7 @@ const AddRFQ = ({ onSuccess }) => {
               )}
 
               <div className="md:col-span-2 space-y-2">
-                <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+                <label className="text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
                   <Layers size={14} className="text-black/40" />
                   Project Name <span className="text-rose-500">*</span>
                 </label>
@@ -267,8 +450,8 @@ const AddRFQ = ({ onSuccess }) => {
                   {...register("projectName", {
                     required: "Project name is required",
                   })}
-                  placeholder="Enter project name"
-                  className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black placeholder:text-black/20 font-bold"
+                  placeholder=""
+                  className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black placeholder:text-black/20"
                 />
                 {errors.projectName && (
                   <p className="text-[10px] text-rose-600 uppercase tracking-widest">
@@ -278,26 +461,72 @@ const AddRFQ = ({ onSuccess }) => {
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm text-black font-black uppercase tracking-widest">
+                <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+                  <Hash size={14} className="text-black/40" />
                   Project Number
                 </label>
                 <Input
                   {...register("projectNumber")}
-                  placeholder="Optional"
+                  placeholder=""
                   className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black placeholder:text-black/20"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+                <label className="text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
                   <Globe size={14} className="text-black/40" />
                   Location
                 </label>
-                <Input
-                  {...register("location")}
-                  placeholder="Enter location"
-                  className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black placeholder:text-black/20"
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Controller
+                    name="country"
+                    control={control}
+                    render={({ field }) => (
+                      <div className="space-y-1">
+                       
+                        <Select
+                          name={field.name}
+                          options={countryOptions}
+                          value={field.value}
+                          placeholder="Select Country"
+                          className="border-black rounded-2xl h-14"
+                          onChange={(_, value) => {
+                            field.onChange(value ?? "");
+                            setValue("state", ""); // Reset state when country changes
+                          }}
+                        />
+                      </div>
+                    )}
+                  />
+                  {stateOptions.length > 0 ? (
+                    <Controller
+                      name="state"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-black/40 uppercase tracking-widest flex items-center gap-1">
+                            <Globe size={10} /> State
+                          </label>
+                          <Select
+                            name={field.name}
+                            options={stateOptions}
+                            value={field.value}
+                            placeholder="Select State"
+                            className="border-black rounded-2xl h-14"
+                            disabled={!selectedCountry}
+                            onChange={(_, value) => field.onChange(value ?? "")}
+                          />
+                        </div>
+                      )}
+                    />
+                  ) : (
+                    <Input
+                      {...register("location")}
+                      placeholder="Enter Location"
+                      className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black placeholder:text-black/20"
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </section>
@@ -306,150 +535,198 @@ const AddRFQ = ({ onSuccess }) => {
           <section className="space-y-3 md:space-y-4">
             <div className="space-y-3">
               <div className="space-y-2">
-                <label className="block text-sm text-black font-black uppercase tracking-widest">
+                <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+                  <Mail size={14} className="text-black/40" />
                   Subject
                 </label>
                 <Input
                   {...register("subject")}
-                  placeholder="Enter subject"
+                  placeholder=""
                   className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm text-black font-black uppercase tracking-widest">
+                <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+                  <FileText size={14} className="text-black/40" />
                   Project Scope & Detailed Description
                 </label>
                 <div className="border border-black rounded-2xl overflow-hidden min-h-[200px] bg-white">
                   <RichTextEditor
                     value={description}
                     onChange={setDescription}
-                    placeholder="Describe the project scope..."
+                    placeholder=""
                   />
                 </div>
               </div>
 
-        {/* TOOLS */}
-        <div className="space-y-2">
-          <label className="font-semibold text-gray-700 mb-1 block">
-            Tools *
-          </label>
-
-          <Controller
-            name="tools"
-            control={control}
-            rules={{ required: "Tools selection is required" }}
-            render={({ field }) => (
-              <Select
-                name={field.name}
-                options={[
-                  "TEKLA",
-                  "SDS2",
-                  "BOTH",
-                  "NO_PREFERENCE",
-                  "OTHER",
-                ].map((t) => ({ label: t, value: t }))}
-                value={field.value}
-                onChange={(_, value) => field.onChange(value ?? "")}
-              />
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
-              <Percent size={14} className="text-black/40" />
-              Bid Price ({selectedFabricator?.currencyType || "USD"})
-            </label>
-            <Input
-              type="number"
-              {...register("bidPrice")}
-              placeholder="0.00"
-              className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
-              <Calendar size={14} className="text-black/40" />
-              Response Due Date <span className="text-rose-500">*</span>
-            </label>
-            <Input
-              type="date"
-              {...register("estimationDate", {
-                required: "Due date is required",
-              })}
-              className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-
-          {/* Service Matrix Section */}
-          <section className="space-y-4 md:space-y-6 pt-4 md:pt-5">
-            {/* Row 1: Scopes */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              {/* CONNECTION DESIGN SCOPE */}
-              <div className="space-y-4 border border-black p-5 md:p-8 rounded-[2rem] bg-white shadow-sm">
-                <h3 className="text-sm text-black font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                  Connection Design Scope
-                </h3>
-                <div className="grid grid-cols-1 gap-y-4">
-                  <Toggle label="MAIN DESIGN" {...register("connectionDesign")} />
-                  <Toggle label="MISC DESIGN" {...register("miscDesign")} />
-                  <Toggle label="CUSTOMER DESIGN" {...register("customerDesign")} />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <div className="space-y-2">
+                  <label className="block text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+                    <Wrench size={14} className="text-black/40" />
+                    Tools{" "}
+                    <span className="text-rose-500">*</span>
+                  </label>
+                  <Controller
+                    name="tools"
+                    control={control}
+                    rules={{ required: "Tools selection is required" }}
+                    render={({ field }) => (
+                      <Select
+                        name={field.name}
+                        options={[
+                          { label: "TEKLA", value: "TEKLA" },
+                          { label: "SDS2", value: "SDS2" },
+                          { label: "BOTH", value: "BOTH" },
+                          { label: "NO PREFERENCE", value: "NO_PREFERENCE" },
+                          { label: "OTHER", value: "OTHER" },
+                        ]}
+                        className="border-black rounded-2xl h-14"
+                        value={field.value}
+                        onChange={(_, value) => field.onChange(value ?? "")}
+                      />
+                    )}
+                  />
                 </div>
-              </div>
 
-              {/* DETAILING SCOPE */}
-              <div className="space-y-4 border border-black p-5 md:p-8 rounded-[2rem] bg-white shadow-sm">
-                <h3 className="text-sm text-black font-black uppercase tracking-[0.2em] flex items-center gap-2 ">
-                  Detailing Scope
-                </h3>
-                <div className="grid grid-cols-1 gap-y-4">
-                  <Toggle label="MAIN STEEL" {...register("detailingMain")} />
-                  <Toggle label="MISC STEEL" {...register("detailingMisc")} />
+                <div className="space-y-2">
+                  <label className="text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+                    <DollarSign size={14} className="text-black/40" />
+                    Bid Price ({selectedFabricator?.currencyType || "USD"})
+                  </label>
+                  <Input
+                    type="number"
+                    {...register("bidPrice")}
+                    placeholder="0.00"
+                    className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+                    <Calendar size={14} className="text-black/40" />
+                    Due Date <span className="text-rose-500">*</span>
+                  </label>
+                  <Input
+                    type="date"
+                    {...register("estimationDate", {
+                      required: "Due date is required",
+                    })}
+                    className="w-full bg-white border-black rounded-2xl focus:bg-white h-14 text-sm font-black"
+                  />
                 </div>
               </div>
             </div>
+          </section>
 
-            {/* Row 2: MTO */}
+          {/* Service Matrix Section */}
+          <section className="space-y-3 md:space-y-4 pt-4 md:pt-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <div className="space-y-4 border border-black p-5 md:p-8 rounded-[2rem] bg-white shadow-sm">
-                <h3 className="text-sm text-black font-black uppercase tracking-[0.2em] flex items-center gap-2 ">
-                  Material Take Off
+              <div className="space-y-3 border border-black p-4 md:p-6 rounded-[2rem]">
+                <h3 className="text-sm text-black font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Layers size={16} className="text-black/60" />
+                  Connection Design Scope
                 </h3>
                 <div className="grid grid-cols-1 gap-y-4">
-                  <Toggle label="MTO - MANUAL" {...register("MTOManual")} />
                   <Toggle
-                    label="MTO - STICK MODEL"
+                    label="Main Design"
+                    {...register("connectionDesign")}
+                  />
+                  <Toggle label="Misc Design" {...register("miscDesign")} />
+                  <Toggle
+                    label="Customer Design"
+                    {...register("customerDesign")}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3 border border-black p-4 md:p-6 rounded-[2rem]">
+                <h3 className="text-sm text-black font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Wrench size={16} className="text-black/60" />
+                  Detailing Scope
+                </h3>
+                <div className="grid grid-cols-1 gap-y-4">
+                  <Toggle label="Main Steel" {...register("detailingMain")} />
+                  <Toggle label="Misc Steel" {...register("detailingMisc")} />
+                </div>
+              </div>
+
+            </div>
+              <div className="space-y-3 border border-black p-4 md:p-6 rounded-[2rem]">
+                <h3 className="text-sm text-black font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Layout size={16} className="text-black/60" />
+                  Material Take off
+                </h3>
+                <div className="grid grid-cols-1 gap-y-4">
+                  <Toggle label="MTO - Manual" {...register("MTOManual")} />
+                  <Toggle
+                    label="MTO - Stick Model"
                     {...register("mtoStickModelEnabled")}
                   />
                 </div>
                 {mtoStickModelEnabled && (
-                  <div className="mt-4 space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
-                    <label className="block text-[10px] font-black text-black uppercase tracking-widest opacity-40">
-                      MTO Stick Model Details
-                    </label>
-                    <div className="border border-black rounded-2xl overflow-hidden bg-white min-h-[150px]">
-                      <Controller
-                        name="MTOStickModel"
-                        control={control}
-                        render={({ field }) => (
-                          <RichTextEditor
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            placeholder="Enter MTO Stick Model details..."
-                          />
-                        )}
-                      />
+                  <div className="mt-6 space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                    {/* Main Steel Scope */}
+                    <div className="space-y-3 p-4 bg-gray-50 rounded-2xl border border-black/5">
+                      <h4 className="text-[10px] font-black text-black uppercase tracking-widest flex items-center gap-2">
+                        Main Steel Scope
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <Toggle label="Main Steel" {...register("mainSteel")} />
+                        <Toggle label="Main Steel Misc Attachments" {...register("mainSteelMiscAttachments")} />
+                        <Toggle label="Main Steel Connections" {...register("mainSteelConnections")} />
+                      </div>
+                    </div>
+
+                    {/* Miscellaneous Steel Scope */}
+                    <div className="space-y-3 p-4 bg-gray-50 rounded-2xl border border-black/5">
+                      <h4 className="text-[10px] font-black text-black uppercase tracking-widest flex items-center gap-2">
+                        Miscellaneous Steel Scope
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <Toggle label="Misc Steel" {...register("miscSteel")} />
+                        <Toggle label="Misc Steel Connection" {...register("miscSteelConnection")} />
+                        <Toggle label="Misc Steel Attachments" {...register("miscSteelAttachments")} />
+                      </div>
+                    </div>
+
+                    {/* MTO Files Requirements */}
+                    <div className="space-y-3 p-4 bg-gray-50 rounded-2xl border border-black/5">
+                      <h4 className="text-[10px] font-black text-black uppercase tracking-widest flex items-center gap-2">
+                        MTO Files Requirements
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <Toggle label="3d Model" {...register("mto3dModel")} />
+                        <Toggle label="Tekla/SDS-2" {...register("mtoTeklaSDS2")} />
+                        <Toggle label="IFC files" {...register("mtoIFC")} />
+                        <Toggle label="EJE files" {...register("mtoEJE")} />
+                        <Toggle label="Kss files" {...register("mtoKss")} />
+                        <Toggle label="bolt List" {...register("mtoBoltList")} />
+                        <Toggle label="Material Summary Report" {...register("mtoMaterialSummary")} />
+                      </div>
+                    </div>
+
+                    <div className="mt-3 space-y-2">
+                      <label className="block text-xs font-black text-black uppercase tracking-widest opacity-40">
+                        MTO Stick Model Details (Real-time Preview)
+                      </label>
+                      <div className="border border-black rounded-xl overflow-hidden min-h-[200px] bg-white">
+                        <Controller
+                          name="MTOStickModel"
+                          control={control}
+                          render={({ field }) => (
+                            <RichTextEditor
+                              value={field.value || ""}
+                              onChange={field.onChange}
+                              placeholder="MTO details will appear here as you toggle options..."
+                            />
+                          )}
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
-            </div>
           </section>
 
           {/* Assets Section */}

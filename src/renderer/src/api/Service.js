@@ -755,7 +755,7 @@ class Service {
   }
 
   // Estimation Task For Assignee
-  static async GetEstimationTaskForAssignee() {
+  static async GetEstimationTaskForME() {
     try {
       const response = await api.get(`estimation/estimation-tasks/my`, {
         headers: {
@@ -770,9 +770,54 @@ class Service {
   }
 
   // Get all assigned estimation task
-  static async GetAllAssignedEstimationTask() {
+  static async GetAllAssignedEstimationTaskForME() {
     try {
       const response = await api.get(`estimation/estimation-tasks/my/all`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  //get all estimation tasks
+  static async GetAllEstimationTasks() {
+    try {
+      const response = await api.get(`estimation/estimation-tasks`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // Update Estimation Task By ID
+  static async UpdateEstimationTaskById(id, data) {
+    try {
+      const response = await api.patch(`estimation/estimation-tasks/${id}`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  // Review Estimation Task By ID
+  static async ReviewEstimationTaskById(id, data) {
+    try {
+      const response = await api.patch(`estimation/estimation-tasks/${id}/review`, data, {
         headers: {
           'Content-Type': 'application/json'
         }

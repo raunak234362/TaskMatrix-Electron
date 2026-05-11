@@ -5,47 +5,54 @@ import { format } from 'date-fns'
 import DataTable from '../../ui/table'
 import EstimationTaskByID from './EstimationTaskByID'
 
-const AllAssignedTask = () => {
-  const [isLoading, setIsLoading] = useState(false)
-  const [estimations, setEstimations] = useState([])
+const AllAssignedTask = ({
+  estimations: externalEstimations,
+  onRefresh: externalOnRefresh,
+  isLoading: externalIsLoading
+}) => {
+  const [internalLoading, setInternalLoading] = useState(false)
+  const [internalEstimations, setInternalEstimations] = useState([])
+
+  const isLoading = externalIsLoading !== undefined ? externalIsLoading : internalLoading
+  const estimations = externalEstimations !== undefined ? externalEstimations : internalEstimations
+  const onRefresh = externalOnRefresh || fetchEstimations
+
   const fetchEstimations = async () => {
-    setIsLoading(true)
+    if (externalOnRefresh) return externalOnRefresh()
+
+    setInternalLoading(true)
     try {
-      const response = await Service.GetAllAssignedEstimationTask()
-      console.log(response)
-      setEstimations(response.data)
+      const response = await Service.GetEstimationTaskForME()
+      const data = Array.isArray(response) ? response : response?.data || []
+      setInternalEstimations(data)
     } catch (error) {
-      console.log(error)
+      console.error('Error fetching estimations:', error)
     } finally {
-      setIsLoading(false)
+      setInternalLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchEstimations()
-  },)
+    if (externalEstimations === undefined) {
+      fetchEstimations()
+    }
+  }, [])
   const columns = [
-    {
-      header: 'Project Name',
-      accessorFn: (row) => row.estimation?.projectName || '—'
-    },
     {
       header: 'Fabricator Name',
       accessorFn: (row) => row.estimation?.fabricators?.fabName || '—'
     },
+    {
+      header: 'Project Name',
+      accessorFn: (row) => row.estimation?.projectName || '—'
+    },
+
     {
       header: 'Assigned To',
       accessorFn: (row) =>
         `${row.assignedTo?.firstName ?? ''} ${row.assignedTo?.middleName ?? ''
           } ${row.assignedTo?.lastName ?? ''}`.trim() || '—'
     },
-    {
-      header: 'Assigned By',
-      accessorFn: (row) =>
-        `${row.assignedBy?.firstName ?? ''} ${row.assignedBy?.middleName ?? ''
-          } ${row.assignedBy?.lastName ?? ''}`.trim() || '—'
-    },
-
     {
       header: 'End Date',
       accessorFn: (row) => (row.endDate ? format(new Date(row.endDate), 'dd MMM yyyy') : '—')
@@ -92,7 +99,7 @@ const AllAssignedTask = () => {
                 <EstimationTaskByID
                   id={estimationUniqueId}
                   onClose={close}
-                  refresh={fetchEstimations}
+                  refresh={onRefresh}
                 />
               )
             }}

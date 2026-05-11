@@ -228,7 +228,7 @@ const EditProject = ({
       { label: "Assigned", value: "ASSIGNED" },
     ],
     clientProjectManagers: clients
-      .filter((c) => ["CLIENT", "CLIENT_ADMIN"].includes(c.role))
+      .filter((c) => c && ["CLIENT", "CLIENT_ADMIN"].includes(c.role))
       .map((c) => ({
         label: `${c.firstName} ${c.lastName} (${c.role === 'CLIENT_ADMIN' ? 'Admin' : 'Client'})`,
         value: c.id,

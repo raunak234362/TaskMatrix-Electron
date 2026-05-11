@@ -185,7 +185,7 @@ const LineItemList = ({ id, onClose }) => {
     try {
       const promises = Object.entries(pendingChanges).map(([id, data]) => {
         return Service.UpdateLineItemById(id, {
-          quantity: data.quantity,
+          quantity: Number(data.quantity),
           totalHours: data.totalHours
         });
       });
