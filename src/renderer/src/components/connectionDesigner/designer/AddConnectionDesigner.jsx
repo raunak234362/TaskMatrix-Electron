@@ -8,7 +8,7 @@ import { State } from "country-state-city";
 
 import { toast } from "react-toastify";
 import Service from "../../../api/Service";
-// import Service from "../../../api/Service";
+import MultipleFileUpload from "../../fields/MultipleFileUpload";
 
 const AddConnectionDesigner = () => {
   const [stateOptions, setStateOptions] = useState([]);
@@ -38,6 +38,7 @@ const AddConnectionDesigner = () => {
   });
 
   const country = watch("headquater.country");
+  const certList = watch("certificate") || [];
 
   // --- Load states when country changes ---
   useEffect(() => {
@@ -151,15 +152,9 @@ const AddConnectionDesigner = () => {
             <label className="text-sm font-medium text-gray-700">
               Certificate (optional)
             </label>
-            <input
-              type="file"
-              multiple
-              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 border border-gray-300 rounded-lg p-1"
-              onChange={(e) => {
-                if (e.target.files) {
-                  setValue("certificate", Array.from(e.target.files));
-                }
-              }}
+            <MultipleFileUpload 
+              onFilesChange={(files) => setValue("certificate", files)} 
+              initialFiles={certList}
             />
           </div>
         </div>

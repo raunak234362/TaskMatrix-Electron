@@ -4,6 +4,7 @@ import { formatDateTime } from "../../../utils/dateUtils";
 import Service from "../../../api/Service";
 import Button from "../../fields/Button";
 import RichTextEditor from "../../fields/RichTextEditor";
+import MultipleFileUpload from "../../fields/MultipleFileUpload";
 import RenderFiles from "../../ui/RenderFiles";
 import { toast } from "react-toastify";
 
@@ -160,14 +161,9 @@ const MilestoneResponseDetailsModal = ({
                                     <option value="CLARIFICATION_REQUIRED">Clarification Required</option>
                                 </select>
                             </div>
-                            <div>
+                            <div className="md:col-span-2">
                                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Attach Files</label>
-                                <input
-                                    type="file"
-                                    multiple
-                                    onChange={(e) => setReplyFiles(Array.from(e.target.files || []))}
-                                    className="w-full border rounded-xl p-2 text-sm bg-gray-50"
-                                />
+                                <MultipleFileUpload onFilesChange={setReplyFiles} initialFiles={replyFiles} />
                             </div>
                         </div>
 

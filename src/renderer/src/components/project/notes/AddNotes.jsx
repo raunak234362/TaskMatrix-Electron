@@ -6,6 +6,7 @@ import Button from "../../fields/Button";
 import { toast } from "react-toastify";
 import { Controller } from "react-hook-form";
 import RichTextEditor from "../../fields/RichTextEditor";
+import MultipleFileUpload from "../../fields/MultipleFileUpload";
 
 
 
@@ -19,15 +20,6 @@ const AddNotes = ({ projectId, onNoteAdded, onClose }) => {
     formState: { errors },
   } = useForm();
 
-  const handleFileChange = (e) => {
-    if (e.target.files) {
-      setSelectedFiles(Array.from(e.target.files));
-    }
-  };
-
-  const removeFile = (index) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-  };
 
   const onSubmit = async (data) => {
     try {
@@ -127,38 +119,7 @@ const AddNotes = ({ projectId, onNoteAdded, onClose }) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Attachments
             </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-gray-50 transition-colors relative">
-              <input
-                type="file"
-                multiple
-                onChange={handleFileChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-              <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-700">
-                Click or drag files to upload
-              </p>
-            </div>
-
-            {selectedFiles.length > 0 && (
-              <div className="mt-3 space-y-2">
-                {selectedFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between bg-gray-50 p-2 rounded text-sm"
-                  >
-                    <span className="truncate max-w-[80%]">{file.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeFile(index)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <MultipleFileUpload onFilesChange={setSelectedFiles} initialFiles={selectedFiles} />
           </div>
 
           <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">

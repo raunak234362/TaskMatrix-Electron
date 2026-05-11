@@ -62,7 +62,7 @@ const AddCoordinationDrawingResponse = ({ drawingId, parentResponseId, onCancel,
             />
           </div>
 
-          <MultipleFileUpload onFilesChange={setFiles} />
+          <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
         </div>
 
         <div className="flex justify-end gap-3 pt-4">

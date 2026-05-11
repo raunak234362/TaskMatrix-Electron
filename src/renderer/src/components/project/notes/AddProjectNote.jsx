@@ -4,6 +4,7 @@ import { Loader2, Paperclip, X, FileText, Flag, Palette, AlertCircle } from "luc
 import Select from "react-select";
 import Service from "../../../api/Service";
 import RichTextEditor from "../../fields/RichTextEditor";
+import MultipleFileUpload from "../../fields/MultipleFileUpload";
 
 const AddProjectNote = ({
     projectId,
@@ -23,7 +24,6 @@ const AddProjectNote = ({
     const [newFlag, setNewFlag] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
-    const fileInputRef = useRef(null);
 
     const [allUsers, setAllUsers] = useState([]);
     useEffect(() => {
@@ -82,15 +82,6 @@ const AddProjectNote = ({
         ? allUsers.filter(u => u && u.role && allowedRoles.includes(String(u.role).toLowerCase()))
         : [];
 
-    const handleFileChange = (e) => {
-        const selected = Array.from(e.target.files || []);
-        setFiles((prev) => [...prev, ...selected]);
-        e.target.value = "";
-    };
-
-    const removeFile = (index) => {
-        setFiles((prev) => prev.filter((_, i) => i !== index));
-    };
 
     const addFlag = () => {
         if (newFlag.trim() && !flags.includes(newFlag.trim())) {
@@ -332,41 +323,7 @@ const AddProjectNote = ({
                         <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
                             Attachments
                         </label>
-                        <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-[#6bbd45] hover:text-[#6bbd45] transition-colors"
-                        >
-                            <Paperclip size={14} />
-                            Attach files
-                        </button>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            multiple
-                            className="hidden"
-                            onChange={handleFileChange}
-                        />
-                        {files.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-2">
-                                {files.map((file, i) => (
-                                    <div
-                                        key={i}
-                                        className="flex items-center gap-1.5 bg-[#6bbd45]/10 border border-[#6bbd45]/30 text-black text-xs px-3 py-1.5 rounded-lg"
-                                    >
-                                        <Paperclip size={10} />
-                                        <span className="max-w-[140px] truncate">{file.name}</span>
-                                        <button
-                                            type="button"
-                                            onClick={() => removeFile(i)}
-                                            className="ml-1 text-gray-400 hover:text-red-500 transition-colors"
-                                        >
-                                            <X size={10} />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                        <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
                     </div>
 
                     {/* Error */}

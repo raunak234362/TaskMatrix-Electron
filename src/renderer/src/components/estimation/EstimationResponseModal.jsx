@@ -124,14 +124,7 @@ const EstimationResponseModal = ({ estimationId, onClose, onSuccess, parentRespo
                                 <Paperclip className="w-3.5 h-3.5" />
                                 Attachments
                             </label>
-                            <div className="border border-dashed border-gray-300 rounded-xl p-4 bg-gray-50 hover:bg-gray-100 transition-colors">
-                                <MultipleFileUpload onFilesChange={(uploaded) => setFiles(uploaded)} />
-                            </div>
-                            {files.length > 0 && (
-                                <p className="text-xs text-gray-500 font-medium">
-                                    {files.length} file{files.length > 1 ? 's' : ''} selected
-                                </p>
-                            )}
+                            <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
                         </div>
 
                     </div>

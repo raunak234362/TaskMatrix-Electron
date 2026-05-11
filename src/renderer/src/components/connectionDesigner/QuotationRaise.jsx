@@ -336,17 +336,16 @@ const QuotationRaise = ({
             <label className="block text-[0.875em] font-medium text-gray-700 mb-2">
               CD Attachments
             </label>
-            <div className="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-xl p-4 hover:border-[#6bbd45]/50 transition-all">
-              <Controller
-                name="CDAttachments"
-                control={control}
-                render={({ field }) => (
-                  <MultipleFileUpload
-                    onFilesChange={(files) => field.onChange(files)}
-                  />
-                )}
-              />
-            </div>
+            <Controller
+              name="CDAttachments"
+              control={control}
+              render={({ field }) => (
+                <MultipleFileUpload
+                  onFilesChange={(files) => field.onChange(files)}
+                  initialFiles={field.value || []}
+                />
+              )}
+            />
           </div>
 
           {/* Submit */}

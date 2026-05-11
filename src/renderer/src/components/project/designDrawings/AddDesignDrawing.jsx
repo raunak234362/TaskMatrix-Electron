@@ -88,7 +88,7 @@ const AddDesignDrawing = ({ projectId, onSuccess }) => {
         </div>
 
         <div className="md:col-span-2">
-          <MultipleFileUpload key={formKey} onFilesChange={setFiles} />
+          <MultipleFileUpload key={formKey} onFilesChange={setFiles} initialFiles={files} />
         </div>
       </div>
 

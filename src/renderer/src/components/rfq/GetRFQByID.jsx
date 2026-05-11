@@ -460,6 +460,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                             </label>
                                             <MultipleFileUpload
                                                 onFilesChange={setFollowUpFiles}
+                                                initialFiles={followUpFiles}
                                             />
                                         </div>
                                         <div className="flex justify-end">

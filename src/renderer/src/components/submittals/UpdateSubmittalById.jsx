@@ -3,6 +3,7 @@ import { X, Check, Loader2, Upload } from "lucide-react";
 import Service from "../../api/Service";
 import RichTextEditor from "../fields/RichTextEditor";
 import Select from "react-select";
+import MultipleFileUpload from "../fields/MultipleFileUpload";
 import { useSelector } from "react-redux";
 
 const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
@@ -10,7 +11,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
     const [description, setDescription] = useState(
         submittal?.description || submittal?.currentVersion?.description || ""
     );
-    const [file, setFile] = useState(null);
+    const [files, setFiles] = useState([]);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
     const [cdEngineers, setCdEngineers] = useState([]);
@@ -70,8 +71,8 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
 
             const formData = new FormData();
             formData.append("description", description);
-            if (file) {
-                formData.append("files", file);
+            if (files && files.length > 0) {
+                files.forEach((f) => formData.append("files", f));
             }
             if (multipleRecipients.length > 0) {
                 multipleRecipients.forEach(id => formData.append("multipleRecipients[]", id));
@@ -206,39 +207,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                         <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
                             New Version File <span className="text-gray-400">(Optional)</span>
                         </label>
-                        <label className="flex items-center gap-3 w-full px-4 py-4 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-[#6bbd45] hover:bg-[#6bbd45]/5 transition-all group">
-                            <Upload className="w-5 h-5 text-gray-400 group-hover:text-[#6bbd45] transition-colors shrink-0" />
-                            <div className="flex-1 min-w-0">
-                                {file ? (
-                                    <span className="text-sm font-semibold text-black truncate block">
-                                        {file.name}
-                                    </span>
-                                ) : (
-                                    <span className="text-sm text-gray-400">
-                                        Click to upload a new version file
-                                    </span>
-                                )}
-                            </div>
-                            {file && (
-                                <button
-                                    type="button"
-                                    onClick={(e) => { e.preventDefault(); setFile(null); }}
-                                    className="shrink-0 text-gray-400 hover:text-red-500 transition-colors"
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
-                            )}
-                            <input
-                                type="file"
-                                className="hidden"
-                                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                            />
-                        </label>
-                        {file && (
-                            <p className="text-[10px] text-gray-400 ml-1">
-                                {(file.size / 1024).toFixed(1)} KB · {file.type || "Unknown type"}
-                            </p>
-                        )}
+                        <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
                     </div>
                 </div>
 

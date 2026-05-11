@@ -3,6 +3,7 @@ import { useState } from "react";
 import Service from "../../api/Service";
 import Button from "../fields/Button";
 import RichTextEditor from "../fields/RichTextEditor";
+import MultipleFileUpload from "../fields/MultipleFileUpload";
 import RenderFiles from "../common/RenderFiles";
 
 
@@ -198,14 +199,7 @@ const ResponseDetailsModal = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Attach Files (Optional)
               </label>
-              <input
-                type="file"
-                multiple
-                onChange={(e) =>
-                  setReplyFiles(Array.from(e.target.files || []))
-                }
-                className="w-full border rounded-md p-2"
-              />
+              <MultipleFileUpload onFilesChange={setReplyFiles} initialFiles={replyFiles} />
             </div>
 
             {/* ACTION BUTTONS */}

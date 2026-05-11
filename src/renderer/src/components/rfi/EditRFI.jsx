@@ -283,7 +283,7 @@ const EditRFI = ({ id, onSuccess }) => {
           <label className="text-sm font-bold text-gray-800">
             Attachments
           </label>
-          <MultipleFileUpload onFilesChange={setFiles} />
+          <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
           <p className="text-[10px] text-gray-400">Supported formats: PDF, DWG, Images. Max size 20MB per file.</p>
         </div>
 

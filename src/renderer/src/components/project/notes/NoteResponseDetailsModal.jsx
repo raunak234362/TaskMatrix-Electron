@@ -4,6 +4,7 @@ import { formatDateTime } from "../../../utils/dateUtils";
 import Service from "../../../api/Service";
 import Button from "../../fields/Button";
 import RichTextEditor from "../../fields/RichTextEditor";
+import MultipleFileUpload from "../../fields/MultipleFileUpload";
 import RenderFiles from "../../ui/RenderFiles";
 import { toast } from "react-toastify";
 
@@ -169,12 +170,7 @@ const NoteResponseDetailsModal = ({
 
                             <div className="space-y-2">
                                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Attach Files</label>
-                                <input
-                                    type="file"
-                                    multiple
-                                    onChange={(e) => setReplyFiles(Array.from(e.target.files || []))}
-                                    className="w-full border rounded-xl p-2.5 text-xs font-bold uppercase bg-gray-50/50"
-                                />
+                                <MultipleFileUpload onFilesChange={setReplyFiles} initialFiles={replyFiles} />
                             </div>
 
                             <div className="flex justify-end gap-3 pt-2">

@@ -180,7 +180,7 @@ const AddEstimationTask = ({ estimationId, onClose, onSuccess }) => {
         <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
           <SectionTitle title="Attachments" />
           <div className="mt-4">
-            <MultipleFileUpload onFilesChange={setFiles} />
+            <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
             {files.length > 0 && (
               <p className="text-sm text-green-600 font-medium mt-2 ml-1">
                 {files.length} file(s) attached

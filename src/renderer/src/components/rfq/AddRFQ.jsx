@@ -466,6 +466,7 @@ const AddRFQ = ({ onSuccess }) => {
                     onFilesChange={(files) => {
                       field.onChange(files);
                     }}
+                    initialFiles={field.value || []}
                   />
                 )}
               />

@@ -296,7 +296,7 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
         </div>
 
 
-        <MultipleFileUpload onFilesChange={setFiles} />
+        <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
 
         <div className="flex justify-center w-full mt-6">
           <Button type="submit" className="w-full" disabled={loading}>

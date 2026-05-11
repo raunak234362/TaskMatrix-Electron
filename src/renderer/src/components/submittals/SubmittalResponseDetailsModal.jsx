@@ -207,7 +207,7 @@ const SubmittalResponseDetailsModal = ({
 
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Attachments</label>
-                      <MultipleFileUpload onFilesChange={setReplyFiles} />
+                      <MultipleFileUpload onFilesChange={setReplyFiles} initialFiles={replyFiles} />
                     </div>
                   </div>
                 </div>

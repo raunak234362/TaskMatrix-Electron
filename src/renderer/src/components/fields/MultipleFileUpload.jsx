@@ -1,8 +1,5 @@
-// src/components/FileUpload/MultipleFileUpload.tsx
-
-import React, { useState } from "react";
-
-// Define the props interface for type safety
+import React, { useState, useRef, useEffect } from "react";
+import { Upload, X, FileText, Paperclip } from "lucide-react";
 
 /**
  * A reusable component for uploading multiple files.
@@ -12,40 +9,35 @@ function MultipleFileUpload({
   onFilesChange,
   initialFiles = [],
 }) {
-  // State to hold the list of File objects
   const [files, setFiles] = useState(initialFiles);
+  const fileInputRef = useRef(null);
 
-  /**
-   * Handles the file input change event.
-   * Appends newly selected files to the existing file list.
-   */
-  const handleFileChange = (event) => {
-    if (!event.target.files) {
-      return; // Exit if no files are selected
+  useEffect(() => {
+    // Only update if initialFiles is explicitly different from current state
+    if (initialFiles && initialFiles.length !== files.length) {
+      setFiles(initialFiles);
+    } else if (initialFiles && initialFiles.length === 0 && files.length > 0) {
+      setFiles([]);
     }
+  }, [initialFiles]);
+
+  const handleFileChange = (event) => {
+    if (!event.target.files) return;
 
     const selectedFiles = Array.from(event.target.files);
     const updatedFiles = [...files, ...selectedFiles];
 
     setFiles(updatedFiles);
     onFilesChange(updatedFiles);
-
-    // Clear the input value to allow selecting the same file(s) again
     event.target.value = "";
   };
 
-  /**
-   * Removes a file from the list based on its index.
-   */
   const removeFile = (indexToRemove) => {
     const updatedFiles = files.filter((_, index) => index !== indexToRemove);
     setFiles(updatedFiles);
     onFilesChange(updatedFiles);
   };
 
-  /**
-   * Formats file size for display.
-   */
   const formatFileSize = (bytes) => {
     if (bytes === 0) return "0 B";
     const k = 1024;
@@ -55,49 +47,64 @@ function MultipleFileUpload({
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md border border-gray-200">
-      <label className="block text-gray-700 text-sm font-medium mb-2">
-        Upload Files
-      </label>
-      <input
-        type="file"
-        multiple
-        onChange={handleFileChange}
-        className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-      />
+    <div className="w-full space-y-3">
+      <div 
+        onClick={() => fileInputRef.current?.click()}
+        className="group cursor-pointer border-2 border-dashed border-gray-200 rounded-2xl p-6 bg-gray-50/50 hover:bg-[#ebf5ea]/30 hover:border-[#6bbd45]/50 transition-all duration-200 flex flex-col items-center justify-center gap-3"
+      >
+        <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+          <Upload className="w-6 h-6 text-[#6bbd45]" />
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-black text-black uppercase tracking-tight">Click to upload files</p>
+          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">PDF, Image, Excel, etc.</p>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          onChange={handleFileChange}
+          className="hidden"
+        />
+      </div>
 
       {files.length > 0 && (
-        <div className="mt-4">
-          <p className="text-sm font-medium text-gray-700 mb-2">
-            Selected Files:
-          </p>
-          <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Selected Files ({files.length})</p>
+          </div>
+          <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
             {files.map((file, index) => (
-              <li
-                key={`${file.name}-${file.lastModified}-${index}`} // More robust key
-                className="flex items-center justify-between p-2 border rounded-md bg-gray-50"
+              <div
+                key={`${file.name}-${file.lastModified}-${index}`}
+                className="flex items-center justify-between p-3 border border-gray-100 rounded-xl bg-white shadow-sm group hover:border-[#6bbd45]/30 transition-colors"
               >
-                <div className="flex-1 min-w-0">
-                  <span
-                    className="text-sm text-gray-700 font-medium block truncate"
-                    title={file.name}
-                  >
-                    {file.name}
-                  </span>
-                  <span className="text-xs text-gray-700">
-                    {formatFileSize(file.size)}
-                  </span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
+                    <FileText className="w-4 h-4 text-[#6bbd45]" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-black truncate" title={file.name}>
+                      {file.name}
+                    </p>
+                    <p className="text-[10px] text-gray-400 font-medium uppercase">
+                      {formatFileSize(file.size)}
+                    </p>
+                  </div>
                 </div>
                 <button
-                  type="button" // Prevents form submission
-                  onClick={() => removeFile(index)}
-                  className="ml-3 text-red-500 hover:text-red-700 focus:outline-none flex-shrink-0"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFile(index);
+                  }}
+                  className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-all"
                 >
-                  Remove
+                  <X className="w-4 h-4" />
                 </button>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
     </div>

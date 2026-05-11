@@ -7,6 +7,7 @@ import Button from "../../fields/Button";
 import { State } from "country-state-city";
 import { toast } from "react-toastify";
 import Service from "../../../api/Service";
+import MultipleFileUpload from "../../fields/MultipleFileUpload";
 
 const AddVendor = () => {
   const [stateOptions, setStateOptions] = useState([]);
@@ -36,6 +37,8 @@ const AddVendor = () => {
   });
 
   const country = watch("headquater.country");
+  const filesList = watch("files") || [];
+  const certsList = watch("certificates") || [];
 
   useEffect(() => {
     if (country && countryMap[country]) {
@@ -160,28 +163,16 @@ const AddVendor = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">Files</label>
-            <input
-              type="file"
-              multiple
-              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 border border-gray-300 rounded-lg p-1"
-              onChange={(e) => {
-                if (e.target.files) {
-                  setValue("files", Array.from(e.target.files));
-                }
-              }}
+            <MultipleFileUpload 
+              onFilesChange={(files) => setValue("files", files)} 
+              initialFiles={filesList}
             />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700">Certificates</label>
-            <input
-              type="file"
-              multiple
-              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 border border-gray-300 rounded-lg p-1"
-              onChange={(e) => {
-                if (e.target.files) {
-                  setValue("certificates", Array.from(e.target.files));
-                }
-              }}
+            <MultipleFileUpload 
+              onFilesChange={(files) => setValue("certificates", files)} 
+              initialFiles={certsList}
             />
           </div>
         </div>

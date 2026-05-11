@@ -117,7 +117,8 @@ const MilestoneResponseModal = ({
                                 control={control}
                                 render={() => (
                                     <MultipleFileUpload
-                                        onFilesChange={(uploadedFiles) => setFiles(uploadedFiles)}
+                                        onFilesChange={setFiles}
+                                        initialFiles={files}
                                     />
                                 )}
                             />

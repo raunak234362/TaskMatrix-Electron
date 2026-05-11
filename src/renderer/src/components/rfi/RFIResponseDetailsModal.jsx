@@ -3,6 +3,7 @@ import { useState } from "react";
 import Button from "../fields/Button";
 import Service from "../../api/Service";
 import RichTextEditor from "../fields/RichTextEditor";
+import MultipleFileUpload from "../fields/MultipleFileUpload";
 import RenderFiles from "../common/RenderFiles";
 
 // Status dropdown options
@@ -154,13 +155,12 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
             </div>
 
             {/* File Upload */}
-            <input
-              type="file"
-              multiple
-              onChange={(e) =>
-                setReplyFiles(e.target.files ? Array.from(e.target.files) : [])
-              }
-            />
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Attach Files
+              </label>
+              <MultipleFileUpload onFilesChange={setReplyFiles} initialFiles={replyFiles} />
+            </div>
 
             {/* Action Buttons */}
             <div className="flex justify-end gap-3">

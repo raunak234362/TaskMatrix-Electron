@@ -3,6 +3,7 @@ import Button from "../fields/Button";
 import Service from "../../api/Service";
 import { X } from "lucide-react";
 import RenderFiles from "../common/RenderFiles";
+import MultipleFileUpload from "../fields/MultipleFileUpload";
 
 const STATUS_OPTIONS = ["PENDING", "APPROVED", "REJECTED"];
 
@@ -78,13 +79,7 @@ const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
                     ))}
                   </select>
 
-                  <input
-                    type="file"
-                    multiple
-                    onChange={(e) =>
-                      setReplyFiles(e.target.files ? Array.from(e.target.files) : [])
-                    }
-                  />
+                  <MultipleFileUpload onFilesChange={setReplyFiles} initialFiles={replyFiles} />
 
         <div className="flex justify-end gap-3">
           <Button onClick={onClose}>Cancel</Button>

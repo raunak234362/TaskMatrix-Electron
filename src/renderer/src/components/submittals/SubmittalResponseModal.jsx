@@ -2,6 +2,7 @@ import { useState } from "react";
 import Button from "../fields/Button";
 import Service from "../../api/Service";
 import RichTextEditor from "../fields/RichTextEditor";
+import MultipleFileUpload from "../fields/MultipleFileUpload";
 import { toast } from "react-toastify";
 
 
@@ -115,12 +116,7 @@ const SubmittalResponseModal = ({
         {/* FILE UPLOAD */}
         <div>
           <label className="text-sm font-medium">Attachments</label>
-          <input
-            type="file"
-            multiple
-            onChange={(e) => setFiles(Array.from(e.target.files || []))}
-            className="w-full border rounded-md p-2 mt-1"
-          />
+          <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
         </div>
 
         {/* ACTIONS */}

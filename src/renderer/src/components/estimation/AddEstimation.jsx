@@ -250,7 +250,7 @@ const AddEstimation = ({ initialRfqId = null, onClose, onSuccess = () => { } }) 
           />
 
           <SectionTitle title="Attach Files" />
-          <MultipleFileUpload onFilesChange={setFiles} />
+          <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
           {files.length > 0 && (
             <p className="text-sm text-black font-bold mt-2 uppercase tracking-widest text-[10px]">{files.length} file(s) attached</p>
           )}

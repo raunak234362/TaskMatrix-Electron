@@ -84,7 +84,7 @@ const RFIResponseModal = ({
             name="files"
             control={control}
             render={() => (
-              <MultipleFileUpload onFilesChange={(f) => setFiles(f)} />
+              <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
             )}
           />
 

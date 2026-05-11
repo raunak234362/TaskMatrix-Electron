@@ -79,7 +79,7 @@ const EditDesignDrawing = ({
         <label className="block text-sm font-medium text-gray-700">
           Add More Files (Optional)
         </label>
-        <MultipleFileUpload onFilesChange={setFiles} />
+        <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
       </div>
 
       <div className="flex justify-end gap-2">

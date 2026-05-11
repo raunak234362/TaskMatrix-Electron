@@ -332,7 +332,10 @@ const AddProject = () => {
                       name="files"
                       control={control}
                       render={({ field }) => (
-                        <MultipleFileUpload onFilesChange={(files) => field.onChange(files)} />
+                        <MultipleFileUpload 
+                          onFilesChange={(files) => field.onChange(files)} 
+                          initialFiles={field.value || []}
+                        />
                       )}
                     />
                   </div>

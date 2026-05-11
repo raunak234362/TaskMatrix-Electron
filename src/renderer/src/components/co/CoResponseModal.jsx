@@ -77,7 +77,7 @@ const CoResponseModal = ({ CoId, onClose, onSuccess }) => {
           <Controller
             name="files"
             control={control}
-            render={() => <MultipleFileUpload onFilesChange={setFiles} />}
+            render={() => <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />}
           />
 
           <div className="flex justify-end gap-3">
