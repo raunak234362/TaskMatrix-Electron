@@ -22,7 +22,7 @@ const AddEstimationTask = ({ estimationId, onClose, onSuccess }) => {
   // Dropdown options for staff
   const staffOptions =
     staffData
-      ?.filter((staff) => ['STAFF', 'ESTIMATOR', 'ESTIMATION_HEAD'].includes(staff.role))
+      ?.filter((staff) => staff && ['STAFF', 'ESTIMATOR', 'ESTIMATION_HEAD'].includes(staff.role))
       .map((staff) => ({
         label: `${staff.firstName} ${staff.lastName}`,
         value: staff.id
