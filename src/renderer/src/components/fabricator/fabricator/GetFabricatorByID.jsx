@@ -255,21 +255,27 @@ const GetFabricatorByID = ({ id, onClose }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-6">
                   {/* Identification & Assignments */}
                   <div className="space-y-5 bg-white p-6 rounded-2xl border border-green-50 shadow-sm">
-                    <p className="text-[10px] font-black text-green-700 uppercase tracking-[0.2em] mb-4">Partner Details</p>
+                    <p className="text-md font-semibold text-green-700 uppercase tracking-[0.2em] mb-4">Partner Details</p>
                     <InfoRow label="Partner Stage" value={fabricator.fabStage || "—"} />
                     <InfoRow 
                       label="WBT Contact" 
                       value={
-                        Array.isArray(fabricator.wbtFabricatorPointOfContact)
-                          ? fabricator.wbtFabricatorPointOfContact.map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : c).join(", ")
+                        Array.isArray(fabricator.wbtFabricatorPointOfContact) && fabricator.wbtFabricatorPointOfContact.length > 0
+                          ? fabricator.wbtFabricatorPointOfContact
+                              .map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : String(c).replace(/^Contact:/i, ""))
+                              .filter(Boolean)
+                              .join(", ")
                           : "—"
                       } 
                     />
                     <InfoRow 
                       label="Point of Contact" 
                       value={
-                        Array.isArray(fabricator.pointOfContact)
-                          ? fabricator.pointOfContact.map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : c).join(", ")
+                        Array.isArray(fabricator.pointOfContact) && fabricator.pointOfContact.length > 0
+                          ? fabricator.pointOfContact
+                              .map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : String(c).replace(/^Contact:/i, ""))
+                              .filter(Boolean)
+                              .join(", ")
                           : "—"
                       } 
                     />
@@ -298,7 +304,7 @@ const GetFabricatorByID = ({ id, onClose }) => {
 
                   {/* Financial Terms & Metadata */}
                   <div className="space-y-5 bg-white p-6 rounded-2xl border border-green-50 shadow-sm">
-                    <p className="text-[10px] font-black text-green-700 uppercase tracking-[0.2em] mb-4">Terms & Activity</p>
+                    <p className="text-md font-semibold text-green-700 uppercase tracking-[0.2em] mb-4">Terms & Activity</p>
                     <InfoRow label="Approval %" value={<span className="font-bold text-green-600">{fabricator.approvalPercentage || 0}%</span>} />
                     <InfoRow label="Fabrication %" value={<span className="font-bold text-green-600">{fabricator.fabricatPercentage || 0}%</span>} />
                     <InfoRow label="Settlement Cycle" value={<span className="font-bold">{fabricator.paymenTDueDate || 0} Days</span>} />
@@ -363,9 +369,9 @@ const GetFabricatorByID = ({ id, onClose }) => {
 };
 
 const InfoRow = ({ label, value }) => (
-  <div className="flex justify-between">
-    <span className="text-gray-600">{label}:</span>
-    <span className="text-gray-800">{value}</span>
+  <div className="grid grid-cols-3 gap-4 py-1.5 border-b border-gray-50 last:border-0 items-start">
+    <span className="text-gray-500 text-[11px] font-bold uppercase tracking-wider whitespace-nowrap pt-0.5">{label}:</span>
+    <span className="text-gray-800 text-sm font-semibold col-span-2 text-left break-words leading-relaxed">{value}</span>
   </div>
 );
 

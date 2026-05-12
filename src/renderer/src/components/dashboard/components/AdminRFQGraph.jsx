@@ -61,7 +61,7 @@ const AdminRFQGraph = ({ rfqs = [] }) => {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip 
+              <Tooltip
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
                     const data = payload[0].payload;
@@ -76,7 +76,7 @@ const AdminRFQGraph = ({ rfqs = [] }) => {
                   return null;
                 }}
               />
-              <Legend 
+              <Legend
                 wrapperStyle={{ paddingTop: '20px' }}
                 formatter={(value, entry) => (
                   <span className="text-xs font-bold text-gray-600 uppercase tracking-wider ml-1">{value}</span>

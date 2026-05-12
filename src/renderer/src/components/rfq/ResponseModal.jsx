@@ -419,6 +419,7 @@ const ResponseModal = ({
       // Convert to FormData
       const formData = new FormData();
       formData.append("rfqId", payload.rfqId);
+      formData.append("subject", payload.subject || "");
       formData.append("description", payload.description);
       formData.append("status", "OPEN");
       formData.append("wbtStatus", "OPEN");
@@ -570,6 +571,25 @@ const ResponseModal = ({
             )}
 
             {/* Description */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Subject *
+              </label>
+              <Controller
+                name="subject"
+                control={control}
+                rules={{ required: "Subject is required" }}
+                render={({ field }) => (
+                  <input
+                    type="text"
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    placeholder=""
+                    className="w-full pl-3 pr-12 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-green-500 outline-none"
+                  />
+                )}
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Message *

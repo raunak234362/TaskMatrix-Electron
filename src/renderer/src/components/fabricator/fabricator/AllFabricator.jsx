@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, Filter } from "lucide-react";
 import DataTable from "../../ui/table";
 
 import GetFabricatorByID from "./GetFabricatorByID";
@@ -9,6 +8,11 @@ import { useSelector } from "react-redux";
 
 const AllFabricator = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState({
+    fabStage: "All Stages",
+    wbtContact: "All WBT Contacts",
+    poc: "All POCs",
+  });
 
   // const [fabricators, setFabricators] = useState([]);
   const fabricators = useSelector(
@@ -38,15 +42,75 @@ const AllFabricator = () => {
   // }, []);
   console.log(fabricators);
 
-  // Filter fabricators based on search query
-  const filteredFabricators = useMemo(() => {
-    if (!searchQuery.trim()) return fabricators || [];
+  // Derive Unique Filter Options
+  const stages = useMemo(() => {
+    const list = (fabricators || [])
+      .map((f) => f.fabStage)
+      .filter(Boolean);
+    return ["All Stages", ...new Set(list)];
+  }, [fabricators]);
 
-    const query = searchQuery.toLowerCase();
-    return (fabricators || []).filter((fabricator) =>
-      fabricator.fabName?.toLowerCase().includes(query)
-    );
-  }, [fabricators, searchQuery]);
+  const wbtContacts = useMemo(() => {
+    const list = (fabricators || [])
+      .flatMap((f) => 
+        Array.isArray(f.wbtFabricatorPointOfContact) 
+          ? f.wbtFabricatorPointOfContact.map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : c)
+          : []
+      )
+      .filter(Boolean);
+    return ["All WBT Contacts", ...new Set(list)];
+  }, [fabricators]);
+
+  const pocs = useMemo(() => {
+    const list = (fabricators || [])
+      .flatMap((f) => 
+        Array.isArray(f.pointOfContact) 
+          ? f.pointOfContact.map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : c)
+          : []
+      )
+      .filter(Boolean);
+    return ["All POCs", ...new Set(list)];
+  }, [fabricators]);
+
+  // Filter fabricators based on search query and dropdowns
+  const filteredFabricators = useMemo(() => {
+    let result = fabricators || [];
+
+    // Search Query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((f) =>
+        f.fabName?.toLowerCase().includes(query)
+      );
+    }
+
+    // Stage Filter
+    if (filters.fabStage !== "All Stages") {
+      result = result.filter((f) => f.fabStage === filters.fabStage);
+    }
+
+    // WBT Contact Filter
+    if (filters.wbtContact !== "All WBT Contacts") {
+      result = result.filter((f) => {
+        const contacts = Array.isArray(f.wbtFabricatorPointOfContact)
+          ? f.wbtFabricatorPointOfContact.map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : c)
+          : [];
+        return contacts.includes(filters.wbtContact);
+      });
+    }
+
+    // POC Filter
+    if (filters.poc !== "All POCs") {
+      result = result.filter((f) => {
+        const contacts = Array.isArray(f.pointOfContact)
+          ? f.pointOfContact.map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : c)
+          : [];
+        return contacts.includes(filters.poc);
+      });
+    }
+
+    return result;
+  }, [fabricators, searchQuery, filters]);
 
   // Handle row click (optional)
   const handleRowClick = (row) => {
@@ -96,28 +160,87 @@ const AllFabricator = () => {
   // Render DataTable
   return (
     <div className="bg-[#fcfdfc] min-h-[500px]">
-      {/* Search Bar - Premium Style */}
-      <div className="mb-8 px-2">
-        <div className="relative group max-w-xl">
-          <div className="absolute -inset-1 bg-linear-to-r from-green-100 to-emerald-100 rounded-xl blur-sm opacity-25 group-hover:opacity-40 transition-duration-1000"></div>
-          <div className="relative bg-white border border-gray-100 rounded-xl p-1 flex items-center shadow-sm hover:border-green-200 transition-colors">
-            <Search className="ml-3 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search fabricators by name..."
-              className="flex-1 px-4 py-2 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none font-medium"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="p-1 px-3 text-gray-300 hover:text-gray-500 transition-colors"
-              >
-                <X size={16} />
-              </button>
-            )}
+      {/* Search Bar & Filters - Premium Style */}
+      <div className="mb-8 px-2 space-y-6">
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="relative group flex-1 max-w-xl">
+            <div className="absolute -inset-1 bg-linear-to-r from-green-100 to-emerald-100 rounded-xl blur-sm opacity-25 group-hover:opacity-40 transition-duration-1000"></div>
+            <div className="relative bg-white border border-gray-100 rounded-xl p-1 flex items-center shadow-sm hover:border-green-200 transition-colors">
+              <Search className="ml-3 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search fabricators by name..."
+                className="flex-1 px-4 py-2 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none font-medium"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="p-1 px-3 text-gray-300 hover:text-gray-500 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
           </div>
+
+          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm hover:border-green-100 transition-all">
+            <Filter size={16} className="text-gray-400" />
+            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Quick Filters</span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-4 items-end animate-in fade-in slide-in-from-top-2 duration-500">
+          {/* Stage Filter */}
+          <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[200px]">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Partner Stage</label>
+            <select
+              className="w-full text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl px-4 py-2.5 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/5 transition-all shadow-sm"
+              value={filters.fabStage}
+              onChange={(e) => setFilters(prev => ({ ...prev, fabStage: e.target.value }))}
+            >
+              {stages.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+
+          {/* WBT Contact Filter */}
+          <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[220px]">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">WBT Contact</label>
+            <select
+              className="w-full text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl px-4 py-2.5 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/5 transition-all shadow-sm"
+              value={filters.wbtContact}
+              onChange={(e) => setFilters(prev => ({ ...prev, wbtContact: e.target.value }))}
+            >
+              {wbtContacts.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+
+          {/* POC Filter */}
+          <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[220px]">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Point of Contact</label>
+            <select
+              className="w-full text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl px-4 py-2.5 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/5 transition-all shadow-sm"
+              value={filters.poc}
+              onChange={(e) => setFilters(prev => ({ ...prev, poc: e.target.value }))}
+            >
+              {pocs.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+
+          {/* Clear All */}
+          {(filters.fabStage !== "All Stages" || filters.wbtContact !== "All WBT Contacts" || filters.poc !== "All POCs" || searchQuery) && (
+            <button
+              onClick={() => {
+                setFilters({ fabStage: "All Stages", wbtContact: "All WBT Contacts", poc: "All POCs" });
+                setSearchQuery("");
+              }}
+              className="px-4 py-2.5 text-xs font-bold text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all flex items-center gap-2 mb-0.5"
+            >
+              <X size={14} />
+              Clear Filters
+            </button>
+          )}
         </div>
       </div>
 
