@@ -29,46 +29,68 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
 
     const changeOrderColumns = [
         {
-            accessorKey: 'serialNo',
-            header: 'Serial No',
+            accessorKey: 'project',
+            header: 'Project',
             cell: ({ row }) => (
-                <span className="font-semibold text-blue-700 text-xs tracking-wide">
-                    {row.original.serialNo || '—'}
+                <span className="text-gray-800 font-bold truncate max-w-[280px] inline-block">
+                    {row.original.Project?.name || row.original.project?.name || row.original.project || '—'}
                 </span>
             )
         },
         {
             accessorKey: 'changeOrderNumber',
-            header: 'CO Number',
+            header: 'COR Number',
             cell: ({ row }) => (
-                <span className="font-bold text-gray-800">
+                <span className="font-bold text-gray-800 whitespace-nowrap">
                     {row.original.changeOrderNumber || '—'}
                 </span>
             )
         },
         {
             accessorKey: 'remarks',
-            header: 'Remarks',
+            header: 'Subject',
             cell: ({ row }) => (
-                <span className="text-gray-600 font-medium">
+                <span className="text-gray-600 font-medium truncate max-w-[250px] inline-block">
                     {row.original.remarks || '—'}
                 </span>
             )
         },
         {
-            accessorKey: 'project',
-            header: 'Project',
-            cell: ({ row }) => (
-                <span className="text-gray-600 font-medium truncate max-w-[150px] inline-block">
-                    {row.original.Project?.name || row.original.project?.name || row.original.project || '—'}
-                </span>
-            )
+            id: 'sentBy',
+            header: 'Sent By',
+            cell: ({ row }) => {
+                const senderObj = row.original.senders || (typeof row.original.sender === 'object' ? row.original.sender : null);
+                const senderName = senderObj 
+                    ? `${senderObj.firstName || ''} ${senderObj.lastName || ''}`.trim() || senderObj.username || '—'
+                    : '—';
+                return (
+                    <span className="text-gray-700 font-semibold truncate max-w-[200px] inline-block">
+                        {senderName}
+                    </span>
+                );
+            }
+        },
+        {
+            id: 'sentTo',
+            header: 'Sent To',
+            cell: ({ row }) => {
+                const recipients = row.original.multipleRecipients;
+                if (!Array.isArray(recipients) || recipients.length === 0) {
+                    return <span className="text-gray-400 font-medium">—</span>;
+                }
+                const names = recipients.map(r => `${r.firstName || ''} ${r.lastName || ''}`.trim() || r.username || 'Unknown').filter(Boolean);
+                return (
+                    <span className="text-gray-700 font-medium truncate max-w-[320px] inline-block" title={names.join(', ')}>
+                        {names.join(', ')}
+                    </span>
+                );
+            }
         },
         {
             accessorKey: 'stage',
             header: 'Stage',
             cell: ({ row }) => (
-                <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-100">
+                <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-100 whitespace-nowrap">
                     {row.original.stage || '—'}
                 </span>
             )
@@ -86,7 +108,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
                     'COMPLETED': 'bg-green-100 text-green-700',
                 }
                 return (
-                    <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${colorMap[status] || 'bg-blue-100 text-blue-700'}`}>
+                    <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider whitespace-nowrap ${colorMap[status] || 'bg-blue-100 text-blue-700'}`}>
                         {status.replace(/_/g, ' ')}
                     </span>
                 )
@@ -96,7 +118,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             accessorKey: 'createdAt',
             header: 'Date',
             cell: ({ row }) => (
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-gray-500 whitespace-nowrap">
                     {row.original.createdAt ? new Date(row.original.createdAt).toLocaleDateString() : '—'}
                 </span>
             )
@@ -108,19 +130,111 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             accessorKey: 'subject',
             header: 'Subject / Title',
             cell: ({ row }) => (
-                <span className="font-semibold text-gray-800">
+                <span className="font-semibold text-gray-800 truncate max-w-[250px] inline-block">
                     {row.original.subject || row.original.title || row.original.name || 'No Subject'}
                 </span>
             )
         },
         {
-            accessorKey: 'project.name',
+            accessorKey: 'project',
             header: 'Project',
             cell: ({ row }) => (
-                <span className="text-gray-600 font-medium">
-                    {row.original.Project?.name || row.original.project?.name || row.original.project || 'N/A'}
+                <span className="text-gray-600 font-medium truncate max-w-[280px] inline-block">
+                    {row.original.Project?.name || row.original.project?.name || row.original.project || '—'}
                 </span>
             )
+        },
+        {
+            accessorKey: 'sender',
+            header: 'Sent By',
+            cell: ({ row }) => {
+                const item = row.original.submittal || row.original.data || row.original;
+                let senderObj = item.sender || item.senders || item.createdBy || item.created_by || item.fabricator;
+                let senderName = '';
+                if (senderObj && typeof senderObj === 'object') {
+                    senderName = `${senderObj.firstName || ''} ${senderObj.lastName || ''}`.trim() || senderObj.username || senderObj.fabName || senderObj.email || '';
+                }
+                if (!senderName) {
+                    const versions = item.versions || [];
+                    for (const v of versions) {
+                        const vSender = v.sender || v.createdBy || v.created_by || v.fabricator;
+                        if (vSender && typeof vSender === 'object') {
+                            const name = `${vSender.firstName || ''} ${vSender.lastName || ''}`.trim() || vSender.username || vSender.fabName || vSender.email || '';
+                            if (name) {
+                                senderName = name;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (!senderName && (item.firstName || item.lastName || item.username || item.fabName)) {
+                    senderName = `${item.firstName || ''} ${item.lastName || ''}`.trim() || item.username || item.fabName || '';
+                }
+                return (
+                    <span className="text-gray-700 font-semibold truncate max-w-[200px] inline-block">
+                        {senderName || '—'}
+                    </span>
+                );
+            }
+        },
+        {
+            accessorKey: 'multipleRecipients',
+            header: 'Sent To',
+            cell: ({ row }) => {
+                const item = row.original.submittal || row.original.data || row.original;
+                let recs = item.multipleRecipients || item.recepients || item.recipients;
+                if (!Array.isArray(recs) || recs.length === 0) {
+                    const versions = item.versions || [];
+                    for (const v of versions) {
+                        const vRecs = v.multipleRecipients || v.recepients || v.recipients;
+                        if (Array.isArray(vRecs) && vRecs.length > 0) {
+                            recs = vRecs;
+                            break;
+                        }
+                    }
+                }
+                if (!Array.isArray(recs) || recs.length === 0) {
+                    const resps = item.submittalsResponse || [];
+                    for (const r of resps) {
+                        const rRecs = r.multipleRecipients || r.recepients || r.recipients;
+                        if (Array.isArray(rRecs) && rRecs.length > 0) {
+                            recs = rRecs;
+                            break;
+                        }
+                    }
+                }
+
+                if (Array.isArray(recs) && recs.length > 0) {
+                    const names = recs.map(r => `${r.firstName || ''} ${r.lastName || ''}`.trim() || r.username || r.email || r.fabName || 'Unknown').filter(Boolean);
+                    return (
+                        <span className="text-gray-700 font-medium truncate max-w-[320px] inline-block" title={names.join(', ')}>
+                            {names.join(', ')}
+                        </span>
+                    );
+                }
+
+                let singleRec = item.recipient || item.recepient;
+                if (!singleRec) {
+                    const versions = item.versions || [];
+                    for (const v of versions) {
+                        const vRec = v.recipient || v.recepient;
+                        if (vRec && typeof vRec === 'object') {
+                            singleRec = vRec;
+                            break;
+                        }
+                    }
+                }
+                if (singleRec && typeof singleRec === 'object') {
+                    const name = `${singleRec.firstName || ''} ${singleRec.lastName || ''}`.trim() || singleRec.username || singleRec.email || singleRec.fabName || 'Unknown';
+                    return (
+                        <span className="text-gray-700 font-medium truncate max-w-[320px] inline-block" title={name}>
+                            {name}
+                        </span>
+                    );
+                }
+
+                return <span className="text-gray-400 font-medium">—</span>;
+            }
         },
         {
             accessorKey: 'status',
@@ -131,7 +245,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
                 if (type === 'PENDING_SUBMITTALS') {
                     const isSubmitted = rawStatus === false
                     return (
-                        <span className={`text-[10px] uppercase font-bold tracking-wider`}>
+                        <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider whitespace-nowrap ${isSubmitted ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
                             {isSubmitted ? 'Pending' : 'Submitted to EOR'}
                         </span>
                     )
@@ -140,19 +254,23 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
                 if (type === 'PENDING_RFI') {
                     const isAnswered = rawStatus === false
                     return (
-                        <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${isAnswered ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                        <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider whitespace-nowrap ${isAnswered ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
                             {isAnswered ? 'Answered' : 'Pending'}
                         </span>
                     )
                 }
 
-                const status = rawStatus || 'PENDING'
+                const statusStr = typeof rawStatus === 'string' ? rawStatus.toUpperCase() : 'PENDING'
+                const colorMap = {
+                    'NOT_REPLIED': 'bg-amber-100 text-amber-700',
+                    'PENDING': 'bg-amber-100 text-amber-700',
+                    'APPROVED': 'bg-green-100 text-green-700',
+                    'REJECTED': 'bg-red-100 text-red-700',
+                    'COMPLETED': 'bg-green-100 text-green-700',
+                }
                 return (
-                    <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${status === 'PENDING' ? 'bg-amber-100 text-amber-700' :
-                        status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
-                            'bg-blue-100 text-blue-700'
-                        }`}>
-                        {status}
+                    <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider whitespace-nowrap ${colorMap[statusStr] || 'bg-blue-100 text-blue-700'}`}>
+                        {statusStr.replace(/_/g, ' ')}
                     </span>
                 )
             }
@@ -161,7 +279,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             accessorKey: 'createdAt',
             header: 'Date',
             cell: ({ row }) => (
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-gray-500 whitespace-nowrap">
                     {row.original.createdAt ? new Date(row.original.createdAt).toLocaleDateString() :
                         row.original.date ? new Date(row.original.date).toLocaleDateString() : 'N/A'}
                 </span>
@@ -173,10 +291,10 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
 
     return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="bg-white w-full max-w-7xl max-h-[85vh] rounded-xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in zoom-in-95 duration-200">
+            <div className="bg-white w-[96%] max-w-[1700px] h-[92vh] max-h-[92vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in zoom-in-95 duration-200">
 
                 {/* Modal Header */}
-                <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between bg-white">
+                <div className="px-8 py-5 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
                     <div className="flex items-center gap-4">
                         <div className={`p-3 rounded-lg ${headerInfo.iconBg} ${headerInfo.color}`}>
                             <headerInfo.icon size={24} />
@@ -202,7 +320,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
 
                 {/* Tabs */}
                 {isSegmented && (
-                    <div className="flex px-8 pt-4 bg-white border-b border-gray-50">
+                    <div className="flex px-8 pt-2 bg-white border-b border-gray-50 shrink-0">
                         <button
                             onClick={() => setActiveTab('wbt')}
                             className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${activeTab === 'wbt'
@@ -225,7 +343,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
                 )}
 
                 {/* Modal Content */}
-                <div className="flex-1 overflow-y-auto min-h-[50vh] p-8 bg-[#fcfcfc]">
+                <div className="flex-1 overflow-y-auto p-6 bg-[#fcfcfc]">
                     <DataTable
                         columns={columns}
                         data={effectiveData}

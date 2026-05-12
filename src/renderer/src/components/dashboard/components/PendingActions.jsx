@@ -71,8 +71,8 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
               }}
               className="flex items-center justify-between p-4 rounded-lg border border-black border-l-5 border-l-[#48b614] bg-white hover:bg-gray-50 transition-all duration-300 cursor-pointer group hover:shadow-md hover:-translate-y-0.5"
             >
-              <div className="flex flex-row items-center gap-3 flex-1 min-w-0 justify-between">
-                <div className="flex flex-row items-center gap-2">
+              <div className="flex flex-row items-center gap-2 flex-1 min-w-0 justify-between">
+                <div className="flex flex-row items-center gap-2 min-w-0 pr-1">
                   <div
                     className="p-2.5 rounded-none bg-white border border-gray-100 text-black shadow-sm shrink-0 transition-all group-hover:bg-green-600 group-hover:text-white"
                   >
@@ -83,15 +83,15 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
                   </div>
                 </div>
                 {['admin', 'deputy_manager', 'operation_executive', 'dept_manager', 'project_manager'].includes(userRole?.toLowerCase()) && (action.wbtCount > 0 || action.clientCount > 0) && (
-                  <div className="flex flex-col md:flex-row items-center gap-5 mt-2">
-                    <div className="flex flex-col">
-                      <span className="text-md font-medium text-black uppercase tracking-tighter">WBT</span>
-                      <span className="text-lg font-black text-gray-700">{action.wbtCount}</span>
+                  <div className="flex flex-row items-center gap-2 lg:gap-3 xl:gap-4 shrink-0">
+                    <div className="flex flex-col items-center">
+                      <span className="text-[10px] font-bold text-black/60 uppercase tracking-tighter leading-none">WBT</span>
+                      <span className="text-base font-black text-gray-800 leading-tight">{action.wbtCount}</span>
                     </div>
-                    <div className="w-[1px] h-4 bg-gray-200 mt-2"></div>
-                    <div className="flex flex-col">
-                      <span className="text-md font-medium text-black uppercase tracking-tighter">CLIENT</span>
-                      <span className="text-lg font-black text-gray-700">{action.clientCount}</span>
+                    <div className="w-[1px] h-5 bg-gray-200"></div>
+                    <div className="flex flex-col items-center">
+                      <span className="text-[10px] font-bold text-black/60 uppercase tracking-tighter leading-none">CLIENT</span>
+                      <span className="text-base font-black text-gray-800 leading-tight">{action.clientCount}</span>
                     </div>
                   </div>
                 )}

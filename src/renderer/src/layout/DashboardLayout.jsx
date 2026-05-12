@@ -69,7 +69,7 @@ const Layout = () => {
       )}
 
       {/* Main Content Area */}
-      <div className="flex flex-col flex-1 min-h-0 relative z-50 bg-[#f9fafb]">
+      <div className="flex flex-col flex-1 min-w-0 min-h-0 relative z-50 bg-[#f9fafb]">
         {/* Header - Sticky top with border */}
         {!isAnyModalOpen && (
           <div className="sticky top-0 z-30 w-full border-b border-gray-200 bg-white/95 backdrop-blur-sm">
@@ -77,7 +77,7 @@ const Layout = () => {
           </div>
         )}
 
-        <main className={`flex flex-col flex-1 w-full min-h-0 custom-scrollbar ${isAnyModalOpen ? 'p-0' : 'p-6'} ${isChatPage ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+        <main className={`flex flex-col flex-1 w-full min-w-0 min-h-0 custom-scrollbar ${isAnyModalOpen ? 'p-0' : 'p-6'} ${isChatPage ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden'}`}>
           <Outlet />
         </main>
       </div>
