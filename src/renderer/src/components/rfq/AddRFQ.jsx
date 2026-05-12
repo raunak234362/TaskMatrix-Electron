@@ -86,6 +86,7 @@ const AddRFQ = ({ onSuccess }) => {
 
   const selectedFabricatorId = watch("fabricatorId");
   const mtoStickModelEnabled = watch("mtoStickModelEnabled");
+  const mtoManualEnabled = watch("MTOManual");
 
   const [description, setDescription] = useState("");
 
@@ -181,59 +182,93 @@ const AddRFQ = ({ onSuccess }) => {
   }, [userDetail, userRole, selectedCountry, setValue]);
 
   // --- REAL-TIME MTO DESCRIPTION SYNC ---
-  const mainSteel = watch("mainSteel");
-  const mainSteelMiscAttachments = watch("mainSteelMiscAttachments");
-  const mainSteelConnections = watch("mainSteelConnections");
-  const miscSteel = watch("miscSteel");
-  const miscSteelConnection = watch("miscSteelConnection");
-  const miscSteelAttachments = watch("miscSteelAttachments");
-  const mto3dModel = watch("mto3dModel");
-  const mtoTeklaSDS2 = watch("mtoTeklaSDS2");
-  const mtoIFC = watch("mtoIFC");
-  const mtoEJE = watch("mtoEJE");
-  const mtoKss = watch("mtoKss");
-  const mtoBoltList = watch("mtoBoltList");
-  const mtoMaterialSummary = watch("mtoMaterialSummary");
+  const mtoFields = watch();
 
   useEffect(() => {
-    if (!mtoStickModelEnabled) return;
-
     const sections = [];
 
-    const mainSteelList = [];
-    if (mainSteel) mainSteelList.push("Main Steel");
-    if (mainSteelMiscAttachments) mainSteelList.push("Main steel Misc Attachments");
-    if (mainSteelConnections) mainSteelList.push("Main Steel Connections");
-    if (mainSteelList.length > 0) {
-      sections.push(`<p><strong>Main Steel Scope:</strong></p><ul>${mainSteelList.map(item => `<li>${item}</li>`).join("")}</ul>`);
+    // --- Stick Model Processing ---
+    if (mtoStickModelEnabled) {
+      sections.push(`<p style="font-size: 16px; margin-bottom: 8px; color: #000;"><strong>STICK MODEL SCOPE:</strong></p>`);
+      const stickMain = [];
+      if (mtoFields.mainSteel) stickMain.push("MAIN STEEL");
+      if (mtoFields.mainSteelMiscAttachments) stickMain.push("MAIN STEEL MISC ATTACHMENTS");
+      if (mtoFields.mainSteelConnections) stickMain.push("MAIN STEEL CONNECTIONS");
+      if (stickMain.length > 0) {
+        sections.push(`<p><strong>MAIN STEEL SCOPE:</strong></p><ul>${stickMain.map(item => `<li>${item}</li>`).join("")}</ul>`);
+      }
+
+      const stickMisc = [];
+      if (mtoFields.miscSteel) stickMisc.push("MISC STEEL");
+      if (mtoFields.miscSteelConnection) stickMisc.push("MISC STEEL CONNECTIONS");
+      if (mtoFields.miscSteelAttachments) stickMisc.push("MISC STEEL ATTACHMENTS");
+      if (stickMisc.length > 0) {
+        sections.push(`<p><strong>MISCELLANEOUS STEEL SCOPE:</strong></p><ul>${stickMisc.map(item => `<li>${item}</li>`).join("")}</ul>`);
+      }
+
+      const stickFiles = [];
+      if (mtoFields.mto3dModel) stickFiles.push("3D MODEL");
+      if (mtoFields.mtoTeklaSDS2) stickFiles.push("TEKLA/SDS-2");
+      if (mtoFields.mtoIFC) stickFiles.push("IFC FILES");
+      if (mtoFields.mtoEJE) stickFiles.push("EJE FILES");
+      if (mtoFields.mtoKss) stickFiles.push("KSS FILES");
+      if (mtoFields.mtoBoltList) stickFiles.push("BOLT LIST");
+      if (mtoFields.mtoMaterialSummary) stickFiles.push("MATERIAL SUMMARY REPORT");
+      if (stickFiles.length > 0) {
+        sections.push(`<p><strong>MTO FILES REQUIREMENTS:</strong></p><ul>${stickFiles.map(item => `<li>${item}</li>`).join("")}</ul>`);
+      }
+      sections.push(`<br/>`);
     }
 
-    const miscSteelList = [];
-    if (miscSteel) miscSteelList.push("Misc steel");
-    if (miscSteelConnection) miscSteelList.push("Misc Steel Connection");
-    if (miscSteelAttachments) miscSteelList.push("Misc steel attachments");
-    if (miscSteelList.length > 0) {
-      sections.push(`<p><strong>Miscellaneous Steel Scope:</strong></p><ul>${miscSteelList.map(item => `<li>${item}</li>`).join("")}</ul>`);
+    // --- Manual Model Processing ---
+    if (mtoManualEnabled) {
+      sections.push(`<p style="font-size: 16px; margin-bottom: 8px; color: #000;"><strong>MANUAL TAKEOFF SCOPE:</strong></p>`);
+      const manualMain = [];
+      if (mtoFields.manualMainSteel) manualMain.push(`MAIN STEEL`);
+      if (mtoFields.manualMainSteelMiscAttachments) manualMain.push(`MAIN STEEL MISC ATTACHMENTS`);
+      if (mtoFields.manualMainSteelConnections) manualMain.push(`MAIN STEEL CONNECTIONS`);
+      if (manualMain.length > 0) {
+        sections.push(`<p><strong>MAIN STEEL SCOPE:</strong></p><ul>${manualMain.map(item => `<li>${item}</li>`).join("")}</ul>`);
+      }
+
+      const manualMisc = [];
+      if (mtoFields.manualMiscSteel) manualMisc.push(`MISC STEEL`);
+      if (mtoFields.manualMiscSteelConnection) manualMisc.push(`MISC STEEL CONNECTIONS - ${mtoFields.manualMiscSteelConnectionPercentage || 0}%`);
+      if (mtoFields.manualMiscSteelAttachments) manualMisc.push(`MISC STEEL ATTACHMENTS`);
+      if (manualMisc.length > 0) {
+        sections.push(`<p><strong>MISCELLANEOUS STEEL SCOPE:</strong></p><ul>${manualMisc.map(item => `<li>${item}</li>`).join("")}</ul>`);
+      }
+
+      const manualFiles = [];
+      if (mtoFields.manualMaterialSummary) manualFiles.push(`MATERIAL SUMMARY REPORT`);
+      if (manualFiles.length > 0) {
+        sections.push(`<p><strong>MTO FILES REQUIREMENTS:</strong></p><ul>${manualFiles.map(item => `<li>${item}</li>`).join("")}</ul>`);
+      }
     }
 
-    const mtoFileList = [];
-    if (mto3dModel) mtoFileList.push("3d Model");
-    if (mtoTeklaSDS2) mtoFileList.push("Tekla/SDS-2");
-    if (mtoIFC) mtoFileList.push("IFC files");
-    if (mtoEJE) mtoFileList.push("EJE files");
-    if (mtoKss) mtoFileList.push("Kss files");
-    if (mtoBoltList) mtoFileList.push("bolt List");
-    if (mtoMaterialSummary) mtoFileList.push("Material Summary Report");
-    if (mtoFileList.length > 0) {
-      sections.push(`<p><strong>MTO Files Requirements:</strong></p><ul>${mtoFileList.map(item => `<li>${item}</li>`).join("")}</ul>`);
+    if (mtoStickModelEnabled || mtoManualEnabled) {
+      const consolidated = sections.join("");
+      setValue("MTOStickModel", consolidated);
+      setValue("MTOManualModel", consolidated);
+      setValue("MTOValue", consolidated);
+    } else {
+      setValue("MTOStickModel", "");
+      setValue("MTOManualModel", "");
+      setValue("MTOValue", "");
     }
-
-    setValue("MTOStickModel", sections.join(""));
   }, [
     mtoStickModelEnabled,
-    mainSteel, mainSteelMiscAttachments, mainSteelConnections,
-    miscSteel, miscSteelConnection, miscSteelAttachments,
-    mto3dModel, mtoTeklaSDS2, mtoIFC, mtoEJE, mtoKss, mtoBoltList, mtoMaterialSummary,
+    mtoManualEnabled,
+    mtoFields.mainSteel, mtoFields.mainSteelMiscAttachments, mtoFields.mainSteelConnections,
+    mtoFields.miscSteel, mtoFields.miscSteelConnection, mtoFields.miscSteelAttachments,
+    mtoFields.mto3dModel, mtoFields.mtoTeklaSDS2, mtoFields.mtoIFC, mtoFields.mtoEJE, mtoFields.mtoKss, mtoFields.mtoBoltList, mtoFields.mtoMaterialSummary,
+    mtoFields.manualMainSteel,
+    mtoFields.manualMainSteelMiscAttachments,
+    mtoFields.manualMainSteelConnections,
+    mtoFields.manualMiscSteel,
+    mtoFields.manualMiscSteelConnection, mtoFields.manualMiscSteelConnectionPercentage,
+    mtoFields.manualMiscSteelAttachments,
+    mtoFields.manualMaterialSummary,
     setValue
   ]);
 
@@ -260,6 +295,8 @@ const AddRFQ = ({ onSuccess }) => {
         detailingMisc: data.detailingMisc,
         MTOManual: !!data.MTOManual,
         MTOStickModel: data.mtoStickModelEnabled ? (data.MTOStickModel || "") : "",
+        MTOManualModel: data.MTOManual ? (data.MTOManualModel || "") : "",
+        MTOValue: data.MTOValue || "",
         mainSteel: !!data.mainSteel,
         mainSteelMiscAttachments: !!data.mainSteelMiscAttachments,
         mainSteelConnections: !!data.mainSteelConnections,
@@ -273,6 +310,13 @@ const AddRFQ = ({ onSuccess }) => {
         mtoKss: !!data.mtoKss,
         mtoBoltList: !!data.mtoBoltList,
         mtoMaterialSummary: !!data.mtoMaterialSummary,
+        manualMainSteel: !!data.manualMainSteel,
+        manualMainSteelMiscAttachments: !!data.manualMainSteelMiscAttachments,
+        manualMainSteelConnections: !!data.manualMainSteelConnections,
+        manualMiscSteel: !!data.manualMiscSteel,
+        manualMiscSteelConnection: !!data.manualMiscSteelConnection,
+        manualMiscSteelAttachments: !!data.manualMiscSteelAttachments,
+        manualMaterialSummary: !!data.manualMaterialSummary,
 
         files: data.files ?? [],
       };
@@ -483,7 +527,9 @@ const AddRFQ = ({ onSuccess }) => {
                     control={control}
                     render={({ field }) => (
                       <div className="space-y-1">
-                       
+                        <label className="text-[10px] font-black text-black/40 uppercase tracking-widest flex items-center gap-1">
+                          <Globe size={10} /> Country
+                        </label>
                         <Select
                           name={field.name}
                           options={countryOptions}
@@ -665,10 +711,15 @@ const AddRFQ = ({ onSuccess }) => {
                   />
                 </div>
                 {mtoStickModelEnabled && (
-                  <div className="mt-6 space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="mt-6 space-y-6 p-6 bg-[#6bbd45]/10 rounded-2xl border border-[#6bbd45]/20 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center gap-3 border-b border-[#6bbd45]/20 pb-3">
+                      <div className="w-1.5 h-5 bg-[#6bbd45] rounded-full" />
+                      <h4 className="text-xs font-black uppercase tracking-widest text-[#4a8a2d]">Stick Model Configuration</h4>
+                    </div>
+
                     {/* Main Steel Scope */}
-                    <div className="space-y-3 p-4 bg-gray-50 rounded-2xl border border-black/5">
-                      <h4 className="text-[10px] font-black text-black uppercase tracking-widest flex items-center gap-2">
+                    <div className="space-y-3 p-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-[#6bbd45]/10">
+                      <h4 className="text-[10px] font-black text-[#4a8a2d]/60 uppercase tracking-widest">
                         Main Steel Scope
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -679,8 +730,8 @@ const AddRFQ = ({ onSuccess }) => {
                     </div>
 
                     {/* Miscellaneous Steel Scope */}
-                    <div className="space-y-3 p-4 bg-gray-50 rounded-2xl border border-black/5">
-                      <h4 className="text-[10px] font-black text-black uppercase tracking-widest flex items-center gap-2">
+                    <div className="space-y-3 p-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-[#6bbd45]/10">
+                      <h4 className="text-[10px] font-black text-[#4a8a2d]/60 uppercase tracking-widest">
                         Miscellaneous Steel Scope
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -691,8 +742,8 @@ const AddRFQ = ({ onSuccess }) => {
                     </div>
 
                     {/* MTO Files Requirements */}
-                    <div className="space-y-3 p-4 bg-gray-50 rounded-2xl border border-black/5">
-                      <h4 className="text-[10px] font-black text-black uppercase tracking-widest flex items-center gap-2">
+                    <div className="space-y-3 p-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-[#6bbd45]/10">
+                      <h4 className="text-[10px] font-black text-[#4a8a2d]/60 uppercase tracking-widest">
                         MTO Files Requirements
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -705,24 +756,87 @@ const AddRFQ = ({ onSuccess }) => {
                         <Toggle label="Material Summary Report" {...register("mtoMaterialSummary")} />
                       </div>
                     </div>
+                  </div>
+                )}
 
-                    <div className="mt-3 space-y-2">
-                      <label className="block text-xs font-black text-black uppercase tracking-widest opacity-40">
-                        MTO Stick Model Details (Real-time Preview)
-                      </label>
-                      <div className="border border-black rounded-xl overflow-hidden min-h-[200px] bg-white">
-                        <Controller
-                          name="MTOStickModel"
-                          control={control}
-                          render={({ field }) => (
-                            <RichTextEditor
-                              value={field.value || ""}
-                              onChange={field.onChange}
-                              placeholder="MTO details will appear here as you toggle options..."
-                            />
-                          )}
-                        />
+                {mtoManualEnabled && (
+                  <div className="mt-6 space-y-6 p-6 bg-[#6bbd45]/10 rounded-2xl border border-[#6bbd45]/20 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center gap-3 border-b border-[#6bbd45]/20 pb-3">
+                      <div className="w-1.5 h-5 bg-[#6bbd45] rounded-full" />
+                      <h4 className="text-xs font-black uppercase tracking-widest text-[#4a8a2d]">Manual Model Configuration</h4>
+                    </div>
+
+                    {/* Main Steel Scope */}
+                    <div className="space-y-3 p-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-[#6bbd45]/10">
+                      <h4 className="text-[10px] font-black text-[#4a8a2d]/60 uppercase tracking-widest">
+                        Main Steel Scope
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <Toggle label="Main Steel" {...register("manualMainSteel")} />
+                        <Toggle label="Main Steel Misc Attachments" {...register("manualMainSteelMiscAttachments")} />
+                        <Toggle label="Main Steel Connections" {...register("manualMainSteelConnections")} />
                       </div>
+                    </div>
+
+                    {/* Miscellaneous Steel Scope */}
+                    <div className="space-y-3 p-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-[#6bbd45]/10">
+                      <h4 className="text-[10px] font-black text-[#4a8a2d]/60 uppercase tracking-widest">
+                        Miscellaneous Steel Scope
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+                        <Toggle label="Misc Steel" {...register("manualMiscSteel")} />
+                        <div className="space-y-2.5 w-full">
+                          <Toggle label="Misc Steel Connections" {...register("manualMiscSteelConnection")} />
+                          {mtoFields.manualMiscSteelConnection && (
+                            <div className="pl-2 pt-1 flex flex-col gap-1.5 animate-in fade-in duration-200">
+                              <div className="flex justify-between items-center text-[10px] font-black text-[#4a8a2d]">
+                                <span>Percentage</span>
+                                <span>{mtoFields.manualMiscSteelConnectionPercentage || 0}%</span>
+                              </div>
+                              <input 
+                                type="range" 
+                                min="0" 
+                                max="100" 
+                                {...register("manualMiscSteelConnectionPercentage")} 
+                                className="w-full h-1.5 bg-[#6bbd45]/30 rounded-lg appearance-none cursor-pointer accent-black" 
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <Toggle label="Misc Steel Attachments" {...register("manualMiscSteelAttachments")} />
+                      </div>
+                    </div>
+
+                    {/* Requirements */}
+                    <div className="space-y-3 p-4 bg-white/80 backdrop-blur-sm rounded-2xl border border-[#6bbd45]/10">
+                      <h4 className="text-[10px] font-black text-[#4a8a2d]/60 uppercase tracking-widest">
+                        Requirements
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <Toggle label="Material Summary Report" {...register("manualMaterialSummary")} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {(mtoStickModelEnabled || mtoManualEnabled) && (
+                  <div className="mt-6 space-y-2 pt-4 border-t border-black/5">
+                    <label className="block text-xs font-black text-black uppercase tracking-widest opacity-40 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#6bbd45]" />
+                      Live Material Takeoff Generation Preview
+                    </label>
+                    <div className="border border-black rounded-xl overflow-hidden min-h-[200px] bg-white shadow-inner">
+                      <Controller
+                        name="MTOValue"
+                        control={control}
+                        render={({ field }) => (
+                          <RichTextEditor
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            placeholder="MTO details preview will dynamically generate here..."
+                          />
+                        )}
+                      />
                     </div>
                   </div>
                 )}

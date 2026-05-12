@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Service from "../../api/Service";
 
-import { Loader2, AlertCircle, Settings, Paperclip, User, Clock, MessageSquare, Send } from "lucide-react";
+import { Loader2, AlertCircle, Settings, Paperclip, User, Clock, MessageSquare, Send, Layout } from "lucide-react";
 import ResponseModal from "./ResponseModal";
 import RichTextEditor from "../fields/RichTextEditor";
 import MultipleFileUpload from "../fields/MultipleFileUpload";
@@ -586,6 +586,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                         />
                                     </div>
                                 </div>
+
                                 <div className="p-4 bg-white rounded-2xl border border-black text-sm">
                                     <h4 className="text-xs font-black text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
                                         <Settings className="w-4 h-4" /> Detailing Scope
@@ -599,17 +600,32 @@ const GetRFQByID = ({ id, onClose }) => {
                                             label="Detailing Misc"
                                             enabled={rfq?.detailingMisc || false}
                                         />
+                                    </div>
+                                </div>
+
+                                <div className="p-4 bg-white rounded-2xl border border-black text-sm space-y-4">
+                                    <h4 className="text-xs font-black text-black flex items-center gap-2 uppercase tracking-widest">
+                                        <Layout className="w-4 h-4" /> Material Take-off
+                                    </h4>
+                                    <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
                                         <Scope
                                             label="MTO - Manual"
                                             enabled={rfq?.MTOManual || false}
                                         />
-                                        {rfq?.MTOStickModel && (
-                                            <Scope
-                                                label={`MTO - Stick Model: ${rfq.MTOStickModel}`}
-                                                enabled={true}
-                                            />
-                                        )}
+                                        <Scope
+                                            label="MTO - Stick Model"
+                                            enabled={!!rfq?.MTOStickModel || false}
+                                        />
                                     </div>
+
+                                    {(rfq?.MTOValue || rfq?.MTOStickModel || rfq?.MTOManualModel) && (
+                                        <div className="p-4 bg-[#6bbd45]/5 rounded-xl border border-[#6bbd45]/20 overflow-hidden">
+                                            <div 
+                                                className="prose prose-sm max-w-none text-xs text-black font-bold leading-relaxed break-words"
+                                                dangerouslySetInnerHTML={{ __html: rfq?.MTOValue || rfq?.MTOStickModel || rfq?.MTOManualModel }}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
