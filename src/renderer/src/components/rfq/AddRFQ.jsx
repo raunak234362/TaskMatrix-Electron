@@ -833,7 +833,7 @@ const AddRFQ = ({ onSuccess }) => {
                           <RichTextEditor
                             value={field.value || ""}
                             onChange={field.onChange}
-                            placeholder="MTO details preview will dynamically generate here..."
+                            placeholder=""
                           />
                         )}
                       />

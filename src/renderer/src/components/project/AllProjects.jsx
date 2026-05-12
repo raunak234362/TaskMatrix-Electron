@@ -3,10 +3,11 @@ import React, { Suspense, useMemo, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import DataTable from "../ui/table";
 import Modal from "../ui/Modal";
-import { Filter, Search } from "lucide-react";
+import { Filter, Search, FileText, File } from "lucide-react";
 import Service from "../../api/Service";
 import DateFilter from "../common/DateFilter";
 import { matchesDateFilter } from "../../utils/dateFilter";
+import RenderFiles from "../common/RenderFiles";
 
 const GetProjectById = React.lazy(() =>
   import("./GetProjectById").then((module) => ({ default: module.default }))
@@ -30,6 +31,13 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
     month: new Date().getMonth(),
   });
 
+  const [fabricatorDetails, setFabricatorDetails] = useState(null);
+  const [loadingFab, setLoadingFab] = useState(false);
+
+  const fabricatorList = useSelector(
+    (state) => state.fabricatorInfo?.fabricatorData || []
+  );
+
   const projects = useSelector(
     (state) => state.projectInfo?.projectData || []
   );
@@ -48,6 +56,31 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
     };
     fetchTasks();
   }, []);
+
+  useEffect(() => {
+    const fetchFabricatorDetails = async () => {
+      if (filters.fabricator && filters.fabricator !== "All Fabricators") {
+        const fab = fabricatorList.find(f => f.fabName === filters.fabricator);
+        if (fab) {
+          try {
+            setLoadingFab(true);
+            const response = await Service.GetFabricatorByID(fab.id || fab._id);
+            setFabricatorDetails(response?.data || null);
+          } catch (error) {
+            console.error("Error fetching fabricator details:", error);
+            setFabricatorDetails(null);
+          } finally {
+            setLoadingFab(false);
+          }
+        } else {
+          setFabricatorDetails(null);
+        }
+      } else {
+        setFabricatorDetails(null);
+      }
+    };
+    fetchFabricatorDetails();
+  }, [filters.fabricator, fabricatorList]);
 
   // --- Derive Unique Filter Options ---
   const managers = useMemo(() => {
@@ -358,6 +391,42 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
             <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
           </div>
         </div>
+
+        {/* Fabricator Detailing Standards Section */}
+        {filters.fabricator !== "All Fabricators" && fabricatorDetails && (
+          <div className="mt-6 pt-6 border-t border-gray-100 animate-in slide-in-from-top-2 duration-300">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-green-50 rounded-lg">
+                <FileText size={16} className="text-green-600" />
+              </div>
+              <div>
+                <h4 className="text-sm font-black text-gray-800 uppercase tracking-tight">
+                  {filters.fabricator}'s Detailing Standards
+                </h4>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">
+                  Reference documents for technical compliance
+                </p>
+              </div>
+            </div>
+            
+            <div className="max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+              {fabricatorDetails.files && fabricatorDetails.files.length > 0 ? (
+                <RenderFiles 
+                  files={fabricatorDetails.files} 
+                  table="fabricator" 
+                  parentId={fabricatorDetails.id || fabricatorDetails._id} 
+                  hideHeader={true}
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest italic">
+                    No detailing standards uploaded for this partner
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <DataTable

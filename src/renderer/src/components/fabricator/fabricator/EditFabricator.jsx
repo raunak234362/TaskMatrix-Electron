@@ -464,13 +464,14 @@ const EditFabricator = ({
             )}
 
             {/* New Upload Area */}
-            <div className="md:col-span-2">
+            <div className="bg-white border-2 border-dashed border-green-200 rounded-2xl p-10 hover:border-green-300 transition-all group">
               <Controller
                 name="files"
                 control={control}
                 render={({ field }) => (
                   <MultipleFileUpload
                     onFilesChange={(files) => field.onChange(files)}
+                    initialFiles={field.value || []}
                   />
                 )}
               />

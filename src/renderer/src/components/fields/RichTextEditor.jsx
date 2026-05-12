@@ -12,7 +12,8 @@ const RichTextEditor = ({
   const config = useMemo(
     () => ({
       readonly: false,
-      placeholder: placeholder || "Start typing...",
+      placeholder: "",
+      showPlaceholder: false,
       toolbarAdaptive: false,
 
       enter: "P",          // ✅ Important
