@@ -166,7 +166,7 @@ const RenderFiles = ({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h4 className="text-sm font-medium text-black">Project Files</h4>
+        {/* <h4 className="text-sm font-medium text-black">Project Files</h4> */}
         {onAddFilesClick && (
           <Button onClick={onAddFilesClick}>Add Document</Button>
         )}

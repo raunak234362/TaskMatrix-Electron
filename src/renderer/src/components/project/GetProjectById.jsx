@@ -344,11 +344,11 @@ const GetProjectById = ({ id, onClose }) => {
           {/* Header */}
           <div className="flex justify-between items-start pr-4 pt-2">
             <div className="flex flex-col">
-              <h2 className="text-2xl md:text-3xl font-black text-black uppercase tracking-tight leading-none">
+              <h2 className="text-3xl md:text-4xl font-black text-black uppercase tracking-tighter leading-[0.9]">
                 {project.name}
               </h2>
-              <p className="text-black/60 text-[12px] font-bold uppercase tracking-widest mt-1">
-                Project No: {project.projectCode || project.serialNo}
+              <p className="text-black/40 text-[11px] font-black uppercase tracking-[0.2em] mt-2">
+                PROJECT NO: {project.projectCode || project.serialNo}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -356,7 +356,7 @@ const GetProjectById = ({ id, onClose }) => {
               {(userRole === "admin" || userRole === "operation_executive" || userRole === "dept_manager" || userRole === "deputy_manager" || userRole === "project_manager") && (
                 <div className="flex flex-wrap gap-3">
                   <button
-                    className="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border-2 transition-all hover:bg-green-300"
+                    className="px-5 py-2 bg-white text-black border-2 border-gray-800 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-gray-50 shadow-sm"
                     onClick={() => setShowAssistsModal(true)}
                   >
                     Add Assists
@@ -366,7 +366,7 @@ const GetProjectById = ({ id, onClose }) => {
               {(userRole === "admin" || userRole === "operation_executive" || userRole === "dept_manager" || userRole === "deputy_manager" || userRole === "project_manager") && (
                 <div className="flex flex-wrap gap-3">
                   <button
-                    className="px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border-2 transition-all hover:bg-green-300"
+                    className="px-5 py-2 bg-white text-black border-2 border-gray-800 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-gray-50 shadow-sm"
                     onClick={() => handleEditModel(project)}
                   >
                     Edit Project
@@ -374,9 +374,9 @@ const GetProjectById = ({ id, onClose }) => {
                 </div>
               )}
               <div
-                className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border-2 transition-all ${project.status === "ACTIVE"
-                  ? "bg-green-100 text-black"
-                  : "bg-red-100 text-black "
+                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all shadow-sm ${project.status === "ACTIVE"
+                  ? "bg-green-100 text-black border-green-200"
+                  : "bg-red-100 text-black border-red-200"
                   }`}
               >
                 {project.status}
@@ -384,7 +384,7 @@ const GetProjectById = ({ id, onClose }) => {
               {onClose && (
                 <button
                   onClick={onClose}
-                  className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+                  className="px-10 py-2 bg-white text-red-600 border-2 border-red-600 rounded-xl hover:bg-red-50 transition-all font-black text-[12px] uppercase tracking-widest shadow-sm"
                 >
                   Close
                 </button>
@@ -424,9 +424,9 @@ const GetProjectById = ({ id, onClose }) => {
                   <button
                     key={key}
                     onClick={() => setActiveTab(key)}
-                    className={`flex items-center gap-2 border px-5 py-2 text-[12px] rounded-lg font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-sm hover:shadow-md active:scale-95 ${activeTab === key
+                    className={`flex items-center gap-2.5 border-2 px-6 py-2.5 text-[10px] rounded-xl font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-sm active:scale-95 ${activeTab === key
                       ? "bg-green-50 text-black border-[#6bbd45]"
-                      : "text-black bg-white border-black hover:border-black"
+                      : "text-black bg-white border-gray-800 hover:bg-gray-50"
                       }`}
                   >
                     <TabIcon className="w-4 h-4" />

@@ -240,13 +240,13 @@ const GetRFQByID = ({ id, onClose }) => {
             accessorKey: "createdAt",
             header: "Created",
             cell: ({ row }) => (
-                <span className="text-gray-500 text-xs font-bold uppercase tracking-widest leading-none">
+                <span className="text-gray-800 text-xs font-bold uppercase tracking-widest leading-none">
                     {new Date(row.original.createdAt).toLocaleDateString("en-IN", {
                         day: '2-digit',
                         month: 'short'
                     })}
-                    <br />
-                    <span className="text-[10px] opacity-60">
+                    {" : "}
+                    <span className="text-xs">
                         {new Date(row.original.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                 </span>
@@ -293,7 +293,7 @@ const GetRFQByID = ({ id, onClose }) => {
             accessorKey: "createdAt",
             header: "Created",
             cell: ({ row }) => (
-                <span className="text-gray-500 text-xs font-bold uppercase tracking-widest leading-none">
+                <span className="text-gray-800 text-xs font-bold uppercase tracking-widest leading-none">
                     {new Date(row.original.createdAt).toLocaleDateString("en-IN", {
                         day: '2-digit',
                         month: 'short'
@@ -383,6 +383,82 @@ const GetRFQByID = ({ id, onClose }) => {
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
                     <div className="grid grid-cols-1 gap-4 sm:gap-6">
+                      {/* ---------------- RIGHT COLUMN — RESPONSES & CD QUOTAS ---------------- */}
+                        <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8 flex flex-col min-h-0">
+                            {/* Header + Add Response Button */}
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-gray-300 pb-1">
+                                <div className="flex gap-6 items-center">
+                                    <button
+                                        onClick={() => setActiveTab("responses")}
+                                        className={`text-sm md:text-xl font-semibold uppercase tracking-tight transition-all relative ${activeTab === "responses" ? "text-black" : "text-gray-400 hover:text-gray-600"
+                                            }`}
+                                    >
+                                        Responses
+                                        {activeTab === "responses" && <div className="absolute left-0 w-full bg-black rounded-t-full"></div>}
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab("cdQuotas")}
+                                        className={`text-sm md:text-xl font-semibold uppercase tracking-tight transition-all relative ${activeTab === "cdQuotas" ? "text-black" : "text-gray-400 hover:text-gray-600"
+                                            }`}
+                                    >
+                                        CD Quotes
+                                        {activeTab === "cdQuotas" && <div className="absolute left-0 w-full bg-black rounded-t-full"></div>}
+                                    </button>
+                                </div>
+
+                                {activeTab === "responses" && (userRole === "ADMIN" ||
+                                    userRole === "DEPUTY_MANAGER" ||
+                                    userRole === "OPERATION_EXECUTIVE" ||
+                                    userRole === "ESTIMATION_HEAD") && (
+                                        <button
+                                            onClick={() => setShowResponseModal(true)}
+                                            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#6bbd45]/15 text-black font-bold rounded-lg shadow-sm hover:bg-[#6bbd45]/80 transition text-sm border-2 border-[#6bbd45]/50 whitespace-nowrap"
+                                        >
+                                            + Add Response
+                                        </button>
+                                    )}
+                            </div>
+
+                            <div className="flex-1 overflow-auto">
+                                {activeTab === "responses" && (
+                                    <>
+                                        {showResponseModal && (
+                                            <ResponseModal
+                                                rfqId={id}
+                                                onClose={() => setShowResponseModal(false)}
+                                                onSuccess={fetchRfq}
+                                            />
+                                        )}
+
+                                        {/* ---- RESPONSE TABLE ---- */}
+                                        {rfq?.responses?.length ? (
+                                            <DataTable
+                                                columns={responseColumns}
+                                                data={rfq.responses}
+                                                onRowClick={(row) => setSelectedResponse(row)}
+                                            />
+                                        ) : (
+                                            <p className="text-gray-700 italic font-medium p-4 text-center">No responses yet.</p>
+                                        )}
+                                    </>
+                                )}
+
+                                {activeTab === "cdQuotas" && (
+                                    <>
+                                        {/* ---- CDQUOTAS TABLE ---- */}
+                                        {rfq?.CDQuotas?.length ? (
+                                            <DataTable
+                                                columns={cdQuotasColumns}
+                                                data={rfq.CDQuotas}
+                                                onRowClick={(row) => setSelectedCDQuota(row)}
+                                            />
+                                        ) : (
+                                            <p className="text-gray-700 italic font-medium p-4 text-center">No CD Quotas available.</p>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        </div>
                         {/* ---------------- LEFT COLUMN — RFQ DETAILS ---------------- */}
                         <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8">
 
@@ -655,82 +731,7 @@ const GetRFQByID = ({ id, onClose }) => {
                             )}
                         </div>
 
-                        {/* ---------------- RIGHT COLUMN — RESPONSES & CD QUOTAS ---------------- */}
-                        <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8 flex flex-col min-h-0">
-                            {/* Header + Add Response Button */}
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-gray-300 pb-2">
-                                <div className="flex gap-6 items-center">
-                                    <button
-                                        onClick={() => setActiveTab("responses")}
-                                        className={`text-sm md:text-xl font-bold uppercase tracking-tight transition-all relative ${activeTab === "responses" ? "text-black" : "text-gray-400 hover:text-gray-600"
-                                            }`}
-                                    >
-                                        Responses
-                                        {activeTab === "responses" && <div className="absolute left-0 w-full bg-black rounded-t-full"></div>}
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveTab("cdQuotas")}
-                                        className={`text-sm md:text-xl font-bold uppercase tracking-tight transition-all relative ${activeTab === "cdQuotas" ? "text-black" : "text-gray-400 hover:text-gray-600"
-                                            }`}
-                                    >
-                                        CD Quotes
-                                        {activeTab === "cdQuotas" && <div className="absolute left-0 w-full bg-black rounded-t-full"></div>}
-                                    </button>
-                                </div>
-
-                                {activeTab === "responses" && (userRole === "ADMIN" ||
-                                    userRole === "DEPUTY_MANAGER" ||
-                                    userRole === "OPERATION_EXECUTIVE" ||
-                                    userRole === "ESTIMATION_HEAD") && (
-                                        <button
-                                            onClick={() => setShowResponseModal(true)}
-                                            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#6bbd45]/15 text-black font-bold rounded-lg shadow-sm hover:bg-[#6bbd45]/80 transition text-sm border-2 border-[#6bbd45]/50 whitespace-nowrap"
-                                        >
-                                            + Add Response
-                                        </button>
-                                    )}
-                            </div>
-
-                            <div className="flex-1 overflow-auto">
-                                {activeTab === "responses" && (
-                                    <>
-                                        {showResponseModal && (
-                                            <ResponseModal
-                                                rfqId={id}
-                                                onClose={() => setShowResponseModal(false)}
-                                                onSuccess={fetchRfq}
-                                            />
-                                        )}
-
-                                        {/* ---- RESPONSE TABLE ---- */}
-                                        {rfq?.responses?.length ? (
-                                            <DataTable
-                                                columns={responseColumns}
-                                                data={rfq.responses}
-                                                onRowClick={(row) => setSelectedResponse(row)}
-                                            />
-                                        ) : (
-                                            <p className="text-gray-700 italic font-medium p-4 text-center">No responses yet.</p>
-                                        )}
-                                    </>
-                                )}
-
-                                {activeTab === "cdQuotas" && (
-                                    <>
-                                        {/* ---- CDQUOTAS TABLE ---- */}
-                                        {rfq?.CDQuotas?.length ? (
-                                            <DataTable
-                                                columns={cdQuotasColumns}
-                                                data={rfq.CDQuotas}
-                                                onRowClick={(row) => setSelectedCDQuota(row)}
-                                            />
-                                        ) : (
-                                            <p className="text-gray-700 italic font-medium p-4 text-center">No CD Quotas available.</p>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        </div>
+                      
                     </div>
                 </div>
                 {showCDQuotationModal && (
