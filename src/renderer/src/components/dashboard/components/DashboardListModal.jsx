@@ -123,7 +123,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
                 </span>
             )
         }
-    ]
+    ].filter(col => !(activeTab === 'clientSide' && col.id === 'sentTo'))
 
     const defaultColumns = [
         {
