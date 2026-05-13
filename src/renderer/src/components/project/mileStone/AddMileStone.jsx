@@ -18,6 +18,7 @@ const AddMileStone = ({
     handleSubmit,
     control,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
@@ -26,6 +27,8 @@ const AddMileStone = ({
       status: "ACTIVE",
     },
   });
+
+  const selectedSubject = watch("subject");
 
   const statusOptions = [
     { label: "Pending", value: "PENDING" },
@@ -59,6 +62,7 @@ const AddMileStone = ({
     try {
       const payload = {
         ...data,
+        subject: data.subject === "Others" ? data.customSubject : data.subject,
         stage: data.stage || "IFA",
         date: data.date ? new Date(data.date).toISOString() : undefined,
         approvalDate: data.approvalDate
@@ -130,6 +134,25 @@ const AddMileStone = ({
               </p>
             )}
           </div>
+
+          {selectedSubject === "Others" && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Custom Subject *
+              </label>
+              <Input
+                {...register("customSubject", {
+                  required: selectedSubject === "Others" ? "Custom subject is required" : false,
+                })}
+                placeholder="Type your subject here"
+              />
+              {errors.customSubject && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.customSubject.message}
+                </p>
+              )}
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
