@@ -376,20 +376,22 @@ const AddRFQ = ({ onSuccess }) => {
           fabricator: selectedFab || createdRFQ.fabricator,
           sender: selectedSender
             ? {
-              firstName: selectedSender.label.split(" ")[0],
-              lastName: selectedSender.label.split(" ").slice(1).join(" "),
-            }
+                firstName: selectedSender.label.split(" ")[0],
+                lastName: selectedSender.label.split(" ").slice(1).join(" "),
+              }
             : userDetail,
         };
         dispatch(addRFQ(enrichedRFQ));
+        toast.success("RFQ Created Successfully");
+        setDescription("");
+        reset();
+        onSuccess?.();
+      } else {
+        toast.error(response?.message || "Failed to create RFQ");
       }
-      toast.success("RFQ Created Successfully");
-      setDescription("");
-      reset();
-      onSuccess?.();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to create RFQ");
+      toast.error(err?.response?.data?.message || "Failed to create RFQ");
     }
   };
 

@@ -188,10 +188,12 @@ const AddProject = () => {
       formData.append("stage", "IFA");
 
       const res = await Service.AddProject(formData);
-      if (res?.data) {
-        dispatch(addProject(res.data));
+      if (res?.data || res?.project) {
+        dispatch(addProject(res?.data || res?.project));
+        toast.success("Project launched successfully!");
+      } else {
+        toast.error(res?.message || "Failed to create project");
       }
-      toast.success("Project launched successfully!");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to create project");
     } finally {
