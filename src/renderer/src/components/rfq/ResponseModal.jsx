@@ -428,6 +428,16 @@ const ResponseModal = ({
 
       if (payload.link) formData.append("link", payload.link);
 
+      formData.append(
+        "totalTonnageWithConnection",
+        payload.totalTonnageWithConnection || "",
+      );
+      formData.append(
+        "totalTonnageWithoutConnection",
+        payload.totalTonnageWithoutConnection || "",
+      );
+      formData.append("PageNumbers", payload.PageNumbers || "");
+
       if (files.length > 0) {
         files.forEach((file) => formData.append("files", file));
       }
@@ -606,6 +616,43 @@ const ResponseModal = ({
                   />
                 )}
               />
+            </div>
+
+            {/* Additional Response Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Total Tonnage (With Connection)
+                </label>
+                <input
+                  type="text"
+                  {...register("totalTonnageWithConnection")}
+                  placeholder="e.g. 150 MT"
+                  className="w-full pl-3 pr-3 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-green-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Total Tonnage (Without Connection)
+                </label>
+                <input
+                  type="text"
+                  {...register("totalTonnageWithoutConnection")}
+                  placeholder="e.g. 130 MT"
+                  className="w-full pl-3 pr-3 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-green-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Page Numbers
+                </label>
+                <input
+                  type="text"
+                  {...register("PageNumbers")}
+                  placeholder="e.g. 1-12"
+                  className="w-full pl-3 pr-3 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-green-500 outline-none"
+                />
+              </div>
             </div>
 
             {/* Optional Link */}
