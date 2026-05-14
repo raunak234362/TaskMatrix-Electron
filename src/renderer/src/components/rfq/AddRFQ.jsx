@@ -54,8 +54,10 @@ const AddRFQ = ({ onSuccess }) => {
     (state) => state.fabricatorInfo?.fabricatorData,
   ) || [];
 
-  // const staffData = useSelector((state) => state.userInfo.staffData);
+  // const staffData = useSelector((state: any) => state.userInfo.staffData);
 
+  // const userType =
+  typeof window !== "undefined" ? sessionStorage.getItem("userType") : null;
   // const userType =
   typeof window !== "undefined" ? sessionStorage.getItem("userType") : null;
 
@@ -447,6 +449,12 @@ const AddRFQ = ({ onSuccess }) => {
                     {errors.projectName.message}
                   </p>
                 )}
+              <div className="space-y-2 w-full">
+                <label className="block text-sm text-black font-black uppercase tracking-widest">Project Scope & Detailed Description</label>
+                <div className="border border-black rounded-lg overflow-hidden min-h-[200px] bg-white">
+                  <RichTextEditor value={description} onChange={setDescription} />
+                </div>
+              </div>
               </div>
 
               <div className="md:col-span-2 space-y-2 w-full mt-4 h-full flex flex-col">
