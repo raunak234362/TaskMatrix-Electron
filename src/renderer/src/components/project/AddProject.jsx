@@ -124,6 +124,7 @@ const AddProject = () => {
     tools: [
       { label: "Tekla", value: "TEKLA" },
       { label: "SDS/2", value: "SDS2" },
+      { label: "No Preference", value: "NO_PREFERENCE" },
       { label: "Both (Tekla + SDS/2)", value: "BOTH" },
     ],
     clientProjectManagers: clients
@@ -359,6 +360,24 @@ const AddProject = () => {
                           <Select
                             options={options.fabricators}
                             value={options.fabricators.find((o) => o.value === field.value)}
+                            onChange={(o) => field.onChange(o?.value || "")}
+                            placeholder="Select..."
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase">Tools *</label>
+                      <Controller
+                        name="tools"
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field }) => (
+                          <Select
+                            options={options.tools}
+                            value={options.tools.find((o) => o.value === field.value)}
                             onChange={(o) => field.onChange(o?.value || "")}
                             placeholder="Select..."
                             className="text-sm"
