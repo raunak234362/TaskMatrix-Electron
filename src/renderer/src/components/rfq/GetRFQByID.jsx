@@ -394,7 +394,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                             }`}
                                     >
                                         Responses
-                                        {activeTab === "responses" && <div className="absolute left-0 w-full bg-black rounded-t-full"></div>}
+                                        {activeTab === "responses" && <div className="absolute left-0 w-full h-1 bg-black rounded-t-full bottom-[-4px]"></div>}
                                     </button>
                                     <button
                                         onClick={() => setActiveTab("cdQuotas")}
@@ -402,7 +402,15 @@ const GetRFQByID = ({ id, onClose }) => {
                                             }`}
                                     >
                                         CD Quotes
-                                        {activeTab === "cdQuotas" && <div className="absolute left-0 w-full bg-black rounded-t-full"></div>}
+                                        {activeTab === "cdQuotas" && <div className="absolute left-0 w-full h-1 bg-black rounded-t-full bottom-[-4px]"></div>}
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab("cdSent")}
+                                        className={`text-sm md:text-xl font-semibold uppercase tracking-tight transition-all relative ${activeTab === "cdSent" ? "text-black" : "text-gray-400 hover:text-gray-600"
+                                            }`}
+                                    >
+                                        Sent to CD
+                                        {activeTab === "cdSent" && <div className="absolute left-0 w-full h-1 bg-black rounded-t-full bottom-[-4px]"></div>}
                                     </button>
                                 </div>
 
@@ -456,6 +464,52 @@ const GetRFQByID = ({ id, onClose }) => {
                                             <p className="text-gray-700 italic font-medium p-4 text-center">No CD Quotas available.</p>
                                         )}
                                     </>
+                                )}
+
+                                {activeTab === "cdSent" && (
+                                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-2">
+                                                <User size={16} className="text-gray-400" />
+                                                <h4 className="text-xs font-black text-black uppercase tracking-widest">Recipients</h4>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {rfq?.connectionDesignerRFQ?.length ? (
+                                                    rfq.connectionDesignerRFQ.map((cd) => (
+                                                        <div key={cd.id} className="px-3 py-1.5 bg-white border border-black rounded-xl text-xs font-bold text-gray-800 shadow-sm">
+                                                            {cd.name}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-xs text-gray-400 italic">No recipients assigned</p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4 pt-4 border-t border-gray-200">
+                                            <div className="flex items-center gap-2">
+                                                <Layout size={16} className="text-gray-400" />
+                                                <h4 className="text-xs font-black text-black uppercase tracking-widest">Sent Package Description</h4>
+                                            </div>
+                                            <div 
+                                                className="bg-white p-5 rounded-2xl border border-black prose prose-sm max-w-none text-xs sm:text-sm font-medium text-gray-800"
+                                                dangerouslySetInnerHTML={{ __html: rfq?.CDDescription || "No description provided" }}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-4 pt-4 border-t border-gray-200">
+                                            <div className="flex items-center gap-2">
+                                                <Paperclip size={16} className="text-gray-400" />
+                                                <h4 className="text-xs font-black text-black uppercase tracking-widest">Sent Attachments</h4>
+                                            </div>
+                                            <RenderFiles
+                                                files={rfq?.CDAttachments || []}
+                                                table="rFQ"
+                                                parentId={rfq?.id}
+                                                formatDate={(date) => new Date(date).toLocaleDateString()}
+                                            />
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         </div>
