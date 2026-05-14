@@ -113,7 +113,7 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
       <div className={`${isMinimized ? 'p-2' : 'p-4'} border-t border-gray-100 bg-gray-50/30`}>
         {!isMinimized && (
           <div className="flex items-center gap-3 mb-6 px-2">
-            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold text-lg border border-gray-300">
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-black font-black text-lg border border-green-200 shrink-0">
               {sessionStorage.getItem('firstName')?.[0]?.toUpperCase() || 'U'}
             </div>
             <div className="overflow-hidden">
