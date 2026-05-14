@@ -6,6 +6,7 @@ const RichTextEditor = ({
   onChange,
   placeholder,
   className = "",
+  height,
 }) => {
   const editor = useRef(null);
 
@@ -44,9 +45,9 @@ const RichTextEditor = ({
         "hr",
         "eraser",
       ],
-      height: 300,
+      height: height || 300,
     }),
-    [placeholder]
+    [placeholder, height]
   );
 
   return (
