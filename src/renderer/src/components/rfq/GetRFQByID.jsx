@@ -215,7 +215,7 @@ const GetRFQByID = ({ id, onClose }) => {
                     ? "Client"
                     : "WBT Team";
                 return (
-                    <span className="font-bold text-gray-900 text-sm">
+                    <span className="font-bold text-black text-sm">
                         {displayName}
                     </span>
                 );
@@ -228,8 +228,8 @@ const GetRFQByID = ({ id, onClose }) => {
                 const plainText = truncateWords(row.original.description, 20);
                 return (
                     <div className="flex flex-col max-w-[200px]">
-                        <p className="truncate text-sm font-bold text-gray-700">{plainText}</p>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                        <p className="truncate text-sm font-bold text-black">{plainText}</p>
+                        <span className="text-xs text-black font-bold uppercase tracking-wider">
                             {row.original.files?.length || 0} Attachments
                         </span>
                     </div>
@@ -240,7 +240,7 @@ const GetRFQByID = ({ id, onClose }) => {
             accessorKey: "createdAt",
             header: "Created",
             cell: ({ row }) => (
-                <span className="text-gray-800 text-xs font-bold uppercase tracking-widest leading-none">
+                <span className="text-black text-xs font-bold uppercase tracking-widest leading-none">
                     {new Date(row.original.createdAt).toLocaleDateString("en-IN", {
                         day: '2-digit',
                         month: 'short'
@@ -257,7 +257,7 @@ const GetRFQByID = ({ id, onClose }) => {
             header: "Status",
             cell: ({ row }) => (
                 <span
-                    className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${row.original.status === "OPEN"
+                    className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${row.original.status === "OPEN"
                         ? "bg-green-100 text-green-700"
                         : "bg-yellow-100 text-yellow-700"
                         }`}
@@ -308,7 +308,7 @@ const GetRFQByID = ({ id, onClose }) => {
                 const isApproved = row.original.approvalStatus;
                 return (
                     <span
-                        className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${isApproved ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
+                        className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${isApproved ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
                     >
                         {isApproved ? "Approved" : "Pending"}
                     </span>
@@ -330,7 +330,7 @@ const GetRFQByID = ({ id, onClose }) => {
                             {rfq?.projectName}
                         </h3>
                         <span
-                            className={`px-3 py-1 rounded-full text-[9px] sm:text-[11px] font-bold uppercase tracking-widest border border-black shrink-0 ${rfq?.status === "RECEIVED"
+                            className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-black shrink-0 ${rfq?.status === "RECEIVED"
                                 ? "bg-orange-100 text-black"
                                 : "bg-green-100 text-black"
                                 }`}
@@ -344,14 +344,14 @@ const GetRFQByID = ({ id, onClose }) => {
                             <>
                                 <button
                                     onClick={() => setShowEditModal(true)}
-                                    className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-gray-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-[10px] sm:text-xs shadow-sm hover:shadow-md active:scale-95"
+                                    className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-gray-200 border-2 border-black text-black font-bold uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-xs shadow-sm hover:shadow-md active:scale-95"
                                 >
                                     Edit
                                 </button>
 
                                 <button
                                     onClick={() => setShowStatusModal(true)}
-                                    className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-green-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-[10px] sm:text-xs shadow-sm hover:shadow-md active:scale-95"
+                                    className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-green-200 border-2 border-black text-black font-bold uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-xs shadow-sm hover:shadow-md active:scale-95"
                                 >
                                     Status
                                 </button>
@@ -390,7 +390,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                 <div className="flex gap-6 items-center">
                                     <button
                                         onClick={() => setActiveTab("responses")}
-                                        className={`text-sm md:text-xl font-semibold uppercase tracking-tight transition-all relative ${activeTab === "responses" ? "text-black" : "text-gray-400 hover:text-gray-600"
+                                        className={`text-sm md:text-xl font-bold uppercase tracking-tight transition-all relative ${activeTab === "responses" ? "text-black" : "text-black opacity-40 hover:opacity-100"
                                             }`}
                                     >
                                         Responses
@@ -398,7 +398,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                     </button>
                                     <button
                                         onClick={() => setActiveTab("cdQuotas")}
-                                        className={`text-sm md:text-xl font-semibold uppercase tracking-tight transition-all relative ${activeTab === "cdQuotas" ? "text-black" : "text-gray-400 hover:text-gray-600"
+                                        className={`text-sm md:text-xl font-bold uppercase tracking-tight transition-all relative ${activeTab === "cdQuotas" ? "text-black" : "text-black opacity-40 hover:opacity-100"
                                             }`}
                                     >
                                         CD Quotes
@@ -406,7 +406,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                     </button>
                                     <button
                                         onClick={() => setActiveTab("cdSent")}
-                                        className={`text-sm md:text-xl font-semibold uppercase tracking-tight transition-all relative ${activeTab === "cdSent" ? "text-black" : "text-gray-400 hover:text-gray-600"
+                                        className={`text-sm md:text-xl font-bold uppercase tracking-tight transition-all relative ${activeTab === "cdSent" ? "text-black" : "text-black opacity-40 hover:opacity-100"
                                             }`}
                                     >
                                         Sent to CD
@@ -446,7 +446,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                                 onRowClick={(row) => setSelectedResponse(row)}
                                             />
                                         ) : (
-                                            <p className="text-gray-700 italic font-medium p-4 text-center">No responses yet.</p>
+                                            <p className="text-black italic font-bold p-4 text-center">No responses yet.</p>
                                         )}
                                     </>
                                 )}
@@ -461,7 +461,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                                 onRowClick={(row) => setSelectedCDQuota(row)}
                                             />
                                         ) : (
-                                            <p className="text-gray-700 italic font-medium p-4 text-center">No CD Quotas available.</p>
+                                            <p className="text-black italic font-bold p-4 text-center">No CD Quotas available.</p>
                                         )}
                                     </>
                                 )}
@@ -470,37 +470,37 @@ const GetRFQByID = ({ id, onClose }) => {
                                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                                         <div className="space-y-4">
                                             <div className="flex items-center gap-2">
-                                                <User size={16} className="text-gray-400" />
-                                                <h4 className="text-xs font-black text-black uppercase tracking-widest">Recipients</h4>
+                                                <User size={16} className="text-black" />
+                                                <h4 className="text-sm font-bold text-black uppercase tracking-widest">Recipients</h4>
                                             </div>
                                             <div className="flex flex-wrap gap-2">
                                                 {rfq?.connectionDesignerRFQ?.length ? (
                                                     rfq.connectionDesignerRFQ.map((cd) => (
-                                                        <div key={cd.id} className="px-3 py-1.5 bg-white border border-black rounded-xl text-xs font-bold text-gray-800 shadow-sm">
+                                                        <div key={cd.id} className="px-3 py-1.5 bg-white border border-black rounded-xl text-sm font-bold text-black shadow-sm">
                                                             {cd.name}
                                                         </div>
                                                     ))
                                                 ) : (
-                                                    <p className="text-xs text-gray-400 italic">No recipients assigned</p>
+                                                    <p className="text-sm text-black italic">No recipients assigned</p>
                                                 )}
                                             </div>
                                         </div>
 
                                         <div className="space-y-4 pt-4 border-t border-gray-200">
                                             <div className="flex items-center gap-2">
-                                                <Layout size={16} className="text-gray-400" />
-                                                <h4 className="text-xs font-black text-black uppercase tracking-widest">Sent Package Description</h4>
+                                                <Layout size={16} className="text-black" />
+                                                <h4 className="text-sm font-bold text-black uppercase tracking-widest">Sent Package Description</h4>
                                             </div>
                                             <div 
-                                                className="bg-white p-5 rounded-2xl border border-black prose prose-sm max-w-none text-xs sm:text-sm font-medium text-gray-800"
+                                                className="bg-white p-5 rounded-2xl border border-black prose prose-sm max-w-none text-sm font-medium text-black"
                                                 dangerouslySetInnerHTML={{ __html: rfq?.CDDescription || "No description provided" }}
                                             />
                                         </div>
 
                                         <div className="space-y-4 pt-4 border-t border-gray-200">
                                             <div className="flex items-center gap-2">
-                                                <Paperclip size={16} className="text-gray-400" />
-                                                <h4 className="text-xs font-black text-black uppercase tracking-widest">Sent Attachments</h4>
+                                                <Paperclip size={16} className="text-black" />
+                                                <h4 className="text-sm font-bold text-black uppercase tracking-widest">Sent Attachments</h4>
                                             </div>
                                             <RenderFiles
                                                 files={rfq?.CDAttachments || []}
@@ -540,18 +540,17 @@ const GetRFQByID = ({ id, onClose }) => {
                                     return null;
                                 })()}
                             </div>
-
                             {/* Description */}
                             <div className="space-y-2">
                                 <button
                                     onClick={() => setShowDescription((prev) => !prev)}
-                                    className="text-sm font-black text-black/40 uppercase tracking-widest hover:text-black transition-colors flex items-center gap-1"
+                                    className="text-sm font-bold text-black uppercase tracking-widest hover:underline transition-colors flex items-center gap-1"
                                 >
                                     {showDescription ? 'Hide Description' : 'Show Description'}
                                 </button>
                                 {showDescription && (
                                     <div
-                                        className="text-black bg-white p-4 rounded-xl border border-black prose prose-sm max-w-none text-xs sm:text-sm font-medium break-words overflow-hidden"
+                                        className="text-black bg-white p-4 rounded-xl border border-black prose prose-sm max-w-none text-sm font-medium break-words overflow-hidden"
                                         dangerouslySetInnerHTML={{
                                             __html: rfq?.description || "No description provided",
                                         }}
@@ -562,12 +561,12 @@ const GetRFQByID = ({ id, onClose }) => {
                             {/* ---------------- FOLLOW-UPS SECTION ---------------- */}
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <h4 className="text-xs font-black text-black flex items-center gap-2 uppercase tracking-widest">
+                                    <h4 className="text-sm font-bold text-black flex items-center gap-2 uppercase tracking-widest">
                                         <MessageSquare className="w-4 h-4" /> RFQ Follow-ups
                                     </h4>
                                     <button
                                         onClick={() => setShowFollowUpForm(!showFollowUpForm)}
-                                        className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline flex items-center gap-1"
+                                        className="text-xs font-bold text-blue-600 uppercase tracking-widest hover:underline flex items-center gap-1"
                                     >
                                         {showFollowUpForm ? "Cancel" : "+ Add Follow-up"}
                                     </button>
@@ -585,7 +584,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                             placeholder="Type your follow-up message..."
                                         />
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-black/40 uppercase tracking-widest">
+                                            <label className="text-xs font-bold text-black uppercase tracking-widest">
                                                 Attachments
                                             </label>
                                             <MultipleFileUpload
@@ -597,7 +596,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                             <button
                                                 type="submit"
                                                 disabled={isSubmittingFollowUp}
-                                                className="px-6 py-2 bg-green-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-green-300 transition-all text-[10px] flex items-center gap-2 disabled:opacity-50"
+                                                className="px-6 py-2 bg-green-200 border-2 border-black text-black font-bold uppercase tracking-widest rounded-lg hover:bg-green-300 transition-all text-xs flex items-center gap-2 disabled:opacity-50"
                                             >
                                                 {isSubmittingFollowUp ? (
                                                     <Loader2 className="w-3 h-3 animate-spin" />
@@ -623,7 +622,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                                         <div className="w-6 h-6 rounded-full bg-gray-100 border border-black flex items-center justify-center">
                                                             <User className="w-3 h-3 text-black" />
                                                         </div>
-                                                        <span className="text-[10px] font-black text-black uppercase tracking-widest">
+                                                        <span className="text-xs font-bold text-black uppercase tracking-widest">
                                                             {fu.createdByRole === "CLIENT"
                                                                 ? rfq?.sender?.fabricator?.fabName || "Client"
                                                                 : fu.user
@@ -631,7 +630,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                                                 : "WBT Team"}
                                                         </span>
                                                     </div>
-                                                    <div className="flex items-center gap-1 text-[10px] font-bold text-black/40 uppercase tracking-widest">
+                                                    <div className="flex items-center gap-1 text-xs font-bold text-black uppercase tracking-widest">
                                                         <Clock className="w-3 h-3" />
                                                         {new Date(fu.createdAt).toLocaleString("en-IN", {
                                                             day: '2-digit',
@@ -671,8 +670,8 @@ const GetRFQByID = ({ id, onClose }) => {
                                                                 }}
                                                                 className="flex items-center gap-2 px-3 py-1 bg-gray-50 border border-black rounded-full hover:bg-gray-100 transition-all group"
                                                             >
-                                                                <Paperclip className="w-3 h-3 text-black/40 group-hover:text-black" />
-                                                                <span className="text-[10px] font-black text-black uppercase tracking-widest truncate max-w-[150px]">
+                                                                <Paperclip className="w-3 h-3 text-black" />
+                                                                <span className="text-xs font-bold text-black uppercase tracking-widest truncate max-w-[150px]">
                                                                     {file.originalName || file.fileName || "File"}
                                                                 </span>
                                                             </button>
@@ -682,8 +681,8 @@ const GetRFQByID = ({ id, onClose }) => {
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="p-8 text-center bg-gray-50 rounded-2xl border-2 border-dashed border-black/10">
-                                            <p className="text-[10px] font-black text-black/20 uppercase tracking-[0.2em]">
+                                        <div className="p-8 text-center bg-gray-50 rounded-2xl border-2 border-dashed border-black">
+                                            <p className="text-sm font-bold text-black uppercase tracking-[0.2em]">
                                                 No follow-ups recorded yet
                                             </p>
                                         </div>
@@ -692,64 +691,61 @@ const GetRFQByID = ({ id, onClose }) => {
                             </div>
 
                             {/* Scopes */}
-                            <div className="space-y-4">
-                                <div className="p-4 bg-white rounded-2xl border border-black text-sm">
-                                    <h4 className="text-xs font-black text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
+                            <div className="space-y-6">
+                                <div className="p-6 bg-white rounded-2xl border border-black shadow-sm">
+                                    <h4 className="text-xs font-bold text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
                                         <Settings className="w-4 h-4" /> Connection Design Scope
                                     </h4>
-                                    <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
-                                        <Scope
-                                            label="Connection Design"
-                                            enabled={rfq?.connectionDesign || false}
-                                        />
-                                        <Scope
-                                            label="Misc Design"
-                                            enabled={rfq?.miscDesign || false}
-                                        />
-                                        <Scope
-                                            label={
-                                                !rfq?.customerDesign && rfq?.sender?.fabricator?.fabName
-                                                    ? `Connection design by ${rfq.sender.fabricator.fabName}`
-                                                    : "Connection Design by WBT"
-                                            }
-                                            enabled={true}
-                                        />
-                                    </div>
+                                    <ul className="space-y-2 list-disc pl-5">
+                                        {rfq?.connectionDesign && (
+                                            <li className="text-sm font-bold text-black uppercase tracking-widest">Connection Design</li>
+                                        )}
+                                        {rfq?.miscDesign && (
+                                            <li className="text-sm font-bold text-black uppercase tracking-widest">Misc Design</li>
+                                        )}
+                                        <li className="text-sm font-bold text-black uppercase tracking-widest">
+                                            {!rfq?.customerDesign && rfq?.sender?.fabricator?.fabName
+                                                ? `Connection design by ${rfq.sender.fabricator.fabName}`
+                                                : "Connection Design by WBT"}
+                                        </li>
+                                    </ul>
                                 </div>
 
-                                <div className="p-4 bg-white rounded-2xl border border-black text-sm">
-                                    <h4 className="text-xs font-black text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
+                                <div className="p-6 bg-white rounded-2xl border border-black shadow-sm">
+                                    <h4 className="text-xs font-bold text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
                                         <Settings className="w-4 h-4" /> Detailing Scope
                                     </h4>
-                                    <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
-                                        <Scope
-                                            label="Detailing Main"
-                                            enabled={rfq?.detailingMain || false}
-                                        />
-                                        <Scope
-                                            label="Detailing Misc"
-                                            enabled={rfq?.detailingMisc || false}
-                                        />
-                                    </div>
+                                    <ul className="space-y-2 list-disc pl-5">
+                                        {rfq?.detailingMain && (
+                                            <li className="text-sm font-bold text-black uppercase tracking-widest">Detailing Main</li>
+                                        )}
+                                        {rfq?.detailingMisc && (
+                                            <li className="text-sm font-bold text-black uppercase tracking-widest">Detailing Misc</li>
+                                        )}
+                                        {!rfq?.detailingMain && !rfq?.detailingMisc && (
+                                            <li className="text-sm font-bold text-black uppercase tracking-widest list-none ml-[-20px]">No Detailing Items Selected</li>
+                                        )}
+                                    </ul>
                                 </div>
 
-                                <div className="p-4 bg-white rounded-2xl border border-black text-sm space-y-4">
-                                    <h4 className="text-xs font-black text-black flex items-center gap-2 uppercase tracking-widest">
+                                <div className="p-6 bg-white rounded-2xl border border-black shadow-sm space-y-4">
+                                    <h4 className="text-xs font-bold text-black flex items-center gap-2 uppercase tracking-widest">
                                         <Layout className="w-4 h-4" /> Material Take-off
                                     </h4>
-                                    <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
-                                        <Scope
-                                            label="MTO - Manual"
-                                            enabled={rfq?.MTOManual || false}
-                                        />
-                                        <Scope
-                                            label="MTO - Stick Model"
-                                            enabled={!!rfq?.MTOStickModel || false}
-                                        />
-                                    </div>
+                                    <ul className="space-y-2 list-disc pl-5">
+                                        {rfq?.MTOManual && (
+                                            <li className="text-sm font-bold text-black uppercase tracking-widest">MTO - Manual</li>
+                                        )}
+                                        {!!rfq?.MTOStickModel && (
+                                            <li className="text-sm font-bold text-black uppercase tracking-widest">MTO - Stick Model</li>
+                                        )}
+                                        {!rfq?.MTOManual && !rfq?.MTOStickModel && (
+                                            <li className="text-sm font-bold text-black uppercase tracking-widest list-none ml-[-20px]">No MTO Items Selected</li>
+                                        )}
+                                    </ul>
 
                                     {(rfq?.MTOValue || rfq?.MTOStickModel || rfq?.MTOManualModel) && (
-                                        <div className="p-4 bg-[#6bbd45]/5 rounded-xl border border-[#6bbd45]/20 overflow-hidden">
+                                        <div className="p-4 bg-[#6bbd45]/5 rounded-xl border border-[#6bbd45]/20 overflow-hidden mt-4">
                                             <div 
                                                 className="prose prose-sm max-w-none text-xs text-black font-bold leading-relaxed break-words"
                                                 dangerouslySetInnerHTML={{ __html: rfq?.MTOValue || rfq?.MTOStickModel || rfq?.MTOManualModel }}
@@ -777,7 +773,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                     </Button>
                                     <Button
                                         onClick={() => handleCDQuotationModal()}
-                                        className="w-full sm:w-auto h-auto py-2.5 px-4 text-[11px] sm:text-sm bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 whitespace-normal leading-tight "
+                                        className="w-full sm:w-auto h-auto py-2.5 px-4 text-xs sm:text-sm bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 whitespace-normal leading-tight "
                                     >
                                         Raise for Connection Designer Quotation
                                     </Button>
@@ -837,7 +833,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                 </h3>
                                 <button
                                     onClick={() => setShowDeleteModal(false)}
-                                    className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
+                                    className="px-4 py-2 bg-red-50 border border-red-600 text-black font-bold text-xs uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
                                 >
                                     Close
                                 </button>
@@ -891,7 +887,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                 </h3>
                                 <button
                                     onClick={() => setShowStatusModal(false)}
-                                    className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
+                                    className="px-4 py-2 bg-red-50 border border-red-600 text-black font-bold text-xs uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
                                     aria-label="Close"
                                 >
                                     Close
@@ -966,21 +962,10 @@ const GetRFQByID = ({ id, onClose }) => {
 
 const Info = ({ label, value }) => (
     <div className="flex justify-between items-center gap-4 py-2 border-b border-black/5 last:border-0">
-        <p className="text-black/40 text-[10px] font-bold uppercase tracking-widest ">
+        <p className="text-black text-xs font-bold uppercase tracking-widest ">
             {label}:
         </p>
-        <p className="text-black text-xs font-bold uppercase tracking-tight text-right">{value}</p>
-    </div>
-);
-
-const Scope = ({ label, enabled }) => (
-    <div
-        className={`px-4 py-1.5 rounded-full border border-black text-[10px] font-bold uppercase tracking-widest shadow-sm transition-all ${enabled
-            ? "bg-green-100 text-black"
-            : "bg-gray-100 text-black/40"
-            }`}
-    >
-        {label}
+        <p className="text-black text-sm font-bold uppercase tracking-tight text-right">{value}</p>
     </div>
 );
 

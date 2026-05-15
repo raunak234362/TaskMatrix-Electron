@@ -10,6 +10,7 @@ const ASCI = "";  // Asset not found
 import Button from "../fields/Button";
 import RichTextEditor from "../fields/RichTextEditor";
 import Select from "../fields/Select";
+import Input from "../fields/input";
 
 
 const ResponseModal = ({
@@ -459,248 +460,254 @@ const ResponseModal = ({
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white shadow-2xl rounded-2xl border border-gray-200 w-[90%] max-w-7xl relative overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 shrink-0 bg-white">
-          <h2 className="text-xl font-black text-black tracking-tight">Add Response</h2>
+        <div className="flex items-center justify-between p-6 border-b border-black shrink-0 bg-white">
+          <div className="flex items-center gap-4">
+            <div className="w-2 h-8 bg-[#6bbd45] rounded-full" />
+            <h2 className="text-2xl font-black text-black uppercase tracking-tight">Add Response</h2>
+          </div>
           <button
             onClick={onClose}
-            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+            className="px-8 py-2 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
             Close
           </button>
         </div>
 
-        <div className="overflow-y-auto flex-1 p-6 custom-scrollbar">
-
-          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-            {/* Estimation Selection */}
-            <div className="flex items-end gap-4">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Estimation for Proposal
-                </label>
-                <Select
-                  name="estimationId"
-                  options={estimations.map((est) => ({
-                    label: `${est.estimationNumber} - ${est.projectName}`,
-                    value: est.id,
-                  }))}
-                  value={selectedEstimationId}
-                  onChange={(_, val) =>
-                    handleEstimationChange(val)
-                  }
-                  placeholder="Select an estimation..."
-                />
+        <div className="overflow-y-auto flex-1 p-8 custom-scrollbar">
+          <form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
+            
+            {/* Proposal Selection Section */}
+            <section className="space-y-6">
+              <div className="flex items-center gap-4 border-b border-black pb-4">
+                <div className="w-1.5 h-6 bg-[#6bbd45] rounded-full" />
+                <h3 className="text-lg text-black font-black uppercase tracking-widest">Proposal Details</h3>
               </div>
-              <Button
-                type="button"
-                onClick={handlePrint}
-                disabled={!selectedEstimationId}
-                className="flex items-center gap-2 px-4 py-2 bg-green-200 text-black rounded-lg hover:bg-green-300 "
-              >
-                <Printer className="w-4 h-4" />
-                Print Proposal
-              </Button>
-            </div>
+              
+              <div className="flex items-end gap-6">
+                <div className="flex-1 space-y-2">
+                  <label className="block text-xs text-black font-black uppercase tracking-widest">
+                    Select Estimation for Proposal
+                  </label>
+                  <Select
+                    name="estimationId"
+                    options={estimations.map((est) => ({
+                      label: `${est.estimationNumber} - ${est.projectName}`,
+                      value: est.id,
+                    }))}
+                    value={selectedEstimationId}
+                    onChange={(_, val) => handleEstimationChange(val)}
+                    placeholder="Select an estimation..."
+                    className="border border-black rounded-lg h-14 bg-white"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  disabled={!selectedEstimationId}
+                  className="flex items-center gap-2 px-8 h-14 bg-green-50 text-black border-2 border-[#6bbd45] rounded-lg hover:bg-green-100 transition-all font-black text-sm uppercase tracking-widest disabled:opacity-50"
+                >
+                  <Printer className="w-5 h-5" />
+                  Print Proposal
+                </button>
+              </div>
 
-            {/* Pricing Items Selection */}
-            {selectedEstimationId && (
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                <h3 className="text-sm font-semibold text-gray-700 border-bottom pb-2">
-                  Select Pricing Items
-                </h3>
-                <div className="grid grid-cols-1 gap-3">
-                  {pricingItems.map((item, index) => (
-                    <div key={item.label} className="space-y-2">
-                      <label className="flex items-center gap-3 cursor-pointer group">
-                        <input
-                          type="checkbox"
-                          checked={item.selected}
-                          onChange={(e) =>
-                            handlePricingItemChange(
-                              index,
-                              "selected",
-                              e.target.checked,
-                            )
-                          }
-                          className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
-                        />
-                        <span className="text-sm font-medium text-gray-700 group-hover:text-green-700 transition-colors">
-                          {item.label}
-                        </span>
-                      </label>
+              {/* Pricing Items Selection */}
+              {selectedEstimationId && (
+                <div className="bg-white p-6 rounded-xl border border-black space-y-6">
+                  <h3 className="text-sm font-black text-black uppercase tracking-widest border-b border-black/10 pb-2">
+                    Select Pricing Items
+                  </h3>
+                  <div className="grid grid-cols-1 gap-6">
+                    {pricingItems.map((item, index) => (
+                      <div key={item.label} className="space-y-4">
+                        <label className="flex items-center gap-4 cursor-pointer group">
+                          <input
+                            type="checkbox"
+                            checked={item.selected}
+                            onChange={(e) =>
+                              handlePricingItemChange(index, "selected", e.target.checked)
+                            }
+                            className="w-5 h-5 accent-[#6bbd45] border-2 border-black rounded cursor-pointer"
+                          />
+                          <span className="text-sm font-black text-black uppercase tracking-widest group-hover:text-[#6bbd45] transition-colors">
+                            {item.label}
+                          </span>
+                        </label>
 
-                      {item.selected && (
-                        <div className="ml-7 flex gap-4 items-center animate-in fade-in slide-in-from-left-2 duration-200">
-                          <div className="flex-1">
-                            <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs ">
-                                {selectedEstimation?.fabricators?.currencyType ||
-                                  "USD"}
-                              </span>
-                              <input
+                        {item.selected && (
+                          <div className="ml-9 flex gap-6 items-center animate-in fade-in slide-in-from-left-4 duration-300">
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[10px] text-black font-black uppercase tracking-[0.2em] opacity-60">Price ({selectedEstimation?.fabricators?.currencyType || "USD"})</label>
+                              <Input
                                 type="number"
                                 value={item.price}
-                                onChange={(e) =>
-                                  handlePricingItemChange(
-                                    index,
-                                    "price",
-                                    e.target.value,
-                                  )
-                                }
-                                placeholder="Price"
-                                className="w-full pl-12 pr-3 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-green-500 outline-none"
+                                onChange={(e) => handlePricingItemChange(index, "price", e.target.value)}
+                                placeholder="0.00"
+                                className="h-12 border-black"
                               />
                             </div>
-                          </div>
-                          <div className="flex-1">
-                            <div className="relative">
-                              <input
+                            <div className="flex-1 space-y-2">
+                              <label className="block text-[10px] text-black font-black uppercase tracking-[0.2em] opacity-60">Approx. Duration (Weeks)</label>
+                              <Input
                                 type="number"
                                 value={item.weeks}
-                                onChange={(e) =>
-                                  handlePricingItemChange(
-                                    index,
-                                    "weeks",
-                                    e.target.value,
-                                  )
-                                }
-                                placeholder="Weeks"
-                                className="w-full pl-3 pr-12 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-green-500 outline-none"
+                                onChange={(e) => handlePricingItemChange(index, "weeks", e.target.value)}
+                                placeholder="0"
+                                className="h-12 border-black"
                               />
-                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">
-                                weeks
-                              </span>
                             </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {/* Message Content Section */}
+            <section className="space-y-6">
+              <div className="flex items-center gap-4 border-b border-black pb-4">
+                <div className="w-1.5 h-6 bg-[#6bbd45] rounded-full" />
+                <h3 className="text-lg text-black font-black uppercase tracking-widest">Message Content</h3>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="block text-xs text-black font-black uppercase tracking-widest">
+                  Subject *
+                </label>
+                <Controller
+                  name="subject"
+                  control={control}
+                  rules={{ required: "Subject is required" }}
+                  render={({ field }) => (
+                    <Input
+                      type="text"
+                      {...field}
+                      value={field.value || ""}
+                      className="h-14 border-black font-black"
+                    />
+                  )}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs text-black font-black uppercase tracking-widest">
+                  Message *
+                </label>
+                <div className="border border-black rounded-lg overflow-hidden bg-white">
+                  <Controller
+                    name="description"
+                    control={control}
+                    rules={{ required: "Message is required" }}
+                    render={({ field }) => (
+                      <RichTextEditor
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                        placeholder="Type your response..."
+                      />
+                    )}
+                  />
                 </div>
               </div>
-            )}
+            </section>
 
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Subject *
-              </label>
-              <Controller
-                name="subject"
-                control={control}
-                rules={{ required: "Subject is required" }}
-                render={({ field }) => (
-                  <input
-                    type="text"
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                    placeholder=""
-                    className="w-full pl-3 pr-12 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-green-500 outline-none"
-                  />
-                )}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Message *
-              </label>
-              <Controller
-                name="description"
-                control={control}
-                rules={{ required: "Message is required" }}
-                render={({ field }) => (
-                  <RichTextEditor
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                    placeholder="Type your response..."
-                  />
-                )}
-              />
-            </div>
+            {/* Metrics Section */}
+            <section className="space-y-6">
+              <div className="flex items-center gap-4 border-b border-black pb-4">
+                <div className="w-1.5 h-6 bg-[#6bbd45] rounded-full" />
+                <h3 className="text-lg text-black font-black uppercase tracking-widest">Tonnage & Documentation</h3>
+              </div>
 
-            {/* Additional Response Details */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Total Tonnage (With Connection)
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="block text-xs text-black font-black uppercase tracking-widest">
+                    Total Tonnage (With Connection)
+                  </label>
+                  <Input
+                    {...register("totalTonnageWithConnection")}
+                    placeholder="e.g. 150 MT"
+                    className="h-14 border-black"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-xs text-black font-black uppercase tracking-widest">
+                    Total Tonnage (Without Connection)
+                  </label>
+                  <Input
+                    {...register("totalTonnageWithoutConnection")}
+                    placeholder="e.g. 130 MT"
+                    className="h-14 border-black"
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <label className="block text-xs text-black font-black uppercase tracking-widest">
+                    Page Numbers
+                  </label>
+                  <div className="border border-black rounded-lg overflow-hidden bg-white">
+                    <Controller
+                      name="PageNumbers"
+                      control={control}
+                      render={({ field }) => (
+                        <RichTextEditor
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          placeholder="e.g. 1-12"
+                          height={150}
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Attachments Section */}
+            <section className="space-y-6">
+              <div className="flex items-center gap-4 border-b border-black pb-4">
+                <div className="w-1.5 h-6 bg-[#6bbd45] rounded-full" />
+                <h3 className="text-lg text-black font-black uppercase tracking-widest">Attachments & Links</h3>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs text-black font-black uppercase tracking-widest">
+                  Optional Link
                 </label>
-                <input
-                  type="text"
-                  {...register("totalTonnageWithConnection")}
-                  placeholder="e.g. 150 MT"
-                  className="w-full pl-3 pr-3 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-green-500 outline-none"
+                <Input
+                  {...register("link")}
+                  placeholder="Paste URL if any"
+                  className="h-14 border-black"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Total Tonnage (Without Connection)
-                </label>
-                <input
-                  type="text"
-                  {...register("totalTonnageWithoutConnection")}
-                  placeholder="e.g. 130 MT"
-                  className="w-full pl-3 pr-3 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-green-500 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Page Numbers
-                </label>
-                <input
-                  type="text"
-                  {...register("PageNumbers")}
-                  placeholder="e.g. 1-12"
-                  className="w-full pl-3 pr-3 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-green-500 outline-none"
-                />
-              </div>
-            </div>
 
-            {/* Optional Link */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Optional Link
-              </label>
-              <input
-                {...register("link")}
-                placeholder="Paste URL if any"
-                className="w-full border rounded-md p-2"
-              />
-            </div>
-
-            {/* Files */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Attach Files
-              </label>
-              <Controller
-                name="files"
-                control={control}
-                render={() => (
-                  <MultipleFileUpload
-                    onFilesChange={setFiles}
-                    initialFiles={files}
+              <div className="space-y-2">
+                <label className="block text-xs text-black font-black uppercase tracking-widest">
+                  Attach Files
+                </label>
+                <div className="bg-white rounded-lg border border-black p-4">
+                  <Controller
+                    name="files"
+                    control={control}
+                    render={() => (
+                      <MultipleFileUpload
+                        onFilesChange={setFiles}
+                        initialFiles={files}
+                      />
+                    )}
                   />
-                )}
-              />
-            </div>
+                </div>
+              </div>
+            </section>
 
-            {/* Submit */}
-            <div className="flex justify-end gap-4">
-              <Button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 bg-green-200 text-black rounded-lg hover:bg-green-300"
-              >
-                Cancel
-              </Button>
-
-              <Button
+            {/* Form Footer */}
+            <div className="pt-10 flex justify-center border-t border-black/10">
+              <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2 bg-green-200 text-black rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+                className="w-full max-w-2xl py-5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg font-black text-sm uppercase tracking-[0.3em] hover:bg-green-100 transition-all duration-500 shadow-xl active:scale-95 flex items-center justify-center gap-4 disabled:opacity-50"
               >
-                {loading ? "Submitting..." : "Submit Response"}
-              </Button>
+                {loading ? "Processing..." : "Submit Response"}
+              </button>
             </div>
           </form>
         </div>
