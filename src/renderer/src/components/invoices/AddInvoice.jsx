@@ -413,6 +413,7 @@ const AddInvoice = ({
               <option value="">-- Select Type --</option>
               <option value="APPROVAL">Approval</option>
               <option value="FABRICATION">Fabrication</option>
+              <option value="MTO">MTO</option>
               <option value="CHANGE_ORDER">Change Order</option>
             </select>
           </div>
