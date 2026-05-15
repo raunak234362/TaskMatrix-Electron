@@ -115,7 +115,7 @@ const AddRFQ = ({ onSuccess }) => {
 
   // Sync tools and reset fields when estimation type changes
   useEffect(() => {
-    if (isMTO && !isDetailing) {
+    if (isMTO && !isDetailing && !mtoStickModelEnabled) {
       setValue("tools", "NO_PREFERENCE");
     }
     if (!isMTO) {
@@ -129,7 +129,7 @@ const AddRFQ = ({ onSuccess }) => {
       setValue("detailingMain", false);
       setValue("detailingMisc", false);
     }
-  }, [isDetailing, isMTO, setValue]);
+  }, [isDetailing, isMTO, mtoStickModelEnabled, setValue]);
 
   // --- FETCH STAFF ONCE ---
   useEffect(() => {
@@ -380,7 +380,7 @@ const AddRFQ = ({ onSuccess }) => {
                 userRole !== "CLIENT_ESTIMATOR" && (
                   <>
                     <div className="space-y-2">
-                      <label className="block text-xs text-black font-black uppercase tracking-widest opacity-60">
+                      <label className="block text-xs text-black font-black uppercase tracking-widest">
                         Fabricator Partner
                       </label>
                       <Controller
@@ -393,7 +393,7 @@ const AddRFQ = ({ onSuccess }) => {
                             value={
                               field.value ? String(field.value) : undefined
                             }
-                            className="border-black rounded-lg h-14 bg-white"
+                            className="border border-black rounded-lg h-14 bg-white"
                             onChange={(_, value) => field.onChange(value ?? "")}
                           />
                         )}
@@ -406,7 +406,7 @@ const AddRFQ = ({ onSuccess }) => {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-xs text-black font-black uppercase tracking-widest opacity-60">
+                      <label className="block text-xs text-black font-black uppercase tracking-widest">
                         Fabricator Contact
                       </label>
                       <Controller
@@ -416,7 +416,7 @@ const AddRFQ = ({ onSuccess }) => {
                           <Select
                             name={field.name}
                             options={clientOptions}
-                            className="border-black rounded-lg h-14 bg-white"
+                            className="border border-black rounded-lg h-14 bg-white"
                             value={
                               field.value ? String(field.value) : undefined
                             }
@@ -439,7 +439,7 @@ const AddRFQ = ({ onSuccess }) => {
                 </label>
                 <Input
                   {...register("projectName", { required: "Project name is required" })}
-                  className="w-full bg-white border-black rounded-lg h-14 text-sm font-black"
+                  className="w-full bg-white border border-black rounded-lg h-14 text-sm font-black"
                 />
                 {errors.projectName && (
                   <p className="text-[10px] text-rose-600 uppercase tracking-widest">
@@ -473,13 +473,13 @@ const AddRFQ = ({ onSuccess }) => {
               <button
                 type="button"
                 onClick={() => setIsDetailing(!isDetailing)}
-                className={`p-6 rounded-xl border-2 transition-all flex flex-col items-center gap-4 group ${
+                className={`p-6 rounded-xl border transition-all flex flex-col items-center gap-4 group ${
                   isDetailing
-                    ? "bg-[#6bbd45]/10 border-[#6bbd45] text-black"
-                    : "bg-white border-black/10 text-gray-400 hover:border-black/20"
+                    ? "bg-[#6bbd45]/10 border-2 border-[#6bbd45] text-black"
+                    : "bg-white border border-black text-black hover:bg-black/5"
                 }`}
               >
-                <div className={`p-4 rounded-full transition-colors ${isDetailing ? "bg-[#6bbd45] text-white" : "bg-gray-100 text-gray-400"}`}>
+                <div className={`p-4 rounded-full border transition-colors ${isDetailing ? "bg-[#6bbd45] border-[#6bbd45] text-white" : "bg-white border-black text-black"}`}>
                   <Layers size={32} />
                 </div>
                 <span className="font-black uppercase tracking-widest text-sm">Detailing Estimation</span>
@@ -487,13 +487,13 @@ const AddRFQ = ({ onSuccess }) => {
               <button
                 type="button"
                 onClick={() => setIsMTO(!isMTO)}
-                className={`p-6 rounded-xl border-2 transition-all flex flex-col items-center gap-4 group ${
+                className={`p-6 rounded-xl border transition-all flex flex-col items-center gap-4 group ${
                   isMTO
-                    ? "bg-[#6bbd45]/10 border-[#6bbd45] text-black"
-                    : "bg-white border-black/10 text-gray-400 hover:border-black/20"
+                    ? "bg-[#6bbd45]/10 border-2 border-[#6bbd45] text-black"
+                    : "bg-white border border-black text-black hover:bg-black/5"
                 }`}
               >
-                <div className={`p-4 rounded-full transition-colors ${isMTO ? "bg-[#6bbd45] text-white" : "bg-gray-100 text-gray-400"}`}>
+                <div className={`p-4 rounded-full border transition-colors ${isMTO ? "bg-[#6bbd45] border-[#6bbd45] text-white" : "bg-white border-black text-black"}`}>
                   <Settings2 size={32} />
                 </div>
                 <span className="font-black uppercase tracking-widest text-sm">Material Take-off</span>
@@ -513,9 +513,9 @@ const AddRFQ = ({ onSuccess }) => {
                     Connection Design Scope
                   </h3>
                   <div className="grid grid-cols-1 gap-4">
-                    <Toggle label="Main Design" {...register("connectionDesign")} />
-                    <Toggle label="Misc Design" {...register("miscDesign")} />
-                    <Toggle label="Customer Design" {...register("customerDesign")} />
+                    <Toggle label="Main Design" {...register("connectionDesign")} checked={mtoFields.connectionDesign} />
+                    <Toggle label="Misc Design" {...register("miscDesign")} checked={mtoFields.miscDesign} />
+                    <Toggle label="Customer Design" {...register("customerDesign")} checked={mtoFields.customerDesign} />
                   </div>
                 </div>
 
@@ -525,8 +525,8 @@ const AddRFQ = ({ onSuccess }) => {
                     Detailing Scope
                   </h3>
                   <div className="grid grid-cols-1 gap-4">
-                    <Toggle label="Main Steel" {...register("detailingMain")} />
-                    <Toggle label="Misc Steel" {...register("detailingMisc")} />
+                    <Toggle label="Main Steel" {...register("detailingMain")} checked={mtoFields.detailingMain} />
+                    <Toggle label="Misc Steel" {...register("detailingMisc")} checked={mtoFields.detailingMisc} />
                   </div>
                 </div>
               </div>
@@ -547,10 +547,12 @@ const AddRFQ = ({ onSuccess }) => {
                   <Toggle
                     label="MTO - Manual"
                     {...register("MTOManual")}
+                    checked={mtoFields.MTOManual}
                   />
                   <Toggle
                     label="MTO - Stick Model"
                     {...register("mtoStickModelEnabled")}
+                    checked={mtoFields.mtoStickModelEnabled}
                   />
                 </div>
               </div>
@@ -576,41 +578,40 @@ const AddRFQ = ({ onSuccess }) => {
                       <Calendar size={14} className="text-black/40" />
                       Due Date <span className="text-rose-500">*</span>
                     </label>
-                    <Input {...register("estimationDate", { required: "Due date is required" })} type="date" className="w-full bg-white border-black rounded-lg h-14 text-sm font-black" />
+                    <Input {...register("estimationDate", { required: "Due date is required" })} type="date" className="w-full bg-white border border-black rounded-lg h-14 text-sm font-black" />
                   </div>
+                  {(isDetailing || mtoStickModelEnabled) && (
+                    <div className="space-y-2 animate-in fade-in duration-300">
+                      <label className="block text-sm text-black font-black uppercase tracking-widest">Tools <span className="text-rose-500">*</span></label>
+                      <Controller
+                        name="tools"
+                        control={control}
+                        rules={{ required: (isDetailing || mtoStickModelEnabled) ? "Tools selection is required" : false }}
+                        render={({ field }) => (
+                          <Select
+                            name={field.name}
+                            options={[
+                              { label: "TEKLA", value: "TEKLA" },
+                              { label: "SDS2", value: "SDS2" },
+                              { label: "NO PREFERENCE", value: "NO_PREFERENCE" },
+                              { label: "OTHER", value: "OTHER" },
+                            ]}
+                            className="border border-black rounded-lg h-14 bg-white"
+                            value={field.value}
+                            onChange={(_, value) => field.onChange(value ?? "")}
+                          />
+                        )}
+                      />
+                    </div>
+                  )}
                   {isDetailing && (
-                    <>
-                      <div className="space-y-2 animate-in fade-in duration-300">
-                        <label className="block text-sm text-black font-black uppercase tracking-widest">Tools <span className="text-rose-500">*</span></label>
-                        <Controller
-                          name="tools"
-                          control={control}
-                          rules={{ required: isDetailing ? "Tools selection is required" : false }}
-                          render={({ field }) => (
-                            <Select
-                              name={field.name}
-                              options={[
-                                { label: "TEKLA", value: "TEKLA" },
-                                { label: "SDS2", value: "SDS2" },
-                                { label: "BOTH", value: "BOTH" },
-                                { label: "NO PREFERENCE", value: "NO_PREFERENCE" },
-                                { label: "OTHER", value: "OTHER" },
-                              ]}
-                              className="border-black rounded-lg h-14 bg-white"
-                              value={field.value}
-                              onChange={(_, value) => field.onChange(value ?? "")}
-                            />
-                          )}
-                        />
-                      </div>
-                      <div className="space-y-2 animate-in fade-in duration-300">
-                        <label className="text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
-                          <Percent size={14} className="text-black/40" />
-                          Bid Price
-                        </label>
-                        <Input {...register("bidPrice")} type="number" className="w-full bg-white border-black rounded-lg h-14 text-sm font-black" />
-                      </div>
-                    </>
+                    <div className="space-y-2 animate-in fade-in duration-300">
+                      <label className="text-sm text-black font-black uppercase tracking-widest flex items-center gap-2">
+                        <Percent size={14} className="text-black/40" />
+                        Bid Price
+                      </label>
+                      <Input {...register("bidPrice")} type="number" className="w-full bg-white border border-black rounded-lg h-14 text-sm font-black" />
+                    </div>
                   )}
                 </div>
               </section>
@@ -620,7 +621,7 @@ const AddRFQ = ({ onSuccess }) => {
                 <div className="flex items-center gap-4 border-b border-black/10 pb-4">
                   <div className="w-2 h-8 bg-[#6bbd45] rounded-full" />
                   <h3 className="text-xl text-black font-black uppercase tracking-tight">
-                    Project / Scope Sheet Attachments
+                    Design Drawings / Scope Sheet Attachments
                   </h3>
                 </div>
                 <div className="bg-gray-50/50 rounded-lg border border-black/5">

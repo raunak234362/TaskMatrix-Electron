@@ -27,15 +27,21 @@ const Toggle = forwardRef(
         )}
 
         {/* TOGGLE */}
-        <input
-          type="checkbox"
-          id={id}
-          name={name}
-          onChange={onChange}
-          ref={ref}
-          {...props}
-          className="w-4 h-4 accent-black border-2 border-black rounded cursor-pointer"
-        />
+        <div className="relative flex items-center justify-center">
+          <input
+            type="checkbox"
+            id={id}
+            name={name}
+            onChange={onChange}
+            ref={ref}
+            checked={isChecked}
+            {...props}
+            className="peer appearance-none w-4 h-4 border border-black rounded cursor-pointer checked:bg-[#6bbd45] checked:border-[#6bbd45] transition-colors"
+          />
+          <svg className="absolute w-2.5 h-2.5 pointer-events-none hidden peer-checked:block text-black" viewBox="0 0 14 14" fill="none">
+            <path d="M3 7.5L6 10.5L11 3.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
       </div>
     );
   }
