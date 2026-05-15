@@ -309,6 +309,22 @@ class Service {
     }
   }
 
+  //edit team
+  static async EditTeam(teamId, teamData) {
+    try {
+      const response = await api.put(`team/${teamId}`, teamData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response?.data)
+      return response?.data
+    } catch (error) {
+      console.log(error)
+      console.log('Error while editing team', error)
+    }
+  }
+
   // Add fabricator
   static async AddFabricator(fabricatorData) {
     try {

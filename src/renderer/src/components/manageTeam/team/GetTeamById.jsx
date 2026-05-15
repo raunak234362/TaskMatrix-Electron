@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import Service from "../../../api/Service";
-import { AlertCircle, Loader2, Users, Mail, Phone, Shield, Edit2, Trash2, UserPlus } from "lucide-react";
+import { AlertCircle, Loader2, Users, Mail, Phone, Shield, Edit2, Trash2, UserPlus, X } from "lucide-react";
 import Button from "../../fields/Button";
 import TeamMember from "./TeamMember";
+import EditTeamById from "./EditTeamById";
 
 const GetTeamByID = ({ id, onClose, onSuccess }) => {
   const [team, setTeam] = useState(null);
@@ -10,6 +11,36 @@ const GetTeamByID = ({ id, onClose, onSuccess }) => {
   const [error, setError] = useState(null);
   const [teamMember, setTeamMember] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  const fetchTeam = async () => {
+    if (!id) {
+      setError("Invalid team ID");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await Service.GetTeamByID(id);
+      const raw = response?.data;
+
+      if (raw?.isDeleted) {
+        setError("Team not found");
+        setTeam(null);
+        return;
+      }
+
+      setTeam(raw);
+    } catch (err) {
+      const msg = "Failed to load team details";
+      setError(msg);
+      console.error(msg, err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDeleteTeam = async () => {
   try {
@@ -27,36 +58,6 @@ const GetTeamByID = ({ id, onClose, onSuccess }) => {
 };
 
   useEffect(() => {
-    const fetchTeam = async () => {
-      if (!id) {
-        setError("Invalid team ID");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-const response = await Service.GetTeamByID(id);
-const raw = response?.data;
-
-// ✅ ADD THIS
-if (raw?.isDeleted) {
-  setError("Team not found");
-  setTeam(null);
-  return;
-}
-
-setTeam(raw);
-      } catch (err) {
-        const msg = "Failed to load team details";
-        setError(msg);
-        console.error(msg, err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTeam();
   }, [id]);
 
@@ -180,7 +181,10 @@ setTeam(raw);
 
       {/* Footer */}
       <footer className="p-6 border-t border-gray-200 bg-white flex flex-wrap justify-end gap-3 shrink-0">
-        <button className="flex items-center gap-2 px-6 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all active:scale-95">
+        <button 
+          onClick={() => setShowEditModal(true)}
+          className="flex items-center gap-2 px-6 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all active:scale-95"
+        >
           <Edit2 className="w-4 h-4 text-[#6bbd45]" />
           Edit Team
         </button>
@@ -200,6 +204,19 @@ setTeam(raw);
           Team Members
         </button>
       </footer>
+
+      {showEditModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <EditTeamById
+            id={id}
+            onClose={() => setShowEditModal(false)}
+            onSuccess={() => {
+              fetchTeam();
+              if (onSuccess) onSuccess();
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
