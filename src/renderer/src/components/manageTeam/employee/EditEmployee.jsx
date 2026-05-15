@@ -6,6 +6,7 @@ import Service from "../../../api/Service";
 import { X, Check, Loader2, Trash2 } from "lucide-react";
 import Input from "../../fields/input";
 import Select from "../../fields/Select";
+import Toggle from "../../fields/Toggle";
 import { useDispatch, useSelector } from "react-redux";
 import { updateStaffData, setUserData } from "../../../store/userSlice";
 
@@ -75,6 +76,8 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
   const selectedRoleOption =
     roleOptions.find((opt) => opt.value === selectedRole) || null;
 
+  const isTrue = (val) => val === true || val === "true" || val === 1;
+
   // ── Fetch employee data & pre‑fill form ──
   useEffect(() => {
     const fetchEmployee = async () => {
@@ -94,7 +97,8 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
 
         // Fill form
         Object.keys(employee).forEach((key) => {
-          const value = employee[key];
+          let value = employee[key];
+          if (key === "isActive") value = isTrue(value);
           if (value !== undefined && value !== null) {
             setValue(key, value);
           }
@@ -248,6 +252,15 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
                     {errors.role.message}
                   </p>
                 )}
+              </div>
+
+              <div className="md:col-span-2 flex items-center gap-4 bg-white/50 p-4 rounded-xl border border-gray-200 mt-2">
+                <Toggle 
+                  label="User Active Status" 
+                  {...register("isActive")} 
+                  checked={isTrue(watch("isActive"))}
+                  onChange={(e) => setValue("isActive", e.target.checked, { shouldDirty: true })}
+                />
               </div>
 
               {/* ── Address ── */}

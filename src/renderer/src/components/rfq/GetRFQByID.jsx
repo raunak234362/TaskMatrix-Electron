@@ -21,6 +21,7 @@ import EditRFQByID from "./EditRFQByID";
 import ConnectionDesignerQuotaByID from "../connectionDesigner/ConnectionDesignerQuotaByID";
 import { truncateWords } from "../../utils/stringUtils";
 
+const isTrue = (val) => val === true || val === "true" || val === 1;
 
 const GetRFQByID = ({ id, onClose }) => {
     const [rfq, setRfq] = useState(null);
@@ -692,71 +693,48 @@ const GetRFQByID = ({ id, onClose }) => {
                             </div>
 
                             {/* Scopes */}
-                            <div className="space-y-4">
-                                <div className="p-4 bg-white rounded-2xl border border-black text-sm">
-                                    <h4 className="text-xs font-black text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
-                                        <Settings className="w-4 h-4" /> Connection Design Scope
-                                    </h4>
-                                    <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
-                                        <Scope
-                                            label="Connection Design"
-                                            enabled={rfq?.connectionDesign || false}
-                                        />
-                                        <Scope
-                                            label="Misc Design"
-                                            enabled={rfq?.miscDesign || false}
-                                        />
-                                        <Scope
-                                            label={
-                                                !rfq?.customerDesign && rfq?.sender?.fabricator?.fabName
-                                                    ? `Connection design by ${rfq.sender.fabricator.fabName}`
-                                                    : "Connection Design by WBT"
-                                            }
-                                            enabled={true}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <ScopeList 
+                                    title="Connection Design Scope" 
+                                    icon={<Settings className="w-4 h-4" />}
+                                    items={[
+                                        { label: "Main Design", value: rfq?.connectionDesign },
+                                        { label: "Misc Design", value: rfq?.miscDesign },
+                                        { label: "Customer Design", value: rfq?.customerDesign },
+                                        { 
+                                            label: "Design by WBT", 
+                                            value: !isTrue(rfq?.customerDesign) && (isTrue(rfq?.connectionDesign) || isTrue(rfq?.miscDesign)) 
+                                        }
+                                    ]} 
+                                />
+
+                                <ScopeList 
+                                    title="Detailing Scope" 
+                                    icon={<Layout className="w-4 h-4" />}
+                                    items={[
+                                        { label: "Detailing Main", value: rfq?.detailingMain },
+                                        { label: "Detailing Misc", value: rfq?.detailingMisc }
+                                    ]} 
+                                />
+
+                                <ScopeList 
+                                    title="Material Take-off" 
+                                    icon={<Layout className="w-4 h-4" />}
+                                    className="md:col-span-2"
+                                    items={[
+                                        { label: "MTO - Manual", value: rfq?.MTOManual },
+                                        { label: "MTO - Stick Model", value: isTrue(rfq?.MTOStickModel) || isTrue(rfq?.mtoStickModelEnabled) }
+                                    ]} 
+                                />
+
+                                {(rfq?.MTOValue || rfq?.MTOStickModel || rfq?.MTOManualModel) && (
+                                    <div className="md:col-span-2 p-4 bg-[#6bbd45]/5 rounded-xl border border-[#6bbd45]/20 overflow-hidden">
+                                        <div 
+                                            className="prose prose-sm max-w-none text-xs text-black font-bold leading-relaxed break-words"
+                                            dangerouslySetInnerHTML={{ __html: rfq?.MTOValue || rfq?.MTOStickModel || rfq?.MTOManualModel }}
                                         />
                                     </div>
-                                </div>
-
-                                <div className="p-4 bg-white rounded-2xl border border-black text-sm">
-                                    <h4 className="text-xs font-black text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
-                                        <Settings className="w-4 h-4" /> Detailing Scope
-                                    </h4>
-                                    <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
-                                        <Scope
-                                            label="Detailing Main"
-                                            enabled={rfq?.detailingMain || false}
-                                        />
-                                        <Scope
-                                            label="Detailing Misc"
-                                            enabled={rfq?.detailingMisc || false}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="p-4 bg-white rounded-2xl border border-black text-sm space-y-4">
-                                    <h4 className="text-xs font-black text-black flex items-center gap-2 uppercase tracking-widest">
-                                        <Layout className="w-4 h-4" /> Material Take-off
-                                    </h4>
-                                    <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
-                                        <Scope
-                                            label="MTO - Manual"
-                                            enabled={rfq?.MTOManual || false}
-                                        />
-                                        <Scope
-                                            label="MTO - Stick Model"
-                                            enabled={!!rfq?.MTOStickModel || false}
-                                        />
-                                    </div>
-
-                                    {(rfq?.MTOValue || rfq?.MTOStickModel || rfq?.MTOManualModel) && (
-                                        <div className="p-4 bg-[#6bbd45]/5 rounded-xl border border-[#6bbd45]/20 overflow-hidden">
-                                            <div 
-                                                className="prose prose-sm max-w-none text-xs text-black font-bold leading-relaxed break-words"
-                                                dangerouslySetInnerHTML={{ __html: rfq?.MTOValue || rfq?.MTOStickModel || rfq?.MTOManualModel }}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
+                                )}
                             </div>
 
 
@@ -972,6 +950,35 @@ const Info = ({ label, value }) => (
         <p className="text-black text-xs font-bold uppercase tracking-tight text-right">{value}</p>
     </div>
 );
+
+const ScopeList = ({ title, icon, items, className = "" }) => {
+    const activeItems = items.filter(item => isTrue(item.value));
+    
+    if (activeItems.length === 0) return null;
+
+    return (
+        <div className={`p-4 sm:p-6 bg-white rounded-2xl border border-black shadow-sm space-y-4 animate-in fade-in zoom-in duration-200 ${className}`}>
+            <div className="flex items-center gap-3 border-b border-black/5 pb-3">
+                <span className="text-black/40">{icon}</span>
+                <h4 className="text-[10px] font-black text-black uppercase tracking-widest">{title}</h4>
+            </div>
+            <div className="space-y-3">
+                {activeItems.map((item, idx) => {
+                    return (
+                        <div key={idx} className="flex items-center justify-between gap-4">
+                            <span className="text-[11px] font-bold uppercase tracking-tight text-black">
+                                {item.label}
+                            </span>
+                            <div className="px-3 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest bg-green-50 text-green-700 border-green-200 shadow-sm">
+                                Required
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
 
 const Scope = ({ label, enabled }) => (
     <div
