@@ -40,6 +40,38 @@ const AllRFQ = ({ rfq }) => {
         </div>
       )
     },
+    {
+      id: "rfqType",
+      header: "RFQ Type",
+      cell: ({ row }) => {
+        const r = row.original;
+        const types = [];
+        const isTrue = (val) => val === true || val === "true";
+        const isMTO = isTrue(r.MTOManual) || r.MTOStickModel || r.MTOValue;
+        const isDetailing = isTrue(r.detailingMain) || isTrue(r.detailingMisc) || isTrue(r.miscDesign) || isTrue(r.customerDesign) || isTrue(r.connectionDesign);
+
+        if (isMTO) types.push("MTO");
+        if (isDetailing) types.push("Detailing");
+
+        return (
+          <div className="flex gap-1 flex-wrap">
+            {types.map(t => (
+              <span
+                key={t}
+                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest border ${
+                  t === 'MTO'
+                    ? 'bg-purple-50 text-purple-700 border-purple-100'
+                    : 'bg-indigo-50 text-indigo-700 border-indigo-100'
+                }`}
+              >
+                {t}
+              </span>
+            ))}
+            {types.length === 0 && <span className="text-gray-300 font-bold tracking-widest text-[10px]">N/A</span>}
+          </div>
+        );
+      }
+    },
   ];
 
   // ➕ Only Admin / Staff see Fabricator
@@ -126,41 +158,110 @@ const AllRFQ = ({ rfq }) => {
   );
 
   const [searchQuery, setSearchQuery] = useState("");
-  const filteredRfq = (rfq || []).filter(item =>
-    item.projectName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.projectNumber?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [selectedType, setSelectedType] = useState("ALL");
+  const [activeTab, setActiveTab] = useState("all");
+
+  const filteredRfq = useMemo(() => {
+    return (rfq || []).filter(item => {
+      // 1. Search Filter
+      const matchesSearch = item.projectName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.projectNumber?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      if (!matchesSearch) return false;
+
+      // 2. Tab Filter (Awarded vs All)
+      if (activeTab === "awarded") {
+        const isAwarded = item.wbtStatus === "AWARDED" || item.status === "AWARDED";
+        if (!isAwarded) return false;
+      }
+
+      // 3. Type Filter
+      if (selectedType === "ALL") return true;
+
+      const isTrue = (val) => val === true || val === "true";
+      const isMTO = isTrue(item.MTOManual) || item.MTOStickModel || item.MTOValue;
+      const isDetailing = isTrue(item.detailingMain) || isTrue(item.detailingMisc) || isTrue(item.miscDesign) || isTrue(item.customerDesign) || isTrue(item.connectionDesign);
+
+      if (selectedType === "MTO") return isMTO;
+      if (selectedType === "DETAILING") return isDetailing;
+      if (selectedType === "BOTH") return isMTO && isDetailing;
+
+      return true;
+    });
+  }, [rfq, searchQuery, selectedType, activeTab]);
 
   return (
     <div className="bg-[#fcfdfc] min-h-[600px] animate-in fade-in duration-700">
-      {/* Search Bar - Premium Style */}
-      <div className="mb-10 px-1">
-        <div className="relative group max-w-xl">
-          <div className="absolute -inset-1 bg-linear-to-r from-green-100 to-emerald-100 rounded-xl blur-sm opacity-25 group-hover:opacity-40 transition-duration-1000"></div>
-          <div className="relative bg-white border border-gray-100 rounded-xl p-1 flex items-center shadow-sm hover:border-green-200 transition-colors">
-            <Search className="ml-3 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search RFQs by project name or number..."
-              className="flex-1 px-4 py-2 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none font-medium"
-            />
-            {searchQuery && (
+      {/* Premium Header Controls */}
+      <div className="mb-10 flex flex-col gap-6">
+        <div className="flex flex-wrap items-center justify-between gap-6">
+          {/* Search Bar */}
+          <div className="relative group max-w-xl flex-1 min-w-[300px]">
+            <div className="absolute -inset-1 bg-linear-to-r from-green-100 to-emerald-100 rounded-xl blur-sm opacity-25 group-hover:opacity-40 transition-all duration-1000"></div>
+            <div className="relative bg-white border border-gray-100 rounded-xl p-1 flex items-center shadow-sm hover:border-green-200 transition-colors">
+              <Search className="ml-3 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search RFQs by project name or number..."
+                className="flex-1 px-4 py-2 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none font-medium"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="p-1 px-3 text-gray-300 hover:text-gray-500 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4">
+            {/* RFQ Type Toggle */}
+            <div className="flex items-center bg-gray-50/50 p-1.5 rounded-2xl border border-black/5 shadow-sm">
+              {['ALL', 'MTO', 'DETAILING', 'BOTH'].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setSelectedType(type)}
+                  className={`px-6 py-2 rounded-xl text-sm font-semibold uppercase tracking-[0.2em] transition-all duration-300 active:scale-95 ${
+                    selectedType === type
+                      ? 'bg-green-200 text-black shadow-md border border-black/5'
+                      : 'text-black hover:text-black/60'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+
+            {/* Status Tabs */}
+            <div className="flex items-center bg-gray-50/50 p-1.5 rounded-2xl border border-black/5 shadow-sm">
               <button
-                onClick={() => setSearchQuery("")}
-                className="p-1 px-3 text-gray-300 hover:text-gray-500 transition-colors"
+                onClick={() => setActiveTab("all")}
+                className={`flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-semibold uppercase tracking-[0.2em] transition-all duration-300 active:scale-95 ${
+                  activeTab === "all"
+                    ? 'bg-green-200 text-black shadow-md border border-black/5'
+                    : 'text-black hover:text-black/60'
+                }`}
               >
-                <X size={16} />
+                All RFQs
               </button>
-            )}
+              <button
+                onClick={() => setActiveTab("awarded")}
+                className={`flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-semibold uppercase tracking-[0.2em] transition-all duration-300 active:scale-95 ${
+                  activeTab === "awarded"
+                    ? 'bg-green-200 text-black shadow-md border border-black/5'
+                    : 'text-black hover:text-black/60'
+                }`}
+              >
+                Awarded
+              </button>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* <div className="flex justify-between items-center mb-8 px-1">
-        <h1 className="text-2xl font-black text-gray-900 tracking-tight uppercase">Total-RFQs <span className="text-primary/40 ml-2">{filteredRfq.length}</span></h1>
-      </div> */}
 
       <DataTable
         columns={columns}

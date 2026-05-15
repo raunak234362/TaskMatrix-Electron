@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { toast } from "react-toastify";
-import { Search } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import DataTable from "../../ui/table";
 import GetEmployeeByID from "./GetEmployeeByID";
 import { useSelector } from "react-redux";
@@ -12,6 +12,18 @@ const AllEmployee = () => {
   const [loading] = useState(false);
   const [error] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRole, setSelectedRole] = useState("All");
+  const [selectedDesignation, setSelectedDesignation] = useState("All");
+
+  const roles = useMemo(() => {
+    const r = new Set((employees || []).map((emp) => emp.role).filter(Boolean));
+    return ["All", ...Array.from(r).sort()];
+  }, [employees]);
+
+  const designations = useMemo(() => {
+    const d = new Set((employees || []).map((emp) => emp.designation).filter(Boolean));
+    return ["All", ...Array.from(d).sort()];
+  }, [employees]);
 
   const handleDelete = async (selectedRows) => {
     try {
@@ -28,11 +40,24 @@ const AllEmployee = () => {
     setEmployeeID(row.id);
   };
 
-  // Filter by username, full name, email, or designation
+  // Filter by username, full name, email, designation, or role
   const filteredEmployees = useMemo(() => {
-    if (!searchTerm.trim()) return employees;
+    let list = employees || [];
+
+    // Role filter
+    if (selectedRole !== "All") {
+      list = list.filter((emp) => emp.role === selectedRole);
+    }
+
+    // Designation filter
+    if (selectedDesignation !== "All") {
+      list = list.filter((emp) => emp.designation === selectedDesignation);
+    }
+
+    if (!searchTerm.trim()) return list;
+
     const q = searchTerm.toLowerCase();
-    return (employees || []).filter((emp) => {
+    return list.filter((emp) => {
       const fullName = [emp?.firstName, emp?.middleName, emp?.lastName]
         .filter(Boolean)
         .join(" ")
@@ -41,10 +66,11 @@ const AllEmployee = () => {
         emp?.username?.toLowerCase().includes(q) ||
         fullName.includes(q) ||
         emp?.email?.toLowerCase().includes(q) ||
-        emp?.designation?.toLowerCase().includes(q)
+        emp?.designation?.toLowerCase().includes(q) ||
+        emp?.role?.toLowerCase().includes(q)
       );
     });
-  }, [employees, searchTerm]);
+  }, [employees, searchTerm, selectedRole, selectedDesignation]);
 
   const columns = [
     { accessorKey: "username", header: "Username" },
@@ -56,6 +82,15 @@ const AllEmployee = () => {
       id: "fullName",
     },
     { accessorKey: "phone", header: "Phone" },
+    {
+      accessorKey: "role",
+      header: "Role",
+      cell: ({ row }) => (
+        <span className="font-bold text-black/60 uppercase tracking-tighter">
+          {row.original.role || "—"}
+        </span>
+      ),
+    },
     { accessorKey: "designation", header: "Designation" },
   ];
 
@@ -81,8 +116,8 @@ const AllEmployee = () => {
   return (
     <div className="bg-white rounded-[2.5rem] shadow-soft border border-black/5 overflow-hidden mt-6">
 
-      {/* Search Bar */}
-      <div className="px-8 pt-6 pb-2 flex items-center gap-4">
+      {/* Search and Filters */}
+      <div className="px-8 pt-6 pb-2 flex flex-wrap items-center gap-6">
         <div className="relative flex-1 max-w-sm group">
           <Search
             size={18}
@@ -104,8 +139,40 @@ const AllEmployee = () => {
             </button>
           )}
         </div>
-        {searchTerm && (
-          <span className="text-xs font-bold text-black/40 uppercase tracking-widest whitespace-nowrap">
+
+        <div className="flex items-center gap-4">
+          {/* Role Filter */}
+          <div className="flex items-center gap-2">
+            <Filter size={14} className="text-black/30" />
+            <select
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value)}
+              className="bg-transparent text-xs font-black uppercase tracking-widest text-black/60 focus:outline-none cursor-pointer hover:text-black transition-colors"
+            >
+              <option value="All">All Roles</option>
+              {roles.filter(r => r !== "All").map((r) => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Designation Filter */}
+          <div className="flex items-center gap-2 border-l border-black/10 pl-4">
+            <select
+              value={selectedDesignation}
+              onChange={(e) => setSelectedDesignation(e.target.value)}
+              className="bg-transparent text-xs font-black uppercase tracking-widest text-black/60 focus:outline-none cursor-pointer hover:text-black transition-colors"
+            >
+              <option value="All">All Designations</option>
+              {designations.filter(d => d !== "All").map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {(searchTerm || selectedRole !== "All" || selectedDesignation !== "All") && (
+          <span className="ml-auto text-xs font-bold text-black/40 uppercase tracking-widest whitespace-nowrap">
             {filteredEmployees.length} result{filteredEmployees.length !== 1 ? "s" : ""}
           </span>
         )}
