@@ -97,6 +97,14 @@ const AddRFQ = ({ onSuccess }) => {
   const selectedFabricatorId = watch("fabricatorId");
   const mtoStickModelEnabled = watch("mtoStickModelEnabled");
   const mtoManualEnabled = watch("MTOManual");
+  const projectName = watch("projectName");
+
+  // Sync subject with project name
+  useEffect(() => {
+    if (projectName) {
+      setValue("subject", projectName);
+    }
+  }, [projectName, setValue]);
 
 
   const [description, setDescription] = useState("");
@@ -243,7 +251,7 @@ const AddRFQ = ({ onSuccess }) => {
       const basePayload = {
         projectNumber: data.projectNumber || "",
         projectName: data.projectName,
-        subject: data.subject || "",
+        subject: data.projectName,
         description,
         tools: data.tools,
         location: data.location,
@@ -629,7 +637,10 @@ const AddRFQ = ({ onSuccess }) => {
                     name="files"
                     control={control}
                     render={({ field }) => (
-                      <MultipleFileUpload onFilesChange={field.onChange} />
+                      <MultipleFileUpload 
+                        onFilesChange={field.onChange} 
+                        initialFiles={field.value}
+                      />
                     )}
                   />
                 </div>

@@ -21,6 +21,7 @@ import EditRFQByID from "./EditRFQByID";
 import ConnectionDesignerQuotaByID from "../connectionDesigner/ConnectionDesignerQuotaByID";
 import { truncateWords } from "../../utils/stringUtils";
 
+const isTrue = (val) => val === true || val === "true" || val === 1;
 
 const GetRFQByID = ({ id, onClose }) => {
     const [rfq, setRfq] = useState(null);
@@ -691,61 +692,64 @@ const GetRFQByID = ({ id, onClose }) => {
                             </div>
 
                             {/* Scopes */}
-                            <div className="space-y-6">
-                                <div className="p-6 bg-white rounded-2xl border border-black shadow-sm">
-                                    <h4 className="text-xs font-bold text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
+                            <div className="space-y-4">
+                                <div className="p-4 bg-white rounded-2xl border border-black text-sm">
+                                    <h4 className="text-xs font-black text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
                                         <Settings className="w-4 h-4" /> Connection Design Scope
                                     </h4>
-                                    <ul className="space-y-2 list-disc pl-5">
-                                        {rfq?.connectionDesign && (
-                                            <li className="text-sm font-bold text-black uppercase tracking-widest">Connection Design</li>
-                                        )}
-                                        {rfq?.miscDesign && (
-                                            <li className="text-sm font-bold text-black uppercase tracking-widest">Misc Design</li>
-                                        )}
-                                        <li className="text-sm font-bold text-black uppercase tracking-widest">
-                                            {!rfq?.customerDesign && rfq?.sender?.fabricator?.fabName
-                                                ? `Connection design by ${rfq.sender.fabricator.fabName}`
-                                                : "Connection Design by WBT"}
-                                        </li>
-                                    </ul>
+                                    <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
+                                        <Scope
+                                            label="Connection Design"
+                                            enabled={rfq?.connectionDesign || false}
+                                        />
+                                        <Scope
+                                            label="Misc Design"
+                                            enabled={rfq?.miscDesign || false}
+                                        />
+                                        <Scope
+                                            label={
+                                                !rfq?.customerDesign && rfq?.sender?.fabricator?.fabName
+                                                    ? `Connection design by ${rfq.sender.fabricator.fabName}`
+                                                    : "Connection Design by WBT"
+                                            }
+                                            enabled={true}
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="p-6 bg-white rounded-2xl border border-black shadow-sm">
-                                    <h4 className="text-xs font-bold text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
+                                <div className="p-4 bg-white rounded-2xl border border-black text-sm">
+                                    <h4 className="text-xs font-black text-black mb-4 flex items-center gap-2 uppercase tracking-widest">
                                         <Settings className="w-4 h-4" /> Detailing Scope
                                     </h4>
-                                    <ul className="space-y-2 list-disc pl-5">
-                                        {rfq?.detailingMain && (
-                                            <li className="text-sm font-bold text-black uppercase tracking-widest">Detailing Main</li>
-                                        )}
-                                        {rfq?.detailingMisc && (
-                                            <li className="text-sm font-bold text-black uppercase tracking-widest">Detailing Misc</li>
-                                        )}
-                                        {!rfq?.detailingMain && !rfq?.detailingMisc && (
-                                            <li className="text-sm font-bold text-black uppercase tracking-widest list-none ml-[-20px]">No Detailing Items Selected</li>
-                                        )}
-                                    </ul>
+                                    <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
+                                        <Scope
+                                            label="Detailing Main"
+                                            enabled={rfq?.detailingMain || false}
+                                        />
+                                        <Scope
+                                            label="Detailing Misc"
+                                            enabled={rfq?.detailingMisc || false}
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="p-6 bg-white rounded-2xl border border-black shadow-sm space-y-4">
-                                    <h4 className="text-xs font-bold text-black flex items-center gap-2 uppercase tracking-widest">
+                                <div className="p-4 bg-white rounded-2xl border border-black text-sm space-y-4">
+                                    <h4 className="text-xs font-black text-black flex items-center gap-2 uppercase tracking-widest">
                                         <Layout className="w-4 h-4" /> Material Take-off
                                     </h4>
-                                    <ul className="space-y-2 list-disc pl-5">
-                                        {rfq?.MTOManual && (
-                                            <li className="text-sm font-bold text-black uppercase tracking-widest">MTO - Manual</li>
-                                        )}
-                                        {!!rfq?.MTOStickModel && (
-                                            <li className="text-sm font-bold text-black uppercase tracking-widest">MTO - Stick Model</li>
-                                        )}
-                                        {!rfq?.MTOManual && !rfq?.MTOStickModel && (
-                                            <li className="text-sm font-bold text-black uppercase tracking-widest list-none ml-[-20px]">No MTO Items Selected</li>
-                                        )}
-                                    </ul>
+                                    <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs">
+                                        <Scope
+                                            label="MTO - Manual"
+                                            enabled={rfq?.MTOManual || false}
+                                        />
+                                        <Scope
+                                            label="MTO - Stick Model"
+                                            enabled={!!rfq?.MTOStickModel || false}
+                                        />
+                                    </div>
 
                                     {(rfq?.MTOValue || rfq?.MTOStickModel || rfq?.MTOManualModel) && (
-                                        <div className="p-4 bg-[#6bbd45]/5 rounded-xl border border-[#6bbd45]/20 overflow-hidden mt-4">
+                                        <div className="p-4 bg-[#6bbd45]/5 rounded-xl border border-[#6bbd45]/20 overflow-hidden">
                                             <div 
                                                 className="prose prose-sm max-w-none text-xs text-black font-bold leading-relaxed break-words"
                                                 dangerouslySetInnerHTML={{ __html: rfq?.MTOValue || rfq?.MTOStickModel || rfq?.MTOManualModel }}
@@ -965,7 +969,18 @@ const Info = ({ label, value }) => (
         <p className="text-black text-xs font-bold uppercase tracking-widest ">
             {label}:
         </p>
-        <p className="text-black text-sm font-bold uppercase tracking-tight text-right">{value}</p>
+        <p className="text-black text-xs font-bold uppercase tracking-tight text-right">{value}</p>
+    </div>
+);
+
+const Scope = ({ label, enabled }) => (
+    <div
+        className={`px-4 py-1.5 rounded-full border border-black text-[10px] font-bold uppercase tracking-widest shadow-sm transition-all ${enabled
+            ? "bg-green-100 text-black"
+            : "bg-gray-100 text-black/40"
+            }`}
+    >
+        {label}
     </div>
 );
 

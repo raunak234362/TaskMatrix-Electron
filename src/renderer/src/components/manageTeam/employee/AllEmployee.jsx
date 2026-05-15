@@ -6,6 +6,7 @@ import GetEmployeeByID from "./GetEmployeeByID";
 import { useSelector } from "react-redux";
 
 const AllEmployee = () => {
+  const isTrue = (val) => val === true || val === "true" || val === 1;
   const staffData = useSelector((state) => state.userInfo.staffData);
   const [employees, setEmployees] = useState(staffData);
   const [employeeID, setEmployeeID] = useState(null);
@@ -14,6 +15,7 @@ const AllEmployee = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("All");
   const [selectedDesignation, setSelectedDesignation] = useState("All");
+  const [selectedStatus, setSelectedStatus] = useState("All");
 
   const roles = useMemo(() => {
     const r = new Set((employees || []).map((emp) => emp.role).filter(Boolean));
@@ -54,6 +56,15 @@ const AllEmployee = () => {
       list = list.filter((emp) => emp.designation === selectedDesignation);
     }
 
+    // Status filter
+    if (selectedStatus !== "All") {
+      const targetActive = selectedStatus === "Active";
+      list = list.filter((emp) => {
+        const isActive = isTrue(emp.isActive);
+        return isActive === targetActive;
+      });
+    }
+
     if (!searchTerm.trim()) return list;
 
     const q = searchTerm.toLowerCase();
@@ -92,6 +103,22 @@ const AllEmployee = () => {
       ),
     },
     { accessorKey: "designation", header: "Designation" },
+    {
+      accessorKey: "isActive",
+      header: "Status",
+      cell: ({ row }) => {
+        const active = isTrue(row.original.isActive);
+        return (
+          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.1em] border ${
+            active 
+              ? "bg-green-50 text-green-700 border-green-200" 
+              : "bg-red-50 text-red-700 border-red-200"
+          }`}>
+            {active ? "Active" : "Inactive"}
+          </span>
+        );
+      }
+    },
   ];
 
   if (loading) {
@@ -169,9 +196,22 @@ const AllEmployee = () => {
               ))}
             </select>
           </div>
+
+          {/* Status Filter */}
+          <div className="flex items-center gap-2 border-l border-black/10 pl-4">
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="bg-transparent text-xs font-black uppercase tracking-widest text-black/60 focus:outline-none cursor-pointer hover:text-black transition-colors"
+            >
+              <option value="All">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
         </div>
 
-        {(searchTerm || selectedRole !== "All" || selectedDesignation !== "All") && (
+        {(searchTerm || selectedRole !== "All" || selectedDesignation !== "All" || selectedStatus !== "All") && (
           <span className="ml-auto text-xs font-bold text-black/40 uppercase tracking-widest whitespace-nowrap">
             {filteredEmployees.length} result{filteredEmployees.length !== 1 ? "s" : ""}
           </span>

@@ -424,7 +424,7 @@ const GetProjectById = ({ id, onClose }) => {
                   <button
                     key={key}
                     onClick={() => setActiveTab(key)}
-                    className={`flex items-center gap-2.5 border-2 px-6 py-2.5 text-[10px] rounded-xl font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-sm active:scale-95 ${activeTab === key
+                    className={`flex items-center gap-2.5 border-2 px-6 py-2.5 text-sm rounded-xl font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-sm active:scale-95 ${activeTab === key
                       ? "bg-green-50 text-black border-[#6bbd45]"
                       : "text-black bg-white border-gray-800 hover:bg-gray-50"
                       }`}
