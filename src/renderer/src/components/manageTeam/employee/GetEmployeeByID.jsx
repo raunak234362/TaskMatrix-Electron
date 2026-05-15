@@ -642,7 +642,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {(userRole === "admin" || userRole === "deputy_manager" || userRole === "operation_executive") && (
+            {(userRole === "admin" || userRole === "deputy_manager" || userRole === "operation_executive" || userRole === "human_resource") && (
               <button
                 onClick={() => handleModel(employee)}
                 className="flex items-center gap-2 px-6 py-2 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all active:scale-95"
