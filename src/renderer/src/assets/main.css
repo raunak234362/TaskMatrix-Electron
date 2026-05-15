@@ -43,6 +43,12 @@ body {
   text-transform: uppercase;
 }
 
+input,
+textarea,
+select {
+  text-transform: none;
+}
+
 /* Custom Green Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
