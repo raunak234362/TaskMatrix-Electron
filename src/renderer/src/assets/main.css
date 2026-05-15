@@ -27,8 +27,9 @@ body,
   padding: 0;
 }
 
-* {
+*:not(input):not(textarea):not(select) {
   text-transform: uppercase;
+  box-sizing: border-box;
 }
 
 body {
@@ -40,7 +41,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: 0.025em;
-  text-transform: uppercase;
 }
 
 input,

@@ -20,9 +20,9 @@ const Input = React.forwardRef(
 
     // Variant styles
     const variantStyles = {
-      default: "border border-gray-300 rounded-md bg-white focus:ring-blue-500",
+      default: "border border-black rounded-md bg-white focus:ring-blue-500",
       outline:
-        "border border-gray-300 rounded-md bg-transparent focus:ring-blue-500",
+        "border border-black rounded-md bg-transparent focus:ring-blue-500",
       filled: "border-0 rounded-md bg-gray-100 focus:ring-blue-500",
     };
 

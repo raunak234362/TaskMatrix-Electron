@@ -134,7 +134,7 @@ const Select = ({
             }, 100);
           }
         }}
-        className={`flex items-center justify-between p-2.5 text-xs font-bold border rounded-lg bg-white cursor-pointer transition-all ${isOpen ? "border-sky-400 ring-4 ring-sky-50 shadow-sm" : "border-gray-200"
+        className={`flex items-center justify-between p-2.5 text-xs font-bold border rounded-lg bg-white cursor-pointer transition-all ${isOpen ? "border-sky-400 ring-4 ring-sky-50 shadow-sm" : "border-black"
           } ${className}`}
       >
         <div className="flex-1">
@@ -153,7 +153,7 @@ const Select = ({
             </div>
           ) : (
             <span
-              className={`uppercase tracking-wide ${selectedOption ? "text-slate-600" : "text-gray-400"}`}
+              className={`uppercase tracking-wide text-black`}
             >
               {selectedOption
                 ? selectedOption.label
@@ -162,7 +162,7 @@ const Select = ({
           )}
         </div>
         <svg
-          className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""
+          className={`w-3.5 h-3.5 text-black transition-transform duration-300 ${isOpen ? "rotate-180" : ""
             }`}
           fill="none"
           stroke="currentColor"
