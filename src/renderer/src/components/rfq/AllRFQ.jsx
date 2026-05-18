@@ -120,7 +120,17 @@ const AllRFQ = ({ rfq }) => {
         return status === filterValue;
       },
       cell: ({ row }) => {
-        const status = row.original.wbtStatus || row.original.status || 'PENDING';
+        let status = row.original.wbtStatus || row.original.status || 'PENDING';
+
+        if (status === 'AWARDED') {
+          const r = row.original;
+          const isTrue = (val) => val === true || val === "true";
+          const isMTO = isTrue(r.MTOManual) || r.MTOStickModel || r.MTOValue;
+          if (isMTO) {
+            status = 'SUBMITTED';
+          }
+        }
+
         const colors = {
           IN_REVIEW: 'bg-orange-100 text-black shadow-sm border border-black',
           COMPLETED: 'bg-green-100 text-black shadow-sm border border-black',
@@ -128,6 +138,7 @@ const AllRFQ = ({ rfq }) => {
           RECEIVED: 'bg-blue-100 text-black shadow-sm border border-black',
           SENT: 'bg-green-100 text-black shadow-sm border border-black',
           AWARDED: 'bg-green-200 text-black shadow-sm border border-black',
+          SUBMITTED: 'bg-green-200 text-black shadow-sm border border-black',
           OPEN: 'bg-blue-50 text-blue-800 shadow-sm border border-black',
           CLOSED: 'bg-red-100 text-red-800 shadow-sm border border-black',
           RE_APPROVAL: 'bg-yellow-100 text-yellow-800 shadow-sm border border-black',
@@ -139,6 +150,21 @@ const AllRFQ = ({ rfq }) => {
           </span>
         );
       },
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Created Date",
+      cell: ({ row }) => (
+        <span className="text-sm font-bold text-gray-600">
+          {row.original.createdAt
+            ? new Date(row.original.createdAt).toLocaleDateString("en-IN", {
+              month: "short",
+              day: "2-digit",
+              year: "numeric"
+            })
+            : "—"}
+        </span>
+      ),
     },
     {
       accessorKey: "estimationDate",

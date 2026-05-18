@@ -20,6 +20,7 @@ import { toast } from "react-toastify";
 import EditRFQByID from "./EditRFQByID";
 import ConnectionDesignerQuotaByID from "../connectionDesigner/ConnectionDesignerQuotaByID";
 import { truncateWords } from "../../utils/stringUtils";
+import GetEstimationByID from "../estimation/GetEstimationByID";
 
 const isTrue = (val) => val === true || val === "true" || val === 1;
 
@@ -31,6 +32,7 @@ const GetRFQByID = ({ id, onClose }) => {
     const [selectedResponse, setSelectedResponse] = useState(null);
     const [selectedCDQuota, setSelectedCDQuota] = useState(null);
     const [showEstimationModal, setShowEstimationModal] = useState(false);
+    const [showEstimationDetails, setShowEstimationDetails] = useState(false);
     const [showCDQuotationModal, setShowCDQuotationModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -747,12 +749,21 @@ const GetRFQByID = ({ id, onClose }) => {
                             />
                             {userRole !== "CLIENT" && (
                                 <div className="flex flex-col gap-2 pt-2">
-                                    <Button
-                                        onClick={() => setShowEstimationModal(true)}
-                                        className="w-full sm:w-auto h-auto py-2.5 px-4 text-sm  bg-[#6bbd45]/15 text-black rounded-md hover:bg-[#6bbd45]/80 transition text-sm"
-                                    >
-                                        Raise For Estimation
-                                    </Button>
+                                    {rfq?.estimations && rfq.estimations.length > 0 ? (
+                                        <Button
+                                            onClick={() => setShowEstimationDetails(true)}
+                                            className="w-full sm:w-auto h-auto py-2.5 px-4 text-sm  bg-[#6bbd45]/15 text-black rounded-md hover:bg-[#6bbd45]/80 transition text-sm"
+                                        >
+                                            View Estimation Details
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            onClick={() => setShowEstimationModal(true)}
+                                            className="w-full sm:w-auto h-auto py-2.5 px-4 text-sm  bg-[#6bbd45]/15 text-black rounded-md hover:bg-[#6bbd45]/80 transition text-sm"
+                                        >
+                                            Raise For Estimation
+                                        </Button>
+                                    )}
                                     <Button
                                         onClick={() => handleCDQuotationModal()}
                                         className="w-full sm:w-auto h-auto py-2.5 px-4 text-xs sm:text-sm bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 whitespace-normal leading-tight "
@@ -786,6 +797,13 @@ const GetRFQByID = ({ id, onClose }) => {
                     <ConnectionDesignerQuotaByID
                         id={selectedCDQuota.id}
                         onClose={() => setSelectedCDQuota(null)}
+                    />
+                )}
+
+                {showEstimationDetails && rfq?.estimations?.[0]?.id && (
+                    <GetEstimationByID
+                        id={rfq.estimations[0].id}
+                        onClose={() => setShowEstimationDetails(false)}
                     />
                 )}
 

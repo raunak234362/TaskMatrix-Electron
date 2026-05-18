@@ -1,108 +1,178 @@
-import { useEffect, useState } from 'react'
-import { Loader2, AlertCircle, MessageSquare } from 'lucide-react'
-import Service from '../../api/Service'
-import Button from '../fields/Button'
-import AllEstimationTask from './estimationTask/AllEstimationTask'
-import LineItemGroup from './estimationLineItem/LineItemGroup'
-import EditEstimation from './EditEstimation'
+import { useEffect, useMemo, useState } from "react";
+import {
+  Loader2,
+  AlertCircle,
+  MessageSquare,
+  CalendarDays,
+  Clock3,
+  IndianRupee,
+  BriefcaseBusiness,
+  User2,
+  FileText,
+  Pencil,
+  Plus,
+  X,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 
-import RenderFiles from '../ui/RenderFiles'
-import InclusionExclusion from './InclusionExclusion'
-import EditInclusionExclusion from './EditInclusionExclusion'
-import EstimationResponseModal from './EstimationResponseModal'
+import Service from "../../api/Service";
+import Button from "../fields/Button";
 
-const truncateText = (text, max = 40) => (text.length > max ? text.substring(0, max) + '...' : text)
+import AllEstimationTask from "./estimationTask/AllEstimationTask";
+import LineItemGroup from "./estimationLineItem/LineItemGroup";
+import InclusionExclusion from "./InclusionExclusion";
+import EditInclusionExclusion from "./EditInclusionExclusion";
+import EditEstimation from "./EditEstimation";
+import EstimationResponseModal from "./EstimationResponseModal";
+
+import RenderFiles from "../ui/RenderFiles";
+
+const tabs = [
+  "overview",
+  "tasks",
+  "hours",
+  "inclusion",
+  "responses",
+];
 
 const GetEstimationByID = ({ id, onRefresh, onClose }) => {
-  const [estimation, setEstimation] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [isEstimationTaskOpen, setIsEstimationTaskOpen] = useState(false)
-  const [isHoursOpen, setIsHoursOpen] = useState(false)
-  const [isInclusionOpen, setIsInclusionOpen] = useState(false)
-  const [isEditingInclusion, setIsEditingInclusion] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
-  const [showResponseModal, setShowResponseModal] = useState(false)
-  const [isResponsesOpen, setIsResponsesOpen] = useState(false)
-  const [showDescription, setShowDescription] = useState(false)
-  const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+  const [estimation, setEstimation] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [activeTab, setActiveTab] = useState("overview");
+
+  const [showDescription, setShowDescription] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isEditingInclusion, setIsEditingInclusion] = useState(false);
+  const [showResponseModal, setShowResponseModal] = useState(false);
+
+  const userRole =
+    sessionStorage.getItem("userRole")?.toLowerCase() || "";
+
+  const canManage =
+    userRole === "admin" || userRole === "estimation_head";
+
   const fetchEstimation = async () => {
     if (!id) {
-      setError('Invalid Estimation ID')
-      setLoading(false)
-      return
+      setError("Invalid Estimation ID");
+      setLoading(false);
+      return;
     }
 
     try {
-      setLoading(true)
-      setError(null)
-      const response = await Service.GetEstimationById(id)
-      setEstimation(response?.data)
+      setLoading(true);
+      setError(null);
+
+      const response = await Service.GetEstimationById(id);
+
+      setEstimation(response?.data);
     } catch (err) {
-      console.error('Error fetching estimation:', err)
-      setError('Failed to load estimation details')
+      console.error(err);
+      setError("Failed to load estimation details");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchEstimation()
-  }, [id])
-
-  const formatDateTime = (date) =>
-    date
-      ? new Date(date).toLocaleString('en-IN', {
-        dateStyle: 'medium',
-        timeStyle: 'short'
-      })
-      : 'N/A'
+    fetchEstimation();
+  }, [id]);
 
   const formatDate = (date) =>
     date
-      ? new Date(date).toLocaleDateString('en-IN', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      })
-      : 'N/A'
+      ? new Date(date).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+      : "N/A";
+
+  const formatDateTime = (date) =>
+    date
+      ? new Date(date).toLocaleString("en-IN", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      : "N/A";
 
   const formatHours = (hours) => {
-    if (hours == null || hours === '') return 'N/A'
-    const numHours = typeof hours === 'string' ? parseFloat(hours) : hours
-    if (isNaN(numHours)) return 'N/A'
-    const h = Math.floor(numHours)
-    const m = Math.round((numHours - h) * 60)
-    return `${h}h ${m.toString().padStart(2, '0')}m`
-  }
+    if (hours == null || hours === "") return "N/A";
+
+    const numHours =
+      typeof hours === "string"
+        ? parseFloat(hours)
+        : hours;
+
+    if (isNaN(numHours)) return "N/A";
+
+    const h = Math.floor(numHours);
+    const m = Math.round((numHours - h) * 60);
+
+    return `${h}h ${m.toString().padStart(2, "0")}m`;
+  };
+
+  const statusStyles = useMemo(() => {
+    switch (estimation?.status) {
+      case "COMPLETED":
+        return "bg-emerald-100 text-emerald-700 border-emerald-200";
+      case "DRAFT":
+        return "bg-amber-100 text-amber-700 border-amber-200";
+      default:
+        return "bg-blue-100 text-blue-700 border-blue-200";
+    }
+  }, [estimation]);
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-        <div className="bg-white p-8 rounded-2xl shadow-2xl flex items-center">
-          <Loader2 className="w-6 h-6 animate-spin mr-3 text-green-600" />
-          <span className="text-lg font-medium text-gray-700">Loading estimation details...</span>
+      <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl px-8 py-6 shadow-2xl border border-slate-200 flex items-center gap-4">
+          <Loader2 className="animate-spin text-slate-700" />
+          <div>
+            <h3 className="font-semibold text-slate-900">
+              Loading Estimation
+            </h3>
+            <p className="text-sm text-slate-500">
+              Please wait while we fetch the details.
+            </p>
+          </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !estimation) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-        <div className="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center">
-          <div className="flex items-center text-red-600 mb-4">
-            <AlertCircle className="w-6 h-6 mr-2" />
-            <span className="text-lg font-medium">{error || 'Estimation not found'}</span>
+      <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl p-8 shadow-2xl border border-slate-200 w-full max-w-md">
+          <div className="flex items-start gap-4">
+            <div className="bg-red-100 p-3 rounded-2xl">
+              <AlertCircle className="text-red-600" />
+            </div>
+
+            <div className="flex-1">
+              <h2 className="font-semibold text-slate-900">
+                Unable to Load
+              </h2>
+
+              <p className="text-sm text-slate-500 mt-1">
+                {error || "Estimation not found"}
+              </p>
+
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  className="mt-5 px-5 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition"
+                >
+                  Close
+                </button>
+              )}
+            </div>
           </div>
-          {onClose && (
-            <button onClick={onClose} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 font-medium">
-              Close
-            </button>
-          )}
         </div>
       </div>
-    )
+    );
   }
 
   const {
@@ -124,325 +194,483 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
     createdBy,
     totalAgreatedHours,
     files,
-    responses: estimationResponses = []
-  } = estimation
-
-  const statusColor =
-    status === 'DRAFT'
-      ? 'bg-orange-100 text-black'
-      : status === 'COMPLETED'
-        ? 'bg-green-100 text-black'
-        : 'bg-blue-100 text-black'
+    responses: estimationResponses = [],
+  } = estimation;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-2 animate-in fade-in duration-200">
-      <div className="bg-gray-100 rounded-3xl w-[98vw] max-w-none h-[98vh] flex flex-col overflow-hidden border border-black shadow-2xl">
-        {/* Sticky Modal Header */}
-        <div className="sticky top-0 z-10 bg-gray-100 border-b border-black/10 px-8 py-5 flex justify-between items-center shrink-0">
-          <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tight">Estimation Details</h2>
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-3">
+      <div className="w-full max-w-7xl h-[95vh] bg-slate-50 rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+        {/* HEADER */}
+        <div className="bg-white border-b border-slate-200 px-8 py-6 shrink-0">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+            <div>
+              <p className="text-sm text-slate-500 font-medium">
+                Estimations / {estimationNumber}
+              </p>
+
+              <div className="flex items-center gap-3 mt-1 flex-wrap">
+                <h1 className="text-3xl font-bold text-slate-900">
+                  {projectName}
+                </h1>
+
+                <span
+                  className={`px-3 py-1 rounded-full border text-xs font-semibold ${statusStyles}`}
+                >
+                  {status}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                onClick={() => setShowResponseModal(true)}
+                className="px-5 py-2 bg-white text-black border-2 border-gray-800 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-gray-50 shadow-sm flex items-center gap-2"
+              >
+                <Plus size={14} />
+                Add Response
+              </button>
+
+              {canManage && (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="px-5 py-2 bg-white text-black border-2 border-gray-800 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-gray-50 shadow-sm flex items-center gap-2"
+                >
+                  <Pencil size={14} />
+                  Edit
+                </button>
+              )}
+
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 bg-red-100 text-black border-2 border-red-600 rounded-xl hover:bg-red-50 transition-all font-bold text-[12px] uppercase tracking-widest shadow-sm"
+                >
+                  Close
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* BODY */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* METRICS */}
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+            <MetricCard
+              icon={<Clock3 size={18} />}
+              label="Final Hours"
+              value={formatHours(finalHours)}
+            />
+
+            <MetricCard
+              icon={<CalendarDays size={18} />}
+              label="Final Weeks"
+              value={finalWeeks || "N/A"}
+            />
+
+            <MetricCard
+              icon={<IndianRupee size={18} />}
+              label="Final Price"
+              value={
+                finalPrice != null
+                  ? `₹${finalPrice.toLocaleString()}`
+                  : "N/A"
+              }
+            />
+
+            <MetricCard
+              icon={<Clock3 size={18} />}
+              label="Agreated Hours"
+              value={formatHours(totalAgreatedHours)}
+            />
+          </div>
+
+          {/* DETAILS */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* LEFT */}
+            <SectionCard title="Project Information">
+              <InfoRow
+                icon={<BriefcaseBusiness size={16} />}
+                label="Fabricator"
+                value={
+                  fabricators?.fabName ||
+                  fabricatorName ||
+                  "N/A"
+                }
+              />
+
+              <InfoRow
+                icon={<FileText size={16} />}
+                label="Tools"
+                value={tools || "N/A"}
+              />
+
+              <InfoRow
+                icon={<User2 size={16} />}
+                label="Created By"
+                value={
+                  createdBy
+                    ? `${createdBy.firstName} ${createdBy.lastName}`
+                    : "N/A"
+                }
+              />
+
+              {rfq && (
+                <InfoRow
+                  icon={<FileText size={16} />}
+                  label="RFQ"
+                  value={`${rfq.projectName || "RFQ"} • ${
+                    rfq.projectNumber || "N/A"
+                  }`}
+                />
+              )}
+            </SectionCard>
+
+            {/* RIGHT */}
+            <SectionCard title="Timeline">
+              <InfoRow
+                label="Estimate Date"
+                value={formatDate(estimateDate)}
+              />
+
+              <InfoRow
+                label="Start Date"
+                value={formatDate(startDate)}
+              />
+
+              <InfoRow
+                label="Created"
+                value={formatDateTime(createdAt)}
+              />
+
+              <InfoRow
+                label="Updated"
+                value={formatDateTime(updatedAt)}
+              />
+            </SectionCard>
+          </div>
+
+          {/* DESCRIPTION */}
+          {description && (
+            <SectionCard title="Description">
+              <div
+                className={`prose prose-sm max-w-none text-slate-700 transition-all ${
+                  showDescription
+                    ? ""
+                    : "line-clamp-3"
+                }`}
+                dangerouslySetInnerHTML={{
+                  __html: description,
+                }}
+              />
+
+              <button
+                onClick={() =>
+                  setShowDescription(!showDescription)
+                }
+                className="mt-4 text-sm font-medium text-slate-700 hover:text-slate-900 flex items-center gap-2"
+              >
+                {showDescription ? (
+                  <>
+                    <ChevronUp size={16} />
+                    Show Less
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown size={16} />
+                    Read More
+                  </>
+                )}
+              </button>
+            </SectionCard>
+          )}
+
+          {/* FILES */}
+          <SectionCard title="Attachments">
+            <RenderFiles
+              files={files || []}
+              table="estimation"
+              parentId={id}
+              formatDate={formatDate}
+            />
+          </SectionCard>
+
+          {/* TABS */}
+          <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden">
+            <div className="border-b border-slate-200 px-4 pt-4">
+              <div className="flex gap-2 overflow-x-auto pb-4">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`flex items-center gap-2.5 border-2 px-6 py-2.5 text-[12px] rounded-xl font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-sm active:scale-95 ${
+                      activeTab === tab
+                        ? "bg-green-50 text-black border-[#6bbd45]"
+                        : "text-black bg-white border-gray-800 hover:bg-gray-50"
+                    }`}
+                  >
+                    {tab}
+                    {tab === "responses" &&
+                      ` (${estimationResponses.length})`}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-6">
+              {/* TASKS */}
+              {activeTab === "tasks" && (
+                <>
+                  {canManage ? (
+                    <AllEstimationTask
+                      estimationId={estimation?.id || ""}
+                      onRefresh={fetchEstimation}
+                      estimations={
+                        Array.isArray(estimation?.tasks)
+                          ? estimation.tasks
+                          : Array.isArray(
+                              estimation?.estimationTasks
+                            )
+                          ? estimation.estimationTasks
+                          : []
+                      }
+                    />
+                  ) : (
+                    <EmptyState text="You don't have permission to access tasks." />
+                  )}
+                </>
+              )}
+
+              {/* HOURS */}
+              {activeTab === "hours" && (
+                <LineItemGroup
+                  estimationId={estimation?.id}
+                />
+              )}
+
+              {/* INCLUSION */}
+              {activeTab === "inclusion" && (
+                <>
+                  {isEditingInclusion ? (
+                    <EditInclusionExclusion
+                      estimationId={estimation?.id || ""}
+                      onCancel={() =>
+                        setIsEditingInclusion(false)
+                      }
+                      onSuccess={() => {
+                        setIsEditingInclusion(false);
+                        fetchEstimation();
+                      }}
+                    />
+                  ) : (
+                    <InclusionExclusion
+                      estimationId={estimation?.id || ""}
+                      onEdit={() =>
+                        setIsEditingInclusion(true)
+                      }
+                    />
+                  )}
+                </>
+              )}
+
+              {/* RESPONSES */}
+              {activeTab === "responses" && (
+                <>
+                  {estimationResponses.length === 0 ? (
+                    <EmptyState text="No responses added yet." />
+                  ) : (
+                    <div className="space-y-5">
+                      {estimationResponses.map(
+                        (resp, index) => (
+                          <div
+                            key={resp.id}
+                            className="bg-slate-50 border border-slate-200 rounded-3xl p-5"
+                          >
+                            <div className="flex items-start justify-between gap-4 mb-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center">
+                                  <MessageSquare
+                                    size={18}
+                                    className="text-blue-700"
+                                  />
+                                </div>
+
+                                <div>
+                                  <h4 className="font-semibold text-slate-900">
+                                    Response #{index + 1}
+                                  </h4>
+
+                                  <p className="text-xs text-slate-500">
+                                    {formatDateTime(
+                                      resp.createdAt
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {resp.message && (
+                              <div
+                                className="prose prose-sm max-w-none text-slate-700"
+                                dangerouslySetInnerHTML={{
+                                  __html: resp.message,
+                                }}
+                              />
+                            )}
+
+                            {resp.files?.length > 0 && (
+                              <div className="mt-5">
+                                <RenderFiles
+                                  files={resp.files}
+                                  table="estimationResponse"
+                                  parentId={resp.id}
+                                  formatDate={formatDate}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* OVERVIEW */}
+              {activeTab === "overview" && (
+                <div className="text-sm text-slate-500">
+                  Overview information is displayed above.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* STICKY FOOTER */}
+        {/* <div className="bg-white border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3 shrink-0">
+          <button
+            onClick={() => setShowResponseModal(true)}
+            className="px-5 py-2 bg-white text-black border-2 border-gray-800 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-gray-50 shadow-sm flex items-center gap-2"
+          >
+            <Plus size={14} />
+            Add Response
+          </button>
+
           {onClose && (
             <button
               onClick={onClose}
-              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+              className="px-10 py-2 bg-white text-red-600 border-2 border-red-600 rounded-xl hover:bg-red-50 transition-all font-black text-[12px] uppercase tracking-widest shadow-sm"
             >
               Close
             </button>
           )}
-        </div>
-        
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-8 space-y-6">
-          <div className="bg-white rounded-2xl p-8 border border-black/10 shadow-sm">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-        <div>
-          <h3 className="text-xl font-black text-black uppercase tracking-tight">Estimation #{estimationNumber}</h3>
-          <p className="text-black/60 text-xs font-black uppercase tracking-widest">Project: {projectName}</p>
-        </div>
-        <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-black ${statusColor}`}>
-          {status}
-        </span>
+        </div> */}
       </div>
 
-      {/* Top Grid */}
-      <div className="grid max-sm:grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Left Column */}
-        <div className="space-y-3">
-          {/* Fabricator */}
-          {(fabricators?.fabName || fabricatorName) && (
-            <InfoRow label="Fabricator" value={fabricators?.fabName || fabricatorName || 'N/A'} />
-          )}
-
-          {/* RFQ */}
-          {rfq && (
-            <InfoRow
-              label="RFQ"
-              value={
-                <div className="flex flex-col text-right">
-                  <span className="font-semibold">{rfq.projectName || 'RFQ Linked'}</span>
-                  <span className="text-xs text-gray-700">
-                    Project No: {rfq.projectNumber || 'N/A'} · Bid: {rfq.bidPrice || '-'}
-                  </span>
-                </div>
-              }
-            />
-          )}
-
-          {/* Tools */}
-          {tools && <InfoRow label="Tools" value={tools} />}
-
-
-          {/* Created By */}
-          {createdBy && (
-            <InfoRow
-              label="Created By"
-              value={
-                <span>
-                  {createdBy.firstName} {createdBy.lastName} (
-                  {createdBy.username || createdBy.email || 'N/A'})
-                </span>
-              }
-            />
-          )}
-        </div>
-
-        {/* Right Column */}
-        <div className="space-y-3">
-          <InfoRow label="Estimate Date" value={formatDate(estimateDate)} />
-          <InfoRow label="Start Date" value={startDate ? formatDate(startDate) : 'N/A'} />
-          <InfoRow label="Created" value={formatDateTime(createdAt)} />
-          <InfoRow label="Updated" value={formatDateTime(updatedAt)} />
-          <InfoRow label="Total Agreed Hours" value={formatHours(totalAgreatedHours)} />
-          <InfoRow label="Final Hours" value={formatHours(finalHours)} />
-          <InfoRow label="Final Weeks" value={finalWeeks != null ? finalWeeks : 'N/A'} />
-          <InfoRow
-            label="Final Price"
-            value={finalPrice != null ? `$${finalPrice.toLocaleString()}` : 'N/A'}
-          />
-        </div>
-      </div>
-
-      {/* Description toggle */}
-      {description && (
-        <div className="mt-6 space-y-2">
-          <button
-            onClick={() => setShowDescription((prev) => !prev)}
-            className="text-sm font-black text-black/40 uppercase tracking-widest hover:text-black transition-colors flex items-center gap-1"
-          >
-            <span className="ml-1">{showDescription ? 'Hide Description' : 'Show Description'}</span>
-          </button>
-          {showDescription && (
-            <div
-              className="text-sm text-black bg-white rounded-xl border border-black/10 p-4 prose prose-sm max-w-none leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: description }}
-            />
-          )}
-        </div>
-      )}
-
-      {/* Files Section */}
-      <div className='my-4'>
-
-        <RenderFiles files={files || []} table="estimation" parentId={id} formatDate={formatDate} />
-      </div>
-
-      {/* Action Buttons (placeholders for future edit/view actions) */}
-      <div className="py-3 flex flex-wrap gap-3">
-        {
-          userRole === 'admin' || userRole === 'estimation_head' && (
-            <Button
-              className="py-0 px-1 text-sm rounded-xl"
-              onClick={() => setIsEstimationTaskOpen(!isEstimationTaskOpen)}
-            >
-              Estimation Task
-            </Button>
-          )
-        }
-        <Button
-          className="py-0 px-2 text-sm rounded-xl"
-          onClick={() => setIsHoursOpen(!isHoursOpen)}
-        >
-          Estimated Hours/Weeks
-        </Button>
-        <Button
-          className="py-0 px-2 text-sm rounded-xl"
-          onClick={() => setIsInclusionOpen(!isInclusionOpen)}
-        >
-          Inclusion/Exclusion
-        </Button>
-        <Button
-          className="py-0 px-2 text-sm rounded-xl bg-green-100 text-black border border-black hover:bg-green-200 hover:text-black flex items-center gap-1"
-          onClick={() => setIsResponsesOpen((prev) => !prev)}
-        >
-          <MessageSquare className="w-3.5 h-3.5" />
-          Inclusion/Exclusion Documents ({estimationResponses.length})
-        </Button>
-        <Button
-          className="py-0 px-2 text-sm rounded-xl bg-green-100 text-black border border-black hover:bg-green-200 hover:text-black flex items-center gap-1"
-          onClick={() => setShowResponseModal(true)}
-        >
-          + Add Response
-        </Button>
-
-        {(userRole === 'admin' || userRole === 'estimation_head') && (
-          <Button className="py-0 px-2 text-sm rounded-xl" onClick={() => setIsEditing(!isEditing)}>
-            Edit Estimation
-          </Button>
-        )}
-      </div>
-      {isEstimationTaskOpen && (
-        <AllEstimationTask
-          estimationId={estimation?.id || ''}
-          onRefresh={fetchEstimation}
-          // Many APIs return tasks either nested under `tasks` or `estimationTasks`
-          // Fallback to an empty array to avoid runtime errors.
-          estimations={
-            Array.isArray(estimation?.tasks)
-              ? estimation.tasks
-              : Array.isArray(estimation?.estimationTasks)
-                ? estimation.estimationTasks
-                : []
-          }
-          onClose={() => setIsEstimationTaskOpen(false)}
-        />
-      )}
-      {isHoursOpen && (
-        <div className="mt-6 border-t pt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg  text-gray-700">Estimated Hours/Weeks</h3>
-            <button
-              onClick={() => setIsHoursOpen(false)}
-              className="text-gray-700 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-md text-sm transition-colors"
-            >
-              Close
-            </button>
-          </div>
-          <LineItemGroup estimationId={estimation?.id} />
-        </div>
-      )}
-      {isInclusionOpen && (
-        <div className="mt-6 border-t pt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg  text-gray-700">Inclusion/Exclusion</h3>
-            <button
-              onClick={() => setIsInclusionOpen(false)}
-              className="text-black border border-black hover:text-black bg-red-100 hover:bg-red-200 px-3 py-1 rounded-md text-sm transition-colors"
-            >
-              Close
-            </button>
-          </div>
-          {isEditingInclusion ? (
-            <EditInclusionExclusion
-              estimationId={estimation?.id || ''}
-              onCancel={() => setIsEditingInclusion(false)}
-              onSuccess={() => {
-                setIsEditingInclusion(false)
-                fetchEstimation()
-              }}
-            />
-          ) : (
-            <InclusionExclusion
-              estimationId={estimation?.id || ''}
-              onEdit={() => setIsEditingInclusion(true)}
-            />
-          )}
-        </div>
-      )}
+      {/* MODALS */}
       {isEditing && (
         <EditEstimation
           id={id}
           onSuccess={() => {
-            setIsEditing(false)
-            fetchEstimation()
-            onRefresh?.()
+            setIsEditing(false);
+            fetchEstimation();
+            onRefresh?.();
           }}
           onCancel={() => setIsEditing(false)}
         />
       )}
+
       {showResponseModal && (
         <EstimationResponseModal
           estimationId={id}
-          onClose={() => setShowResponseModal(false)}
+          onClose={() =>
+            setShowResponseModal(false)
+          }
           onSuccess={fetchEstimation}
         />
       )}
+    </div>
+  );
+};
 
-      {/* Responses Panel */}
-      {isResponsesOpen && (
-        <div className="mt-6 border-t pt-6 space-y-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-base font-black text-black uppercase tracking-widest flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-black" />
-              Responses
-              <span className="ml-1 px-2 py-0.5 text-[10px] bg-black text-white rounded-full font-black">
-                {estimationResponses.length}
-              </span>
-            </h3>
-          </div>
+/* -------------------------------------------------------------------------- */
+/*                                  COMPONENTS                                */
+/* -------------------------------------------------------------------------- */
 
-          {estimationResponses.length === 0 ? (
-            <p className="text-sm text-gray-500 italic">No responses yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {estimationResponses.map((resp, idx) => (
-                <div
-                  key={resp.id}
-                  className="bg-white border border-black/10 rounded-2xl p-4 space-y-3 shadow-sm"
-                >
-                  {/* Header: index + timestamp */}
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
-                      Response #{idx + 1}
-                    </span>
-                    <span className="text-[10px] text-gray-400 font-medium">
-                      {resp.createdAt
-                        ? new Date(resp.createdAt).toLocaleString('en-IN', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })
-                        : '—'}
-                    </span>
-                  </div>
-
-                  {/* Message */}
-                  {resp.message && (
-                    <div
-                      className="text-sm text-gray-700 prose prose-sm max-w-none leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: resp.message }}
-                    />
-                  )}
-
-                  {/* Files */}
-                  {resp.files?.length > 0 && (
-                    <RenderFiles
-                      files={resp.files}
-                      table="estimationResponse"
-                      parentId={resp.id}
-                      formatDate={formatDate}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-            </div>
-          )}
-        </div>
+const MetricCard = ({ icon, label, value }) => {
+  return (
+    <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700">
+          {icon}
         </div>
       </div>
+
+      <div className="mt-5">
+        <p className="text-sm text-slate-500">
+          {label}
+        </p>
+
+        <h3 className="mt-1 text-2xl font-bold text-slate-900">
+          {value}
+        </h3>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-// Reusable Info Row
-const InfoRow = ({ label, value }) => (
-  <div className="flex justify-between gap-3 pb-1.5 border-b border-black/5 last:border-0">
-    <span className="font-black text-black/40 uppercase tracking-widest text-[10px]">{label}:</span>
-    <span className="text-black font-black uppercase tracking-tight text-xs text-right whitespace-pre-wrap">{value}</span>
-  </div>
-)
+const SectionCard = ({ title, children }) => {
+  return (
+    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+      <div className="mb-5">
+        <h2 className="text-lg font-semibold text-slate-900">
+          {title}
+        </h2>
+      </div>
 
-export default GetEstimationByID
+      {children}
+    </div>
+  );
+};
+
+const InfoRow = ({
+  label,
+  value,
+  icon,
+}) => {
+  return (
+    <div className="flex items-start justify-between gap-4 py-4 border-b border-slate-100 last:border-none">
+      <div className="flex items-center gap-2 min-w-[140px]">
+        {icon && (
+          <span className="text-slate-400">
+            {icon}
+          </span>
+        )}
+
+        <span className="text-sm font-medium text-slate-500">
+          {label}
+        </span>
+      </div>
+
+      <div className="text-sm font-semibold text-slate-900 text-right break-words">
+        {value}
+      </div>
+    </div>
+  );
+};
+
+const EmptyState = ({ text }) => {
+  return (
+    <div className="py-16 flex flex-col items-center justify-center text-center">
+      <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+        <MessageSquare className="text-slate-500" />
+      </div>
+
+      <p className="text-slate-500 text-sm">
+        {text}
+      </p>
+    </div>
+  );
+};
+
+export default GetEstimationByID;
