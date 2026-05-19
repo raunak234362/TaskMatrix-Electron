@@ -198,9 +198,7 @@ const AddInvoice = ({
           console.log("RFQ Data-------", rfq);
 
           if (rfq && rfq.sender) {
-            const senderName = `${rfq.sender.firstName || ""} ${rfq.sender.lastName || ""
-              }`.trim();
-            setValue("customerName", senderName);
+            // Keep customerName as the fabricator name. Do not overwrite it with sender name.
             setValue("clientId", rfq.senderId || rfq.sender.id);
           }
         } catch (error) {
@@ -282,19 +280,42 @@ const AddInvoice = ({
         if (isMTO && !isDetailing) {
           setValue("invoiceType", "MTO");
           setValue("jobName", selectedRfq.subject || selectedRfq.projectName || selectedRfq.jobName || selectedRfq.rfqNumber || "");
+        }
+      }
+
+      // Filter projects related to this RFQ (for both Detailing and MTO)
+      const matchedProjects = allProjects.filter(
+        (p) =>
+          p.rfqId === rfqId ||
+          p.rfqID === rfqId ||
+          p.rfq_id === rfqId ||
+          (p.rfq && (p.rfq.id || p.rfq._id) === rfqId)
+      );
+      setFilteredProjects(matchedProjects);
+
+      if (matchedProjects.length > 0) {
+        selectProject(matchedProjects[0].id || matchedProjects[0]._id);
+      } else {
+        if (isMTO && !isDetailing) {
+          setSelectedProjectId("");
+          setValue("projectId", "");
+          setProjectChangeOrders([]);
+        } else {
           setSelectedProjectId("");
           setValue("projectId", "");
           setProjectChangeOrders([]);
         }
       }
-
-      if (!isMTO || isDetailing) {
-        // Find project having this rfqId
-        const matchedProject = allProjects.find(p => p.rfqId === rfqId || p.rfqID === rfqId || p.rfq_id === rfqId || (p.rfq && (p.rfq.id || p.rfq._id) === rfqId));
-        if (matchedProject) {
-           selectProject(matchedProject.id || matchedProject._id);
-        }
-      }
+    } else {
+      // Restore projects for selected fabricator
+      const projects = allProjects.filter(
+        (p) =>
+          p.fabricatorID === selectedFabricatorId || p.fabricator_id === selectedFabricatorId
+      );
+      setFilteredProjects(projects);
+      setSelectedProjectId("");
+      setValue("projectId", "");
+      setProjectChangeOrders([]);
     }
   };
 
@@ -378,7 +399,7 @@ const AddInvoice = ({
             </div>
           )}
 
-          {selectedFabricatorId && watch("invoiceType") !== "MTO" && (
+          {selectedFabricatorId && (
             <div className="w-full md:w-64">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Select Project
@@ -402,7 +423,7 @@ const AddInvoice = ({
             </div>
           )}
 
-          {selectedProjectId && projectChangeOrders.length > 0 && watch("invoiceType") !== "MTO" && (
+          {selectedProjectId && projectChangeOrders.length > 0 && (
             <div className="w-full md:w-64">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Select Change Order
@@ -430,18 +451,18 @@ const AddInvoice = ({
                 onChange: (e) => {
                   const type = e.target.value;
                   const currentRfqId = watch("rfqId");
-                  if (type === "MTO" && currentRfqId) {
-                    const selectedRfq = availableRfqs.find(r => r.id === currentRfqId || r._id === currentRfqId);
-                    if (selectedRfq) {
-                      setValue("jobName", selectedRfq.subject || selectedRfq.projectName || selectedRfq.jobName || selectedRfq.rfqNumber || "");
-                      setSelectedProjectId("");
-                      setValue("projectId", "");
-                      setProjectChangeOrders([]);
-                    }
-                  } else if (type && type !== "MTO" && currentRfqId) {
+                  if (currentRfqId) {
                     const matchedProject = allProjects.find(p => p.rfqId === currentRfqId || p.rfqID === currentRfqId || p.rfq_id === currentRfqId || (p.rfq && (p.rfq.id || p.rfq._id) === currentRfqId));
                     if (matchedProject) {
                       selectProject(matchedProject.id || matchedProject._id);
+                    } else if (type === "MTO") {
+                      const selectedRfq = availableRfqs.find(r => r.id === currentRfqId || r._id === currentRfqId);
+                      if (selectedRfq) {
+                        setValue("jobName", selectedRfq.subject || selectedRfq.projectName || selectedRfq.jobName || selectedRfq.rfqNumber || "");
+                      }
+                      setSelectedProjectId("");
+                      setValue("projectId", "");
+                      setProjectChangeOrders([]);
                     }
                   }
                 }
