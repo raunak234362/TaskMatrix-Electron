@@ -51,6 +51,7 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
           { label: "Client", value: "CLIENT" },
           { label: "Client Administrator", value: "CLIENT_ADMIN" },
           { label: "Client Estimator", value: "CLIENT_ESTIMATOR" },
+          { label: "Client Accountant", value: "CLIENT_ACCOUNTANT" },
         ]
         : [
           { label: "STAFF", value: "STAFF" },

@@ -271,10 +271,29 @@ const AddInvoice = ({
     setValue("rfqId", rfqId);
     
     if (rfqId) {
-      // Find project having this rfqId
-      const matchedProject = allProjects.find(p => p.rfqId === rfqId || p.rfqID === rfqId || p.rfq_id === rfqId || (p.rfq && (p.rfq.id || p.rfq._id) === rfqId));
-      if (matchedProject) {
-         selectProject(matchedProject.id || matchedProject._id);
+      const selectedRfq = availableRfqs.find(r => r.id === rfqId || r._id === rfqId);
+      let isMTO = false;
+      let isDetailing = false;
+      
+      if (selectedRfq) {
+        isMTO = selectedRfq.MTOManual || selectedRfq.mtoStickModelEnabled || selectedRfq.MTOStickModel || selectedRfq.MTOValue || selectedRfq.mto3dModel || selectedRfq.mtoTeklaSDS2 || selectedRfq.mtoIFC || selectedRfq.mtoEJE || selectedRfq.mtoKss || selectedRfq.mtoBoltList || selectedRfq.mtoMaterialSummary;
+        isDetailing = selectedRfq.connectionDesign || selectedRfq.miscDesign || selectedRfq.customerDesign || selectedRfq.detailingMain || selectedRfq.detailingMisc;
+        
+        if (isMTO && !isDetailing) {
+          setValue("invoiceType", "MTO");
+          setValue("jobName", selectedRfq.subject || selectedRfq.projectName || selectedRfq.jobName || selectedRfq.rfqNumber || "");
+          setSelectedProjectId("");
+          setValue("projectId", "");
+          setProjectChangeOrders([]);
+        }
+      }
+
+      if (!isMTO || isDetailing) {
+        // Find project having this rfqId
+        const matchedProject = allProjects.find(p => p.rfqId === rfqId || p.rfqID === rfqId || p.rfq_id === rfqId || (p.rfq && (p.rfq.id || p.rfq._id) === rfqId));
+        if (matchedProject) {
+           selectProject(matchedProject.id || matchedProject._id);
+        }
       }
     }
   };
@@ -359,7 +378,7 @@ const AddInvoice = ({
             </div>
           )}
 
-          {selectedFabricatorId && (
+          {selectedFabricatorId && watch("invoiceType") !== "MTO" && (
             <div className="w-full md:w-64">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Select Project
@@ -383,7 +402,7 @@ const AddInvoice = ({
             </div>
           )}
 
-          {selectedProjectId && projectChangeOrders.length > 0 && (
+          {selectedProjectId && projectChangeOrders.length > 0 && watch("invoiceType") !== "MTO" && (
             <div className="w-full md:w-64">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Select Change Order
@@ -407,7 +426,26 @@ const AddInvoice = ({
               Invoice Type
             </label>
             <select
-              {...register("invoiceType")}
+              {...register("invoiceType", {
+                onChange: (e) => {
+                  const type = e.target.value;
+                  const currentRfqId = watch("rfqId");
+                  if (type === "MTO" && currentRfqId) {
+                    const selectedRfq = availableRfqs.find(r => r.id === currentRfqId || r._id === currentRfqId);
+                    if (selectedRfq) {
+                      setValue("jobName", selectedRfq.subject || selectedRfq.projectName || selectedRfq.jobName || selectedRfq.rfqNumber || "");
+                      setSelectedProjectId("");
+                      setValue("projectId", "");
+                      setProjectChangeOrders([]);
+                    }
+                  } else if (type && type !== "MTO" && currentRfqId) {
+                    const matchedProject = allProjects.find(p => p.rfqId === currentRfqId || p.rfqID === currentRfqId || p.rfq_id === currentRfqId || (p.rfq && (p.rfq.id || p.rfq._id) === currentRfqId));
+                    if (matchedProject) {
+                      selectProject(matchedProject.id || matchedProject._id);
+                    }
+                  }
+                }
+              })}
               className="w-full p-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all bg-green-50/30"
             >
               <option value="">-- Select Type --</option>
