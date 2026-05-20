@@ -326,6 +326,7 @@ const AddInvoice = ({
     // Ensure numeric fields are numbers
     const formattedData = {
       ...data,
+      clientId: data.receiptId || data.clientId || "",
       totalInvoiceValue: Number(data.totalInvoiceValue),
       changeOrderId: data.changeOrderId || "",
       rfqId: data.rfqId || "",
@@ -532,8 +533,7 @@ const AddInvoice = ({
                 {contacts.map((contact) => (
                   <option
                     key={contact.id || contact._id}
-                    value={`${contact.firstName || ""} ${contact.lastName || ""
-                      }`.trim()}
+                    value={contact.id || contact._id}
                   >
                     {contact.firstName} {contact.lastName}
                   </option>
