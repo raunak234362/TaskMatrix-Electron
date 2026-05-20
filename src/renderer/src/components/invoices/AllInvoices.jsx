@@ -1,12 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Service from "../../api/Service";
 
 import DataTable from "../ui/table";
 import GetInvoiceById from "./GetInvoiceById";
 
+const INVOICE_TYPES = [
+  { label: "All", value: "ALL" },
+  { label: "Approval", value: "APPROVAL" },
+  { label: "Fabrication", value: "FABRICATION" },
+  { label: "MTO", value: "MTO" },
+  { label: "Change Order", value: "CHANGE_ORDER" },
+];
+
 const AllInvoices = () => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeType, setActiveType] = useState("ALL");
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -22,6 +32,21 @@ const AllInvoices = () => {
     fetchInvoices();
   }, []);
 
+  // Count per type for badge display
+  const countByType = useMemo(() => {
+    const counts = { ALL: invoices.length };
+    INVOICE_TYPES.slice(1).forEach(({ value }) => {
+      counts[value] = invoices.filter((inv) => inv.type === value).length;
+    });
+    return counts;
+  }, [invoices]);
+
+  // Filtered data based on active tab
+  const filteredInvoices = useMemo(() => {
+    if (activeType === "ALL") return invoices;
+    return invoices.filter((inv) => inv.type === activeType);
+  }, [invoices, activeType]);
+
   const columns = [
     {
       accessorKey: "invoiceNumber",
@@ -34,6 +59,29 @@ const AllInvoices = () => {
     {
       accessorKey: "jobName",
       header: "Job Name",
+    },
+    {
+      accessorKey: "type",
+      header: "Type",
+      cell: ({ row }) => {
+        const type = row.getValue("type");
+        const typeLabel = INVOICE_TYPES.find((t) => t.value === type)?.label || type || "—";
+        const colorMap = {
+          APPROVAL: "bg-blue-50 text-blue-700 border-blue-100",
+          FABRICATION: "bg-purple-50 text-purple-700 border-purple-100",
+          MTO: "bg-orange-50 text-orange-700 border-orange-100",
+          CHANGE_ORDER: "bg-cyan-50 text-cyan-700 border-cyan-100",
+        };
+        return (
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${
+              colorMap[type] || "bg-gray-100 text-gray-600 border-gray-200"
+            }`}
+          >
+            {typeLabel}
+          </span>
+        );
+      },
     },
     {
       accessorKey: "invoiceDate",
@@ -62,10 +110,11 @@ const AllInvoices = () => {
         const status = row.getValue("paymentStatus");
         return (
           <span
-            className={`px-2 py-1 rounded-full text-xs font-medium ${status
-              ? "bg-green-100 text-green-700"
-              : "bg-yellow-100 text-yellow-700"
-              }`}
+            className={`px-2 py-1 rounded-full text-xs font-medium ${
+              status
+                ? "bg-green-100 text-green-700"
+                : "bg-yellow-100 text-yellow-700"
+            }`}
           >
             {status ? "Paid" : "Pending"}
           </span>
@@ -73,8 +122,6 @@ const AllInvoices = () => {
       },
     },
   ];
-
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState(null);
 
   if (loading) {
     return (
@@ -86,15 +133,64 @@ const AllInvoices = () => {
 
   return (
     <div className="bg-white p-4 rounded-2xl shadow-sm">
-      <div className="mb-4">
+      {/* Header */}
+      <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-700">All Invoices</h2>
+        <span className="text-xs text-gray-400 font-medium">
+          {filteredInvoices.length} invoice{filteredInvoices.length !== 1 ? "s" : ""}
+        </span>
       </div>
+
+      {/* Type Filter Tabs */}
+      <div className="flex flex-wrap gap-2 mb-5">
+        {INVOICE_TYPES.map(({ label, value }) => {
+          const isActive = activeType === value;
+          const count = countByType[value] ?? 0;
+
+          const activeColors = {
+            ALL: "bg-gray-900 text-white border-gray-900",
+            APPROVAL: "bg-blue-600 text-white border-blue-600",
+            FABRICATION: "bg-purple-600 text-white border-purple-600",
+            MTO: "bg-orange-500 text-white border-orange-500",
+            CHANGE_ORDER: "bg-cyan-600 text-white border-cyan-600",
+          };
+          const inactiveColors = {
+            ALL: "bg-white text-gray-600 border-gray-200 hover:bg-gray-50",
+            APPROVAL: "bg-white text-blue-600 border-blue-200 hover:bg-blue-50",
+            FABRICATION: "bg-white text-purple-600 border-purple-200 hover:bg-purple-50",
+            MTO: "bg-white text-orange-600 border-orange-200 hover:bg-orange-50",
+            CHANGE_ORDER: "bg-white text-cyan-600 border-cyan-200 hover:bg-cyan-50",
+          };
+
+          return (
+            <button
+              key={value}
+              onClick={() => setActiveType(value)}
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border transition-all cursor-pointer ${
+                isActive ? activeColors[value] : inactiveColors[value]
+              }`}
+            >
+              {label}
+              <span
+                className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black ${
+                  isActive
+                    ? "bg-white/20 text-white"
+                    : "bg-gray-100 text-gray-500"
+                }`}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       <DataTable
         columns={columns}
-        data={invoices}
+        data={filteredInvoices}
         onRowClick={(row) => setSelectedInvoiceId(row._id || row.id)}
-
       />
+
       {selectedInvoiceId && (
         <GetInvoiceById
           id={selectedInvoiceId}

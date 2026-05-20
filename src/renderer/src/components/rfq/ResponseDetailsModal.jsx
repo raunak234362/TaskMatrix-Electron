@@ -51,7 +51,7 @@ const ResponseDetailsModal = ({
     formData.append("rfqId", response.rfqId);
     formData.append("userId", sessionStorage.getItem("userId") || "");
     // formData.append("status", replyStatus);
-    // formData.append("wbtStatus", replyStatus);
+    formData.append("wbtStatus", replyStatus);
 
     // Attach files
     replyFiles.forEach((file) => formData.append("files", file));

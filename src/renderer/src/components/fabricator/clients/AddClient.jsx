@@ -43,8 +43,9 @@ const AddClients = ({ fabricator, onClose }) => {
 
   const roleOptions = [
     { label: "CLIENT", value: "CLIENT" },
-    { label: "CLIENT ADMIN", value: "CLIENT_ADMIN" },
+    { label: "Client Admin", value: "CLIENT_ADMIN" },
     { label: "Client Estimator", value: "CLIENT_ESTIMATOR" },
+    { label: "Client Accountant", value: "CLIENT_ACCOUNTANT" },
   ];
 
   const selectedRole = watch("role");
@@ -96,6 +97,10 @@ const AddClients = ({ fabricator, onClose }) => {
                   type="text"
                   {...register("username", { required: "Username is required" })}
                   placeholder="Enter username"
+                  onChange={(e) => {
+                    e.target.value = e.target.value.toUpperCase();
+                    register("username").onChange(e);
+                  }}
                 />
                 {errors.username && (
                   <p className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-1">

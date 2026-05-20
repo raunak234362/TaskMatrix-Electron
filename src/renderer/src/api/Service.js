@@ -116,9 +116,8 @@ class Service {
       console.log(response)
       return response.data
     } catch (error) {
-      //alert(error);
-      console.log('Error fetching Employee by ID', error)
-      console.log('Error fetching Employee by ID', error)
+      console.log('Error updating Employee by ID', error)
+      throw error
     }
   }
 

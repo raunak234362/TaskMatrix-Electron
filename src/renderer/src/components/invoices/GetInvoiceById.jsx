@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from "react";
-import { Loader2, AlertCircle, X, Download } from "lucide-react";
+import { Loader2, AlertCircle, X, Download, Pencil } from "lucide-react";
 import Service from "../../api/Service";
 import logo from "../../assets/logo.png";
 import { useDispatch } from "react-redux";
 import { incrementModalCount, decrementModalCount } from "../../store/uiSlice";
-
+import UpdateInvoice from "./UpdateInvoice";
 
 const GetInvoiceById = ({
   id,
@@ -15,6 +15,10 @@ const GetInvoiceById = ({
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+
+  const userRole = sessionStorage.getItem("userRole")?.toUpperCase();
+  const canEdit = ["ADMIN", "PROJECT_MANAGER_OFFICER"].includes(userRole);
 
   const componentRef = useRef(null);
   const dispatch = useDispatch();
@@ -383,9 +387,9 @@ const GetInvoiceById = ({
         }}
       />
 
-      <div className="modal-root fixed inset-0 z-1000 flex items-start justify-center overflow-auto bg-black/80 backdrop-blur-xl pt-0 pb-0">
+      <div className="modal-root fixed inset-0 z-[1000] flex items-start justify-center overflow-auto bg-black/80 backdrop-blur-xl pt-0 pb-0">
         {/* Action Header */}
-        <div className="fixed top-6 right-10 z-110 flex gap-4 no-print">
+        <div className="fixed top-6 right-10 z-[1010] flex gap-4 no-print">
           <button
             onClick={handleHtmlPrint}
             className="flex items-center gap-2 px-8 py-3 bg-green-600 text-white rounded-full shadow-2xl hover:bg-green-700 transition-all font-bold group scale-110"
@@ -393,6 +397,17 @@ const GetInvoiceById = ({
             <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
             Download PDF
           </button>
+
+          {/* Edit button — ADMIN / PROJECT_MANAGER_OFFICER only */}
+          {canEdit && invoice && (
+            <button
+              onClick={() => setEditMode(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-amber-500 text-white rounded-full shadow-2xl hover:bg-amber-600 transition-all font-bold group scale-110"
+            >
+              <Pencil className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              Edit
+            </button>
+          )}
 
           {handleClose && (
             <button
@@ -804,6 +819,34 @@ const GetInvoiceById = ({
           </div>
         </div>
       </div>
+
+      {/* Edit Mode — render UpdateInvoice as overlay */}
+      {editMode && invoice && (
+        <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 overflow-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-gray-100">
+              <h2 className="text-lg font-black text-black uppercase tracking-tight">Edit Invoice</h2>
+              <button
+                onClick={() => setEditMode(false)}
+                className="p-2 rounded-full hover:bg-red-50 hover:text-red-600 transition-all text-gray-500"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <UpdateInvoice
+                invoiceId={id}
+                onSuccess={() => {
+                  setEditMode(false);
+                  Service.GetInvoiceById(id).then((res) =>
+                    setInvoice(res?.data || res || null)
+                  );
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

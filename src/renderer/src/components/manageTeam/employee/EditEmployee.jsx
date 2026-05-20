@@ -36,6 +36,7 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
     "CLIENT_PROJECT_COORDINATOR",
     "CLIENT_GENERAL_CONSTRUCTOR",
     "CLIENT_ESTIMATOR",
+    "CLIENT_ACCOUNTANT"
   ].includes(employeeData?.role || "");
 
   const roleOptions = [
@@ -117,16 +118,25 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
 
   // ── Submit handler ──
   const onSubmit = async (data) => {
+    let success = false;
+    let updatedEmployee = null;
+
     try {
       setSubmitting(true);
-
       const response = await Service.EditEmployeeByID(
         employeeData?.id,
         data,
       );
-      const updatedEmployee =
-        response?.data?.user || response?.data || response;
+      updatedEmployee = response?.data?.user || response?.data || response;
+      success = true;
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to update employee");
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
 
+    if (success) {
       if (updatedEmployee) {
         // Update staff list
         dispatch(updateStaffData(updatedEmployee));
@@ -140,11 +150,6 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
       toast.success("Employee updated successfully!");
       onSuccess?.();
       onClose();
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to update employee");
-      console.error(err);
-    } finally {
-      setSubmitting(false);
     }
   };
 

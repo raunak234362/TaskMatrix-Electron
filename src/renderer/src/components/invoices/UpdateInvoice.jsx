@@ -77,6 +77,7 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
             dateOfSupply: invoiceData.dateOfSupply ? new Date(invoiceData.dateOfSupply).toISOString().split('T')[0] : "",
             placeOfSupply: invoiceData.placeOfSupply,
             currencyType: invoiceData.currencyType || "USD",
+            type: invoiceData.type || "",
             totalInvoiceValue: invoiceData.totalInvoiceValue,
             totalInvoiceValueInWords: invoiceData.totalInvoiceValueInWords,
             paymentStatus: invoiceData.paymentStatus === true || invoiceData.paymentStatus === "Paid",
@@ -147,17 +148,22 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
       })),
     };
 
+    let success = false;
     try {
       setIsSubmitting(true);
       await Service.UpdateInvoiceById(invoiceId, formattedData);
-      toast.success("Invoice updated successfully");
-      if (onSuccess) onSuccess();
-      onClose();
+      success = true;
     } catch (error) {
       console.error("Error updating invoice:", error);
       toast.error("Failed to update invoice");
     } finally {
       setIsSubmitting(false);
+    }
+
+    if (success) {
+      toast.success("Invoice updated successfully");
+      if (onSuccess) onSuccess();
+      if (onClose) onClose();
     }
   };
 
@@ -237,6 +243,19 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
                   <option value="USD">USD</option>
                   <option value="INR">INR</option>
                   <option value="CAD">CAD</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Invoice Type</label>
+                <select
+                  {...register("type")}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none bg-white font-medium"
+                >
+                  <option value="">-- Select Type --</option>
+                  <option value="APPROVAL">Approval</option>
+                  <option value="FABRICATION">Fabrication</option>
+                  <option value="MTO">MTO</option>
+                  <option value="CHANGE_ORDER">Change Order</option>
                 </select>
               </div>
             </div>

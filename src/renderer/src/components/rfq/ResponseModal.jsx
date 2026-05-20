@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { toast } from "react-toastify";
 import MultipleFileUpload from "../fields/MultipleFileUpload";
 import Service from "../../api/Service";
 import { X, Printer } from "lucide-react";
@@ -402,6 +403,7 @@ const ResponseModal = ({
 
   // Submit Handler
   const onSubmit = async (data) => {
+    let success = false;
     try {
       setLoading(true);
 
@@ -447,12 +449,18 @@ const ResponseModal = ({
 
       reset();
       setFiles([]);
-      onSuccess();
-      onClose();
+      success = true;
     } catch (err) {
       console.error("Response submission failed:", err);
+      toast.error(err?.response?.data?.message || "Failed to submit response");
     } finally {
       setLoading(false);
+    }
+
+    if (success) {
+      toast.success("Response added successfully!");
+      onSuccess();
+      onClose();
     }
   };
 
