@@ -537,7 +537,7 @@ class Service {
         'Content-Type': 'multipart/form-data'
       }
     })
-    
+
     return response.data
   }
 
@@ -3901,6 +3901,79 @@ class Service {
       return response.data
     } catch (error) {
       console.error('Error creating progress report response:', error)
+      throw error
+    }
+  }
+
+  // --- Invoice Wire Transfers ---
+  static async GetAllWireTransfers() {
+    try {
+      const response = await api.get('invoiceWireTransfer/all', {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching all wire transfers:', error)
+      throw error
+    }
+  }
+
+  static async GetWireTransfersByInvoiceId(invoiceId) {
+    try {
+      const response = await api.get(`invoiceWireTransfer/byInvoiceId/${invoiceId}`, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching wire transfers by invoice id:', error)
+      throw error
+    }
+  }
+
+  static async GetMyWireTransfers() {
+    try {
+      const response = await api.get('invoiceWireTransfer/my-transfers', {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching my wire transfers:', error)
+      throw error
+    }
+  }
+
+  static async GetWireTransferById(id) {
+    try {
+      const response = await api.get(`invoiceWireTransfer/byId/${id}`, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching wire transfer by id:', error)
+      throw error
+    }
+  }
+
+  static async UpdateWireTransfer(id, data) {
+    try {
+      const response = await api.put(`invoiceWireTransfer/${id}`, data, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error updating wire transfer:', error)
+      throw error
+    }
+  }
+
+  static async DeleteWireTransfer(id) {
+    try {
+      const response = await api.delete(`invoiceWireTransfer/${id}`, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error deleting wire transfer:', error)
       throw error
     }
   }

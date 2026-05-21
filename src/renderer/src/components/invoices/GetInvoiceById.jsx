@@ -471,7 +471,7 @@ const GetInvoiceById = ({
 
                   <span className="text-black ">Country/State /Code:</span>
                   {/* <span className=" "> {invoice.pointOfContact?.[0]?.state || invoice.state || invoice.stateCode || invoice.client?.state || invoice.fabricator?.branches?.[0]?.state || "-"} </span> */}
-<br/>
+                  <br />
                   <span className="text-black ">GSTIN / UNIQUE ID:</span>
                   <span className=" ">{invoice.GSTIN || "-"}</span>
                 </div>

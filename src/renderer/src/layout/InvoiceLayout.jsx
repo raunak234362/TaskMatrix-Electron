@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AddInvoice, AllInvoices, InvoiceDashboard } from "../components";
+import { AddInvoice, AllInvoices, InvoiceDashboard, WireTransfers } from "../components";
 import AccountLayout from "./AccountLayout";
 
 const InvoiceLayout = () => {
@@ -40,6 +40,16 @@ const InvoiceLayout = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab("wireTransfers")}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "wireTransfers"
+              ? "bg-[#ebf5ea] text-black border-black shadow-sm"
+              : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+              }`}
+          >
+            Wire Transfers
+          </button>
+
+          <button
             onClick={() => setActiveTab("accounts")}
             className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "accounts"
               ? "bg-[#ebf5ea] text-black border-black shadow-sm"
@@ -69,6 +79,11 @@ const InvoiceLayout = () => {
         {activeTab === "accounts" && (
           <div>
             <AccountLayout />
+          </div>
+        )}
+        {activeTab === "wireTransfers" && (
+          <div>
+            <WireTransfers />
           </div>
         )}
       </div>

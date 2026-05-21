@@ -33,6 +33,7 @@ import GetInvoiceById from './invoices/GetInvoiceById'
 import InvoiceDashboard from './invoices/dashboard/InvoiceDashboard'
 import TeamDashboard from './manageTeam/teamDashboard/TeamDashboard'
 import UpdateInvoice from './invoices/UpdateInvoice'
+import WireTransfers from './invoices/WireTransfers'
 
 // Task Components
 import AllTasks from './task/AllTasks'
@@ -69,5 +70,6 @@ export {
   AllActiveTask,
   GetCommunicationById,
   GetMeetingById,
-  UpdateInvoice
+  UpdateInvoice,
+  WireTransfers
 }
