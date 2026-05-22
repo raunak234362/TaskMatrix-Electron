@@ -2,10 +2,13 @@ import { useEffect, useState, useMemo } from "react";
 import Service from "../../api/Service";
 import DataTable from "../ui/table";
 import { Loader2, AlertCircle } from "lucide-react";
+import Modal from "../ui/Modal";
+import WireTransferDetails from "./WireTransferDetails";
 
 const WireTransfers = () => {
   const [transfers, setTransfers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTransferId, setSelectedTransferId] = useState(null);
 
   useEffect(() => {
     const fetchTransfers = async () => {
@@ -23,30 +26,23 @@ const WireTransfers = () => {
 
   const columns = [
     {
-      accessorKey: "invoiceNumber",
-      header: "Invoice #",
-      cell: ({ row }) => row.original.invoice?.invoiceNumber || row.getValue("invoiceNumber") || "—"
-    },
-    {
-      accessorKey: "referenceNumber",
-      header: "Reference #",
-    },
-    {
-      accessorKey: "amount",
-      header: "Amount",
+      accessorKey: "user",
+      header: "Sender",
       cell: ({ row }) => {
-        const amount = parseFloat(row.getValue("amount"));
-        return isNaN(amount) ? "—" : new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(amount);
-      },
+        const user = row.original.user;
+        return user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username : "—";
+      }
     },
     {
-      accessorKey: "transferDate",
+      accessorKey: "subject",
+      header: "Subject",
+      cell: ({ row }) => row.getValue("subject") || "—"
+    },
+    {
+      accessorKey: "date",
       header: "Date",
       cell: ({ row }) => {
-        const date = row.getValue("transferDate");
+        const date = row.getValue("date");
         return date ? new Date(date).toLocaleDateString() : "N/A";
       },
     },
@@ -93,10 +89,17 @@ const WireTransfers = () => {
         columns={columns}
         data={transfers}
         onRowClick={(row) => {
-          // Future: open wire transfer details
-          console.log("Wire Transfer clicked:", row);
+          setSelectedTransferId(row.id);
         }}
       />
+
+      <Modal
+        isOpen={!!selectedTransferId}
+        onClose={() => setSelectedTransferId(null)}
+        title="Wire Transfer Details"
+      >
+        {selectedTransferId && <WireTransferDetails id={selectedTransferId} />}
+      </Modal>
     </div>
   );
 };
