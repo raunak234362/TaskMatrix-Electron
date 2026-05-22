@@ -74,7 +74,7 @@ const AdminDashboardView = ({
                                         <div className="p-2.5 bg-green-100 rounded-xl border border-primary/20 shadow-sm transition-transform group-hover:scale-110">
                                             <Clock className="w-5 h-5 text-primary" strokeWidth={2.5} />
                                         </div>
-                                        <span className="text-[15px] font-black text-primary uppercase tracking-[0.1em]">Priority Focus</span>
+                                        <span className="text-[15px] font-black text-primary uppercase tracking-widest">Priority Focus</span>
                                     </div>
                                     {currentTask && (
                                         <div className="flex items-center gap-2">
