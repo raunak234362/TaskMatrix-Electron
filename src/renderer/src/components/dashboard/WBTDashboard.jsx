@@ -240,7 +240,8 @@ const WBTDashboard = () => {
               setShowSubmittalsPopup,
               setShowDeadlinesPopup,
               setShowNotesPopup,
-              handleInvoiceClick: (id) => setDetailModal({ isOpen: true, type: 'INVOICE', id })
+              handleInvoiceClick: (id) => setDetailModal({ isOpen: true, type: 'INVOICE', id }),
+              onRFQClick: (id) => setDetailModal({ isOpen: true, type: 'RFQ', id })
             }}
           />
         ) : (
