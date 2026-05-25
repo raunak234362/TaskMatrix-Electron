@@ -41,29 +41,128 @@ const WorkProgressReport = ({
   const [software, setSoftware] = useState(project?.tools || "SDS2");
   const [fabProjectManager, setFabProjectManager] = useState("Matt Aurand");
 
-  // RFI Grid local state
-  const [rfis, setRfis] = useState([]);
-  // Project Schedule Grid (Milestones & Submittals) local state
-  const [scheduleRows, setScheduleRows] = useState([]);
-  // Change Order local state
-  const [coRows, setCoRows] = useState([]);
-  // Coordination Drawings local state
-  const [coordDrawings, setCoordDrawings] = useState([]);
+  // Raw grids local states (unfiltered)
+  const [rawRfis, setRawRfis] = useState([]);
+  const [rawScheduleRows, setRawScheduleRows] = useState([]);
+  const [rawCoRows, setRawCoRows] = useState([]);
+  const [rawCoordDrawings, setRawCoordDrawings] = useState([]);
+
+  // Selected week state
+  const [selectedWeek, setSelectedWeek] = useState("All");
 
   // Keyboard navigation & Editing Cell state
-  // format: { table: 'rfi'|'schedule'|'co'|'coordDrawing', rowIndex: number, field: string }
+  // format: { table: 'rfi'|'schedule'|'co'|'coordDrawing', rowId: string, field: string }
   const [activeCell, setActiveCell] = useState(null);
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef(null);
 
-  // Set default week ending date to next/previous Friday
+  // Date helper functions for week calculation
+  const getMonday = (d) => {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+    const monday = new Date(date.setDate(diff));
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+  };
+
+  const getSunday = (d) => {
+    const mon = getMonday(d);
+    const sun = new Date(mon);
+    sun.setDate(mon.getDate() + 6);
+    sun.setHours(23, 59, 59, 999);
+    return sun;
+  };
+
+  const isWithinWeek = (dateStr, start, end) => {
+    if (!dateStr || dateStr === "—" || dateStr === "Waiting...") return false;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return false;
+    return d >= start && d <= end;
+  };
+
+  // Generate Available Weeks from Project Start Date to End Date / Today
+  const projectWeeks = useMemo(() => {
+    if (!project || !project.startDate) return [];
+    
+    const start = new Date(project.startDate);
+    if (isNaN(start.getTime())) return [];
+    
+    let end = new Date();
+    if (project.fabricationDate) {
+      const fabDate = new Date(project.fabricationDate);
+      if (!isNaN(fabDate.getTime())) {
+        end = fabDate;
+      }
+    } else if (project.endDate) {
+      const eDate = new Date(project.endDate);
+      if (!isNaN(eDate.getTime())) {
+        end = eDate;
+      }
+    }
+    
+    // Ensure the current week is always covered
+    const todaySunday = getSunday(new Date());
+    if (end < todaySunday) {
+      end = todaySunday;
+    }
+    
+    const startMon = getMonday(start);
+    const endSun = getSunday(end);
+    
+    const weeks = [];
+    let currentMon = new Date(startMon);
+    
+    while (currentMon <= endSun) {
+      const currentSun = getSunday(currentMon);
+      const label = `Week ${weeks.length + 1} (${currentMon.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${currentSun.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })})`;
+      
+      weeks.push({
+        index: weeks.length + 1,
+        start: new Date(currentMon),
+        end: new Date(currentSun),
+        label
+      });
+      
+      currentMon.setDate(currentMon.getDate() + 7);
+    }
+    
+    return weeks;
+  }, [project]);
+
+  // Set default week ending date to current week
   useEffect(() => {
-    const d = new Date();
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 5); // next/current Friday
-    const friday = new Date(d.setDate(diff));
-    setWeekEnding(friday.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }));
-  }, []);
+    if (projectWeeks.length > 0 && selectedWeek === "All") {
+      const today = new Date();
+      const current = projectWeeks.find(w => today >= w.start && today <= w.end);
+      if (current) {
+        setSelectedWeek(current.label);
+        setWeekEnding(current.end.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }));
+      } else {
+        setSelectedWeek("All");
+        const sunday = getSunday(today);
+        setWeekEnding(sunday.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }));
+      }
+    } else if (selectedWeek === "All") {
+      const d = new Date();
+      const sunday = getSunday(d);
+      setWeekEnding(sunday.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }));
+    }
+  }, [projectWeeks]);
+
+  const handleWeekChange = (label) => {
+    setSelectedWeek(label);
+    if (label === "All") {
+      const d = new Date();
+      const sunday = getSunday(d);
+      setWeekEnding(sunday.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }));
+    } else {
+      const wk = projectWeeks.find(w => w.label === label);
+      if (wk) {
+        setWeekEnding(wk.end.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }));
+      }
+    }
+  };
 
   // Sync RFIs
   useEffect(() => {
@@ -92,13 +191,12 @@ const WorkProgressReport = ({
       };
     });
 
-    setRfis(formattedRFIs);
+    setRawRfis(formattedRFIs);
   }, [rfiData]);
 
   // Sync Schedule (Milestones mapped to Submittals)
   useEffect(() => {
     const rows = milestones.map((m) => {
-      // Find submittals for this milestone
       const milestoneSubmittals = submittalData.filter(
         sub => String(sub.mileStoneId || sub.milestoneId || sub.milestone?.id) === String(m.id || m._id)
       );
@@ -107,7 +205,6 @@ const WorkProgressReport = ({
       const ifcSub = milestoneSubmittals.find(s => String(s.stage).toUpperCase() === "IFC");
       const corSub = milestoneSubmittals.find(s => ["CO", "COR"].includes(String(s.stage).toUpperCase()));
 
-      // BFA Date is response date of IFA submittals
       const ifaResponses = ifaSub?.submittalsResponse || [];
       const latestIfaResponse = ifaResponses.length > 0 ? ifaResponses[ifaResponses.length - 1] : null;
 
@@ -123,7 +220,7 @@ const WorkProgressReport = ({
       };
     });
 
-    setScheduleRows(rows);
+    setRawScheduleRows(rows);
   }, [milestones, submittalData, project]);
 
   // Sync Change Orders Month-by-month
@@ -147,13 +244,14 @@ const WorkProgressReport = ({
 
       return {
         id: co.id || co._id,
+        createdAt: co.createdAt || co.date || new Date().toISOString(),
         changeOrder: co.changeOrderNumber ? `COR-${co.changeOrderNumber.slice(-3)}` : "COR-New",
         ...monthlyBreakdown,
         total: amount > 0 ? `$${amount.toLocaleString()}` : "—"
       };
     });
 
-    setCoRows(rows);
+    setRawCoRows(rows);
   }, [project]);
 
   // Sync Coordination Drawings
@@ -166,14 +264,49 @@ const WorkProgressReport = ({
         status: cd.status || "Pending",
         createdAt: cd.createdAt ? new Date(cd.createdAt).toLocaleDateString("en-US") : "—"
       }));
-      setCoordDrawings(formattedDrawings);
+      setRawCoordDrawings(formattedDrawings);
     }
   }, [coordinationDrawings]);
 
+  // Filtered Datasets based on selected week
+  const activeWeekRange = useMemo(() => {
+    if (selectedWeek === "All") return null;
+    return projectWeeks.find(w => w.label === selectedWeek) || null;
+  }, [selectedWeek, projectWeeks]);
+
+  const filteredRfis = useMemo(() => {
+    if (!activeWeekRange) return rawRfis;
+    return rawRfis.filter(r => 
+      isWithinWeek(r.sentDate, activeWeekRange.start, activeWeekRange.end) ||
+      isWithinWeek(r.responseReceivedDate, activeWeekRange.start, activeWeekRange.end)
+    );
+  }, [rawRfis, activeWeekRange]);
+
+  const filteredScheduleRows = useMemo(() => {
+    if (!activeWeekRange) return rawScheduleRows;
+    return rawScheduleRows.filter(s => 
+      isWithinWeek(s.startDate, activeWeekRange.start, activeWeekRange.end) ||
+      isWithinWeek(s.ifaSubDate, activeWeekRange.start, activeWeekRange.end) ||
+      isWithinWeek(s.bfaRecdDate, activeWeekRange.start, activeWeekRange.end) ||
+      isWithinWeek(s.ifcSubDate, activeWeekRange.start, activeWeekRange.end) ||
+      isWithinWeek(s.corSubDate, activeWeekRange.start, activeWeekRange.end)
+    );
+  }, [rawScheduleRows, activeWeekRange]);
+
+  const filteredCoRows = useMemo(() => {
+    if (!activeWeekRange) return rawCoRows;
+    return rawCoRows.filter(c => isWithinWeek(c.createdAt, activeWeekRange.start, activeWeekRange.end));
+  }, [rawCoRows, activeWeekRange]);
+
+  const filteredCoordDrawings = useMemo(() => {
+    if (!activeWeekRange) return rawCoordDrawings;
+    return rawCoordDrawings.filter(cd => isWithinWeek(cd.createdAt, activeWeekRange.start, activeWeekRange.end));
+  }, [rawCoordDrawings, activeWeekRange]);
+
   // Handle cell double-click
-  const handleCellClick = (table, rowIndex, field, value) => {
+  const handleCellClick = (table, rowId, field, value) => {
     if (!canEdit) return;
-    setActiveCell({ table, rowIndex, field });
+    setActiveCell({ table, rowId, field });
     setEditValue(value);
     setTimeout(() => inputRef.current?.focus(), 50);
   };
@@ -181,33 +314,49 @@ const WorkProgressReport = ({
   // Save cell edit
   const handleCellSave = () => {
     if (!activeCell) return;
-    const { table, rowIndex, field } = activeCell;
+    const { table, rowId, field } = activeCell;
 
     if (table === "rfi") {
-      const updated = [...rfis];
-      updated[rowIndex][field] = editValue;
-      setRfis(updated);
-    } else if (table === "schedule") {
-      const updated = [...scheduleRows];
-      updated[rowIndex][field] = editValue;
-      setScheduleRows(updated);
-    } else if (table === "co") {
-      const updated = [...coRows];
-      updated[rowIndex][field] = editValue;
-      
-      // Recompute total if month was changed
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      let sum = 0;
-      months.forEach(m => {
-        const val = updated[rowIndex][m]?.replace(/[^0-9.]/g, "");
-        if (val) sum += Number(val);
+      const updated = rawRfis.map(row => {
+        if (row.id === rowId) {
+          return { ...row, [field]: editValue };
+        }
+        return row;
       });
-      updated[rowIndex].total = sum > 0 ? `$${sum.toLocaleString()}` : "—";
-      setCoRows(updated);
+      setRawRfis(updated);
+    } else if (table === "schedule") {
+      const updated = rawScheduleRows.map(row => {
+        if (row.id === rowId) {
+          return { ...row, [field]: editValue };
+        }
+        return row;
+      });
+      setRawScheduleRows(updated);
+    } else if (table === "co") {
+      const updated = rawCoRows.map(row => {
+        if (row.id === rowId) {
+          const newRow = { ...row, [field]: editValue };
+          // Recompute total if month was changed
+          const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+          let sum = 0;
+          months.forEach(m => {
+            const val = newRow[m]?.replace(/[^0-9.]/g, "");
+            if (val) sum += Number(val);
+          });
+          newRow.total = sum > 0 ? `$${sum.toLocaleString()}` : "—";
+          return newRow;
+        }
+        return row;
+      });
+      setRawCoRows(updated);
     } else if (table === "coordDrawing") {
-      const updated = [...coordDrawings];
-      updated[rowIndex][field] = editValue;
-      setCoordDrawings(updated);
+      const updated = rawCoordDrawings.map(row => {
+        if (row.id === rowId) {
+          return { ...row, [field]: editValue };
+        }
+        return row;
+      });
+      setRawCoordDrawings(updated);
     }
     setActiveCell(null);
   };
@@ -215,35 +364,37 @@ const WorkProgressReport = ({
   // Keyboard Navigation inside table cells
   const handleKeyDown = (e) => {
     if (!activeCell) return;
-    const { table, rowIndex, field } = activeCell;
+    const { table, rowId, field } = activeCell;
     const tableData = 
       table === "rfi" 
-        ? rfis 
+        ? filteredRfis 
         : table === "schedule" 
-        ? scheduleRows 
+        ? filteredScheduleRows 
         : table === "co" 
-        ? coRows 
-        : coordDrawings;
-    const fields = Object.keys(tableData[0]).filter(k => k !== "id");
+        ? filteredCoRows 
+        : filteredCoordDrawings;
+    const rowIndex = tableData.findIndex(row => row.id === rowId);
+    if (rowIndex === -1) return;
+
+    const fields = Object.keys(tableData[0]).filter(k => k !== "id" && k !== "createdAt");
     const fieldIndex = fields.indexOf(field);
 
     if (e.key === "Enter") {
       handleCellSave();
-      // Move to cell below
       if (rowIndex < tableData.length - 1) {
-        handleCellClick(table, rowIndex + 1, field, tableData[rowIndex + 1][field]);
+        const nextRow = tableData[rowIndex + 1];
+        handleCellClick(table, nextRow.id, field, nextRow[field]);
       }
     } else if (e.key === "Tab") {
       e.preventDefault();
       handleCellSave();
-      // Move to next cell horizontally
       if (fieldIndex < fields.length - 1) {
         const nextField = fields[fieldIndex + 1];
-        handleCellClick(table, rowIndex, nextField, tableData[rowIndex][nextField]);
+        handleCellClick(table, rowId, nextField, tableData[rowIndex][nextField]);
       } else if (rowIndex < tableData.length - 1) {
-        // Wrap to next row
+        const nextRow = tableData[rowIndex + 1];
         const nextField = fields[0];
-        handleCellClick(table, rowIndex + 1, nextField, tableData[rowIndex + 1][nextField]);
+        handleCellClick(table, nextRow.id, nextField, nextRow[nextField]);
       }
     } else if (e.key === "Escape") {
       setActiveCell(null);
@@ -256,33 +407,43 @@ const WorkProgressReport = ({
     try {
       setSaving(true);
       // Sync milestones to backend
-      for (const row of scheduleRows) {
-        if (row.id) {
-          const payload = {
-            subject: row.phase,
-            description: row.comments,
-            // Convert formatted dates back to ISO
-            approvalDate: row.ifaSubDate !== "—" ? new Date(row.ifaSubDate).toISOString() : undefined,
-            CDApprovalDate: row.ifcSubDate !== "—" ? new Date(row.ifcSubDate).toISOString() : undefined,
-          };
+      for (const row of rawScheduleRows) {
+        const payload = {
+          projectId: projectId,
+          subject: row.phase,
+          description: row.comments,
+          date: row.startDate !== "—" ? new Date(row.startDate).toISOString() : new Date().toISOString(),
+          approvalDate: row.ifaSubDate !== "—" ? new Date(row.ifaSubDate).toISOString() : undefined,
+          CDApprovalDate: row.ifcSubDate !== "—" ? new Date(row.ifcSubDate).toISOString() : undefined,
+        };
+        if (row.id && !String(row.id).startsWith("temp-")) {
           await Service.EditMilestoneById(row.id, payload);
+        } else {
+          await Service.AddProjectMilestone(payload);
         }
       }
 
       // Sync RFIs to backend
-      for (const row of rfis) {
-        if (row.id) {
+      for (const row of rawRfis) {
+        if (row.id && !String(row.id).startsWith("temp-")) {
           const payload = {
             subject: row.rfiNo,
             status: row.status === "OPEN",
           };
           await Service.EditRFIByID(row.id, payload);
+        } else {
+          const formData = new FormData();
+          formData.append("projectId", projectId);
+          formData.append("subject", row.rfiNo);
+          formData.append("description", "Created from Weekly Progress Report");
+          formData.append("date", row.sentDate !== "—" ? new Date(row.sentDate).toISOString() : new Date().toISOString());
+          await Service.addRFI(formData);
         }
       }
 
       // Sync Coordination Drawings to backend
-      for (const row of coordDrawings) {
-        if (row.id) {
+      for (const row of rawCoordDrawings) {
+        if (row.id && !String(row.id).startsWith("temp-")) {
           const payload = {
             title: row.title,
             stage: row.stage,
@@ -290,7 +451,6 @@ const WorkProgressReport = ({
           };
           await Service.updateCoordinationDrawing(row.id, payload);
         } else {
-          // Create new drawing
           const formData = new FormData();
           formData.append("projectId", projectId);
           formData.append("title", row.title);
@@ -307,6 +467,24 @@ const WorkProgressReport = ({
         }
       }
 
+      // Sync Change Orders
+      for (const row of rawCoRows) {
+        if (row.id && String(row.id).startsWith("temp-")) {
+          const formData = new FormData();
+          formData.append("projectId", projectId);
+          formData.append("changeOrderNumber", row.changeOrder.replace("COR-", ""));
+          formData.append("description", "Created from Weekly Progress Report");
+          let sum = 0;
+          const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+          months.forEach(m => {
+            const val = row[m]?.replace(/[^0-9.]/g, "");
+            if (val) sum += Number(val);
+          });
+          formData.append("totalCost", sum);
+          await Service.ChangeOrder(formData);
+        }
+      }
+
       toast.success("Progress Report updated successfully!");
       if (onUpdate) onUpdate();
     } catch (err) {
@@ -319,21 +497,27 @@ const WorkProgressReport = ({
 
   // Add new rows to table
   const addRow = (table) => {
+    const defaultDate = activeWeekRange 
+      ? activeWeekRange.start.toLocaleDateString("en-US")
+      : new Date().toLocaleDateString("en-US");
+
+    const tempId = `temp-${Date.now()}`;
+
     if (table === "rfi") {
-      setRfis([...rfis, {
-        id: "",
-        rfiNo: `RFI #${rfis.length + 1}`,
-        sentDate: new Date().toLocaleDateString("en-US"),
+      setRawRfis([...rawRfis, {
+        id: tempId,
+        rfiNo: `RFI #${rawRfis.length + 1}`,
+        sentDate: defaultDate,
         customerResponse: "—",
         responseReceivedDate: "—",
         wbtResponse: "—",
         status: "OPEN"
       }]);
     } else if (table === "schedule") {
-      setScheduleRows([...scheduleRows, {
-        id: "",
-        phase: `New Phase #${scheduleRows.length + 1}`,
-        startDate: new Date().toLocaleDateString("en-US"),
+      setRawScheduleRows([...rawScheduleRows, {
+        id: tempId,
+        phase: `New Phase #${rawScheduleRows.length + 1}`,
+        startDate: defaultDate,
         ifaSubDate: "—",
         bfaRecdDate: "—",
         ifcSubDate: "—",
@@ -341,19 +525,20 @@ const WorkProgressReport = ({
         comments: "—"
       }]);
     } else if (table === "co") {
-      setCoRows([...coRows, {
-        id: "",
-        changeOrder: `COR-${String(coRows.length + 1).padStart(3, "0")}`,
+      setRawCoRows([...rawCoRows, {
+        id: tempId,
+        changeOrder: `COR-${String(rawCoRows.length + 1).padStart(3, "0")}`,
+        createdAt: activeWeekRange ? activeWeekRange.start.toISOString() : new Date().toISOString(),
         Jan: "", Feb: "", Mar: "", Apr: "", May: "", Jun: "", Jul: "", Aug: "", Sep: "", Oct: "", Nov: "", Dec: "",
         total: "—"
       }]);
     } else if (table === "coordDrawing") {
-      setCoordDrawings([...coordDrawings, {
-        id: "",
-        title: `Drawing #${coordDrawings.length + 1}`,
+      setRawCoordDrawings([...rawCoordDrawings, {
+        id: tempId,
+        title: `Drawing #${rawCoordDrawings.length + 1}`,
         stage: "IFA",
         status: "Pending",
-        createdAt: new Date().toLocaleDateString("en-US")
+        createdAt: defaultDate
       }]);
     }
   };
@@ -363,7 +548,7 @@ const WorkProgressReport = ({
     const workbook = XLSX.utils.book_new();
 
     // Sheet 1: RFI
-    const rfiWS = XLSX.utils.json_to_sheet(rfis.map(r => ({
+    const rfiWS = XLSX.utils.json_to_sheet(filteredRfis.map(r => ({
       "RFI No.": r.rfiNo,
       "Sent Date": r.sentDate,
       "Customer Response": r.customerResponse,
@@ -374,7 +559,7 @@ const WorkProgressReport = ({
     XLSX.utils.book_append_sheet(workbook, rfiWS, "RFI Status");
 
     // Sheet 2: Schedule
-    const schedWS = XLSX.utils.json_to_sheet(scheduleRows.map(s => ({
+    const schedWS = XLSX.utils.json_to_sheet(filteredScheduleRows.map(s => ({
       "Phase": s.phase,
       "Start Date": s.startDate,
       "IFA Submission Date": s.ifaSubDate,
@@ -386,11 +571,14 @@ const WorkProgressReport = ({
     XLSX.utils.book_append_sheet(workbook, schedWS, "Project Schedule");
 
     // Sheet 3: Change Orders
-    const coWS = XLSX.utils.json_to_sheet(coRows);
+    const coWS = XLSX.utils.json_to_sheet(filteredCoRows.map(c => {
+      const { id, createdAt, ...rest } = c;
+      return rest;
+    }));
     XLSX.utils.book_append_sheet(workbook, coWS, "Change Orders");
 
     // Sheet 4: Coordination Drawings
-    const coordWS = XLSX.utils.json_to_sheet(coordDrawings.map(cd => ({
+    const coordWS = XLSX.utils.json_to_sheet(filteredCoordDrawings.map(cd => ({
       "Drawing Name": cd.title,
       "Stage": cd.stage,
       "Status": cd.status,
@@ -423,7 +611,7 @@ const WorkProgressReport = ({
     doc.autoTable({
       startY: 140,
       head: [["Phase", "Start Date", "IFA Sub Date", "BFA Recd Date", "IFC Sub Date", "COR Sub Date", "Comments"]],
-      body: scheduleRows.map(s => [s.phase, s.startDate, s.ifaSubDate, s.bfaRecdDate, s.ifcSubDate, s.corSubDate, s.comments]),
+      body: filteredScheduleRows.map(s => [s.phase, s.startDate, s.ifaSubDate, s.bfaRecdDate, s.ifcSubDate, s.corSubDate, s.comments]),
       theme: "grid",
       styles: { fontSize: 8 },
       headStyles: { fillColor: [107, 189, 69] }
@@ -435,7 +623,7 @@ const WorkProgressReport = ({
     doc.autoTable({
       startY: rfiY + 10,
       head: [["RFI No.", "Sent Date", "Customer Response", "Response Recd Date", "Whiteboard Response", "Status"]],
-      body: rfis.map(r => [r.rfiNo, r.sentDate, r.customerResponse, r.responseReceivedDate, r.wbtResponse, r.status]),
+      body: filteredRfis.map(r => [r.rfiNo, r.sentDate, r.customerResponse, r.responseReceivedDate, r.wbtResponse, r.status]),
       theme: "grid",
       styles: { fontSize: 8 },
       headStyles: { fillColor: [107, 189, 69] }
@@ -452,7 +640,7 @@ const WorkProgressReport = ({
     doc.autoTable({
       startY: finalCoY + 10,
       head: [["Change Order", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "FY Total"]],
-      body: coRows.map(c => [
+      body: filteredCoRows.map(c => [
         c.changeOrder, c.Jan, c.Feb, c.Mar, c.Apr, c.May, c.Jun, c.Jul, c.Aug, c.Sep, c.Oct, c.Nov, c.Dec, c.total
       ]),
       theme: "grid",
@@ -471,7 +659,7 @@ const WorkProgressReport = ({
     doc.autoTable({
       startY: finalCoordY + 10,
       head: [["Drawing Name", "Stage", "Status", "Date Created"]],
-      body: coordDrawings.map(cd => [cd.title, cd.stage, cd.status, cd.createdAt]),
+      body: filteredCoordDrawings.map(cd => [cd.title, cd.stage, cd.status, cd.createdAt]),
       theme: "grid",
       styles: { fontSize: 8 },
       headStyles: { fillColor: [107, 189, 69] }
@@ -494,6 +682,23 @@ const WorkProgressReport = ({
         <div className="flex items-center gap-3">
           <div className="w-2.5 h-6 bg-[#6bbd45] rounded-full" />
           <h2 className="text-md font-black uppercase tracking-widest text-slate-700">WPR Spreadsheet Control</h2>
+          {projectWeeks.length > 0 && (
+            <div className="flex items-center gap-2 ml-4">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Select Week:</span>
+              <select
+                value={selectedWeek}
+                onChange={(e) => handleWeekChange(e.target.value)}
+                className="px-3 py-1.5 bg-white border border-black rounded-lg text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#6bbd45] transition-all cursor-pointer font-bold"
+              >
+                <option value="All">All Weeks</option>
+                {projectWeeks.map((w) => (
+                  <option key={w.label} value={w.label}>
+                    {w.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {canEdit && (
@@ -644,14 +849,14 @@ const WorkProgressReport = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5">
-              {scheduleRows.map((row, rowIndex) => (
-                <tr key={row.id || rowIndex} className="hover:bg-slate-50 transition-all">
+              {filteredScheduleRows.map((row) => (
+                <tr key={row.id} className="hover:bg-slate-50 transition-all">
                   {/* Phase cell */}
                   <td 
-                    onClick={() => handleCellClick("schedule", rowIndex, "phase", row.phase)}
+                    onClick={() => handleCellClick("schedule", row.id, "phase", row.phase)}
                     className="p-3 font-black border-r border-black/5 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "schedule" && activeCell.rowIndex === rowIndex && activeCell.field === "phase" ? (
+                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "phase" ? (
                       <input
                         ref={inputRef}
                         type="text"
@@ -668,10 +873,10 @@ const WorkProgressReport = ({
 
                   {/* Start Date */}
                   <td 
-                    onClick={() => handleCellClick("schedule", rowIndex, "startDate", row.startDate)}
+                    onClick={() => handleCellClick("schedule", row.id, "startDate", row.startDate)}
                     className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "schedule" && activeCell.rowIndex === rowIndex && activeCell.field === "startDate" ? (
+                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "startDate" ? (
                       <input
                         ref={inputRef}
                         type="text"
@@ -688,10 +893,10 @@ const WorkProgressReport = ({
 
                   {/* IFA submission date */}
                   <td 
-                    onClick={() => handleCellClick("schedule", rowIndex, "ifaSubDate", row.ifaSubDate)}
+                    onClick={() => handleCellClick("schedule", row.id, "ifaSubDate", row.ifaSubDate)}
                     className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "schedule" && activeCell.rowIndex === rowIndex && activeCell.field === "ifaSubDate" ? (
+                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "ifaSubDate" ? (
                       <input
                         ref={inputRef}
                         type="text"
@@ -708,10 +913,10 @@ const WorkProgressReport = ({
 
                   {/* BFA date */}
                   <td 
-                    onClick={() => handleCellClick("schedule", rowIndex, "bfaRecdDate", row.bfaRecdDate)}
+                    onClick={() => handleCellClick("schedule", row.id, "bfaRecdDate", row.bfaRecdDate)}
                     className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "schedule" && activeCell.rowIndex === rowIndex && activeCell.field === "bfaRecdDate" ? (
+                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "bfaRecdDate" ? (
                       <input
                         ref={inputRef}
                         type="text"
@@ -728,10 +933,10 @@ const WorkProgressReport = ({
 
                   {/* IFC sub date */}
                   <td 
-                    onClick={() => handleCellClick("schedule", rowIndex, "ifcSubDate", row.ifcSubDate)}
+                    onClick={() => handleCellClick("schedule", row.id, "ifcSubDate", row.ifcSubDate)}
                     className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "schedule" && activeCell.rowIndex === rowIndex && activeCell.field === "ifcSubDate" ? (
+                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "ifcSubDate" ? (
                       <input
                         ref={inputRef}
                         type="text"
@@ -748,10 +953,10 @@ const WorkProgressReport = ({
 
                   {/* COR Sub date */}
                   <td 
-                    onClick={() => handleCellClick("schedule", rowIndex, "corSubDate", row.corSubDate)}
+                    onClick={() => handleCellClick("schedule", row.id, "corSubDate", row.corSubDate)}
                     className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "schedule" && activeCell.rowIndex === rowIndex && activeCell.field === "corSubDate" ? (
+                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "corSubDate" ? (
                       <input
                         ref={inputRef}
                         type="text"
@@ -768,10 +973,10 @@ const WorkProgressReport = ({
 
                   {/* Comments */}
                   <td 
-                    onClick={() => handleCellClick("schedule", rowIndex, "comments", row.comments)}
+                    onClick={() => handleCellClick("schedule", row.id, "comments", row.comments)}
                     className="p-3 font-semibold text-slate-700 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "schedule" && activeCell.rowIndex === rowIndex && activeCell.field === "comments" ? (
+                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "comments" ? (
                       <input
                         ref={inputRef}
                         type="text"
@@ -823,14 +1028,14 @@ const WorkProgressReport = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5">
-              {rfis.map((row, rowIndex) => (
-                <tr key={row.id || rowIndex} className="hover:bg-slate-50 transition-all">
+              {filteredRfis.map((row) => (
+                <tr key={row.id} className="hover:bg-slate-50 transition-all">
                   {/* RFI No. */}
                   <td 
-                    onClick={() => handleCellClick("rfi", rowIndex, "rfiNo", row.rfiNo)}
+                    onClick={() => handleCellClick("rfi", row.id, "rfiNo", row.rfiNo)}
                     className="p-3 font-black border-r border-black/5 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "rfi" && activeCell.rowIndex === rowIndex && activeCell.field === "rfiNo" ? (
+                    {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "rfiNo" ? (
                       <input
                         ref={inputRef}
                         type="text"
@@ -847,10 +1052,10 @@ const WorkProgressReport = ({
 
                   {/* Sent Date */}
                   <td 
-                    onClick={() => handleCellClick("rfi", rowIndex, "sentDate", row.sentDate)}
+                    onClick={() => handleCellClick("rfi", row.id, "sentDate", row.sentDate)}
                     className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "rfi" && activeCell.rowIndex === rowIndex && activeCell.field === "sentDate" ? (
+                    {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "sentDate" ? (
                       <input
                         ref={inputRef}
                         type="text"
@@ -867,10 +1072,10 @@ const WorkProgressReport = ({
 
                   {/* Customer Response */}
                   <td 
-                    onClick={() => handleCellClick("rfi", rowIndex, "customerResponse", row.customerResponse)}
+                    onClick={() => handleCellClick("rfi", row.id, "customerResponse", row.customerResponse)}
                     className="p-3 border-r border-black/5 font-semibold text-slate-700 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "rfi" && activeCell.rowIndex === rowIndex && activeCell.field === "customerResponse" ? (
+                    {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "customerResponse" ? (
                       <textarea
                         ref={inputRef}
                         value={editValue}
@@ -886,10 +1091,10 @@ const WorkProgressReport = ({
 
                   {/* Response Recd Date */}
                   <td 
-                    onClick={() => handleCellClick("rfi", rowIndex, "responseReceivedDate", row.responseReceivedDate)}
+                    onClick={() => handleCellClick("rfi", row.id, "responseReceivedDate", row.responseReceivedDate)}
                     className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "rfi" && activeCell.rowIndex === rowIndex && activeCell.field === "responseReceivedDate" ? (
+                    {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "responseReceivedDate" ? (
                       <input
                         ref={inputRef}
                         type="text"
@@ -906,10 +1111,10 @@ const WorkProgressReport = ({
 
                   {/* WBT Response */}
                   <td 
-                    onClick={() => handleCellClick("rfi", rowIndex, "wbtResponse", row.wbtResponse)}
+                    onClick={() => handleCellClick("rfi", row.id, "wbtResponse", row.wbtResponse)}
                     className="p-3 border-r border-black/5 font-semibold text-slate-700 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "rfi" && activeCell.rowIndex === rowIndex && activeCell.field === "wbtResponse" ? (
+                    {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "wbtResponse" ? (
                       <textarea
                         ref={inputRef}
                         value={editValue}
@@ -925,10 +1130,10 @@ const WorkProgressReport = ({
 
                   {/* Status */}
                   <td 
-                    onClick={() => handleCellClick("rfi", rowIndex, "status", row.status)}
+                    onClick={() => handleCellClick("rfi", row.id, "status", row.status)}
                     className="p-3 font-black text-xs cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "rfi" && activeCell.rowIndex === rowIndex && activeCell.field === "status" ? (
+                    {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "status" ? (
                       <select
                         ref={inputRef}
                         value={editValue}
@@ -983,14 +1188,14 @@ const WorkProgressReport = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5 font-semibold text-slate-600">
-              {coRows.map((row, rowIndex) => (
-                <tr key={row.id || rowIndex} className="hover:bg-slate-50 transition-all">
+              {filteredCoRows.map((row) => (
+                <tr key={row.id} className="hover:bg-slate-50 transition-all">
                   {/* CO number name */}
                   <td 
-                    onClick={() => handleCellClick("co", rowIndex, "changeOrder", row.changeOrder)}
+                    onClick={() => handleCellClick("co", row.id, "changeOrder", row.changeOrder)}
                     className="p-3 text-left font-black text-black border-r border-black/5 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "co" && activeCell.rowIndex === rowIndex && activeCell.field === "changeOrder" ? (
+                    {activeCell?.table === "co" && activeCell.rowId === row.id && activeCell.field === "changeOrder" ? (
                       <input
                         ref={inputRef}
                         type="text"
@@ -1009,10 +1214,10 @@ const WorkProgressReport = ({
                   {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map(m => (
                     <td 
                       key={m}
-                      onClick={() => handleCellClick("co", rowIndex, m, row[m])}
+                      onClick={() => handleCellClick("co", row.id, m, row[m])}
                       className="p-3 border-r border-black/5 cursor-pointer hover:bg-slate-100/50 text-slate-800"
                     >
-                      {activeCell?.table === "co" && activeCell.rowIndex === rowIndex && activeCell.field === m ? (
+                      {activeCell?.table === "co" && activeCell.rowId === row.id && activeCell.field === m ? (
                         <input
                           ref={inputRef}
                           type="text"
@@ -1066,14 +1271,14 @@ const WorkProgressReport = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5">
-              {coordDrawings.map((row, rowIndex) => (
-                <tr key={row.id || rowIndex} className="hover:bg-slate-50 transition-all">
+              {filteredCoordDrawings.map((row) => (
+                <tr key={row.id} className="hover:bg-slate-50 transition-all">
                   {/* Drawing Name */}
                   <td 
-                    onClick={() => handleCellClick("coordDrawing", rowIndex, "title", row.title)}
+                    onClick={() => handleCellClick("coordDrawing", row.id, "title", row.title)}
                     className="p-3 font-black border-r border-black/5 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "coordDrawing" && activeCell.rowIndex === rowIndex && activeCell.field === "title" ? (
+                    {activeCell?.table === "coordDrawing" && activeCell.rowId === row.id && activeCell.field === "title" ? (
                       <input
                         ref={inputRef}
                         type="text"
@@ -1090,10 +1295,10 @@ const WorkProgressReport = ({
 
                   {/* Stage */}
                   <td 
-                    onClick={() => handleCellClick("coordDrawing", rowIndex, "stage", row.stage)}
+                    onClick={() => handleCellClick("coordDrawing", row.id, "stage", row.stage)}
                     className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "coordDrawing" && activeCell.rowIndex === rowIndex && activeCell.field === "stage" ? (
+                    {activeCell?.table === "coordDrawing" && activeCell.rowId === row.id && activeCell.field === "stage" ? (
                       <select
                         ref={inputRef}
                         value={editValue}
@@ -1114,10 +1319,10 @@ const WorkProgressReport = ({
 
                   {/* Status */}
                   <td 
-                    onClick={() => handleCellClick("coordDrawing", rowIndex, "status", row.status)}
+                    onClick={() => handleCellClick("coordDrawing", row.id, "status", row.status)}
                     className="p-3 border-r border-black/5 font-black text-xs cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "coordDrawing" && activeCell.rowIndex === rowIndex && activeCell.field === "status" ? (
+                    {activeCell?.table === "coordDrawing" && activeCell.rowId === row.id && activeCell.field === "status" ? (
                       <select
                         ref={inputRef}
                         value={editValue}
@@ -1139,10 +1344,10 @@ const WorkProgressReport = ({
 
                   {/* Date Created */}
                   <td 
-                    onClick={() => handleCellClick("coordDrawing", rowIndex, "createdAt", row.createdAt)}
+                    onClick={() => handleCellClick("coordDrawing", row.id, "createdAt", row.createdAt)}
                     className="p-3 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
                   >
-                    {activeCell?.table === "coordDrawing" && activeCell.rowIndex === rowIndex && activeCell.field === "createdAt" ? (
+                    {activeCell?.table === "coordDrawing" && activeCell.rowId === row.id && activeCell.field === "createdAt" ? (
                       <input
                         ref={inputRef}
                         type="text"
