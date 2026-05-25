@@ -12,7 +12,8 @@ import {
   CheckCircle2,
   TrendingUp,
   Activity,
-  X
+  X,
+  FileSpreadsheet
 } from "lucide-react";
 import Service from "../../api/Service";
 import Button from "../fields/Button";
@@ -38,12 +39,14 @@ import AddAssistsModal from "./AddAssistsModal";
 import ProjectMilestoneMetrics from "./ProjectMilestoneMetrics.jsx";
 import ProjectProgress from "./ProjectProgress";
 import CoordinationDrawings from "./coordinationDrawings/CoordinationDrawings";
+import WorkProgressReport from "./WorkProgressReport";
 
 const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);
   const [milestones, setMilestones] = useState([]); // Added milestones state
   const [rfiData, setRfiData] = useState([]); // Added rfiData state
   const [submittalData, setSubmittalData] = useState([]); // Added submittalData state
+  const [coordinationDrawings, setCoordinationDrawings] = useState([]); // Added coordinationDrawings state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
@@ -275,17 +278,19 @@ const GetProjectById = ({ id, onClose }) => {
     try {
       setLoading(true);
       setError(null);
-      const [projRes, mileRes, rfiRes, subRes] = await Promise.all([
+      const [projRes, mileRes, rfiRes, subRes, coordRes] = await Promise.all([
         Service.GetProjectById(id),
         Service.GetProjectMilestoneById(id),
         Service.GetRFIByProjectId(id),
         Service.GetSubmittalByProjectId(id),
+        Service.getCoordinationDrawingsByProjectId(id),
         fetchProjectTasks()
       ]);
       setProject(projRes?.data || null);
       setMilestones(mileRes?.data || []);
       setRfiData(rfiRes || []);
       setSubmittalData(subRes?.data || (Array.isArray(subRes) ? subRes : []));
+      setCoordinationDrawings(coordRes?.data || (Array.isArray(coordRes) ? coordRes : []));
     } catch (err) {
       setError("Failed to load project details");
       console.error("Error fetching project:", err);
@@ -396,6 +401,7 @@ const GetProjectById = ({ id, onClose }) => {
             <div className="hidden md:flex gap-3 overflow-x-auto custom-scrollbar pb-3 pt-1">
               {[
                 { key: "overview", label: "Overview", icon: ClipboardList },
+                { key: "wpr", label: "WPR", icon: FileSpreadsheet },
                 { key: "analytics", label: "Analytics", icon: TrendingUp },
                 { key: "teamAnalytics", label: "Team Analytics", icon: Users },
                 { key: "details", label: "Details", icon: FileText },
@@ -1134,6 +1140,17 @@ const GetProjectById = ({ id, onClose }) => {
           )}
           {activeTab === "coordinationDrawings" && (
             <CoordinationDrawings projectId={id} />
+          )}
+          {activeTab === "wpr" && (
+            <WorkProgressReport
+              projectId={id}
+              project={project}
+              milestones={milestones}
+              rfiData={rfiData}
+              submittalData={submittalData}
+              coordinationDrawings={coordinationDrawings}
+              onUpdate={fetchProject}
+            />
           )}
         </div>
       </div >
