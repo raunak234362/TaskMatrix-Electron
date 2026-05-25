@@ -8,6 +8,7 @@ import Service from "../../api/Service";
 import DateFilter from "../common/DateFilter";
 import { matchesDateFilter } from "../../utils/dateFilter";
 import RenderFiles from "../common/RenderFiles";
+import ProjectStatusTabs from "./ProjectStatusTabs";
 
 const GetProjectById = React.lazy(() =>
   import("./GetProjectById").then((module) => ({ default: module.default }))
@@ -15,12 +16,12 @@ const GetProjectById = React.lazy(() =>
 
 const AllProjects = () => {
   const [selectedProject, setSelectedProject] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("All Statuses");
   const [tasks, setTasks] = useState([]);
   const [filters, setFilters] = useState({
     manager: "All Managers",
     fabricator: "All Fabricators",
     stage: "All Stages",
-    status: "All Statuses",
     overrunOnly: false,
     searchTerm: "",
   });
@@ -41,6 +42,14 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const projects = useSelector(
     (state) => state.projectInfo?.projectData || []
   );
+
+  const stats = useMemo(() => ({
+    total: projects.length,
+    active: projects.filter((p) => p.status === "ACTIVE").length,
+    completed: projects.filter((p) => p.status === "COMPLETE").length,
+    onHold: projects.filter((p) => p.status === "ONHOLD").length,
+    inActive: projects.filter((p) => p.status === "INACTIVE").length,
+  }), [projects]);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -108,13 +117,6 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
     return ["All Stages", ...new Set(list)];
   }, [projects]);
 
-  const statuses = useMemo(() => {
-    const list = projects
-      .map((p) => p.status || "Unknown")
-      .filter(Boolean);
-    return ["All Statuses", ...new Set(list)];
-  }, [projects]);
-
   // --- Filter Logic ---
   const filteredProjects = useMemo(() => {
     return projects.map(project => {
@@ -165,8 +167,8 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
       if (filters.stage !== "All Stages" && stage !== filters.stage)
         return false;
       if (
-        filters.status !== "All Statuses" &&
-        project.status !== filters.status
+        statusFilter !== "All Statuses" &&
+        project.status !== statusFilter
       )
         return false;
       if (filters.overrunOnly && !isOverrun) return false;
@@ -176,7 +178,7 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
 
       return true;
     });
-  }, [projects, filters, tasks, dateFilter]);
+  }, [projects, filters, tasks, dateFilter, statusFilter]);
 
   // --- Column Definitions ---
   const columns = [
@@ -274,18 +276,27 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
     {
       accessorKey: "status",
       header: "Status",
-      cell: ({ row }) => (
-        <span
-          className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-black ${row.original.status === 'ACTIVE'
-            ? 'bg-green-100 text-black'
-            : row.original.status === 'COMPLETED'
-              ? 'bg-blue-100 text-black shadow-sm'
-              : 'bg-orange-100 text-black shadow-sm'
-            }`}
-        >
-          {row.original.status}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const status = row.original.status;
+        let colorClasses = "bg-gray-100 text-gray-700 border-gray-300";
+        if (status === 'ACTIVE') {
+          colorClasses = "bg-blue-100 text-blue-700 border-blue-300";
+        } else if (status === 'COMPLETE' || status === 'COMPLETED') {
+          colorClasses = "bg-green-100 text-green-700 border-green-300";
+        } else if (status === 'ONHOLD') {
+          colorClasses = "bg-red-100 text-red-900 border-red-300";
+        } else if (status === 'INACTIVE') {
+          colorClasses = "bg-yellow-100 text-yellow-700 border-yellow-300";
+        }
+
+        return (
+          <span
+            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${colorClasses}`}
+          >
+            {status}
+          </span>
+        );
+      },
     },
   ];
 
@@ -295,6 +306,13 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
 
   return (
     <div className="bg-[#fcfdfc] min-h-[600px] animate-in fade-in duration-700 flex flex-col gap-4">
+      {/* Status Tabs */}
+      <ProjectStatusTabs 
+        stats={stats} 
+        statusFilter={statusFilter} 
+        setStatusFilter={setStatusFilter} 
+      />
+
       {/* Filters Section */}
       <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
         <div className="flex items-center gap-2 mb-3">
@@ -355,21 +373,7 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
             </select>
           </div>
 
-          {/* Status Filter */}
-          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Status</label>
-            <select
-              className="w-full text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
-              value={filters.status}
-              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-            >
-              {statuses.map(status => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Status Filter removed */}
 
           {/* Overrun Checkbox */}
           <div className="flex items-center gap-2 pb-2 pl-2">

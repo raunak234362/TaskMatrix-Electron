@@ -19,14 +19,6 @@ const ProjectLayout = () => {
   const projects = useSelector(
     (state) => state?.projectInfo?.projectData || []
   );
-
-  const stats = {
-    total: projects.length,
-    active: projects.filter((p) => p.status === "ACTIVE").length,
-    completed: projects.filter((p) => p.status === "COMPLETE").length,
-    onHold: projects.filter((p) => p.status === "ONHOLD").length,
-    inActive: projects.filter((p) => p.status === "INACTIVE").length,
-  };
   // ✅ Fetch Departments only when data is null or empty
   const fetchDepartment = async () => {
     try {
@@ -63,46 +55,7 @@ const ProjectLayout = () => {
       <div className="flex flex-col w-full h-full">
         <div className=" px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 rounded-t-2xl flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4">
-            <div className="flex items-center gap-2 px-2 md:px-3 py-1 bg-indigo-50 rounded-lg border border-indigo-100">
-              <span className="text-sm md:text-xl animate-in font-medium text-indigo-600 uppercase tracking-wider">
-                Total -
-              </span>
-              <span className="text-sm md:text-xl animate-in  text-indigo-700">
-                {stats.total}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 px-2 md:px-3 py-1 bg-green-50 rounded-lg border border-green-100">
-              <span className="text-sm md:text-xl animate-in font-medium text-green-600 uppercase tracking-wider">
-                Active -
-              </span>
-              <span className="text-sm md:text-xl animate-in  text-green-700">
-                {stats.active}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 px-2 md:px-3 py-1 bg-blue-50 rounded-lg border border-blue-100">
-              <span className="text-sm md:text-xl animate-in font-medium text-blue-600 uppercase tracking-wider">
-                Completed -
-              </span>
-              <span className="text-sm md:text-xl animate-in  text-blue-700">
-                {stats.completed}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 px-2 md:px-3 py-1 bg-orange-50 rounded-lg border border-orange-100">
-              <span className="text-sm md:text-xl animate-in font-medium text-orange-600 uppercase tracking-wider">
-                On Hold -
-              </span>
-              <span className="text-sm md:text-xl animate-in  text-orange-700">
-                {stats.onHold}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 px-2 md:px-3 py-1 bg-orange-50 rounded-lg border border-orange-100">
-              <span className="text-sm md:text-xl animate-in font-medium text-orange-600 uppercase tracking-wider">
-                In-Active -
-              </span>
-              <span className="text-sm md:text-xl animate-in  text-orange-700">
-                {stats.inActive}
-              </span>
-            </div>
+            {/* Status tabs moved to AllProjects component */}
           </div>
           <div className="flex flex-wrap gap-2 md:gap-4 items-center justify-center md:justify-end">
             {[

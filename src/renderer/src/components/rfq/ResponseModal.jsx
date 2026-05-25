@@ -20,7 +20,11 @@ const ResponseModal = ({
   onSuccess,
 }) => {
   const { register, handleSubmit, control, reset, setValue, getValues } =
-    useForm();
+    useForm({
+      defaultValues: {
+        status: "OPEN"
+      }
+    });
 
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -424,8 +428,8 @@ const ResponseModal = ({
       formData.append("rfqId", payload.rfqId);
       formData.append("subject", payload.subject || "");
       formData.append("description", payload.description);
-      formData.append("status", "OPEN");
-      formData.append("wbtStatus", "OPEN");
+      formData.append("status", payload.status || "OPEN");
+      formData.append("wbtStatus", payload.status || "OPEN");
       formData.append("userRole", userRole ?? "");
       formData.append("userId", userId ?? "");
 
@@ -666,6 +670,30 @@ const ResponseModal = ({
                       )}
                     />
                   </div>
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <label className="block text-xs text-black font-black uppercase tracking-widest">
+                    Status
+                  </label>
+                  <Controller
+                    name="status"
+                    control={control}
+                    defaultValue="OPEN"
+                    render={({ field }) => (
+                      <Select
+                        name="status"
+                        options={[
+                          { label: "WBT SUBMITTED", value: "WBT_SUBMITTED" },
+                          { label: "Awarded", value: "AWARDED" },
+                          { label: "Re Estimation Requested", value: "RE_ESTIMATION_REQUESTED" }
+                        ]}
+                        value={field.value}
+                        onChange={(_, val) => field.onChange(val)}
+                        placeholder="Select Status"
+                        className="border border-black rounded-lg h-14 bg-white"
+                      />
+                    )}
+                  />
                 </div>
               </div>
             </section>
