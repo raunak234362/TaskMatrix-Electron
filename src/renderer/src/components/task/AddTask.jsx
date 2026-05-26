@@ -49,6 +49,7 @@ const AddTask = () => {
   const [isLoadingTasks, setIsLoadingTasks] = useState(false);
   const [existingWbsHours, setExistingWbsHours] = useState(0);
   const [bundles, setBundles] = useState([]);
+  const [projectSubmittals, setProjectSubmittals] = useState([]);
 
   const dispatch = useDispatch();
   const projects = useSelector(
@@ -125,6 +126,15 @@ const AddTask = () => {
         setBundles(res?.data || []);
       });
 
+      // Fetch project submittals
+      Service.GetSubmittalByProjectId(selectedProjectId).then((res) => {
+        const submittalsList = Array.isArray(res) ? res : (res?.data || []);
+        setProjectSubmittals(submittalsList);
+      }).catch((err) => {
+        console.error("Failed to fetch submittals", err);
+        setProjectSubmittals([]);
+      });
+
       if (!milestonesByProject[selectedProjectId]) {
         Service.GetProjectMilestoneById(selectedProjectId).then((res) => {
           dispatch(
@@ -141,6 +151,7 @@ const AddTask = () => {
       setValue("project_bundle_id", "");
       setValue("departmentId", "");
       setSelectedWbs(null);
+      setProjectSubmittals([]);
     }
   }, [
     selectedProjectId,
@@ -426,10 +437,23 @@ const AddTask = () => {
     value: p.id,
   }));
 
-  const milestoneOptions = milestones.map((m) => ({
-    label: m.subject + " - " + m.stage || m.name - m.stage  || "Unnamed Milestone",
-    value: m.id,
-  }));
+  const milestoneOptions = milestones
+    .filter((m) => {
+      const hasSubmittals = projectSubmittals.some(
+        (sub) => String(sub.mileStoneId || sub.milestoneId || sub.milestone?.id) === String(m.id || m._id)
+      );
+      return !hasSubmittals;
+    })
+    .map((m) => {
+      const milestoneName = m.subject || m.name || "Unnamed Milestone";
+      const subSubjectName = m.subSubject || "";
+      const stageName = m.stage || "";
+      const labelParts = [milestoneName, subSubjectName, stageName].filter(Boolean);
+      return {
+        label: labelParts.join(" - "),
+        value: m.id,
+      };
+    });
 
   const wbsTypeOptions = [
     { label: "Modeling", value: "modeling" },

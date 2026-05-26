@@ -339,6 +339,20 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
               color="text-green-600"
               bg="bg-green-50"
             />
+            <InfoCard
+              icon={<Tag className="w-5 h-5" />}
+              label="Types"
+              value={milestone.types || "—"}
+              color="text-amber-600"
+              bg="bg-amber-50"
+            />
+            <InfoCard
+              icon={<Tag className="w-5 h-5" />}
+              label="Sub Subject"
+              value={milestone.subSubject || "—"}
+              color="text-indigo-600"
+              bg="bg-indigo-50"
+            />
             <div className="flex flex-col gap-1 w-full col-span-1 md:col-span-2 lg:col-span-1">
               <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                 Progress

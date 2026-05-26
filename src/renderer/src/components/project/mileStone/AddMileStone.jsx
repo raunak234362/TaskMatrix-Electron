@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 import { X, CheckCircle } from "lucide-react";
@@ -25,10 +26,29 @@ const AddMileStone = ({
       project_id: projectId,
       fabricator_id: fabricatorId,
       status: "ACTIVE",
+      types: "ANCHOR_BOLT",
+      subSubject: "string",
+      isConnectionDesigner: false,
     },
   });
 
   const selectedSubject = watch("subject");
+  const customSubject = watch("customSubject");
+  const isConnectionDesigner = watch("isConnectionDesigner");
+
+  useEffect(() => {
+    if (selectedSubject) {
+      if (selectedSubject === "Others") {
+        if (customSubject) {
+          setValue("types", customSubject.toUpperCase().replace(/\s+/g, "_"));
+        } else {
+          setValue("types", "");
+        }
+      } else {
+        setValue("types", selectedSubject.toUpperCase().replace(/\s+/g, "_"));
+      }
+    }
+  }, [selectedSubject, customSubject, setValue]);
 
   const statusOptions = [
     { label: "Pending", value: "PENDING" },
@@ -60,16 +80,23 @@ const AddMileStone = ({
 
   const onSubmit = async (data) => {
     try {
+      const finalSubject = data.subject === "Others" ? data.customSubject : data.subject;
+      const computedTypes = finalSubject ? finalSubject.toUpperCase().replace(/\s+/g, "_") : "ANCHOR_BOLT";
       const payload = {
         ...data,
-        subject: data.subject === "Others" ? data.customSubject : data.subject,
+        subject: finalSubject,
+        types: computedTypes,
         stage: data.stage || "IFA",
+        isConnectionDesigner: !!data.isConnectionDesigner,
         date: data.date ? new Date(data.date).toISOString() : undefined,
-        approvalDate: data.approvalDate
+        approvalDate: (!data.isConnectionDesigner && data.approvalDate)
           ? new Date(data.approvalDate).toISOString()
           : undefined,
-        CDApprovalDate: data.CDApprovalDate
+        CDApprovalDate: (data.isConnectionDesigner && data.CDApprovalDate)
           ? new Date(data.CDApprovalDate).toISOString()
+          : undefined,
+        CDTargetDate: (data.isConnectionDesigner && data.CDTargetDate)
+          ? new Date(data.CDTargetDate).toISOString()
           : undefined,
       };
       await Service.AddProjectMilestone(payload);
@@ -103,7 +130,7 @@ const AddMileStone = ({
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5 overflow-y-auto h-[80vh]">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Subject *
+              Milestone *
             </label>
             <Controller
               name="subject"
@@ -138,7 +165,7 @@ const AddMileStone = ({
           {selectedSubject === "Others" && (
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Custom Subject *
+                Custom Milestone *
               </label>
               <Input
                 {...register("customSubject", {
@@ -154,6 +181,25 @@ const AddMileStone = ({
             </div>
           )}
 
+          <div>
+            <Input
+              label="Subject"
+              {...register("subSubject")}
+              placeholder="e.g. string"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="isConnectionDesigner"
+              {...register("isConnectionDesigner")}
+              className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+            />
+            <label htmlFor="isConnectionDesigner" className="text-sm font-medium text-gray-700">
+              Is Connection Designer
+            </label>
+          </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Description *
@@ -177,23 +223,28 @@ const AddMileStone = ({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Approval Date/Reapproved Date/Fabrication Date"
-              type="date"
-              {...register("approvalDate")}
-            />
-            <Input
-              label="CD Submission Date By WBT"
-              type="date"
-              {...register("CDApprovalDate")}
-            />
-            <Input
-              label="CD Approval Submission By"
-              type="date"
-              {...register("CDTargetDate")}
-            />
-          </div>
+          {isConnectionDesigner ? (
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="CD Submission Date By WBT"
+                type="date"
+                {...register("CDApprovalDate")}
+              />
+              <Input
+                label="CD Approval Submission By"
+                type="date"
+                {...register("CDTargetDate")}
+              />
+            </div>
+          ) : (
+            <div>
+              <Input
+                label="Approval Date/Reapproved Date/Fabrication Date"
+                type="date"
+                {...register("approvalDate")}
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">

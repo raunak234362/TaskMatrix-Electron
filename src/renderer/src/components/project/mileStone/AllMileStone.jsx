@@ -52,7 +52,9 @@ const AllMileStone = ({ project, onUpdate }) => {
   };
 
   const columns = [
-    { accessorKey: "subject", header: "Subject" },
+    { accessorKey: "subject", header: "Milestone" },
+    { accessorKey: "subSubject", header: "Subject" },
+    { accessorKey: "stage", header: "Stage" },
     {
       accessorKey: "approvalDate",
       header: "Approval Date",
@@ -64,7 +66,6 @@ const AllMileStone = ({ project, onUpdate }) => {
       cell: ({ row }) => formatDate(row.original.CDApprovalDate),
     },
     { accessorKey: "status", header: "Status" },
-    { accessorKey: "stage", header: "Stage" },
   ];
   const handleRowClick = (row) => {
     const milestonesId = row.id ?? row.fabId ?? "";

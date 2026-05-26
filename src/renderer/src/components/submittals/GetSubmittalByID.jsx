@@ -16,6 +16,26 @@ const Info = ({ label, value }) => (
   </div>
 );
 
+const getMilestoneLabel = (m) => {
+  if (!m) return "—";
+  const parts = [];
+  if (m.subject) {
+    parts.push(m.subject);
+  } else if (m.description) {
+    const plain = m.description.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").trim();
+    const words = plain.split(/\s+/);
+    const truncated = words.length > 10 ? words.slice(0, 10).join(" ") + "..." : plain;
+    parts.push(truncated);
+  }
+  if (m.subSubject) {
+    parts.push(m.subSubject);
+  }
+  if (m.stage) {
+    parts.push(m.stage);
+  }
+  return parts.join(" - ") || "Unnamed Milestone";
+};
+
 // ── Version History Row ──────────────────────────────────────────────────────
 const VersionRow = ({ version, index, total, isCurrent }) => {
   const [open, setOpen] = useState(false);
@@ -307,6 +327,32 @@ const GetSubmittalByID = ({ id, onClose }) => {
                 </div>
 
                 <Info label="Project" value={submittal.project?.name || "—"} />
+                {submittal.mileStones && submittal.mileStones.length > 0 ? (
+                  <div className="mb-2">
+                    <h4 className="text-sm text-gray-700">Milestones</h4>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {submittal.mileStones.map((m) => (
+                        <span
+                          key={m.id || m._id}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#6bbd45]/15 text-[#48b614] border border-[#6bbd45]/30"
+                        >
+                          {getMilestoneLabel(m)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : submittal.mileStoneBelongsTo ? (
+                  <div className="mb-2">
+                    <h4 className="text-sm text-gray-700">Milestone</h4>
+                    <div className="mt-1">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#6bbd45]/15 text-[#48b614] border border-[#6bbd45]/30">
+                        {getMilestoneLabel(submittal.mileStoneBelongsTo)}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <Info label="Milestone" value="—" />
+                )}
                 <Info
                   label="Submitted By"
                   value={submittal.sender?.firstName || "—"}

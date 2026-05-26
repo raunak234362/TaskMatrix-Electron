@@ -45,6 +45,7 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
     defaultValues: {
       subject: initialData?.subject || "",
       stage: initialData?.stage || "",
+      mileStoneId: [],
     },
   });
   const [description, setDescription] = useState(
@@ -106,14 +107,21 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
   const mileStoneOptions =
     milestones?.map((m) => {
       const labelParts = [];
-      if (m.subject) labelParts.push(m.subject);
-      else if (m.description) {
+      if (m.subject) {
+        labelParts.push(m.subject);
+      } else if (m.description) {
         // Strip HTML tags from description for label
         const plainDesc = truncateWords(m.description, 10);
         labelParts.push(plainDesc);
       }
 
-      if (m.stage) labelParts.push(m.stage);
+      if (m.subSubject) {
+        labelParts.push(m.subSubject);
+      }
+
+      if (m.stage) {
+        labelParts.push(m.stage);
+      }
 
       return {
         label: labelParts.join(" - ") || "Unnamed Milestone",
@@ -143,6 +151,11 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
       Object.entries(payload).forEach(([key, value]) => {
         if (key === "multipleRecipients" && Array.isArray(value)) {
           value.forEach((v) => formData.append("multipleRecipients[]", v));
+        } else if (key === "mileStoneId" && Array.isArray(value)) {
+          value.forEach((v) => formData.append("mileStoneId[]", v));
+          if (value.length > 0) {
+            formData.append("mileStoneId", value[0]);
+          }
         } else if (Array.isArray(value)) {
           value.forEach((v) => formData.append(key, v));
         } else if (value !== null && value !== undefined) {
@@ -154,6 +167,14 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
       toast.success("Submittal Created Successfully!");
 
       reset();
+      if (milestones.length > 0) {
+        const firstMilestone = milestones[0];
+        const firstId = firstMilestone.id || firstMilestone._id;
+        if (firstId) {
+          setValue("mileStoneId", [String(firstId)]);
+          setValue("stage", firstMilestone.stage || "");
+        }
+      }
       setDescription("");
       setFiles([]);
       onSuccess?.();
@@ -170,7 +191,7 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
       const firstMilestone = milestones[0];
       const firstId = firstMilestone.id || firstMilestone._id;
       if (firstId) {
-        setValue("mileStoneId", String(firstId));
+        setValue("mileStoneId", [String(firstId)]);
         setValue("stage", firstMilestone.stage || "");
       }
     }
@@ -253,18 +274,23 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
           control={control}
           render={({ field }) => (
             <Select
+              isMulti
               placeholder="Select Project Milestone"
               options={mileStoneOptions}
               value={
-                mileStoneOptions.find((o) => o.value === field.value) ?? null
+                mileStoneOptions.filter((o) => (field.value || []).includes(o.value))
               }
-              onChange={(option) => {
-                field.onChange(option?.value || null);
-                const selectedMilestone = milestones.find(
-                  (m) => String(m.id || m._id) === String(option?.value),
-                );
-                if (selectedMilestone) {
-                  setValue("stage", selectedMilestone.stage || "");
+              onChange={(options) => {
+                const selectedIds = options ? options.map((o) => o.value) : [];
+                field.onChange(selectedIds);
+                if (selectedIds.length > 0) {
+                  const lastSelectedId = selectedIds[selectedIds.length - 1];
+                  const selectedMilestone = milestones.find(
+                    (m) => String(m.id || m._id) === String(lastSelectedId),
+                  );
+                  if (selectedMilestone) {
+                    setValue("stage", selectedMilestone.stage || "");
+                  }
                 }
               }}
             />

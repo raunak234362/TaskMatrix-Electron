@@ -20,9 +20,10 @@ const EditMileStone = ({
     register,
     handleSubmit,
     control,
-
+    watch,
+    setValue,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, dirtyFields },
   } = useForm({
     defaultValues: {
       subject: "",
@@ -33,8 +34,18 @@ const EditMileStone = ({
       CDApprovalDate: "",
       stage: "",
       reason: "",
+      types: "ANCHOR_BOLT",
+      subSubject: "string",
     },
   });
+
+  const selectedSubject = watch("subject");
+
+  useEffect(() => {
+    if (selectedSubject && dirtyFields.subject) {
+      setValue("types", selectedSubject.toUpperCase().replace(/\s+/g, "_"));
+    }
+  }, [selectedSubject, setValue, dirtyFields.subject]);
 
   const statusOptions = [
     { label: "In Progress", value: "ACTIVE" },
@@ -95,6 +106,8 @@ const EditMileStone = ({
             : "",
           stage: data.stage || "",
           reason: data.reason || "",
+          types: data.types || "ANCHOR_BOLT",
+          subSubject: data.subSubject || "string",
         });
       }
     };
@@ -154,8 +167,10 @@ const EditMileStone = ({
 
   const onSubmit = async (data) => {
     try {
+      const computedTypes = data.subject ? data.subject.toUpperCase().replace(/\s+/g, "_") : "ANCHOR_BOLT";
       const payload = {
         ...data,
+        types: computedTypes,
         percentage: Number(data.percentage),
         approvalDate: data.approvalDate
           ? new Date(data.approvalDate).toISOString()
@@ -306,6 +321,12 @@ const EditMileStone = ({
               label="CD Approval Date"
               type="date"
               {...register("CDApprovalDate")}
+            />
+
+            <Input
+              label="Sub Subject"
+              {...register("subSubject")}
+              placeholder="e.g. string"
             />
 
             <div className="flex flex-col gap-2">

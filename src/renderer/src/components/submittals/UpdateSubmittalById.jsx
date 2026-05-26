@@ -18,6 +18,31 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
     const [fetchingEngineers, setFetchingEngineers] = useState(false);
     const [isCDMode, setIsCDMode] = useState(false);
 
+    const userRole = sessionStorage.getItem("userRole")?.toUpperCase();
+    const canUpdateMilestone = ["ADMIN", "OPERATION_EXECUTIVE", "DEPT_MANAGER"].includes(userRole);
+
+    const [milestones, setMilestones] = useState([]);
+    const [fetchingMilestones, setFetchingMilestones] = useState(false);
+
+    // Initialize selected milestone IDs:
+    const initialMilestones = (() => {
+        const ids = [];
+        if (submittal?.mileStones) {
+            submittal.mileStones.forEach(m => {
+                if (m.id || m._id) ids.push(String(m.id || m._id));
+            });
+        }
+        if (submittal?.mileStoneBelongsTo && (submittal.mileStoneBelongsTo.id || submittal.mileStoneBelongsTo._id)) {
+            const id = String(submittal.mileStoneBelongsTo.id || submittal.mileStoneBelongsTo._id);
+            if (!ids.includes(id)) {
+                ids.push(id);
+            }
+        }
+        return ids;
+    })();
+
+    const [selectedMileStoneIds, setSelectedMileStoneIds] = useState(initialMilestones);
+
     const fabricators = useSelector((state) => state.fabricatorInfo.fabricatorData);
     const fabricatorID = submittal?.fabricator_id || submittal?.fabricator?.id;
     const connectionDesignerID = submittal?.project?.connectionDesignerID;
@@ -42,6 +67,30 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
         fetchEngineers();
     }, [connectionDesignerID]);
 
+    useEffect(() => {
+        const fetchMilestones = async () => {
+            const projectId = submittal?.project_id || submittal?.project?.id;
+            if (projectId && canUpdateMilestone) {
+                try {
+                    setFetchingMilestones(true);
+                    const response = await Service.GetPendingSubmittal();
+                    const allPending = Array.isArray(response) ? response : response?.data || [];
+                    const projectMilestones = allPending.filter(
+                        (m) =>
+                            String(m.projectId || m.project_id || m.project?.id) ===
+                            String(projectId),
+                    );
+                    setMilestones(projectMilestones);
+                } catch (error) {
+                    console.error("Failed to fetch milestones:", error);
+                } finally {
+                    setFetchingMilestones(false);
+                }
+            }
+        };
+        fetchMilestones();
+    }, [submittal?.project_id, submittal?.project?.id, canUpdateMilestone]);
+
     const selectedFabricator = fabricators?.find((f) => String(f.id) === String(fabricatorID));
     const pocOptions = selectedFabricator?.pointOfContact?.map((p) => ({
         label: `${p.firstName} ${p.middleName ?? ""} ${p.lastName}`,
@@ -54,6 +103,43 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
     })) ?? [];
 
     const activeRecipientOptions = isCDMode ? cdEngineerOptions : pocOptions;
+
+    const allMilestonesForSelect = [...milestones];
+    if (submittal?.mileStones) {
+        submittal.mileStones.forEach((m) => {
+            if (!allMilestonesForSelect.some((el) => String(el.id || el._id) === String(m.id || m._id))) {
+                allMilestonesForSelect.push(m);
+            }
+        });
+    }
+    if (submittal?.mileStoneBelongsTo) {
+        const m = submittal.mileStoneBelongsTo;
+        if (!allMilestonesForSelect.some((el) => String(el.id || el._id) === String(m.id || m._id))) {
+            allMilestonesForSelect.push(m);
+        }
+    }
+
+    const mileStoneOptions = allMilestonesForSelect.map((m) => {
+        const labelParts = [];
+        if (m.subject) {
+            labelParts.push(m.subject);
+        } else if (m.description) {
+            const plainDesc = m.description.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").trim();
+            const words = plainDesc.split(/\s+/);
+            const truncated = words.length > 10 ? words.slice(0, 10).join(" ") + "..." : plainDesc;
+            labelParts.push(truncated);
+        }
+        if (m.subSubject) {
+            labelParts.push(m.subSubject);
+        }
+        if (m.stage) {
+            labelParts.push(m.stage);
+        }
+        return {
+            label: labelParts.join(" - ") || "Unnamed Milestone",
+            value: m.id || m._id,
+        };
+    });
 
     const [multipleRecipients, setMultipleRecipients] = useState(
         submittal?.multipleRecipients?.map((r) => r.id) || []
@@ -76,6 +162,12 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
             }
             if (multipleRecipients.length > 0) {
                 multipleRecipients.forEach(id => formData.append("multipleRecipients[]", id));
+            }
+            if (canUpdateMilestone) {
+                selectedMileStoneIds.forEach(id => formData.append("mileStoneId[]", id));
+                if (selectedMileStoneIds.length > 0) {
+                    formData.append("mileStoneId", selectedMileStoneIds[0]);
+                }
             }
 
             await Service.updateSubmittalVersionById(submittal.id, formData);
@@ -201,6 +293,35 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                             }}
                         />
                     </div>
+
+                    {/* Milestones Select (for authorized roles only) */}
+                    {canUpdateMilestone && (
+                        <div className="space-y-2">
+                            <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
+                                Milestones
+                            </label>
+                            <Select
+                                isMulti
+                                options={mileStoneOptions}
+                                isLoading={fetchingMilestones}
+                                value={mileStoneOptions.filter(opt => selectedMileStoneIds.includes(opt.value))}
+                                onChange={(options) => {
+                                    const values = options ? options.map(o => o.value) : [];
+                                    setSelectedMileStoneIds(values);
+                                }}
+                                placeholder={fetchingMilestones ? "Fetching milestones..." : "Assign milestones..."}
+                                styles={{
+                                    control: (base) => ({
+                                        ...base,
+                                        borderRadius: "12px",
+                                        padding: "2px",
+                                        borderColor: "#d1d5db",
+                                        "&:hover": { borderColor: "#6bbd45" }
+                                    })
+                                }}
+                            />
+                        </div>
+                    )}
 
                     {/* File Upload (new version) */}
                     <div className="space-y-2">

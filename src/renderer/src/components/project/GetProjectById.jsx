@@ -13,7 +13,9 @@ import {
   TrendingUp,
   Activity,
   X,
-  FileSpreadsheet
+  FileSpreadsheet,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import Service from "../../api/Service";
 import Button from "../fields/Button";
@@ -41,6 +43,46 @@ import ProjectProgress from "./ProjectProgress";
 import CoordinationDrawings from "./coordinationDrawings/CoordinationDrawings";
 import WorkProgressReport from "./WorkProgressReport";
 
+const WBS_TYPE_ALIAS = {
+  // Modelling
+  "modeling": "modelling",
+  "modelling": "modelling",
+  // Modelling Checking
+  "modeling_checking": "modelling_checking",
+  "modelling_checking": "modelling_checking",
+  "modeling checking": "modelling_checking",
+  "modelling checking": "modelling_checking",
+  "modeling-checking": "modelling_checking",
+  "modelling-checking": "modelling_checking",
+  "modelingchecking": "modelling_checking",
+  "modellingchecking": "modelling_checking",
+  // Detailing
+  "detailing": "detailing",
+  // Detailing Checking
+  "detailing_checking": "detailing_checking",
+  "detailing checking": "detailing_checking",
+  "detailing-checking": "detailing_checking",
+  "detailingchecking": "detailing_checking",
+  // Erection
+  "erection": "erection",
+  "erection_plan": "erection",
+  // Erection Checking
+  "erection_checking": "erection_checking",
+  "erection checking": "erection_checking",
+  "erection-checking": "erection_checking",
+  "erectionchecking": "erection_checking",
+  // Others
+  "others": "others",
+  "other": "others",
+};
+
+const normaliseWbsType = (raw) => {
+  if (!raw) return "others";
+  // Collapse whitespace & lowercase
+  const key = String(raw).toLowerCase().trim().replace(/\s+/g, " ");
+  return WBS_TYPE_ALIAS[key] ?? "others";
+};
+
 const GetProjectById = ({ id, onClose }) => {
   const [project, setProject] = useState(null);
   const [milestones, setMilestones] = useState([]); // Added milestones state
@@ -50,6 +92,20 @@ const GetProjectById = ({ id, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
+
+  const [expandedGroups, setExpandedGroups] = useState({
+    "Training and Practice": false,
+    "Job Study": false,
+    "Meeting": false,
+    "Other Tasks": false,
+  });
+
+  const toggleGroup = (groupKey) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [groupKey]: !prev[groupKey],
+    }));
+  };
   const [rfiView, setRfiView] = useState("list");
   const [submittalView, setSubmittalView] = useState("list");
   const [editModel, setEditModel] = useState(null);
@@ -105,6 +161,9 @@ const GetProjectById = ({ id, onClose }) => {
     // Stage-wise aggregation
     const stageStats = projectTasks.reduce(
       (acc, task) => {
+        if (normaliseWbsType(task.wbsType) === "others") {
+          return acc;
+        }
         const stage = (task.Stage || "").toUpperCase().trim();
         const taskSecs = (task.workingHourTask || []).reduce(
           (tSum, entry) => tSum + (entry.duration_seconds || 0),
@@ -168,63 +227,42 @@ const GetProjectById = ({ id, onClose }) => {
     };
   }, [project, projectTasks]);
 
-  // Group "others" wbsType tasks by their projectBundle.bundleKey
+  // Group "others" wbsType tasks by categories: Training and Practice, Job Study, Meeting, and Other Tasks
   const otherTasksByBundle = useMemo(() => {
-    const grouped = {};
+    const grouped = {
+      "Training and Practice": [],
+      "Job Study": [],
+      "Meeting": [],
+      "Other Tasks": []
+    };
+
     projectTasks.forEach((task) => {
-      if (String(task.wbsType || "").toLowerCase() !== "others") return;
-      const key =
-        task.projectBundle?.bundleKey ||
-        task.projectBundle?.bundle?.bundleKey ||
-        task.bundleKey ||
-        "Uncategorised";
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push(task);
+      if (normaliseWbsType(task.wbsType) !== "others") return;
+      const name = String(task.name || task.title || task.wbsTemplate?.name || "").toLowerCase();
+      
+      if (name.includes("training") || name.includes("practice")) {
+        grouped["Training and Practice"].push(task);
+      } else if (name.includes("job study") || name.includes("jobstudy")) {
+        grouped["Job Study"].push(task);
+      } else if (name.includes("meeting")) {
+        grouped["Meeting"].push(task);
+      } else {
+        grouped["Other Tasks"].push(task);
+      }
     });
-    return grouped;
+
+    // Remove empty groups to keep UI clean
+    const cleanedGrouped = {};
+    Object.entries(grouped).forEach(([key, list]) => {
+      if (list.length > 0) {
+        cleanedGrouped[key] = list;
+      }
+    });
+
+    return cleanedGrouped;
   }, [projectTasks]);
 
-  // Alias map: every possible API spelling → canonical category key
-  // Handles: single/double-l (modeling/modelling), spaces, hyphens, mixed case
-  const WBS_TYPE_ALIAS = {
-    // Modelling
-    "modeling": "modelling",
-    "modelling": "modelling",
-    // Modelling Checking
-    "modeling_checking": "modelling_checking",
-    "modelling_checking": "modelling_checking",
-    "modeling checking": "modelling_checking",
-    "modelling checking": "modelling_checking",
-    "modeling-checking": "modelling_checking",
-    "modelling-checking": "modelling_checking",
-    "modelingchecking": "modelling_checking",
-    "modellingchecking": "modelling_checking",
-    // Detailing
-    "detailing": "detailing",
-    // Detailing Checking
-    "detailing_checking": "detailing_checking",
-    "detailing checking": "detailing_checking",
-    "detailing-checking": "detailing_checking",
-    "detailingchecking": "detailing_checking",
-    // Erection
-    "erection": "erection",
-    "erection_plan": "erection",
-    // Erection Checking
-    "erection_checking": "erection_checking",
-    "erection checking": "erection_checking",
-    "erection-checking": "erection_checking",
-    "erectionchecking": "erection_checking",
-    // Others
-    "others": "others",
-    "other": "others",
-  };
 
-  const normaliseWbsType = (raw) => {
-    if (!raw) return "others";
-    // Collapse whitespace & lowercase
-    const key = String(raw).toLowerCase().trim().replace(/\s+/g, " ");
-    return WBS_TYPE_ALIAS[key] ?? "others";
-  };
 
   const wbsTasksByBundle = useMemo(() => {
     const grouped = {};
@@ -245,22 +283,31 @@ const GetProjectById = ({ id, onClose }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectTasks]);
 
-  // Aggregate total seconds for primary WBS categories across the entire project
+  // Aggregate total logged seconds and allocated seconds for primary WBS categories across the entire project
   const wbsCategoryTotals = useMemo(() => {
     const totals = {
-      modelling: 0,
-      modelling_checking: 0,
-      detailing: 0,
-      detailing_checking: 0,
-      erection: 0,
-      erection_checking: 0,
+      modelling: { logged: 0, allocated: 0 },
+      modelling_checking: { logged: 0, allocated: 0 },
+      detailing: { logged: 0, allocated: 0 },
+      detailing_checking: { logged: 0, allocated: 0 },
+      erection: { logged: 0, allocated: 0 },
+      erection_checking: { logged: 0, allocated: 0 },
+    };
+
+    const parseAllocSecsLocal = (str) => {
+      if (!str || typeof str !== "string") return 0;
+      const [h, m] = str.split(":").map(Number);
+      return (h || 0) * 3600 + (m || 0) * 60;
     };
 
     projectTasks.forEach((task) => {
       const typeKey = normaliseWbsType(task.wbsType);
       if (totals[typeKey] !== undefined) {
         const taskSeconds = (task.workingHourTask || []).reduce((s, w) => s + (w.duration_seconds || 0), 0);
-        totals[typeKey] += taskSeconds;
+        totals[typeKey].logged += taskSeconds;
+
+        const allocSeconds = parseAllocSecsLocal(task.allocationLog?.allocatedHours);
+        totals[typeKey].allocated += allocSeconds;
       }
     });
 
@@ -585,10 +632,16 @@ const GetProjectById = ({ id, onClose }) => {
                         rework: "bg-orange-100 text-orange-700 border-orange-200",
                       };
 
+                      const isExpanded = !!expandedGroups[bundleKey];
+
                       return (
                         <div key={bundleKey}>
                           {/* Bundle key header row */}
-                          <div className="flex items-center gap-3 px-5 py-2 bg-slate-50/80 border-b border-gray-100">
+                          <button
+                            type="button"
+                            onClick={() => toggleGroup(bundleKey)}
+                            className="w-full flex items-center gap-3 px-5 py-2.5 bg-slate-50/80 border-b border-gray-100 hover:bg-slate-100/80 transition-colors text-left"
+                          >
                             <span className="w-1.5 h-1.5 rounded-full bg-[#6bbd45] shrink-0" />
                             <span className="flex-1 text-xs font-black uppercase tracking-widest text-slate-600">
                               {bundleKey}
@@ -599,72 +652,77 @@ const GetProjectById = ({ id, onClose }) => {
                             <span className="text-xs font-black text-[#3a8a1a] min-w-[52px] text-right">
                               {formatSeconds(bundleTotalSeconds)}
                             </span>
-                          </div>
+                            <span className="shrink-0 text-slate-400 ml-1">
+                              {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            </span>
+                          </button>
 
                           {/* Task rows */}
-                          <div className="divide-y divide-gray-50">
-                            {tasks.map((task, idx) => {
-                              const assignee = task.user
-                                ? `${task.user.firstName || ""} ${task.user.lastName || ""}`.trim()
-                                : task.assignedTo
-                                  ? `${task.assignedTo.firstName || ""} ${task.assignedTo.lastName || ""}`.trim()
-                                  : "Unassigned";
+                          {isExpanded && (
+                            <div className="divide-y divide-gray-50">
+                              {tasks.map((task, idx) => {
+                                const assignee = task.user
+                                  ? `${task.user.firstName || ""} ${task.user.lastName || ""}`.trim()
+                                  : task.assignedTo
+                                    ? `${task.assignedTo.firstName || ""} ${task.assignedTo.lastName || ""}`.trim()
+                                    : "Unassigned";
 
-                              const initials = assignee
-                                .split(" ")
-                                .filter(Boolean)
-                                .map((n) => n[0])
-                                .slice(0, 2)
-                                .join("")
-                                .toUpperCase();
+                                const initials = assignee
+                                  .split(" ")
+                                  .filter(Boolean)
+                                  .map((n) => n[0])
+                                  .slice(0, 2)
+                                  .join("")
+                                  .toUpperCase();
 
-                              const taskSeconds = (task.workingHourTask || []).reduce(
-                                (s, w) => s + (w.duration_seconds || 0),
-                                0,
-                              );
+                                const taskSeconds = (task.workingHourTask || []).reduce(
+                                  (s, w) => s + (w.duration_seconds || 0),
+                                  0,
+                                );
 
-                              const sc =
-                                statusMap[(task.status || "").toLowerCase()] ||
-                                "bg-gray-100 text-gray-500 border-gray-200";
+                                const sc =
+                                  statusMap[(task.status || "").toLowerCase()] ||
+                                  "bg-gray-100 text-gray-500 border-gray-200";
 
-                              return (
-                                <div
-                                  key={task.id || idx}
-                                  className="flex items-center gap-3 px-5 py-2.5 bg-white hover:bg-slate-50 transition-colors"
-                                >
-                                  {/* Avatar */}
-                                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center text-[10px] font-black text-white shrink-0">
-                                    {initials || "?"}
-                                  </div>
-
-                                  {/* Assignee + task name */}
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-bold text-gray-800 truncate leading-tight">
-                                      {assignee}
-                                    </p>
-                                    <p className="text-[10px] text-gray-400 truncate leading-tight mt-0.5">
-                                      {task.name || task.title || `Task #${idx + 1}`}
-                                    </p>
-                                  </div>
-
-                                  {/* Status badge */}
-                                  <span
-                                    className={`text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wide shrink-0 ${sc}`}
+                                return (
+                                  <div
+                                    key={task.id || idx}
+                                    className="flex items-center gap-3 px-5 py-2.5 bg-white hover:bg-slate-50 transition-colors"
                                   >
-                                    {task.status || "—"}
-                                  </span>
+                                    {/* Avatar */}
+                                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center text-[10px] font-black text-white shrink-0">
+                                      {initials || "?"}
+                                    </div>
 
-                                  {/* Logged time */}
-                                  <div className="flex items-center gap-1 shrink-0">
-                                    <Clock className="w-3 h-3 text-gray-400" />
-                                    <span className="text-xs font-black text-gray-700 min-w-[42px] text-right">
-                                      {taskSeconds > 0 ? formatSeconds(taskSeconds) : "—"}
+                                    {/* Assignee + task name */}
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs font-bold text-gray-800 truncate leading-tight">
+                                        {assignee}
+                                      </p>
+                                      <p className="text-[10px] text-gray-400 truncate leading-tight mt-0.5">
+                                        {task.name || task.title || `Task #${idx + 1}`}
+                                      </p>
+                                    </div>
+
+                                    {/* Status badge */}
+                                    <span
+                                      className={`text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wide shrink-0 ${sc}`}
+                                    >
+                                      {task.status || "—"}
                                     </span>
+
+                                    {/* Logged time */}
+                                    <div className="flex items-center gap-1 shrink-0">
+                                      <Clock className="w-3 h-3 text-gray-400" />
+                                      <span className="text-xs font-black text-gray-700 min-w-[42px] text-right">
+                                        {taskSeconds > 0 ? formatSeconds(taskSeconds) : "—"}
+                                      </span>
+                                    </div>
                                   </div>
-                                </div>
-                              );
-                            })}
-                          </div>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -672,12 +730,12 @@ const GetProjectById = ({ id, onClose }) => {
                 </div>
               )}
 
-              {/* ✅ Core WBS Categories — Total Time Overview */}
+              {/* ✅ Core WBS Categories — Logged & Allocated Time Overview */}
               <div className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm bg-white">
                 <div className="px-5 py-3 bg-slate-50 border-b border-gray-200 flex items-center gap-2">
                   <ClipboardList className="w-4 h-4 text-slate-500" />
                   <h4 className="text-xs font-black uppercase tracking-widest text-slate-700">
-                    Primary WBS &mdash; Total Logged Time
+                    Primary WBS &mdash; Logged &amp; Allocated Time
                   </h4>
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-6 divide-x divide-y lg:divide-y-0 divide-gray-100">
@@ -690,13 +748,24 @@ const GetProjectById = ({ id, onClose }) => {
                     { key: "erection_checking", label: "Erection C.", color: "text-green-600", bg: "bg-green-50" },
                   ].map((cat) => (
                     <div key={cat.key} className="p-4 flex flex-col items-center justify-center text-center hover:bg-slate-50 transition-colors">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 truncate w-full">
+                      <span className="text-sm font-black uppercase tracking-widest text-slate-400 mb-2.5 truncate w-full">
                         {cat.label}
                       </span>
-                      <div className={`px-3 py-1.5 rounded-xl ${cat.bg}`}>
-                        <span className={`text-sm font-black ${cat.color}`}>
-                          {wbsCategoryTotals[cat.key] > 0 ? formatSeconds(wbsCategoryTotals[cat.key]) : "00:00"}
-                        </span>
+                      <div className="flex flex-col gap-1.5 w-full max-w-[110px]">
+                        {/* Worked / Logged Hours */}
+                        <div className={`px-2.5 py-1 rounded-lg ${cat.bg} border border-[#6bbd45]/20 flex justify-between items-center text-[11px] shadow-sm`}>
+                          <span className="font-bold text-slate-400 uppercase tracking-wider">W:</span>
+                          <span className={`font-black ${cat.color}`}>
+                            {wbsCategoryTotals[cat.key]?.logged > 0 ? formatSeconds(wbsCategoryTotals[cat.key].logged) : "00:00"}
+                          </span>
+                        </div>
+                        {/* Allocated Hours */}
+                        <div className="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-100 flex justify-between items-center text-[11px] shadow-sm">
+                          <span className="font-bold text-blue-400 uppercase tracking-wider">A:</span>
+                          <span className="font-black text-blue-600">
+                            {wbsCategoryTotals[cat.key]?.allocated > 0 ? formatSeconds(wbsCategoryTotals[cat.key].allocated) : "00:00"}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   ))}

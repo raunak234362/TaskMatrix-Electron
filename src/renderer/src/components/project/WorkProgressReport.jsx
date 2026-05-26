@@ -216,7 +216,9 @@ const WorkProgressReport = ({
         bfaRecdDate: latestIfaResponse ? new Date(latestIfaResponse.createdAt).toLocaleDateString("en-US") : "—",
         ifcSubDate: ifcSub ? new Date(ifcSub.date || ifcSub.createdAt).toLocaleDateString("en-US") : "—",
         corSubDate: corSub ? new Date(corSub.date || corSub.createdAt).toLocaleDateString("en-US") : "—",
-        comments: m.description ? m.description.replace(/<[^>]+>/g, "") : (m.percentage ? `${m.percentage}% Completed` : "—")
+        comments: m.description ? m.description.replace(/<[^>]+>/g, "") : (m.percentage ? `${m.percentage}% Completed` : "—"),
+        types: m.types || "ANCHOR_BOLT",
+        subSubject: m.subSubject || "string"
       };
     });
 
@@ -415,6 +417,8 @@ const WorkProgressReport = ({
           date: row.startDate !== "—" ? new Date(row.startDate).toISOString() : new Date().toISOString(),
           approvalDate: row.ifaSubDate !== "—" ? new Date(row.ifaSubDate).toISOString() : undefined,
           CDApprovalDate: row.ifcSubDate !== "—" ? new Date(row.ifcSubDate).toISOString() : undefined,
+          types: row.types || "ANCHOR_BOLT",
+          subSubject: row.subSubject || "string",
         };
         if (row.id && !String(row.id).startsWith("temp-")) {
           await Service.EditMilestoneById(row.id, payload);
@@ -522,7 +526,9 @@ const WorkProgressReport = ({
         bfaRecdDate: "—",
         ifcSubDate: "—",
         corSubDate: "—",
-        comments: "—"
+        comments: "—",
+        types: "ANCHOR_BOLT",
+        subSubject: "string"
       }]);
     } else if (table === "co") {
       setRawCoRows([...rawCoRows, {

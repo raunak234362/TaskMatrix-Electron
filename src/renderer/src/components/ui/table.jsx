@@ -311,7 +311,7 @@ export default function DataTable({
                     {hg.headers.map((header) => (
                       <th
                         key={header.id}
-                        className="px-4 py-4 text-left text-sm md:text-base font-black uppercase tracking-widest bg-gray-200 text-gray-700 border-b border-black/5"
+                        className="px-4 py-3 text-left text-sm md:text-base font-bold uppercase tracking-widest bg-green-100 text-black border-b border-black/5"
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         <div className="flex items-center gap-1 cursor-pointer">

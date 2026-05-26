@@ -164,10 +164,16 @@ const EditTask = ({ id, onClose, refresh }) => {
     { label: "RE-IFA", value: "RE-IFA" },
   ];
 
-  const milestoneOptions = milestones.map((m) => ({
-    label: m.subject ? m.subject + (m.stage ? " - " + m.stage : "") : m.name ? m.name + (m.stage ? " - " + m.stage : "") : "Unnamed Milestone",
-    value: m.id,
-  }));
+  const milestoneOptions = milestones.map((m) => {
+    const milestoneName = m.subject || m.name || "Unnamed Milestone";
+    const subSubjectName = m.subSubject || "";
+    const stageName = m.stage || "";
+    const labelParts = [milestoneName, subSubjectName, stageName].filter(Boolean);
+    return {
+      label: labelParts.join(" - "),
+      value: m.id,
+    };
+  });
 
   const wbsTypeOptions = [
     { label: "Modeling", value: "modeling" },
