@@ -90,15 +90,15 @@ const AllWBS = ({ id, stage }) => {
         </span>
       ),
     },
-    {
-      accessorKey: "totalQtyNo",
-      header: "Quantity",
-      cell: ({ row }) => (
-        <span className="text-sm font-bold text-gray-700">
-          {row.original.totalQtyNo || 0}
-        </span>
-      ),
-    },
+    // {
+    //   accessorKey: "totalQtyNo",
+    //   header: "Quantity",
+    //   cell: ({ row }) => (
+    //     <span className="text-sm font-bold text-gray-700">
+    //       {row.original.totalQtyNo || 0}
+    //     </span>
+    //   ),
+    // },
     {
       accessorKey: "totalExecHr",
       header: "Exec Time",

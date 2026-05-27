@@ -87,7 +87,7 @@ const AddMileStone = ({
         subject: finalSubject,
         types: computedTypes,
         stage: data.stage || "IFA",
-        isConnectionDesigner: !!data.isConnectionDesigner,
+        isConnectionDesign: !!data.isConnectionDesigner,
         date: data.date ? new Date(data.date).toISOString() : undefined,
         approvalDate: (!data.isConnectionDesigner && data.approvalDate)
           ? new Date(data.approvalDate).toISOString()
