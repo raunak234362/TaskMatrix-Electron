@@ -122,6 +122,7 @@ const BfaManager = ({ submittalId }) => {
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
+  const [status, setStatus] = useState("partial");
   const [submitting, setSubmitting] = useState(false);
 
   const fetchBfa = async () => {
@@ -164,6 +165,7 @@ const BfaManager = ({ submittalId }) => {
       formData.append("submittalID", submittalId);
       formData.append("subject", subject);
       formData.append("description", description);
+      formData.append("status", status);
       files.forEach((file) => formData.append("files", file));
 
       await Service.AddBFA(formData);
@@ -196,6 +198,7 @@ const BfaManager = ({ submittalId }) => {
       setSubmitting(true);
       const formData = new FormData();
       formData.append("description", description);
+      formData.append("status", status);
       files.forEach((file) => formData.append("files", file));
 
       await Service.UpdateBFA(bfa.id, formData);
@@ -248,6 +251,7 @@ const BfaManager = ({ submittalId }) => {
             onClick={() => {
               setDescription("");
               setFiles([]);
+              setStatus(bfa.status || "partial");
               setShowUpdateModal(true);
             }}
           >
@@ -260,6 +264,7 @@ const BfaManager = ({ submittalId }) => {
               setSubject("");
               setDescription("");
               setFiles([]);
+              setStatus("partial");
               setShowCreateModal(true);
             }}
           >
@@ -379,6 +384,18 @@ const BfaManager = ({ submittalId }) => {
             </div>
 
             <div>
+              <label className="text-sm font-medium">BFA Status *</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full border border-gray-200 bg-white rounded-md p-2 mt-1 focus:outline-none focus:ring-1 focus:ring-[#6bbd45] text-sm"
+              >
+                <option value="partial">Partial</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+
+            <div>
               <label className="text-sm font-medium">Description *</label>
               <div className="mt-1">
                 <RichTextEditor
@@ -411,6 +428,18 @@ const BfaManager = ({ submittalId }) => {
             <h2 className="text-xl font-bold text-green-700">
               Update BFA (New Version)
             </h2>
+
+            <div>
+              <label className="text-sm font-medium">BFA Status *</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full border border-gray-200 bg-white rounded-md p-2 mt-1 focus:outline-none focus:ring-1 focus:ring-[#6bbd45] text-sm"
+              >
+                <option value="partial">Partial</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
 
             <div>
               <label className="text-sm font-medium">Description *</label>
