@@ -35,7 +35,8 @@ const RenderFiles = ({
             ...f,
             uploadedAt: curr.uploadedAt,
             user: curr.user,
-            documentID: curr.id,
+            documentID: (table === "submittals" || table === "bfa") && parentId ? parentId : curr.id,
+            versionId: (table === "submittals" || table === "bfa") ? curr.id : f.versionId,
             stage: curr.stage,
           });
         });
@@ -56,10 +57,13 @@ const RenderFiles = ({
   const getDownloadUrl = (
     table,
     parentId,
-    fileId
+    fileId,
+    file
   ) => {
     const baseURL = import.meta.env.VITE_BASE_URL?.replace(/\/$/, "");
     switch (table) {
+      case "bfa":
+        return `${baseURL}/bfa/viewFile/${parentId}/${fileId}`;
       case "project":
         return `${baseURL}/project/viewFile/${parentId}/${fileId}`;
       case "notes":
@@ -120,7 +124,7 @@ const RenderFiles = ({
   ) => {
     e.preventDefault();
     e.stopPropagation();
-    const downloadUrl = getDownloadUrl(table, file.documentID, file.id);
+    const downloadUrl = getDownloadUrl(table, file.documentID, file.id, file);
 
     try {
       const token = sessionStorage.getItem("token");

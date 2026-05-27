@@ -35,6 +35,8 @@ const getDownloadUrl = (table, parentId, fileId, versionId) => {
     case 'designDrawings':
     case 'designDrawings':
       return `${baseURL}/${table}/viewfile/${parentId}/${fileId}`
+    case 'bfa':
+      return `${baseURL}/bfa/viewFile/${parentId}/${fileId}`
     default:
       return `${baseURL}/${table}/viewFile/${parentId}/${fileId}`
   }
@@ -109,6 +111,8 @@ export const shareFileSecurely = async (type, id, fileId, versionId) => {
       response = await Service.createShareLink('submittalVersion', versionId, fileId)
     } else if (type === 'designDrawings' || type === 'designDrawings') {
       response = await Service.createShareLink('designDrawings', id, fileId)
+    } else if (type === 'bfa') {
+      response = await Service.createShareLink('bfa', id, fileId)
     } else {
       response = await Service.createShareLink(type, id, fileId, versionId)
     }

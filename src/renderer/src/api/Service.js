@@ -2037,6 +2037,106 @@ class Service {
       console.error('cannot find submittal', error)
     }
   }
+  // BFA (Bid for Approval) module API methods
+  static async CreateBFA(formData) {
+    const token = sessionStorage.getItem('token')
+    try {
+      const response = await api.post(`bfa/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error creating BFA:', error)
+      throw error
+    }
+  }
+
+  static async GetAllBFAs() {
+    try {
+      const response = await api.get(`bfa/`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error getting all BFAs:', error)
+      throw error
+    }
+  }
+
+  static async GetBFAById(id) {
+    try {
+      const response = await api.get(`bfa/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching BFA by ID:', error)
+      throw error
+    }
+  }
+
+  static async UpdateBFAById(id, formData) {
+    try {
+      const response = await api.put(`bfa/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error updating BFA by ID:', error)
+      throw error
+    }
+  }
+
+  static async DeleteBFAById(id) {
+    try {
+      const response = await api.delete(`bfa/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error deleting BFA by ID:', error)
+      throw error
+    }
+  }
+
+  static async GetBFABySubmittalId(submittalId) {
+    try {
+      const response = await api.get(`bfa/submittal/${submittalId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching BFA by Submittal ID:', error)
+      throw error
+    }
+  }
+
+  static async ViewBFAFile(bfaId, versionId, fileId) {
+    try {
+      const response = await api.get(`bfa/viewFile/${bfaId}/${versionId}/${fileId}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error viewing BFA file:', error)
+      throw error
+    }
+  }
 
   //change Order ---------------------------------------------
   static async ChangeOrder(formData) {
@@ -3976,6 +4076,71 @@ class Service {
       console.error('Error deleting wire transfer:', error)
       throw error
     }
+  }
+
+  // BFA (Bid for Approval) API methods
+  static async AddBFA(formData) {
+    const response = await api.post(`bfa`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    return response.data
+  }
+
+  static async GetAllBFA() {
+    try {
+      const response = await api.get(`bfa`)
+      return response.data
+    } catch (error) {
+      console.error('Cannot find BFAs', error)
+    }
+  }
+
+  static async GetBFAById(id) {
+    try {
+      const response = await api.get(`bfa/${id}`)
+      return response.data
+    } catch (error) {
+      console.error('Cannot find BFA by ID', error)
+    }
+  }
+
+  static async UpdateBFA(id, formData) {
+    try {
+      const response = await api.put(`bfa/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Cannot update BFA', error)
+      throw error
+    }
+  }
+
+  static async DeleteBFA(id) {
+    try {
+      const response = await api.delete(`bfa/${id}`)
+      return response.data
+    } catch (error) {
+      console.error('Cannot delete BFA', error)
+    }
+  }
+
+  static async GetBFABySubmittalId(submittalId) {
+    try {
+      const response = await api.get(`bfa/submittal/${submittalId}`)
+      return response.data
+    } catch (error) {
+      console.error('Cannot find BFA by Submittal ID', error)
+    }
+  }
+
+  static GetBFAFileViewUrl(bfaId, versionId, fileId) {
+    const baseURL = api.defaults.baseURL || ''
+    return `${baseURL}bfa/viewFile/${bfaId}/${versionId}/${fileId}`
   }
 
 }
