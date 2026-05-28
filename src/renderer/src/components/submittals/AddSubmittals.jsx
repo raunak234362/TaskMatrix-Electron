@@ -19,6 +19,7 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
   );
   const staff = useSelector((state) => state.userInfo.staffData);
   const [milestones, setMilestones] = useState([]);
+  const [submittedMilestoneIds, setSubmittedMilestoneIds] = useState(new Set());
   const projectId = project?.id;
   const fabricatorId = project?.fabricatorID;
 
@@ -32,6 +33,28 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
           String(project.id || project._id),
       );
       setMilestones(projectMilestones);
+
+      if (projectId) {
+        const submittalsRes = await Service.GetSubmittalByProjectId(projectId);
+        const submittalsList = Array.isArray(submittalsRes) ? submittalsRes : [];
+        const submittedIds = new Set();
+        submittalsList.forEach((sub) => {
+          if (sub.mileStoneId) {
+            submittedIds.add(String(sub.mileStoneId));
+          }
+          if (sub.mileStoneBelongsTo) {
+            const id = sub.mileStoneBelongsTo.id || sub.mileStoneBelongsTo._id;
+            if (id) submittedIds.add(String(id));
+          }
+          if (Array.isArray(sub.mileStones)) {
+            sub.mileStones.forEach((m) => {
+              const id = m.id || m._id;
+              if (id) submittedIds.add(String(id));
+            });
+          }
+        });
+        setSubmittedMilestoneIds(submittedIds);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -45,7 +68,7 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
     defaultValues: {
       subject: initialData?.subject || "",
       stage: initialData?.stage || "",
-      mileStoneId: [],
+      mileStoneId: "",
     },
   });
   const [description, setDescription] = useState(
@@ -104,8 +127,17 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
 
   const activeRecipientOptions = isCDMode ? cdEngineerOptions : pocOptions;
 
+  const filteredMilestones =
+    milestones?.filter((m) => {
+      if (isCDMode) {
+        return !!m.isConnectionDesign;
+      } else {
+        return !m.isConnectionDesign;
+      }
+    }) ?? [];
+
   const mileStoneOptions =
-    milestones?.map((m) => {
+    filteredMilestones.map((m) => {
       const labelParts = [];
       if (m.subject) {
         labelParts.push(m.subject);
@@ -123,9 +155,17 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
         labelParts.push(m.stage);
       }
 
+      const mId = m.id || m._id;
+      const isAlreadySubmitted = submittedMilestoneIds.has(String(mId));
+      let label = labelParts.join(" - ") || "Unnamed Milestone";
+      if (isAlreadySubmitted) {
+        label += " (Already Submitted)";
+      }
+
       return {
-        label: labelParts.join(" - ") || "Unnamed Milestone",
-        value: m.id || m._id,
+        label,
+        value: mId,
+        isDisabled: isAlreadySubmitted,
       };
     }) ?? [];
 
@@ -151,10 +191,10 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
       Object.entries(payload).forEach(([key, value]) => {
         if (key === "multipleRecipients" && Array.isArray(value)) {
           value.forEach((v) => formData.append("multipleRecipients[]", v));
-        } else if (key === "mileStoneId" && Array.isArray(value)) {
-          value.forEach((v) => formData.append("mileStoneId[]", v));
-          if (value.length > 0) {
-            formData.append("mileStoneId", value[0]);
+        } else if (key === "mileStoneId") {
+          if (value) {
+            formData.append("mileStoneId", value);
+            formData.append("mileStoneId[]", value);
           }
         } else if (Array.isArray(value)) {
           value.forEach((v) => formData.append(key, v));
@@ -167,14 +207,7 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
       toast.success("Submittal Created Successfully!");
 
       reset();
-      if (milestones.length > 0) {
-        const firstMilestone = milestones[0];
-        const firstId = firstMilestone.id || firstMilestone._id;
-        if (firstId) {
-          setValue("mileStoneId", [String(firstId)]);
-          setValue("stage", firstMilestone.stage || "");
-        }
-      }
+      await fetchMileStone();
       setDescription("");
       setFiles([]);
       onSuccess?.();
@@ -187,15 +220,30 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
   };
 
   useEffect(() => {
-    if (milestones.length > 0) {
-      const firstMilestone = milestones[0];
+    const currentFiltered = milestones?.filter((m) => {
+      if (isCDMode) {
+        return !!m.isConnectionDesign;
+      } else {
+        return !m.isConnectionDesign;
+      }
+    }) ?? [];
+
+    const availableMilestones = currentFiltered.filter(
+      (m) => !submittedMilestoneIds.has(String(m.id || m._id))
+    );
+
+    if (availableMilestones.length > 0) {
+      const firstMilestone = availableMilestones[0];
       const firstId = firstMilestone.id || firstMilestone._id;
       if (firstId) {
-        setValue("mileStoneId", [String(firstId)]);
+        setValue("mileStoneId", String(firstId));
         setValue("stage", firstMilestone.stage || "");
       }
+    } else {
+      setValue("mileStoneId", "");
+      setValue("stage", "");
     }
-  }, [milestones]);
+  }, [milestones, isCDMode, submittedMilestoneIds]);
 
   return (
     <div className="w-full mx-auto bg-white p-4 rounded-xl shadow">
@@ -274,23 +322,23 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
           control={control}
           render={({ field }) => (
             <Select
-              isMulti
               placeholder="Select Project Milestone"
               options={mileStoneOptions}
               value={
-                mileStoneOptions.filter((o) => (field.value || []).includes(o.value))
+                mileStoneOptions.find((o) => String(o.value) === String(field.value)) || null
               }
-              onChange={(options) => {
-                const selectedIds = options ? options.map((o) => o.value) : [];
-                field.onChange(selectedIds);
-                if (selectedIds.length > 0) {
-                  const lastSelectedId = selectedIds[selectedIds.length - 1];
+              onChange={(option) => {
+                const selectedVal = option ? option.value : "";
+                field.onChange(selectedVal);
+                if (selectedVal) {
                   const selectedMilestone = milestones.find(
-                    (m) => String(m.id || m._id) === String(lastSelectedId),
+                    (m) => String(m.id || m._id) === String(selectedVal),
                   );
                   if (selectedMilestone) {
                     setValue("stage", selectedMilestone.stage || "");
                   }
+                } else {
+                  setValue("stage", "");
                 }
               }}
             />

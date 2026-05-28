@@ -8,6 +8,7 @@ import RenderFiles from "../common/RenderFiles";
 import SubmittalResponseModal from "./SubmittalResponseModal";
 import SubmittalResponseDetailsModal from "./SubmittalResponseDetailsModal";
 import UpdateSubmittalById from "./UpdateSubmittalById";
+import BfaManager from "./BfaManager";
 
 const Info = ({ label, value }) => (
   <div className="mb-2">
@@ -289,7 +290,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
           {/* Body */}
           <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6 bg-gray-50">
             <div className="grid grid-cols-1 gap-6">
-               <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
+               <div className="lg:col-span-2 bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>
                   {(userRole === "CLIENT_ADMIN" || userRole === "CLIENT" || userRole === "ADMIN" || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole== "DEPUTY_MANAGER") && (
@@ -389,13 +390,14 @@ const GetSubmittalByID = ({ id, onClose }) => {
                 )}
               </div>
 
-              {/* RIGHT PANEL */}
+              {/* RIGHT PANEL - BFA Manager */}
+              <BfaManager submittalId={submittal.id} />
              
             </div>
 
             {/* ── VERSION HISTORY (only when > 1 versions) ── */}
             {hasMultipleVersions && (
-              <div className="bg-gray-100 border border-gray-100 rounded-xl p-6 space-y-4">
+              <div className="lg:col-span-2 bg-gray-100 border border-gray-100 rounded-xl p-6 space-y-4">
                 <div className="flex items-center gap-2">
                   <History className="w-5 h-5 text-[#6bbd45]" />
                   <h2 className="text-lg font-black text-black uppercase tracking-tight">

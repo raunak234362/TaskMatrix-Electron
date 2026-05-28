@@ -119,7 +119,15 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
         }
     }
 
-    const mileStoneOptions = allMilestonesForSelect.map((m) => {
+    const filteredMilestones = allMilestonesForSelect.filter((m) => {
+        if (isCDMode) {
+            return !!m.isConnectionDesign;
+        } else {
+            return !m.isConnectionDesign;
+        }
+    });
+
+    const mileStoneOptions = filteredMilestones.map((m) => {
         const labelParts = [];
         if (m.subject) {
             labelParts.push(m.subject);
@@ -224,6 +232,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                             onClick={() => {
                                 setIsCDMode(false);
                                 setMultipleRecipients([]); // Clear selection when switching modes
+                                setSelectedMileStoneIds([]); // Clear milestone selection when switching modes
                             }}
                             className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${!isCDMode
                                     ? "bg-white text-black shadow-sm"
@@ -237,6 +246,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                             onClick={() => {
                                 setIsCDMode(true);
                                 setMultipleRecipients([]); // Clear selection when switching modes
+                                setSelectedMileStoneIds([]); // Clear milestone selection when switching modes
                             }}
                             className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${isCDMode
                                     ? "bg-white text-black shadow-sm"
