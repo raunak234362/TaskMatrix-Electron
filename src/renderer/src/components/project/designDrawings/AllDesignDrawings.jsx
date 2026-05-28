@@ -30,7 +30,7 @@ const AllDesignDrawings = ({ projectId }) => {
       accessorKey: "stage",
       header: "Stage",
       cell: ({ row }) => (
-        <span className="text-sm font-bold text-gray-600 tracking-tight uppercase">
+        <span className="text-sm font-bold text-black tracking-tight uppercase">
           {row.original.stage || "—"}
         </span>
       )
@@ -39,7 +39,7 @@ const AllDesignDrawings = ({ projectId }) => {
       accessorKey: "description",
       header: "Description",
       cell: ({ row }) => (
-        <p className="text-sm font-bold text-gray-700 truncate max-w-[400px]">
+        <p className="text-sm font-bold text-black truncate max-w-[400px]">
           {row.original.description || "No description"}
         </p>
       ),
@@ -50,7 +50,7 @@ const AllDesignDrawings = ({ projectId }) => {
       cell: ({ row }) => {
         const dateStr = row.original.uploadedAt || row.original.createdAt;
         return (
-          <span className="text-sm font-bold text-gray-600">
+          <span className="text-sm font-bold text-black">
             {dateStr ? new Date(dateStr).toLocaleString("en-IN", {
               day: "2-digit",
               month: "short",

@@ -49,6 +49,20 @@ select {
   text-transform: none;
 }
 
+/* Hide native calendar icon and make entire input clickable */
+.clean-date-input::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
+
 /* Custom Green Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

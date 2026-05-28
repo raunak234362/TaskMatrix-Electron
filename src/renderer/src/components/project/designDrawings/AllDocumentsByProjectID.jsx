@@ -173,87 +173,85 @@ const AllDocumentsByProjectID = ({ projectId }) => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Integrated Header */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div className="px-6 py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-4">
-            <h3 className="text-xl text-black font-black uppercase tracking-tight">Project Files</h3>
-            <div className="relative" ref={categoryRef}>
-              <button
-                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-green-400/50 hover:bg-green-50/30 transition-all shadow-sm"
-              >
-                <Filter className="w-3.5 h-3.5 text-[#6bbd45]" />
-                {categories.find(c => c.id === selectedCategory)?.label || "Type"}
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isCategoryOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {isCategoryOpen && (
-                <div className="absolute top-full left-0 mt-3 w-64 bg-white border border-black/10 rounded-2xl shadow-2xl z-50 overflow-hidden py-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => {
-                        setSelectedCategory(cat.id);
-                        setIsCategoryOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-5 py-3 text-[11px] font-black uppercase tracking-widest transition-colors ${selectedCategory === cat.id
-                          ? "bg-green-50 text-[#4a8a1a]"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-black"
-                        }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        {cat.id === "All" ? <Layers className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
-                        {cat.label}
-                      </div>
-                      <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded-lg font-bold">{cat.count}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-2">
+        <div className="flex items-center gap-4">
+          <h3 className="text-sm font-bold text-black uppercase tracking-widest">Project Files</h3>
+          <div className="relative" ref={categoryRef}>
+            <button
+              onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+              className="flex items-center gap-2 px-4 py-1.5 bg-white border border-black rounded-none text-sm font-bold uppercase tracking-tight hover:bg-slate-50 transition-all cursor-pointer"
+            >
+              <Filter className="w-3.5 h-3.5 text-[#6bbd45]" />
+              {categories.find(c => c.id === selectedCategory)?.label || "Type"}
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isCategoryOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isCategoryOpen && (
+              <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-black rounded-none shadow-lg z-50 overflow-hidden py-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => {
+                      setSelectedCategory(cat.id);
+                      setIsCategoryOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-4 py-2 text-sm font-bold uppercase tracking-tight transition-colors cursor-pointer ${selectedCategory === cat.id
+                        ? "bg-green-50 text-green-700"
+                        : "text-black hover:bg-gray-50 hover:text-black"
+                      }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {cat.id === "All" ? <Layers className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                      {cat.label}
+                    </div>
+                    <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-none border border-black font-semibold text-black">{cat.count}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-gray-400 font-black uppercase tracking-widest">
-              {categories.find(c => c.id === selectedCategory)?.count} Total Files
-            </span>
-          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-black font-bold uppercase tracking-widest">
+            {categories.find(c => c.id === selectedCategory)?.count} Total Files
+          </span>
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm items-center">
+      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 items-center py-2">
         <div className="relative md:col-span-2 lg:col-span-2">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
             placeholder="Search file..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-10 py-3 bg-gray-50/50 border border-transparent rounded-xl text-sm font-semibold focus:bg-white focus:border-green-400/30 focus:ring-4 focus:ring-green-400/5 transition-all outline-none"
+            className="w-full pl-9 pr-10 py-1.5 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-none focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all placeholder:text-gray-500 placeholder:font-normal shadow-sm cursor-pointer"
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors">
+            <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors cursor-pointer">
               <X size={16} />
             </button>
           )}
         </div>
         <div className="relative">
-          <Layers className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Layers className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <select
             value={selectedStage}
             onChange={(e) => setSelectedStage(e.target.value)}
-            className="w-full pl-12 pr-10 py-3 bg-gray-50/50 border border-transparent rounded-xl text-sm font-semibold appearance-none cursor-pointer focus:bg-white focus:border-green-400/30 focus:ring-4 focus:ring-green-400/5 transition-all outline-none"
+            className="w-full pl-9 pr-10 py-1.5 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-none focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm appearance-none cursor-pointer"
           >
             {availableStages.map(s => <option key={s} value={s}>{s === "All" ? "All Stages" : s}</option>)}
           </select>
-          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
         </div>
         <div className="relative">
-          <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-gray-50/50 border border-transparent rounded-xl text-sm font-semibold focus:bg-white focus:border-green-400/30 focus:ring-4 focus:ring-green-400/5 transition-all outline-none"
+            className="w-full pl-9 pr-4 py-1.5 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-none focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm cursor-pointer"
           />
         </div>
         <button
@@ -263,7 +261,7 @@ const AllDocumentsByProjectID = ({ projectId }) => {
             setSelectedDate("");
             setSelectedCategory("All");
           }}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-red-50 text-red-600 border border-red-100/50 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-sm"
+          className="flex items-center justify-center gap-2 px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
         >
           <X size={16} strokeWidth={3} />
           Reset Filters
@@ -318,12 +316,12 @@ const AllDocumentsByProjectID = ({ projectId }) => {
           </Section>
         )}
         {Object.values(processedData).every(arr => arr.length === 0) && (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-500 bg-white rounded-2xl border border-dashed border-gray-200">
-            <Search className="w-12 h-12 mb-4 text-gray-200" />
-            <p className="text-lg font-bold">No files match your filters</p>
+          <div className="flex flex-col items-center justify-center py-20 text-black bg-white rounded-none border border-dashed border-black/30">
+            <Search className="w-12 h-12 mb-4 text-black/40" />
+            <p className="text-sm font-bold uppercase tracking-widest">No files match your filters</p>
             <button 
               onClick={() => { setSearchQuery(""); setSelectedStage("All"); setSelectedCategory("All"); setSelectedDate(""); }}
-              className="mt-4 text-[#6bbd45] font-bold hover:underline"
+              className="mt-4 px-4 py-1.5 text-sm font-bold uppercase tracking-tight rounded-none border border-black hover:bg-slate-50 transition-all cursor-pointer"
             >
               Clear all filters
             </button>
@@ -336,8 +334,8 @@ const AllDocumentsByProjectID = ({ projectId }) => {
 
 const Section = ({ title, children }) => (
   <div className="space-y-4">
-    <h3 className="text-lg text-black font-black uppercase tracking-tight ml-1">{title}</h3>
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <h3 className="text-sm text-black font-bold uppercase tracking-widest ml-1">{title}</h3>
+    <div className="bg-transparent shadow-none space-y-4">
       {children}
     </div>
   </div>

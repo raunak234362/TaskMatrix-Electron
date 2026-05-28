@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
   Loader2,
   ChevronDown,
@@ -48,6 +48,9 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+
+  const startRef = useRef(null);
+  const endRef = useRef(null);
 
   const fetchData = async () => {
     try {
@@ -208,48 +211,48 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
     return (
       <div
         key={task.id}
-        className="grid grid-cols-6 gap-4 p-4 border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+        className="grid grid-cols-6 gap-4 p-4 border-b border-black/10 hover:bg-gray-50/50 transition-colors"
       >
         <div className="col-span-2 flex items-center gap-3">
           <div
-            className={`p-1.5 rounded-lg ${isOverrun ? "bg-red-50 text-red-600" : "bg-[#6bbd45]/15 text-[#6bbd45]"}`}
+            className={`p-1.5 rounded-none border border-black ${isOverrun ? "bg-red-50 text-black" : "bg-green-50 text-black"}`}
           >
             <CheckCircle2 size={16} />
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-800">{task.name}</p>
-            <p className="text-[10px] text-gray-500 uppercase tracking-wider">
+            <p className="text-base font-bold text-black">{task.name}</p>
+            <p className="text-xs text-black font-semibold uppercase tracking-wider">
               {task.wbsType || "Task"}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center">
-            <User size={12} className="text-slate-500" />
+          <div className="w-6 h-6 rounded-none border border-black bg-slate-50 flex items-center justify-center">
+            <User size={12} className="text-black" />
           </div>
-          <span className="text-sm text-gray-700 truncate">
+          <span className="text-base font-semibold text-black truncate">
             {task.user?.firstName} {task.user?.lastName}
           </span>
         </div>
         <div className="flex items-center justify-center">
-          <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-semibold">
+          <span className="px-2.5 py-1 bg-blue-50 text-black rounded-none border border-black text-xs font-bold">
             {assignedHours.toFixed(2)}h Assigned
           </span>
         </div>
         <div className="flex items-center justify-center">
           <span
-            className={`px-2.5 py-1 rounded-md text-xs font-semibold ${isOverrun ? "bg-red-50 text-red-700" : "bg-slate-100 text-slate-700"}`}
+            className={`px-2.5 py-1 rounded-none text-xs font-bold border border-black ${isOverrun ? "bg-red-50 text-black" : "bg-slate-50 text-black"}`}
           >
             {formatSeconds(workedSeconds || 0)} Worked
           </span>
         </div>
         <div className="flex items-center justify-end">
           <span
-            className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter ${task.status === "COMPLETED"
-              ? "bg-[#6bbd45]/15 text-[#6bbd45]"
+            className={`text-xs font-bold px-2 py-0.5 rounded-none uppercase tracking-wider border border-black ${task.status === "COMPLETED"
+              ? "bg-green-50 text-black"
               : task.status === "ASSIGNED"
-                ? "bg-blue-100 text-blue-700"
-                : "bg-amber-100 text-amber-700"
+                ? "bg-blue-50 text-black"
+                : "bg-amber-50 text-black"
               }`}
           >
             {task.status}
@@ -262,43 +265,77 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-10">
       {/* Header with Filters and Actions */}
-      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Calendar size={18} className="text-gray-400" />
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="text-sm border-gray-200 rounded-lg focus:ring-[#6bbd45] focus:border-[#6bbd45]"
-              placeholder="Start Date"
-            />
-            <span className="text-gray-400">to</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="text-sm border-gray-200 rounded-lg focus:ring-[#6bbd45] focus:border-[#6bbd45]"
-              placeholder="End Date"
-            />
+      <div className="bg-white py-3 px-6 rounded-none border border-black shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex flex-wrap items-center gap-6">
+          
+          {/* Start Date Selector */}
+          <div 
+            onClick={() => {
+              try { startRef.current?.showPicker(); } catch (e) { startRef.current?.focus(); }
+            }}
+            className="flex items-center gap-2 cursor-pointer select-none"
+          >
+            <Calendar size={18} className="text-black" />
+            <div className="relative flex items-center">
+              <input
+                ref={startRef}
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                className="clean-date-input text-base border-0 bg-transparent focus:ring-0 focus:outline-none text-black font-bold cursor-pointer p-0 w-28 uppercase"
+                placeholder="Start Date"
+              />
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Filter size={18} className="text-gray-400" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="text-sm border-gray-200 rounded-lg focus:ring-[#6bbd45] focus:border-[#6bbd45]"
-            >
-              <option value="ALL">All Status</option>
-              <option value="ASSIGNED">Assigned</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="REWORK">Rework</option>
-            </select>
+
+          {/* End Date Selector */}
+          <div 
+            onClick={() => {
+              try { endRef.current?.showPicker(); } catch (e) { endRef.current?.focus(); }
+            }}
+            className="flex items-center gap-2 cursor-pointer select-none"
+          >
+            <Calendar size={18} className="text-black" />
+            <span className="text-black font-bold text-sm uppercase tracking-wider">TO</span>
+            <div className="relative flex items-center">
+              <input
+                ref={endRef}
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                className="clean-date-input text-base border-0 bg-transparent focus:ring-0 focus:outline-none text-black font-bold cursor-pointer p-0 w-28 uppercase"
+                placeholder="End Date"
+              />
+            </div>
+            {/* The third calendar icon from reference image */}
+            <Calendar size={18} className="text-black" />
           </div>
+
+          {/* Status Filter */}
+          <div className="flex items-center gap-2">
+            <Filter size={18} className="text-black" />
+            <div className="relative flex items-center">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="text-base border-0 bg-transparent focus:ring-0 focus:outline-none text-black font-bold cursor-pointer p-0 pr-5 appearance-none"
+              >
+                <option value="ALL">All Status</option>
+                <option value="ASSIGNED">Assigned</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="REWORK">Rework</option>
+              </select>
+              <ChevronDown size={14} className="text-black pointer-events-none ml-1" />
+            </div>
+          </div>
+
         </div>
+
         <button
           onClick={handleDownload}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-green-100 hover:bg-green-200 text-black rounded-xl font-bold transition-all shadow-lg shadow-green-200 active:scale-95"
+          className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-base uppercase tracking-wider shadow-sm inline-flex items-center justify-center cursor-pointer gap-2"
         >
           <Download size={18} />
           Download Report
@@ -308,25 +345,25 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <SummaryCard
-          icon={<Briefcase className="text-green-600" size={20} />}
+          icon={<Briefcase className="text-black" size={20} />}
           label="Filtered Tasks"
           value={filteredTasks.length}
           color="green"
         />
         <SummaryCard
-          icon={<Flag className="text-green-600" size={20} />}
+          icon={<Flag className="text-black" size={20} />}
           label="Active Milestones"
           value={Object.keys(tasksByMilestone).filter(id => id !== "unassigned").length}
           color="green"
         />
         <SummaryCard
-          icon={<Layers className="text-green-600" size={20} />}
+          icon={<Layers className="text-black" size={20} />}
           label="Worked Hours"
           value={`${Math.round(filteredTasks.reduce((sum, t) => sum + calculateWorkedSeconds(t) / 3600, 0))}h`}
           color="green"
         />
         <SummaryCard
-          icon={<TrendingUp className="text-[#6bbd45]" size={20} />}
+          icon={<TrendingUp className="text-black" size={20} />}
           label="Completion Rate"
           value={`${Math.round((filteredTasks.filter((t) => t.status === "COMPLETED").length / (filteredTasks.length || 1)) * 100)}%`}
           color="green"
@@ -335,31 +372,31 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <TrendingUp size={20} className="text-green-600" />
+        <div className="bg-white p-6 rounded-none border border-black shadow-sm">
+          <h3 className="text-sm font-bold text-black mb-6 flex items-center gap-2 uppercase tracking-wider">
+            <TrendingUp size={20} className="text-black" />
             Hours by Milestone
           </h3>
           <div className="h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" fontSize={10} tick={{ fill: "#6b7280" }} />
-                <YAxis fontSize={10} tick={{ fill: "#6b7280" }} />
+                <XAxis dataKey="name" fontSize={10} tick={{ fill: "#000000" }} />
+                <YAxis fontSize={10} tick={{ fill: "#000000" }} />
                 <Tooltip
-                  contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}
+                  contentStyle={{ borderRadius: "0", border: "1px solid black", boxShadow: "none" }}
                 />
                 <Legend />
-                <Bar dataKey="assigned" name="Assigned Hours" fill="#374151" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="worked" name="Worked Hours" fill="#6bbd45" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="assigned" name="Assigned Hours" fill="#374151" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="worked" name="Worked Hours" fill="#6bbd45" radius={[0, 0, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <CheckCircle2 size={20} className="text-[#6bbd45]" />
+        <div className="bg-white p-6 rounded-none border border-black shadow-sm">
+          <h3 className="text-sm font-bold text-black mb-6 flex items-center gap-2 uppercase tracking-wider">
+            <CheckCircle2 size={20} className="text-black" />
             Task Status Distribution
           </h3>
           <div className="h-80 w-full">
@@ -379,7 +416,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                <Legend verticalAlign="bottom" height={36} iconType="square" />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -387,20 +424,20 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
       </div>
 
       {/* Group by Milestone */}
-      <section className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="bg-slate-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-slate-800">
-            <Flag size={18} className="text-green-600" />
-            <h3 className="text-lg font-bold tracking-tight">
+      <section className="bg-white rounded-none border border-black shadow-sm overflow-hidden">
+        <div className="bg-slate-100 px-6 py-4 border-b border-black flex items-center justify-between">
+          <div className="flex items-center gap-2 text-black">
+            <Flag size={18} className="text-black" />
+            <h3 className="text-base font-bold uppercase tracking-wider text-black">
               Tasks by Milestone
             </h3>
           </div>
-          <span className="text-xs font-semibold text-slate-500 bg-white px-2 py-1 rounded-lg shadow-sm border border-slate-200 uppercase tracking-widest text-center">
+          <span className="text-sm font-bold text-black bg-white px-2 py-1 rounded-none shadow-sm border border-black uppercase tracking-wider text-center">
             {Object.keys(tasksByMilestone).length} Sections
           </span>
         </div>
 
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-black/10">
           {milestones.length > 0 ? (
             milestones.map((ms) => (
               <div key={ms.id}>
@@ -409,18 +446,18 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                   className="w-full flex items-center justify-between p-5 hover:bg-gray-50/80 transition-colors group"
                 >
                   <div className="flex items-center gap-4 text-left">
-                    <div className="p-2 bg-purple-50 rounded-xl group-hover:scale-110 transition-transform">
+                    <div className="p-2 bg-green-50 rounded-none border border-black">
                       {expandedSections[`ms-${ms.id}`] ? (
-                        <ChevronDown size={18} className="text-purple-600" />
+                        <ChevronDown size={18} className="text-black" />
                       ) : (
-                        <ChevronRight size={18} className="text-purple-600" />
+                        <ChevronRight size={18} className="text-black" />
                       )}
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-800 text-lg">
+                      <h4 className="font-bold text-black text-base uppercase tracking-wider">
                         {ms.subject}
                       </h4>
-                      <p className="text-xs text-gray-500 font-medium">
+                      <p className="text-sm text-black font-bold mt-0.5">
                         Due:{" "}
                         {ms.approvalDate
                           ? new Date(ms.approvalDate).toLocaleDateString()
@@ -429,26 +466,11 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                     </div>
                   </div>
                   <div className="flex items-center gap-6">
-                    <div className="flex -space-x-2">
-                      {tasksByMilestone[ms.id]?.slice(0, 3).map((_, i) => (
-                        <div
-                          key={i}
-                          className="w-8 h-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center"
-                        >
-                          <User size={14} className="text-slate-500" />
-                        </div>
-                      ))}
-                      {tasksByMilestone[ms.id]?.length > 3 && (
-                        <div className="w-8 h-8 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-slate-600">
-                          +{tasksByMilestone[ms.id].length - 3}
-                        </div>
-                      )}
-                    </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-slate-700">
+                      <p className="text-sm font-bold text-black uppercase tracking-wider">
                         {tasksByMilestone[ms.id]?.length || 0} Tasks
                       </p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                      <p className="text-xs text-black font-bold uppercase tracking-widest mt-0.5">
                         In this section
                       </p>
                     </div>
@@ -456,33 +478,33 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                 </button>
 
                 {expandedSections[`ms-${ms.id}`] && (
-                  <div className="bg-gray-50/30 p-2">
-                    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                  <div className="bg-slate-50 p-2">
+                    <div className="bg-white rounded-none border border-black overflow-hidden shadow-sm">
                       {tasksByMilestone[ms.id] &&
                         tasksByMilestone[ms.id].length > 0 ? (
                         <div>
                           {/* Table Header */}
-                          <div className="grid grid-cols-6 gap-4 p-4 bg-slate-50/50 border-b border-gray-100">
-                            <p className="col-span-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                          <div className="grid grid-cols-6 gap-4 p-4 bg-slate-100 border-b border-black">
+                            <p className="col-span-2 text-sm font-bold text-black uppercase tracking-wider">
                               Task Details
                             </p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            <p className="text-sm font-bold text-black uppercase tracking-wider">
                               Assigned To
                             </p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-center">
+                            <p className="text-sm font-bold text-black uppercase tracking-wider flex justify-center">
                               Estimated
                             </p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-center">
+                            <p className="text-sm font-bold text-black uppercase tracking-wider flex justify-center">
                               Worked
                             </p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-end">
+                            <p className="text-sm font-bold text-black uppercase tracking-wider flex justify-end">
                               Status
                             </p>
                           </div>
                           {tasksByMilestone[ms.id].map(renderTaskRow)}
                         </div>
                       ) : (
-                        <div className="p-8 text-center text-gray-500 text-sm">
+                        <div className="p-8 text-center text-black text-xs font-bold">
                           No tasks match the filters for this milestone.
                         </div>
                       )}
@@ -492,7 +514,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
               </div>
             ))
           ) : (
-            <div className="p-8 text-center text-gray-400 text-sm">
+            <div className="p-8 text-center text-black text-xs font-bold">
               No milestones found for this project.
             </div>
           )}
@@ -500,20 +522,20 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
       </section>
 
       {/* Group by WBS Bundle */}
-      <section className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="bg-slate-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-slate-800">
-            <Layers size={18} className="text-green-600" />
-            <h3 className="text-lg font-bold tracking-tight">
+      <section className="bg-white rounded-none border border-black shadow-sm overflow-hidden">
+        <div className="bg-slate-100 px-6 py-4 border-b border-black flex items-center justify-between">
+          <div className="flex items-center gap-2 text-black">
+            <Layers size={18} className="text-black" />
+            <h3 className="text-base font-bold uppercase tracking-wider text-black">
               Tasks by WBS Bundle
             </h3>
           </div>
-          <span className="text-xs font-semibold text-slate-500 bg-white px-2 py-1 rounded-lg shadow-sm border border-slate-200 uppercase tracking-widest text-center">
+          <span className="text-sm font-bold text-black bg-white px-2 py-1 rounded-none shadow-sm border border-black uppercase tracking-wider text-center">
             {Object.keys(tasksByBundle).length} Sections
           </span>
         </div>
 
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-black/10">
           {bundles.length > 0 ? (
             bundles.map((bundle) => {
               // Resolve the shared bundleKey — present on both bundle objects and tasks
@@ -530,34 +552,34 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                     className="w-full flex items-center justify-between p-5 hover:bg-gray-50/80 transition-colors group"
                   >
                     <div className="flex items-center gap-4 text-left">
-                      <div className="p-2 bg-green-50 rounded-xl group-hover:scale-110 transition-transform">
+                      <div className="p-2 bg-green-50 rounded-none border border-black">
                         {expandedSections[`bundle-${bundleKey}`] ? (
-                          <ChevronDown size={18} className="text-green-600" />
+                          <ChevronDown size={18} className="text-black" />
                         ) : (
-                          <ChevronRight size={18} className="text-green-600" />
+                          <ChevronRight size={18} className="text-black" />
                         )}
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-800 text-lg">
+                        <h4 className="font-bold text-black text-base uppercase tracking-wider">
                           {bundle.bundleKey || bundle.name || "Unnamed Bundle"}
                         </h4>
-                        <p className="text-xs text-gray-500 font-medium">
+                        <p className="text-sm text-black font-bold mt-0.5">
                           Stage: {bundle.stage || "—"} {"\u00A0"}·{"\u00A0"} {bundleTasks.length} task{bundleTasks.length !== 1 ? "s" : ""}
                         </p>
                       </div>
                     </div>
                     <div className="text-right flex items-center gap-6">
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <p className="text-sm font-bold text-black uppercase tracking-wider">
                           Exec
                         </p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <p className="text-sm font-bold text-black uppercase tracking-wider">
                           Check
                         </p>
-                        <p className="text-sm font-bold text-slate-700">
+                        <p className="text-base font-bold text-black">
                           {((bundle.totalExecHr) / 60 || 0).toFixed(2)}h
                         </p>
-                        <p className="text-sm font-bold text-slate-700">
+                        <p className="text-base font-bold text-black">
                           {((bundle.totalCheckHr) / 60 || 0).toFixed(2)}h
                         </p>
                       </div>
@@ -570,16 +592,16 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                           return (
                             <>
                               <div className="flex items-center gap-2 mb-1 justify-end">
-                                <span className="text-xs font-bold text-gray-700">{percentage.toFixed(0)}%</span>
-                                <span className="text-[10px] text-gray-400 font-medium">Completed</span>
+                                <span className="text-sm font-bold text-black">{percentage.toFixed(0)}%</span>
+                                <span className="text-sm text-black font-bold">Completed</span>
                               </div>
                               <div className="flex items-center gap-2 mb-1 justify-end">
-                                <span className="text-xs font-bold text-gray-700">{(totalAllocatedHours - totalWorkedHours).toFixed(1)}h</span>
-                                <span className="text-[10px] text-gray-400 font-medium">Remaining</span>
+                                <span className="text-sm font-bold text-black">{(totalAllocatedHours - totalWorkedHours).toFixed(1)}h</span>
+                                <span className="text-sm text-black font-bold">Remaining</span>
                               </div>
-                              <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                              <div className="w-full h-1.5 bg-slate-200 rounded-none overflow-hidden border border-black">
                                 <div
-                                  className={`h-full rounded-full ${percentage >= 100 ? 'bg-[#6bbd45]' : 'bg-blue-500'}`}
+                                  className={`h-full rounded-none ${percentage >= 100 ? 'bg-[#6bbd45]' : 'bg-blue-500'}`}
                                   style={{ width: `${percentage}%` }}
                                 />
                               </div>
@@ -590,31 +612,31 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
                     </div>
                   </button>
                   {expandedSections[`bundle-${bundleKey}`] && (
-                    <div className="bg-gray-50/30 p-2">
-                      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                    <div className="bg-slate-50 p-2">
+                      <div className="bg-white rounded-none border border-black overflow-hidden shadow-sm">
                         {bundleTasks.length > 0 ? (
                           <div>
-                            <div className="grid grid-cols-6 gap-4 p-4 bg-slate-50/50 border-b border-gray-100">
-                              <p className="col-span-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            <div className="grid grid-cols-6 gap-4 p-4 bg-slate-100 border-b border-black">
+                              <p className="col-span-2 text-sm font-bold text-black uppercase tracking-wider">
                                 Task Details
                               </p>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                              <p className="text-sm font-bold text-black uppercase tracking-wider">
                                 Assigned To
                               </p>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-center">
+                              <p className="text-sm font-bold text-black uppercase tracking-wider flex justify-center">
                                 Estimated
                               </p>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-center">
+                              <p className="text-sm font-bold text-black uppercase tracking-wider flex justify-center">
                                 Worked
                               </p>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-end">
+                              <p className="text-sm font-bold text-black uppercase tracking-wider flex justify-end">
                                 Status
                               </p>
                             </div>
                             {bundleTasks.map(renderTaskRow)}
                           </div>
                         ) : (
-                          <div className="p-8 text-center text-gray-500 text-sm">
+                          <div className="p-8 text-center text-black text-xs font-bold">
                             No tasks found matching these filters.
                           </div>
                         )}
@@ -625,7 +647,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
               );
             })
           ) : (
-            <div className="p-8 text-center text-gray-400 text-sm">
+            <div className="p-8 text-center text-black text-xs font-bold">
               No WBS bundles found for this project.
             </div>
           )}
@@ -642,29 +664,28 @@ const SummaryCard = ({
   color,
 }) => {
   const colorMap = {
-    blue: "bg-blue-50 text-blue-600",
-    purple: "bg-purple-50 text-purple-600",
-    amber: "bg-amber-50 text-amber-600",
-    green: "bg-[#6bbd45]/15 text-[#6bbd45]",
+    blue: "bg-blue-50 text-black border border-black",
+    purple: "bg-purple-50 text-black border border-black",
+    amber: "bg-amber-50 text-black border border-black",
+    green: "bg-green-50 text-black border border-black",
   };
 
   return (
-    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-row justify-between items-center gap-4 group hover:shadow-md transition-shadow">
+    <div className="bg-white p-6 rounded-none border border-black shadow-sm flex flex-row justify-between items-center gap-4 group transition-shadow">
       <div className="flex flex-row justify-between items-center gap-4">
         <div
-          className={`p-3 rounded-2xl ${colorMap[color]} group-hover:scale-110 transition-transform w-fit mt-2`}
+          className={`p-3 rounded-none ${colorMap[color]} group-hover:scale-105 transition-transform w-fit mt-2`}
         >
           {icon}
         </div>
         <div>
-
-          <p className="text-md font-bold text-gray-700 uppercase tracking-widest">
+          <p className="text-sm font-bold text-black uppercase tracking-wider">
             {label}
           </p>
         </div>
       </div>
       <div>
-        <p className="text-3xl font-black text-gray-800 tracking-tight text-right">
+        <p className="text-3xl font-bold text-black tracking-tight text-right">
           {value}
         </p>
       </div>

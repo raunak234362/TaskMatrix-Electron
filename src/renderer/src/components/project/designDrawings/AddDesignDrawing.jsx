@@ -47,20 +47,20 @@ const AddDesignDrawing = ({ projectId, onSuccess }) => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit, onError)}
-      className="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 space-y-6"
+      className="bg-white p-4 md:p-6 rounded-none border border-black space-y-6"
     >
-      <div className="border-b border-gray-50 pb-4">
-        <h3 className="text-xl  text-gray-800">Add Design Drawing</h3>
+      <div className="border-b border-black pb-4">
+        <h3 className="text-sm font-bold text-black uppercase tracking-widest">Add Design Drawing</h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+          <label className="text-sm font-bold text-black uppercase tracking-wider">
             Stage
           </label>
           <select
             {...register("stage", { required: true })}
-            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all bg-gray-50/50"
+            className="w-full px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-none focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm cursor-pointer"
           >
             <option value="">Select Stage</option>
             <option value="IFA">IFA</option>
@@ -73,13 +73,13 @@ const AddDesignDrawing = ({ projectId, onSuccess }) => {
         </div>
 
         <div className="space-y-2 md:col-span-2">
-          <label className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+          <label className="text-sm font-bold text-black uppercase tracking-wider">
             Description
           </label>
           <textarea
             {...register("description", { required: true })}
             rows={3}
-            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all bg-gray-50/50"
+            className="w-full px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-none focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm"
             placeholder="Enter drawing description..."
           />
           {errors.description && (
@@ -93,10 +93,10 @@ const AddDesignDrawing = ({ projectId, onSuccess }) => {
       </div>
 
       <div className="flex justify-center pt-4">
-        <Button
+        <button
           type="submit"
           disabled={loading}
-          className="w-full bg-green-600 hover:bg-green-700 text-white px-8 py-2.5 rounded-xl shadow-lg shadow-green-200 transition-all disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 px-6 py-2 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer disabled:opacity-50"
         >
           {loading ? (
             <div className="flex items-center gap-2">
@@ -106,7 +106,7 @@ const AddDesignDrawing = ({ projectId, onSuccess }) => {
           ) : (
             "Create Document"
           )}
-        </Button>
+        </button>
       </div>
     </form>
   );

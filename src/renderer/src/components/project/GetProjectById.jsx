@@ -406,39 +406,40 @@ const GetProjectById = ({ id, onClose }) => {
     <>
       <div className="w-full relative bg-[#fcfdfc] min-h-[600px] flex flex-col gap-6 p-4">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-100">
+        <div className="sticky top-0 z-30 bg-[#fcfdfc] flex flex-col md:flex-row md:items-start justify-between gap-4 pb-4 border-b border-gray-100">
           <div>
             <h2 className="text-lg md:text-2xl font-semibold text-gray-900 tracking-tight uppercase">
               {project.name}
             </h2>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center">
-              PROJECT NO: {project.projectCode || project.serialNo}
-            </span>
-            {project.stage && (
-              <span className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center">
-                {project.stage}
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              <span className="px-6 py-1.5 bg-gray-900 text-white border-2 border-gray-900 rounded-none font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center">
+                PROJECT NO: {project.projectCode || project.serialNo}
               </span>
-            )}
-            <span className={`px-6 py-1.5 text-black border-2 rounded-none font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center ${
-              project.status === "ACTIVE"
-                ? "bg-green-50 border-green-700/80"
-                : "bg-red-50 border-red-700/80"
-            }`}>
-              {project.status}
-            </span>
-            
+              {project.stage && (
+                <span className="px-6 py-1.5 bg-blue-50 text-blue-800 border-2 border-dashed border-blue-600/60 rounded-none font-bold text-sm uppercase tracking-tight inline-flex items-center justify-center">
+                  STAGE: {project.stage}
+                </span>
+              )}
+              <span className={`px-6 py-1.5 border-2 border-dashed rounded-none font-bold text-sm uppercase tracking-tight inline-flex items-center justify-center ${
+                project.status === "ACTIVE"
+                  ? "bg-green-50 text-green-800 border-green-600/60"
+                  : "bg-red-50 text-red-800 border-red-600/60"
+              }`}>
+                STATUS: {project.status}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 md:mt-1">
             {(userRole === "admin" || userRole === "operation_executive" || userRole === "dept_manager" || userRole === "deputy_manager" || userRole === "project_manager") && (
               <>
                 <button
-                  className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center"
+                  className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
                   onClick={() => setShowAssistsModal(true)}
                 >
                   Add Assists
                 </button>
                 <button
-                  className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center"
+                  className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
                   onClick={() => handleEditModel(project)}
                 >
                   Edit
@@ -448,7 +449,7 @@ const GetProjectById = ({ id, onClose }) => {
             {onClose && (
               <button
                 onClick={onClose}
-                className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center"
+                className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
               >
                 Close
               </button>
@@ -459,7 +460,7 @@ const GetProjectById = ({ id, onClose }) => {
         {/* Main Content Layout with Sidebar */}
         <div className="flex flex-col md:flex-row gap-6 items-start">
           {/* Sidebar */}
-          <div className="w-full md:w-64 shrink-0 flex flex-col gap-1 border-r border-gray-100 pr-4">
+          <div className="w-full md:w-64 shrink-0 flex flex-col gap-1 border-r border-gray-100 pr-4 sticky top-[120px] self-start">
             {[
               { key: "overview", label: "Overview", icon: ClipboardList },
               { key: "wpr", label: "WPR", icon: FileSpreadsheet },
@@ -490,7 +491,7 @@ const GetProjectById = ({ id, onClose }) => {
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
-                  className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm font-semibold tracking-normal rounded-none transition-all text-left ${activeTab === key
+                  className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm font-semibold tracking-normal rounded-none transition-all text-left cursor-pointer ${activeTab === key
                     ? "bg-green-50 text-green-700 font-bold border-l-4 border-green-600 pl-3"
                     : "text-black hover:bg-gray-50 hover:text-black border-l-4 border-transparent"
                     }`}
@@ -591,7 +592,10 @@ const GetProjectById = ({ id, onClose }) => {
                 {/* Section 2: Counts */}
                 <div className="mb-8">
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <div className="flex items-center justify-between bg-green-50/20 p-3 rounded-none border border-black">
+                    <button
+                      onClick={() => setActiveTab("rfi")}
+                      className="w-full flex items-center justify-between bg-green-50/20 p-3 rounded-none border border-black hover:bg-green-50/40 transition-colors text-left cursor-pointer"
+                    >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div className="w-8 h-8 rounded-none bg-green-100/40 flex items-center justify-center text-green-600 shrink-0">
                           <FileText size={16} />
@@ -599,9 +603,12 @@ const GetProjectById = ({ id, onClose }) => {
                         <span className="text-sm font-bold text-black uppercase tracking-wider truncate">RFIs</span>
                       </div>
                       <span className="text-sm font-bold text-black pr-1">{rfiData.length}</span>
-                    </div>
+                    </button>
 
-                    <div className="flex items-center justify-between bg-green-50/20 p-3 rounded-none border border-black">
+                    <button
+                      onClick={() => setActiveTab("submittals")}
+                      className="w-full flex items-center justify-between bg-green-50/20 p-3 rounded-none border border-black hover:bg-green-50/40 transition-colors text-left cursor-pointer"
+                    >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div className="w-8 h-8 rounded-none bg-green-100/40 flex items-center justify-center text-green-600 shrink-0">
                           <FileText size={16} />
@@ -609,9 +616,12 @@ const GetProjectById = ({ id, onClose }) => {
                         <span className="text-sm font-bold text-black uppercase tracking-wider truncate">Submittals</span>
                       </div>
                       <span className="text-sm font-bold text-black pr-1">{submittalData.length}</span>
-                    </div>
+                    </button>
 
-                    <div className="flex items-center justify-between bg-green-50/20 p-3 rounded-none border border-black">
+                    <button
+                      onClick={() => setActiveTab("changeOrder")}
+                      className="w-full flex items-center justify-between bg-green-50/20 p-3 rounded-none border border-black hover:bg-green-50/40 transition-colors text-left cursor-pointer"
+                    >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div className="w-8 h-8 rounded-none bg-green-100/40 flex items-center justify-center text-green-600 shrink-0">
                           <Settings size={16} />
@@ -619,9 +629,12 @@ const GetProjectById = ({ id, onClose }) => {
                         <span className="text-sm font-bold text-black uppercase tracking-wider truncate">Change Orders</span>
                       </div>
                       <span className="text-sm font-bold text-black pr-1">{changeOrderData.length}</span>
-                    </div>
+                    </button>
 
-                    <div className="flex items-center justify-between bg-green-50/20 p-3 rounded-none border border-black">
+                    <button
+                      onClick={() => setActiveTab("milestones")}
+                      className="w-full flex items-center justify-between bg-green-50/20 p-3 rounded-none border border-black hover:bg-green-50/40 transition-colors text-left cursor-pointer"
+                    >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div className="w-8 h-8 rounded-none bg-green-100/40 flex items-center justify-center text-green-600 shrink-0">
                           <Clock size={16} />
@@ -629,9 +642,12 @@ const GetProjectById = ({ id, onClose }) => {
                         <span className="text-sm font-bold text-black uppercase tracking-wider truncate">Milestones</span>
                       </div>
                       <span className="text-sm font-bold text-black pr-1">{milestones.length}</span>
-                    </div>
+                    </button>
 
-                    <div className="flex items-center justify-between bg-green-50/20 p-3 rounded-none border border-black">
+                    <button
+                      onClick={() => setActiveTab("files")}
+                      className="w-full flex items-center justify-between bg-green-50/20 p-3 rounded-none border border-black hover:bg-green-50/40 transition-colors text-left cursor-pointer"
+                    >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div className="w-8 h-8 rounded-none bg-green-100/40 flex items-center justify-center text-green-600 shrink-0">
                           <FolderOpenDot size={16} />
@@ -641,7 +657,7 @@ const GetProjectById = ({ id, onClose }) => {
                       <span className="text-sm font-bold text-black pr-1">
                         {project.files?.length || project.documents?.length || 0}
                       </span>
-                    </div>
+                    </button>
                   </div>
                 </div>                {/* Section 3: Project Details & Scopes */}
                 <div className="bg-[#f4faf0] p-6 rounded-none mt-8">

@@ -684,17 +684,18 @@ const WorkProgressReport = ({
     <div className="space-y-8 p-1 animate-in fade-in slide-in-from-bottom-2 duration-500">
       
       {/* ── ACTION TOOLBAR ── */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-50 border border-black p-4 rounded-2xl shadow-sm shrink-0">
+      {/* ── ACTION TOOLBAR ── */}
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-white shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-2.5 h-6 bg-[#6bbd45] rounded-full" />
-          <h2 className="text-md font-black uppercase tracking-widest text-slate-700">WPR Spreadsheet Control</h2>
+          <div className="w-2.5 h-6 bg-[#6bbd45] rounded-none" />
+          <h2 className="text-sm font-bold uppercase tracking-wider text-black">WPR Spreadsheet Control</h2>
           {projectWeeks.length > 0 && (
             <div className="flex items-center gap-2 ml-4">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Select Week:</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-black">Select Week:</span>
               <select
                 value={selectedWeek}
                 onChange={(e) => handleWeekChange(e.target.value)}
-                className="px-3 py-1.5 bg-white border border-black rounded-lg text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#6bbd45] transition-all cursor-pointer font-bold"
+                className="px-3 py-1.5 bg-white border border-black rounded-none text-xs font-bold uppercase tracking-wider outline-none focus:border-[#6bbd45] transition-all cursor-pointer"
               >
                 <option value="All">All Weeks</option>
                 {projectWeeks.map((w) => (
@@ -711,7 +712,7 @@ const WorkProgressReport = ({
             <button
               onClick={handleSaveChanges}
               disabled={saving}
-              className="flex items-center gap-2 px-5 py-2.5 bg-[#6bbd45]/15 border border-[#6bbd45] rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#6bbd45]/30 text-black shadow-sm transition-all"
+              className="flex items-center gap-2 px-5 py-2 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm transition-all cursor-pointer"
             >
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
               Save Changes
@@ -719,21 +720,21 @@ const WorkProgressReport = ({
           )}
           <button
             onClick={exportToExcel}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-50 border border-blue-200 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-100 text-blue-700 shadow-sm transition-all"
+            className="flex items-center gap-2 px-5 py-2 bg-blue-50 text-black border-2 border-blue-700/80 hover:bg-blue-100 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm transition-all cursor-pointer"
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
             Excel Export
           </button>
           <button
             onClick={exportToPDF}
-            className="flex items-center gap-2 px-5 py-2.5 bg-red-50 border border-red-200 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-100 text-red-700 shadow-sm transition-all"
+            className="flex items-center gap-2 px-5 py-2 bg-red-50 text-black border-2 border-red-700/80 hover:bg-red-100 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm transition-all cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             PDF Export
           </button>
           <button
             onClick={handlePrint}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-gray-200 text-gray-700 shadow-sm transition-all"
+            className="flex items-center gap-2 px-5 py-2 bg-slate-50 text-black border-2 border-slate-700/80 hover:bg-slate-100 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm transition-all cursor-pointer"
           >
             <Printer className="w-3.5 h-3.5" />
             Print Report
@@ -742,81 +743,81 @@ const WorkProgressReport = ({
       </div>
 
       {/* ── REPORT METADATA GRID (SPREADSHEET HEADER) ── */}
-      <div className="bg-white border-2 border-black rounded-2xl overflow-hidden shadow-md">
-        <div className="p-4 bg-[#6bbd45]/10 border-b border-black flex justify-between items-center">
+      <div className="bg-[#f4faf0] border border-black rounded-none overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-black flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <FileText className="text-[#6bbd45]" />
-            <span className="text-sm font-black uppercase tracking-[0.2em] text-black">WPR Report Metadata</span>
+            <FileText className="text-black" />
+            <span className="text-sm font-bold uppercase tracking-wider text-black">WPR Report Metadata</span>
           </div>
-          <span className="text-[10px] font-black uppercase tracking-widest border-2 border-black px-3 py-1 rounded-md bg-white">
+          <span className="text-[10px] font-bold uppercase tracking-wider border border-black px-3 py-1 rounded-none bg-white text-black">
             FORM NO: WBT/PMO/WPR-001
           </span>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
           <div className="space-y-1.5">
-            <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Week Ending Date</span>
+            <span className="block text-xs font-bold uppercase tracking-wider text-black">Week Ending Date</span>
             <input 
               type="text" 
               value={weekEnding} 
               onChange={(e) => setWeekEnding(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-slate-100 rounded-xl font-bold outline-none focus:border-[#6bbd45] transition-all text-sm uppercase"
+              className="w-full px-4 py-2.5 border border-black rounded-none font-bold outline-none focus:border-green-700 bg-white transition-all text-sm uppercase text-black"
             />
           </div>
           <div className="space-y-1.5">
-            <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Customer</span>
-            <div className="px-4 py-2.5 border-2 border-slate-100 bg-slate-50/50 rounded-xl font-bold text-sm uppercase text-slate-700">
+            <span className="block text-xs font-bold uppercase tracking-wider text-black">Customer</span>
+            <div className="px-4 py-2.5 border border-black bg-white rounded-none font-bold text-sm uppercase text-black">
               {project?.fabricator?.fabName || "—"}
             </div>
           </div>
           <div className="space-y-1.5">
-            <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Project Name</span>
-            <div className="px-4 py-2.5 border-2 border-slate-100 bg-slate-50/50 rounded-xl font-bold text-sm uppercase text-slate-700 truncate">
+            <span className="block text-xs font-bold uppercase tracking-wider text-black">Project Name</span>
+            <div className="px-4 py-2.5 border border-black bg-white rounded-none font-bold text-sm uppercase text-black truncate">
               {project?.projectName || project?.name || "—"}
             </div>
           </div>
           <div className="space-y-1.5">
-            <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">WBT Project Manager</span>
-            <div className="px-4 py-2.5 border-2 border-slate-100 bg-slate-50/50 rounded-xl font-bold text-sm uppercase text-slate-700">
+            <span className="block text-xs font-bold uppercase tracking-wider text-black">WBT Project Manager</span>
+            <div className="px-4 py-2.5 border border-black bg-white rounded-none font-bold text-sm uppercase text-black">
               {project?.manager ? `${project.manager.firstName} ${project.manager.lastName}` : "—"}
             </div>
           </div>
           <div className="space-y-1.5">
-            <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Fabricator Project Manager</span>
+            <span className="block text-xs font-bold uppercase tracking-wider text-black">Fabricator Project Manager</span>
             <input 
               type="text" 
               value={fabProjectManager} 
               onChange={(e) => setFabProjectManager(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-slate-100 rounded-xl font-bold outline-none focus:border-[#6bbd45] transition-all text-sm uppercase"
+              className="w-full px-4 py-2.5 border border-black rounded-none font-bold outline-none focus:border-green-700 bg-white transition-all text-sm uppercase text-black"
             />
           </div>
           <div className="space-y-1.5">
-            <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Report Circulated To</span>
+            <span className="block text-xs font-bold uppercase tracking-wider text-black">Report Circulated To</span>
             <input 
               type="text" 
               value={circulatedTo} 
               onChange={(e) => setCirculatedTo(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-slate-100 rounded-xl font-bold outline-none focus:border-[#6bbd45] transition-all text-sm uppercase"
+              className="w-full px-4 py-2.5 border border-black rounded-none font-bold outline-none focus:border-green-700 bg-white transition-all text-sm uppercase text-black"
             />
           </div>
           <div className="space-y-1.5">
-            <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Software</span>
+            <span className="block text-xs font-bold uppercase tracking-wider text-black">Software</span>
             <input 
               type="text" 
               value={software} 
               onChange={(e) => setSoftware(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-slate-100 rounded-xl font-bold outline-none focus:border-[#6bbd45] transition-all text-sm uppercase"
+              className="w-full px-4 py-2.5 border border-black rounded-none font-bold outline-none focus:border-green-700 bg-white transition-all text-sm uppercase text-black"
             />
           </div>
           <div className="space-y-1.5">
-            <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Project Awarded</span>
-            <div className="px-4 py-2.5 border-2 border-slate-100 bg-slate-50/50 rounded-xl font-bold text-sm uppercase text-slate-700">
+            <span className="block text-xs font-bold uppercase tracking-wider text-black">Project Awarded</span>
+            <div className="px-4 py-2.5 border border-black bg-white rounded-none font-bold text-sm uppercase text-black">
               {project?.startDate ? new Date(project.startDate).toLocaleDateString() : "—"}
             </div>
           </div>
           <div className="space-y-1.5">
-            <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Fab Released Date</span>
-            <div className="px-4 py-2.5 border-2 border-slate-100 bg-slate-50/50 rounded-xl font-bold text-sm uppercase text-slate-700">
+            <span className="block text-xs font-bold uppercase tracking-wider text-black">Fab Released Date</span>
+            <div className="px-4 py-2.5 border border-black bg-white rounded-none font-bold text-sm uppercase text-black">
               {project?.fabricationDate ? new Date(project.fabricationDate).toLocaleDateString() : "—"}
             </div>
           </div>
@@ -827,13 +828,13 @@ const WorkProgressReport = ({
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <CheckCircle className="text-[#6bbd45] w-5 h-5" />
-            <h3 className="text-md font-black uppercase tracking-widest text-slate-700">1. Project Schedule / Milestones</h3>
+            <CheckCircle className="text-black w-5 h-5" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-black">1. Project Schedule / Milestones</h3>
           </div>
           {canEdit && (
             <button
               onClick={() => addRow("schedule")}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 rounded-lg text-xs font-bold uppercase transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-750 rounded-none text-xs font-bold uppercase transition-all shadow-sm cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Row
@@ -841,26 +842,26 @@ const WorkProgressReport = ({
           )}
         </div>
 
-        <div className="overflow-x-auto border border-black/15 rounded-2xl bg-white shadow-sm custom-scrollbar max-w-full">
+        <div className="overflow-x-auto border border-black rounded-none bg-white shadow-sm custom-scrollbar max-w-full">
           <table className="w-full text-left border-collapse min-w-[800px] text-xs">
             <thead>
-              <tr className="bg-slate-100 border-b border-black/10">
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5">Phase</th>
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5 w-28">Start Date</th>
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5 w-40">IFA - Submission Date</th>
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5 w-36">BFA - Recd Date</th>
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5 w-40">IFC - Sub Date</th>
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5 w-44">COR Drawing Sub Date</th>
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500">Comments</th>
+              <tr className="bg-slate-100 border-b border-black">
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10">Phase</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-28">Start Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-40">IFA - Submission Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-36">BFA - Recd Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-40">IFC - Sub Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-44">COR Drawing Sub Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black">Comments</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black/5">
+            <tbody className="divide-y divide-black/10">
               {filteredScheduleRows.map((row) => (
                 <tr key={row.id} className="hover:bg-slate-50 transition-all">
                   {/* Phase cell */}
                   <td 
                     onClick={() => handleCellClick("schedule", row.id, "phase", row.phase)}
-                    className="p-3 font-black border-r border-black/5 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 font-bold border-r border-black/10 cursor-pointer hover:bg-slate-100/50 text-black"
                   >
                     {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "phase" ? (
                       <input
@@ -870,7 +871,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded font-bold uppercase text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none font-bold uppercase text-xs text-black"
                       />
                     ) : (
                       <span className="uppercase">{row.phase}</span>
@@ -880,7 +881,7 @@ const WorkProgressReport = ({
                   {/* Start Date */}
                   <td 
                     onClick={() => handleCellClick("schedule", row.id, "startDate", row.startDate)}
-                    className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "startDate" ? (
                       <input
@@ -890,7 +891,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                       />
                     ) : (
                       <span>{row.startDate}</span>
@@ -900,7 +901,7 @@ const WorkProgressReport = ({
                   {/* IFA submission date */}
                   <td 
                     onClick={() => handleCellClick("schedule", row.id, "ifaSubDate", row.ifaSubDate)}
-                    className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "ifaSubDate" ? (
                       <input
@@ -910,7 +911,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                       />
                     ) : (
                       <span>{row.ifaSubDate}</span>
@@ -920,7 +921,7 @@ const WorkProgressReport = ({
                   {/* BFA date */}
                   <td 
                     onClick={() => handleCellClick("schedule", row.id, "bfaRecdDate", row.bfaRecdDate)}
-                    className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "bfaRecdDate" ? (
                       <input
@@ -930,7 +931,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                       />
                     ) : (
                       <span>{row.bfaRecdDate}</span>
@@ -940,7 +941,7 @@ const WorkProgressReport = ({
                   {/* IFC sub date */}
                   <td 
                     onClick={() => handleCellClick("schedule", row.id, "ifcSubDate", row.ifcSubDate)}
-                    className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "ifcSubDate" ? (
                       <input
@@ -950,7 +951,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                       />
                     ) : (
                       <span>{row.ifcSubDate}</span>
@@ -960,7 +961,7 @@ const WorkProgressReport = ({
                   {/* COR Sub date */}
                   <td 
                     onClick={() => handleCellClick("schedule", row.id, "corSubDate", row.corSubDate)}
-                    className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "corSubDate" ? (
                       <input
@@ -970,7 +971,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                       />
                     ) : (
                       <span>{row.corSubDate}</span>
@@ -980,7 +981,7 @@ const WorkProgressReport = ({
                   {/* Comments */}
                   <td 
                     onClick={() => handleCellClick("schedule", row.id, "comments", row.comments)}
-                    className="p-3 font-semibold text-slate-700 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "comments" ? (
                       <input
@@ -990,7 +991,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                       />
                     ) : (
                       <span>{row.comments}</span>
@@ -1007,13 +1008,13 @@ const WorkProgressReport = ({
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <HelpCircle className="text-[#6bbd45] w-5 h-5" />
-            <h3 className="text-md font-black uppercase tracking-widest text-slate-700">2. RFI Status Overview</h3>
+            <HelpCircle className="text-black w-5 h-5" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-black">2. RFI Status Overview</h3>
           </div>
           {canEdit && (
             <button
               onClick={() => addRow("rfi")}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 rounded-lg text-xs font-bold uppercase transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 rounded-none text-xs font-bold uppercase transition-all shadow-sm cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Row
@@ -1021,25 +1022,25 @@ const WorkProgressReport = ({
           )}
         </div>
 
-        <div className="overflow-x-auto border border-black/15 rounded-2xl bg-white shadow-sm custom-scrollbar max-w-full">
+        <div className="overflow-x-auto border border-black rounded-none bg-white shadow-sm custom-scrollbar max-w-full">
           <table className="w-full text-left border-collapse min-w-[800px] text-xs">
             <thead>
-              <tr className="bg-slate-100 border-b border-black/10">
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5 w-24">RFI No.</th>
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5 w-28">Sent Date</th>
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5">Customer Response</th>
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5 w-36">Response Received</th>
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5">Whiteboard Response</th>
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 w-24">Status</th>
+              <tr className="bg-slate-100 border-b border-black">
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-24">RFI No.</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-28">Sent Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10">Customer Response</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-36">Response Received</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10">Whiteboard Response</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black w-24">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black/5">
+            <tbody className="divide-y divide-black/10">
               {filteredRfis.map((row) => (
                 <tr key={row.id} className="hover:bg-slate-50 transition-all">
                   {/* RFI No. */}
                   <td 
                     onClick={() => handleCellClick("rfi", row.id, "rfiNo", row.rfiNo)}
-                    className="p-3 font-black border-r border-black/5 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 font-bold border-r border-black/10 cursor-pointer hover:bg-slate-100/50 text-black"
                   >
                     {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "rfiNo" ? (
                       <input
@@ -1049,7 +1050,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded font-bold text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none font-bold text-xs text-black"
                       />
                     ) : (
                       <span>{row.rfiNo}</span>
@@ -1059,7 +1060,7 @@ const WorkProgressReport = ({
                   {/* Sent Date */}
                   <td 
                     onClick={() => handleCellClick("rfi", row.id, "sentDate", row.sentDate)}
-                    className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "sentDate" ? (
                       <input
@@ -1069,7 +1070,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                       />
                     ) : (
                       <span>{row.sentDate}</span>
@@ -1079,7 +1080,7 @@ const WorkProgressReport = ({
                   {/* Customer Response */}
                   <td 
                     onClick={() => handleCellClick("rfi", row.id, "customerResponse", row.customerResponse)}
-                    className="p-3 border-r border-black/5 font-semibold text-slate-700 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "customerResponse" ? (
                       <textarea
@@ -1088,7 +1089,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                       />
                     ) : (
                       <span>{row.customerResponse}</span>
@@ -1098,7 +1099,7 @@ const WorkProgressReport = ({
                   {/* Response Recd Date */}
                   <td 
                     onClick={() => handleCellClick("rfi", row.id, "responseReceivedDate", row.responseReceivedDate)}
-                    className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "responseReceivedDate" ? (
                       <input
@@ -1108,7 +1109,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                       />
                     ) : (
                       <span>{row.responseReceivedDate}</span>
@@ -1118,7 +1119,7 @@ const WorkProgressReport = ({
                   {/* WBT Response */}
                   <td 
                     onClick={() => handleCellClick("rfi", row.id, "wbtResponse", row.wbtResponse)}
-                    className="p-3 border-r border-black/5 font-semibold text-slate-700 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "wbtResponse" ? (
                       <textarea
@@ -1127,7 +1128,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                       />
                     ) : (
                       <span>{row.wbtResponse}</span>
@@ -1137,7 +1138,7 @@ const WorkProgressReport = ({
                   {/* Status */}
                   <td 
                     onClick={() => handleCellClick("rfi", row.id, "status", row.status)}
-                    className="p-3 font-black text-xs cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 font-bold text-xs cursor-pointer hover:bg-slate-100/50 text-black"
                   >
                     {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "status" ? (
                       <select
@@ -1146,13 +1147,13 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-1 py-1 rounded text-xs uppercase font-black"
+                        className="w-full bg-white border border-black px-1 py-1 rounded-none text-xs uppercase font-bold text-black"
                       >
                         <option value="OPEN">OPEN</option>
                         <option value="Closed">Closed</option>
                       </select>
                     ) : (
-                      <span className={`px-2 py-1 rounded border border-black ${row.status === "OPEN" ? "bg-orange-50 text-orange-700" : "bg-green-50 text-green-700"}`}>
+                      <span className={`px-2 py-1 rounded-none border border-black ${row.status === "OPEN" ? "bg-orange-50 text-orange-700" : "bg-green-50 text-green-700"}`}>
                         {row.status}
                       </span>
                     )}
@@ -1168,13 +1169,13 @@ const WorkProgressReport = ({
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <Clock className="text-[#6bbd45] w-5 h-5" />
-            <h3 className="text-md font-black uppercase tracking-widest text-slate-700">3. Change Order Amount ($) Monthly Breakdown</h3>
+            <Clock className="text-black w-5 h-5" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-black">3. Change Order Amount ($) Monthly Breakdown</h3>
           </div>
           {canEdit && (
             <button
               onClick={() => addRow("co")}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 rounded-lg text-xs font-bold uppercase transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 rounded-none text-xs font-bold uppercase transition-all shadow-sm cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Row
@@ -1182,24 +1183,24 @@ const WorkProgressReport = ({
           )}
         </div>
 
-        <div className="overflow-x-auto border border-black/15 rounded-2xl bg-white shadow-sm custom-scrollbar max-w-full">
+        <div className="overflow-x-auto border border-black rounded-none bg-white shadow-sm custom-scrollbar max-w-full">
           <table className="w-full text-center border-collapse min-w-[1000px] text-xs">
             <thead>
-              <tr className="bg-slate-100 border-b border-black/10">
-                <th className="p-3 text-left font-black uppercase tracking-wider text-slate-500 border-r border-black/5">Change Order</th>
+              <tr className="bg-slate-100 border-b border-black">
+                <th className="p-3 text-left font-bold uppercase tracking-wider text-black border-r border-black/10">Change Order</th>
                 {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map(m => (
-                  <th key={m} className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5">{m}</th>
+                  <th key={m} className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10">{m}</th>
                 ))}
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500">FY Total</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black">FY Total</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black/5 font-semibold text-slate-600">
+            <tbody className="divide-y divide-black/10 font-bold text-black">
               {filteredCoRows.map((row) => (
                 <tr key={row.id} className="hover:bg-slate-50 transition-all">
                   {/* CO number name */}
                   <td 
                     onClick={() => handleCellClick("co", row.id, "changeOrder", row.changeOrder)}
-                    className="p-3 text-left font-black text-black border-r border-black/5 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 text-left font-bold text-black border-r border-black/10 cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "co" && activeCell.rowId === row.id && activeCell.field === "changeOrder" ? (
                       <input
@@ -1209,7 +1210,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded font-bold text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none font-bold text-xs text-black"
                       />
                     ) : (
                       <span>{row.changeOrder}</span>
@@ -1221,7 +1222,7 @@ const WorkProgressReport = ({
                     <td 
                       key={m}
                       onClick={() => handleCellClick("co", row.id, m, row[m])}
-                      className="p-3 border-r border-black/5 cursor-pointer hover:bg-slate-100/50 text-slate-800"
+                      className="p-3 border-r border-black/10 cursor-pointer hover:bg-slate-100/50 text-black"
                     >
                       {activeCell?.table === "co" && activeCell.rowId === row.id && activeCell.field === m ? (
                         <input
@@ -1231,16 +1232,16 @@ const WorkProgressReport = ({
                           onChange={(e) => setEditValue(e.target.value)}
                           onBlur={handleCellSave}
                           onKeyDown={handleKeyDown}
-                          className="w-8/12 bg-white border border-[#6bbd45] px-1 py-0.5 rounded text-center text-xs"
+                          className="w-8/12 bg-white border border-black px-1 py-0.5 rounded-none text-center text-xs text-black"
                         />
                       ) : (
-                        <span className={row[m] === "Sent" ? "text-blue-500 font-bold" : ""}>{row[m] || "—"}</span>
+                        <span className={row[m] === "Sent" ? "text-blue-600 font-bold" : ""}>{row[m] || "—"}</span>
                       )}
                     </td>
                   ))}
 
                   {/* Total */}
-                  <td className="p-3 font-black text-black">{row.total}</td>
+                  <td className="p-3 font-bold text-black">{row.total}</td>
                 </tr>
               ))}
             </tbody>
@@ -1252,13 +1253,13 @@ const WorkProgressReport = ({
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <Compass className="text-[#6bbd45] w-5 h-5" />
-            <h3 className="text-md font-black uppercase tracking-widest text-slate-700">4. Coordination Drawings Status</h3>
+            <Compass className="text-black w-5 h-5" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-black">4. Coordination Drawings Status</h3>
           </div>
           {canEdit && (
             <button
               onClick={() => addRow("coordDrawing")}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 rounded-lg text-xs font-bold uppercase transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 rounded-none text-xs font-bold uppercase transition-all shadow-sm cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Row
@@ -1266,23 +1267,23 @@ const WorkProgressReport = ({
           )}
         </div>
 
-        <div className="overflow-x-auto border border-black/15 rounded-2xl bg-white shadow-sm custom-scrollbar max-w-full">
+        <div className="overflow-x-auto border border-black rounded-none bg-white shadow-sm custom-scrollbar max-w-full">
           <table className="w-full text-left border-collapse min-w-[800px] text-xs">
             <thead>
-              <tr className="bg-slate-100 border-b border-black/10">
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5">Drawing Name</th>
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5 w-32">Stage</th>
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 border-r border-black/5 w-36">Status</th>
-                <th className="p-3 font-black uppercase tracking-wider text-slate-500 w-44">Date Created</th>
+              <tr className="bg-slate-100 border-b border-black">
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10">Drawing Name</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-32">Stage</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-36">Status</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black w-44">Date Created</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black/5">
+            <tbody className="divide-y divide-black/10">
               {filteredCoordDrawings.map((row) => (
                 <tr key={row.id} className="hover:bg-slate-50 transition-all">
                   {/* Drawing Name */}
                   <td 
                     onClick={() => handleCellClick("coordDrawing", row.id, "title", row.title)}
-                    className="p-3 font-black border-r border-black/5 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 font-bold border-r border-black/10 cursor-pointer hover:bg-slate-100/50 text-black"
                   >
                     {activeCell?.table === "coordDrawing" && activeCell.rowId === row.id && activeCell.field === "title" ? (
                       <input
@@ -1292,7 +1293,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded font-bold text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none font-bold text-xs text-black"
                       />
                     ) : (
                       <span className="uppercase">{row.title}</span>
@@ -1302,7 +1303,7 @@ const WorkProgressReport = ({
                   {/* Stage */}
                   <td 
                     onClick={() => handleCellClick("coordDrawing", row.id, "stage", row.stage)}
-                    className="p-3 border-r border-black/5 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "coordDrawing" && activeCell.rowId === row.id && activeCell.field === "stage" ? (
                       <select
@@ -1311,7 +1312,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-1 py-1 rounded text-xs uppercase font-black"
+                        className="w-full bg-white border border-black px-1 py-1 rounded-none text-xs uppercase font-bold text-black"
                       >
                         <option value="IFA">IFA</option>
                         <option value="IFC">IFC</option>
@@ -1326,7 +1327,7 @@ const WorkProgressReport = ({
                   {/* Status */}
                   <td 
                     onClick={() => handleCellClick("coordDrawing", row.id, "status", row.status)}
-                    className="p-3 border-r border-black/5 font-black text-xs cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 border-r border-black/10 font-bold text-xs cursor-pointer hover:bg-slate-100/50 text-black"
                   >
                     {activeCell?.table === "coordDrawing" && activeCell.rowId === row.id && activeCell.field === "status" ? (
                       <select
@@ -1335,14 +1336,14 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-1 py-1 rounded text-xs uppercase font-black"
+                        className="w-full bg-white border border-black px-1 py-1 rounded-none text-xs uppercase font-bold text-black"
                       >
                         <option value="Pending">Pending</option>
                         <option value="In Review">In Review</option>
                         <option value="Approved">Approved</option>
                       </select>
                     ) : (
-                      <span className={`px-2 py-1 rounded border border-black ${row.status === "Approved" ? "bg-green-50 text-green-700" : "bg-orange-50 text-orange-700"}`}>
+                      <span className={`px-2 py-1 rounded-none border border-black ${row.status === "Approved" ? "bg-green-50 text-green-700" : "bg-orange-50 text-orange-700"}`}>
                         {row.status}
                       </span>
                     )}
@@ -1351,7 +1352,7 @@ const WorkProgressReport = ({
                   {/* Date Created */}
                   <td 
                     onClick={() => handleCellClick("coordDrawing", row.id, "createdAt", row.createdAt)}
-                    className="p-3 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100/50"
+                    className="p-3 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "coordDrawing" && activeCell.rowId === row.id && activeCell.field === "createdAt" ? (
                       <input
@@ -1361,7 +1362,7 @@ const WorkProgressReport = ({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={handleCellSave}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-[#6bbd45] px-2 py-1 rounded text-xs"
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                       />
                     ) : (
                       <span>{row.createdAt}</span>

@@ -46,17 +46,17 @@ const EditDesignDrawing = ({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="bg-white p-4 rounded-lg border space-y-4"
+      className="bg-white p-4 rounded-none border border-black space-y-4"
     >
-      <h3 className="text-lg font-semibold text-green-700">
+      <h3 className="text-sm font-bold text-black uppercase tracking-widest">
         Edit Design Drawing
       </h3>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Stage</label>
+        <label className="block text-sm font-bold text-black uppercase tracking-wider">Stage</label>
         <select
           {...register("stage", { required: true })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+          className="w-full mt-1 px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-none focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm cursor-pointer"
         >
           <option value="IFA">IFA</option>
           <option value="IFC">IFC</option>
@@ -65,35 +65,35 @@ const EditDesignDrawing = ({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-bold text-black uppercase tracking-wider">
           Description
         </label>
         <textarea
           {...register("description", { required: true })}
           rows={3}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+          className="w-full mt-1 px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-none focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-bold text-black uppercase tracking-wider">
           Add More Files (Optional)
         </label>
         <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button
+        <button
           type="button"
           onClick={onCancel}
-          className="bg-gray-100 text-gray-700 hover:bg-gray-200"
+          className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
         >
           Cancel
-        </Button>
-        <Button
+        </button>
+        <button
           type="submit"
           disabled={loading}
-          className="bg-green-600 text-white"
+          className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer disabled:opacity-50"
         >
           {loading ? (
             <>
@@ -103,7 +103,7 @@ const EditDesignDrawing = ({
           ) : (
             "Update Drawing"
           )}
-        </Button>
+        </button>
       </div>
     </form>
   );

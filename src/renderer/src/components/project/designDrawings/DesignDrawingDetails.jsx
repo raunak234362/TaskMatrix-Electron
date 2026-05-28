@@ -65,24 +65,24 @@ const DesignDrawingDetails = ({ id, onUpdate }) => {
   }
 
   return (
-    <div className="p-4 bg-gray-50 rounded-lg border space-y-4">
+    <div className="p-4 bg-white rounded-none border border-black space-y-4">
       <div className="flex justify-between items-start">
         <div>
-          <h4 className="font-semibold text-green-700">
+          <h4 className="text-sm font-bold text-black uppercase tracking-widest">
             Stage: {drawing.stage}
           </h4>
-          <p className="text-sm text-gray-600">{drawing.description}</p>
+          <p className="text-sm text-black mt-1">{drawing.description}</p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => setIsEditing(true)}
-            className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+            className="p-1 text-blue-700 hover:bg-blue-50 rounded-none border border-transparent hover:border-blue-700/30 transition-all cursor-pointer"
           >
             <Edit className="w-4 h-4" />
           </button>
           <button
             onClick={handleDelete}
-            className="p-1 text-red-600 hover:bg-red-50 rounded"
+            className="p-1 text-red-700 hover:bg-red-50 rounded-none border border-transparent hover:border-red-700/30 transition-all cursor-pointer"
           >
             <Trash2 className="w-4 h-4" />
           </button>

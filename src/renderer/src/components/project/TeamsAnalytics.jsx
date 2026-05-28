@@ -126,12 +126,12 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
           <button
             key={t}
             onClick={() => setSubTab(t)}
-            className={`px-5 py-2 rounded-xl font-black text-xs uppercase tracking-widest border-2 transition-all ${subTab === t
-              ? "bg-[#6bbd45] text-white border-[#6bbd45] shadow-md shadow-[#6bbd45]/20"
-              : "bg-white text-black border-black hover:bg-green-50"
+            className={`px-5 py-2 rounded-none font-bold text-sm uppercase tracking-tight border-2 transition-all cursor-pointer ${subTab === t
+              ? "bg-green-50 text-black border-green-700/80 hover:bg-green-100 shadow-sm"
+              : "bg-white text-black border-black/80 hover:bg-slate-50 shadow-sm"
               }`}
           >
-            {t === "team" ? "👥 Team Analytics" : "📊 Manager Analytics"}
+            {t === "team" ? " Team Analytics" : " Manager Analytics"}
           </button>
         ))}
       </div>
@@ -147,13 +147,13 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
       {subTab === "manager" && (
         <div className="space-y-8 animate-in fade-in duration-300">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-8 rounded-[2.5rem] border border-black/5 shadow-sm">
+            <div className="bg-white p-8 rounded-none border border-black shadow-sm">
               <div className="flex items-center gap-4 mb-8">
-                <div className="p-4 bg-blue-50 rounded-[1.5rem]">
+                <div className="p-4 bg-blue-50 rounded-none border border-black">
                   <PieChart className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em] block mb-1">
+                  <span className="text-sm font-black text-black/40 uppercase tracking-[0.2em] block mb-1">
                     Project Score
                   </span>
                   <h3 className="text-xl font-black text-black uppercase tracking-tight">
@@ -165,29 +165,29 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
               {loadingBias ? (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
                   <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                  <span className="text-xs font-bold text-black/40 uppercase tracking-widest">
+                  <span className="text-sm font-bold text-black/40 uppercase tracking-widest">
                     Fetching Analysis...
                   </span>
                 </div>
               ) : managerBias ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gray-50 p-6 rounded-2xl border border-black/5">
-                      <span className="text-[10px] font-black text-black/40 uppercase tracking-widest block mb-2">
+                    <div className="bg-gray-50 p-6 rounded-none border border-black">
+                      <span className="text-sm font-black text-black/40 uppercase tracking-widest block mb-2">
                         Bias Value
                       </span>
                       <span className="text-3xl font-black text-black">
                         {managerBias.bias || "0.00"}
                       </span>
                     </div>
-                    <div className="bg-gray-50 p-6 rounded-2xl border border-black/5">
-                      <span className="text-[10px] font-black text-black/40 uppercase tracking-widest block mb-2">
+                    <div className="bg-gray-50 p-6 rounded-none border border-black">
+                      <span className="text-sm font-black text-black/40 uppercase tracking-widest block mb-2">
                         Status
                       </span>
                       <span
-                        className={`text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full ${managerBias.interpretation === "BALANCED"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-yellow-100 text-yellow-700"
+                        className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-none border ${managerBias.interpretation === "BALANCED"
+                          ? "bg-green-100 text-green-700 border-green-700/80"
+                          : "bg-yellow-100 text-yellow-700 border-yellow-700/80"
                           }`}
                       >
                         {managerBias.interpretation || "N/A"}
@@ -196,7 +196,7 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-12 bg-gray-50 rounded-[1.5rem] border border-dashed border-black/10">
+                <div className="text-center py-12 bg-gray-50 rounded-none border border-dashed border-black/20">
                   <p className="text-black/40 font-bold text-sm tracking-tight uppercase">
                     No bias data available
                   </p>
@@ -205,13 +205,13 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
             </div>
 
             {/* Meas Section */}
-            <div className="bg-white p-8 rounded-[2.5rem] border border-black/5 shadow-sm">
+            <div className="bg-white p-8 rounded-none border border-black shadow-sm">
               <div className="flex items-center gap-4 mb-8">
-                <div className="p-4 bg-green-50 rounded-[1.5rem]">
+                <div className="p-4 bg-green-50 rounded-none border border-black">
                   <Activity className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em] block mb-1">
+                  <span className="text-sm font-black text-black/40 uppercase tracking-[0.2em] block mb-1">
                     Performance Engine
                   </span>
                   <h3 className="text-xl font-black text-black uppercase tracking-tight">
@@ -223,10 +223,10 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
               <div className="space-y-4">
                 {measResult ? (
                   <div className="animate-in slide-in-from-bottom-2 fade-in duration-300">
-                    <div className="p-5 bg-gradient-to-br from-green-50 to-emerald-100/50 rounded-2xl border border-green-200 mb-6 text-center shadow-sm">
+                    <div className="p-5 bg-gradient-to-br from-green-50 to-emerald-100/50 rounded-none border border-black mb-6 text-center shadow-sm">
                       {measResult.type === "manual" ? (
                         <>
-                          <span className="text-[10px] font-black text-green-800/60 uppercase tracking-widest block mb-1">
+                          <span className="text-sm font-black text-green-800/60 uppercase tracking-widest block mb-1">
                             Calculated Score
                           </span>
                           <span className="text-4xl font-black text-green-700">
@@ -234,7 +234,7 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                               ? Number(measResult.score).toFixed(2)
                               : "0.00"}
                           </span>
-                          <span className="text-[9px] font-black text-green-800/40 uppercase tracking-widest block mt-2">
+                          <span className="text-sm font-black text-green-800/40 uppercase tracking-widest block mt-2">
                             {measResult.calculatedAt
                               ? `Calculated On: ${new Date(measResult.calculatedAt).toLocaleString()}`
                               : "Recently Calculated"}
@@ -242,13 +242,13 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                         </>
                       ) : (
                         <>
-                          <span className="text-[10px] font-black text-green-800/60 uppercase tracking-widest block mb-1">
+                          <span className="text-sm font-black text-green-800/60 uppercase tracking-widest block mb-1">
                             Monthly Analytics
                           </span>
                           <span className="text-base font-black text-green-700 block my-2 px-2 leading-tight">
                             {measResult.message}
                           </span>
-                          <span className="text-[9px] font-black text-green-800/40 uppercase tracking-widest block mt-2">
+                          <span className="text-sm font-black text-green-800/40 uppercase tracking-widest block mt-2">
                             Processed {measResult.processed || 0} of{" "}
                             {measResult.validProjects || 0} valid projects
                           </span>
@@ -257,7 +257,7 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                     </div>
                     <button
                       onClick={() => setMeasResult(null)}
-                      className="w-full py-3 bg-white border border-black/10 text-black/60 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-colors"
+                      className="w-full py-2 bg-white text-black border-2 border-black/80 hover:bg-slate-50 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm transition-all cursor-pointer"
                     >
                       Clear Result
                     </button>
@@ -267,19 +267,19 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                     <button
                       onClick={runMeasManually}
                       disabled={measLoading}
-                      className="w-full flex items-center justify-center gap-3 px-8 py-5 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-black/90 transition-all shadow-md group active:scale-[0.98] disabled:opacity-50"
+                      className="w-full flex items-center justify-center gap-3 px-6 py-2.5 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 rounded-none font-bold text-sm uppercase tracking-tight shadow-sm transition-all cursor-pointer group disabled:opacity-50"
                     >
                       {measLoading ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
-                        <Play className="w-4 h-4 fill-white group-hover:scale-110 transition-transform" />
+                        <Play className="w-4 h-4 fill-black group-hover:scale-110 transition-transform" />
                       )}
                       Run Meas Manually
                     </button>
                     <button
                       onClick={runMeasMonthly}
                       disabled={measLoading}
-                      className="w-full flex items-center justify-center gap-3 px-8 py-5 bg-white border-2 border-black text-black rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-gray-50 transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
+                      className="w-full flex items-center justify-center gap-3 px-6 py-2.5 bg-white text-black border-2 border-black/80 hover:bg-slate-50 rounded-none font-bold text-sm uppercase tracking-tight shadow-sm transition-all cursor-pointer group disabled:opacity-50"
                     >
                       {measLoading ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -296,13 +296,13 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
 
           {/* Admin Analytics Overview */}
           {adminAnalytics && (
-            <div className="bg-white p-8 rounded-[2.5rem] border border-black/5 shadow-sm mt-8 animate-in slide-in-from-bottom-2 fade-in duration-500">
+            <div className="bg-white p-8 rounded-none border border-black shadow-sm mt-8 animate-in slide-in-from-bottom-2 fade-in duration-500">
               <div className="flex items-center gap-4 mb-8">
-                <div className="p-3 bg-purple-50 rounded-[1.5rem]">
+                <div className="p-3 bg-purple-50 rounded-none border border-black">
                   <Target className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em] block mb-1">
+                  <span className="text-sm font-black text-black/40 uppercase tracking-[0.2em] block mb-1">
                     Executive Overview
                   </span>
                   <h3 className="text-xl font-black text-black uppercase tracking-tight">
@@ -313,7 +313,7 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
                 {/* MEAS Score Card */}
-                <div className="bg-gray-50 p-6 rounded-3xl border border-black/5 flex flex-col justify-between">
+                <div className="bg-gray-50 p-6 rounded-none border border-black flex flex-col justify-between">
                   <div>
                     <span className="text-[10px] font-black text-black/40 uppercase tracking-widest mb-1 flex items-center justify-between">
                       MEAS Score
@@ -325,7 +325,7 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                         : "N/A"}
                     </span>
                   </div>
-                  <div className="bg-white p-3 rounded-xl border border-black/5 flex items-center gap-2">
+                  <div className="bg-white p-3 rounded-none border border-black flex items-center gap-2">
                     <span className="text-xs font-bold text-gray-700">
                       {adminAnalytics.measInsight || "No insight available."}
                     </span>
@@ -333,7 +333,7 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                 </div>
 
                 {/* Bias Analytics */}
-                <div className="bg-gray-50 p-6 rounded-3xl border border-black/5 flex flex-col justify-between">
+                <div className="bg-gray-50 p-6 rounded-none border border-black flex flex-col justify-between">
                   <div>
                     <span className="text-[10px] font-black text-black/40 uppercase tracking-widest mb-1 flex items-center justify-between">
                       Bias Score
@@ -345,9 +345,9 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                         : "N/A"}
                     </span>
                     <span
-                      className={`inline-block text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-4 ${adminAnalytics.biasInterpretation === "BALANCED"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
+                      className={`inline-block text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-none border mb-4 ${adminAnalytics.biasInterpretation === "BALANCED"
+                        ? "bg-green-100 text-green-700 border-green-700/80"
+                        : "bg-yellow-100 text-yellow-700 border-yellow-700/80"
                         }`}
                     >
                       {adminAnalytics.biasInterpretation || "UNKNOWN"}
@@ -359,13 +359,13 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                 </div>
 
                 {/* Allocation Metrics */}
-                <div className="bg-gray-50 p-6 rounded-3xl border border-black/5 flex flex-col justify-between">
+                <div className="bg-gray-50 p-6 rounded-none border border-black flex flex-col justify-between">
                   <span className="text-[10px] font-black text-black/40 uppercase tracking-widest mb-4 flex items-center justify-between">
                     Resource Allocation
                     <AlertTriangle className="w-3 h-3 text-black/40" />
                   </span>
                   <div className="space-y-4">
-                    <div className="bg-red-50/50 p-4 rounded-2xl border border-red-100">
+                    <div className="bg-red-50/50 p-4 rounded-none border border-black">
                       <span className="text-[9px] font-black text-red-800/60 uppercase tracking-widest block mb-1">
                         Overrun
                       </span>
@@ -375,7 +375,7 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                           : "0%"}
                       </span>
                     </div>
-                    <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
+                    <div className="bg-blue-50/50 p-4 rounded-none border border-black">
                       <span className="text-[9px] font-black text-blue-800/60 uppercase tracking-widest block mb-1">
                         Underutilized
                       </span>
@@ -389,7 +389,7 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                 </div>
 
                 {/* Task Summary */}
-                <div className="bg-gray-50 p-6 rounded-3xl border border-black/5 flex flex-col">
+                <div className="bg-gray-50 p-6 rounded-none border border-black flex flex-col">
                   <span className="text-[10px] font-black text-black/40 uppercase tracking-widest mb-4 flex items-center justify-between">
                     Task Breakdown
                     <ListTodo className="w-3 h-3 text-black/40" />
@@ -400,12 +400,12 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                       adminAnalytics.taskSummary.map((ts, idx) => (
                         <div
                           key={idx}
-                          className="flex items-center justify-between p-3 bg-white rounded-xl border border-black/5"
+                          className="flex items-center justify-between p-3 bg-white rounded-none border border-black"
                         >
                           <span className="text-xs font-bold text-gray-700 uppercase">
                             {ts.status?.replace("_", " ")}
                           </span>
-                          <span className="text-sm font-black text-black bg-gray-100 px-2 py-0.5 rounded-lg">
+                          <span className="text-sm font-black text-black bg-gray-100 px-2 py-0.5 rounded-none border border-black">
                             {ts._count?.id || 0}
                           </span>
                         </div>
@@ -421,7 +421,7 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
 
               {/* Trendline Section */}
               {adminTrendline && adminTrendline.length > 0 && (
-                <div className="bg-gray-50 p-6 rounded-3xl border border-black/5">
+                <div className="bg-gray-50 p-6 rounded-none border border-black">
                   <span className="text-[10px] font-black text-black/40 uppercase tracking-widest block mb-6">
                     MEAS Score Trend (6 Months)
                   </span>
@@ -451,8 +451,8 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                         />
                         <Tooltip
                           contentStyle={{
-                            borderRadius: "16px",
-                            border: "1px solid rgba(0,0,0,0.05)",
+                            borderRadius: "0px",
+                            border: "1px solid #000000",
                             boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                             fontSize: "12px",
                             fontWeight: "bold",
@@ -482,22 +482,22 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
           )}
 
           {/* Manager Bias Section */}
-          <div className="bg-gray-50 p-6 rounded-2xl border border-black/5 mt-4 mb-6">
+          <div className="bg-gray-50 p-6 rounded-none border border-black mt-4 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <h4 className="text-[12px] font-black text-black">
                 Score Range for Meas Analytics:
               </h4>
-              <span className="bg-gray-200 text-gray-700 text-[10px] px-2 py-0.5 rounded-md font-mono">
+              <span className="bg-gray-200 text-gray-700 text-[10px] px-2 py-0.5 rounded-none border border-black font-mono">
                 0 &rarr; 100
               </span>
             </div>
-            <div className="overflow-x-auto rounded-xl border border-gray-200/60 bg-white mb-6">
+            <div className="overflow-x-auto rounded-none border border-black bg-white mb-6">
               <table className="w-full text-sm text-left">
-                <thead className="text-[10px] text-gray-500 bg-gray-50 uppercase font-black tracking-widest border-b border-gray-200/60">
+                <thead className="text-[10px] text-gray-500 bg-gray-50 uppercase font-black tracking-widest border-b border-black">
                   <tr>
                     <th
                       scope="col"
-                      className="px-4 py-3 border-r border-gray-200/60"
+                      className="px-4 py-3 border-r border-black"
                     >
                       Score
                     </th>
@@ -507,24 +507,24 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-gray-200/60">
-                    <td className="px-4 py-3 font-bold text-gray-800 border-r border-gray-200/60">
+                  <tr className="border-b border-black/10">
+                    <td className="px-4 py-3 font-bold text-gray-800 border-r border-black/10">
                       100
                     </td>
                     <td className="px-4 py-3 font-medium text-gray-600">
                       Perfect estimation accuracy
                     </td>
                   </tr>
-                  <tr className="border-b border-gray-200/60 bg-gray-50/50">
-                    <td className="px-4 py-3 font-bold text-gray-800 border-r border-gray-200/60">
+                  <tr className="border-b border-black/10 bg-gray-50/50">
+                    <td className="px-4 py-3 font-bold text-gray-800 border-r border-black/10">
                       &gt; 80
                     </td>
                     <td className="px-4 py-3 font-medium text-gray-600">
                       Good, reliable estimation
                     </td>
                   </tr>
-                  <tr className="border-b border-gray-200/60">
-                    <td className="px-4 py-3 font-bold text-gray-800 border-r border-gray-200/60">
+                  <tr className="border-b border-black/10">
+                    <td className="px-4 py-3 font-bold text-gray-800 border-r border-black/10">
                       &lt; 60
                     </td>
                     <td className="px-4 py-3 font-medium text-gray-600">
@@ -532,7 +532,7 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                     </td>
                   </tr>
                   <tr className="bg-white">
-                    <td className="px-4 py-3 font-bold text-gray-800 border-r border-gray-200/60">
+                    <td className="px-4 py-3 font-bold text-gray-800 border-r border-black/10">
                       &lt; 40
                     </td>
                     <td className="px-4 py-3 font-medium text-gray-600">
@@ -570,29 +570,29 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
             </ul>
           </div>
 
-          <div className="bg-gray-50 p-6 rounded-2xl border border-black/5 mt-4">
+          <div className="bg-gray-50 p-6 rounded-none border border-black mt-4">
             <h4 className="text-[12px] font-black text-black uppercase tracking-widest mb-4">
               Interpretation Table for Manager Bias
             </h4>
-            <div className="overflow-x-auto rounded-xl border border-gray-200/60 bg-white">
+            <div className="overflow-x-auto rounded-none border border-black bg-white">
               <table className="w-full text-sm text-left">
                 <thead className="text-[10px] text-gray-500 bg-gray-50 uppercase font-black tracking-widest">
                   <tr>
                     <th
                       scope="col"
-                      className="px-4 py-3 border-b border-gray-200/60"
+                      className="px-4 py-3 border-b border-black/10"
                     >
                       Bias Value
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3 border-b border-gray-200/60"
+                      className="px-4 py-3 border-b border-black/10"
                     >
                       Meaning
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3 border-b border-gray-200/60"
+                      className="px-4 py-3 border-b border-black/10"
                     >
                       Behavior
                     </th>

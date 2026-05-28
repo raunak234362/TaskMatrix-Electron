@@ -79,7 +79,7 @@ const GREEN_BORDER = "#d1f0bb";
 /* ─── Shared task row base style ─── */
 const taskRowBaseStyle = {
     padding: "8px 10px",
-    borderRadius: "8px",
+    borderRadius: "0px",
     marginBottom: "6px",
     background: "#f9fafb",
     border: "1px solid rgba(0,0,0,0.06)",
@@ -126,7 +126,7 @@ function TaskDetailPanel({ taskId, onClose }) {
 
     const st = task
         ? getStatusStyle(task.status)
-        : { bg: "#f3f4f6", color: "#6b7280" };
+        : { bg: "#f3f4f6", color: "#000000" };
 
     return createPortal(
         <div
@@ -180,7 +180,7 @@ function TaskDetailPanel({ taskId, onClose }) {
                         <div
                             style={{
                                 background: GREEN,
-                                borderRadius: "8px",
+                                borderRadius: "0px",
                                 padding: "8px",
                                 display: "flex",
                             }}
@@ -190,7 +190,7 @@ function TaskDetailPanel({ taskId, onClose }) {
                         <div>
                             <div
                                 style={{
-                                    fontSize: "10px",
+                                    fontSize: "14px",
                                     color: GREEN,
                                     fontWeight: 800,
                                     letterSpacing: "1.5px",
@@ -216,8 +216,8 @@ function TaskDetailPanel({ taskId, onClose }) {
                         onClick={onClose}
                         style={{
                             background: "#fee2e2",
-                            border: "none",
-                            borderRadius: "8px",
+                            border: "1px solid #dc2626",
+                            borderRadius: "0px",
                             padding: "6px",
                             cursor: "pointer",
                             display: "flex",
@@ -255,7 +255,7 @@ function TaskDetailPanel({ taskId, onClose }) {
                                 style={{ animation: "spin 1s linear infinite" }}
                                 color={GREEN}
                             />
-                            <span style={{ fontSize: "13px", fontWeight: 600 }}>
+                            <span style={{ fontSize: "14px", fontWeight: 600 }}>
                                 Loading task details...
                             </span>
                         </div>
@@ -268,7 +268,7 @@ function TaskDetailPanel({ taskId, onClose }) {
                             }}
                         >
                             <AlertCircle size={32} style={{ margin: "0 auto 10px" }} />
-                            <div style={{ fontSize: "13px", fontWeight: 600 }}>
+                            <div style={{ fontSize: "14px", fontWeight: 600 }}>
                                 Could not load task details.
                             </div>
                         </div>
@@ -279,8 +279,9 @@ function TaskDetailPanel({ taskId, onClose }) {
                                 <span
                                     style={{
                                         padding: "4px 12px",
-                                        borderRadius: "999px",
-                                        fontSize: "11px",
+                                        borderRadius: "0px",
+                                        border: `1px solid ${st.color}`,
+                                        fontSize: "14px",
                                         fontWeight: 700,
                                         background: st.bg,
                                         color: st.color,
@@ -294,11 +295,12 @@ function TaskDetailPanel({ taskId, onClose }) {
                                     <span
                                         style={{
                                             padding: "4px 12px",
-                                            borderRadius: "999px",
-                                            fontSize: "11px",
+                                            borderRadius: "0px",
+                                            border: "1px solid #000000",
+                                            fontSize: "14px",
                                             fontWeight: 700,
                                             background: "#f3f4f6",
-                                            color: "#374151",
+                                            color: "#000000",
                                             display: "flex",
                                             alignItems: "center",
                                             gap: "5px",
@@ -343,8 +345,8 @@ function TaskDetailPanel({ taskId, onClose }) {
                                         key={s.label}
                                         style={{
                                             background: "#f9fafb",
-                                            border: "1px solid #f3f4f6",
-                                            borderRadius: "10px",
+                                            border: "1px solid #000000",
+                                            borderRadius: "0px",
                                             padding: "10px 12px",
                                         }}
                                     >
@@ -353,14 +355,14 @@ function TaskDetailPanel({ taskId, onClose }) {
                                                 display: "flex",
                                                 alignItems: "center",
                                                 gap: "5px",
-                                                color: "#9ca3af",
+                                                color: "#000000",
                                                 marginBottom: "4px",
                                             }}
                                         >
                                             {s.icon}
                                             <span
                                                 style={{
-                                                    fontSize: "10px",
+                                                    fontSize: "14px",
                                                     fontWeight: 700,
                                                     textTransform: "uppercase",
                                                     letterSpacing: "0.5px",
@@ -371,7 +373,7 @@ function TaskDetailPanel({ taskId, onClose }) {
                                         </div>
                                         <div
                                             style={{
-                                                fontSize: "15px",
+                                                fontSize: "14px",
                                                 fontWeight: 800,
                                                 color: "#111827",
                                             }}
@@ -387,14 +389,14 @@ function TaskDetailPanel({ taskId, onClose }) {
                                 <div
                                     style={{
                                         background: "#f9fafb",
-                                        border: "1px solid #f3f4f6",
-                                        borderRadius: "12px",
+                                        border: "1px solid #000000",
+                                        borderRadius: "0px",
                                         padding: "14px 16px",
                                     }}
                                 >
                                     <div
                                         style={{
-                                            fontSize: "10px",
+                                            fontSize: "14px",
                                             fontWeight: 800,
                                             color: GREEN,
                                             letterSpacing: "1.5px",
@@ -408,7 +410,7 @@ function TaskDetailPanel({ taskId, onClose }) {
                                         <FileText size={12} /> Description / Comments
                                     </div>
                                     <div
-                                        style={{ fontSize: "13px", color: "#374151", lineHeight: 1.7 }}
+                                        style={{ fontSize: "14px", color: "#000000", lineHeight: 1.7 }}
                                         dangerouslySetInnerHTML={{ __html: task.description }}
                                     />
                                 </div>
@@ -416,12 +418,12 @@ function TaskDetailPanel({ taskId, onClose }) {
                                 <div
                                     style={{
                                         background: "#f9fafb",
-                                        border: "1px dashed #e5e7eb",
-                                        borderRadius: "12px",
+                                        border: "1px dashed #000000",
+                                        borderRadius: "0px",
                                         padding: "20px",
                                         textAlign: "center",
-                                        color: "#9ca3af",
-                                        fontSize: "12px",
+                                        color: "#000000",
+                                        fontSize: "14px",
                                         fontWeight: 600,
                                     }}
                                 >
@@ -434,9 +436,9 @@ function TaskDetailPanel({ taskId, onClose }) {
                                 <div>
                                     <div
                                         style={{
-                                            fontSize: "10px",
+                                            fontSize: "14px",
                                             fontWeight: 800,
-                                            color: "#6b7280",
+                                            color: "#000000",
                                             letterSpacing: "1.5px",
                                             textTransform: "uppercase",
                                             marginBottom: "10px",
@@ -458,8 +460,8 @@ function TaskDetailPanel({ taskId, onClose }) {
                                                     key={wh.id || idx}
                                                     style={{
                                                         background: isActive ? GREEN_LIGHT : "#f9fafb",
-                                                        border: `1px solid ${isActive ? GREEN_BORDER : "#f3f4f6"}`,
-                                                        borderRadius: "10px",
+                                                        border: "1px solid #000000",
+                                                        borderRadius: "0px",
                                                         padding: "10px 14px",
                                                         display: "flex",
                                                         justifyContent: "space-between",
@@ -469,7 +471,7 @@ function TaskDetailPanel({ taskId, onClose }) {
                                                     <div>
                                                         <div
                                                             style={{
-                                                                fontSize: "11px",
+                                                                fontSize: "14px",
                                                                 fontWeight: 700,
                                                                 color: "#111827",
                                                             }}
@@ -479,11 +481,12 @@ function TaskDetailPanel({ taskId, onClose }) {
                                                                 <span
                                                                     style={{
                                                                         marginLeft: "8px",
-                                                                        fontSize: "9px",
+                                                                        fontSize: "14px",
                                                                         background: GREEN,
                                                                         color: "#fff",
                                                                         padding: "1px 7px",
-                                                                        borderRadius: "999px",
+                                                                        borderRadius: "0px",
+                                                                        border: "1px solid #ffffff",
                                                                         fontWeight: 800,
                                                                     }}
                                                                 >
@@ -493,8 +496,8 @@ function TaskDetailPanel({ taskId, onClose }) {
                                                         </div>
                                                         <div
                                                             style={{
-                                                                fontSize: "10px",
-                                                                color: "#9ca3af",
+                                                                fontSize: "14px",
+                                                                color: "#000000",
                                                                 marginTop: "2px",
                                                             }}
                                                         >
@@ -509,8 +512,8 @@ function TaskDetailPanel({ taskId, onClose }) {
                                                     <div
                                                         style={{
                                                             fontWeight: 800,
-                                                            fontSize: "13px",
-                                                            color: isActive ? GREEN : "#374151",
+                                                            fontSize: "14px",
+                                                            color: isActive ? GREEN : "#000000",
                                                         }}
                                                     >
                                                         {formatSecs(secs)}
@@ -527,14 +530,14 @@ function TaskDetailPanel({ taskId, onClose }) {
                                 <div
                                     style={{
                                         background: "#eff6ff",
-                                        border: "1px solid #bfdbfe",
-                                        borderRadius: "12px",
+                                        border: "1px solid #000000",
+                                        borderRadius: "0px",
                                         padding: "14px 16px",
                                     }}
                                 >
                                     <div
                                         style={{
-                                            fontSize: "10px",
+                                            fontSize: "14px",
                                             fontWeight: 800,
                                             color: "#2563eb",
                                             letterSpacing: "1.5px",
@@ -568,16 +571,16 @@ function TaskDetailPanel({ taskId, onClose }) {
                                     <div
                                         style={{
                                             background: "#f9fafb",
-                                            border: "1px solid #f3f4f6",
-                                            borderRadius: "10px",
+                                            border: "1px solid #000000",
+                                            borderRadius: "0px",
                                             padding: "10px 12px",
                                         }}
                                     >
                                         <div
                                             style={{
-                                                fontSize: "10px",
+                                                fontSize: "14px",
                                                 fontWeight: 700,
-                                                color: "#9ca3af",
+                                                color: "#000000",
                                                 textTransform: "uppercase",
                                                 letterSpacing: "0.5px",
                                                 marginBottom: "3px",
@@ -587,7 +590,7 @@ function TaskDetailPanel({ taskId, onClose }) {
                                         </div>
                                         <div
                                             style={{
-                                                fontSize: "12px",
+                                                fontSize: "14px",
                                                 fontWeight: 700,
                                                 color: "#111827",
                                             }}
@@ -600,16 +603,16 @@ function TaskDetailPanel({ taskId, onClose }) {
                                     <div
                                         style={{
                                             background: "#f9fafb",
-                                            border: "1px solid #f3f4f6",
-                                            borderRadius: "10px",
+                                            border: "1px solid #000000",
+                                            borderRadius: "0px",
                                             padding: "10px 12px",
                                         }}
                                     >
                                         <div
                                             style={{
-                                                fontSize: "10px",
+                                                fontSize: "14px",
                                                 fontWeight: 700,
-                                                color: "#9ca3af",
+                                                color: "#000000",
                                                 textTransform: "uppercase",
                                                 letterSpacing: "0.5px",
                                                 marginBottom: "3px",
@@ -619,7 +622,7 @@ function TaskDetailPanel({ taskId, onClose }) {
                                         </div>
                                         <div
                                             style={{
-                                                fontSize: "12px",
+                                                fontSize: "14px",
                                                 fontWeight: 700,
                                                 color: "#111827",
                                             }}
@@ -702,11 +705,11 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
             style={{
                 fontFamily: "inherit",
                 background: "#ffffff",
-                borderRadius: "24px",
+                borderRadius: "0px",
                 color: "#111827",
                 padding: "0",
                 overflow: "hidden",
-                border: "1px solid rgba(0,0,0,0.06)",
+                border: "1px solid #000000",
                 boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
             }}
         >
@@ -743,17 +746,6 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
 
                         <div>
 
-                            <div
-                                style={{
-                                    fontSize: "22px",
-                                    fontWeight: 800,
-                                    letterSpacing: "-0.5px",
-                                    lineHeight: 1.2,
-                                    color: "#111827",
-                                }}
-                            >
-                                MEAS Dashboard
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -766,15 +758,15 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                             onClick={() => setView(tab)}
                             style={{
                                 padding: "7px 18px",
-                                borderRadius: "8px",
-                                border: view === tab ? `2px solid ${GREEN}` : "2px solid #e5e7eb",
+                                borderRadius: "0px",
+                                border: view === tab ? "2px solid #16a34a" : "2px solid #000000",
                                 cursor: "pointer",
-                                fontSize: "11px",
+                                fontSize: "14px",
                                 fontWeight: 700,
                                 letterSpacing: "0.5px",
                                 textTransform: "uppercase",
-                                background: view === tab ? GREEN : "#ffffff",
-                                color: view === tab ? "#fff" : "#6b7280",
+                                background: view === tab ? "#f0fdf4" : "#ffffff",
+                                color: "#000000",
                                 transition: "all 0.15s",
                             }}
                         >
@@ -799,8 +791,8 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                 key={emp.name}
                                 style={{
                                     background: "#ffffff",
-                                    border: `1px solid ${getMEASBg(emp.meas) === "#dcfce7" ? GREEN_BORDER : "rgba(0,0,0,0.07)"}`,
-                                    borderRadius: "20px",
+                                    border: "1px solid #000000",
+                                    borderRadius: "0px",
                                     padding: "22px",
                                     boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
                                 }}
@@ -816,7 +808,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                     <div>
                                         <div
                                             style={{
-                                                fontSize: "13px",
+                                                fontSize: "14px",
                                                 fontWeight: 800,
                                                 color: "#111827",
                                                 marginBottom: "3px",
@@ -824,7 +816,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                         >
                                             {emp.name}
                                         </div>
-                                        <div style={{ fontSize: "11px", color: "#9ca3af" }}>
+                                        <div style={{ fontSize: "14px", color: "#000000" }}>
                                             {emp.tasks.length} task{emp.tasks.length !== 1 ? "s" : ""}
                                         </div>
                                     </div>
@@ -841,8 +833,8 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                         </div>
                                         <div
                                             style={{
-                                                fontSize: "9px",
-                                                color: "#9ca3af",
+                                                fontSize: "14px",
+                                                color: "#000000",
                                                 letterSpacing: "1.5px",
                                                 textTransform: "uppercase",
                                                 marginTop: "2px",
@@ -857,15 +849,16 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                 <div
                                     style={{
                                         background: "#f3f4f6",
-                                        borderRadius: "8px",
+                                        borderRadius: "0px",
+                                        border: "1px solid #000000",
                                         height: "7px",
                                         marginBottom: "16px",
                                     }}
                                 >
                                     <div
                                         style={{
-                                            height: "7px",
-                                            borderRadius: "8px",
+                                            height: "5px",
+                                            borderRadius: "0px",
                                             width: `${Math.min(100, emp.meas)}%`,
                                             background: `linear-gradient(90deg, ${getMEASColor(emp.meas)}, ${getMEASColor(emp.meas)}99)`,
                                             transition: "width 0.6s ease",
@@ -875,9 +868,9 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
 
                                 <div
                                     style={{
-                                        fontSize: "10px",
+                                        fontSize: "14px",
                                         fontWeight: 800,
-                                        color: "#9ca3af",
+                                        color: "#000000",
                                         letterSpacing: "1px",
                                         marginBottom: "8px",
                                         textTransform: "uppercase",
@@ -886,7 +879,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                     Tasks{" "}
                                     <span
                                         style={{
-                                            color: "#b0b8c1",
+                                            color: "#000000",
                                             fontWeight: 500,
                                             letterSpacing: 0,
                                         }}
@@ -923,7 +916,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                                 <div style={{ flex: 1, minWidth: 0 }}>
                                                     <div
                                                         style={{
-                                                            fontSize: "11px",
+                                                            fontSize: "14px",
                                                             fontWeight: 600,
                                                             color: "#111827",
                                                             overflow: "hidden",
@@ -935,8 +928,8 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                                     </div>
                                                     <div
                                                         style={{
-                                                            fontSize: "10px",
-                                                            color: "#9ca3af",
+                                                            fontSize: "14px",
+                                                            color: "#000000",
                                                             marginTop: "1px",
                                                         }}
                                                     >
@@ -953,12 +946,13 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                                 >
                                                     <span
                                                         style={{
-                                                            fontSize: "10px",
+                                                            fontSize: "14px",
                                                             fontWeight: 700,
                                                             color: over ? "#d97706" : "#2563eb",
                                                             background: over ? "#fef3c7" : "#eff6ff",
                                                             padding: "1px 6px",
-                                                            borderRadius: "4px",
+                                                            borderRadius: "0px",
+                                                            border: `1px solid ${over ? "#d97706" : "#2563eb"}`,
                                                         }}
                                                     >
                                                         {over ? "+" : ""}
@@ -966,12 +960,13 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                                     </span>
                                                     <span
                                                         style={{
-                                                            fontSize: "11px",
+                                                            fontSize: "14px",
                                                             fontWeight: 800,
                                                             color: getMEASColor(acc),
                                                             background: getMEASBg(acc),
                                                             padding: "1px 7px",
-                                                            borderRadius: "4px",
+                                                            borderRadius: "0px",
+                                                            border: `1px solid ${getMEASColor(acc)}`,
                                                         }}
                                                     >
                                                         {acc.toFixed(0)}
@@ -986,10 +981,10 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                     style={{
                                         marginTop: "12px",
                                         padding: "8px 12px",
-                                        borderRadius: "8px",
+                                        borderRadius: "0px",
                                         background: getMEASBg(emp.meas),
-                                        border: `1px solid ${getMEASColor(emp.meas)}33`,
-                                        fontSize: "11px",
+                                        border: `1px solid ${getMEASColor(emp.meas)}`,
+                                        fontSize: "14px",
                                         color: getMEASColor(emp.meas),
                                         fontWeight: 700,
                                         textAlign: "center",
@@ -1006,12 +1001,12 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                     gridColumn: "1/-1",
                                     textAlign: "center",
                                     padding: "60px",
-                                    color: "#9ca3af",
-                                    fontSize: "13px",
+                                    color: "#000000",
+                                    fontSize: "14px",
                                     fontWeight: 600,
                                     background: "#ffffff",
-                                    borderRadius: "16px",
-                                    border: "1px dashed #e5e7eb",
+                                    borderRadius: "0px",
+                                    border: "1px dashed #000000",
                                 }}
                             >
                                 No task data available for this project yet.
@@ -1025,8 +1020,8 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                     <div
                         style={{
                             background: "#ffffff",
-                            borderRadius: "16px",
-                            border: "1px solid rgba(0,0,0,0.06)",
+                            borderRadius: "0px",
+                            border: "1px solid #000000",
                             overflow: "hidden",
                             boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
                         }}
@@ -1037,11 +1032,11 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                 display: "grid",
                                 gridTemplateColumns: "2fr 1fr 80px 80px 80px 80px 95px",
                                 padding: "10px 16px",
-                                fontSize: "9px",
+                                fontSize: "14px",
                                 letterSpacing: "1.5px",
-                                color: "#9ca3af",
+                                color: "#000000",
                                 fontWeight: 800,
-                                borderBottom: "1px solid #f3f4f6",
+                                borderBottom: "1px solid #000000",
                                 background: "#f9fafb",
                                 textTransform: "uppercase",
                             }}
@@ -1068,7 +1063,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                             display: "grid",
                                             gridTemplateColumns: "2fr 1fr 80px 80px 80px 80px 95px",
                                             padding: "12px 16px",
-                                            borderBottom: "1px solid #f9fafb",
+                                            borderBottom: "1px solid rgba(0,0,0,0.1)",
                                             background: rowBg,
                                             alignItems: "center",
                                             cursor: "pointer",
@@ -1085,7 +1080,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                         <div>
                                             <div
                                                 style={{
-                                                    fontSize: "12px",
+                                                    fontSize: "14px",
                                                     fontWeight: 600,
                                                     color: "#111827",
                                                 }}
@@ -1094,8 +1089,8 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                             </div>
                                             <div
                                                 style={{
-                                                    fontSize: "10px",
-                                                    color: "#9ca3af",
+                                                    fontSize: "14px",
+                                                    color: "#000000",
                                                     marginTop: "2px",
                                                 }}
                                             >
@@ -1104,8 +1099,8 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                         </div>
                                         <div
                                             style={{
-                                                fontSize: "11px",
-                                                color: "#6b7280",
+                                                fontSize: "14px",
+                                                color: "#000000",
                                                 overflow: "hidden",
                                                 textOverflow: "ellipsis",
                                                 whiteSpace: "nowrap",
@@ -1116,8 +1111,8 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                         <div
                                             style={{
                                                 textAlign: "right",
-                                                fontSize: "11px",
-                                                color: "#6b7280",
+                                                fontSize: "14px",
+                                                color: "#000000",
                                             }}
                                         >
                                             {t.allocatedHours.toFixed(2)}h
@@ -1125,7 +1120,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                         <div
                                             style={{
                                                 textAlign: "right",
-                                                fontSize: "11px",
+                                                fontSize: "14px",
                                                 fontWeight: 600,
                                                 color: "#111827",
                                             }}
@@ -1135,7 +1130,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                         <div
                                             style={{
                                                 textAlign: "right",
-                                                fontSize: "11px",
+                                                fontSize: "14px",
                                                 fontWeight: 700,
                                                 color: over ? "#d97706" : "#2563eb",
                                             }}
@@ -1146,7 +1141,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                         <div
                                             style={{
                                                 textAlign: "right",
-                                                fontSize: "13px",
+                                                fontSize: "14px",
                                                 fontWeight: 900,
                                                 color: getMEASColor(t.accuracy),
                                             }}
@@ -1157,8 +1152,9 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                             <span
                                                 style={{
                                                     padding: "3px 8px",
-                                                    borderRadius: "999px",
-                                                    fontSize: "9px",
+                                                    borderRadius: "0px",
+                                                    border: `1px solid ${rowSt.color}`,
+                                                    fontSize: "14px",
                                                     fontWeight: 700,
                                                     letterSpacing: "0.5px",
                                                     background: rowSt.bg,
@@ -1178,8 +1174,8 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                 style={{
                                     textAlign: "center",
                                     padding: "40px",
-                                    color: "#9ca3af",
-                                    fontSize: "13px",
+                                    color: "#000000",
+                                    fontSize: "14px",
                                     fontWeight: 600,
                                 }}
                             >
@@ -1192,7 +1188,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                             style={{
                                 padding: "16px 20px",
                                 background: GREEN_LIGHT,
-                                borderTop: `1px solid ${GREEN_BORDER}`,
+                                borderTop: "1px solid #000000",
                                 display: "flex",
                                 gap: "32px",
                                 alignItems: "center",
@@ -1201,8 +1197,8 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                             <div>
                                 <div
                                     style={{
-                                        fontSize: "9px",
-                                        color: "#4b7a2e",
+                                        fontSize: "14px",
+                                        color: "#000000",
                                         letterSpacing: "1.5px",
                                         fontWeight: 800,
                                         textTransform: "uppercase",
@@ -1222,16 +1218,17 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                 </div>
                             </div>
                             <div
-                                style={{ flex: 1, fontSize: "11px", color: "#4b7a2e", lineHeight: 1.7 }}
+                                style={{ flex: 1, fontSize: "14px", color: "#000000", lineHeight: 1.7 }}
                             >
                                 Formula:{" "}
                                 <span
                                     style={{
                                         fontFamily: "monospace",
-                                        fontSize: "10px",
+                                        fontSize: "14px",
                                         background: "#d1f0bb",
+                                        border: "1px solid #4b7a2e",
                                         padding: "1px 6px",
-                                        borderRadius: "4px",
+                                        borderRadius: "0px",
                                     }}
                                 >
                                     accuracy = max(0, 100 − |actual − allocated| / allocated × 100)

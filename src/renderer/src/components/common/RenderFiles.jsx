@@ -84,11 +84,14 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, vers
             {/* Header */}
             {!hideHeader && (
                 <div className="flex justify-between items-center mb-2">
-                    <h4 className="text-sm  text-gray-700 uppercase tracking-tight">Project Files</h4>
+                    <h4 className="text-sm font-bold text-black uppercase tracking-widest">Project Files</h4>
                     {onAddFilesClick && (
-                        <Button onClick={onAddFilesClick} className="scale-90 origin-right">
-                            <Plus size={14} className="mr-1" /> Add Document
-                        </Button>
+                        <button
+                            onClick={onAddFilesClick}
+                            className="px-4 py-1.5 text-sm font-bold uppercase tracking-tight rounded-none border border-black hover:bg-slate-50 transition-all cursor-pointer"
+                        >
+                            <Plus size={14} className="inline mr-1" /> Add Document
+                        </button>
                     )}
                 </div>
             )}
@@ -105,29 +108,29 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, vers
                     return (
                         <div
                             key={description}
-                            className="border border-gray-100 rounded-xl p-4 space-y-3 bg-white shadow-sm hover:shadow-md transition-shadow"
+                            className="border border-black bg-white rounded-none p-4 space-y-3 shadow-none"
                         >
                             {/* Description + Stage */}
                             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                                 <div>
                                     <h5
-                                        className="text-sm border-l-4 border-green-500 pl-3 sm:text-base  text-gray-800"
+                                        className="text-sm border-l-4 border-black pl-2 sm:text-base font-bold text-black uppercase tracking-wider"
                                         dangerouslySetInnerHTML={{ __html: description }}
                                     />
-                                    <div className="flex flex-wrap items-center gap-3 mt-1.5 ml-4">
+                                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1.5 ml-4">
                                         {firstFile?.stage && (
-                                            <p className="text-[10px] text-blue-600  bg-blue-50 px-2 py-0.5 rounded-full uppercase">
+                                            <p className="text-xs text-blue-800 bg-blue-50 px-2 py-0.5 rounded-none border border-blue-200 font-semibold uppercase tracking-wider">
                                                 {firstFile.stage}
                                             </p>
                                         )}
                                         {firstFile?.uploadedAt && (
-                                            <p className="text-[10px] text-gray-400 font-medium">
+                                            <p className="text-xs text-black/60 font-medium">
                                                 {formatDate ? formatDate(firstFile.uploadedAt) : new Date(firstFile.uploadedAt).toLocaleString()}
                                             </p>
                                         )}
                                         {uploaderName !== 'Unknown User' && (
-                                            <p className="text-[10px] text-gray-400">
-                                                by <span className="font-semibold text-gray-600">{uploaderName}</span>
+                                            <p className="text-xs text-black/60 font-medium">
+                                                by <span className="font-bold text-black">{uploaderName}</span>
                                             </p>
                                         )}
                                     </div>
@@ -135,20 +138,20 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, vers
                             </div>
 
                             {/* File List */}
-                            <div className="grid grid-cols-1 gap-2 mt-3">
+                            <div className="divide-y divide-black/5 border-t border-black/10 mt-3 bg-white">
                                 {files.map((file, index) => {
                                     const { icon: Icon, color, bgColor, text, textColor } = getFileIcon(file.originalName);
                                     return (
                                         <div
                                             key={file.id || `file-${index}`}
-                                            className="flex items-center gap-3 p-3 rounded-xl border border-gray-50 bg-gray-50/30 hover:bg-[#6bbd45]/10 hover:border-green-100 transition-all group"
+                                            className="flex items-center gap-2 py-2 px-3 rounded-none hover:bg-green-50/50 hover:text-black transition-colors group cursor-pointer"
                                             title={file.originalName || `File ${index + 1}`}
                                         >
                                             <div
                                                 onClick={(e) => handleOpen(e, file)}
                                                 className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
                                             >
-                                                <div className={`p-2 rounded-lg shadow-sm ${bgColor} relative flex items-center justify-center`}>
+                                                <div className={`p-1.5 rounded-none border border-black/10 ${bgColor} relative flex items-center justify-center`}>
                                                     <Icon size={18} className={color} strokeWidth={2} />
                                                     {text && (
                                                         <span className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[7px] font-bold mt-[2px] ${textColor}`}>
@@ -157,31 +160,35 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, vers
                                                     )}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-gray-700 text-sm  truncate group-hover:text-black">
+                                                    <p className="text-black text-sm font-semibold truncate group-hover:text-black">
                                                         {file.originalName || `File ${index + 1}`}
                                                     </p>
-                                                    {file.stage && <p className="text-[10px] text-gray-400 font-medium">{file.stage}</p>}
+                                                    {file.stage && (
+                                                        <p className="text-xs text-black/60 uppercase font-bold tracking-wider mt-0.5">
+                                                            {file.stage}
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
 
                                             <div className="flex items-center gap-1 transition-opacity">
                                                 <button
                                                     onClick={(e) => handleShare(e, file)}
-                                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                                    className="p-1.5 text-black hover:text-green-700 hover:bg-green-50 rounded-none border border-transparent hover:border-black/20 transition-colors cursor-pointer"
                                                     title="Share Link"
                                                 >
                                                     <Share2 size={16} />
                                                 </button>
                                                 <button
                                                     onClick={(e) => handleDownload(e, file)}
-                                                    className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all"
+                                                    className="p-1.5 text-black hover:text-green-700 hover:bg-green-50 rounded-none border border-transparent hover:border-black/20 transition-colors cursor-pointer"
                                                     title="Download"
                                                 >
                                                     <Download size={16} />
                                                 </button>
                                             </div>
 
-                                            <ChevronRight size={16} className="text-gray-300 group-hover:text-black transition-colors" />
+                                            <ChevronRight size={16} className="text-gray-400 group-hover:text-black transition-colors" />
                                         </div>
                                     );
                                 })}
@@ -191,13 +198,16 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, vers
                 })
             ) : (
                 // Empty State
-                <div className="text-center py-10 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/50">
-                    <FileText className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-gray-400">No files available</p>
+                <div className="text-center py-8 border border-dashed border-black/30 rounded-none">
+                    <FileText className="w-10 h-10 text-black/40 mx-auto mb-3" />
+                    <p className="text-sm font-bold uppercase tracking-widest text-black/60">No files available</p>
                     {onAddFilesClick && (
-                        <Button onClick={onAddFilesClick} className="mt-4 bg-green-600 text-white">
+                        <button
+                            onClick={onAddFilesClick}
+                            className="mt-4 inline-flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+                        >
                             <Plus size={14} className="mr-2" /> Upload Files
-                        </Button>
+                        </button>
                     )}
                 </div>
             )}
