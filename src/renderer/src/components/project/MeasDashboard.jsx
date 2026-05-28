@@ -701,28 +701,9 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
     }, [projectTasks]);
 
     return (
-        <div
-            style={{
-                fontFamily: "inherit",
-                background: "#ffffff",
-                borderRadius: "0px",
-                color: "#111827",
-                padding: "0",
-                overflow: "hidden",
-                border: "1px solid #000000",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-            }}
-        >
-            {/* Header */}
-            <div
-                style={{
-                    background: `linear-gradient(135deg, ${GREEN_LIGHT} 0%, #ffffff 100%)`,
-                    borderBottom: `1px solid ${GREEN_BORDER}`,
-                    padding: "28px 36px 20px",
-                    position: "relative",
-                    overflow: "hidden",
-                }}
-            >
+        <div>
+
+            
                 <div
                     style={{
                         position: "absolute",
@@ -734,21 +715,6 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                         pointerEvents: "none",
                     }}
                 />
-                <div style={{ position: "relative" }}>
-                    <div
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                            marginBottom: "4px",
-                        }}
-                    >
-
-                        <div>
-
-                        </div>
-                    </div>
-                </div>
 
                 {/* Nav Tabs */}
                 <div style={{ display: "flex", gap: "6px", marginTop: "20px" }}>
@@ -774,7 +740,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                         </button>
                     ))}
                 </div>
-            </div>
+            
 
             <div style={{ padding: "28px 36px", background: "#f9fafb" }}>
                 {/* BY EMPLOYEE */}
