@@ -80,7 +80,7 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
                   end={to === '/dashboard'}
                   onClick={isMobile ? toggleSidebar : undefined}
                   className={({ isActive }) =>
-                    `flex items-center ${isMinimized ? 'gap-0 justify-center py-3' : 'gap-4 py-3 px-4'} rounded-lg transition-all duration-200 text-base font-medium tracking-wide
+                    `flex items-center ${isMinimized ? 'gap-0 justify-center py-3' : 'gap-3 py-3 px-4'} rounded-lg transition-all duration-200 text-sm font-medium tracking-normal
                     ${isActive
                       ? 'bg-white border-l-6 border-green-500 text-black font-semibold shadow-sm'
                       : 'text-black hover:bg-green-50 font-semibold hover:text-black'

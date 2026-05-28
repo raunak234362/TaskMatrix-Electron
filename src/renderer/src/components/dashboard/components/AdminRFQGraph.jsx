@@ -33,7 +33,7 @@ const AdminRFQGraph = ({ rfqs = [] }) => {
   }, [rfqs])
 
   return (
-    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center h-full">
+    <div className="flex flex-col items-center h-full">
       <div className="w-full mb-6">
         <h2 className="text-lg font-bold text-gray-800 uppercase tracking-widest flex items-center gap-2">
           RFQ Status Distribution

@@ -8,15 +8,16 @@ import Service from "../../api/Service";
 import DateFilter from "../common/DateFilter";
 import { matchesDateFilter } from "../../utils/dateFilter";
 import RenderFiles from "../common/RenderFiles";
-import ProjectStatusTabs from "./ProjectStatusTabs";
 
 const GetProjectById = React.lazy(() =>
   import("./GetProjectById").then((module) => ({ default: module.default }))
 );
 
-const AllProjects = () => {
+const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatusFilterProp }) => {
   const [selectedProject, setSelectedProject] = useState(null);
-  const [statusFilter, setStatusFilter] = useState("All Statuses");
+  const [localStatusFilter, localSetStatusFilter] = useState("All Statuses");
+  const statusFilter = statusFilterProp !== undefined ? statusFilterProp : localStatusFilter;
+  const setStatusFilter = setStatusFilterProp || localSetStatusFilter;
   const [tasks, setTasks] = useState([]);
   const [filters, setFilters] = useState({
     manager: "All Managers",
@@ -194,7 +195,7 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
       accessorKey: "fabricator",
       header: "Fabricator Name",
       cell: ({ row }) => (
-        <span className="text-sm font-medium text-gray-600 uppercase">
+        <span className="font-medium text-gray-600 uppercase">
           {row.original.fabricator?.fabName || "N/A"}
         </span>
       ),
@@ -203,7 +204,7 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
       accessorKey: "stage",
       header: "Stage",
       cell: ({ row }) => (
-        <span className="text-gray-600 text-sm font-medium">
+        <span className="text-gray-600 font-medium">
           {row.original.stage || "N/A"}
         </span>
       ),
@@ -241,7 +242,7 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
         const isOverrun = worked > est && est > 0;
         return (
           <span
-            className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-sm ${isOverrun ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-700"
+            className={`text-xs uppercase font-bold tracking-wide px-2 py-1 rounded-sm ${isOverrun ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-700"
               }`}
           >
             {isOverrun ? "OVERRUN" : "NORMAL"}
@@ -291,7 +292,7 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
 
         return (
           <span
-            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${colorClasses}`}
+            className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide border shadow-sm ${colorClasses}`}
           >
             {status}
           </span>
@@ -305,31 +306,20 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   };
 
   return (
-    <div className="bg-[#fcfdfc] min-h-[600px] animate-in fade-in duration-700 flex flex-col gap-4">
-      {/* Status Tabs */}
-      <ProjectStatusTabs 
-        stats={stats} 
-        statusFilter={statusFilter} 
-        setStatusFilter={setStatusFilter} 
-      />
-
+    <div className="bg-[#fcfdfc] min-h-[600px] animate-in fade-in duration-700 flex flex-col gap-4 pt-6">
       {/* Filters Section */}
-      <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-        <div className="flex items-center gap-2 mb-3">
-          <Filter size={16} className="text-gray-400" />
-          <span className="text-xs font-black text-gray-500 uppercase tracking-widest">Filters</span>
-        </div>
+      <div className="mb-2">
 
-        <div className="flex flex-wrap items-end gap-4">
+        <div className="flex flex-wrap items-end gap-5">
           {/* Search Project Name */}
-          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[250px]">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Search Project</label>
+          <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[250px]">
+            <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">Search Project</label>
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
               <input
                 type="text"
                 placeholder="Search by name..."
-                className="w-full text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-2 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all placeholder:text-gray-400 placeholder:font-normal"
+                className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md pl-9 pr-3 py-2 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all placeholder:text-gray-500 placeholder:font-normal shadow-sm"
                 value={filters.searchTerm}
                 onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
               />
@@ -338,10 +328,10 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
 
           {/* Manager Filter */}
           {userRole !== "project_manager" && (
-          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Manager</label>
+          <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[200px]">
+            <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">Manager</label>
             <select
-              className="w-full text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+              className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm"
               value={filters.manager}
               onChange={(e) => setFilters(prev => ({ ...prev, manager: e.target.value }))}
             >
@@ -350,10 +340,10 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
           </div>
           )}
           {/* Fabricator Filter */}
-          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Fabricator</label>
+          <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[200px]">
+            <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">Fabricator</label>
             <select
-              className="w-full text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+              className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm"
               value={filters.fabricator}
               onChange={(e) => setFilters(prev => ({ ...prev, fabricator: e.target.value }))}
             >
@@ -362,10 +352,10 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
           </div>
 
           {/* Stage Filter */}
-          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Stage</label>
+          <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[200px]">
+            <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">Stage</label>
             <select
-              className="w-full text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+              className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm"
               value={filters.stage}
               onChange={(e) => setFilters(prev => ({ ...prev, stage: e.target.value }))}
             >
@@ -373,25 +363,23 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
             </select>
           </div>
 
-          {/* Status Filter removed */}
-
           {/* Overrun Checkbox */}
-          <div className="flex items-center gap-2 pb-2 pl-2">
+          <div className="flex items-center gap-2 pb-2 pl-1">
             <input
               type="checkbox"
               id="overrunOnly"
               checked={filters.overrunOnly}
               onChange={(e) => setFilters(prev => ({ ...prev, overrunOnly: e.target.checked }))}
-              className="w-4 h-4 text-green-600 rounded focus:ring-green-500 border-gray-300 cursor-pointer"
+              className="w-4 h-4 text-green-600 rounded focus:ring-green-600 border-gray-300 cursor-pointer"
             />
-            <label htmlFor="overrunOnly" className="text-sm font-bold text-gray-600 cursor-pointer select-none">
+            <label htmlFor="overrunOnly" className="text-sm font-semibold text-gray-900 cursor-pointer select-none">
               Overrun Only
             </label>
           </div>
 
           {/* Date Filter */}
-          <div className="flex flex-col gap-1 w-full sm:w-auto">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date Period</label>
+          <div className="flex flex-col gap-1.5 w-full sm:w-auto">
+            <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">Date Period</label>
             <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
           </div>
         </div>

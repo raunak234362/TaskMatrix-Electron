@@ -36,9 +36,9 @@ const ProjectStats = ({ stats, onCardClick }) => {
   ]
 
   return (
-    <div className="p-0 transition-all duration-500 h-full border border-green-200 bg-white p-4 rounded-lg">
-      <div className="flex items-center justify-between mb-6 px-1">
-        <h2 className="text-base font-bold text-black uppercase tracking-[0.15em] flex items-center gap-2">
+    <div className="transition-all duration-500 h-full bg-green-100 p-5 rounded-lg border border-green-300 shadow-lg">
+      <div className="flex items-center justify-between mb-5 px-1">
+        <h2 className="text-xl font-semibold text-black uppercase tracking-normal flex items-center gap-2">
           <Files className="w-5 h-5 text-green-600" />
           Project Overview
         </h2>
@@ -61,8 +61,8 @@ const ProjectStats = ({ stats, onCardClick }) => {
               className="flex items-center justify-between p-4 rounded-lg border border-black border-l-5 border-l-[#48b614] bg-white hover:bg-gray-50 transition-all duration-300 cursor-pointer group hover:shadow-md hover:-translate-y-0.5"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="p-2.5 rounded-none bg-white border border-gray-100 text-black shadow-sm shrink-0 transition-all group-hover:bg-green-600 group-hover:text-white">
-                  <card.icon size={20} strokeWidth={3} />
+                <div className="p-2.5 rounded-full bg-white border border-gray-100 text-black shadow-sm shrink-0 transition-all group-hover:bg-green-100">
+                  <card.icon size={20} strokeWidth={2.5} />
                 </div>
                 <span className="text-sm font-bold text-black uppercase tracking-wide leading-none truncate">
                   {card.label}

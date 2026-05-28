@@ -67,18 +67,18 @@ function ColumnFilter({ column }) {
         type="date"
         value={column.getFilterValue() ?? ""}
         onChange={(e) => column.setFilterValue(e.target.value || undefined)}
-        className="w-full px-3 py-2 bg-gray-50 border-2 border-transparent focus:border-green-500/20 focus:bg-white rounded-xl text-base font-medium text-gray-700 outline-none transition-all shadow-sm focus:ring-2 focus:ring-green-500/10"
+        className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-none px-3 py-2 cursor-pointer focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm"
       />
     );
   }
 
   return (
     <div className="relative group">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-green-600 transition-colors" />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-green-600 transition-colors" />
       <input
         value={column.getFilterValue() ?? ""}
         onChange={(e) => column.setFilterValue(e.target.value || undefined)}
-        className="w-full pl-10 pr-4 py-2 bg-gray-50 border-2 border-transparent focus:border-green-500/20 focus:bg-white rounded-xl text-base font-bold text-gray-700 outline-none transition-all shadow-sm focus:ring-2 focus:ring-green-500/10 placeholder:text-gray-400 placeholder:font-medium"
+        className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-none pl-9 pr-3 py-2 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all placeholder:text-gray-500 placeholder:font-normal shadow-sm"
         placeholder={`Search ${header}...`}
       />
     </div>
@@ -268,29 +268,27 @@ export default function DataTable({
       {table
         .getAllColumns()
         .some((c) => c.columnDef.enableColumnFilter) && (
-          <div className="flex flex-wrap items-end gap-6 mb-8 p-6 bg-white rounded-3xl border-2 border-slate-50 shadow-sm animate-in slide-in-from-top-2 duration-300">
+          <div className="flex flex-wrap items-end gap-5 mb-4 py-2 animate-in slide-in-from-top-2 duration-300">
             {table
               .getAllColumns()
               .filter((c) => c.columnDef.enableColumnFilter)
               .map((column) => (
                 <div
                   key={column.id}
-                  className="flex flex-col gap-2 min-w-[240px]"
+                  className="flex flex-col gap-1.5 min-w-[240px]"
                 >
-                  <label className="text-sm font-black text-black/40 uppercase tracking-widest ml-1">
+                  <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">
                     {column.columnDef.header}
                   </label>
                   <ColumnFilter column={column} />
                 </div>
               ))}
-            <Button
+            <button
               onClick={() => table.resetColumnFilters()}
-              variant="outline"
-              size="sm"
-              className="h-10 px-5 border-2 border-slate-100 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all rounded-xl"
+              className="h-[38px] px-4 border border-gray-300 rounded-none bg-white hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all text-xs font-bold uppercase tracking-wider flex items-center shadow-sm"
             >
-              <X className="w-4 h-4 mr-2" /> Clear Filters
-            </Button>
+              <X className="w-4 h-4 mr-2 text-gray-500 hover:text-red-600" /> Clear Filters
+            </button>
           </div>
         )}
 
@@ -302,7 +300,7 @@ export default function DataTable({
           onRowClick={onRowClick}
         />
       ) : (
-        <div className="w-full border border-gray-100 rounded-lg overflow-hidden bg-[#fcfdfc]">
+        <div className="w-full">
           <div className="max-h-[800px] overflow-y-auto overflow-x-auto">
             <table className="min-w-full divide-y-0">
               <thead className="bg-gray-50 sticky top-0 z-10">
@@ -311,7 +309,7 @@ export default function DataTable({
                     {hg.headers.map((header) => (
                       <th
                         key={header.id}
-                        className="px-4 py-3 text-left text-sm md:text-base font-bold uppercase tracking-widest bg-green-100 text-black border-b border-black/5"
+                        className="px-4 py-3 text-left text-base font-bold uppercase tracking-wide bg-green-100 text-black border-b border-black/5"
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         <div className="flex items-center gap-1 cursor-pointer">
@@ -353,7 +351,7 @@ export default function DataTable({
                       }}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id} className="px-4 py-4 text-base md:text-lg font-medium text-gray-800">
+                        <td key={cell.id} className="px-4 py-4 text-sm font-bold text-black">
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext(),
@@ -364,7 +362,7 @@ export default function DataTable({
                     {expandedRowId === row.id && DetailComponent && (
                       <tr className="bg-gray-50/50">
                         <td colSpan={columns.length} className="px-4 py-4">
-                          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-gray-800">
+                          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-black">
                             <DetailComponent
                               row={row.original}
                               close={() => setExpandedRowId(null)}
@@ -384,7 +382,7 @@ export default function DataTable({
       {/* pagination */}
       <div className="flex flex-col sm:flex-row items-center gap-4 text-sm p-4 border-gray-50 dark:border-slate-800">
         <div className="flex items-center gap-4">
-          <span className="text-gray-800 ">
+          <span className="text-black font-bold">
             Page {table.getState().pagination.pageIndex + 1} of{" "}
             {table.getPageCount()}
           </span>
@@ -393,14 +391,14 @@ export default function DataTable({
           <Button
             disabled={!table.getCanPreviousPage()}
             onClick={() => table.previousPage()}
-            className="px-3 py-1 border border-gray-200 rounded disabled:opacity-50 text-gray-700 "
+            className="px-3 py-1 border border-gray-200 rounded disabled:opacity-50 text-black font-bold"
           >
             {"<"}
           </Button>
           <Button
             disabled={!table.getCanNextPage()}
             onClick={() => table.nextPage()}
-            className="px-3 py-1 border border-gray-200 rounded disabled:opacity-50 text-gray-700 "
+            className="px-3 py-1 border border-gray-200 rounded disabled:opacity-50 text-black font-bold"
           >
             {">"}
           </Button>

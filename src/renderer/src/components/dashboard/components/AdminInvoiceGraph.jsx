@@ -113,7 +113,7 @@ const AdminInvoiceGraph = ({
   const years = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
 
   return (
-    <div className="bg-white rounded-2xl shadow-none border-none p-6 w-full flex flex-col gap-6">
+    <div className="w-full flex flex-col gap-6">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start gap-6">
         <div className="w-full md:w-auto">

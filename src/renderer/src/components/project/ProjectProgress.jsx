@@ -62,7 +62,7 @@ const ProjectProgress = ({ projectId }) => {
       accessorKey: 'createdBy.firstName',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-[10px] font-black text-black border border-black shadow-sm">
+          <div className="w-8 h-8 rounded-none bg-slate-100 flex items-center justify-center text-[10px] font-black text-black border border-black shadow-none">
             {row.original.createdBy?.firstName?.[0] || 'U'}
           </div>
           <span className="text-[10px] font-black text-black uppercase tracking-widest">
@@ -75,16 +75,14 @@ const ProjectProgress = ({ projectId }) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center pb-3 border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-black/5">
-            <Activity className="w-5 h-5 text-black" />
-          </div>
-          <h2 className="text-lg font-black text-black uppercase tracking-tight">Weekly Progress Reports</h2>
+          <Activity className="w-5 h-5 text-black" />
+          <h2 className="text-base font-bold text-black uppercase tracking-wider">Weekly Progress Reports</h2>
         </div>
         <button
           onClick={() => setIsAdding(true)}
-          className="flex items-center gap-2 px-6 py-2 border-2 border-[#6bbd45] text-[#6bbd45] hover:bg-[#6bbd45] hover:text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-sm"
+          className="flex items-center gap-2 px-6 py-2 border-2 border-[#6bbd45] text-[#6bbd45] hover:bg-[#6bbd45] hover:text-white rounded-none text-xs font-black uppercase tracking-widest transition-all shadow-none"
         >
           <Plus className="w-4 h-4" />
           Add Report
@@ -93,9 +91,9 @@ const ProjectProgress = ({ projectId }) => {
 
       <div className="flex-1">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-lg border border-black shadow-sm">
+          <div className="flex flex-col items-center justify-center py-20 text-center">
             <Loader2 className="w-10 h-10 animate-spin text-[#6bbd45] mb-4" />
-            <p className="text-sm text-black font-black uppercase tracking-widest">Loading Reports...</p>
+            <p className="text-sm text-gray-500 font-bold uppercase tracking-wider">Loading Reports...</p>
           </div>
         ) : (
           <DataTable 

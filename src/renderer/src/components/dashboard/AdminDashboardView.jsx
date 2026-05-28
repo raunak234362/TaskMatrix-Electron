@@ -240,7 +240,7 @@ const AdminDashboardView = ({
     const showWorkloadAlerts = ['dept_manager', 'project_manager', 'deputy_manager'].includes(userRole?.toLowerCase())
 
     return (
-        <div className="flex flex-col gap-4 lg:gap-6 transition-all duration-300 ease-in-out">
+        <div className="flex flex-col gap-8 lg:gap-10 transition-all duration-300 ease-in-out">
             {/* Row 1: Project Overview & Pending Actions */}
             <div className={`grid grid-cols-1 ${userRole === 'project_manager_officer' ? 'lg:grid-cols-1' : 'lg:grid-cols-2'} gap-4 lg:gap-5 transition-all duration-300`}>
                 {userRole !== 'project_manager_officer' && (
@@ -260,7 +260,7 @@ const AdminDashboardView = ({
 
             {/* Workload Alerts Section */}
             {showWorkloadAlerts && memberStats.length > 0 && (
-                <div className="mt-4">
+                <div>
                     <WorkloadAlerts
                         memberStats={memberStats}
                         onFilterChange={() => { }} // Navigation or filtering logic can be added here
@@ -270,13 +270,11 @@ const AdminDashboardView = ({
 
             {/* Row 2: Priority Header Row */}
             <div className="relative">
-                <div className="bg-linear-to-br from-gray-50/50 to-white/50 p-6 rounded-3xl border border-gray-200 shadow-sm relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                    <div className={`grid grid-cols-1 sm:grid-cols-2 ${userRole === 'project_manager_officer' || userRole === 'operation_executive' ? 'lg:grid-cols-2' : 'lg:grid-cols-2 2xl:grid-cols-4'} gap-4 lg:gap-6 relative z-10`}>
+                <div className={`grid grid-cols-1 sm:grid-cols-2 ${userRole === 'project_manager_officer' || userRole === 'operation_executive' ? 'lg:grid-cols-2' : 'lg:grid-cols-2 2xl:grid-cols-4'} gap-4 lg:gap-6 relative z-10`}>
                         {/* 1. Priority Focus - Hidden for PMO and OE */}
                         {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && (
                             <div
-                                className="bg-green-50/60 p-4 rounded-2xl border border-gray-300 shadow-sm flex flex-col justify-between hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group"
+                                className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-between hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group"
                                 onClick={() => currentTask && setDetailTaskId(currentTask.id)}
                             >
                                 <div className="flex items-center justify-between mb-4">
@@ -307,7 +305,7 @@ const AdminDashboardView = ({
                         {/* 2. Upcoming Deadlines Trigger - Hidden for PMO and OE */}
                         {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && (
                             <div
-                                className="bg-green-50/60 p-4 rounded-2xl border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                                className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                                 onClick={() => setShowDeadlinesPopup(true)}
                             >
                                 <div className="flex items-center justify-between">
@@ -326,7 +324,7 @@ const AdminDashboardView = ({
 
                         {/* 3. Upcoming Submittals Trigger */}
                         <div
-                            className="bg-green-50/60 p-4 rounded-2xl border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                            className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                             onClick={() => setShowSubmittalsPopup(true)}
                         >
                             <div className="flex items-center justify-between">
@@ -344,7 +342,7 @@ const AdminDashboardView = ({
 
                         {/* 4. Notes & Updates Trigger */}
                         <div
-                            className="bg-green-50/60 p-4 rounded-2xl border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                            className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                             onClick={() => setShowNotesPopup(true)}
                         >
                             <div className="flex items-center justify-between">
@@ -360,7 +358,6 @@ const AdminDashboardView = ({
                             </div>
                         </div>
                     </div>
-                </div>
             </div>
             {
                 (userRole === 'admin' || userRole === 'project_manager_officer' || userRole === 'deputy_manager') && (

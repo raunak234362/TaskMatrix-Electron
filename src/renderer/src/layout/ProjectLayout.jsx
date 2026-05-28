@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { AddProject, AllProjects, ProjectDashboard } from "../components";
+import ProjectStatusTabs from "../components/project/ProjectStatusTabs";
 import Service from "../api/Service";
 import { useDispatch, useSelector } from "react-redux";
 import { showDepartment, showTeam } from "../store/userSlice";
@@ -11,6 +12,7 @@ const ProjectLayout = () => {
       ? "allProject"
       : "projectDashboard",
   );
+  const [statusFilter, setStatusFilter] = useState("All Statuses");
   const dispatch = useDispatch();
   const departmentDatas = useSelector(
     (state) => state?.userInfo?.departmentData,
@@ -50,12 +52,26 @@ const ProjectLayout = () => {
     }
   }, [dispatch]);
 
+  const stats = useMemo(() => ({
+    total: projects.length,
+    active: projects.filter((p) => p.status === "ACTIVE").length,
+    completed: projects.filter((p) => p.status === "COMPLETE").length,
+    onHold: projects.filter((p) => p.status === "ONHOLD").length,
+    inActive: projects.filter((p) => p.status === "INACTIVE").length,
+  }), [projects]);
+
   return (
     <div className="w-full overflow-y-hidden overflow-x-hidden">
       <div className="flex flex-col w-full h-full">
         <div className=" px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 rounded-t-2xl flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4">
-            {/* Status tabs moved to AllProjects component */}
+            {activeTab === "allProject" && (
+              <ProjectStatusTabs 
+                stats={stats}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+              />
+            )}
           </div>
           <div className="flex flex-wrap gap-2 md:gap-4 items-center justify-center md:justify-end">
             {[
@@ -117,7 +133,7 @@ const ProjectLayout = () => {
       <div className="flex-1 min-h-0 bg-white p-2 rounded-b-2xl overflow-y-auto">
         {activeTab === "allProject" && (
           <div>
-            <AllProjects />
+            <AllProjects statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
           </div>
         )}
         {activeTab === "addProject" && (

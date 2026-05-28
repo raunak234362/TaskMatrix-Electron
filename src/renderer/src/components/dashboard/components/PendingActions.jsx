@@ -45,9 +45,9 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
   ].filter(action => !action.hidden)
 
   return (
-    <div className="transition-all duration-500 h-full border border-green-200 bg-white p-4 rounded-lg">
-      <div className="flex items-center justify-between mb-6 px-1 ">
-        <h2 className="text-base font-black text-black uppercase tracking-[0.15em] flex items-center gap-2 ">
+    <div className="transition-all duration-500 h-full bg-green-100 p-5 rounded-lg border border-green-300 shadow-lg">
+      <div className="flex items-center justify-between mb-5 px-1">
+        <h2 className="text-xl font-semibold text-black uppercase tracking-normal flex items-center gap-2">
           <ClipboardList className="w-5 h-5 text-green-600" />
           Pending Actions
         </h2>
@@ -74,9 +74,9 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
               <div className="flex flex-row items-center gap-2 flex-1 min-w-0 justify-between">
                 <div className="flex flex-row items-center gap-2 min-w-0 pr-1">
                   <div
-                    className="p-2.5 rounded-none bg-white border border-gray-100 text-black shadow-sm shrink-0 transition-all group-hover:bg-green-600 group-hover:text-white"
+                    className="p-2.5 rounded-full bg-white border border-gray-100 text-black shadow-sm shrink-0 transition-all group-hover:bg-green-100"
                   >
-                    <action.icon size={20} strokeWidth={3} />
+                    <action.icon size={20} strokeWidth={2.5} />
                   </div>
                   <div className="flex flex-col text-left min-w-0">
                     <span className="text-sm font-semibold text-black uppercase tracking-wide leading-none truncate">{action.title}</span>

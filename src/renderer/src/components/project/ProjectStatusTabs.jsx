@@ -65,19 +65,23 @@ const ProjectStatusTabs = ({ stats, statusFilter, setStatusFilter }) => {
   ];
 
   return (
-    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 px-1">
+    <div className="flex flex-wrap items-center gap-2 md:gap-3">
       {tabsConfig.map((tab) => {
         const isActive = statusFilter === tab.id;
         return (
           <div
             key={tab.id}
             onClick={() => setStatusFilter(tab.id)}
-            className={`flex items-center gap-2 px-2 py-0.5 rounded-lg border cursor-pointer transition-all ${isActive ? `${tab.activeBg} ${tab.activeBorder} shadow-sm` : `${tab.inactiveBg} ${tab.inactiveBorder} ${tab.hoverBg}`}`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 cursor-pointer transition-all ${
+              isActive 
+                ? 'bg-green-800 border-green-200 text-white shadow-md scale-105' 
+                : 'bg-green-700 border-white text-white hover:bg-green-800 shadow-sm'
+            }`}
           >
-            <span className={`text-sm animate-in font-medium uppercase tracking-wider `}>
+            <span className="text-xs font-semibold uppercase tracking-wide">
               {tab.label} -
             </span>
-            <span className={`text-sm animate-in font-semibold`}>
+            <span className="text-xs font-bold">
               {tab.count}
             </span>
           </div>

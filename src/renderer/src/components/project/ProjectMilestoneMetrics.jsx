@@ -137,18 +137,20 @@ const ProjectMilestoneMetrics = ({
   }, [milestoneStats]);
 
   return (
-    <div className="space-y-8 p-1">
+    <div className="space-y-8">
       {/* Milestone Approvals Section */}
       <div>
-        <h4 className="text-lg text-gray-800 mb-4 flex items-center gap-2 uppercase tracking-tight">
-          <CalendarCheck size={20} className="text-green-600" />
-          Project Progress
-        </h4>
+        <div className="pb-3 border-b border-gray-200 flex items-center gap-2 mb-6">
+          <CalendarCheck size={20} className="text-[#6bbd45]" />
+          <h4 className="text-base font-bold uppercase tracking-wider text-black">
+            Project Progress &mdash; Milestones
+          </h4>
+        </div>
         {groupedMilestones.length > 0 ? (
           <div className="space-y-8">
             {groupedMilestones.map(([stage, mStats]) => (
               <div key={stage} className="space-y-4">
-                <h5 className="text-md font-bold text-gray-600 uppercase tracking-widest border-b bg-gray-50 px-4 py-2 rounded-t-xl border-gray-200">
+                <h5 className="text-sm font-bold text-black uppercase tracking-wider pb-2 border-b border-gray-150">
                   {stage} Milestones
                 </h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -171,16 +173,16 @@ const ProjectMilestoneMetrics = ({
                       onClick={() => {
                         setSelectedMilestoneToView(ms);
                       }}
-                      className={`p-4 bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col justify-between transition-colors cursor-pointer hover:bg-gray-50`}
+                      className={`p-4 bg-slate-50/40 border border-gray-200 rounded-none shadow-none flex flex-col justify-between transition-colors cursor-pointer hover:bg-slate-50`}
                     >
                       <div>
-                        <h5 className="font-semibold text-gray-800 mb-1 line-clamp-1">
+                        <h5 className="font-bold text-black text-base mb-1 line-clamp-1">
                           {ms.subject}
                         </h5>
-                        <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
+                        <div className="flex justify-between items-center text-sm text-black font-semibold mb-2">
                           <span>Status:</span>
                           <span
-                            className={`px-2 py-0.5 rounded-full text-md uppercase font-bold tracking-widest ${ms.status === "APPROVED" ||
+                            className={`px-2 py-0.5 rounded-none text-md uppercase font-bold tracking-widest ${ms.status === "APPROVED" ||
                               ms.status === "COMPLETED"
                               ? " text-green-700"
                               : " text-yellow-700"
@@ -189,14 +191,14 @@ const ProjectMilestoneMetrics = ({
                             {ms.status || "PENDING"}
                           </span>
                         </div>
-                        <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
+                        <div className="flex justify-between items-center text-sm text-black font-semibold mb-2">
                           <span>Completion Percentage :</span>
                           <div className="flex items-center">
                             <span
-                              className={`px-2 py-0.5 rounded-full text-md uppercase font-bold tracking-widest ${ms.status === "APPROVED" ||
+                              className={`px-2 py-0.5 rounded-none text-md uppercase font-bold tracking-widest ${ms.status === "APPROVED" ||
                                 ms.status === "COMPLETED"
                                 ? " text-green-700"
-                                : " text-green-900"
+                                : " text-green-950"
                                 }`}
                             >
                               {ms.progress}%
@@ -209,7 +211,7 @@ const ProjectMilestoneMetrics = ({
                                     setSelectedMilestoneId(ms.id || ms._id);
                                     setIsUpdateModalOpen(true);
                                   }}
-                                  className="ml-2 text-gray-400 hover:text-blue-600"
+                                  className="ml-2 text-black hover:text-blue-600"
                                 >
                                   <Pencil size={14} />
                                 </button>
@@ -217,7 +219,7 @@ const ProjectMilestoneMetrics = ({
                           </div>
                         </div>
                       </div>
-                      <div className="w-full bg-red-500 rounded-full h-2 relative overflow-hidden">
+                      <div className="w-full bg-red-500 rounded-none h-2 relative overflow-hidden">
                         {/* Time Progress (background shadow layer) */}
                         <div
                           className="absolute top-0 left-0 h-2 bg-gray-400 opacity-40 transition-all duration-500"
@@ -225,29 +227,29 @@ const ProjectMilestoneMetrics = ({
                         ></div>
                         {/* Task Completion (real progress) */}
                         <div
-                          className="absolute top-0 left-0 h-2 rounded-full bg-teal-500 transition-all duration-500"
+                          className="absolute top-0 left-0 h-2 rounded-none bg-teal-500 transition-all duration-500"
                           style={{
                             width: `${ms.progress || 0}%`,
                           }}
                         ></div>
                       </div>
                       <div className="border-t border-gray-100 pt-2 mt-2 space-y-2">
-
+ 
                         <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-500 uppercase text-xs font-semibold">
+                          <span className="text-black uppercase text-sm font-bold">
                             Approval Date
                           </span>
-                          <span className="font-bold text-gray-700">
+                          <span className="font-bold text-black text-sm">
                             {formatDate(ms.approvalDate)}
                           </span>
                         </div>
-
+ 
                         {userRole !== "client" && userRole !== "client_admin" && (
                           <div className="flex justify-between items-center text-sm">
-                            <span className="text-gray-500 uppercase text-xs font-semibold">
+                            <span className="text-black uppercase text-sm font-bold">
                               CD Approval Date
                             </span>
-                            <span className="font-bold text-gray-700">
+                            <span className="font-bold text-black text-sm">
                               {formatDate(ms.CDApprovalDate)}
                             </span>
                           </div>
@@ -260,14 +262,14 @@ const ProjectMilestoneMetrics = ({
             ))}
           </div>
         ) : (
-          <div className="p-6 bg-gray-50 rounded-xl border border-gray-100 text-center text-gray-500 italic">
+          <div className="py-8 text-center text-gray-500 font-medium text-sm">
             No milestones found.
           </div>
         )}
       </div>
       {isUpdateModalOpen && selectedMilestoneId && (
         <div className="fixed inset-0 z-99999 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg h-auto bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="w-full max-w-lg h-auto bg-white rounded-none shadow-none overflow-hidden animate-in fade-in zoom-in duration-200">
             <UpdateCompletionPer
               milestoneId={selectedMilestoneId}
               onClose={() => setIsUpdateModalOpen(false)}
