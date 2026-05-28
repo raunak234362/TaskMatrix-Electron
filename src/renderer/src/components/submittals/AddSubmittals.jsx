@@ -39,9 +39,8 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
         const submittalsList = Array.isArray(submittalsRes) ? submittalsRes : [];
         const submittedIds = new Set();
         submittalsList.forEach((sub) => {
-          if (sub.mileStoneId) {
-            submittedIds.add(String(sub.mileStoneId));
-          }
+          // Check all possible milestone link fields
+          if (sub.mileStoneId) submittedIds.add(String(sub.mileStoneId));
           if (sub.mileStoneBelongsTo) {
             const id = sub.mileStoneBelongsTo.id || sub.mileStoneBelongsTo._id;
             if (id) submittedIds.add(String(id));
@@ -49,6 +48,13 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
           if (Array.isArray(sub.mileStones)) {
             sub.mileStones.forEach((m) => {
               const id = m.id || m._id;
+              if (id) submittedIds.add(String(id));
+            });
+          }
+          // mileStoneIds is the primary link field
+          if (Array.isArray(sub.mileStoneIds)) {
+            sub.mileStoneIds.forEach((link) => {
+              const id = typeof link === "string" ? link : (link?.id || link?.mileStoneId || link?.milestoneId);
               if (id) submittedIds.add(String(id));
             });
           }
@@ -68,7 +74,8 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
     defaultValues: {
       subject: initialData?.subject || "",
       stage: initialData?.stage || "",
-      mileStoneId: "",
+      mileStoneIds: [],   // array of milestone IDs
+      isConnectionDesign: false,
     },
   });
   const [description, setDescription] = useState(
@@ -173,6 +180,10 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
     setValue("sender_id", String(userDetail?.id));
   }, []);
 
+  useEffect(() => {
+    register("isConnectionDesign");
+  }, [register]);
+
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (data) => {
@@ -191,11 +202,10 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
       Object.entries(payload).forEach(([key, value]) => {
         if (key === "multipleRecipients" && Array.isArray(value)) {
           value.forEach((v) => formData.append("multipleRecipients[]", v));
-        } else if (key === "mileStoneId") {
-          if (value) {
-            formData.append("mileStoneId", value);
-            formData.append("mileStoneId[]", value);
-          }
+        } else if (key === "mileStoneIds") {
+          // Send as mileStoneIds[] array
+          const links = Array.isArray(value) ? value : (value ? [value] : []);
+          links.forEach((v) => formData.append("mileStoneIds[]", v));
         } else if (Array.isArray(value)) {
           value.forEach((v) => formData.append(key, v));
         } else if (value !== null && value !== undefined) {
@@ -236,11 +246,11 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
       const firstMilestone = availableMilestones[0];
       const firstId = firstMilestone.id || firstMilestone._id;
       if (firstId) {
-        setValue("mileStoneId", String(firstId));
+        setValue("mileStoneIds", [String(firstId)]);
         setValue("stage", firstMilestone.stage || "");
       }
     } else {
-      setValue("mileStoneId", "");
+      setValue("mileStoneIds", []);
       setValue("stage", "");
     }
   }, [milestones, isCDMode, submittedMilestoneIds]);
@@ -254,6 +264,7 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
           onClick={() => {
             setIsCDMode(false);
             setValue("multipleRecipients", []); // Clear selection when switching modes
+            setValue("isConnectionDesign", false);
           }}
           className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${!isCDMode
             ? "bg-white text-black shadow-sm"
@@ -267,6 +278,7 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
           onClick={() => {
             setIsCDMode(true);
             setValue("multipleRecipients", []); // Clear selection when switching modes
+            setValue("isConnectionDesign", true);
           }}
           className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${isCDMode
             ? "bg-white text-black shadow-sm"
@@ -318,31 +330,36 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
           Select Milestone
         </label>
         <Controller
-          name="mileStoneId"
+          name="mileStoneIds"
           control={control}
-          render={({ field }) => (
-            <Select
-              placeholder="Select Project Milestone"
-              options={mileStoneOptions}
-              value={
-                mileStoneOptions.find((o) => String(o.value) === String(field.value)) || null
-              }
-              onChange={(option) => {
-                const selectedVal = option ? option.value : "";
-                field.onChange(selectedVal);
-                if (selectedVal) {
-                  const selectedMilestone = milestones.find(
-                    (m) => String(m.id || m._id) === String(selectedVal),
-                  );
-                  if (selectedMilestone) {
-                    setValue("stage", selectedMilestone.stage || "");
-                  }
-                } else {
-                  setValue("stage", "");
+          render={({ field }) => {
+            // field.value is an array; display the first selected milestone
+            const selectedId = Array.isArray(field.value) ? field.value[0] : field.value;
+            return (
+              <Select
+                placeholder="Select Project Milestone"
+                options={mileStoneOptions}
+                value={
+                  mileStoneOptions.find((o) => String(o.value) === String(selectedId)) || null
                 }
-              }}
-            />
-          )}
+                onChange={(option) => {
+                  const selectedVal = option ? option.value : "";
+                  // store as array
+                  field.onChange(selectedVal ? [String(selectedVal)] : []);
+                  if (selectedVal) {
+                    const selectedMilestone = milestones.find(
+                      (m) => String(m.id || m._id) === String(selectedVal),
+                    );
+                    if (selectedMilestone) {
+                      setValue("stage", selectedMilestone.stage || "");
+                    }
+                  } else {
+                    setValue("stage", "");
+                  }
+                }}
+              />
+            );
+          }}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -8,9 +8,10 @@ import { Loader2, Inbox, MessageSquare } from "lucide-react";
 import GetRFIByID from "./GetRFIByID";
 import Modal from "../ui/Modal";
 import AddCommunication from "../communication/AddCommunication";
+import Service from "../../api/Service";
 
 
-const AllRFI = ({ rfiData = [] }) => {
+const AllRFI = ({ rfiData = [], onUpdate }) => {
   const [rfis, setRFIs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
@@ -25,29 +26,67 @@ const AllRFI = ({ rfiData = [] }) => {
 
 
   useEffect(() => {
-    let rfiArray = [];
-    if (Array.isArray(rfiData)) {
-      rfiArray = rfiData;
-    } else if (rfiData && rfiData["show rfi"]) {
-      rfiArray = rfiData["show rfi"];
-    } else if (rfiData && rfiData.data) {
-      rfiArray = rfiData.data;
-    } else if (rfiData && typeof rfiData === "object") {
-      const firstArray = Object.values(rfiData).find(Array.isArray);
-      if (firstArray) rfiArray = firstArray;
-    }
+    const fetchRFIs = async () => {
+      try {
+        setLoading(true);
+        let res;
+        if (userRole === "CLIENT") {
+          res = await Service.RfiSent();
+        } else {
+          res = await Service.RfiRecieved();
+        }
+        let rfiArray = [];
+        if (res) {
+          if (Array.isArray(res)) {
+            rfiArray = res;
+          } else if (res["show rfi"]) {
+            rfiArray = res["show rfi"];
+          } else if (res.data) {
+            rfiArray = res.data;
+          } else if (typeof res === "object") {
+            const firstArray = Object.values(res).find(Array.isArray);
+            if (firstArray) rfiArray = firstArray;
+          }
+        }
+        const normalized = rfiArray.map((item) => ({
+          ...item,
+          createdAt: item.createdAt || item.date || null,
+        }));
+        setRFIs(normalized);
+      } catch (error) {
+        console.error("Error fetching RFIs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (rfiArray.length > 0) {
-      const normalized = rfiArray.map((item) => ({
-        ...item,
-        createdAt: item.createdAt || item.date || null,
-      }));
-      setRFIs(normalized);
+    if (!rfiData || rfiData.length === 0) {
+      fetchRFIs();
     } else {
-      setRFIs([]);
+      let rfiArray = [];
+      if (Array.isArray(rfiData)) {
+        rfiArray = rfiData;
+      } else if (rfiData && rfiData["show rfi"]) {
+        rfiArray = rfiData["show rfi"];
+      } else if (rfiData && rfiData.data) {
+        rfiArray = rfiData.data;
+      } else if (rfiData && typeof rfiData === "object") {
+        const firstArray = Object.values(rfiData).find(Array.isArray);
+        if (firstArray) rfiArray = firstArray;
+      }
+
+      if (rfiArray.length > 0) {
+        const normalized = rfiArray.map((item) => ({
+          ...item,
+          createdAt: item.createdAt || item.date || null,
+        }));
+        setRFIs(normalized);
+      } else {
+        setRFIs([]);
+      }
+      setLoading(false);
     }
-    setLoading(false);
-  }, [rfiData]);
+  }, [rfiData, userRole]);
 
   // const handleRowClick = (row) => {
   //   // setSelectedRfiID(row.id);
@@ -89,20 +128,51 @@ const AllRFI = ({ rfiData = [] }) => {
 
 
 
+  const getStatusInfo = (item) => {
+    const responses = item.rfiresponse || [];
+    if (responses.length > 0) {
+      const sorted = [...responses].sort(
+        (a, b) => new Date(b.createdAt || b.date || 0) - new Date(a.createdAt || a.date || 0)
+      );
+      const latest = sorted[0];
+      const rfiStatus = latest.wbtStatus || latest.status;
+      if (rfiStatus) {
+        const statusStr = rfiStatus.toUpperCase();
+        switch (statusStr) {
+          case "OPEN":
+            return { label: "OPEN", className: "bg-blue-100 text-black shadow-sm" };
+          case "PARTIAL":
+            return { label: "PARTIAL", className: "bg-orange-100 text-black shadow-sm" };
+          case "COMPLETE":
+            return { label: "COMPLETE", className: "bg-green-100 text-black shadow-sm" };
+          default:
+            return { label: statusStr, className: "bg-gray-100 text-black shadow-sm" };
+        }
+      }
+    }
+
+    // Fallback if no responses exist
+    if (item.status === true || item.status === "OPEN" || item.status === "PENDING") {
+      return { label: "PENDING", className: "bg-green-100 text-black shadow-sm" };
+    } else {
+      return { label: "ANSWERED", className: "bg-orange-100 text-black shadow-sm" };
+    }
+  };
+
   columns.push(
     {
       accessorKey: "status",
       header: "Status",
-      cell: ({ row }) => (
-        <span
-          className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border border-black ${row.original.status === true
-            ? "bg-green-100 text-black shadow-sm"
-            : "bg-orange-100 text-black shadow-sm"
-            }`}
-        >
-          {row.original.status ? "PENDING" : "ANSWERED"}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const statusInfo = getStatusInfo(row.original);
+        return (
+          <span
+            className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border border-black ${statusInfo.className}`}
+          >
+            {statusInfo.label}
+          </span>
+        );
+      },
     },
     {
       accessorKey: "createdAt",
@@ -174,7 +244,7 @@ const AllRFI = ({ rfiData = [] }) => {
       <DataTable
         columns={columns}
         data={rfis}
-        detailComponent={({ row }) => <GetRFIByID id={row.id} />}
+        detailComponent={({ row }) => <GetRFIByID id={row.id} onUpdate={onUpdate} />}
       />
 
       {isFollowUpOpen && (

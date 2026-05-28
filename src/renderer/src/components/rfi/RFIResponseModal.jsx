@@ -14,7 +14,11 @@ const RFIResponseModal = ({
   onClose,
   onSuccess,
 }) => {
-  const { handleSubmit, control, reset } = useForm();
+  const { handleSubmit, control, reset } = useForm({
+    defaultValues: {
+      wbtStatus: "",
+    },
+  });
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -37,6 +41,7 @@ const RFIResponseModal = ({
       //   formData.append("responseState", data.responseState ? "true" : "false");
       formData.append("userRole", userRole);
       formData.append("userId", userId);
+      formData.append("wbtStatus", data.wbtStatus || "");
 
       files.forEach((file) => formData.append("files", file));
 
@@ -85,6 +90,26 @@ const RFIResponseModal = ({
             control={control}
             render={() => (
               <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
+            )}
+          />
+
+          {/* Status Dropdown */}
+          <Controller
+            name="wbtStatus"
+            control={control}
+            rules={{ required: true }}
+            render={({ field }) => (
+              <div className="flex flex-col gap-1">
+                <select
+                  {...field}
+                  className="w-full border border-gray-300 rounded-md p-2 text-sm text-gray-700"
+                  required
+                >
+                  <option value="">Select Status</option>
+                  <option value="PARTIAL">Partial</option>
+                  <option value="COMPLETE">Complete</option>
+                </select>
+              </div>
             )}
           />
 

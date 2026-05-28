@@ -170,13 +170,13 @@ const BfaManager = ({ submittalId }) => {
 
       await Service.AddBFA(formData);
       toast.success("BFA Raised Successfully!");
-      
+
       // Reset form
       setSubject("");
       setDescription("");
       setFiles([]);
       setShowCreateModal(false);
-      
+
       // Refresh BFA details
       fetchBfa();
     } catch (err) {
@@ -203,12 +203,12 @@ const BfaManager = ({ submittalId }) => {
 
       await Service.UpdateBFA(bfa.id, formData);
       toast.success("BFA Updated Successfully!");
-      
+
       // Reset form
       setDescription("");
       setFiles([]);
       setShowUpdateModal(false);
-      
+
       // Refresh BFA details
       fetchBfa();
     } catch (err) {
@@ -279,13 +279,12 @@ const BfaManager = ({ submittalId }) => {
             <Info label="BFA Subject" value={bfa.subject} />
             <div className="mb-2">
               <h4 className="text-sm text-gray-700">BFA Status</h4>
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tight border mt-1 ${
-                bfa.status === "APPROVED"
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tight border mt-1 ${bfa.status === "APPROVED"
                   ? "bg-green-100 text-green-700 border-green-200"
                   : bfa.status === "REJECTED"
                     ? "bg-red-100 text-red-700 border-red-200"
                     : "bg-yellow-100 text-yellow-700 border-yellow-200"
-              }`}>
+                }`}>
                 {bfa.status || "PENDING"}
               </span>
             </div>
@@ -354,7 +353,7 @@ const BfaManager = ({ submittalId }) => {
       ) : (
         <div className="text-center py-8 border border-dashed border-gray-300 rounded-xl bg-white flex flex-col items-center justify-center">
           <FileText className="w-10 h-10 text-gray-300 mb-2" />
-          <p className="text-sm text-gray-500 italic">No Bid for Approval (BFA) associated with this submittal yet.</p>
+          <p className="text-sm text-gray-500 italic">No bacK FROM APPROVAL (BFA) associated with this submittal yet.</p>
           <button
             onClick={() => setShowCreateModal(true)}
             className="text-xs font-bold text-[#6bbd45] mt-2 hover:underline"

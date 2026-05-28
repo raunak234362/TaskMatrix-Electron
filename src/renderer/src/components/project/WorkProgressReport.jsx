@@ -177,52 +177,225 @@ const WorkProgressReport = ({
 
     const formattedRFIs = rfiArray.map((r, index) => {
       const responses = r.rfiresponse || [];
-      const customerRep = responses.find(res => res.userRole === "CLIENT" || res.userRole === "CLIENT_ADMIN" || res.createdByRole === "CLIENT");
-      const wbtRep = responses.find(res => res.userRole !== "CLIENT" && res.userRole !== "CLIENT_ADMIN" && res.createdByRole !== "CLIENT");
-      
+
+      // Detect role from nested user object or responseState
+      const isClientResponse = (res) => {
+        const role = (res.user?.role || res.userRole || res.createdByRole || "").toUpperCase();
+        return role === "CLIENT" || role === "CLIENT_ADMIN";
+      };
+
+      // Sort responses by date (oldest first) so we can separate Q & A
+      const sorted = [...responses].sort(
+        (a, b) => new Date(a.createdAt || a.date || 0) - new Date(b.createdAt || b.date || 0)
+      );
+
+      // Customer response = first SENT response from client, else latest non-wbt
+      const customerRep = sorted.find(res => isClientResponse(res))
+        || sorted.find(res => res.responseState === "SENT" && !isClientResponse(res));
+
+      // WBT response = latest non-client response
+      const wbtRep = [...sorted].reverse().find(res => !isClientResponse(res));
+
+      let statusLabel = "PENDING";
+      if (sorted.length > 0) {
+        const latest = sorted[sorted.length - 1];
+        const rfiStatus = latest.wbtStatus || latest.status;
+        if (rfiStatus && typeof rfiStatus === "string") {
+          statusLabel = rfiStatus.toUpperCase();
+        }
+      } else {
+        statusLabel = r.status === true || r.status === "OPEN" || r.status === "PENDING" ? "PENDING" : "ANSWERED";
+      }
+
+      // Prefer `reason` field (actual API field), fallback to `description`
+      const extractText = (res) =>
+        ((res?.reason || res?.description || "").replace(/<[^>]+>/g, "")).trim();
+
       return {
         id: r.id || r._id,
-        rfiNo: r.subject || `RFI #${index + 1}`,
+        rfiNo: r.subject || r.serialNo || `RFI #${index + 1}`,
         sentDate: r.date ? new Date(r.date).toLocaleDateString("en-US") : "—",
-        customerResponse: customerRep ? customerRep.description?.replace(/<[^>]+>/g, "") : "Waiting...",
-        responseReceivedDate: customerRep ? new Date(customerRep.createdAt).toLocaleDateString("en-US") : "—",
-        wbtResponse: wbtRep ? wbtRep.description?.replace(/<[^>]+>/g, "") : "100% Responded & Updated",
-        status: r.status ? "OPEN" : "Closed"
+        customerResponse: customerRep ? (extractText(customerRep) || "(no text)") : "Waiting...",
+        responseReceivedDate: customerRep
+          ? new Date(customerRep.createdAt || customerRep.date).toLocaleDateString("en-US")
+          : "—",
+        wbtResponse: wbtRep ? (extractText(wbtRep) || "Responded") : "—",
+        status: statusLabel,
+        rfiresponse: r.rfiresponse
       };
     });
 
     setRawRfis(formattedRFIs);
   }, [rfiData]);
 
-  // Sync Schedule (Milestones mapped to Submittals)
+  // Sync Schedule – one row per milestone (with stacked submittal entries), plus standalone submittals
   useEffect(() => {
-    const rows = milestones.map((m) => {
-      const milestoneSubmittals = submittalData.filter(
-        sub => String(sub.mileStoneId || sub.milestoneId || sub.milestone?.id) === String(m.id || m._id)
-      );
+    const linkedSubmittalIds = new Set();
+    const fmt = (d) => d ? new Date(d).toLocaleDateString("en-US") : "—";
+    const toEntry = (sub) => ({ subject: sub.subject || sub.serialNo || "—", date: fmt(sub.date || sub.createdAt) });
+    const cleanHtml = (str) => (str || "").replace(/<[^>]+>/g, "").replace(/&nbsp;/gi, " ").trim();
 
-      const ifaSub = milestoneSubmittals.find(s => String(s.stage).toUpperCase() === "IFA");
-      const ifcSub = milestoneSubmittals.find(s => String(s.stage).toUpperCase() === "IFC");
-      const corSub = milestoneSubmittals.find(s => ["CO", "COR"].includes(String(s.stage).toUpperCase()));
+    // ── Milestone rows ────────────────────────────────────────────────────────
+    const milestoneRows = milestones.map((m) => {
+      const mId = String(m.id || m._id);
 
-      const ifaResponses = ifaSub?.submittalsResponse || [];
-      const latestIfaResponse = ifaResponses.length > 0 ? ifaResponses[ifaResponses.length - 1] : null;
+      // A submittal belongs to this milestone if:
+      //   1. Its mileStoneId / milestoneId matches, OR
+      //   2. Its mileStoneIds[] (new field) contains this milestone ID, OR
+      //   3. Its mileStoneLinks[] (legacy) contains a reference to this milestone
+      const matchLink = (link) =>
+        String(link) === mId ||
+        String(link?.id) === mId ||
+        String(link?.mileStoneId) === mId ||
+        String(link?.milestoneId) === mId;
+
+      const belongsToMilestone = (sub) => {
+        if (String(sub.mileStoneId || sub.milestoneId || sub.milestone?.id) === mId) return true;
+        if (Array.isArray(sub.mileStoneIds) && sub.mileStoneIds.some(matchLink)) return true;
+        if (Array.isArray(sub.mileStoneLinks) && sub.mileStoneLinks.some(matchLink)) return true;
+        return false;
+      };
+
+      const subs = submittalData.filter(belongsToMilestone);
+      subs.forEach(s => linkedSubmittalIds.add(s.id || s._id));
+
+      const ifaSubs = subs.filter(s => String(s.stage || "").toUpperCase() === "IFA");
+      const ifcSubs = subs.filter(s => String(s.stage || "").toUpperCase() === "IFC");
+      const corSubs = subs.filter(s => ["CO", "COR"].includes(String(s.stage || "").toUpperCase()));
+
+      // BFA = latest response across all IFA submittals
+      const allIfaResponses = ifaSubs.flatMap(s => s.submittalsResponse || []);
+      const latestBfa = allIfaResponses.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0];
+
+      const primarySub = ifaSubs[0] || subs[0];
+      const submittalStatus = primarySub ? (primarySub.wbtStatus || primarySub.status || "PENDING") : "—";
+
+      const ifaEntries = ifaSubs.map(toEntry);
+      const ifcEntries = ifcSubs.map(toEntry);
+      const corEntries = corSubs.map(toEntry);
 
       return {
         id: m.id || m._id,
+        _type: "milestone",
         phase: m.subject || "Unnamed Phase",
-        startDate: m.date ? new Date(m.date).toLocaleDateString("en-US") : project?.startDate ? new Date(project.startDate).toLocaleDateString("en-US") : "—",
-        ifaSubDate: ifaSub ? new Date(ifaSub.date || ifaSub.createdAt).toLocaleDateString("en-US") : "—",
-        bfaRecdDate: latestIfaResponse ? new Date(latestIfaResponse.createdAt).toLocaleDateString("en-US") : "—",
-        ifcSubDate: ifcSub ? new Date(ifcSub.date || ifcSub.createdAt).toLocaleDateString("en-US") : "—",
-        corSubDate: corSub ? new Date(corSub.date || corSub.createdAt).toLocaleDateString("en-US") : "—",
-        comments: m.description ? m.description.replace(/<[^>]+>/g, "") : (m.percentage ? `${m.percentage}% Completed` : "—"),
+        startDate: m.date ? fmt(m.date) : (project?.startDate ? fmt(project.startDate) : "—"),
+        ifaEntries,
+        bfaRecdDate: latestBfa ? fmt(latestBfa.createdAt) : "—",
+        ifcEntries,
+        corEntries,
+        // flat dates kept for filtering/export
+        ifaSubDate: ifaEntries[0]?.date || "—",
+        ifcSubDate: ifcEntries[0]?.date || "—",
+        corSubDate: corEntries[0]?.date || "—",
+        submittalStatus,
+        comments: m.description ? cleanHtml(m.description) : (m.percentage ? `${m.percentage}% Completed` : "—"),
         types: m.types || "ANCHOR_BOLT",
-        subSubject: m.subSubject || "string"
+        subSubject: "",
       };
     });
 
-    setRawScheduleRows(rows);
+    // ── Standalone submittal rows (no milestone link of any kind) ─────────────
+    const standaloneRows = submittalData
+      .filter(sub => {
+        if (linkedSubmittalIds.has(sub.id || sub._id)) return false;
+        if (sub.mileStoneId || sub.milestoneId) return false;
+        if (sub.mileStoneIds && sub.mileStoneIds.length > 0) return false;
+        if (sub.mileStoneLinks && sub.mileStoneLinks.length > 0) return false;
+        return true;
+      })
+      .map((sub) => {
+        const responses = sub.submittalsResponse || [];
+        const latestResponse = responses.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0];
+        const stage = String(sub.stage || "").toUpperCase();
+        const entry = toEntry(sub);
+        return {
+          id: sub.id || sub._id,
+          _type: "submittal",
+          phase: sub.subject || sub.serialNo || "Unnamed Submittal",
+          startDate: fmt(sub.date || sub.createdAt),
+          ifaEntries: stage === "IFA" ? [entry] : [],
+          bfaRecdDate: latestResponse ? fmt(latestResponse.createdAt || latestResponse.respondedAt) : "—",
+          ifcEntries: stage === "IFC" ? [entry] : [],
+          corEntries: ["CO", "COR"].includes(stage) ? [entry] : [],
+          ifaSubDate: stage === "IFA" ? entry.date : "—",
+          ifcSubDate: stage === "IFC" ? entry.date : "—",
+          corSubDate: ["CO", "COR"].includes(stage) ? entry.date : "—",
+          submittalStatus: sub.wbtStatus || sub.status || "PENDING",
+          comments: latestResponse
+            ? cleanHtml(latestResponse.description || latestResponse.reason) || "—"
+            : "—",
+          types: "ANCHOR_BOLT",
+          subSubject: sub.subject || sub.serialNo || "",
+        };
+      });
+
+    // ── Merge rows that share the same Phase / Subject ────────────────────────
+    // (e.g. two milestones both named "ANCHOR BOLT" collapse into one row)
+    const sortByDate = (entries) =>
+      [...entries].sort((a, b) => {
+        const da = a.date && a.date !== "—" ? new Date(a.date) : new Date(0);
+        const db = b.date && b.date !== "—" ? new Date(b.date) : new Date(0);
+        return da - db;
+      });
+
+    const mergeMap = new Map();
+    [...milestoneRows, ...standaloneRows].forEach((row) => {
+      const key = (row.phase || "").trim().toUpperCase();
+      if (!mergeMap.has(key)) {
+        mergeMap.set(key, {
+          ...row,
+          ifaEntries: [...(row.ifaEntries || [])],
+          ifcEntries: [...(row.ifcEntries || [])],
+          corEntries: [...(row.corEntries || [])],
+        });
+      } else {
+        const base = mergeMap.get(key);
+        base.ifaEntries.push(...(row.ifaEntries || []));
+        base.ifcEntries.push(...(row.ifcEntries || []));
+        base.corEntries.push(...(row.corEntries || []));
+        // Keep earliest start date
+        if (row.startDate && row.startDate !== "—" &&
+            (base.startDate === "—" || new Date(row.startDate) < new Date(base.startDate))) {
+          base.startDate = row.startDate;
+        }
+        // Keep latest BFA date
+        if (row.bfaRecdDate && row.bfaRecdDate !== "—") {
+          if (base.bfaRecdDate === "—" || new Date(row.bfaRecdDate) > new Date(base.bfaRecdDate)) {
+            base.bfaRecdDate = row.bfaRecdDate;
+          }
+        }
+        // Keep most meaningful status
+        if (row.submittalStatus && row.submittalStatus !== "—") {
+          base.submittalStatus = row.submittalStatus;
+        }
+        // Append unique comments
+        if (row.comments && row.comments !== "—") {
+          base.comments = base.comments === "—"
+            ? row.comments
+            : base.comments.includes(row.comments)
+              ? base.comments
+              : `${base.comments} | ${row.comments}`;
+        }
+      }
+    });
+
+    // Sort each entry list by date and update flat date fields
+    const mergedRows = Array.from(mergeMap.values()).map((row) => {
+      const ifa = sortByDate(row.ifaEntries);
+      const ifc = sortByDate(row.ifcEntries);
+      const cor = sortByDate(row.corEntries);
+      return {
+        ...row,
+        ifaEntries: ifa,
+        ifcEntries: ifc,
+        corEntries: cor,
+        ifaSubDate: ifa[0]?.date || "—",
+        ifcSubDate: ifc[0]?.date || "—",
+        corSubDate: cor[0]?.date || "—",
+      };
+    });
+
+    setRawScheduleRows(mergedRows);
   }, [milestones, submittalData, project]);
 
   // Sync Change Orders Month-by-month
@@ -432,7 +605,7 @@ const WorkProgressReport = ({
         if (row.id && !String(row.id).startsWith("temp-")) {
           const payload = {
             subject: row.rfiNo,
-            status: row.status === "OPEN",
+            status: ["OPEN", "PENDING", "PARTIAL"].includes(row.status?.toUpperCase()),
           };
           await Service.EditRFIByID(row.id, payload);
         } else {
@@ -824,187 +997,7 @@ const WorkProgressReport = ({
         </div>
       </div>
 
-      {/* ── 1. PROJECT SCHEDULE & MILESTONES TABLE ── */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="text-black w-5 h-5" />
-            <h3 className="text-sm font-bold uppercase tracking-wider text-black">1. Project Schedule / Milestones</h3>
-          </div>
-          {canEdit && (
-            <button
-              onClick={() => addRow("schedule")}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-750 rounded-none text-xs font-bold uppercase transition-all shadow-sm cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              Add Row
-            </button>
-          )}
-        </div>
-
-        <div className="overflow-x-auto border border-black rounded-none bg-white shadow-sm custom-scrollbar max-w-full">
-          <table className="w-full text-left border-collapse min-w-[800px] text-xs">
-            <thead>
-              <tr className="bg-slate-100 border-b border-black">
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10">Phase</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-28">Start Date</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-40">IFA - Submission Date</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-36">BFA - Recd Date</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-40">IFC - Sub Date</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-44">COR Drawing Sub Date</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black">Comments</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-black/10">
-              {filteredScheduleRows.map((row) => (
-                <tr key={row.id} className="hover:bg-slate-50 transition-all">
-                  {/* Phase cell */}
-                  <td 
-                    onClick={() => handleCellClick("schedule", row.id, "phase", row.phase)}
-                    className="p-3 font-bold border-r border-black/10 cursor-pointer hover:bg-slate-100/50 text-black"
-                  >
-                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "phase" ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-2 py-1 rounded-none font-bold uppercase text-xs text-black"
-                      />
-                    ) : (
-                      <span className="uppercase">{row.phase}</span>
-                    )}
-                  </td>
-
-                  {/* Start Date */}
-                  <td 
-                    onClick={() => handleCellClick("schedule", row.id, "startDate", row.startDate)}
-                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
-                  >
-                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "startDate" ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
-                      />
-                    ) : (
-                      <span>{row.startDate}</span>
-                    )}
-                  </td>
-
-                  {/* IFA submission date */}
-                  <td 
-                    onClick={() => handleCellClick("schedule", row.id, "ifaSubDate", row.ifaSubDate)}
-                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
-                  >
-                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "ifaSubDate" ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
-                      />
-                    ) : (
-                      <span>{row.ifaSubDate}</span>
-                    )}
-                  </td>
-
-                  {/* BFA date */}
-                  <td 
-                    onClick={() => handleCellClick("schedule", row.id, "bfaRecdDate", row.bfaRecdDate)}
-                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
-                  >
-                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "bfaRecdDate" ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
-                      />
-                    ) : (
-                      <span>{row.bfaRecdDate}</span>
-                    )}
-                  </td>
-
-                  {/* IFC sub date */}
-                  <td 
-                    onClick={() => handleCellClick("schedule", row.id, "ifcSubDate", row.ifcSubDate)}
-                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
-                  >
-                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "ifcSubDate" ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
-                      />
-                    ) : (
-                      <span>{row.ifcSubDate}</span>
-                    )}
-                  </td>
-
-                  {/* COR Sub date */}
-                  <td 
-                    onClick={() => handleCellClick("schedule", row.id, "corSubDate", row.corSubDate)}
-                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
-                  >
-                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "corSubDate" ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
-                      />
-                    ) : (
-                      <span>{row.corSubDate}</span>
-                    )}
-                  </td>
-
-                  {/* Comments */}
-                  <td 
-                    onClick={() => handleCellClick("schedule", row.id, "comments", row.comments)}
-                    className="p-3 font-bold text-black cursor-pointer hover:bg-slate-100/50"
-                  >
-                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "comments" ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
-                      />
-                    ) : (
-                      <span>{row.comments}</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* ── 2. RFIs OVERVIEW TABLE ── */}
+       {/* ── 2. RFIs OVERVIEW TABLE ── */}
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -1150,10 +1143,20 @@ const WorkProgressReport = ({
                         className="w-full bg-white border border-black px-1 py-1 rounded-none text-xs uppercase font-bold text-black"
                       >
                         <option value="OPEN">OPEN</option>
-                        <option value="Closed">Closed</option>
+                        <option value="PARTIAL">PARTIAL</option>
+                        <option value="COMPLETE">COMPLETE</option>
+                        <option value="PENDING">PENDING</option>
+                        <option value="ANSWERED">ANSWERED</option>
                       </select>
                     ) : (
-                      <span className={`px-2 py-1 rounded-none border border-black ${row.status === "OPEN" ? "bg-orange-50 text-orange-700" : "bg-green-50 text-green-700"}`}>
+                      <span className={`px-2 py-1 rounded-none border border-black ${
+                        row.status === "OPEN" ? "bg-blue-50 text-blue-700" :
+                        row.status === "PARTIAL" ? "bg-orange-50 text-orange-700" :
+                        row.status === "COMPLETE" ? "bg-green-50 text-green-700" :
+                        row.status === "PENDING" ? "bg-green-50 text-green-700" :
+                        row.status === "ANSWERED" ? "bg-orange-50 text-orange-700" :
+                        "bg-slate-50 text-slate-700"
+                      }`}>
                         {row.status}
                       </span>
                     )}
@@ -1164,6 +1167,252 @@ const WorkProgressReport = ({
           </table>
         </div>
       </div>
+
+      {/* ── 1. PROJECT SCHEDULE & MILESTONES TABLE ── */}
+      <div className="space-y-3">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="text-black w-5 h-5" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-black">1. Project Schedule / Milestones</h3>
+          </div>
+          {canEdit && (
+            <button
+              onClick={() => addRow("schedule")}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-750 rounded-none text-xs font-bold uppercase transition-all shadow-sm cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add Row
+            </button>
+          )}
+        </div>
+
+        <div className="overflow-x-auto border border-black rounded-none bg-white shadow-sm custom-scrollbar max-w-full">
+          <table className="w-full text-left border-collapse min-w-[800px] text-xs">
+            <thead>
+              <tr className="bg-slate-100 border-b border-black">
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10">Phase / Subject</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-28">Start Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-44">IFA - Submission Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-36">BFA - Recd Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-40">IFC - Sub Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-44">COR Drawing Sub Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-40">Status</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black">Comments</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-black/10">
+              {filteredScheduleRows.map((row) => (
+                <tr
+                  key={row.id}
+                  className={`border-b border-black/10 transition-all ${
+                    row._type === "milestone"
+                      ? "bg-[#f0f7ed] hover:bg-[#e6f3e2]"
+                      : "bg-white hover:bg-slate-50"
+                  }`}
+                >
+                  {/* Phase cell */}
+                  <td 
+                    onClick={() => handleCellClick("schedule", row.id, "phase", row.phase)}
+                    className="p-3 font-bold border-r border-black/10 cursor-pointer hover:bg-slate-100/50 text-black"
+                  >
+                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "phase" ? (
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={handleCellSave}
+                        onKeyDown={handleKeyDown}
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none font-bold uppercase text-xs text-black"
+                      />
+                    ) : (
+                      <span className="uppercase">{row.phase}</span>
+                    )}
+                  </td>
+
+
+
+                  {/* Start Date */}
+                  <td 
+                    onClick={() => handleCellClick("schedule", row.id, "startDate", row.startDate)}
+                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
+                  >
+                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "startDate" ? (
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={handleCellSave}
+                        onKeyDown={handleKeyDown}
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
+                      />
+                    ) : (
+                      <span>{row.startDate}</span>
+                    )}
+                  </td>
+
+                  {/* IFA submission date – stacked entries: Subject – Date */}
+                  <td className="p-3 border-r border-black/10 align-top">
+                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "ifaSubDate" ? (
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={handleCellSave}
+                        onKeyDown={handleKeyDown}
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
+                      />
+                    ) : row.ifaEntries && row.ifaEntries.length > 0 ? (
+                      <div className="flex flex-col gap-0.5">
+                        {row.ifaEntries.map((entry, i) => (
+                          <span key={i} className="text-[11px] font-semibold text-blue-800">
+                            {entry.subject} – {entry.date}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
+                  </td>
+
+                  {/* BFA date */}
+                  <td 
+                    onClick={() => handleCellClick("schedule", row.id, "bfaRecdDate", row.bfaRecdDate)}
+                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
+                  >
+                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "bfaRecdDate" ? (
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={handleCellSave}
+                        onKeyDown={handleKeyDown}
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
+                      />
+                    ) : (
+                      <span>{row.bfaRecdDate}</span>
+                    )}
+                  </td>
+
+                  {/* IFC sub date – stacked entries */}
+                  <td className="p-3 border-r border-black/10 align-top">
+                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "ifcSubDate" ? (
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={handleCellSave}
+                        onKeyDown={handleKeyDown}
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
+                      />
+                    ) : row.ifcEntries && row.ifcEntries.length > 0 ? (
+                      <div className="flex flex-col gap-0.5">
+                        {row.ifcEntries.map((entry, i) => (
+                          <span key={i} className="text-[11px] font-semibold text-blue-800">
+                            {entry.subject} – {entry.date}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
+                  </td>
+
+                  {/* COR Drawing Sub date – stacked entries */}
+                  <td className="p-3 border-r border-black/10 align-top">
+                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "corSubDate" ? (
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={handleCellSave}
+                        onKeyDown={handleKeyDown}
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
+                      />
+                    ) : row.corEntries && row.corEntries.length > 0 ? (
+                      <div className="flex flex-col gap-0.5">
+                        {row.corEntries.map((entry, i) => (
+                          <span key={i} className="text-[11px] font-semibold text-blue-800">
+                            {entry.subject} – {entry.date}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
+                  </td>
+
+                  {/* Submittal Status Badge */}
+                  <td className="p-3 border-r border-black/10">
+                    {(() => {
+                      const STATUS_LABELS = {
+                        WAITING_FOR_BFA: "Waiting for BFA",
+                        BFA_RECEIVED: "Back From Approval – Received",
+                        BFA_SENT: "Back From Approval – Sent",
+                        SUBMITTED_TO_EOR: "Submitted to EOR",
+                        RELEASE_FOR_FABRICATION: "Release for Fab",
+                        NOT_APPROVED: "Not Approved",
+                        REVISED_RESUBMITTAL: "Revised & Resubmitted",
+                        REVISED_RESUBMIT_FOR_FABRICATION: "Revised & Resub for Fab",
+                        PENDING: "Pending",
+                      };
+                      const STATUS_COLORS = {
+                        WAITING_FOR_BFA: "bg-purple-100 text-purple-700 border-purple-200",
+                        BFA_RECEIVED: "bg-emerald-100 text-emerald-700 border-emerald-200",
+                        BFA_SENT: "bg-indigo-100 text-indigo-700 border-indigo-200",
+                        SUBMITTED_TO_EOR: "bg-blue-100 text-blue-700 border-blue-200",
+                        RELEASE_FOR_FABRICATION: "bg-green-100 text-green-700 border-green-200",
+                        NOT_APPROVED: "bg-red-100 text-red-700 border-red-200",
+                        REVISED_RESUBMITTAL: "bg-orange-100 text-orange-700 border-orange-200",
+                        REVISED_RESUBMIT_FOR_FABRICATION: "bg-orange-100 text-orange-700 border-orange-200",
+                        PENDING: "bg-yellow-100 text-yellow-700 border-yellow-200",
+                      };
+                      const key = String(row.submittalStatus || "—").replace(/\s+/g, "_").toUpperCase();
+                      const label = STATUS_LABELS[key] || String(row.submittalStatus || "—").replace(/_/g, " ");
+                      const color = STATUS_COLORS[key] || "bg-gray-100 text-gray-600 border-gray-200";
+                      if (row.submittalStatus && row.submittalStatus !== "—") {
+                        return (
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border ${color}`}>
+                            {label}
+                          </span>
+                        );
+                      }
+                      return <span className="text-gray-400">—</span>;
+                    })()}
+                  </td>
+
+                  {/* Comments */}
+                  <td 
+                    onClick={() => handleCellClick("schedule", row.id, "comments", row.comments)}
+                    className="p-3 font-bold text-black cursor-pointer hover:bg-slate-100/50"
+                  >
+                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "comments" ? (
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={handleCellSave}
+                        onKeyDown={handleKeyDown}
+                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
+                      />
+                    ) : (
+                      <span>{row.comments}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+     
 
       {/* ── 3. CHANGE ORDER AMOUNT GRID ── */}
       <div className="space-y-3">

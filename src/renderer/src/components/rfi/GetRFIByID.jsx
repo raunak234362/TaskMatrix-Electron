@@ -17,7 +17,7 @@ const Info = ({ label, value }) => (
 );
 
 
-const GetRFIByID = ({ id }) => {
+const GetRFIByID = ({ id, onUpdate }) => {
   const [loading, setLoading] = useState(true);
   const [rfi, setRfi] = useState(null);
   const [error, setError] = useState(null);
@@ -239,7 +239,10 @@ const GetRFIByID = ({ id }) => {
             <RFIResponseModal
               rfiId={id}
               onClose={() => setShowModal(false)}
-              onSuccess={fetchRfi}
+              onSuccess={() => {
+                fetchRfi();
+                onUpdate?.();
+              }}
             />
           )}
 
@@ -253,6 +256,7 @@ const GetRFIByID = ({ id }) => {
                     onSuccess={() => {
                       setShowEditModal(false);
                       fetchRfi();
+                      onUpdate?.();
                     }}
                   />
                 </div>
@@ -264,7 +268,11 @@ const GetRFIByID = ({ id }) => {
           {selectedResponse && (
             <RFIResponseDetailsModal
               response={selectedResponse}
-              onClose={() => setSelectedResponse(null)}
+              onClose={() => {
+                setSelectedResponse(null);
+                fetchRfi();
+                onUpdate?.();
+              }}
             />
           )}
         </div>

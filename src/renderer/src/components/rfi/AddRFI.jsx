@@ -28,7 +28,11 @@ const AddRFI = ({
   console.log("Fabricators from Redux:", fabricators);
 
   const { register, setValue, handleSubmit, control, reset } =
-    useForm();
+    useForm({
+      defaultValues: {
+        isConnectionDesign: false
+      }
+    });
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -151,6 +155,10 @@ const AddRFI = ({
     }
   }, [userRole, projectOptions]);
 
+  useEffect(() => {
+    register("isConnectionDesign");
+  }, [register]);
+
   return (
     <div className="w-full mx-auto bg-white p-2 rounded-xl shadow">
       {/* Recipient Category Toggle */}
@@ -160,6 +168,7 @@ const AddRFI = ({
           onClick={() => {
             setIsCDMode(false);
             setValue("multipleRecipients", []); // Clear selection when switching modes
+            setValue("isConnectionDesign", false);
           }}
           className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
             !isCDMode
@@ -174,6 +183,7 @@ const AddRFI = ({
           onClick={() => {
             setIsCDMode(true);
             setValue("multipleRecipients", []); // Clear selection when switching modes
+            setValue("isConnectionDesign", true);
           }}
           className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
             isCDMode

@@ -6,14 +6,6 @@ import RichTextEditor from "../fields/RichTextEditor";
 import RenderFiles from "../common/RenderFiles";
 import MultipleFileUpload from "../fields/MultipleFileUpload";
 
-// Status options for submittal
-const STATUS_OPTIONS = [
-  { label: "Submitted to EOR", value: "SUBMITTED_TO_EOR" },
-  { label: "Revised & Resubmitted", value: "REVISED_RESUBMITTAL" },
-  { label: "NOT APPROVED", value: "NOT_APPROVED" },
-  { label: "RELEASE_FOR_FABRICATION", value: "RELEASE_FOR_FABRICATION" },
-  { label: "REVISED_RESUBMIT_FOR_FABRICATION", value: "REVISED_RESUBMIT_FOR_FABRICATION" },
-];
 
 
 const Info = ({ label, value }) => (
@@ -33,7 +25,6 @@ const SubmittalResponseDetailsModal = ({
   const [replyMode, setReplyMode] = useState(false);
   const [replyMessage, setReplyMessage] = useState("");
   const [replyFiles, setReplyFiles] = useState([]);
-  const [replyStatus, setReplyStatus] = useState("NOT_APPROVED");
 
   const userRole = sessionStorage.getItem("userRole")?.toUpperCase() || "";
   const userId = sessionStorage.getItem("userId") || "";
@@ -52,7 +43,6 @@ const SubmittalResponseDetailsModal = ({
     formData.append("parentResponseId", response.id);
     formData.append("userId", userId);
     formData.append("userRole", userRole);
-    formData.append("status", replyStatus);
 
     replyFiles.forEach((file) => formData.append("files", file));
 
@@ -190,20 +180,7 @@ const SubmittalResponseDetailsModal = ({
                   />
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</label>
-                      <select
-                        className="w-full border-gray-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-[#6bbd45] focus:border-transparent transition-all"
-                        value={replyStatus}
-                        onChange={(e) => setReplyStatus(e.target.value)}
-                      >
-                        {STATUS_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                   
 
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Attachments</label>

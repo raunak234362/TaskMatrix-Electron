@@ -1036,7 +1036,7 @@ const GetProjectById = ({ id, onClose }) => {
 
               {/* RFI Content */}
               {rfiView === "list" ? (
-                <AllRFI rfiData={rfiData} />
+                <AllRFI rfiData={rfiData} onUpdate={fetchProject} />
               ) : (
                 <AddRFI
                   project={project}
@@ -1132,7 +1132,7 @@ const GetProjectById = ({ id, onClose }) => {
 
               {/* RFI Content */}
               {rfiView === "list" ? (
-                <AllRFI rfiData={rfiData} />
+                <AllRFI rfiData={rfiData} onUpdate={fetchProject} />
               ) : (
                 <AddRFI
                   project={project}
