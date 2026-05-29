@@ -359,6 +359,42 @@ const GetSubmittalByID = ({ id, onClose }) => {
                   value={submittal.sender?.firstName || "—"}
                 />
                 <Info
+                  label="Status"
+                  value={(() => {
+                    const status = submittal.wbtStatus || submittal.status || "PENDING";
+                    const STATUS_LABELS = {
+                      WAITING_FOR_BFA: "Waiting for BFA",
+                      BFA_RECEIVED: "BFA RECEIVED",
+                      BFA_SENT: "BFA SENT",
+                      SUBMITTED_TO_EOR: "Submitted to EOR",
+                      RELEASE_FOR_FABRICATION: "Release for Fabrication",
+                      NOT_APPROVED: "Not Approved",
+                      REVISED_RESUBMITTAL: "Revised & Resubmitted",
+                      REVISED_RESUBMIT_FOR_FABRICATION: "Revised & Resubmit for Fabrication",
+                      PENDING: "Pending",
+                    };
+                    const key = String(status).replace(/\s+/g, "_").toUpperCase();
+                    const label = STATUS_LABELS[key] || String(status).replace(/_/g, " ");
+                    
+                    const getStatusStyles = (k) => {
+                      switch (k) {
+                        case "WAITING_FOR_BFA": return "bg-purple-100 text-purple-700 border-purple-200";
+                        case "BFA_RECEIVED": return "bg-emerald-100 text-emerald-700 border-emerald-200";
+                        case "BFA_SENT": return "bg-indigo-100 text-indigo-700 border-indigo-200";
+                        case "SUBMITTED_TO_EOR": return "bg-blue-100 text-blue-700 border-blue-200";
+                        case "RELEASE_FOR_FABRICATION": return "bg-green-100 text-green-700 border-green-200";
+                        case "NOT_APPROVED": return "bg-red-100 text-red-700 border-red-200";
+                        case "REVISED_RESUBMITTAL":
+                        case "REVISED_RESUBMIT_FOR_FABRICATION": return "bg-orange-100 text-orange-700 border-orange-200";
+                        case "PENDING": return "bg-yellow-100 text-yellow-700 border-yellow-200";
+                        default: return "bg-gray-100 text-gray-600 border-gray-200";
+                      }
+                    };
+
+                    return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tight border ${getStatusStyles(key)}">${label}</span>`;
+                  })()}
+                />
+                <Info
                   label="Recipients"
                   value={
                     submittal.multipleRecipients?.length > 0

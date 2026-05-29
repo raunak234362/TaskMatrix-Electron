@@ -10,6 +10,7 @@ const ChangePasswordModal = ({
     onClose,
     onSuccess,
 }) => {
+    const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -19,7 +20,7 @@ const ChangePasswordModal = ({
         e.preventDefault();
         setError(null);
 
-        if (!newPassword || !confirmPassword) {
+        if (!currentPassword || !newPassword || !confirmPassword) {
             setError("Please fill in all fields");
             return;
         }
@@ -36,13 +37,9 @@ const ChangePasswordModal = ({
 
         try {
             setLoading(true);
-            const token = sessionStorage.getItem("token") || "";
-
-            await AuthService.changePassword({
-                id,
-                token,
-                newPassword,
-                username: "", // Not needed for this endpoint but required by interface
+            await AuthService.updatePassword({
+                currentPassword,
+                newPassword
             });
 
             toast.success("Password changed successfully");
@@ -87,6 +84,19 @@ const ChangePasswordModal = ({
                                 {error}
                             </div>
                         )}
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Current Password
+                            </label>
+                            <input
+                                type="password"
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-green-500 transition-all font-mono"
+                                placeholder="••••••••"
+                            />
+                        </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { 
-  FileSpreadsheet, 
-  Printer, 
-  Download, 
-  Plus, 
-  Save, 
-  Trash2, 
+import {
+  FileSpreadsheet,
+  Printer,
+  Download,
+  Plus,
+  Save,
+  Trash2,
   FileText,
   Calendar,
   CheckCircle,
@@ -22,14 +22,14 @@ import * as XLSX from "xlsx";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 
-const WorkProgressReport = ({ 
-  projectId, 
-  project, 
-  milestones = [], 
-  rfiData = [], 
-  submittalData = [], 
+const WorkProgressReport = ({
+  projectId,
+  project,
+  milestones = [],
+  rfiData = [],
+  submittalData = [],
   coordinationDrawings = [],
-  onUpdate 
+  onUpdate
 }) => {
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const canEdit = !["client", "staff", "estimator"].includes(userRole);
@@ -84,10 +84,10 @@ const WorkProgressReport = ({
   // Generate Available Weeks from Project Start Date to End Date / Today
   const projectWeeks = useMemo(() => {
     if (!project || !project.startDate) return [];
-    
+
     const start = new Date(project.startDate);
     if (isNaN(start.getTime())) return [];
-    
+
     let end = new Date();
     if (project.fabricationDate) {
       const fabDate = new Date(project.fabricationDate);
@@ -100,33 +100,33 @@ const WorkProgressReport = ({
         end = eDate;
       }
     }
-    
+
     // Ensure the current week is always covered
     const todaySunday = getSunday(new Date());
     if (end < todaySunday) {
       end = todaySunday;
     }
-    
+
     const startMon = getMonday(start);
     const endSun = getSunday(end);
-    
+
     const weeks = [];
     let currentMon = new Date(startMon);
-    
+
     while (currentMon <= endSun) {
       const currentSun = getSunday(currentMon);
       const label = `Week ${weeks.length + 1} (${currentMon.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${currentSun.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })})`;
-      
+
       weeks.push({
         index: weeks.length + 1,
         start: new Date(currentMon),
         end: new Date(currentSun),
         label
       });
-      
+
       currentMon.setDate(currentMon.getDate() + 7);
     }
-    
+
     return weeks;
   }, [project]);
 
@@ -174,6 +174,9 @@ const WorkProgressReport = ({
     } else if (rfiData && rfiData["show rfi"]) {
       rfiArray = rfiData["show rfi"];
     }
+
+    // Hide connection design RFIs
+    rfiArray = rfiArray.filter(r => !(r.isConnectionDesign === true || String(r.isConnectionDesign).toLowerCase() === "true"));
 
     const formattedRFIs = rfiArray.map((r, index) => {
       const responses = r.rfiresponse || [];
@@ -230,179 +233,247 @@ const WorkProgressReport = ({
 
   // Sync Schedule – one row per milestone (with stacked submittal entries), plus standalone submittals
   useEffect(() => {
-    const linkedSubmittalIds = new Set();
-    const fmt = (d) => d ? new Date(d).toLocaleDateString("en-US") : "—";
-    const toEntry = (sub) => ({ subject: sub.subject || sub.serialNo || "—", date: fmt(sub.date || sub.createdAt) });
-    const cleanHtml = (str) => (str || "").replace(/<[^>]+>/g, "").replace(/&nbsp;/gi, " ").trim();
+    const processSchedule = async () => {
+      // Hide connection design submittals
+      const filteredSubmittalData = (submittalData || []).filter(sub => !(sub.isConnectionDesign === true || String(sub.isConnectionDesign).toLowerCase() === "true"));
 
-    // ── Milestone rows ────────────────────────────────────────────────────────
-    const milestoneRows = milestones.map((m) => {
-      const mId = String(m.id || m._id);
+      // Fetch BFA details for submittals marked as BFA_SENT
+      const bfaCache = {};
+      const subsToFetch = filteredSubmittalData.filter(sub => sub.bfaStatus === true && sub.status === "BFA_SENT");
 
-      // A submittal belongs to this milestone if:
-      //   1. Its mileStoneId / milestoneId matches, OR
-      //   2. Its mileStoneIds[] (new field) contains this milestone ID, OR
-      //   3. Its mileStoneLinks[] (legacy) contains a reference to this milestone
-      const matchLink = (link) =>
-        String(link) === mId ||
-        String(link?.id) === mId ||
-        String(link?.mileStoneId) === mId ||
-        String(link?.milestoneId) === mId;
+      await Promise.all(subsToFetch.map(async (sub) => {
+        try {
+          const res = await Service.GetBFABySubmittalId(sub.id || sub._id);
+          if (res && res.data) {
+            bfaCache[sub.id || sub._id] = res.data;
+          }
+        } catch (e) {
+          console.error("Failed to fetch BFA for submittal", sub.id, e);
+        }
+      }));
 
-      const belongsToMilestone = (sub) => {
-        if (String(sub.mileStoneId || sub.milestoneId || sub.milestone?.id) === mId) return true;
-        if (Array.isArray(sub.mileStoneIds) && sub.mileStoneIds.some(matchLink)) return true;
-        if (Array.isArray(sub.mileStoneLinks) && sub.mileStoneLinks.some(matchLink)) return true;
-        return false;
-      };
+      const linkedSubmittalIds = new Set();
+      const fmt = (d) => d ? new Date(d).toLocaleDateString("en-US") : "—";
+      const toEntry = (sub) => ({ subject: sub.subject || sub.serialNo || "—", date: fmt(sub.date || sub.createdAt) });
+      const cleanHtml = (str) => (str || "").replace(/<[^>]+>/g, "").replace(/&nbsp;/gi, " ").trim();
 
-      const subs = submittalData.filter(belongsToMilestone);
-      subs.forEach(s => linkedSubmittalIds.add(s.id || s._id));
+      // ── Milestone rows ────────────────────────────────────────────────────────
+      const milestoneRows = milestones.map((m) => {
+        const mId = String(m.id || m._id);
 
-      const ifaSubs = subs.filter(s => String(s.stage || "").toUpperCase() === "IFA");
-      const ifcSubs = subs.filter(s => String(s.stage || "").toUpperCase() === "IFC");
-      const corSubs = subs.filter(s => ["CO", "COR"].includes(String(s.stage || "").toUpperCase()));
+        // A submittal belongs to this milestone if:
+        //   1. Its mileStoneId / milestoneId matches, OR
+        //   2. Its mileStoneIds[] (new field) contains this milestone ID, OR
+        //   3. Its mileStoneLinks[] (legacy) contains a reference to this milestone
+        const matchLink = (link) =>
+          String(link) === mId ||
+          String(link?.id) === mId ||
+          String(link?.mileStoneId) === mId ||
+          String(link?.milestoneId) === mId;
 
-      // BFA = latest response across all IFA submittals
-      const allIfaResponses = ifaSubs.flatMap(s => s.submittalsResponse || []);
-      const latestBfa = allIfaResponses.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0];
+        const belongsToMilestone = (sub) => {
+          if (String(sub.mileStoneId || sub.milestoneId || sub.milestone?.id) === mId) return true;
+          if (Array.isArray(sub.mileStoneIds) && sub.mileStoneIds.some(matchLink)) return true;
+          if (Array.isArray(sub.mileStoneLinks) && sub.mileStoneLinks.some(matchLink)) return true;
+          return false;
+        };
 
-      const primarySub = ifaSubs[0] || subs[0];
-      const submittalStatus = primarySub ? (primarySub.wbtStatus || primarySub.status || "PENDING") : "—";
+        const subs = filteredSubmittalData.filter(belongsToMilestone);
+        subs.forEach(s => linkedSubmittalIds.add(s.id || s._id));
 
-      const ifaEntries = ifaSubs.map(toEntry);
-      const ifcEntries = ifcSubs.map(toEntry);
-      const corEntries = corSubs.map(toEntry);
+        const ifaSubs = subs.filter(s => String(s.stage || "").toUpperCase() === "IFA");
+        const ifcSubs = subs.filter(s => String(s.stage || "").toUpperCase() === "IFC");
+        const corSubs = subs.filter(s => ["CO", "COR"].includes(String(s.stage || "").toUpperCase()));
 
-      return {
-        id: m.id || m._id,
-        _type: "milestone",
-        phase: m.subject || "Unnamed Phase",
-        startDate: m.date ? fmt(m.date) : (project?.startDate ? fmt(project.startDate) : "—"),
-        ifaEntries,
-        bfaRecdDate: latestBfa ? fmt(latestBfa.createdAt) : "—",
-        ifcEntries,
-        corEntries,
-        // flat dates kept for filtering/export
-        ifaSubDate: ifaEntries[0]?.date || "—",
-        ifcSubDate: ifcEntries[0]?.date || "—",
-        corSubDate: corEntries[0]?.date || "—",
-        submittalStatus,
-        comments: m.description ? cleanHtml(m.description) : (m.percentage ? `${m.percentage}% Completed` : "—"),
-        types: m.types || "ANCHOR_BOLT",
-        subSubject: "",
-      };
-    });
+        const unifiedEntries = subs.map(s => {
+          const stage = String(s.stage || "").toUpperCase();
+          const dateStr = s.createdAt || s.date || 0;
 
-    // ── Standalone submittal rows (no milestone link of any kind) ─────────────
-    const standaloneRows = submittalData
-      .filter(sub => {
-        if (linkedSubmittalIds.has(sub.id || sub._id)) return false;
-        if (sub.mileStoneId || sub.milestoneId) return false;
-        if (sub.mileStoneIds && sub.mileStoneIds.length > 0) return false;
-        if (sub.mileStoneLinks && sub.mileStoneLinks.length > 0) return false;
-        return true;
-      })
-      .map((sub) => {
-        const responses = sub.submittalsResponse || [];
-        const latestResponse = responses.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0];
-        const stage = String(sub.stage || "").toUpperCase();
-        const entry = toEntry(sub);
+          let bfaDate = "—";
+          const resList = s.submittalsResponse || [];
+          if (resList.length > 0) {
+            const latest = [...resList].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0];
+            if (latest && latest.createdAt) bfaDate = fmt(latest.createdAt);
+          }
+          if (s.bfaStatus === true && s.status === "BFA_SENT" && bfaCache[s.id || s._id]) {
+            const bfaData = bfaCache[s.id || s._id];
+            const bDate = bfaData.createdAt || bfaData.date;
+            if (bDate) bfaDate = fmt(bDate);
+          }
+
+          let currentStatus = s.wbtStatus || s.status || "PENDING";
+          if (bfaCache[s.id || s._id]) {
+            const bfaData = bfaCache[s.id || s._id];
+            if (bfaData.status) currentStatus = bfaData.status;
+          }
+
+          return {
+            id: s.id || s._id,
+            subject: s.subject || s.serialNo || "—",
+            ifaDate: stage === "IFA" ? fmt(dateStr) : "—",
+            bfaDate: bfaDate,
+            ifcDate: stage === "IFC" ? fmt(dateStr) : "—",
+            corDate: ["CO", "COR"].includes(stage) ? fmt(dateStr) : "—",
+            status: currentStatus,
+            date: dateStr
+          };
+        });
+
+        const finalBfaRecdDate = unifiedEntries.find(e => e.bfaDate !== "—")?.bfaDate || "—";
+        const primarySub = subs.length > 0 ? [...subs].sort((a, b) => new Date(b.createdAt || b.date || 0) - new Date(a.createdAt || a.date || 0))[0] : null;
+        const submittalStatus = primarySub ? (primarySub.wbtStatus || primarySub.status || "PENDING") : "—";
+
         return {
-          id: sub.id || sub._id,
-          _type: "submittal",
-          phase: sub.subject || sub.serialNo || "Unnamed Submittal",
-          startDate: fmt(sub.date || sub.createdAt),
-          ifaEntries: stage === "IFA" ? [entry] : [],
-          bfaRecdDate: latestResponse ? fmt(latestResponse.createdAt || latestResponse.respondedAt) : "—",
-          ifcEntries: stage === "IFC" ? [entry] : [],
-          corEntries: ["CO", "COR"].includes(stage) ? [entry] : [],
-          ifaSubDate: stage === "IFA" ? entry.date : "—",
-          ifcSubDate: stage === "IFC" ? entry.date : "—",
-          corSubDate: ["CO", "COR"].includes(stage) ? entry.date : "—",
-          submittalStatus: sub.wbtStatus || sub.status || "PENDING",
-          comments: latestResponse
-            ? cleanHtml(latestResponse.description || latestResponse.reason) || "—"
-            : "—",
-          types: "ANCHOR_BOLT",
-          subSubject: sub.subject || sub.serialNo || "",
+          id: m.id || m._id,
+          _type: "milestone",
+          phase: m.subject || "Unnamed Phase",
+          startDate: m.date ? fmt(m.date) : (project?.startDate ? fmt(project.startDate) : "—"),
+          unifiedEntries,
+          bfaRecdDate: finalBfaRecdDate,
+          submittalStatus,
+          // flat dates kept for filtering/export
+          ifaSubDate: unifiedEntries.find(e => e.ifaDate !== "—")?.ifaDate || "—",
+          ifcSubDate: unifiedEntries.find(e => e.ifcDate !== "—")?.ifcDate || "—",
+          corSubDate: unifiedEntries.find(e => e.corDate !== "—")?.corDate || "—",
+          comments: m.description ? cleanHtml(m.description) : (m.percentage ? `${m.percentage}% Completed` : "—"),
+          types: m.types || "ANCHOR_BOLT",
+          subSubject: "",
         };
       });
 
-    // ── Merge rows that share the same Phase / Subject ────────────────────────
-    // (e.g. two milestones both named "ANCHOR BOLT" collapse into one row)
-    const sortByDate = (entries) =>
-      [...entries].sort((a, b) => {
-        const da = a.date && a.date !== "—" ? new Date(a.date) : new Date(0);
-        const db = b.date && b.date !== "—" ? new Date(b.date) : new Date(0);
-        return da - db;
-      });
+      // ── Standalone submittal rows (no milestone link of any kind) ─────────────
+      const standaloneRows = filteredSubmittalData
+        .filter(sub => {
+          if (linkedSubmittalIds.has(sub.id || sub._id)) return false;
+          if (sub.mileStoneId || sub.milestoneId) return false;
+          if (sub.mileStoneIds && sub.mileStoneIds.length > 0) return false;
+          if (sub.mileStoneLinks && sub.mileStoneLinks.length > 0) return false;
+          return true;
+        })
+        .map((sub) => {
+          const responses = sub.submittalsResponse || [];
+          const latestResponse = responses.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0];
+          const stage = String(sub.stage || "").toUpperCase();
+          const entry = toEntry(sub);
 
-    const mergeMap = new Map();
-    [...milestoneRows, ...standaloneRows].forEach((row) => {
-      const key = (row.phase || "").trim().toUpperCase();
-      if (!mergeMap.has(key)) {
-        mergeMap.set(key, {
-          ...row,
-          ifaEntries: [...(row.ifaEntries || [])],
-          ifcEntries: [...(row.ifcEntries || [])],
-          corEntries: [...(row.corEntries || [])],
+          let finalBfaRecdDate = latestResponse ? fmt(latestResponse.createdAt || latestResponse.respondedAt) : "—";
+          if (sub.bfaStatus === true && sub.status === "BFA_SENT" && bfaCache[sub.id || sub._id]) {
+            const bfaData = bfaCache[sub.id || sub._id];
+            const dateStr = bfaData.createdAt || bfaData.date;
+            if (dateStr) finalBfaRecdDate = fmt(dateStr);
+          }
+          const bfaEntries = finalBfaRecdDate !== "—" ? [{ subject: sub.subject || sub.serialNo || "—", date: finalBfaRecdDate }] : [];
+          let currentStatus = sub.wbtStatus || sub.status || "PENDING";
+          if (bfaCache[sub.id || sub._id]) {
+            const bfaData = bfaCache[sub.id || sub._id];
+            if (bfaData.status) currentStatus = bfaData.status;
+          }
+          const statusEntries = [{
+            subject: sub.subject || sub.serialNo || "—",
+            status: currentStatus,
+            date: sub.createdAt || sub.date || 0
+          }];
+
+          const dateStr = sub.createdAt || sub.date || 0;
+          const unifiedEntries = [{
+            id: sub.id || sub._id,
+            subject: sub.subject || sub.serialNo || "—",
+            ifaDate: stage === "IFA" ? fmt(dateStr) : "—",
+            bfaDate: finalBfaRecdDate,
+            ifcDate: stage === "IFC" ? fmt(dateStr) : "—",
+            corDate: ["CO", "COR"].includes(stage) ? fmt(dateStr) : "—",
+            status: currentStatus,
+            date: dateStr
+          }];
+
+          return {
+            id: sub.id || sub._id,
+            _type: "submittal",
+            phase: sub.subject || sub.serialNo || "Unnamed Submittal",
+            startDate: fmt(sub.date || sub.createdAt),
+            unifiedEntries,
+            bfaRecdDate: finalBfaRecdDate,
+            ifaSubDate: stage === "IFA" ? entry.date : "—",
+            ifcSubDate: stage === "IFC" ? entry.date : "—",
+            corSubDate: ["CO", "COR"].includes(stage) ? entry.date : "—",
+            submittalStatus: sub.wbtStatus || sub.status || "PENDING",
+            comments: latestResponse
+              ? cleanHtml(latestResponse.description || latestResponse.reason) || "—"
+              : "—",
+            types: "ANCHOR_BOLT",
+            subSubject: sub.subject || sub.serialNo || "",
+          };
         });
-      } else {
-        const base = mergeMap.get(key);
-        base.ifaEntries.push(...(row.ifaEntries || []));
-        base.ifcEntries.push(...(row.ifcEntries || []));
-        base.corEntries.push(...(row.corEntries || []));
-        // Keep earliest start date
-        if (row.startDate && row.startDate !== "—" &&
+
+      // ── Merge rows that share the same Phase / Subject ────────────────────────
+      // (e.g. two milestones both named "ANCHOR BOLT" collapse into one row)
+      const sortByDate = (entries) =>
+        [...entries].sort((a, b) => {
+          const da = a.date && a.date !== "—" ? new Date(a.date) : new Date(0);
+          const db = b.date && b.date !== "—" ? new Date(b.date) : new Date(0);
+          return da - db;
+        });
+
+      const mergeMap = new Map();
+      [...milestoneRows, ...standaloneRows].forEach((row) => {
+        const key = (row.phase || "").trim().toUpperCase();
+        if (!mergeMap.has(key)) {
+          mergeMap.set(key, {
+            ...row,
+            unifiedEntries: [...(row.unifiedEntries || [])],
+          });
+        } else {
+          const base = mergeMap.get(key);
+          base.unifiedEntries.push(...(row.unifiedEntries || []));
+          // Keep earliest start date
+          if (row.startDate && row.startDate !== "—" &&
             (base.startDate === "—" || new Date(row.startDate) < new Date(base.startDate))) {
-          base.startDate = row.startDate;
-        }
-        // Keep latest BFA date
-        if (row.bfaRecdDate && row.bfaRecdDate !== "—") {
-          if (base.bfaRecdDate === "—" || new Date(row.bfaRecdDate) > new Date(base.bfaRecdDate)) {
-            base.bfaRecdDate = row.bfaRecdDate;
+            base.startDate = row.startDate;
+          }
+          // Keep latest BFA date
+          if (row.bfaRecdDate && row.bfaRecdDate !== "—") {
+            if (base.bfaRecdDate === "—" || new Date(row.bfaRecdDate) > new Date(base.bfaRecdDate)) {
+              base.bfaRecdDate = row.bfaRecdDate;
+            }
+          }
+          // Keep most meaningful status
+          if (row.submittalStatus && row.submittalStatus !== "—") {
+            base.submittalStatus = row.submittalStatus;
+          }
+          // Append unique comments
+          if (row.comments && row.comments !== "—") {
+            base.comments = base.comments === "—"
+              ? row.comments
+              : base.comments.includes(row.comments)
+                ? base.comments
+                : `${base.comments} | ${row.comments}`;
           }
         }
-        // Keep most meaningful status
-        if (row.submittalStatus && row.submittalStatus !== "—") {
-          base.submittalStatus = row.submittalStatus;
-        }
-        // Append unique comments
-        if (row.comments && row.comments !== "—") {
-          base.comments = base.comments === "—"
-            ? row.comments
-            : base.comments.includes(row.comments)
-              ? base.comments
-              : `${base.comments} | ${row.comments}`;
-        }
-      }
-    });
+      });
 
-    // Sort each entry list by date and update flat date fields
-    const mergedRows = Array.from(mergeMap.values()).map((row) => {
-      const ifa = sortByDate(row.ifaEntries);
-      const ifc = sortByDate(row.ifcEntries);
-      const cor = sortByDate(row.corEntries);
-      return {
-        ...row,
-        ifaEntries: ifa,
-        ifcEntries: ifc,
-        corEntries: cor,
-        ifaSubDate: ifa[0]?.date || "—",
-        ifcSubDate: ifc[0]?.date || "—",
-        corSubDate: cor[0]?.date || "—",
-      };
-    });
+      // Sort each entry list by date and update flat date fields
+      const mergedRows = Array.from(mergeMap.values()).map((row) => {
+        const sortedEntries = sortByDate(row.unifiedEntries || []);
+        return {
+          ...row,
+          unifiedEntries: sortedEntries,
+          ifaSubDate: sortedEntries.find(e => e.ifaDate !== "—")?.ifaDate || "—",
+          ifcSubDate: sortedEntries.find(e => e.ifcDate !== "—")?.ifcDate || "—",
+          corSubDate: sortedEntries.find(e => e.corDate !== "—")?.corDate || "—",
+        };
+      });
 
-    setRawScheduleRows(mergedRows);
+      setRawScheduleRows(mergedRows);
+    };
+
+    processSchedule();
   }, [milestones, submittalData, project]);
 
   // Sync Change Orders Month-by-month
   useEffect(() => {
     const rawCOs = project?.changeOrders || [];
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    
+
     const rows = rawCOs.map((co) => {
       const coDate = co.createdAt || co.date ? new Date(co.createdAt || co.date) : null;
       const coMonthIndex = coDate ? coDate.getMonth() : -1;
@@ -451,7 +522,7 @@ const WorkProgressReport = ({
 
   const filteredRfis = useMemo(() => {
     if (!activeWeekRange) return rawRfis;
-    return rawRfis.filter(r => 
+    return rawRfis.filter(r =>
       isWithinWeek(r.sentDate, activeWeekRange.start, activeWeekRange.end) ||
       isWithinWeek(r.responseReceivedDate, activeWeekRange.start, activeWeekRange.end)
     );
@@ -459,7 +530,7 @@ const WorkProgressReport = ({
 
   const filteredScheduleRows = useMemo(() => {
     if (!activeWeekRange) return rawScheduleRows;
-    return rawScheduleRows.filter(s => 
+    return rawScheduleRows.filter(s =>
       isWithinWeek(s.startDate, activeWeekRange.start, activeWeekRange.end) ||
       isWithinWeek(s.ifaSubDate, activeWeekRange.start, activeWeekRange.end) ||
       isWithinWeek(s.bfaRecdDate, activeWeekRange.start, activeWeekRange.end) ||
@@ -540,14 +611,14 @@ const WorkProgressReport = ({
   const handleKeyDown = (e) => {
     if (!activeCell) return;
     const { table, rowId, field } = activeCell;
-    const tableData = 
-      table === "rfi" 
-        ? filteredRfis 
-        : table === "schedule" 
-        ? filteredScheduleRows 
-        : table === "co" 
-        ? filteredCoRows 
-        : filteredCoordDrawings;
+    const tableData =
+      table === "rfi"
+        ? filteredRfis
+        : table === "schedule"
+          ? filteredScheduleRows
+          : table === "co"
+            ? filteredCoRows
+            : filteredCoordDrawings;
     const rowIndex = tableData.findIndex(row => row.id === rowId);
     if (rowIndex === -1) return;
 
@@ -633,7 +704,7 @@ const WorkProgressReport = ({
           formData.append("title", row.title);
           formData.append("description", `Created from Weekly Progress Report on ${new Date().toLocaleDateString()}`);
           formData.append("stage", row.stage || "IFA");
-          
+
           const res = await Service.createCoordinationDrawing(formData);
           if (res && res.data && row.status !== "Pending") {
             const newId = res.data.id || res.data._id;
@@ -674,7 +745,7 @@ const WorkProgressReport = ({
 
   // Add new rows to table
   const addRow = (table) => {
-    const defaultDate = activeWeekRange 
+    const defaultDate = activeWeekRange
       ? activeWeekRange.start.toLocaleDateString("en-US")
       : new Date().toLocaleDateString("en-US");
 
@@ -744,7 +815,7 @@ const WorkProgressReport = ({
       "IFA Submission Date": s.ifaSubDate,
       "BFA Received Date": s.bfaRecdDate,
       "IFC Submission Date": s.ifcSubDate,
-      "COR Drawing Sub Date": s.corSubDate,
+      "COR Drawing Submission Date": s.corSubDate,
       "Comments": s.comments
     })));
     XLSX.utils.book_append_sheet(workbook, schedWS, "Project Schedule");
@@ -776,7 +847,7 @@ const WorkProgressReport = ({
     doc.setFont("Helvetica", "bold");
     doc.setFontSize(16);
     doc.text(`WEEKLY WORK PROGRESS REPORT`, 40, 40);
-    
+
     doc.setFontSize(10);
     doc.setFont("Helvetica", "normal");
     doc.text(`Project Name: ${project?.projectName || project?.name || "—"}`, 40, 60);
@@ -855,7 +926,7 @@ const WorkProgressReport = ({
 
   return (
     <div className="space-y-8 p-1 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      
+
       {/* ── ACTION TOOLBAR ── */}
       {/* ── ACTION TOOLBAR ── */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-white shrink-0">
@@ -926,13 +997,13 @@ const WorkProgressReport = ({
             FORM NO: WBT/PMO/WPR-001
           </span>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
           <div className="space-y-1.5">
             <span className="block text-xs font-bold uppercase tracking-wider text-black">Week Ending Date</span>
-            <input 
-              type="text" 
-              value={weekEnding} 
+            <input
+              type="text"
+              value={weekEnding}
               onChange={(e) => setWeekEnding(e.target.value)}
               className="w-full px-4 py-2.5 border border-black rounded-none font-bold outline-none focus:border-green-700 bg-white transition-all text-sm uppercase text-black"
             />
@@ -957,27 +1028,27 @@ const WorkProgressReport = ({
           </div>
           <div className="space-y-1.5">
             <span className="block text-xs font-bold uppercase tracking-wider text-black">Fabricator Project Manager</span>
-            <input 
-              type="text" 
-              value={fabProjectManager} 
+            <input
+              type="text"
+              value={fabProjectManager}
               onChange={(e) => setFabProjectManager(e.target.value)}
               className="w-full px-4 py-2.5 border border-black rounded-none font-bold outline-none focus:border-green-700 bg-white transition-all text-sm uppercase text-black"
             />
           </div>
           <div className="space-y-1.5">
             <span className="block text-xs font-bold uppercase tracking-wider text-black">Report Circulated To</span>
-            <input 
-              type="text" 
-              value={circulatedTo} 
+            <input
+              type="text"
+              value={circulatedTo}
               onChange={(e) => setCirculatedTo(e.target.value)}
               className="w-full px-4 py-2.5 border border-black rounded-none font-bold outline-none focus:border-green-700 bg-white transition-all text-sm uppercase text-black"
             />
           </div>
           <div className="space-y-1.5">
             <span className="block text-xs font-bold uppercase tracking-wider text-black">Software</span>
-            <input 
-              type="text" 
-              value={software} 
+            <input
+              type="text"
+              value={software}
               onChange={(e) => setSoftware(e.target.value)}
               className="w-full px-4 py-2.5 border border-black rounded-none font-bold outline-none focus:border-green-700 bg-white transition-all text-sm uppercase text-black"
             />
@@ -997,7 +1068,7 @@ const WorkProgressReport = ({
         </div>
       </div>
 
-       {/* ── 2. RFIs OVERVIEW TABLE ── */}
+      {/* ── 2. RFIs OVERVIEW TABLE ── */}
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -1031,7 +1102,7 @@ const WorkProgressReport = ({
               {filteredRfis.map((row) => (
                 <tr key={row.id} className="hover:bg-slate-50 transition-all">
                   {/* RFI No. */}
-                  <td 
+                  <td
                     onClick={() => handleCellClick("rfi", row.id, "rfiNo", row.rfiNo)}
                     className="p-3 font-bold border-r border-black/10 cursor-pointer hover:bg-slate-100/50 text-black"
                   >
@@ -1051,7 +1122,7 @@ const WorkProgressReport = ({
                   </td>
 
                   {/* Sent Date */}
-                  <td 
+                  <td
                     onClick={() => handleCellClick("rfi", row.id, "sentDate", row.sentDate)}
                     className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
@@ -1071,7 +1142,7 @@ const WorkProgressReport = ({
                   </td>
 
                   {/* Customer Response */}
-                  <td 
+                  <td
                     onClick={() => handleCellClick("rfi", row.id, "customerResponse", row.customerResponse)}
                     className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
@@ -1090,7 +1161,7 @@ const WorkProgressReport = ({
                   </td>
 
                   {/* Response Recd Date */}
-                  <td 
+                  <td
                     onClick={() => handleCellClick("rfi", row.id, "responseReceivedDate", row.responseReceivedDate)}
                     className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
@@ -1110,7 +1181,7 @@ const WorkProgressReport = ({
                   </td>
 
                   {/* WBT Response */}
-                  <td 
+                  <td
                     onClick={() => handleCellClick("rfi", row.id, "wbtResponse", row.wbtResponse)}
                     className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
@@ -1129,7 +1200,7 @@ const WorkProgressReport = ({
                   </td>
 
                   {/* Status */}
-                  <td 
+                  <td
                     onClick={() => handleCellClick("rfi", row.id, "status", row.status)}
                     className="p-3 font-bold text-xs cursor-pointer hover:bg-slate-100/50 text-black"
                   >
@@ -1149,14 +1220,13 @@ const WorkProgressReport = ({
                         <option value="ANSWERED">ANSWERED</option>
                       </select>
                     ) : (
-                      <span className={`px-2 py-1 rounded-none border border-black ${
-                        row.status === "OPEN" ? "bg-blue-50 text-blue-700" :
-                        row.status === "PARTIAL" ? "bg-orange-50 text-orange-700" :
-                        row.status === "COMPLETE" ? "bg-green-50 text-green-700" :
-                        row.status === "PENDING" ? "bg-green-50 text-green-700" :
-                        row.status === "ANSWERED" ? "bg-orange-50 text-orange-700" :
-                        "bg-slate-50 text-slate-700"
-                      }`}>
+                      <span className={`px-2 py-1 rounded-none border border-black ${row.status === "OPEN" ? "bg-blue-50 text-blue-700" :
+                          row.status === "PARTIAL" ? "bg-orange-50 text-orange-700" :
+                            row.status === "COMPLETE" ? "bg-green-50 text-green-700" :
+                              row.status === "PENDING" ? "bg-green-50 text-green-700" :
+                                row.status === "ANSWERED" ? "bg-orange-50 text-orange-700" :
+                                  "bg-slate-50 text-slate-700"
+                        }`}>
                         {row.status}
                       </span>
                     )}
@@ -1190,28 +1260,26 @@ const WorkProgressReport = ({
           <table className="w-full text-left border-collapse min-w-[800px] text-xs">
             <thead>
               <tr className="bg-slate-100 border-b border-black">
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10">Phase / Subject</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-56">Phase / Subject</th>
                 <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-28">Start Date</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-44">IFA - Submission Date</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-36">BFA - Recd Date</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-40">IFC - Sub Date</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-44">COR Drawing Sub Date</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-40">Status</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black">Comments</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 min-w-[15rem]">IFA - Submission Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 min-w-[15rem]">BFA - Recd Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 min-w-[15rem]">IFC - Sub Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 min-w-[16rem]">COR Drawing Submission Date</th>
+                <th className="p-3 font-bold uppercase tracking-wider text-black min-w-[16rem]">Comment</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/10">
               {filteredScheduleRows.map((row) => (
                 <tr
                   key={row.id}
-                  className={`border-b border-black/10 transition-all ${
-                    row._type === "milestone"
+                  className={`border-b border-black/10 transition-all ${row._type === "milestone"
                       ? "bg-[#f0f7ed] hover:bg-[#e6f3e2]"
                       : "bg-white hover:bg-slate-50"
-                  }`}
+                    }`}
                 >
                   {/* Phase cell */}
-                  <td 
+                  <td
                     onClick={() => handleCellClick("schedule", row.id, "phase", row.phase)}
                     className="p-3 font-bold border-r border-black/10 cursor-pointer hover:bg-slate-100/50 text-black"
                   >
@@ -1233,7 +1301,7 @@ const WorkProgressReport = ({
 
 
                   {/* Start Date */}
-                  <td 
+                  <td
                     onClick={() => handleCellClick("schedule", row.id, "startDate", row.startDate)}
                     className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
@@ -1253,113 +1321,177 @@ const WorkProgressReport = ({
                   </td>
 
                   {/* IFA submission date – stacked entries: Subject – Date */}
-                  <td className="p-3 border-r border-black/10 align-top">
+                  <td className="p-0 border-r border-black/10 align-top">
                     {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "ifaSubDate" ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
-                      />
-                    ) : row.ifaEntries && row.ifaEntries.length > 0 ? (
-                      <div className="flex flex-col gap-0.5">
-                        {row.ifaEntries.map((entry, i) => (
-                          <span key={i} className="text-[11px] font-semibold text-blue-800">
-                            {entry.subject} – {entry.date}
-                          </span>
+                      <div className="p-3">
+                        <input
+                          ref={inputRef}
+                          type="text"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={handleCellSave}
+                          onKeyDown={handleKeyDown}
+                          className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
+                        />
+                      </div>
+                    ) : row.unifiedEntries && row.unifiedEntries.length > 0 ? (
+                      <div className="flex flex-col h-full">
+                        {row.unifiedEntries.map((entry, i) => (
+                          <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                            {entry.ifaDate !== "—" ? (
+                              <>
+                                <span className="text-[11px] font-bold text-blue-800 leading-tight">
+                                  {entry.subject}
+                                </span>
+                                <span className="text-[11px] text-blue-600 font-semibold leading-tight mt-0.5">
+                                  {entry.ifaDate}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-gray-400">—</span>
+                            )}
+                          </div>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="block p-3 text-gray-400">—</span>
                     )}
                   </td>
 
                   {/* BFA date */}
-                  <td 
+                  <td
                     onClick={() => handleCellClick("schedule", row.id, "bfaRecdDate", row.bfaRecdDate)}
-                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
+                    className="p-0 border-r border-black/10 align-top cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "bfaRecdDate" ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
-                      />
+                      <div className="p-3">
+                        <input
+                          ref={inputRef}
+                          type="text"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={handleCellSave}
+                          onKeyDown={handleKeyDown}
+                          className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
+                        />
+                      </div>
+                    ) : row.unifiedEntries && row.unifiedEntries.length > 0 ? (
+                      <div className="flex flex-col h-full">
+                        {row.unifiedEntries.map((entry, i) => (
+                          <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                            {entry.bfaDate !== "—" ? (
+                              <>
+                                <span className="text-[11px] font-bold text-blue-800 leading-tight">
+                                  {entry.subject}
+                                </span>
+                                <span className="text-[11px] text-blue-600 font-semibold leading-tight mt-0.5">
+                                  {entry.bfaDate}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-gray-400">—</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     ) : (
-                      <span>{row.bfaRecdDate}</span>
+                      <span className="block p-3 text-gray-400">—</span>
                     )}
                   </td>
 
                   {/* IFC sub date – stacked entries */}
-                  <td className="p-3 border-r border-black/10 align-top">
+                  <td className="p-0 border-r border-black/10 align-top">
                     {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "ifcSubDate" ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
-                      />
-                    ) : row.ifcEntries && row.ifcEntries.length > 0 ? (
-                      <div className="flex flex-col gap-0.5">
-                        {row.ifcEntries.map((entry, i) => (
-                          <span key={i} className="text-[11px] font-semibold text-blue-800">
-                            {entry.subject} – {entry.date}
-                          </span>
+                      <div className="p-3">
+                        <input
+                          ref={inputRef}
+                          type="text"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={handleCellSave}
+                          onKeyDown={handleKeyDown}
+                          className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
+                        />
+                      </div>
+                    ) : row.unifiedEntries && row.unifiedEntries.length > 0 ? (
+                      <div className="flex flex-col h-full">
+                        {row.unifiedEntries.map((entry, i) => (
+                          <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                            {entry.ifcDate !== "—" ? (
+                              <>
+                                <span className="text-[11px] font-bold text-blue-800 leading-tight">
+                                  {entry.subject}
+                                </span>
+                                <span className="text-[11px] text-blue-600 font-semibold leading-tight mt-0.5">
+                                  {entry.ifcDate}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-gray-400">—</span>
+                            )}
+                          </div>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="block p-3 text-gray-400">—</span>
                     )}
                   </td>
 
                   {/* COR Drawing Sub date – stacked entries */}
-                  <td className="p-3 border-r border-black/10 align-top">
+                  <td className="p-0 border-r border-black/10 align-top">
                     {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "corSubDate" ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
-                      />
-                    ) : row.corEntries && row.corEntries.length > 0 ? (
-                      <div className="flex flex-col gap-0.5">
-                        {row.corEntries.map((entry, i) => (
-                          <span key={i} className="text-[11px] font-semibold text-blue-800">
-                            {entry.subject} – {entry.date}
-                          </span>
+                      <div className="p-3">
+                        <input
+                          ref={inputRef}
+                          type="text"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={handleCellSave}
+                          onKeyDown={handleKeyDown}
+                          className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
+                        />
+                      </div>
+                    ) : row.unifiedEntries && row.unifiedEntries.length > 0 ? (
+                      <div className="flex flex-col h-full">
+                        {row.unifiedEntries.map((entry, i) => (
+                          <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                            {entry.corDate !== "—" ? (
+                              <>
+                                <span className="text-[11px] font-bold text-blue-800 leading-tight">
+                                  {entry.subject}
+                                </span>
+                                <span className="text-[11px] text-blue-600 font-semibold leading-tight mt-0.5">
+                                  {entry.corDate}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-gray-400">—</span>
+                            )}
+                          </div>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="block p-3 text-gray-400">—</span>
                     )}
                   </td>
 
-                  {/* Submittal Status Badge */}
-                  <td className="p-3 border-r border-black/10">
+                  {/* Submittal Status (now labeled Comment) */}
+                  <td className="p-0 align-top">
                     {(() => {
                       const STATUS_LABELS = {
                         WAITING_FOR_BFA: "Waiting for BFA",
-                        BFA_RECEIVED: "Back From Approval – Received",
-                        BFA_SENT: "Back From Approval – Sent",
+                        BFA_RECEIVED: "BFA RECEIVED",
+                        BFA_SENT: "BFA SENT",
                         SUBMITTED_TO_EOR: "Submitted to EOR",
                         RELEASE_FOR_FABRICATION: "Release for Fab",
                         NOT_APPROVED: "Not Approved",
                         REVISED_RESUBMITTAL: "Revised & Resubmitted",
                         REVISED_RESUBMIT_FOR_FABRICATION: "Revised & Resub for Fab",
                         PENDING: "Pending",
+                        COMPLETE: "BFA - Complete",
+                        COMPLETED: "BFA - Complete",
+                        PARTIAL: "BFA - Partial",
+                        SUCCESS: "BFA - Success",
                       };
                       const STATUS_COLORS = {
                         WAITING_FOR_BFA: "bg-purple-100 text-purple-700 border-purple-200",
@@ -1371,39 +1503,50 @@ const WorkProgressReport = ({
                         REVISED_RESUBMITTAL: "bg-orange-100 text-orange-700 border-orange-200",
                         REVISED_RESUBMIT_FOR_FABRICATION: "bg-orange-100 text-orange-700 border-orange-200",
                         PENDING: "bg-yellow-100 text-yellow-700 border-yellow-200",
+                        COMPLETE: "bg-teal-100 text-teal-700 border-teal-200",
+                        COMPLETED: "bg-teal-100 text-teal-700 border-teal-200",
+                        PARTIAL: "bg-amber-100 text-amber-700 border-amber-200",
+                        SUCCESS: "bg-emerald-100 text-emerald-700 border-emerald-200",
                       };
+
+                      if (row.unifiedEntries && row.unifiedEntries.length > 0) {
+                        return (
+                          <div className="flex flex-col h-full">
+                            {row.unifiedEntries.map((entry, i) => {
+                              const key = String(entry.status || "—").replace(/\s+/g, "_").toUpperCase();
+                              const label = STATUS_LABELS[key] || String(entry.status || "—").replace(/_/g, " ");
+                              const color = STATUS_COLORS[key] || "bg-gray-100 text-gray-600 border-gray-200";
+                              return (
+                                <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[11px] font-semibold text-blue-800">
+                                      {entry.subject}
+                                    </span>
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border ${color} shrink-0`}>
+                                      {label}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      }
+
                       const key = String(row.submittalStatus || "—").replace(/\s+/g, "_").toUpperCase();
                       const label = STATUS_LABELS[key] || String(row.submittalStatus || "—").replace(/_/g, " ");
                       const color = STATUS_COLORS[key] || "bg-gray-100 text-gray-600 border-gray-200";
                       if (row.submittalStatus && row.submittalStatus !== "—") {
                         return (
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border ${color}`}>
-                            {label}
-                          </span>
+                          <div className="p-3">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border ${color}`}>
+                              {label}
+                            </span>
+                          </div>
                         );
                       }
-                      return <span className="text-gray-400">—</span>;
+                      return <span className="block p-3 text-gray-400">—</span>;
                     })()}
-                  </td>
-
-                  {/* Comments */}
-                  <td 
-                    onClick={() => handleCellClick("schedule", row.id, "comments", row.comments)}
-                    className="p-3 font-bold text-black cursor-pointer hover:bg-slate-100/50"
-                  >
-                    {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "comments" ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
-                      />
-                    ) : (
-                      <span>{row.comments}</span>
-                    )}
                   </td>
                 </tr>
               ))}
@@ -1412,7 +1555,7 @@ const WorkProgressReport = ({
         </div>
       </div>
 
-     
+
 
       {/* ── 3. CHANGE ORDER AMOUNT GRID ── */}
       <div className="space-y-3">
@@ -1447,7 +1590,7 @@ const WorkProgressReport = ({
               {filteredCoRows.map((row) => (
                 <tr key={row.id} className="hover:bg-slate-50 transition-all">
                   {/* CO number name */}
-                  <td 
+                  <td
                     onClick={() => handleCellClick("co", row.id, "changeOrder", row.changeOrder)}
                     className="p-3 text-left font-bold text-black border-r border-black/10 cursor-pointer hover:bg-slate-100/50"
                   >
@@ -1468,7 +1611,7 @@ const WorkProgressReport = ({
 
                   {/* Monthly amount columns */}
                   {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map(m => (
-                    <td 
+                    <td
                       key={m}
                       onClick={() => handleCellClick("co", row.id, m, row[m])}
                       className="p-3 border-r border-black/10 cursor-pointer hover:bg-slate-100/50 text-black"
@@ -1530,7 +1673,7 @@ const WorkProgressReport = ({
               {filteredCoordDrawings.map((row) => (
                 <tr key={row.id} className="hover:bg-slate-50 transition-all">
                   {/* Drawing Name */}
-                  <td 
+                  <td
                     onClick={() => handleCellClick("coordDrawing", row.id, "title", row.title)}
                     className="p-3 font-bold border-r border-black/10 cursor-pointer hover:bg-slate-100/50 text-black"
                   >
@@ -1550,7 +1693,7 @@ const WorkProgressReport = ({
                   </td>
 
                   {/* Stage */}
-                  <td 
+                  <td
                     onClick={() => handleCellClick("coordDrawing", row.id, "stage", row.stage)}
                     className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
@@ -1574,7 +1717,7 @@ const WorkProgressReport = ({
                   </td>
 
                   {/* Status */}
-                  <td 
+                  <td
                     onClick={() => handleCellClick("coordDrawing", row.id, "status", row.status)}
                     className="p-3 border-r border-black/10 font-bold text-xs cursor-pointer hover:bg-slate-100/50 text-black"
                   >
@@ -1599,7 +1742,7 @@ const WorkProgressReport = ({
                   </td>
 
                   {/* Date Created */}
-                  <td 
+                  <td
                     onClick={() => handleCellClick("coordDrawing", row.id, "createdAt", row.createdAt)}
                     className="p-3 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                   >
@@ -1623,7 +1766,7 @@ const WorkProgressReport = ({
           </table>
         </div>
       </div>
-      
+
     </div>
   );
 };

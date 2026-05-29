@@ -1951,14 +1951,12 @@ class Service {
       console.error('cannot find submittal', error)
     }
   }
-  //submittal responses
   static async addSubmittalResponse(formData) {
     const token = sessionStorage.getItem('token')
 
     const response = await api.post(`submittal/responses/`, formData, {
       headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
+        Authorization: `Bearer ${token}`
       }
     })
 

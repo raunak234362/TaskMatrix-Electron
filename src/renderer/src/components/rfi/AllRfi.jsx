@@ -4,7 +4,7 @@ import DataTable from "../ui/table";
 
 
 import { useSelector } from "react-redux";
-import { Loader2, Inbox, MessageSquare } from "lucide-react";
+import { Loader2, Inbox, MessageSquare, Search } from "lucide-react";
 import GetRFIByID from "./GetRFIByID";
 import Modal from "../ui/Modal";
 import AddCommunication from "../communication/AddCommunication";
@@ -20,10 +20,12 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
   const projects = useSelector((state) => state.projectInfo?.projectData || []);
   const fabricators = useSelector((state) => state.fabricatorInfo?.fabricatorData || []);
 
-  console.log(rfiData);
-
   const userRole = sessionStorage.getItem("userRole");
 
+  const [activeTab, setActiveTab] = useState(
+    userRole && userRole.toUpperCase().includes("CONNECTION_DESIGNER") ? "CONNECTION_DESIGNER" : "GENERAL"
+  );
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchRFIs = async () => {
@@ -48,7 +50,7 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
             if (firstArray) rfiArray = firstArray;
           }
         }
-        const normalized = rfiArray.map((item) => ({
+        let normalized = rfiArray.map((item) => ({
           ...item,
           createdAt: item.createdAt || item.date || null,
         }));
@@ -76,7 +78,7 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
       }
 
       if (rfiArray.length > 0) {
-        const normalized = rfiArray.map((item) => ({
+        let normalized = rfiArray.map((item) => ({
           ...item,
           createdAt: item.createdAt || item.date || null,
         }));
@@ -124,6 +126,7 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
         );
       },
     },
+    
   ];
 
 
@@ -223,29 +226,64 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
     );
   }
 
-  // ✅ Empty state
-  if (!loading && (!rfis || rfis.length === 0)) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-gray-700">
-        <Inbox className="w-10 h-10 mb-3 text-gray-400" />
-        <p className="text-lg font-medium">No RFIs Available</p>
-        <p className="text-sm text-gray-400">
-          {userRole === "CLIENT"
-            ? "You haven’t sent any RFIs yet."
-            : "No RFIs have been received yet."}
-        </p>
-      </div>
-    );
-  }
+  const generalRfis = rfis.filter(item => item.isConnectionDesign !== true && String(item.isConnectionDesign).toLowerCase() !== "true");
+  const connectionDesignerRfis = rfis.filter(item => item.isConnectionDesign === true || String(item.isConnectionDesign).toLowerCase() === "true");
 
-  // ✅ Render DataTable
+  const displayedRfis = activeTab === "CONNECTION_DESIGNER" ? connectionDesignerRfis : generalRfis;
+
+  const finalRfis = displayedRfis.filter(item => 
+    !searchQuery || (item.subject && item.subject.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  // ✅ Empty state and Render DataTable
   return (
     <div className="bg-white p-2 rounded-2xl shadow-md">
-      <DataTable
-        columns={columns}
-        data={rfis}
-        detailComponent={({ row }) => <GetRFIByID id={row.id} onUpdate={onUpdate} />}
-      />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 px-4 mb-4 gap-4 pb-2 sm:pb-0">
+        <div className="flex space-x-6">
+          <button
+            className={`py-3 px-1 text-sm font-semibold border-b-2 transition-colors ${activeTab === "GENERAL" ? "border-green-600 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+            onClick={() => setActiveTab("GENERAL")}
+          >
+            General RFIs
+          </button>
+          {connectionDesignerRfis.length > 0 && (
+            <button
+              className={`py-3 px-1 text-sm font-semibold border-b-2 transition-colors ${activeTab === "CONNECTION_DESIGNER" ? "border-green-600 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+              onClick={() => setActiveTab("CONNECTION_DESIGNER")}
+            >
+              Connection Designer's RFI
+            </button>
+          )}
+        </div>
+        <div className="relative pb-2 sm:pb-0 sm:mt-2">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by subject..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500 w-full sm:w-64"
+          />
+        </div>
+      </div>
+
+      {!finalRfis || finalRfis.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-gray-700">
+          <Inbox className="w-10 h-10 mb-3 text-gray-400" />
+          <p className="text-lg font-medium">No RFIs Available</p>
+          <p className="text-sm text-gray-400">
+            {userRole === "CLIENT"
+              ? "You haven’t sent any RFIs yet."
+              : "No RFIs have been received yet."}
+          </p>
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={finalRfis}
+          detailComponent={({ row }) => <GetRFIByID id={row.id} onUpdate={onUpdate} />}
+        />
+      )}
 
       {isFollowUpOpen && (
         <Modal

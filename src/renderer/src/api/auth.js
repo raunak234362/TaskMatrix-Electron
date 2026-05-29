@@ -22,11 +22,12 @@ class AuthService {
     }
   }
 
-   static async changePassword({ id, token, newPassword }) {
+   static async changePassword({ id, token, newPassword, purpose }) {
     const userData = {
       id,
       token,
       newPassword,
+      purpose: purpose || "password_reset",
     };
 
     console.log("Sending login request with payload:", userData);
@@ -38,6 +39,23 @@ class AuthService {
     } catch (error) {
       console.error(
         "Error while sign-in:",
+        error?.response?.data || error.message || error
+      );
+      throw error;
+    }
+  }
+  static async updatePassword({ currentPassword, newPassword }) {
+    const userData = {
+      currentPassword,
+      newPassword
+    };
+
+    try {
+      const response = await api.patch(`auth/change-password`, userData);
+      return response?.data;
+    } catch (error) {
+      console.error(
+        "Error while changing password:",
         error?.response?.data || error.message || error
       );
       throw error;
