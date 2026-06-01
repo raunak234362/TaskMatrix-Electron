@@ -941,7 +941,7 @@ const WorkProgressReport = ({
       body: filteredScheduleRows.map(s => [s.phase, s.startDate, s.ifaSubDate, s.bfaRecdDate, s.ifcSubDate, s.corSubDate, s.comments]),
       theme: "grid",
       styles: { fontSize: 8 },
-      headStyles: { fillColor: [107, 189, 69] }
+      headStyles: { fillColor: "#bbf7d0" }
     });
 
     // Add RFI Table
@@ -953,7 +953,7 @@ const WorkProgressReport = ({
       body: filteredRfis.map(r => [r.rfiNo, r.sentDate, r.customerResponse, r.responseReceivedDate, r.wbtResponse, r.status]),
       theme: "grid",
       styles: { fontSize: 8 },
-      headStyles: { fillColor: [107, 189, 69] }
+      headStyles: { fillColor: "#bbf7d0" }
     });
 
     // Add Change Orders Table
@@ -972,7 +972,7 @@ const WorkProgressReport = ({
       ]),
       theme: "grid",
       styles: { fontSize: 7, cellPadding: 2 },
-      headStyles: { fillColor: [107, 189, 69] }
+      headStyles: { fillColor: "#bbf7d0" }
     });
 
     // Add Coordination Drawings Table
@@ -1005,7 +1005,6 @@ const WorkProgressReport = ({
     <div className="space-y-8 p-1 animate-in fade-in slide-in-from-bottom-2 duration-500">
 
       {/* ── ACTION TOOLBAR ── */}
-      {/* ── ACTION TOOLBAR ── */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-white shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-2.5 h-6 bg-[#6bbd45] rounded-none" />
@@ -1036,13 +1035,7 @@ const WorkProgressReport = ({
             <Download className="w-3.5 h-3.5" />
             PDF Export
           </button>
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-2 px-5 py-2 bg-slate-50 text-black border-2 border-slate-700/80 hover:bg-slate-100 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm transition-all cursor-pointer"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            Print Report
-          </button>
+        
         </div>
       </div>
 

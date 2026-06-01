@@ -1289,7 +1289,7 @@ const WorkProgressReport = ({
         startY: finalY,
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 3, overflow: 'linebreak', textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.5 },
-        headStyles: { fillColor: [241, 245, 249], textColor: [0, 0, 0], fontStyle: 'bold' },
+        headStyles: { fillColor: "#bbf7d0", textColor: [0, 0, 0], fontStyle: 'bold' },
         head: [["Phase / Subject", "Start Date", "IFA - Submission Date", "BFA - Recd Date", "IFC - Sub Date", "COR Drawing Submission Date", "Comment"]],
         body: safeScheduleRows.map((s: any) => [
           s?.phase || "—",
@@ -1314,7 +1314,7 @@ const WorkProgressReport = ({
         startY: finalY,
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 3, overflow: 'linebreak', textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.5 },
-        headStyles: { fillColor: [241, 245, 249], textColor: [0, 0, 0], fontStyle: 'bold' },
+        headStyles: { fillColor: "#bbf7d0", textColor: [0, 0, 0], fontStyle: 'bold' },
         head: [["RFI No.", "Sent Date", "Customer Response", "Response Received", "Whiteboard Response", "Status"]],
         body: safeRfis.map((r: any) => [
           r?.rfiNo || "—",
@@ -1338,7 +1338,7 @@ const WorkProgressReport = ({
         startY: finalY,
         theme: 'grid',
         styles: { fontSize: 7, cellPadding: 3, overflow: 'linebreak', textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.5, halign: 'center' },
-        headStyles: { fillColor: [241, 245, 249], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
+        headStyles: { fillColor: "#bbf7d0", textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
         columnStyles: { 0: { halign: 'left' } },
         head: [["Change Order", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "FY Total"]],
         body: safeCoRows.map((c: any) => [

@@ -23,7 +23,7 @@ const WprHeader = ({
           <tr className="bg-[#eaf4fe] border-b border-black">
             <td className="w-1/4 border-r border-black text-center bg-white align-middle">
               <div className="flex items-center justify-center">
-                <img src={Logo} alt="WBT Whiteboard Logo" className="h-14 w-auto object-contain mix-blend-multiply" />
+                <img src={Logo} alt="WBT Whiteboard Logo" className="h-20" />
               </div>
             </td>
             <td colSpan={2} className="p-4 border-r border-black text-center text-lg font-bold bg-[#eaf4fe]">
