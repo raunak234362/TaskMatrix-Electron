@@ -1417,7 +1417,7 @@ const WorkProgressReport = ({
                 setEffDate={setEffDate}
               />
             </div>
-             <div id="section-rfi">
+            <div id="section-rfi">
               <WprRfiTable
                 rfis={filteredRfis}
                 canEdit={canEdit}
