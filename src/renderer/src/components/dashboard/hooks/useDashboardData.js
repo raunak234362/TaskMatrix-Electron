@@ -365,11 +365,53 @@ export const useDashboardData = () => {
           ...computedPMStats
         }
 
+        // Fetch milestones for active projects to show in upcoming submittals if they have no submittals
+        const activeProjects = projects.filter((p) => !p.status || p.status.toUpperCase() === 'ACTIVE')
+        const milestonePromises = activeProjects.map((p) => Service.GetProjectMilestoneById(p.id).catch(err => {
+          console.error(`Error fetching milestone for project ${p.id}:`, err)
+          return null
+        }))
+        let emptyMilestoneSubmittals = []
+        
+        try {
+          const allMilestonesResponses = await Promise.all(milestonePromises)
+          const allMilestones = allMilestonesResponses.filter(Boolean).flatMap(res => extractData(res))
+          
+          let basePendingSubmittals = (userRole === 'admin' || userRole === 'deputy_manager' || userRole === 'project_manager_officer') ? submittals : pendingSubmittals
+          
+          const milestonesWithoutSubmittals = allMilestones.filter(m => {
+            if (!m || m.status === 'APPROVED' || m.status === 'COMPLETED') return false
+            const hasSubmittal = basePendingSubmittals.some(sub => 
+              String(sub.mileStoneId) === String(m.id) || 
+              String(sub.milestoneId) === String(m.id) ||
+              (sub.milestone && String(sub.milestone.id) === String(m.id))
+            )
+            return !hasSubmittal
+          })
+          
+          emptyMilestoneSubmittals = milestonesWithoutSubmittals.map(m => ({
+            ...m,
+            isPlaceholderSubmittal: true,
+            subject: m.subject || m.name || 'Unknown Milestone',
+            approvalDate: m.approvalDate || m.date,
+            project: m.project || projects.find(p => String(p.id) === String(m.project_id || m.projectId))
+          }))
+        } catch (err) {
+          console.error('Error processing milestones for active projects:', err)
+        }
+
+        const finalPendingSubmittals = [
+          ...emptyMilestoneSubmittals
+        ]
+
+        const basePendingSubmittalsArray = (userRole === 'admin' || userRole === 'deputy_manager' || userRole === 'project_manager_officer') ? submittals : pendingSubmittals;
+
         setAdminData({
           projects,
           rfis,
           submittals,
-          pendingSubmittals: (userRole === 'admin' || userRole === 'deputy_manager' || userRole === 'project_manager_officer') ? submittals : pendingSubmittals,
+          pendingSubmittals: basePendingSubmittalsArray,
+          upcomingMilestones: finalPendingSubmittals,
           pendingChangeOrders: coList,
           rfqs: rfqList,
           pendingRFI: rfis,
@@ -385,7 +427,7 @@ export const useDashboardData = () => {
             totalProjects: pmDashboard?.totalProjects ?? projects.length,
             activeProjects:
               pmDashboard?.totalActiveProjects ??
-              projects.filter((p) => !p.status || p.status.toUpperCase() === 'ACTIVE').length,
+              activeProjects.length,
             completedProjects:
               pmDashboard?.totalCompleteProject ??
               projects.filter((p) => p.status?.toUpperCase() === 'COMPLETED').length,
@@ -398,14 +440,8 @@ export const useDashboardData = () => {
             pendingRfiWbt: rfis.length,
             pendingRfiClient: clientRfis.length,
             newRFI: pmDashboard?.newRFI ?? 0,
-            pendingSubmittals: (
-              (userRole === 'admin' || userRole === 'deputy_manager' || userRole === 'project_manager_officer')
-                ? submittals.length
-                : pendingSubmittals.length
-            ) + clientSubmittals.length,
-            pendingSubmittalsWbt: (userRole === 'admin' || userRole === 'deputy_manager' || userRole === 'project_manager_officer')
-              ? submittals.length
-              : pendingSubmittals.length,
+            pendingSubmittals: basePendingSubmittalsArray.length + clientSubmittals.length,
+            pendingSubmittalsWbt: basePendingSubmittalsArray.length,
             pendingSubmittalsClient: clientSubmittals.length,
             pendingChangeOrders: coList.length + clientCos.length,
             pendingChangeOrdersWbt: coList.length,

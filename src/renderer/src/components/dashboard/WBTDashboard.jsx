@@ -315,7 +315,7 @@ const WBTDashboard = () => {
                 </div>
                 <div className="px-6 pb-6">
                   <UpcomingSubmittals
-                    pendingSubmittals={adminData.submittals}
+                    pendingSubmittals={adminData.upcomingMilestones}
                     invoices={adminData.invoices}
                     onSubmittalClick={(submittal) => {
                       setSelectedMilestone(submittal);

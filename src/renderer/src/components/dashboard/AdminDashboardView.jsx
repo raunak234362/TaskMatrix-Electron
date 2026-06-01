@@ -335,7 +335,7 @@ const AdminDashboardView = ({
                                     <span className="text-[15px] font-black text-gray-700 uppercase tracking-[0.1em]">Upcoming Submittal</span>
                                 </div>
                                 <span className="text-3xl font-black text-indigo-600 tracking-tighter">
-                                    {adminData?.submittals?.length || 0}
+                                    {adminData?.upcomingMilestones?.length || 0}
                                 </span>
                             </div>
                         </div>

@@ -41,7 +41,8 @@ import AddAssistsModal from "./AddAssistsModal";
 import ProjectMilestoneMetrics from "./ProjectMilestoneMetrics.jsx";
 import ProjectProgress from "./ProjectProgress";
 import CoordinationDrawings from "./coordinationDrawings/CoordinationDrawings";
-import WorkProgressReport from "./WorkProgressReport";
+import WorkProgressReport from "./wpr/WorkProgressReport";
+import GetTaskByID from "../task/GetTaskByID";
 
 const WBS_TYPE_ALIAS = {
   // Modelling
@@ -88,6 +89,7 @@ const GetProjectById = ({ id, onClose }) => {
   const [milestones, setMilestones] = useState([]); // Added milestones state
   const [rfiData, setRfiData] = useState([]); // Added rfiData state
   const [submittalData, setSubmittalData] = useState([]); // Added submittalData state
+  const [changeOrderData, setChangeOrderData] = useState([]);
   const [coordinationDrawings, setCoordinationDrawings] = useState([]); // Added coordinationDrawings state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -111,6 +113,7 @@ const GetProjectById = ({ id, onClose }) => {
   const [editModel, setEditModel] = useState(null);
   const [changeOrderView, setChangeOrderView] = useState("list");
   const [selectedCoId, setSelectedCoId] = useState(null);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [projectTasks, setProjectTasks] = useState([]);
   const [showAssistsModal, setShowAssistsModal] = useState(false);
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
@@ -317,20 +320,19 @@ const GetProjectById = ({ id, onClose }) => {
 
   // RFI data is now fetched directly via GetRFIByProjectId instead of using project.rfi
 
-  const changeOrderData = useMemo(() => {
-    return project?.changeOrders || [];
-  }, [project]);
+  // Change orders are now fetched directly via Service.GetChangeOrder
 
   const fetchProject = async () => {
     try {
       setLoading(true);
       setError(null);
-      const [projRes, mileRes, rfiRes, subRes, coordRes] = await Promise.all([
+      const [projRes, mileRes, rfiRes, subRes, coordRes, coRes] = await Promise.all([
         Service.GetProjectById(id),
         Service.GetProjectMilestoneById(id),
         Service.GetRFIByProjectId(id),
         Service.GetSubmittalByProjectId(id),
         Service.getCoordinationDrawingsByProjectId(id),
+        Service.GetChangeOrder(id),
         fetchProjectTasks()
       ]);
       setProject(projRes?.data || null);
@@ -351,6 +353,7 @@ const GetProjectById = ({ id, onClose }) => {
       setRfiData(rfiArray);
       setSubmittalData(subRes?.data || (Array.isArray(subRes) ? subRes : []));
       setCoordinationDrawings(coordRes?.data || (Array.isArray(coordRes) ? coordRes : []));
+      setChangeOrderData(coRes?.data || (Array.isArray(coRes) ? coRes : []));
     } catch (err) {
       setError("Failed to load project details");
       console.error("Error fetching project:", err);
@@ -412,15 +415,15 @@ const GetProjectById = ({ id, onClose }) => {
               {project.name}
             </h2>
             <div className="flex flex-wrap items-center gap-2 mt-3">
-              <span className="px-6 py-1.5 bg-gray-900 text-white border-2 border-gray-900 rounded-none font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center">
-                PROJECT NO: {project.projectCode || project.serialNo}
+              <span className="px-6 py-1.5 bg-gray-200 text-black border border-gray-500 rounded-none font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center">
+                PROJECT NO: {project.projectNumber || project.serialNo}
               </span>
               {project.stage && (
-                <span className="px-6 py-1.5 bg-blue-50 text-blue-800 border-2 border-dashed border-blue-600/60 rounded-none font-bold text-sm uppercase tracking-tight inline-flex items-center justify-center">
+                <span className="px-6 py-1.5 bg-blue-50 text-blue-800 border border-blue-600/60 rounded-none font-bold text-sm uppercase tracking-tight inline-flex items-center justify-center">
                   STAGE: {project.stage}
                 </span>
               )}
-              <span className={`px-6 py-1.5 border-2 border-dashed rounded-none font-bold text-sm uppercase tracking-tight inline-flex items-center justify-center ${
+              <span className={`px-6 py-1.5 border rounded-none font-bold text-sm uppercase tracking-tight inline-flex items-center justify-center ${
                 project.status === "ACTIVE"
                   ? "bg-green-50 text-green-800 border-green-600/60"
                   : "bg-red-50 text-red-800 border-red-600/60"
@@ -483,6 +486,9 @@ const GetProjectById = ({ id, onClose }) => {
                   }
                   if (tab.key === "projectNotes") {
                     return ["admin", "project_manager", "deputy_manager", "client", "client_admin", "operation_executive","connection_designer_engineer","connection_designer_admin", "dept_manager" ].includes(userRole);
+                  }
+                  if (tab.key === "wpr") {
+                    return ["admin", "operation_executive", "deputy_manager", "project_manager_officer"].includes(userRole);
                   }
                   return true;
                 }
@@ -875,9 +881,10 @@ const GetProjectById = ({ id, onClose }) => {
                                     "bg-gray-100 text-black border-gray-200";
 
                                   return (
-                                    <div
+                                    <button
                                       key={task.id || idx}
-                                      className="flex items-center gap-3 py-2.5 transition-colors"
+                                      onClick={() => setSelectedTaskId(task.id)}
+                                      className="w-full flex items-center gap-3 py-2.5 hover:bg-slate-100 transition-colors cursor-pointer text-left focus:outline-none"
                                     >
                                       <div className="w-7 h-7 rounded-none bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
                                         {initials || "?"}
@@ -904,7 +911,7 @@ const GetProjectById = ({ id, onClose }) => {
                                           {taskSeconds > 0 ? formatSeconds(taskSeconds) : "—"}
                                         </span>
                                       </div>
-                                    </div>
+                                    </button>
                                   );
                                 })}
                               </div>
@@ -1272,6 +1279,7 @@ const GetProjectById = ({ id, onClose }) => {
               milestones={milestones}
               rfiData={rfiData}
               submittalData={submittalData}
+              changeOrderData={changeOrderData}
               coordinationDrawings={coordinationDrawings}
               onUpdate={fetchProject}
             />
@@ -1279,6 +1287,9 @@ const GetProjectById = ({ id, onClose }) => {
         </div>
       </div>
     </div>
+      {selectedTaskId && (
+        <GetTaskByID id={selectedTaskId} onClose={() => setSelectedTaskId(null)} />
+      )}
       {editModel && (
         <EditProject
           projectId={id}

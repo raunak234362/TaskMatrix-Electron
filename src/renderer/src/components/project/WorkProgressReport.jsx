@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
+import Logo from '../../assets/logo.png';
 
 const WorkProgressReport = ({
   projectId,
@@ -28,6 +29,7 @@ const WorkProgressReport = ({
   milestones = [],
   rfiData = [],
   submittalData = [],
+  changeOrderData = [],
   coordinationDrawings = [],
   onUpdate
 }) => {
@@ -37,9 +39,16 @@ const WorkProgressReport = ({
   // WPR Header Info state
   const [reportDate, setReportDate] = useState(new Date().toISOString().split("T")[0]);
   const [weekEnding, setWeekEnding] = useState("");
-  const [circulatedTo, setCirculatedTo] = useState("Rob Tucci / Vishal / Rajeshwari");
+  const [wbtCirculatedTo, setWbtCirculatedTo] = useState("");
+  const [fabCirculatedTo, setFabCirculatedTo] = useState("");
   const [software, setSoftware] = useState(project?.tools || "SDS2");
-  const [fabProjectManager, setFabProjectManager] = useState("Matt Aurand");
+  const [fabProjectManager, setFabProjectManager] = useState(() => {
+    if (project?.clientProjectManagers?.length > 0) {
+      const pm = project.clientProjectManagers[0];
+      return `${pm.firstName || ""} ${pm.lastName || ""}`.trim().toUpperCase();
+    }
+    return "MATT AURAND";
+  });
 
   // Raw grids local states (unfiltered)
   const [rawRfis, setRawRfis] = useState([]);
@@ -149,6 +158,45 @@ const WorkProgressReport = ({
       setWeekEnding(sunday.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }));
     }
   }, [projectWeeks]);
+
+  // Initialize Circulated To from Fabricator POCs via RFQ
+  useEffect(() => {
+    const fetchFabricatorPOCs = async () => {
+      try {
+        let fabId = project?.fabricatorID || project?.fabricator?.id;
+
+        // Try to get fabricator ID from RFQ if missing or to ensure tracking
+        if (project?.rfqId) {
+          const rfqRes = await Service.GetRFQbyId(project.rfqId);
+          if (rfqRes?.data) {
+            const rfq = rfqRes.data;
+            const rfqFab = rfq.sender?.fabricator || rfq.fabricator;
+            if (rfqFab?.id) fabId = rfqFab.id;
+          }
+        }
+
+        if (fabId) {
+          const fab = await Service.GetFabricatorByID(fabId);
+          if (fab) {
+            const wbtPOCs = fab.wbtFabricatorPointOfContact || fab.data?.wbtFabricatorPointOfContact;
+            const fabPOCs = fab.pointOfContact || fab.data?.pointOfContact;
+
+            if (wbtPOCs && wbtPOCs.length > 0) {
+              const wbtPOC = wbtPOCs[0];
+              setWbtCirculatedTo(`${wbtPOC.firstName || ""} ${wbtPOC.lastName || ""}`.trim().toUpperCase());
+            }
+            if (fabPOCs && fabPOCs.length > 0) {
+              const fabPOC = fabPOCs[0];
+              setFabCirculatedTo(`${fabPOC.firstName || ""} ${fabPOC.lastName || ""}`.trim().toUpperCase());
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch fabricator for POCs", err);
+      }
+    };
+    fetchFabricatorPOCs();
+  }, [project?.rfqId, project?.fabricatorID, project?.fabricator?.id]);
 
   const handleWeekChange = (label) => {
     setSelectedWeek(label);
@@ -471,34 +519,63 @@ const WorkProgressReport = ({
 
   // Sync Change Orders Month-by-month
   useEffect(() => {
-    const rawCOs = project?.changeOrders || [];
+    const rawCOs = changeOrderData || [];
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     const rows = rawCOs.map((co) => {
-      const coDate = co.createdAt || co.date ? new Date(co.createdAt || co.date) : null;
-      const coMonthIndex = coDate ? coDate.getMonth() : -1;
-      const amount = co.totalCost || co.amount || 0;
-
+      let totalAmount = 0;
       const monthlyBreakdown = {};
-      months.forEach((m, idx) => {
-        if (idx === coMonthIndex) {
-          monthlyBreakdown[m] = amount > 0 ? `$${amount.toLocaleString()}` : "Sent";
-        } else {
-          monthlyBreakdown[m] = "";
+      months.forEach(m => monthlyBreakdown[m] = "");
+
+      if (Array.isArray(co.CoRefersTo) && co.CoRefersTo.length > 0) {
+        const monthSums = {};
+        let hasAnyAmount = false;
+
+        co.CoRefersTo.forEach(item => {
+          const itemDate = item.createdAt ? new Date(item.createdAt) : (co.createdAt ? new Date(co.createdAt) : null);
+          if (itemDate) {
+            const mIdx = itemDate.getMonth();
+            const mName = months[mIdx];
+            monthSums[mName] = (monthSums[mName] || 0) + (Number(item.cost) || 0);
+          }
+        });
+
+        months.forEach(m => {
+          if (monthSums[m] > 0) {
+            monthlyBreakdown[m] = `$${monthSums[m].toLocaleString()}`;
+            totalAmount += monthSums[m];
+            hasAnyAmount = true;
+          }
+        });
+
+        if (!hasAnyAmount) {
+          const fallbackMonthIdx = co.createdAt ? new Date(co.createdAt).getMonth() : -1;
+          if (fallbackMonthIdx >= 0) {
+            monthlyBreakdown[months[fallbackMonthIdx]] = "SENT";
+          }
         }
-      });
+      } else {
+        const amount = Number(co.totalCost) || Number(co.amount) || 0;
+        totalAmount = amount;
+        const coDate = co.createdAt || co.date ? new Date(co.createdAt || co.date) : null;
+        const coMonthIndex = coDate ? coDate.getMonth() : -1;
+
+        if (coMonthIndex >= 0) {
+          monthlyBreakdown[months[coMonthIndex]] = amount > 0 ? `$${amount.toLocaleString()}` : "SENT";
+        }
+      }
 
       return {
         id: co.id || co._id,
         createdAt: co.createdAt || co.date || new Date().toISOString(),
-        changeOrder: co.changeOrderNumber ? `COR-${co.changeOrderNumber.slice(-3)}` : "COR-New",
+        changeOrder: co.changeOrderNumber ? `COR-${String(co.changeOrderNumber).padStart(3, "0")}` : "COR-New",
         ...monthlyBreakdown,
-        total: amount > 0 ? `$${amount.toLocaleString()}` : "—"
+        total: totalAmount > 0 ? `$${totalAmount.toLocaleString()}` : "—"
       };
     });
 
     setRawCoRows(rows);
-  }, [project]);
+  }, [changeOrderData, project]);
 
   // Sync Coordination Drawings
   useEffect(() => {
@@ -987,85 +1064,131 @@ const WorkProgressReport = ({
       </div>
 
       {/* ── REPORT METADATA GRID (SPREADSHEET HEADER) ── */}
-      <div className="bg-[#f4faf0] border border-black rounded-none overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-black flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <FileText className="text-black" />
-            <span className="text-sm font-bold uppercase tracking-wider text-black">WPR Report Metadata</span>
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider border border-black px-3 py-1 rounded-none bg-white text-black">
-            FORM NO: WBT/PMO/WPR-001
-          </span>
-        </div>
+      <div className="border border-black overflow-hidden mb-6 bg-white shadow-sm mt-4">
+        <table className="w-full border-collapse text-xs text-black">
+          <tbody>
+            {/* Header Row */}
+            <tr className="bg-[#eaf4fe] border-b border-black">
+              <td className="w-1/4 p-4 border-r border-black text-center bg-white align-middle">
+                <div className="flex items-center justify-center">
+                  <img src={Logo} alt="WBT Whiteboard Logo" className="h-12 w-auto object-contain mix-blend-multiply" />
+                </div>
+              </td>
+              <td colSpan="2" className="p-4 border-r border-black text-center text-lg font-bold bg-[#eaf4fe]">
+                Week Ending {weekEnding}
+              </td>
+              <td className="w-[30%] p-0 bg-[#eaf4fe] align-top">
+                <table className="w-full h-full border-collapse text-[10px]">
+                  <tbody>
+                    <tr>
+                      <td className="p-1.5 border-b border-r border-black bg-[#fef2cd] w-1/3">FORM NO</td>
+                      <td className="p-1.5 border-b border-black font-normal">WBT/PMO/WPR-001</td>
+                    </tr>
+                    <tr>
+                      <td className="p-1.5 border-b border-r border-black bg-[#fef2cd]">VERSION</td>
+                      <td className="p-1.5 border-b border-black font-normal">1.0</td>
+                    </tr>
+                    <tr>
+                      <td className="p-1.5 border-r border-black bg-[#fef2cd]">EFF DATE</td>
+                      <td className="p-1.5 font-normal">05/09/2024</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-          <div className="space-y-1.5">
-            <span className="block text-xs font-bold uppercase tracking-wider text-black">Week Ending Date</span>
-            <input
-              type="text"
-              value={weekEnding}
-              onChange={(e) => setWeekEnding(e.target.value)}
-              className="w-full px-4 py-2.5 border border-black rounded-none font-bold outline-none focus:border-green-700 bg-white transition-all text-sm uppercase text-black"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <span className="block text-xs font-bold uppercase tracking-wider text-black">Customer</span>
-            <div className="px-4 py-2.5 border border-black bg-white rounded-none font-bold text-sm uppercase text-black">
-              {project?.fabricator?.fabName || "—"}
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <span className="block text-xs font-bold uppercase tracking-wider text-black">Project Name</span>
-            <div className="px-4 py-2.5 border border-black bg-white rounded-none font-bold text-sm uppercase text-black truncate">
-              {project?.projectName || project?.name || "—"}
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <span className="block text-xs font-bold uppercase tracking-wider text-black">WBT Project Manager</span>
-            <div className="px-4 py-2.5 border border-black bg-white rounded-none font-bold text-sm uppercase text-black">
-              {project?.manager ? `${project.manager.firstName} ${project.manager.lastName}` : "—"}
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <span className="block text-xs font-bold uppercase tracking-wider text-black">Fabricator Project Manager</span>
-            <input
-              type="text"
-              value={fabProjectManager}
-              onChange={(e) => setFabProjectManager(e.target.value)}
-              className="w-full px-4 py-2.5 border border-black rounded-none font-bold outline-none focus:border-green-700 bg-white transition-all text-sm uppercase text-black"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <span className="block text-xs font-bold uppercase tracking-wider text-black">Report Circulated To</span>
-            <input
-              type="text"
-              value={circulatedTo}
-              onChange={(e) => setCirculatedTo(e.target.value)}
-              className="w-full px-4 py-2.5 border border-black rounded-none font-bold outline-none focus:border-green-700 bg-white transition-all text-sm uppercase text-black"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <span className="block text-xs font-bold uppercase tracking-wider text-black">Software</span>
-            <input
-              type="text"
-              value={software}
-              onChange={(e) => setSoftware(e.target.value)}
-              className="w-full px-4 py-2.5 border border-black rounded-none font-bold outline-none focus:border-green-700 bg-white transition-all text-sm uppercase text-black"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <span className="block text-xs font-bold uppercase tracking-wider text-black">Project Awarded</span>
-            <div className="px-4 py-2.5 border border-black bg-white rounded-none font-bold text-sm uppercase text-black">
-              {project?.startDate ? new Date(project.startDate).toLocaleDateString() : "—"}
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <span className="block text-xs font-bold uppercase tracking-wider text-black">Fab Released Date</span>
-            <div className="px-4 py-2.5 border border-black bg-white rounded-none font-bold text-sm uppercase text-black">
-              {project?.fabricationDate ? new Date(project.fabricationDate).toLocaleDateString() : "—"}
-            </div>
-          </div>
-        </div>
+            {/* Row 1: Customer */}
+            <tr className="border-b border-black">
+              <td className="p-2 border-r border-black bg-green-200 text-center font-bold">Customer</td>
+              <td colSpan="3" className="p-2 bg-white font-normal">
+                {project?.fabricator?.fabName || "—"}
+              </td>
+            </tr>
+
+            {/* Row 2: Project Name | Fab PM */}
+            <tr className="border-b border-black">
+              <td className="p-2 border-r border-black bg-green-200 text-center font-bold">Project Name :</td>
+              <td className="p-2 border-r border-black bg-white font-normal">
+                {project?.projectName || project?.name || "—"}
+              </td>
+              <td className="p-2 border-r border-black bg-green-200 text-center font-bold w-1/4">Fabricator Project Manager</td>
+              <td className="p-0 bg-white font-normal">
+                <input
+                  type="text"
+                  value={fabProjectManager}
+                  onChange={(e) => setFabProjectManager(e.target.value)}
+                  className="w-full h-full p-2 outline-none uppercase bg-transparent"
+                />
+              </td>
+            </tr>
+
+            {/* Row 3: WBT PM | Fab Report Circulated To */}
+            <tr className="border-b border-black">
+              <td className="p-2 border-r border-black bg-green-200 text-center font-bold">WBT Project Manager</td>
+              <td className="p-2 border-r border-black bg-white font-normal">
+                {project?.manager ? `${project.manager.firstName} ${project.manager.lastName}` : "—"}
+              </td>
+              <td className="p-2 border-r border-black bg-green-200 text-center font-bold">Report Circulated to</td>
+              <td className="p-0 bg-white font-normal">
+                <input
+                  type="text"
+                  value={fabCirculatedTo}
+                  onChange={(e) => setFabCirculatedTo(e.target.value)}
+                  className="w-full h-full p-2 outline-none uppercase bg-transparent"
+                />
+              </td>
+            </tr>
+
+            {/* Row 4: WBT Report Circulated To | Software */}
+            <tr className="border-b border-black">
+              <td className="p-2 border-r border-black bg-green-200 text-center font-bold">Report Circulated to</td>
+              <td className="p-0 border-r border-black bg-white font-normal">
+                <input
+                  type="text"
+                  value={wbtCirculatedTo}
+                  onChange={(e) => setWbtCirculatedTo(e.target.value)}
+                  className="w-full h-full p-2 outline-none uppercase bg-transparent"
+                />
+              </td>
+              <td className="p-2 border-r border-black bg-green-200 text-center font-bold">Software</td>
+              <td className="p-0 bg-white font-normal">
+                <input
+                  type="text"
+                  value={software}
+                  onChange={(e) => setSoftware(e.target.value)}
+                  className="w-full h-full p-2 outline-none uppercase bg-transparent"
+                />
+              </td>
+            </tr>
+            {/* Spacer Line */}
+            <tr className="border-b border-black bg-white">
+              <td colSpan="4" className="h-6"></td>
+            </tr>
+            {/* Row 5: Dates */}
+            <tr className="border-b border-black">
+              <td colSpan="4" className="p-0">
+                <table className="w-full h-full border-collapse text-xs">
+                  <tbody>
+                    <tr>
+                      <td className="w-1/6 p-2 border-r border-black text-center font-bold">Project Awarded</td>
+                      <td className="w-1/6 p-2 border-r border-black bg-white font-normal">
+                        {project?.startDate ? new Date(project.startDate).toLocaleDateString() : "—"}
+                      </td>
+                      <td className="w-1/6 p-2 border-r border-black text-center font-bold">Approval Date</td>
+                      <td className="w-1/6 p-2 bg-white font-normal border-r border-black">
+                        {project?.approvalDate ? new Date(project.approvalDate).toLocaleDateString() : "—"}
+                      </td>
+                      <td className="w-1/6 p-2 border-r border-black text-center font-bold">Fab Released Date</td>
+                      <td className="w-1/6 p-2 bg-white font-normal">
+                        {project?.fabricationDate ? new Date(project.fabricationDate).toLocaleDateString() : "—"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       {/* ── 2. RFIs OVERVIEW TABLE ── */}
@@ -1156,7 +1279,7 @@ const WorkProgressReport = ({
                         className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                       />
                     ) : (
-                      <span>{row.customerResponse}</span>
+                      <span>{row.customerResponse?.replace(/&NBSP;|&nbsp;/gi, ' ')}</span>
                     )}
                   </td>
 
@@ -1195,7 +1318,7 @@ const WorkProgressReport = ({
                         className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                       />
                     ) : (
-                      <span>{row.wbtResponse}</span>
+                      <span>{row.wbtResponse?.replace(/&NBSP;|&nbsp;/gi, ' ')}</span>
                     )}
                   </td>
 
@@ -1221,11 +1344,11 @@ const WorkProgressReport = ({
                       </select>
                     ) : (
                       <span className={`px-2 py-1 rounded-none border border-black ${row.status === "OPEN" ? "bg-blue-50 text-blue-700" :
-                          row.status === "PARTIAL" ? "bg-orange-50 text-orange-700" :
-                            row.status === "COMPLETE" ? "bg-green-50 text-green-700" :
-                              row.status === "PENDING" ? "bg-green-50 text-green-700" :
-                                row.status === "ANSWERED" ? "bg-orange-50 text-orange-700" :
-                                  "bg-slate-50 text-slate-700"
+                        row.status === "PARTIAL" ? "bg-orange-50 text-orange-700" :
+                          row.status === "COMPLETE" ? "bg-green-50 text-green-700" :
+                            row.status === "PENDING" ? "bg-green-50 text-green-700" :
+                              row.status === "ANSWERED" ? "bg-orange-50 text-orange-700" :
+                                "bg-slate-50 text-slate-700"
                         }`}>
                         {row.status}
                       </span>
@@ -1274,8 +1397,8 @@ const WorkProgressReport = ({
                 <tr
                   key={row.id}
                   className={`border-b border-black/10 transition-all ${row._type === "milestone"
-                      ? "bg-[#f0f7ed] hover:bg-[#e6f3e2]"
-                      : "bg-white hover:bg-slate-50"
+                    ? "bg-[#f0f7ed] hover:bg-[#e6f3e2]"
+                    : "bg-white hover:bg-slate-50"
                     }`}
                 >
                   {/* Phase cell */}
@@ -1640,133 +1763,6 @@ const WorkProgressReport = ({
           </table>
         </div>
       </div>
-
-      {/* ── 4. COORDINATION DRAWINGS STATUS TABLE ── */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Compass className="text-black w-5 h-5" />
-            <h3 className="text-sm font-bold uppercase tracking-wider text-black">4. Coordination Drawings Status</h3>
-          </div>
-          {canEdit && (
-            <button
-              onClick={() => addRow("coordDrawing")}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 rounded-none text-xs font-bold uppercase transition-all shadow-sm cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              Add Row
-            </button>
-          )}
-        </div>
-
-        <div className="overflow-x-auto border border-black rounded-none bg-white shadow-sm custom-scrollbar max-w-full">
-          <table className="w-full text-left border-collapse min-w-[800px] text-xs">
-            <thead>
-              <tr className="bg-slate-100 border-b border-black">
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10">Drawing Name</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-32">Stage</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 w-36">Status</th>
-                <th className="p-3 font-bold uppercase tracking-wider text-black w-44">Date Created</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-black/10">
-              {filteredCoordDrawings.map((row) => (
-                <tr key={row.id} className="hover:bg-slate-50 transition-all">
-                  {/* Drawing Name */}
-                  <td
-                    onClick={() => handleCellClick("coordDrawing", row.id, "title", row.title)}
-                    className="p-3 font-bold border-r border-black/10 cursor-pointer hover:bg-slate-100/50 text-black"
-                  >
-                    {activeCell?.table === "coordDrawing" && activeCell.rowId === row.id && activeCell.field === "title" ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-2 py-1 rounded-none font-bold text-xs text-black"
-                      />
-                    ) : (
-                      <span className="uppercase">{row.title}</span>
-                    )}
-                  </td>
-
-                  {/* Stage */}
-                  <td
-                    onClick={() => handleCellClick("coordDrawing", row.id, "stage", row.stage)}
-                    className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
-                  >
-                    {activeCell?.table === "coordDrawing" && activeCell.rowId === row.id && activeCell.field === "stage" ? (
-                      <select
-                        ref={inputRef}
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-1 py-1 rounded-none text-xs uppercase font-bold text-black"
-                      >
-                        <option value="IFA">IFA</option>
-                        <option value="IFC">IFC</option>
-                        <option value="RE-IFA">RE-IFA</option>
-                        <option value="RIFC">RIFC</option>
-                      </select>
-                    ) : (
-                      <span>{row.stage}</span>
-                    )}
-                  </td>
-
-                  {/* Status */}
-                  <td
-                    onClick={() => handleCellClick("coordDrawing", row.id, "status", row.status)}
-                    className="p-3 border-r border-black/10 font-bold text-xs cursor-pointer hover:bg-slate-100/50 text-black"
-                  >
-                    {activeCell?.table === "coordDrawing" && activeCell.rowId === row.id && activeCell.field === "status" ? (
-                      <select
-                        ref={inputRef}
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-1 py-1 rounded-none text-xs uppercase font-bold text-black"
-                      >
-                        <option value="Pending">Pending</option>
-                        <option value="In Review">In Review</option>
-                        <option value="Approved">Approved</option>
-                      </select>
-                    ) : (
-                      <span className={`px-2 py-1 rounded-none border border-black ${row.status === "Approved" ? "bg-green-50 text-green-700" : "bg-orange-50 text-orange-700"}`}>
-                        {row.status}
-                      </span>
-                    )}
-                  </td>
-
-                  {/* Date Created */}
-                  <td
-                    onClick={() => handleCellClick("coordDrawing", row.id, "createdAt", row.createdAt)}
-                    className="p-3 font-bold text-black cursor-pointer hover:bg-slate-100/50"
-                  >
-                    {activeCell?.table === "coordDrawing" && activeCell.rowId === row.id && activeCell.field === "createdAt" ? (
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={handleCellSave}
-                        onKeyDown={handleKeyDown}
-                        className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
-                      />
-                    ) : (
-                      <span>{row.createdAt}</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
     </div>
   );
 };
