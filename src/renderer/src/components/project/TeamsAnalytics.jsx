@@ -24,6 +24,7 @@ import {
 
 const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
   const [subTab, setSubTab] = useState("team");
+  const [view, setView] = useState("by employee");
   const [managerBias, setManagerBias] = useState(null);
   const [loadingBias, setLoadingBias] = useState(false);
 
@@ -120,26 +121,48 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
   return (
     <div className="space-y-0 animate-in fade-in duration-500">
 
-      {/* Sub-tab Switcher */}
-      <div className="flex gap-2 mb-6">
-        {["team", "manager"].map((t) => (
-          <button
-            key={t}
-            onClick={() => setSubTab(t)}
-            className={`px-5 py-2 rounded-none font-normal text-sm uppercase tracking-tight border-2 transition-all cursor-pointer ${subTab === t
-              ? "bg-green-50 text-black border-green-700/80 hover:bg-green-100 shadow-sm"
-              : "bg-white text-black border-gray-300 hover:bg-slate-50 shadow-sm"
-              }`}
-          >
-            {t === "team" ? " Team Analytics" : " Manager Analytics"}
-          </button>
-        ))}
+      {/* Sub-tab & View Switchers */}
+      <div className="flex justify-between items-center mb-6 pr-[36px]">
+        {/* Left: Sub-tab Switcher */}
+        <div className="flex gap-2">
+          {["team", "manager"].map((t) => (
+            <button
+              key={t}
+              onClick={() => setSubTab(t)}
+              className={`px-5 py-2 rounded-none font-normal text-sm uppercase tracking-tight border-2 transition-all cursor-pointer ${subTab === t
+                ? "bg-green-50 text-black border-green-700/80 hover:bg-green-100 shadow-sm"
+                : "bg-white text-black border-gray-300 hover:bg-slate-50 shadow-sm"
+                }`}
+            >
+              {t === "team" ? " Team Analytics" : " Manager Analytics"}
+            </button>
+          ))}
+        </div>
+
+        {/* Right: View Switcher (Only for Team Analytics) */}
+        {subTab === "team" && (
+          <div className="flex gap-2.5">
+            {["by employee", "by task"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setView(tab)}
+                className={`px-6 py-1.5 rounded-none font-normal text-sm uppercase tracking-tight border-2 transition-all cursor-pointer ${
+                  view === tab
+                    ? "bg-green-50 text-black border-green-700/80 hover:bg-green-100 shadow-sm"
+                    : "bg-white text-black border-gray-300 hover:bg-slate-50 shadow-sm"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ─── TEAM ANALYTICS TAB ─── */}
       {subTab === "team" && (
         <div className="animate-in fade-in duration-300">
-          <MeasDashboard projectId={projectId} tasks={tasks} />
+          <MeasDashboard projectId={projectId} tasks={tasks} view={view} setView={setView} />
         </div>
       )}
 

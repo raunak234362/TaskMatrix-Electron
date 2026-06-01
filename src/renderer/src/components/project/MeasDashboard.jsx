@@ -642,8 +642,7 @@ function TaskDetailPanel({ taskId, onClose }) {
 }
 
 /* ─── Main Component ─── */
-export default function MeasDashboard({ projectId, tasks = [] }) {
-    const [view, setView] = useState("by employee");
+export default function MeasDashboard({ projectId, tasks = [], view, setView }) {
     const [selectedTaskId, setSelectedTaskId] = useState(null);
     const [expandedEmployees, setExpandedEmployees] = useState({});
 
@@ -724,23 +723,6 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                     }}
                 />
 
-                {/* Nav Tabs */}
-                <div className="flex gap-2.5 mt-5 justify-end pr-[36px]">
-                    {["by employee", "by task"].map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setView(tab)}
-                            className={`px-6 py-1.5 rounded-none font-normal text-sm uppercase tracking-tight border-2 transition-all cursor-pointer ${
-                                view === tab
-                                    ? "bg-green-50 text-black border-green-700/80 hover:bg-green-100 shadow-sm"
-                                    : "bg-white text-black border-gray-300 hover:bg-slate-50 shadow-sm"
-                            }`}
-                        >
-                            {tab}
-                        </button>
-                    ))}
-                </div>
-            
 
             <div style={{ padding: "28px 36px", background: "#f9fafb" }}>
                 {/* BY EMPLOYEE */}
