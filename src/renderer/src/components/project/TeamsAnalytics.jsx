@@ -126,9 +126,9 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
           <button
             key={t}
             onClick={() => setSubTab(t)}
-            className={`px-5 py-2 rounded-none font-bold text-sm uppercase tracking-tight border-2 transition-all cursor-pointer ${subTab === t
+            className={`px-5 py-2 rounded-none font-normal text-sm uppercase tracking-tight border-2 transition-all cursor-pointer ${subTab === t
               ? "bg-green-50 text-black border-green-700/80 hover:bg-green-100 shadow-sm"
-              : "bg-white text-black border-black/80 hover:bg-slate-50 shadow-sm"
+              : "bg-white text-black border-gray-300 hover:bg-slate-50 shadow-sm"
               }`}
           >
             {t === "team" ? " Team Analytics" : " Manager Analytics"}
