@@ -51,7 +51,7 @@ const NoteResponseModal = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-9999 p-4">
             <div className="bg-white shadow-lg rounded-xl w-full max-w-4xl relative flex flex-col max-h-[90vh]">
                 <div className="px-6 py-4 border-b flex justify-between items-center bg-white rounded-t-xl z-10">
                     <h2 className="text-xl font-bold text-black uppercase tracking-tight">Add Response</h2>

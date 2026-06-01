@@ -106,7 +106,7 @@ const NoteResponseDetailsModal = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[9999] backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-9999 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div className="bg-white h-[90vh] overflow-y-auto w-full max-w-5xl p-8 rounded-3xl shadow-2xl space-y-6 relative border border-gray-200 flex flex-col">
                 <div className="flex justify-between items-center shrink-0">
                     <h2 className="text-2xl font-black text-black uppercase tracking-tight">

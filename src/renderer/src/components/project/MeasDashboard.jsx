@@ -789,7 +789,7 @@ export default function MeasDashboard({ projectId, tasks = [], view, setView }) 
                                         </div>
 
                                         {/* Chevron Toggle Button */}
-                                        <div className="p-2 bg-green-50 rounded-none border border-black flex-shrink-0">
+                                        <div className="p-2 bg-green-50 rounded-none border border-black shrink-0">
                                             {isExpanded ? (
                                                 <ChevronDown size={18} className="text-black" />
                                             ) : (

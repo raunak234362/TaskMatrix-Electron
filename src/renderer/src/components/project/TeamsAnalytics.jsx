@@ -246,7 +246,7 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
               <div className="space-y-4">
                 {measResult ? (
                   <div className="animate-in slide-in-from-bottom-2 fade-in duration-300">
-                    <div className="p-5 bg-gradient-to-br from-green-50 to-emerald-100/50 rounded-none border border-black mb-6 text-center shadow-sm">
+                    <div className="p-5 bg-linear-to-br from-green-50 to-emerald-100/50 rounded-none border border-black mb-6 text-center shadow-sm">
                       {measResult.type === "manual" ? (
                         <>
                           <span className="text-sm font-black text-green-800/60 uppercase tracking-widest block mb-1">

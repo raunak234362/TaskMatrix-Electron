@@ -88,7 +88,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
                       <span className="text-[10px] font-bold text-black/60 uppercase tracking-tighter leading-none">WBT</span>
                       <span className="text-base font-black text-gray-800 leading-tight">{action.wbtCount}</span>
                     </div>
-                    <div className="w-[1px] h-5 bg-gray-200"></div>
+                    <div className="w-px h-5 bg-gray-200"></div>
                     <div className="flex flex-col items-center">
                       <span className="text-[10px] font-bold text-black/60 uppercase tracking-tighter leading-none">CLIENT</span>
                       <span className="text-base font-black text-gray-800 leading-tight">{action.clientCount}</span>

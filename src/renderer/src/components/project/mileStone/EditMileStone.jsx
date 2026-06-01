@@ -379,7 +379,7 @@ const EditMileStone = ({
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-green-200 border border-2 border-green-700 hover:bg-green-500 text-black px-8 flex items-center gap-2 h-10 font-bold shadow-sm"
+                className="bg-green-200 border-2 border-green-700 hover:bg-green-500 text-black px-8 flex items-center gap-2 h-10 font-bold shadow-sm"
               >
                 <Save className="w-4 h-4" />
                 {isSubmitting ? "Saving..." : "Save Changes"}

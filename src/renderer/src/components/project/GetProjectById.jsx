@@ -879,7 +879,7 @@ const GetProjectById = ({ id, onClose }) => {
                                       key={task.id || idx}
                                       className="flex items-center gap-3 py-2.5 transition-colors"
                                     >
-                                      <div className="w-7 h-7 rounded-none bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                                      <div className="w-7 h-7 rounded-none bg-linear-to-br from-slate-500 to-slate-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
                                         {initials || "?"}
                                       </div>
 
