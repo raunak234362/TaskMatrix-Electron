@@ -1417,6 +1417,20 @@ const WorkProgressReport = ({
                 setEffDate={setEffDate}
               />
             </div>
+             <div id="section-rfi">
+              <WprRfiTable
+                rfis={filteredRfis}
+                canEdit={canEdit}
+                activeCell={activeCell}
+                editValue={editValue}
+                setEditValue={setEditValue}
+                inputRef={inputRef}
+                onCellClick={handleCellClick}
+                onCellSave={handleCellSave}
+                onKeyDown={handleKeyDown}
+                onAddRow={() => addRow("rfi")}
+              />
+            </div>
             <div id="section-schedule">
               <WprScheduleTable
                 scheduleRows={filteredScheduleRows}
@@ -1431,20 +1445,7 @@ const WorkProgressReport = ({
                 onAddRow={() => addRow("schedule")}
               />
             </div>
-            <div id="section-rfi">
-              <WprRfiTable
-                rfis={filteredRfis}
-                canEdit={canEdit}
-                activeCell={activeCell}
-                editValue={editValue}
-                setEditValue={setEditValue}
-                inputRef={inputRef}
-                onCellClick={handleCellClick}
-                onCellSave={handleCellSave}
-                onKeyDown={handleKeyDown}
-                onAddRow={() => addRow("rfi")}
-              />
-            </div>
+           
             <div id="section-co">
               <WprChangeOrderTable
                 coRows={filteredCoRows}
