@@ -73,7 +73,7 @@ const AllWBS = ({ id, stage }) => {
       accessorKey: "bundleKey",
       header: "Bundle Name",
       cell: ({ row }) => (
-        <span className="font-black text-gray-900">
+        <span className="text-black font-normal">
           {row.original.name ||
             row.original.bundle?.name ||
             row.original.bundleKey ||
@@ -85,7 +85,7 @@ const AllWBS = ({ id, stage }) => {
       accessorKey: "stage",
       header: "Stage",
       cell: ({ row }) => (
-        <span className="text-sm font-bold text-gray-600 tracking-tight uppercase">
+        <span className="text-sm font-normal text-black tracking-tight uppercase">
           {row.original.stage || "—"}
         </span>
       ),
@@ -103,7 +103,7 @@ const AllWBS = ({ id, stage }) => {
       accessorKey: "totalExecHr",
       header: "Exec Time",
       cell: ({ row }) => (
-        <span className="text-sm font-bold text-gray-600">
+        <span className="text-sm font-normal text-black">
           {formatMinutesToTime(row.original.totalExecHr)} hrs
         </span>
       ),
@@ -112,7 +112,7 @@ const AllWBS = ({ id, stage }) => {
       accessorKey: "totalCheckHr",
       header: "Check Time",
       cell: ({ row }) => (
-        <span className="text-sm font-bold text-gray-600">
+        <span className="text-sm font-normal text-black">
           {formatMinutesToTime(row.original.totalCheckHr)} hrs
         </span>
       ),
@@ -155,7 +155,7 @@ const AllWBS = ({ id, stage }) => {
           userRole === "estimation_head") && (
             <Button
               onClick={() => setShowFetchTemplate(true)}
-              className="text-[10px] font-black uppercase tracking-widest py-2 px-4 bg-green-200 hover:bg-green-300 text-black rounded-xl shadow-md hover:bg-green-500 transition-all border-black border"
+              className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
             >
               Add New Bundle
             </Button> 

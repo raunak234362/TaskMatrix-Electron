@@ -23,7 +23,7 @@ import WorkloadAlerts from './components/WorkloadAlerts'
 const StatCard = ({ label, value, icon: Icon, onClick, iconPadding = 'p-3', valueSize = 'text-2xl' }) => (
     <div
         onClick={onClick}
-        className="p-5 rounded-2xl flex items-center justify-between group transition-all duration-300 cursor-pointer bg-white relative overflow-hidden border border-black border-l-[8px] border-l-primary shadow-sm hover:shadow-md hover:bg-gray-50"
+        className="p-5 rounded-2xl flex items-center justify-between group transition-all duration-300 cursor-pointer bg-white relative overflow-hidden border border-black border-l-8 border-l-primary shadow-sm hover:shadow-md hover:bg-gray-50"
     >
         <div className="flex items-center gap-4 z-10">
             <div className={`${iconPadding} rounded-xl bg-gray-50 group-hover:bg-green-50 transition-colors text-black`}>
@@ -332,7 +332,7 @@ const AdminDashboardView = ({
                                     <div className="p-2.5 bg-indigo-100/60 rounded-xl border border-indigo-200 shadow-sm group-hover:scale-110 transition-transform">
                                         <Briefcase className="w-5 h-5 text-indigo-600" strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-[15px] font-black text-gray-700 uppercase tracking-[0.1em]">Upcoming Submittal</span>
+                                    <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">Upcoming Submittal</span>
                                 </div>
                                 <span className="text-3xl font-black text-indigo-600 tracking-tighter">
                                     {adminData?.upcomingMilestones?.length || 0}
@@ -350,7 +350,7 @@ const AdminDashboardView = ({
                                     <div className="p-2.5 bg-amber-100/60 rounded-xl border border-amber-200 shadow-sm group-hover:scale-110 transition-transform">
                                         <Bell className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-[15px] font-black text-gray-700 uppercase tracking-[0.1em]">Notes & Updates</span>
+                                    <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">Notes & Updates</span>
                                 </div>
                                 <span className="text-3xl font-black text-amber-600 tracking-tighter">
                                     {projectNotes.length}

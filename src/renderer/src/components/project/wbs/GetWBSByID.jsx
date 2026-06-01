@@ -88,7 +88,7 @@ const GetWBSByID = ({
       accessorKey: "description",
       header: "",
       cell: ({ row }) => (
-        <p className="text-sm font-semibold text-gray-700 line-clamp-2">
+        <p className="text-sm font-medium text-black line-clamp-2">
           {row.original.name ||
             row.original.wbsTemplate?.name ||
             row.original.description ||
@@ -102,7 +102,7 @@ const GetWBSByID = ({
       accessorKey: "discipline",
       header: "Discipline",
       cell: ({ row }) => (
-        <span className="text-xs font-medium text-gray-500 uppercase">
+        <span className="text-xs font-medium text-black uppercase">
           {row.original.discipline || "—"}
         </span>
       ),
@@ -113,7 +113,7 @@ const GetWBSByID = ({
       accessorFn: (row) => row.qtyNo ?? row.totalQtyNo ?? 0,
       header: "Qty",
       cell: ({ row }) => (
-        <span className="text-sm  text-green-700 bg-green-50 px-2 py-1 rounded-md">
+        <span className="text-sm font-medium text-black">
           {row.getValue("qtyNo")}
         </span>
       ),
@@ -123,7 +123,7 @@ const GetWBSByID = ({
       accessorKey: "execHr",
       header: "Exec Total",
       cell: ({ row }) => (
-        <span className="text-sm  text-gray-700">
+        <span className="text-sm font-medium text-black">
           {formatDecimalHoursToTime((row.original.execHr ?? row.original.totalExecHr ?? 0) / 60)} hrs
         </span>
       ),
@@ -133,7 +133,7 @@ const GetWBSByID = ({
       accessorKey: "checkHr",
       header: "Check Total",
       cell: ({ row }) => (
-        <span className="text-sm  text-gray-700">
+        <span className="text-sm font-medium text-black">
           {formatDecimalHoursToTime((row.original.checkHr ?? row.original.totalCheckHr ?? 0) / 60)} hrs
         </span>
       ),
@@ -189,27 +189,23 @@ const GetWBSByID = ({
       onClick={onClose}
     >
       <div
-        className="bg-white w-full max-w-6xl max-h-[90vh] overflow-hidden rounded-3xl shadow-2xl border border-gray-100 flex flex-col animate-in fade-in zoom-in duration-300"
+        className="bg-white w-full max-w-[95vw] max-h-[92vh] overflow-hidden rounded-3xl shadow-2xl border border-gray-100 flex flex-col animate-in fade-in zoom-in duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Section */}
-        <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-green-50">
+        <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-green-50 sticky top-0 z-50">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center shadow-lg shadow-green-100">
-              <Layers className="w-6 h-6 text-white" />
-            </div>
+            
             <div>
-              <h2 className="text-2xl  text-gray-700 tracking-tight">
+              <h2 className="text-2xl text-black font-semibold tracking-tight">
                 {wbsData?.bundle?.bundleKey ||
                   wbsData?.bundleKey ||
                   "Bundle Details"}
               </h2>
               <div className="flex items-center gap-2 mt-1">
-                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px]  uppercase rounded-md tracking-wider">
+                <span className="px-6 py-0.5 bg-green-200 font-bold text-green-700 text-[15px] uppercase rounded-md tracking-wider">
                   {wbsData?.stage || "—"}
                 </span>
-                <span className="text-gray-400 text-xs">•</span>
-                <span className="text-gray-600 text-xs">Project Bundle</span>
               </div>
             </div>
           </div>

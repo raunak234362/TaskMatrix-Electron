@@ -72,13 +72,13 @@ const NoteResponseDetailsModal = ({
                 {res.childResponses?.map((child) => (
                     <div key={child.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
                         <div className="flex justify-between items-start mb-2">
-                            <span className="text-xs font-bold text-[#6bbd45] uppercase tracking-wider">
+                            <span className="text-sm font-bold text-[#6bbd45] uppercase tracking-wider">
                                 {child.createdBy
                                     ? `${child.createdBy.firstName} ${child.createdBy.lastName}`
                                     : (child.firstName ? `${child.firstName} ${child.lastName}` : "User")}
                             </span>
                             <div className="flex items-center gap-2">
-                                <span className="text-[10px] text-gray-400 font-medium">{formatDateTime(child.createdAt)}</span>
+                                <span className="text-sm text-gray-400 font-medium">{formatDateTime(child.createdAt)}</span>
                                 <button
                                     onClick={() => handleDelete(child.id)}
                                     className="p-1 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors"
@@ -106,7 +106,7 @@ const NoteResponseDetailsModal = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[9999] backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-9999 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div className="bg-white h-[90vh] overflow-y-auto w-full max-w-5xl p-8 rounded-3xl shadow-2xl space-y-6 relative border border-gray-200 flex flex-col">
                 <div className="flex justify-between items-center shrink-0">
                     <h2 className="text-2xl font-black text-black uppercase tracking-tight">
@@ -123,13 +123,13 @@ const NoteResponseDetailsModal = ({
                 <div className="flex-1 overflow-y-auto custom-scrollbar space-y-6 pr-2">
                     <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 shadow-sm space-y-4">
                         <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                            <div className="flex items-center gap-2 text-sm font-bold text-gray-400 uppercase tracking-widest">
                                 <CalendarDays size={14} className="text-[#6bbd45]" />
                                 {formatDateTime(response.createdAt)}
                             </div>
                             <button
                                 onClick={() => handleDelete(response.id)}
-                                className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors flex items-center gap-1 text-[10px] font-bold uppercase"
+                                className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors flex items-center gap-1 text-sm font-bold uppercase"
                             >
                                 <Trash2 size={14} />
                                 Delete
@@ -137,7 +137,7 @@ const NoteResponseDetailsModal = ({
                         </div>
 
                         <div className="space-y-2">
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Message</p>
+                            <p className="text-sm font-black text-gray-400 uppercase tracking-widest">Message</p>
                             <div
                                 className="text-gray-800 prose prose-sm max-w-none bg-white p-4 rounded-xl border border-gray-100 shadow-inner font-medium [&>p]:mb-1 [&>p]:mt-0"
                                 dangerouslySetInnerHTML={{ __html: response.content }}
@@ -146,7 +146,7 @@ const NoteResponseDetailsModal = ({
 
                         {response.files?.length > 0 && (
                             <div className="space-y-2">
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Attachments</p>
+                                <p className="text-sm font-black text-gray-400 uppercase tracking-widest">Attachments</p>
                                 <RenderFiles
                                     files={response.files}
                                     table="teamMeetingResponse"
@@ -169,19 +169,19 @@ const NoteResponseDetailsModal = ({
                             />
 
                             <div className="space-y-2">
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Attach Files</label>
+                                <label className="block text-sm font-black text-gray-400 uppercase tracking-widest mb-1">Attach Files</label>
                                 <MultipleFileUpload onFilesChange={setReplyFiles} initialFiles={replyFiles} />
                             </div>
 
                             <div className="flex justify-end gap-3 pt-2">
                                 <Button
                                     onClick={() => setReplyMode(false)}
-                                    className="px-6 py-2 bg-gray-50 text-black border border-gray-200 rounded-xl font-bold uppercase tracking-tight hover:bg-gray-100 transition-all text-xs"
+                                    className="px-6 py-2 bg-gray-50 text-black border border-gray-200 rounded-xl font-bold uppercase tracking-tight hover:bg-gray-100 transition-all text-sm"
                                 >
                                     Cancel
                                 </Button>
                                 <Button
-                                    className="px-8 py-2 bg-green-200 text-black border border-black rounded-xl font-bold uppercase tracking-tight hover:bg-green-300 transition-all shadow-md text-xs disabled:opacity-50"
+                                    className="px-8 py-2 bg-green-200 text-black border border-black rounded-xl font-bold uppercase tracking-tight hover:bg-green-300 transition-all shadow-md text-sm disabled:opacity-50"
                                     onClick={handleReplySubmit}
                                     disabled={isSubmitting}
                                 >
@@ -195,7 +195,7 @@ const NoteResponseDetailsModal = ({
                         <div className="flex justify-end">
                             <Button
                                 onClick={() => setReplyMode(true)}
-                                className="px-8 py-2 bg-green-200 text-black border border-black rounded-xl font-bold uppercase tracking-tight hover:bg-green-300 transition-all shadow-md text-xs"
+                                className="px-8 py-2 bg-green-200 text-black border border-black rounded-xl font-bold uppercase tracking-tight hover:bg-green-300 transition-all shadow-md text-sm"
                             >
                                 Reply
                             </Button>
@@ -205,7 +205,7 @@ const NoteResponseDetailsModal = ({
                     {response.childResponses?.length > 0 && (
                         <div className="space-y-4 pt-4">
                             <h3 className="text-lg font-black text-black uppercase tracking-tight border-b border-[#6bbd45]/20 pb-2 flex items-center gap-2">
-                                Replies <span className="text-xs bg-[#6bbd45]/10 text-[#6bbd45] px-2 py-0.5 rounded-full">{response.childResponses.length}</span>
+                                Replies <span className="text-sm bg-[#6bbd45]/10 text-[#6bbd45] px-2 py-0.5 rounded-full">{response.childResponses.length}</span>
                             </h3>
                             {renderThread(response)}
                         </div>

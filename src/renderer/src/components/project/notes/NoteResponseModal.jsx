@@ -51,7 +51,7 @@ const NoteResponseModal = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-9999 p-4">
             <div className="bg-white shadow-lg rounded-xl w-full max-w-4xl relative flex flex-col max-h-[90vh]">
                 <div className="px-6 py-4 border-b flex justify-between items-center bg-white rounded-t-xl z-10">
                     <h2 className="text-xl font-bold text-black uppercase tracking-tight">Add Response</h2>
@@ -70,7 +70,7 @@ const NoteResponseModal = ({
                         onSubmit={handleSubmit(onSubmit)}
                     >
                         <div>
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
+                            <label className="block text-sm font-black text-gray-400 uppercase tracking-widest mb-2">
                                 Message *
                             </label>
                             <Controller
@@ -88,7 +88,7 @@ const NoteResponseModal = ({
                         </div>
 
                         <div>
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
+                            <label className="block text-sm font-black text-gray-400 uppercase tracking-widest mb-2">
                                 Attach Files
                             </label>
                             <Controller

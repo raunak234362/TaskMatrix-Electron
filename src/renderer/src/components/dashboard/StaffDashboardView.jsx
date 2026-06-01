@@ -37,7 +37,7 @@ const StaffDashboardView = ({
                                         <Clock className="w-5 h-5 text-primary" strokeWidth={2.5} />
                                     </div>
 
-                                    <span className="text-[13px] font-black text-black uppercase tracking-[0.1em]">Priority Focus</span>
+                                    <span className="text-[13px] font-black text-black uppercase tracking-widest">Priority Focus</span>
                                 </div>
 
                                 {currentTask && (
@@ -67,7 +67,7 @@ const StaffDashboardView = ({
                                     <div className="p-2.5 bg-blue-100/60 rounded-xl border border-blue-200 shadow-sm group-hover:scale-110 transition-transform">
                                         <Calendar className="w-5 h-5 text-blue-600" strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-[13px] font-black text-gray-700 uppercase tracking-[0.1em]">Upcoming Assigned Task Deadlines</span>
+                                    <span className="text-[13px] font-black text-gray-700 uppercase tracking-widest">Upcoming Assigned Task Deadlines</span>
                                 </div>
                                 <span className="text-3xl font-black text-blue-600 tracking-tighter">
                                     {tasks.filter(t => t.status === 'ASSIGNED' || t.status === 'REWORK').length}
@@ -85,7 +85,7 @@ const StaffDashboardView = ({
                                     <div className="p-2.5 bg-amber-100/60 rounded-xl border border-amber-200 shadow-sm group-hover:scale-110 transition-transform">
                                         <Bell className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-[13px] font-black text-gray-700 uppercase tracking-[0.1em]">Notes & Updates</span>
+                                    <span className="text-[13px] font-black text-gray-700 uppercase tracking-widest">Notes & Updates</span>
                                 </div>
                                 <span className="text-3xl font-black text-amber-600 tracking-tighter">
                                     {projectNotes.length}

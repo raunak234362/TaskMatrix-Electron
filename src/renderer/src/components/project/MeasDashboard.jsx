@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { Loader2, X, Clock, User, FileText, CheckCircle2, AlertCircle, Timer } from "lucide-react";
+import { Loader2, X, Clock, User, FileText, CheckCircle2, AlertCircle, Timer, ChevronDown, ChevronRight } from "lucide-react";
 import Service from "../../api/Service";
 
 /* ─── Pure helper functions ─── */
@@ -642,9 +642,16 @@ function TaskDetailPanel({ taskId, onClose }) {
 }
 
 /* ─── Main Component ─── */
-export default function MeasDashboard({ projectId, tasks = [] }) {
-    const [view, setView] = useState("by employee");
+export default function MeasDashboard({ projectId, tasks = [], view, setView }) {
     const [selectedTaskId, setSelectedTaskId] = useState(null);
+    const [expandedEmployees, setExpandedEmployees] = useState({});
+
+    const toggleEmployee = (empName) => {
+        setExpandedEmployees((prev) => ({
+            ...prev,
+            [empName]: !prev[empName],
+        }));
+    };
 
     const projectTasks = useMemo(() => {
         return tasks.filter((t) => t.project_id === projectId);
@@ -716,255 +723,163 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                     }}
                 />
 
-                {/* Nav Tabs */}
-                <div style={{ display: "flex", gap: "6px", marginTop: "20px" }}>
-                    {["by employee", "by task"].map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setView(tab)}
-                            style={{
-                                padding: "7px 18px",
-                                borderRadius: "0px",
-                                border: view === tab ? "2px solid #16a34a" : "2px solid #000000",
-                                cursor: "pointer",
-                                fontSize: "14px",
-                                fontWeight: 700,
-                                letterSpacing: "0.5px",
-                                textTransform: "uppercase",
-                                background: view === tab ? "#f0fdf4" : "#ffffff",
-                                color: "#000000",
-                                transition: "all 0.15s",
-                            }}
-                        >
-                            {tab}
-                        </button>
-                    ))}
-                </div>
-            
 
             <div style={{ padding: "28px 36px", background: "#f9fafb" }}>
                 {/* BY EMPLOYEE */}
                 {view === "by employee" && (
-                    <div
-                        style={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
-                            gap: "14px",
-                        }}
-                    >
-                        {employeeStats.map((emp) => (
-                            <div
-                                key={emp.name}
-                                style={{
-                                    background: "#ffffff",
-                                    border: "1px solid #000000",
-                                    borderRadius: "0px",
-                                    padding: "22px",
-                                    boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "flex-start",
-                                        marginBottom: "14px",
-                                    }}
-                                >
-                                    <div>
-                                        <div
-                                            style={{
-                                                fontSize: "14px",
-                                                fontWeight: 800,
-                                                color: "#111827",
-                                                marginBottom: "3px",
-                                            }}
-                                        >
-                                            {emp.name}
-                                        </div>
-                                        <div style={{ fontSize: "14px", color: "#000000" }}>
-                                            {emp.tasks.length} task{emp.tasks.length !== 1 ? "s" : ""}
-                                        </div>
-                                    </div>
-                                    <div style={{ textAlign: "right" }}>
-                                        <div
-                                            style={{
-                                                fontSize: "30px",
-                                                fontWeight: 900,
-                                                color: getMEASColor(emp.meas),
-                                                lineHeight: 1,
-                                            }}
-                                        >
-                                            {emp.meas.toFixed(1)}
-                                        </div>
-                                        <div
-                                            style={{
-                                                fontSize: "14px",
-                                                color: "#000000",
-                                                letterSpacing: "1.5px",
-                                                textTransform: "uppercase",
-                                                marginTop: "2px",
-                                            }}
-                                        >
-                                            MEAS
-                                        </div>
-                                    </div>
-                                </div>
+                    <div className="space-y-4">
+                        {employeeStats.map((emp) => {
+                            const isExpanded = !!expandedEmployees[emp.name];
+                            const statusColor = getMEASColor(emp.meas);
+                            const statusLabel = getMEASLabel(emp.meas);
+                            const statusBg = getMEASBg(emp.meas);
+                            const emoji = getMEASEmoji(emp.meas);
 
-                                {/* Progress bar */}
+                            return (
                                 <div
-                                    style={{
-                                        background: "#f3f4f6",
-                                        borderRadius: "0px",
-                                        border: "1px solid #000000",
-                                        height: "7px",
-                                        marginBottom: "16px",
-                                    }}
+                                    key={emp.name}
+                                    className="bg-white border border-black rounded-none shadow-sm overflow-hidden"
                                 >
-                                    <div
-                                        style={{
-                                            height: "5px",
-                                            borderRadius: "0px",
-                                            width: `${Math.min(100, emp.meas)}%`,
-                                            background: `linear-gradient(90deg, ${getMEASColor(emp.meas)}, ${getMEASColor(emp.meas)}99)`,
-                                            transition: "width 0.6s ease",
-                                        }}
-                                    />
-                                </div>
-
-                                <div
-                                    style={{
-                                        fontSize: "14px",
-                                        fontWeight: 800,
-                                        color: "#000000",
-                                        letterSpacing: "1px",
-                                        marginBottom: "8px",
-                                        textTransform: "uppercase",
-                                    }}
-                                >
-                                    Tasks{" "}
-                                    <span
-                                        style={{
-                                            color: "#000000",
-                                            fontWeight: 500,
-                                            letterSpacing: 0,
-                                        }}
+                                    {/* Header / Clickable Card Area */}
+                                    <button
+                                        onClick={() => toggleEmployee(emp.name)}
+                                        className="w-full flex items-center justify-between p-5 hover:bg-gray-50/50 transition-colors text-left"
                                     >
-                                        · click to view details
-                                    </span>
-                                </div>
-                                <div style={{ maxHeight: "240px", overflowY: "auto" }}>
-                                    {emp.tasks.map((t) => {
-                                        const allocated = t.allocationLog?.allocatedHours
-                                            ? parseTimeToDecimal(t.allocationLog.allocatedHours)
-                                            : parseFloat(t.hours) || 0;
-                                        const worked = calculateWorkedSeconds(t) / 3600;
-                                        const acc = calcAccuracy(allocated, worked);
-                                        const dev =
-                                            allocated > 0
-                                                ? (((worked - allocated) / allocated) * 100).toFixed(0)
-                                                : "0";
-                                        const over = worked > allocated;
-                                        return (
-                                            <div
-                                                key={t.id}
-                                                style={taskRowBaseStyle}
-                                                onClick={() => setSelectedTaskId(t.id)}
-                                                onMouseEnter={(e) => {
-                                                    e.currentTarget.style.background = "#f0fce8";
-                                                    e.currentTarget.style.borderColor = GREEN_BORDER;
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.style.background = "#f9fafb";
-                                                    e.currentTarget.style.borderColor = "rgba(0,0,0,0.06)";
-                                                }}
-                                            >
-                                                <div style={{ flex: 1, minWidth: 0 }}>
-                                                    <div
-                                                        style={{
-                                                            fontSize: "14px",
-                                                            fontWeight: 600,
-                                                            color: "#111827",
-                                                            overflow: "hidden",
-                                                            textOverflow: "ellipsis",
-                                                            whiteSpace: "nowrap",
-                                                        }}
-                                                    >
-                                                        {t.name}
-                                                    </div>
-                                                    <div
-                                                        style={{
-                                                            fontSize: "14px",
-                                                            color: "#000000",
-                                                            marginTop: "1px",
-                                                        }}
-                                                    >
-                                                        {allocated.toFixed(2)}h → {worked.toFixed(2)}h
-                                                    </div>
-                                                </div>
-                                                <div
+                                        <div className="flex-1 min-w-0 pr-4">
+                                            {/* Badges */}
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-xs font-normal px-2 py-0.5 rounded-none uppercase tracking-wider border border-black bg-slate-100 text-black">
+                                                    MEAS: {emp.meas.toFixed(1)}
+                                                </span>
+                                                <span
+                                                    className="text-xs font-normal px-2 py-0.5 rounded-none uppercase tracking-wider border"
                                                     style={{
-                                                        display: "flex",
-                                                        gap: "6px",
-                                                        alignItems: "center",
-                                                        flexShrink: 0,
+                                                        backgroundColor: statusBg,
+                                                        color: "#000000",
+                                                        borderColor: statusColor,
                                                     }}
                                                 >
-                                                    <span
-                                                        style={{
-                                                            fontSize: "14px",
-                                                            fontWeight: 700,
-                                                            color: over ? "#d97706" : "#2563eb",
-                                                            background: over ? "#fef3c7" : "#eff6ff",
-                                                            padding: "1px 6px",
-                                                            borderRadius: "0px",
-                                                            border: `1px solid ${over ? "#d97706" : "#2563eb"}`,
-                                                        }}
-                                                    >
-                                                        {over ? "+" : ""}
-                                                        {dev}%
-                                                    </span>
-                                                    <span
-                                                        style={{
-                                                            fontSize: "14px",
-                                                            fontWeight: 800,
-                                                            color: getMEASColor(acc),
-                                                            background: getMEASBg(acc),
-                                                            padding: "1px 7px",
-                                                            borderRadius: "0px",
-                                                            border: `1px solid ${getMEASColor(acc)}`,
-                                                        }}
-                                                    >
-                                                        {acc.toFixed(0)}
-                                                    </span>
+                                                    {emoji} {statusLabel}
+                                                </span>
+                                            </div>
+
+                                            {/* Employee Name */}
+                                            <h4 className="text-base font-semibold text-black uppercase tracking-wider mb-2">
+                                                {emp.name}
+                                            </h4>
+
+                                            {/* Info & Progress bar */}
+                                            <div className="flex flex-wrap items-center gap-6">
+                                                <p className="text-sm text-black font-normal uppercase tracking-wider">
+                                                    {emp.tasks.length} Task{emp.tasks.length !== 1 ? "s" : ""}
+                                                </p>
+                                                <div className="flex items-center gap-2 flex-1 max-w-[200px]">
+                                                    <div className="w-full h-2 bg-slate-200 rounded-none border border-black overflow-hidden">
+                                                        <div
+                                                            className="h-full rounded-none"
+                                                            style={{
+                                                                width: `${Math.min(100, emp.meas)}%`,
+                                                                backgroundColor: statusColor,
+                                                                transition: "width 0.6s ease",
+                                                            }}
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
-                                        );
-                                    })}
-                                </div>
+                                        </div>
 
-                                <div
-                                    style={{
-                                        marginTop: "12px",
-                                        padding: "8px 12px",
-                                        borderRadius: "0px",
-                                        background: getMEASBg(emp.meas),
-                                        border: `1px solid ${getMEASColor(emp.meas)}`,
-                                        fontSize: "14px",
-                                        color: getMEASColor(emp.meas),
-                                        fontWeight: 700,
-                                        textAlign: "center",
-                                    }}
-                                >
-                                    {getMEASEmoji(emp.meas)} {getMEASLabel(emp.meas)}
+                                        {/* Chevron Toggle Button */}
+                                        <div className="p-2 bg-green-50 rounded-none border border-black shrink-0">
+                                            {isExpanded ? (
+                                                <ChevronDown size={18} className="text-black" />
+                                            ) : (
+                                                <ChevronRight size={18} className="text-black" />
+                                            )}
+                                        </div>
+                                    </button>
+
+                                    {/* Expanded Task list */}
+                                    {isExpanded && (
+                                        <div className="bg-slate-50 p-4 border-t border-black">
+                                            <div className="bg-white rounded-none border border-black overflow-hidden shadow-sm">
+                                                {/* Header Column Titles */}
+                                                <div className="grid grid-cols-7 gap-4 p-4 bg-slate-100 border-b border-black text-xs font-bold text-black uppercase tracking-wider">
+                                                    <div className="col-span-2">Task Details</div>
+                                                    <div className="text-right">Allocated</div>
+                                                    <div className="text-right">Worked</div>
+                                                    <div className="text-right">Deviation</div>
+                                                    <div className="text-right">MEAS Score</div>
+                                                    <div className="text-end">Status</div>
+                                                </div>
+
+                                                {/* Task Rows */}
+                                                <div className="divide-y divide-black/10">
+                                                    {emp.tasks.map((t) => {
+                                                        const allocated = t.allocationLog?.allocatedHours
+                                                            ? parseTimeToDecimal(t.allocationLog.allocatedHours)
+                                                            : parseFloat(t.hours) || 0;
+                                                        const worked = calculateWorkedSeconds(t) / 3600;
+                                                        const acc = calcAccuracy(allocated, worked);
+                                                        const dev = allocated > 0
+                                                            ? (((worked - allocated) / allocated) * 100).toFixed(0)
+                                                            : "0";
+                                                        const over = worked > allocated;
+
+                                                        return (
+                                                            <div
+                                                                key={t.id}
+                                                                onClick={() => setSelectedTaskId(t.id)}
+                                                                className="grid grid-cols-7 gap-4 p-4 hover:bg-gray-50/50 transition-colors cursor-pointer items-center text-sm font-normal text-black"
+                                                            >
+                                                                <div className="col-span-2">
+                                                                    <p className="font-normal text-black truncate">{t.name || "—"}</p>
+                                                                    <p className="text-xs text-black/60 uppercase mt-0.5">{t.wbsType || "Task"}</p>
+                                                                </div>
+                                                                <div className="text-right">{allocated.toFixed(2)}h</div>
+                                                                <div className="text-right font-normal">{worked.toFixed(2)}h</div>
+                                                                <div className="text-right">
+                                                                    <span
+                                                                        className="px-2 py-0.5 rounded-none text-xs border"
+                                                                        style={{
+                                                                            backgroundColor: over ? "#fef3c7" : "#eff6ff",
+                                                                            color: over ? "#d97706" : "#2563eb",
+                                                                            borderColor: over ? "#d97706" : "#2563eb",
+                                                                        }}
+                                                                    >
+                                                                        {over ? "+" : ""}{dev}%
+                                                                    </span>
+                                                                </div>
+                                                                <div className="text-right">
+                                                                    <span
+                                                                        className="px-2 py-0.5 rounded-none text-xs font-normal border"
+                                                                        style={{
+                                                                            backgroundColor: getMEASBg(acc),
+                                                                            color: getMEASColor(acc),
+                                                                            borderColor: getMEASColor(acc),
+                                                                        }}
+                                                                    >
+                                                                        {acc.toFixed(0)}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="text-end">
+                                                                    <span className="px-2 py-0.5 rounded-none text-xs uppercase tracking-wider border border-black bg-slate-50 text-black font-normal">
+                                                                        {t.status}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
 
                         {employeeStats.length === 0 && (
                             <div
                                 style={{
-                                    gridColumn: "1/-1",
                                     textAlign: "center",
                                     padding: "60px",
                                     color: "#000000",
@@ -1047,7 +962,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                             <div
                                                 style={{
                                                     fontSize: "14px",
-                                                    fontWeight: 600,
+                                                    fontWeight: 400,
                                                     color: "#111827",
                                                 }}
                                             >
@@ -1087,7 +1002,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                             style={{
                                                 textAlign: "right",
                                                 fontSize: "14px",
-                                                fontWeight: 600,
+                                                fontWeight: 400,
                                                 color: "#111827",
                                             }}
                                         >
@@ -1097,7 +1012,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                             style={{
                                                 textAlign: "right",
                                                 fontSize: "14px",
-                                                fontWeight: 700,
+                                                fontWeight: 400,
                                                 color: over ? "#d97706" : "#2563eb",
                                             }}
                                         >
@@ -1108,7 +1023,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                             style={{
                                                 textAlign: "right",
                                                 fontSize: "14px",
-                                                fontWeight: 900,
+                                                fontWeight: 400,
                                                 color: getMEASColor(t.accuracy),
                                             }}
                                         >
@@ -1121,7 +1036,7 @@ export default function MeasDashboard({ projectId, tasks = [] }) {
                                                     borderRadius: "0px",
                                                     border: `1px solid ${rowSt.color}`,
                                                     fontSize: "14px",
-                                                    fontWeight: 700,
+                                                    fontWeight: 400,
                                                     letterSpacing: "0.5px",
                                                     background: rowSt.bg,
                                                     color: rowSt.color,
