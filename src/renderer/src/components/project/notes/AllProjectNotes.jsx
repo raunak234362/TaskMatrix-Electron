@@ -152,11 +152,11 @@ const AllProjectNotes = ({ projectId, project }) => {
     const getPriorityBadge = (priority) => {
         const p = Number(priority);
         switch (p) {
-            case 4: return <span className="bg-red-50 text-red-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest border border-red-100 flex items-center gap-1"><AlertCircle size={8} />Critical</span>;
-            case 3: return <span className="bg-orange-50 text-orange-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest border border-orange-100">Urgent</span>;
-            case 2: return <span className="bg-yellow-50 text-yellow-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest border border-yellow-100">High</span>;
-            case 1: return <span className="bg-blue-50 text-blue-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest border border-blue-100">Medium</span>;
-            case 0: return <span className="bg-gray-50 text-gray-500 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest border border-gray-100">Low</span>;
+            case 4: return <span className="bg-gray-100 text-black text-sm font-normal px-1.5 py-0.5 rounded uppercase tracking-widest border border-gray-200 flex items-center gap-1"><AlertCircle size={10} className="text-black" />Critical</span>;
+            case 3: return <span className="bg-gray-100 text-black text-sm font-normal px-1.5 py-0.5 rounded uppercase tracking-widest border border-gray-200">Urgent</span>;
+            case 2: return <span className="bg-gray-100 text-black text-sm font-normal px-1.5 py-0.5 rounded uppercase tracking-widest border border-gray-200">High</span>;
+            case 1: return <span className="bg-gray-100 text-black text-sm font-normal px-1.5 py-0.5 rounded uppercase tracking-widest border border-gray-200">Medium</span>;
+            case 0: return <span className="bg-gray-100 text-black text-sm font-normal px-1.5 py-0.5 rounded uppercase tracking-widest border border-gray-100">Low</span>;
             default: return null;
         }
     };
@@ -167,7 +167,7 @@ const AllProjectNotes = ({ projectId, project }) => {
 
                 <button
                     onClick={() => setShowAddModal(true)}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-green-200 border border-black font-semibold text-black rounded-xl text-[10px] uppercase shadow-xl hover:bg-green-400 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
                 >
                     + Add New Note
                 </button>
@@ -176,7 +176,7 @@ const AllProjectNotes = ({ projectId, project }) => {
             {filteredNotes.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
                     <Inbox className="w-12 h-12 mb-4 text-gray-200" />
-                    <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">
+                    <p className="text-gray-500 font-bold uppercase tracking-widest text-sm">
                         No Project Notes Found
                     </p>
                 </div>
@@ -204,7 +204,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                                     <div className="flex-1 min-w-0 pr-4">
                                         <div className="flex items-center gap-2 mb-1">
                                             {note.serialNo && (
-                                                <span className="text-[9px] font-black bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase">
+                                                <span className="text-sm font-normal bg-gray-100 text-black px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase border border-gray-200">
                                                     {note.serialNo}
                                                 </span>
                                             )}
@@ -213,8 +213,8 @@ const AllProjectNotes = ({ projectId, project }) => {
                                         </div>
                                         <div className="flex flex-wrap gap-1.5 mb-2">
                                             {note.flags && note.flags.length > 0 && note.flags.map((flag, idx) => (
-                                                <span key={idx} className="text-[8px] font-black bg-gray-50 text-gray-600 px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase border border-gray-200 flex items-center gap-1">
-                                                    <Flag size={8} className="text-[#6bbd45]" />
+                                                <span key={idx} className="text-sm font-normal bg-gray-100 text-black px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase border border-gray-200 flex items-center gap-1">
+                                                    <Flag size={10} className="text-[#6bbd45]" />
                                                     {flag}
                                                 </span>
                                             ))}
@@ -233,25 +233,25 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                     const name = typeof u === 'string' ? u : `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.username;
                                                     if (!name) return null;
                                                     return (
-                                                        <span key={u.id || u._id || idx} className="text-[9px] font-black bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase border border-purple-200">
+                                                        <span key={u.id || u._id || idx} className="text-sm font-normal bg-gray-100 text-black px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase border border-gray-200">
                                                             @{name}
                                                         </span>
                                                     );
                                                 });
                                             })()}
                                         </div>
-                                        <div className="text-sm font-black text-black truncate pr-4 uppercase tracking-tight mb-2">
+                                        <div className="text-lg font-semibold text-black truncate pr-4 uppercase tracking-tight mb-2">
                                             {note.title || truncateWords(note.content?.replace(/<[^>]*>?/gm, "").replace(/&nbsp;/g, " ") || "Untitled Note", 10)}
                                         </div>
-                                        <div className="flex items-center gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                        <div className="flex items-center gap-4 text-sm font-normal text-black uppercase tracking-widest">
                                             {note.createdBy && (
-                                                <span className="flex items-center gap-1.5 bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">
+                                                <span className="flex items-center gap-1.5 bg-gray-100 px-2 py-0.5 rounded-full text-black">
                                                     {note.createdBy.firstName} {note.createdBy.lastName}
                                                 </span>
                                             )}
                                             {note.createdAt && (
                                                 <span className="flex items-center gap-1">
-                                                    <Calendar size={10} />
+                                                    <Calendar size={12} className="text-black" />
                                                     {new Intl.DateTimeFormat("en-IN", {
                                                         day: "2-digit",
                                                         month: "short",
@@ -292,11 +292,11 @@ const AllProjectNotes = ({ projectId, project }) => {
                                     <div className="px-5 pb-5 space-y-6 border-t border-gray-100 pt-5 bg-white">
                                         {/* Content */}
                                         <div className="space-y-2">
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                            <p className="text-sm font-normal text-black uppercase tracking-widest">
                                                 Observation / Discussion
                                             </p>
                                             <div
-                                                className="prose prose-sm max-w-none text-gray-700 bg-gray-50/50 p-4 rounded-xl border border-gray-100 font-medium [&>p]:mb-1 [&>p]:mt-0"
+                                                className="prose prose-sm max-w-none text-black bg-gray-50/50 p-4 rounded-xl border border-gray-100 font-normal [&>p]:mb-1 [&>p]:mt-0"
                                                 dangerouslySetInnerHTML={{
                                                     __html: note.content || "No content.",
                                                 }}
@@ -306,7 +306,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                                         {/* Files */}
                                         {note.files && note.files.length > 0 && (
                                             <div className="space-y-2">
-                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                <p className="text-sm font-normal text-black uppercase tracking-widest">
                                                     Attached Intelligence
                                                 </p>
                                                 <RenderFiles
@@ -321,13 +321,13 @@ const AllProjectNotes = ({ projectId, project }) => {
                                         {/* Responses Section */}
                                         <div className="space-y-4 pt-4 border-t border-gray-100">
                                             <div className="flex justify-between items-center">
-                                                <h4 className="text-[10px] font-black text-black uppercase tracking-widest flex items-center gap-2">
+                                                <h4 className="text-sm font-normal text-black uppercase tracking-widest flex items-center gap-2">
                                                     <span className="w-1.5 h-1.5 bg-[#6bbd45] rounded-full"></span>
                                                     Responses
                                                 </h4>
                                                 <button
                                                     onClick={() => setShowResponseModal(note.id)}
-                                                    className="text-[11px] font-black text-black border border-black uppercase tracking-widest hover:bg-green-200 px-4 py-1.5  rounded-lg"
+                                                    className="px-4 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-normal text-sm uppercase tracking-tight shadow-sm cursor-pointer"
                                                 >
                                                     + Add Response
                                                 </button>
@@ -344,7 +344,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                                     const plainText = row.original.content?.replace(/<[^>]*>?/gm, "").replace(/&nbsp;/g, " ") || "";
                                                                     return (
                                                                         <div className="space-y-1">
-                                                                            <p className="truncate max-w-[300px] text-xs sm:text-sm font-medium">
+                                                                            <p className="truncate max-w-[300px] text-sm text-black font-normal">
                                                                                 {plainText}
                                                                             </p>
                                                                         </div>
@@ -357,11 +357,11 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                                 cell: ({ row }) => {
                                                                     const count = row.original.files?.length ?? 0;
                                                                     return count > 0 ? (
-                                                                        <span className="text-black font-medium text-xs">
+                                                                        <span className="text-black font-normal text-sm">
                                                                             {count} file(s)
                                                                         </span>
                                                                     ) : (
-                                                                        <span className="text-gray-300">—</span>
+                                                                        <span className="text-black font-normal text-sm">—</span>
                                                                     );
                                                                 },
                                                             },
@@ -369,7 +369,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                                 accessorKey: "createdAt",
                                                                 header: "Date",
                                                                 cell: ({ row }) => (
-                                                                    <span className="text-gray-500 text-[10px] sm:text-xs">
+                                                                    <span className="text-black text-sm font-normal">
                                                                         {formatDateTime(row.original.createdAt)}
                                                                     </span>
                                                                 ),
@@ -397,19 +397,19 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                             if (replies.length === 0) return null;
                                                             return (
                                                                 <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 ml-8 mb-4 space-y-4">
-                                                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                                                                        <span className="w-1 h-1 bg-[#6bbd45] rounded-full"></span>
+                                                                    <p className="text-sm font-normal text-black uppercase tracking-widest flex items-center gap-2">
+                                                                        <span className="w-1.5 h-1.5 bg-[#6bbd45] rounded-full"></span>
                                                                         Replies ({replies.length})
                                                                     </p>
                                                                     <div className="space-y-3">
                                                                         {replies.map(reply => (
                                                                             <div key={reply.id} className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm transition-all hover:border-[#6bbd45]/20">
                                                                                 <div className="flex justify-between items-start mb-1">
-                                                                                    <span className="text-[10px] font-bold text-[#6bbd45] uppercase tracking-wider">
+                                                                                    <span className="text-sm font-normal text-[#6bbd45] uppercase tracking-wider">
                                                                                         {reply.createdBy ? `${reply.createdBy.firstName} ${reply.createdBy.lastName}` : (reply.firstName ? `${reply.firstName} ${reply.lastName}` : "User")}
                                                                                     </span>
                                                                                     <div className="flex items-center gap-2">
-                                                                                        <span className="text-[10px] text-gray-400">{formatDateTime(reply.createdAt)}</span>
+                                                                                        <span className="text-sm font-normal text-black">{formatDateTime(reply.createdAt)}</span>
                                                                                         <button
                                                                                             onClick={(e) => {
                                                                                                 e.stopPropagation();
@@ -423,7 +423,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                                                     </div>
                                                                                 </div>
                                                                                 <div
-                                                                                    className="text-xs text-gray-700 line-clamp-2"
+                                                                                    className="text-sm text-black font-normal line-clamp-2"
                                                                                     dangerouslySetInnerHTML={{ __html: reply.content }}
                                                                                 />
                                                                             </div>
@@ -441,7 +441,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                 </div>
                                             ) : (
                                                 <div className="p-8 text-center bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
-                                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest italic">No responses recorded</p>
+                                                    <p className="text-sm text-gray-400 font-bold uppercase tracking-widest italic">No responses recorded</p>
                                                 </div>
                                             )}
                                         </div>

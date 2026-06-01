@@ -169,9 +169,9 @@ const AddProjectNote = ({
                     onSubmit={handleSubmit}
                     className="flex-1 overflow-y-auto p-6 space-y-5"
                 >
-                    {/* Title */}
+                     {/* Title */}
                     <div>
-                        <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
+                        <label className="block text-sm font-black text-gray-500 uppercase tracking-widest mb-1.5">
                             Title <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -185,7 +185,7 @@ const AddProjectNote = ({
 
                     {/* Content */}
                     <div>
-                        <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
+                        <label className="block text-sm font-black text-gray-500 uppercase tracking-widest mb-1.5">
                             Content <span className="text-red-500">*</span>
                         </label>
                         <div className="border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-[#6bbd45]/40 transition-all">
@@ -201,7 +201,7 @@ const AddProjectNote = ({
                     {!isClient && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
+                                <label className="block text-sm font-black text-gray-500 uppercase tracking-widest mb-1.5">
                                     Tag User
                                 </label>
                                 <Select
@@ -225,7 +225,7 @@ const AddProjectNote = ({
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
+                                <label className="block text-sm font-black text-gray-500 uppercase tracking-widest mb-1.5">
                                     Priority
                                 </label>
                                 <Select
@@ -250,7 +250,7 @@ const AddProjectNote = ({
                     {/* Color and Flags */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
+                            <label className="block text-sm font-black text-gray-500 uppercase tracking-widest mb-1.5">
                                 Note Color
                             </label>
                             <div className="flex items-center gap-2 flex-wrap p-2 border border-gray-200 rounded-xl bg-gray-50/50">
@@ -270,7 +270,7 @@ const AddProjectNote = ({
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
+                            <label className="block text-sm font-black text-gray-500 uppercase tracking-widest mb-1.5">
                                 Flags
                             </label>
                             <div className="flex gap-2">
@@ -290,7 +290,7 @@ const AddProjectNote = ({
                                 <button
                                     type="button"
                                     onClick={addFlag}
-                                    className="px-3 py-2 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-all font-bold text-xs"
+                                    className="px-3 py-2 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-all font-bold text-sm"
                                 >
                                     ADD
                                 </button>
@@ -300,7 +300,7 @@ const AddProjectNote = ({
                                     {flags.map((flag) => (
                                         <span
                                             key={flag}
-                                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#6bbd45]/10 text-[#6bbd45] border border-[#6bbd45]/20 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#6bbd45]/10 text-[#6bbd45] border border-[#6bbd45]/20 rounded-full text-sm font-bold uppercase tracking-wider"
                                         >
                                             <Flag size={10} />
                                             {flag}
@@ -320,7 +320,7 @@ const AddProjectNote = ({
 
                     {/* Files */}
                     <div>
-                        <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5">
+                        <label className="block text-sm font-black text-gray-500 uppercase tracking-widest mb-1.5">
                             Attachments
                         </label>
                         <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />

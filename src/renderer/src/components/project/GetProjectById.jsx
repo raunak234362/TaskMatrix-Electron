@@ -1008,10 +1008,10 @@ const GetProjectById = ({ id, onClose }) => {
                   <button
                     onClick={() => setRfiView("list")}
                     className={`
-                      whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
+                      whitespace-nowrap px-6 py-1.5 border-2 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer
                       ${rfiView === "list"
-                        ? "bg-green-100 text-black"
-                        : "bg-gray-50 text-black hover:bg-green-50"
+                        ? "bg-green-50 text-black border-green-700/80"
+                        : "bg-white text-black border-black hover:bg-green-50"
                       }
                     `}
                   >
@@ -1021,10 +1021,10 @@ const GetProjectById = ({ id, onClose }) => {
                     <button
                       onClick={() => setRfiView("add")}
                       className={`
-                        whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
+                        whitespace-nowrap px-6 py-1.5 border-2 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer
                         ${rfiView === "add"
-                          ? "bg-green-100 text-black"
-                          : "bg-gray-50 text-black hover:bg-green-50"
+                          ? "bg-green-50 text-black border-green-700/80"
+                          : "bg-white text-black border-black hover:bg-green-50"
                         }
                     `}
                     >
@@ -1056,10 +1056,10 @@ const GetProjectById = ({ id, onClose }) => {
                   <button
                     onClick={() => setSubmittalView("list")}
                     className={`
-                      whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
+                      whitespace-nowrap px-6 py-1.5 border-2 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer
                       ${submittalView === "list"
-                        ? "bg-green-100 text-black"
-                        : "bg-gray-50 text-black hover:bg-green-50"
+                        ? "bg-green-50 text-black border-green-700/80"
+                        : "bg-white text-black border-black hover:bg-green-50"
                       }
                     `}
                   >
@@ -1069,10 +1069,10 @@ const GetProjectById = ({ id, onClose }) => {
                     <button
                       onClick={() => setSubmittalView("add")}
                       className={`
-                        whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
+                        whitespace-nowrap px-6 py-1.5 border-2 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer
                         ${submittalView === "add"
-                          ? "bg-green-100 text-black"
-                          : "bg-gray-50 text-black hover:bg-green-50"
+                          ? "bg-green-50 text-black border-green-700/80"
+                          : "bg-white text-black border-black hover:bg-green-50"
                         }
                     `}
                     >
@@ -1104,10 +1104,10 @@ const GetProjectById = ({ id, onClose }) => {
                   <button
                     onClick={() => setRfiView("list")}
                     className={`
-                      whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
+                      whitespace-nowrap px-6 py-1.5 border-2 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer
                       ${rfiView === "list"
-                        ? "bg-green-100 text-black"
-                        : "bg-gray-50 text-black hover:bg-green-50"
+                        ? "bg-green-50 text-black border-green-700/80"
+                        : "bg-white text-black border-black hover:bg-green-50"
                       }
                     `}
                   >
@@ -1117,10 +1117,10 @@ const GetProjectById = ({ id, onClose }) => {
                     <button
                       onClick={() => setRfiView("add")}
                       className={`
-                        whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
+                        whitespace-nowrap px-6 py-1.5 border-2 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer
                         ${rfiView === "add"
-                          ? "bg-green-100 text-black"
-                          : "bg-gray-50 text-black hover:bg-green-50"
+                          ? "bg-green-50 text-black border-green-700/80"
+                          : "bg-white text-black border-black hover:bg-green-50"
                         }
                     `}
                     >
@@ -1152,10 +1152,10 @@ const GetProjectById = ({ id, onClose }) => {
                   <button
                     onClick={() => setSubmittalView("list")}
                     className={`
-                      whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
+                      whitespace-nowrap px-6 py-1.5 border-2 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer
                       ${submittalView === "list"
-                        ? "bg-green-100 text-black"
-                        : "bg-gray-50 text-black hover:bg-green-50"
+                        ? "bg-green-50 text-black border-green-700/80"
+                        : "bg-white text-black border-black hover:bg-green-50"
                       }
                     `}
                   >
@@ -1165,10 +1165,10 @@ const GetProjectById = ({ id, onClose }) => {
                     <button
                       onClick={() => setSubmittalView("add")}
                       className={`
-                        whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
+                        whitespace-nowrap px-6 py-1.5 border-2 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer
                         ${submittalView === "add"
-                          ? "bg-green-100 text-black"
-                          : "bg-gray-50 text-black hover:bg-green-50"
+                          ? "bg-green-50 text-black border-green-700/80"
+                          : "bg-white text-black border-black hover:bg-green-50"
                         }
                     `}
                     >
@@ -1200,10 +1200,10 @@ const GetProjectById = ({ id, onClose }) => {
                   <button
                     onClick={() => setChangeOrderView("list")}
                     className={`
-                      whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
+                      whitespace-nowrap px-6 py-1.5 border-2 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer
                       ${changeOrderView === "list"
-                        ? "bg-green-100 text-black"
-                        : "bg-gray-50 text-black hover:bg-green-50"
+                        ? "bg-green-50 text-black border-green-700/80"
+                        : "bg-white text-black border-black hover:bg-green-50"
                       }
                     `}
                   >
@@ -1213,10 +1213,10 @@ const GetProjectById = ({ id, onClose }) => {
                     <button
                       onClick={() => setChangeOrderView("add")}
                       className={`
-                        whitespace-nowrap py-3 px-6 border border-black font-black text-xs uppercase tracking-widest rounded-lg transition-all
+                        whitespace-nowrap px-6 py-1.5 border-2 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer
                         ${changeOrderView === "add"
-                          ? "bg-green-100 text-black"
-                          : "bg-gray-50 text-black hover:bg-green-50"
+                          ? "bg-green-50 text-black border-green-700/80"
+                          : "bg-white text-black border-black hover:bg-green-50"
                         }
                     `}
                     >

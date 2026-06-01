@@ -55,7 +55,7 @@ const GetWBSLineItem = ({
       accessorKey: "description",
       header: "Description",
       cell: ({ row }) => (
-        <p className="text-sm font-semibold text-gray-700">
+        <p className="text-sm font-medium text-black">
           {row.original.name ||
             row.original.wbsTemplate?.name ||
             row.original.description ||
@@ -69,7 +69,7 @@ const GetWBSLineItem = ({
       accessorKey: "discipline",
       header: "Discipline",
       cell: ({ row }) => (
-        <span className="text-xs font-medium text-gray-500 uppercase">
+        <span className="text-xs font-medium text-black uppercase">
           {row.original.discipline || "—"}
         </span>
       ),
@@ -80,7 +80,7 @@ const GetWBSLineItem = ({
       accessorFn: (row) => row.qtyNo ?? row.totalQtyNo ?? 0,
       header: "Qty",
       cell: ({ row }) => (
-        <span className="text-sm  text-green-700 bg-green-50 px-2 py-1 rounded-md">
+        <span className="text-sm font-medium text-black">
           {row.getValue("qtyNo")}
         </span>
       ),
@@ -90,7 +90,7 @@ const GetWBSLineItem = ({
       accessorKey: "execHr",
       header: "Exec Hr",
       cell: ({ row }) => (
-        <span className="text-sm text-gray-700">
+        <span className="text-sm font-medium text-black">
           {formatDecimalHoursToTime((row.original.execHr ?? row.original.totalExecHr ?? 0) / 60)} hrs
         </span>
       ),
@@ -100,8 +100,8 @@ const GetWBSLineItem = ({
       accessorKey: "checkHr",
       header: "Check Hr",
       cell: ({ row }) => (
-        <span className="text-sm text-gray-700">
-          {formatDecimalHoursToTime((row.original.checkHr ?? row.original.totalCheckHr ?? 0) / 60)}  hrs
+        <span className="text-sm font-medium text-black">
+          {formatDecimalHoursToTime((row.original.checkHr ?? row.original.totalCheckHr ?? 0) / 60)} hrs
         </span>
       ),
       enableSorting: true,
@@ -131,13 +131,13 @@ const GetWBSLineItem = ({
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+      <div className="px-6 py-4  border-gray-100 flex justify-between items-center bg-gray-50/50">
         <div className="flex items-center gap-2">
-          <ListChecks className="w-5 h-5 text-green-600" />
-          <h3 className="text-lg  text-gray-700">WBS Line Items</h3>
-          <span className="px-2 py-0.5 bg-gray-200 text-gray-700 text-[10px]  rounded-full">
+          <h3 className="text-2xl font-bold text-black">WBS Line Items</h3>
+           <br /> 
+          <div className="px-2 py-0.5 bg-green-200 text-green-700 font-semibold text-[10px] uppercase rounded-md tracking-wider">
             {lineItems.length} Items
-          </span>
+          </div>
         </div>
         <Button
           onClick={onClose}

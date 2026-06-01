@@ -100,7 +100,7 @@ const UpdateCompletionPer = ({
       {/* Header */}
       <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-50/50">
         <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-          <CheckCircle className="w-6 h-6 text-blue-600" />
+          <CheckCircle className="w-6 h-6 text-green-600" />
           Update Completion Percentage
         </h3>
         <button
@@ -129,19 +129,10 @@ const UpdateCompletionPer = ({
           {/* Action Buttons */}
           <div className="flex justify-end gap-3 pt-6 mt-4 border-t border-gray-100">
             <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="px-6"
-            >
-              Cancel
-            </Button>
-            <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 flex items-center gap-2"
+              className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
             >
-              <Save className="w-4 h-4" />
               {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </div>

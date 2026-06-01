@@ -78,7 +78,7 @@ const AllMileStone = ({ project, onUpdate }) => {
         <div className="flex justify-between items-center mb-4">
           <Button
             onClick={handleOpenAddMileStone}
-            className="text-sm py-1 px-3 bg-green-600 text-white"
+            className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
           >
             + Add Milestone
           </Button>

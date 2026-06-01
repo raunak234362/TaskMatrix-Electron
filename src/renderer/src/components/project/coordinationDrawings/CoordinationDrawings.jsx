@@ -37,11 +37,11 @@ const CoordinationDrawings = ({ projectId }) => {
       enableColumnFilter: true,
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-black text-black uppercase tracking-tight text-sm">
+          <span className="font-semibold text-lg text-black">
             {row.original.title}
           </span>
           {row.original.stage && (
-            <span className="text-[10px] text-black font-black uppercase tracking-widest mt-1 opacity-60">
+            <span className="text-sm text-black font-normal mt-1 opacity-60">
               {row.original.stage}
             </span>
           )}
@@ -59,10 +59,10 @@ const CoordinationDrawings = ({ projectId }) => {
         { label: 'Approved', value: 'Approved' },
       ],
       cell: ({ row }) => (
-        <div className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border inline-block ${
+        <div className={`px-3 py-1 rounded-none text-sm font-normal border inline-block ${
           row.original.status === 'Approved' 
-            ? 'bg-green-50 text-black border-black' 
-            : 'bg-orange-50 text-black border-black'
+            ? 'bg-green-50 text-black border-green-200' 
+            : 'bg-orange-50 text-black border-orange-200'
         }`}>
           {row.original.status || 'In Review'}
         </div>
@@ -72,7 +72,7 @@ const CoordinationDrawings = ({ projectId }) => {
       header: 'Date Created',
       accessorKey: 'createdAt',
       cell: ({ row }) => (
-        <div className="text-[11px] text-black font-black uppercase tracking-widest">
+        <div className="text-sm text-black font-normal">
           {format(new Date(row.original.createdAt), 'dd MMM yyyy')}
         </div>
       ),
@@ -82,10 +82,10 @@ const CoordinationDrawings = ({ projectId }) => {
       accessorKey: 'createdBy.firstName',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-[10px] font-black text-black border border-black shadow-sm">
+          <div className="w-8 h-8 rounded-none bg-gray-100 flex items-center justify-center text-sm font-normal text-black border border-gray-200 shadow-sm">
             {row.original.createdBy?.firstName?.[0] || 'U'}
           </div>
-          <span className="text-[10px] font-black text-black uppercase tracking-widest">
+          <span className="text-sm font-normal text-black">
             {row.original.createdBy?.firstName} {row.original.createdBy?.lastName}
           </span>
         </div>
@@ -106,25 +106,22 @@ const CoordinationDrawings = ({ projectId }) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-black/5">
-            <Compass className="w-5 h-5 text-black" />
-          </div>
-          <h2 className="text-lg font-black text-black uppercase tracking-tight">Coordination Drawings</h2>
+         
+         
         </div>
         <button
           onClick={() => setIsAdding(true)}
-          className="flex items-center gap-2 px-6 py-2 border-2 border-[#6bbd45] text-[#6bbd45] hover:bg-[#6bbd45] hover:text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-sm"
+          className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
-          Add Drawing
+          + Add Drawing
         </button>
       </div>
 
       <div className="flex-1">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-lg border border-black shadow-sm">
-            <Loader2 className="w-10 h-10 animate-spin text-[#6bbd45] mb-4" />
-            <p className="text-sm text-black font-black uppercase tracking-widest">Loading Drawings...</p>
+          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-none border border-gray-200 shadow-sm">
+            <Loader2 className="w-10 h-10 animate-spin text-green-600 mb-4" />
+            <p className="text-sm text-black font-normal">Loading Drawings...</p>
           </div>
         ) : (
           <DataTable 

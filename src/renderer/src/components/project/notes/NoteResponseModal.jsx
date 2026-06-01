@@ -70,7 +70,7 @@ const NoteResponseModal = ({
                         onSubmit={handleSubmit(onSubmit)}
                     >
                         <div>
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
+                            <label className="block text-sm font-black text-gray-400 uppercase tracking-widest mb-2">
                                 Message *
                             </label>
                             <Controller
@@ -88,7 +88,7 @@ const NoteResponseModal = ({
                         </div>
 
                         <div>
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
+                            <label className="block text-sm font-black text-gray-400 uppercase tracking-widest mb-2">
                                 Attach Files
                             </label>
                             <Controller
