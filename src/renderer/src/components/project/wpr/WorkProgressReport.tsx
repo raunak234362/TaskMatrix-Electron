@@ -42,12 +42,15 @@ const WorkProgressReport = ({
   onUpdate
 }: any) => {
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
-  const canEdit = !["client", "staff", "estimator"].includes(userRole);
+  const canEdit = false; // WPR is now fully read-only per user request
 
   // WPR Header Info state
   const [reportDate, setReportDate] = useState(new Date().toISOString().split("T")[0]);
   const [weekEnding, setWeekEnding] = useState("");
   const [isExportingPDF, setIsExportingPDF] = useState(false);
+  const [formNo, setFormNo] = useState("WBT/PMO/WPR-001");
+  const [version, setVersion] = useState("1.0");
+  const [effDate, setEffDate] = useState("05/09/2024");
   const [wbtCirculatedTo, setWbtCirculatedTo] = useState("");
   const [fabCirculatedTo, setFabCirculatedTo] = useState("");
   const [software, setSoftware] = useState(project?.tools || "SDS2");
@@ -245,6 +248,30 @@ const WorkProgressReport = ({
       }
     }
   };
+
+  // Sync Form No, Version, and Eff Date based on selected week
+  useEffect(() => {
+    let weekNum = 1;
+    let targetEnd = new Date();
+
+    if (selectedWeek !== "All") {
+      const match = selectedWeek.match(/Week (\d+)/i);
+      if (match) weekNum = parseInt(match[1], 10);
+      const wk = projectWeeks.find(w => w.label === selectedWeek);
+      if (wk) targetEnd = wk.end;
+    } else if (projectWeeks.length > 0) {
+      const lastWeek = projectWeeks[projectWeeks.length - 1];
+      const match = lastWeek.label.match(/Week (\d+)/i);
+      if (match) weekNum = parseInt(match[1], 10);
+      targetEnd = getSunday(new Date());
+    } else {
+      targetEnd = getSunday(new Date());
+    }
+
+    setVersion(`${weekNum}.0`);
+    setFormNo(`WBT/PMO/WPR-${String(weekNum).padStart(3, "0")}`);
+    setEffDate(targetEnd.toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" }));
+  }, [selectedWeek, projectWeeks]);
 
   // Sync RFIs
   useEffect(() => {
@@ -943,18 +970,18 @@ const WorkProgressReport = ({
       let row = 0;
 
       // Row 0: Title row
-      pushRow(["WHITEBOARD TECHNOLOGIES", "", "", `Week Ending ${weekEnding}`, "", "", "FORM NO", "WBT/PMO/WPR-001"]);
+      pushRow(["WHITEBOARD TECHNOLOGIES", "", "", `Week Ending ${weekEnding}`, "", "", "FORM NO", formNo]);
       merge(row, 0, row, 2); // Logo/company across 3 cols
       merge(row, 3, row, 5); // Title across 3 cols
       row++;
 
       // Row 1: Version
-      pushRow(["", "", "", "", "", "", "VERSION", "1.0"]);
+      pushRow(["", "", "", "", "", "", "VERSION", version]);
       merge(row, 0, row, 5);
       row++;
 
       // Row 2: Eff Date
-      pushRow(["", "", "", "", "", "", "EFF DATE", "05/09/2024"]);
+      pushRow(["", "", "", "", "", "", "EFF DATE", effDate]);
       merge(row, 0, row, 5);
       row++;
 
@@ -1189,36 +1216,36 @@ const WorkProgressReport = ({
             { content: "", rowSpan: 3, colSpan: 2, styles: { minCellWidth: 100 } }, 
             { content: `WEEK ENDING ${weekEnding.toUpperCase()}`, rowSpan: 3, colSpan: 4, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fontSize: 12, fillColor: [230, 240, 255] } },
             { content: "FORM NO", styles: { fillColor: [255, 250, 230], fontSize: 6, fontStyle: 'bold' } }, 
-            { content: "WBT/PMO/WPR-001", styles: { fontSize: 6 } }
+            { content: formNo, styles: { fontSize: 6 } }
           ],
           [
             { content: "VERSION", styles: { fillColor: [255, 250, 230], fontSize: 6, fontStyle: 'bold' } }, 
-            { content: "1.0", styles: { fontSize: 6 } }
+            { content: version, styles: { fontSize: 6 } }
           ],
           [
             { content: "EFF DATE", styles: { fillColor: [255, 250, 230], fontSize: 6, fontStyle: 'bold' } }, 
-            { content: "05/09/2024", styles: { fontSize: 6 } }
+            { content: effDate, styles: { fontSize: 6 } }
           ],
           [
-            { content: "CUSTOMER", colSpan: 2, styles: { fontStyle: 'bold', fillColor: [187, 247, 208], halign: 'center', valign: 'middle' } },
+            { content: "CUSTOMER", colSpan: 2, styles: { fontStyle: 'bold', fillColor: "#bbf7d0", halign: 'center', valign: 'middle' } },
             { content: project?.fabricator?.fabName || "—", colSpan: 6, styles: { valign: 'middle' } }
           ],
           [
-            { content: "PROJECT NAME :", colSpan: 2, styles: { fontStyle: 'bold', fillColor: [187, 247, 208], halign: 'center', valign: 'middle' } },
+            { content: "PROJECT NAME :", colSpan: 2, styles: { fontStyle: 'bold', fillColor: "#bbf7d0", halign: 'center', valign: 'middle' } },
             { content: project?.projectName || project?.name || "—", colSpan: 2, styles: { valign: 'middle' } },
-            { content: "FABRICATOR PROJECT MANAGER", colSpan: 2, styles: { fontStyle: 'bold', fillColor: [187, 247, 208], halign: 'center', valign: 'middle' } },
+            { content: "FABRICATOR PROJECT MANAGER", colSpan: 2, styles: { fontStyle: 'bold', fillColor: "#bbf7d0", halign: 'center', valign: 'middle' } },
             { content: fabPMNames || "—", colSpan: 2, styles: { valign: 'middle' } }
           ],
           [
-            { content: "WBT PROJECT MANAGER", colSpan: 2, styles: { fontStyle: 'bold', fillColor: [187, 247, 208], halign: 'center', valign: 'middle' } },
+            { content: "WBT PROJECT MANAGER", colSpan: 2, styles: { fontStyle: 'bold', fillColor: "#bbf7d0", halign: 'center', valign: 'middle' } },
             { content: wbtPM, colSpan: 2, styles: { valign: 'middle' } },
-            { content: "REPORT CIRCULATED TO", colSpan: 2, styles: { fontStyle: 'bold', fillColor: [187, 247, 208], halign: 'center', valign: 'middle' } },
+            { content: "REPORT CIRCULATED TO", colSpan: 2, styles: { fontStyle: 'bold', fillColor: "#bbf7d0", halign: 'center', valign: 'middle' } },
             { content: fabCirculatedTo || "—", colSpan: 2, styles: { valign: 'middle' } }
           ],
           [
-            { content: "REPORT CIRCULATED TO", colSpan: 2, styles: { fontStyle: 'bold', fillColor: [187, 247, 208], halign: 'center', valign: 'middle' } },
+            { content: "REPORT CIRCULATED TO", colSpan: 2, styles: { fontStyle: 'bold', fillColor: "#bbf7d0", halign: 'center', valign: 'middle' } },
             { content: wbtCirculatedTo || "—", colSpan: 2, styles: { valign: 'middle' } },
-            { content: "SOFTWARE", colSpan: 2, styles: { fontStyle: 'bold', fillColor: [187, 247, 208], halign: 'center', valign: 'middle' } },
+            { content: "SOFTWARE", colSpan: 2, styles: { fontStyle: 'bold', fillColor: "#bbf7d0", halign: 'center', valign: 'middle' } },
             { content: software || "SDS2", colSpan: 2, styles: { valign: 'middle' } }
           ],
           [
@@ -1382,6 +1409,12 @@ const WorkProgressReport = ({
                 setFabCirculatedTo={setFabCirculatedTo}
                 software={software}
                 setSoftware={setSoftware}
+                formNo={formNo}
+                setFormNo={setFormNo}
+                version={version}
+                setVersion={setVersion}
+                effDate={effDate}
+                setEffDate={setEffDate}
               />
             </div>
             <div id="section-schedule">

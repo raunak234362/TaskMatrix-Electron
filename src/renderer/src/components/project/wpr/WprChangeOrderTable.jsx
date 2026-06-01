@@ -44,7 +44,7 @@ const WprChangeOrderTable = ({
           </thead>
           <tbody className="divide-y divide-black/10 font-bold text-black">
             {coRows.map((row) => (
-              <tr key={row.id} className="hover:bg-slate-50 transition-all">
+              <tr key={row.id} className="hover:bg-slate-50 transition-colors">
                 {/* CO number name */}
                 <td
                   onClick={() => onCellClick("co", row.id, "changeOrder", row.changeOrder)}

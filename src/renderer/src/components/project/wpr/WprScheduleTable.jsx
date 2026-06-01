@@ -13,6 +13,7 @@ const WprScheduleTable = ({
   onKeyDown,
   onAddRow
 }) => {
+
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center">
@@ -48,7 +49,7 @@ const WprScheduleTable = ({
             {scheduleRows.map((row) => (
               <tr
                 key={row.id}
-                className={`border-b border-black/10 transition-all ${row._type === "milestone"
+                className={`border-b border-black/10 transition-colors ${row._type === "milestone"
                   ? "bg-[#f0f7ed] hover:bg-[#e6f3e2]"
                   : "bg-white hover:bg-slate-50"
                   }`}

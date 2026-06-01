@@ -13,6 +13,7 @@ const WprRfiTable = ({
   onKeyDown,
   onAddRow
 }) => {
+
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center">
@@ -45,11 +46,11 @@ const WprRfiTable = ({
           </thead>
           <tbody className="divide-y divide-black/10">
             {rfis.map((row) => (
-              <tr key={row.id} className="hover:bg-slate-50 transition-all">
+              <tr key={row.id} className="hover:bg-slate-50 transition-colors">
                 {/* RFI No. */}
                 <td
                   onClick={() => onCellClick("rfi", row.id, "rfiNo", row.rfiNo)}
-                  className="p-3 font-bold border-r border-black/10 cursor-pointer hover:bg-slate-100/50 text-black"
+                  className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
                 >
                   {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "rfiNo" ? (
                     <input

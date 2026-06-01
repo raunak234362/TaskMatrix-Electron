@@ -28,16 +28,7 @@ const WprToolbar = ({
       </div>
       
       <div className="flex flex-wrap items-center gap-2">
-        {canEdit && (
-          <button
-            onClick={onSaveChanges}
-            disabled={saving}
-            className="flex items-center gap-2 px-5 py-2 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm transition-all cursor-pointer"
-          >
-            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            Save Changes
-          </button>
-        )}
+        
         <button
           onClick={onExportPDF}
           disabled={exportingPDF}
@@ -46,13 +37,7 @@ const WprToolbar = ({
           {exportingPDF ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
           {exportingPDF ? "Exporting..." : "PDF Export"}
         </button>
-        <button
-          onClick={onPrint}
-          className="flex items-center gap-2 px-5 py-2 bg-slate-50 text-black border-2 border-slate-700/80 hover:bg-slate-100 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm transition-all cursor-pointer"
-        >
-          <Printer className="w-3.5 h-3.5" />
-          Print Report
-        </button>
+       
       </div>
     </div>
   );

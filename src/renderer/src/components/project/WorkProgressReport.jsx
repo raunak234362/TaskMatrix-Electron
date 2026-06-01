@@ -1029,23 +1029,6 @@ const WorkProgressReport = ({
           )}
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          {canEdit && (
-            <button
-              onClick={handleSaveChanges}
-              disabled={saving}
-              className="flex items-center gap-2 px-5 py-2 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm transition-all cursor-pointer"
-            >
-              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-              Save Changes
-            </button>
-          )}
-          <button
-            onClick={exportToExcel}
-            className="flex items-center gap-2 px-5 py-2 bg-blue-50 text-black border-2 border-blue-700/80 hover:bg-blue-100 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm transition-all cursor-pointer"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5" />
-            Excel Export
-          </button>
           <button
             onClick={exportToPDF}
             className="flex items-center gap-2 px-5 py-2 bg-red-50 text-black border-2 border-red-700/80 hover:bg-red-100 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm transition-all cursor-pointer"
