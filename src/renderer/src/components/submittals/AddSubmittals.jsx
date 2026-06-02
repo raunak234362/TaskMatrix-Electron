@@ -190,7 +190,8 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
     if (submittalData && submittalData.length > 0) {
       let maxNum = 0;
       submittalData.forEach((sub) => {
-        const match = sub.subject?.match(/TR#(\d+)/i);
+        const regex = isCDMode ? /DR#(\d+)/i : /TR#(\d+)/i;
+        const match = sub.subject?.match(regex);
         if (match) {
           const num = parseInt(match[1], 10);
           if (num > maxNum) maxNum = num;
@@ -199,12 +200,15 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
       if (maxNum > 0) {
         nextNum = maxNum + 1;
       } else {
-        nextNum = submittalData.length + 1;
+        const regex = isCDMode ? /DR#\d+/i : /TR#\d+/i;
+        nextNum = submittalData.filter(r => r.subject?.match(regex)).length + 1;
       }
     }
-    const prefix = `TR#${String(nextNum).padStart(3, "0")} - `;
+    const prefix = isCDMode
+      ? `DR#${String(nextNum).padStart(3, "0")} - `
+      : `TR#${String(nextNum).padStart(3, "0")} - `;
     setValue("subject", prefix);
-  }, [submittalData, setValue, initialData]);
+  }, [submittalData, setValue, initialData, isCDMode]);
 
   const [loading, setLoading] = useState(false);
 

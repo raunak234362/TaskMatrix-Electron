@@ -161,25 +161,54 @@ const AddRFI = ({
   }, [register]);
 
   useEffect(() => {
-    let nextNum = 1;
+    let nextVal = 1;
     if (rfiData && rfiData.length > 0) {
       let maxNum = 0;
       rfiData.forEach((rfi) => {
-        const match = rfi.subject?.match(/RFI#(\d+)/i);
-        if (match) {
-          const num = parseInt(match[1], 10);
-          if (num > maxNum) maxNum = num;
+        if (isCDMode) {
+          const match = rfi.subject?.match(/RFI#([A-Za-z]+)/);
+          if (match) {
+            const str = match[1].toUpperCase();
+            let num = 0;
+            for (let i = 0; i < str.length; i++) {
+              num = num * 26 + (str.charCodeAt(i) - 64);
+            }
+            if (num > maxNum) maxNum = num;
+          }
+        } else {
+          const match = rfi.subject?.match(/RFI#(\d+)/i);
+          if (match) {
+            const num = parseInt(match[1], 10);
+            if (num > maxNum) maxNum = num;
+          }
         }
       });
       if (maxNum > 0) {
-        nextNum = maxNum + 1;
+        nextVal = maxNum + 1;
       } else {
-        nextNum = rfiData.length + 1;
+        if (isCDMode) {
+          nextVal = rfiData.filter(r => r.subject?.match(/RFI#[A-Za-z]+/)).length + 1;
+        } else {
+          nextVal = rfiData.filter(r => r.subject?.match(/RFI#\d+/)).length + 1;
+        }
       }
     }
-    const prefix = `RFI#${String(nextNum).padStart(3, "0")} - `;
+    
+    let prefix = "";
+    if (isCDMode) {
+      let temp = nextVal;
+      let alphaStr = "";
+      while (temp > 0) {
+        let rem = (temp - 1) % 26;
+        alphaStr = String.fromCharCode(65 + rem) + alphaStr;
+        temp = Math.floor((temp - 1) / 26);
+      }
+      prefix = `RFI#${alphaStr} - `;
+    } else {
+      prefix = `RFI#${String(nextVal).padStart(3, "0")} - `;
+    }
     setValue("subject", prefix);
-  }, [rfiData, setValue]);
+  }, [rfiData, setValue, isCDMode]);
 
   return (
     <div className="w-full mx-auto bg-white p-2 rounded-xl shadow">
