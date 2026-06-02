@@ -15,7 +15,7 @@ const AddCOContainer = ({ project }) => {
           onSuccess={(co) => setCreatedCO(co)} 
         />
       ) : (
-        <CoTable coId={createdCO.id || createdCO._id} />
+        <CoTable coId={createdCO.id || createdCO._id} onSuccess={() => setCreatedCO(null)} />
       )}
     </div>
   );

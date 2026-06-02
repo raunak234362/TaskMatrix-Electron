@@ -12,7 +12,7 @@ import Service from "../../api/Service";
 import RichTextEditor from "../fields/RichTextEditor";
 import { truncateWords } from "../../utils/stringUtils";
 
-const AddSubmittal = ({ project, initialData, onSuccess }) => {
+const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) => {
   const userDetail = useSelector((state) => state.userInfo.userDetail);
   const fabricators = useSelector(
     (state) => state.fabricatorInfo.fabricatorData,
@@ -183,6 +183,28 @@ const AddSubmittal = ({ project, initialData, onSuccess }) => {
   useEffect(() => {
     register("isConnectionDesign");
   }, [register]);
+
+  useEffect(() => {
+    if (initialData?.subject) return; // Do not override if editing
+    let nextNum = 1;
+    if (submittalData && submittalData.length > 0) {
+      let maxNum = 0;
+      submittalData.forEach((sub) => {
+        const match = sub.subject?.match(/TR#(\d+)/i);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          if (num > maxNum) maxNum = num;
+        }
+      });
+      if (maxNum > 0) {
+        nextNum = maxNum + 1;
+      } else {
+        nextNum = submittalData.length + 1;
+      }
+    }
+    const prefix = `TR#${String(nextNum).padStart(3, "0")} - `;
+    setValue("subject", prefix);
+  }, [submittalData, setValue, initialData]);
 
   const [loading, setLoading] = useState(false);
 

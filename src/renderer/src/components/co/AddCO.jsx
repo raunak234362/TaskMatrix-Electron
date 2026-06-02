@@ -12,7 +12,7 @@ import Select from "react-select";
 import RichTextEditor from "../fields/RichTextEditor";
 
 
-const AddCO = ({ project, onSuccess }) => {
+const AddCO = ({ project, onSuccess, changeOrderData }) => {
   const userDetail = useSelector((state) => state.userInfo.userDetail);
   const staff = useSelector((state) => state.userInfo.staffData);
   const fabricators = useSelector(
@@ -30,21 +30,27 @@ const AddCO = ({ project, onSuccess }) => {
   );
 
   React.useEffect(() => {
-    if (project && selectedFabricator) {
-      const year = new Date().getFullYear();
-      const initials = selectedFabricator.fabName
-        ? selectedFabricator.fabName
-          .split(" ")
-          .map((n) => n[0])
-          .join("")
-          .toUpperCase()
-        : "";
-      const nextNumber = (project.changeOrders?.length || 0) + 1;
-      const formattedNumber = nextNumber.toString().padStart(2, "0");
-      const prefilledCO = `CO#-${year}-${initials}-${formattedNumber}`;
-      setValue("changeOrderNumber", prefilledCO);
+    let maxNum = 0;
+    const coList = changeOrderData || project?.changeOrders || [];
+    
+    if (coList && coList.length > 0) {
+      coList.forEach((co) => {
+        const match = co.changeOrderNumber?.match(/CO#(\d+)/i);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          if (num > maxNum) maxNum = num;
+        }
+      });
     }
-  }, [project, selectedFabricator, setValue]);
+    
+    const nextNum = maxNum > 0 ? maxNum + 1 : (coList.length || 0) + 1;
+    const prefilledCO = `CO#${String(nextNum).padStart(3, "0")} `;
+    setValue("changeOrderNumber", prefilledCO);
+
+    if (["admin", "deputy_manager", "operation_executive"].includes(userDetail?.role?.toLowerCase())) {
+      setValue("isAproovedByAdmin", true);
+    }
+  }, [project, changeOrderData, setValue, userDetail]);
 
   const pocOptions =
     selectedFabricator?.pointOfContact?.map((p) => ({
@@ -147,19 +153,19 @@ const AddCO = ({ project, onSuccess }) => {
             label="Remarks *"
             {...register("remarks", { required: true })}
           />
-          <Input label="Reason" {...register("reason")} />
-          <Input label="Reference Link" {...register("link")} />
-          <div className="flex items-center gap-2 pt-6">
-            <input
-              type="checkbox"
-              id="isAproovedByAdmin"
-              {...register("isAproovedByAdmin")}
-              className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-            />
-            <label htmlFor="isAproovedByAdmin" className="text-sm font-medium text-gray-700">
-              Approved By Admin
-            </label>
-          </div>
+          {["admin", "deputy_manager", "operation_executive"].includes(userDetail?.role?.toLowerCase()) && (
+            <div className="flex items-center gap-2 pt-6">
+              <input
+                type="checkbox"
+                id="isAproovedByAdmin"
+                {...register("isAproovedByAdmin")}
+                className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+              />
+              <label htmlFor="isAproovedByAdmin" className="text-sm font-medium text-gray-700">
+                Approved By Admin
+              </label>
+            </div>
+          )}
         </div>
 
         <div className="space-y-1">
@@ -174,7 +180,7 @@ const AddCO = ({ project, onSuccess }) => {
         </div>
 
         <SectionTitle title="Files" />
-        <MultipleFileUpload onFilesChange={setFiles} />
+        <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
 
         <div className="flex justify-center w-full pt-4">
           <Button

@@ -93,7 +93,9 @@ const GetProjectById = ({ id, onClose }) => {
   const [coordinationDrawings, setCoordinationDrawings] = useState([]); // Added coordinationDrawings state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(() => {
+    return sessionStorage.getItem("userRole")?.toLowerCase() === "human_resource" ? "analytics" : "overview";
+  });
 
   const [expandedGroups, setExpandedGroups] = useState({
     "Training and Practice": false,
@@ -481,6 +483,9 @@ const GetProjectById = ({ id, onClose }) => {
             ]
               .filter(
                 (tab) => {
+                  if (userRole === "human_resource") {
+                    return ["analytics", "teamAnalytics"].includes(tab.key);
+                  }
                   if (userRole === "staff" && !isAssist && ["wbs", "changeOrder", "milestones", "analytics", "teamAnalytics", "CDrfi", "CDsubmittals"].includes(tab.key)) {
                     return false;
                   }
@@ -1047,6 +1052,7 @@ const GetProjectById = ({ id, onClose }) => {
               ) : (
                 <AddRFI
                   project={project}
+                  rfiData={rfiData}
                   onSuccess={() => {
                     fetchProject();
                     setRfiView("list");
@@ -1095,6 +1101,7 @@ const GetProjectById = ({ id, onClose }) => {
               ) : (
                 <AddSubmittal
                   project={project}
+                  submittalData={submittalData}
                   onSuccess={() => {
                     fetchProject();
                     setSubmittalView("list");
@@ -1143,6 +1150,7 @@ const GetProjectById = ({ id, onClose }) => {
               ) : (
                 <AddRFI
                   project={project}
+                  rfiData={rfiData}
                   onSuccess={() => {
                     fetchProject();
                     setRfiView("list");
@@ -1191,6 +1199,7 @@ const GetProjectById = ({ id, onClose }) => {
               ) : (
                 <AddSubmittal
                   project={project}
+                  submittalData={submittalData}
                   onSuccess={() => {
                     fetchProject();
                     setSubmittalView("list");
@@ -1237,7 +1246,7 @@ const GetProjectById = ({ id, onClose }) => {
               {changeOrderView === "list" ? (
                 <AllCO changeOrderData={changeOrderData} />
               ) : changeOrderView === "add" ? (
-                <AddCO project={project} onSuccess={handleCoSuccess} />
+                <AddCO project={project} onSuccess={handleCoSuccess} changeOrderData={changeOrderData} />
               ) : (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
@@ -1251,7 +1260,7 @@ const GetProjectById = ({ id, onClose }) => {
                       &larr; Back to List
                     </button>
                   </div>
-                  {selectedCoId && <CoTable coId={selectedCoId} />}
+                  {selectedCoId && <CoTable coId={selectedCoId} onSuccess={() => setChangeOrderView("add")} />}
                 </div>
               )}
             </div>

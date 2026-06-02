@@ -13,6 +13,7 @@ import RichTextEditor from "../fields/RichTextEditor";
 
 const AddRFI = ({
   project,
+  rfiData = [],
   onSuccess,
 }) => {
   console.log(project);
@@ -158,6 +159,27 @@ const AddRFI = ({
   useEffect(() => {
     register("isConnectionDesign");
   }, [register]);
+
+  useEffect(() => {
+    let nextNum = 1;
+    if (rfiData && rfiData.length > 0) {
+      let maxNum = 0;
+      rfiData.forEach((rfi) => {
+        const match = rfi.subject?.match(/RFI#(\d+)/i);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          if (num > maxNum) maxNum = num;
+        }
+      });
+      if (maxNum > 0) {
+        nextNum = maxNum + 1;
+      } else {
+        nextNum = rfiData.length + 1;
+      }
+    }
+    const prefix = `RFI#${String(nextNum).padStart(3, "0")} - `;
+    setValue("subject", prefix);
+  }, [rfiData, setValue]);
 
   return (
     <div className="w-full mx-auto bg-white p-2 rounded-xl shadow">

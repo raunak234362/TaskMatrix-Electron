@@ -117,7 +117,7 @@ export const navItems = [
             'client',
             'project_manager',
             'user',
-            'human-resource'
+            'human_resource'
         ]
     },
     {
@@ -175,7 +175,7 @@ export const navItems = [
             'project_manager',
             'user',
             'system-admin',
-            'human-resource'
+            'human_resource'
         ]
     },
     {

@@ -6,7 +6,7 @@ import Service from "../../api/Service";
 import { toast } from "react-toastify";
 
 
-const CoTable = ({ coId }) => {
+const CoTable = ({ coId, onSuccess }) => {
   const [loading, setLoading] = useState(true);
   const { control, handleSubmit, watch } = useForm({
     defaultValues: {
@@ -71,6 +71,9 @@ const CoTable = ({ coId }) => {
       await Service.addCOTable(formattedRows, coId);
       toast.success("Table saved successfully!");
       fetchTableRows();
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (err) {
       toast.error("Failed to save table data");
     }

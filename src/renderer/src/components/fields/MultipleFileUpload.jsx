@@ -7,22 +7,19 @@ import { Upload, X, FileText, Paperclip } from "lucide-react";
  */
 function MultipleFileUpload({
   onFilesChange,
-  initialFiles = [],
+  initialFiles,
 }) {
-  const [files, setFiles] = useState(initialFiles);
+  const [files, setFiles] = useState(initialFiles || []);
   const [isDraggingGlobal, setIsDraggingGlobal] = useState(false);
   const dragCounter = useRef(0);
   const fileInputRef = useRef(null);
+  const initialFilesRef = useRef(initialFiles);
 
   useEffect(() => {
-    // Only update if initialFiles is explicitly different from current state
-    // and skip if it's the same array reference to avoid unnecessary resets
-    if (initialFiles && initialFiles !== files && initialFiles.length !== files.length) {
+    // Only update if initialFiles is explicitly provided and has changed
+    if (initialFiles !== undefined && initialFiles !== initialFilesRef.current) {
       setFiles(initialFiles);
-    } else if (initialFiles && initialFiles.length === 0 && files.length > 0) {
-      // Check if this was a manual reset (e.g. form submission)
-      // If the parent passes an empty array, we should clear
-      setFiles([]);
+      initialFilesRef.current = initialFiles;
     }
   }, [initialFiles]);
 

@@ -301,7 +301,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
           {/* Section 3: Files */}
           <section className="space-y-4">
             <SectionTitle title="Add Files (Optional)" />
-            <MultipleFileUpload onFilesChange={setFiles} />
+            <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
           </section>
 
           {/* Footer Actions */}
