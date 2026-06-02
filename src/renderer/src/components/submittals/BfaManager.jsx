@@ -280,10 +280,10 @@ const BfaManager = ({ submittalId }) => {
             <div className="mb-2">
               <h4 className="text-sm text-gray-700">BFA Status</h4>
               <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tight border mt-1 ${bfa.status === "APPROVED"
-                  ? "bg-green-100 text-green-700 border-green-200"
-                  : bfa.status === "REJECTED"
-                    ? "bg-red-100 text-red-700 border-red-200"
-                    : "bg-yellow-100 text-yellow-700 border-yellow-200"
+                ? "bg-green-100 text-green-700 border-green-200"
+                : bfa.status === "REJECTED"
+                  ? "bg-red-100 text-red-700 border-red-200"
+                  : "bg-yellow-100 text-yellow-700 border-yellow-200"
                 }`}>
                 {bfa.status || "PENDING"}
               </span>
@@ -366,7 +366,7 @@ const BfaManager = ({ submittalId }) => {
       {/* CREATE BFA MODAL */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[210] animate-in fade-in duration-200">
-          <div className="bg-white p-6 rounded-xl w-full max-w-lg shadow-lg relative space-y-4 border border-gray-100">
+          <div className="bg-white h-[80vh] overflow-y-auto p-6 rounded-xl w-full max-w-2xl shadow-lg relative space-y-4 border border-gray-100">
             <h2 className="text-xl font-bold text-green-700">
               BFA
             </h2>
@@ -390,7 +390,7 @@ const BfaManager = ({ submittalId }) => {
                 className="w-full border border-gray-200 bg-white rounded-md p-2 mt-1 focus:outline-none focus:ring-1 focus:ring-[#6bbd45] text-sm"
               >
                 <option value="partial">Partial</option>
-                <option value="completed">Completed</option>
+                <option value="complete">Complete</option>
               </select>
             </div>
 
@@ -436,7 +436,7 @@ const BfaManager = ({ submittalId }) => {
                 className="w-full border border-gray-200 bg-white rounded-md p-2 mt-1 focus:outline-none focus:ring-1 focus:ring-[#6bbd45] text-sm"
               >
                 <option value="partial">Partial</option>
-                <option value="completed">Completed</option>
+                <option value="complete">Complete</option>
               </select>
             </div>
 
