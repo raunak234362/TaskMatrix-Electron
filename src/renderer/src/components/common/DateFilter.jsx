@@ -23,30 +23,14 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
 
-    // ✅ Auto close when all required fields are filled
+    const [localDateFilter, setLocalDateFilter] = useState(dateFilter);
+
+    // Sync local state when dropdown is opened
     useEffect(() => {
-        const { type } = dateFilter;
-        if (
-            (type === "month" &&
-                dateFilter.year !== undefined &&
-                dateFilter.month !== undefined) ||
-            (type === "year" && dateFilter.year !== undefined) ||
-            (type === "week" && dateFilter.weekStart && dateFilter.weekEnd) ||
-            (type === "range" &&
-                dateFilter.startMonth !== undefined &&
-                dateFilter.endMonth !== undefined &&
-                dateFilter.year !== undefined) ||
-            (type === "dateRange" && dateFilter.startDate && dateFilter.endDate) ||
-            (type === "specificDate" && dateFilter.date) ||
-            type === "all"
-        ) {
-            // Small timeout or conditional check if user might want to change multiple things
-            // but the request specifically says "Auto close when all required fields are filled"
-            // however, we should be careful not to close too prematurely if they are still clicking.
-            // But I will follow the user's logic provided in the prompt.
-            setShowFilterDropdown(false);
+        if (showFilterDropdown) {
+            setLocalDateFilter(dateFilter);
         }
-    }, [dateFilter]);
+    }, [showFilterDropdown]);
 
     return (
         <div className="bg-white rounded-lg shadow border border-gray-200 z-99">
@@ -78,6 +62,8 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                         <div
                             className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-100"
                             onClick={(e) => e.stopPropagation()} // ✅ prevent auto-close on inside click
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onTouchStart={(e) => e.stopPropagation()}
                         >
                             <div className="p-3">
                                 {/* Filter Type */}
@@ -87,9 +73,9 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                     </label>
                                     <select
                                         className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                        value={dateFilter?.type}
+                                        value={localDateFilter?.type}
                                         onChange={(e) =>
-                                            setDateFilter({ ...dateFilter, type: e.target.value })
+                                            setLocalDateFilter({ ...localDateFilter, type: e.target.value })
                                         }
                                     >
                                         <option value="all">All Time</option>
@@ -102,19 +88,19 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                     </select>
                                 </div>
 
-                                {(dateFilter?.type === "month" ||
-                                    dateFilter?.type === "year" ||
-                                    dateFilter?.type === "range") && (
+                                {(localDateFilter?.type === "month" ||
+                                    localDateFilter?.type === "year" ||
+                                    localDateFilter?.type === "range") && (
                                         <div className="mb-3">
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Year
                                             </label>
                                             <select
                                                 className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                                value={dateFilter.year || ""}
+                                                value={localDateFilter.year || ""}
                                                 onChange={(e) =>
-                                                    setDateFilter({
-                                                        ...dateFilter,
+                                                    setLocalDateFilter({
+                                                        ...localDateFilter,
                                                         year: Number(e.target.value),
                                                     })
                                                 }
@@ -129,7 +115,7 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                         </div>
                                     )}
 
-                                {dateFilter?.type === "week" && (
+                                {localDateFilter?.type === "week" && (
                                     <div className="mb-3">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Week Starting
@@ -138,8 +124,8 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                             type="date"
                                             className="w-full p-2 border border-gray-300 rounded-md text-sm"
                                             value={
-                                                dateFilter.weekStart
-                                                    ? new Date(dateFilter.weekStart)
+                                                localDateFilter.weekStart
+                                                    ? new Date(localDateFilter.weekStart)
                                                         .toISOString()
                                                         .split("T")[0]
                                                     : ""
@@ -151,8 +137,8 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                                 const weekStart = new Date(date.setDate(diff));
                                                 const weekEnd = new Date(weekStart);
                                                 weekEnd.setDate(weekEnd.getDate() + 6);
-                                                setDateFilter({
-                                                    ...dateFilter,
+                                                setLocalDateFilter({
+                                                    ...localDateFilter,
                                                     weekStart: weekStart.getTime(),
                                                     weekEnd: weekEnd.getTime(),
                                                 });
@@ -161,17 +147,17 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                     </div>
                                 )}
 
-                                {dateFilter?.type === "month" && (
+                                {localDateFilter?.type === "month" && (
                                     <div className="mb-3">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Month
                                         </label>
                                         <select
                                             className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                            value={dateFilter.month || ""}
+                                            value={localDateFilter.month || ""}
                                             onChange={(e) =>
-                                                setDateFilter({
-                                                    ...dateFilter,
+                                                setLocalDateFilter({
+                                                    ...localDateFilter,
                                                     month: Number(e.target.value),
                                                 })
                                             }
@@ -186,7 +172,7 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                     </div>
                                 )}
 
-                                {dateFilter?.type === "range" && (
+                                {localDateFilter?.type === "range" && (
                                     <>
                                         <div className="mb-3">
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -194,10 +180,10 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                             </label>
                                             <select
                                                 className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                                value={dateFilter.startMonth || ""}
+                                                value={localDateFilter.startMonth || ""}
                                                 onChange={(e) =>
-                                                    setDateFilter({
-                                                        ...dateFilter,
+                                                    setLocalDateFilter({
+                                                        ...localDateFilter,
                                                         startMonth: Number(e.target.value),
                                                     })
                                                 }
@@ -216,10 +202,10 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                             </label>
                                             <select
                                                 className="w-full p-2 border border-gray-300 rounded-md text-sm"
-                                                value={dateFilter.endMonth || ""}
+                                                value={localDateFilter.endMonth || ""}
                                                 onChange={(e) =>
-                                                    setDateFilter({
-                                                        ...dateFilter,
+                                                    setLocalDateFilter({
+                                                        ...localDateFilter,
                                                         endMonth: Number(e.target.value),
                                                     })
                                                 }
@@ -235,7 +221,7 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                     </>
                                 )}
 
-                                {dateFilter?.type === "dateRange" && (
+                                {localDateFilter?.type === "dateRange" && (
                                     <>
                                         <div className="mb-3">
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -245,15 +231,15 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                                 type="date"
                                                 className="w-full p-2 border border-gray-300 rounded-md text-sm"
                                                 value={
-                                                    dateFilter.startDate
-                                                        ? new Date(dateFilter.startDate)
+                                                    localDateFilter.startDate
+                                                        ? new Date(localDateFilter.startDate)
                                                             .toISOString()
                                                             .split("T")[0]
                                                         : ""
                                                 }
                                                 onChange={(e) =>
-                                                    setDateFilter({
-                                                        ...dateFilter,
+                                                    setLocalDateFilter({
+                                                        ...localDateFilter,
                                                         startDate: new Date(e.target.value).toISOString(),
                                                     })
                                                 }
@@ -267,15 +253,15 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                                 type="date"
                                                 className="w-full p-2 border border-gray-300 rounded-md text-sm"
                                                 value={
-                                                    dateFilter.endDate
-                                                        ? new Date(dateFilter.endDate)
+                                                    localDateFilter.endDate
+                                                        ? new Date(localDateFilter.endDate)
                                                             .toISOString()
                                                             .split("T")[0]
                                                         : ""
                                                 }
                                                 onChange={(e) =>
-                                                    setDateFilter({
-                                                        ...dateFilter,
+                                                    setLocalDateFilter({
+                                                        ...localDateFilter,
                                                         endDate: new Date(e.target.value).toISOString(),
                                                     })
                                                 }
@@ -285,7 +271,7 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                 )}
 
                                 {/* Specific Date Input */}
-                                {dateFilter?.type === "specificDate" && (
+                                {localDateFilter?.type === "specificDate" && (
                                     <div className="mb-3">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Select Date
@@ -294,15 +280,15 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                             type="date"
                                             className="w-full p-2 border border-gray-300 rounded-md text-sm"
                                             value={
-                                                dateFilter.date
-                                                    ? new Date(dateFilter.date)
+                                                localDateFilter.date
+                                                    ? new Date(localDateFilter.date)
                                                         .toISOString()
                                                         .split("T")[0]
                                                     : ""
                                             }
                                             onChange={(e) =>
-                                                setDateFilter({
-                                                    ...dateFilter,
+                                                setLocalDateFilter({
+                                                    ...localDateFilter,
                                                     date: new Date(e.target.value).toISOString(),
                                                 })
                                             }
@@ -312,7 +298,11 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
 
                                 {/* ✅ Apply Button */}
                                 <button
-                                    onClick={() => setShowFilterDropdown(false)}
+                                    type="button"
+                                    onClick={() => {
+                                        setDateFilter(localDateFilter);
+                                        setShowFilterDropdown(false);
+                                    }}
                                     className="mt-2 w-full bg-green-200 hover:bg-green-700 text-black text-sm font-semibold py-2 rounded-md"
                                 >
                                     Apply
