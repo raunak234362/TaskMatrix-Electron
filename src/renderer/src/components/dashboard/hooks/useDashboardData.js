@@ -126,8 +126,8 @@ export const useDashboardData = () => {
         if (userRole === 'project_manager' || userRole === 'assistant_project_manager') {
           requests.push(
             Service.pendingRFIsForProjectManager(),
-            Service.GetPendingSubmittalForPM(),
             Service.PendingSubmittalForProjectManager(),
+            Service.GetPendingSubmittalForPM(),
             Service.PendingCoForProjectManager(),
             Service.GetPendingRfiClientSide(),
             Service.GetPendingSubmittalClientSide(),
@@ -140,7 +140,7 @@ export const useDashboardData = () => {
           requests.push(
             Service.GetPendingRfiDeptManager(),
             Service.GetPendingSubmittalDeptManager(),
-            Service.GetPendingSubmittalDeptManager(),
+            Service.GetPendingSubmittal(),
             Service.GetPendingChangeOrdersDeptManager(),
             Service.GetPendingRfiClientSide(),
             Service.GetPendingSubmittalClientSide(),
@@ -153,7 +153,7 @@ export const useDashboardData = () => {
           requests.push(
             Service.GetPendingRfiOperationExecutive(),
             Service.GetPendingSubmittalOperationExecutive(),
-            Service.GetPendingSubmittalOperationExecutive(),
+            Service.GetPendingSubmittal(),
             Service.GetPendingChangeOrdersOperationExecutive(),
             Service.GetPendingRfiClientSide(),
             Service.GetPendingSubmittalClientSide(),
@@ -167,6 +167,7 @@ export const useDashboardData = () => {
           requests.push(
             Service.pendingRFIs(),
             Service.PendingSubmittal(),
+            Service.GetPendingSubmittal(),
             Service.GetPendingChangeOrders(),
             Service.GetPendingRfq(),
 
@@ -206,16 +207,17 @@ export const useDashboardData = () => {
           rfqRes = responses[12]
           pmDashboardRes = responses[13]
         } else {
-          // Admin, PMO, Deputy Manager mapping (indices 4-12)
+          // Admin, PMO, Deputy Manager mapping (indices 4-13)
           rfiRes = responses[4]
           subRes = responses[5]
-          coRes = responses[6]
-          rfqRes = responses[7]
-          clientRfiRes = responses[8]
-          clientSubRes = responses[9]
-          clientCoRes = responses[10]
-          clientRfqRes = responses[11]
-          pmDashboardRes = responses[12]
+          pendingSubRes = responses[6]
+          coRes = responses[7]
+          rfqRes = responses[8]
+          clientRfiRes = responses[9]
+          clientSubRes = responses[10]
+          clientCoRes = responses[11]
+          clientRfqRes = responses[12]
+          pmDashboardRes = responses[13]
         }
 
         // Fetch member workload if needed
@@ -375,46 +377,18 @@ export const useDashboardData = () => {
           ...computedPMStats
         }
 
-        // Fetch milestones for active projects to show in upcoming submittals if they have no submittals
-        const activeProjects = projects.filter((p) => !p.status || p.status.toUpperCase() === 'ACTIVE')
-        const milestonePromises = activeProjects.map((p) => Service.GetProjectMilestoneById(p.id).catch(err => {
-          console.error(`Error fetching milestone for project ${p.id}:`, err)
-          return null
-        }))
-        let emptyMilestoneSubmittals = []
-        
-        try {
-          const allMilestonesResponses = await Promise.all(milestonePromises)
-          const allMilestones = allMilestonesResponses.filter(Boolean).flatMap(res => extractData(res))
-          
-          let basePendingSubmittals = (userRole === 'admin' || userRole === 'deputy_manager' || userRole === 'project_manager_officer') ? submittals : pendingSubmittals
-          
-          const milestonesWithoutSubmittals = allMilestones.filter(m => {
-            if (!m || m.status === 'APPROVED' || m.status === 'COMPLETED') return false
-            const hasSubmittal = basePendingSubmittals.some(sub => 
-              String(sub.mileStoneId) === String(m.id) || 
-              String(sub.milestoneId) === String(m.id) ||
-              (sub.milestone && String(sub.milestone.id) === String(m.id))
-            )
-            return !hasSubmittal
-          })
-          
-          emptyMilestoneSubmittals = milestonesWithoutSubmittals.map(m => ({
-            ...m,
-            isPlaceholderSubmittal: true,
-            subject: m.subject || m.name || 'Unknown Milestone',
-            approvalDate: m.approvalDate || m.date,
-            project: m.project || projects.find(p => String(p.id) === String(m.project_id || m.projectId))
-          }))
-        } catch (err) {
-          console.error('Error processing milestones for active projects:', err)
-        }
+        // Upcoming milestones from GetPendingSubmittal API
+        let finalPendingSubmittals = Array.isArray(pendingSubmittals) 
+            ? pendingSubmittals.map(m => ({
+                ...m,
+                isPlaceholderSubmittal: true,
+                subject: m.subject || m.name || 'Unknown Milestone',
+                approvalDate: m.approvalDate || m.date,
+                project: m.project || projects.find(p => String(p.id) === String(m.project_id || m.projectId))
+              })) 
+            : [];
 
-        const finalPendingSubmittals = [
-          ...emptyMilestoneSubmittals
-        ]
-
-        const basePendingSubmittalsArray = (userRole === 'admin' || userRole === 'deputy_manager' || userRole === 'project_manager_officer') ? submittals : pendingSubmittals;
+        const basePendingSubmittalsArray = (userRole === 'admin' || userRole === 'deputy_manager' || userRole === 'project_manager_officer') ? submittals : submittals;
 
         setAdminData({
           projects,
