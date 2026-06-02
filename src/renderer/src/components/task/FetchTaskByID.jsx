@@ -328,7 +328,7 @@ const FetchTaskByID = ({
           </p>
           <Button
             onClick={onClose}
-            className="mt-6 px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+            className="mt-6 px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
           >
             Close
           </Button>
@@ -352,17 +352,14 @@ const FetchTaskByID = ({
             </div>
             <div>
               <h2 className="text-xl md:text-2xl font-bold text-gray-800">{task.name}</h2>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">ID: #{task.id}</span>
-              </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 hover:text-gray-700"
+              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+              Close
             </button>
           </div>
         </div>
@@ -389,7 +386,7 @@ const FetchTaskByID = ({
               {/* Task Info Card */}
               <div className="bg-green-50 rounded-2xl p-8 border border-green-200">
                 <h3 className="text-2xl  text-green-900 mb-6 flex items-center gap-3">
-                  <FileText className="w-7 h-7" />
+                  
                   Task Information
                 </h3>
 
@@ -749,36 +746,42 @@ const ActionButton = ({ children, icon, color, onClick, disabled }) => {
 };
 
 const SummaryCard = ({ icon, label, value, color = "text-indigo-700" }) => (
-  <div className="bg-white/80 backdrop-blur flex flex-row gap-5 items-center justify-center p-2 rounded-xl border border-indigo-100 text-center">
-    <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
-      {icon}
+  <div className="bg-white p-4 rounded-xl border border-gray-300 shadow-sm flex items-center justify-between min-h-[80px] w-full">
+    <div className="flex items-center gap-3">
+      <div className="p-2.5 bg-green-50 rounded-xl border border-green-200 shadow-sm text-green-600 shrink-0">
+        {React.cloneElement(icon, { className: "w-5 h-5", strokeWidth: 2.5 })}
+      </div>
+      <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">{label}</span>
     </div>
-    <div>
-      <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl  mt-2 ${color}`}>{value} hrs</p>
-    </div>
+    <span className={`text-lg font-black tracking-tight shrink-0 ${color}`}>
+      {value} hrs
+    </span>
   </div>
 );
 const SummaryCardSession = ({ icon, label, value, color = "text-indigo-700" }) => (
-  <div className="bg-white/80 backdrop-blur flex flex-row gap-5 items-center justify-center p-2 rounded-xl border border-indigo-100 text-center">
-    <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
-      {icon}
+  <div className="bg-white p-4 rounded-xl border border-gray-300 shadow-sm flex items-center justify-between min-h-[80px] w-full">
+    <div className="flex items-center gap-3">
+      <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-200 shadow-sm text-blue-600 shrink-0">
+        {React.cloneElement(icon, { className: "w-5 h-5", strokeWidth: 2.5 })}
+      </div>
+      <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">{label}</span>
     </div>
-    <div>
-      <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl  mt-2 ${color}`}>{value} </p>
-    </div>
+    <span className={`text-lg font-black tracking-tight shrink-0 ${color}`}>
+      {value}
+    </span>
   </div>
 );
 const SummaryCardStatus = ({ icon, label, value, color = "text-indigo-700" }) => (
-  <div className="bg-white/80 backdrop-blur flex flex-row gap-5 items-center justify-center p-2 rounded-xl border border-indigo-100 text-center">
-    <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
-      {icon}
+  <div className="bg-white p-4 rounded-xl border border-gray-300 shadow-sm flex items-center justify-between min-h-[80px] w-full">
+    <div className="flex items-center gap-3">
+      <div className="p-2.5 bg-yellow-50 rounded-xl border border-yellow-200 shadow-sm text-yellow-600 shrink-0">
+        {React.cloneElement(icon, { className: "w-5 h-5", strokeWidth: 2.5 })}
+      </div>
+      <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">{label}</span>
     </div>
-    <div>
-      <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl  mt-2 ${color}`}>{value} </p>
-    </div>
+    <span className={`text-lg font-black tracking-tight shrink-0 ${color}`}>
+      {value}
+    </span>
   </div>
 );
 

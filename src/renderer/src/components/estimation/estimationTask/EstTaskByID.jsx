@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Service from '../../../api/Service'
 import { toast } from 'react-toastify'
 import {
@@ -39,14 +39,16 @@ const InfoItem = ({ icon, label, value }) => (
 )
 
 const SummaryCard = ({ icon, label, value, color = 'text-indigo-700' }) => (
-  <div className="bg-white/80 backdrop-blur flex flex-row gap-5 items-center justify-center p-2 rounded-xl border border-indigo-100 text-center">
-    <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
-      {icon}
+  <div className="bg-white p-4 rounded-xl border border-gray-300 shadow-sm flex items-center justify-between min-h-[80px] w-full">
+    <div className="flex items-center gap-3">
+      <div className="p-2.5 bg-indigo-50 rounded-xl border border-indigo-200 shadow-sm text-indigo-600 shrink-0">
+        {React.cloneElement(icon, { className: "w-5 h-5", strokeWidth: 2.5 })}
+      </div>
+      <span className="text-[13px] font-black text-gray-700 uppercase tracking-widest">{label}</span>
     </div>
-    <div>
-      <p className="text-sm text-gray-700">{label}</p>
-      <p className={`text-xl  mt-2 ${color}`}>{value}</p>
-    </div>
+    <span className={`text-xl font-black tracking-tight shrink-0 ${color}`}>
+      {value}
+    </span>
   </div>
 )
 

@@ -379,7 +379,7 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
 
           {/* Date Filter */}
           <div className="flex flex-col gap-1.5 w-full sm:w-auto">
-            <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">Date Period</label>
+            
             <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
           </div>
         </div>
