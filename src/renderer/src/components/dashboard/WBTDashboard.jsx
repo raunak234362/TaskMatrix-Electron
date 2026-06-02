@@ -155,6 +155,12 @@ const WBTDashboard = () => {
           clientSide: adminData.clientSidePendingCO || []
         }
         break
+      case 'UNAPPROVED_CHANGE_ORDERS':
+        data = {
+          wbt: adminData.unapprovedCO || [],
+          clientSide: []
+        }
+        break
       default:
         data = { wbt: [], clientSide: [] }
     }
@@ -170,6 +176,7 @@ const WBTDashboard = () => {
         case 'PENDING_RFI': type = 'RFI'; break;
         case 'PENDING_SUBMITTALS': type = 'SUBMITTAL'; break;
         case 'CHANGE_ORDERS': type = 'CO'; break;
+        case 'UNAPPROVED_CHANGE_ORDERS': type = 'CO'; break;
       }
 
       if (type && (item.id || item._id)) {

@@ -180,6 +180,11 @@ export const useDashboardData = () => {
           )
         }
 
+        const fetchUnapprovedCO = ['admin', 'deputy_manager', 'operation_executive', 'project_manager_officer'].includes(userRole);
+        if (fetchUnapprovedCO) {
+          requests.push(Service.GetUnapprovedChangeOrders().catch(e => { console.error('Failed to fetch unapproved COs', e); return [] }));
+        }
+
         const responses = await Promise.all(requests)
         console.log('✅ Responses received:', responses.length)
 
@@ -354,6 +359,11 @@ export const useDashboardData = () => {
         const clientRfqs = extractData(clientRfqRes)
 
         // Merge pmDashboard root stats with nested .data stats
+        let unapprovedCOList = [];
+        if (fetchUnapprovedCO) {
+          unapprovedCOList = extractData(responses[responses.length - 1]);
+        }
+
         const pmDataObj = pmDashboardRes?.data || pmDashboardRes || {}
         pmDashboardFromAPI = {
           ...(typeof pmDataObj === 'object' ? pmDataObj : {}),
@@ -421,6 +431,7 @@ export const useDashboardData = () => {
           clientSidePendingSubmittals: clientSubmittals,
           clientSidePendingCO: clientCos,
           clientSidePendingRFQ: clientRfqs,
+          unapprovedCO: unapprovedCOList,
           pmDashboard,
           allRfqs,
           projectStats: {
@@ -447,6 +458,7 @@ export const useDashboardData = () => {
             pendingChangeOrdersWbt: coList.length,
             pendingChangeOrdersClient: clientCos.length,
             newChangeOrders: pmDashboard?.newChangeOrders ?? 0,
+            unapprovedChangeOrders: unapprovedCOList.length,
             pendingRFQ: rfqList.length + clientRfqs.length,
             pendingRfqWbt: rfqList.length,
             pendingRfqClient: clientRfqs.length,

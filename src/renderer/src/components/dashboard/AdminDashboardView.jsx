@@ -8,7 +8,8 @@ import {
     FileText,
     Activity,
     CheckCircle2,
-    Loader2
+    Loader2,
+    RefreshCw
 } from 'lucide-react'
 import UserStatsWidget from './components/UserStatsWidget'
 import ProjectStats from './components/ProjectStats'
@@ -271,8 +272,8 @@ const AdminDashboardView = ({
             {/* Row 2: Priority Header Row */}
             <div className="relative">
                 <div className={`grid grid-cols-1 sm:grid-cols-2 ${userRole === 'project_manager_officer' || userRole === 'operation_executive' ? 'lg:grid-cols-2' : 'lg:grid-cols-2 2xl:grid-cols-4'} gap-4 lg:gap-6 relative z-10`}>
-                        {/* 1. Priority Focus - Hidden for PMO and OE */}
-                        {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && (
+                        {/* 1. Priority Focus - Hidden for PMO, OE, and Admin */}
+                        {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && userRole !== 'admin' && (
                             <div
                                 className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-between hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group"
                                 onClick={() => currentTask && setDetailTaskId(currentTask.id)}
@@ -302,8 +303,8 @@ const AdminDashboardView = ({
                             </div>
                         )}
 
-                        {/* 2. Upcoming Deadlines Trigger - Hidden for PMO and OE */}
-                        {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && (
+                        {/* 2. Upcoming Deadlines Trigger - Hidden for PMO, OE, and Admin */}
+                        {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && userRole !== 'admin' && (
                             <div
                                 className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                                 onClick={() => setShowDeadlinesPopup(true)}
@@ -352,13 +353,33 @@ const AdminDashboardView = ({
                                     </div>
                                     <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">Notes & Updates</span>
                                 </div>
-                                <span className="text-3xl font-black text-amber-600 tracking-tighter">
-                                    {projectNotes.length}
-                                </span>
+                                    <span className="text-3xl font-black text-amber-600 tracking-tighter">
+                                        {projectNotes.length}
+                                    </span>
+                                </div>
                             </div>
+
+                            {/* 5. Unapproved Change Orders */}
+                            {['admin', 'deputy_manager', 'operation_executive', 'project_manager_officer'].includes(userRole?.toLowerCase()) && (
+                                <div
+                                    className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                                    onClick={() => handlers.handleActionClick && handlers.handleActionClick('UNAPPROVED_CHANGE_ORDERS')}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2.5 bg-red-100/60 rounded-xl border border-red-200 shadow-sm group-hover:scale-110 transition-transform">
+                                                <RefreshCw className="w-5 h-5 text-red-600" strokeWidth={2.5} />
+                                            </div>
+                                            <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">Unapproved Change Orders</span>
+                                        </div>
+                                        <span className="text-3xl font-black text-red-600 tracking-tighter">
+                                            {adminData?.dashboardStats?.unapprovedChangeOrders || 0}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
-            </div>
             {
                 (userRole === 'admin' || userRole === 'project_manager_officer' || userRole === 'deputy_manager') && (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

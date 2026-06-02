@@ -65,6 +65,7 @@ const PendingActions = ({ dashboardStats, onActionClick }) => {
                     'RFI': 'PENDING_RFI',
                     'Submittals': 'PENDING_SUBMITTALS',
                     'Change Orders': 'CHANGE_ORDERS',
+                    'Unapproved Change Orders': 'UNAPPROVED_CHANGE_ORDERS',
                   }
                   onActionClick(typeMap[action.title])
                 }

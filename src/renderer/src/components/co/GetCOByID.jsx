@@ -40,25 +40,36 @@ const GetCOByID = ({ id, projectId }) => {
   const userRole = sessionStorage.getItem("userRole");
   console.log(id);
 
+  const userRoleLower = userRole?.toLowerCase() || "";
+  const canSeeAllVersions = ['admin', 'deputy_manager', 'operation_executive', 'project_manager_officer'].includes(userRoleLower);
+
   /* -------------------- SAFE DERIVED VALUES -------------------- */
   const sortedVersions = useMemo(() => {
     if (!co?.versions) return [];
-    return [...co.versions].sort(
+    const allVersions = [...co.versions].sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
-  }, [co?.versions]);
+    if (!canSeeAllVersions && allVersions.length > 0) {
+      return [allVersions[allVersions.length - 1]];
+    }
+    return allVersions;
+  }, [co?.versions, canSeeAllVersions]);
 
   const hasMultipleVersions = sortedVersions.length > 1;
 
   const currentVersion = useMemo(() => {
     if (!co) return null;
+    if (!canSeeAllVersions && sortedVersions.length > 0) {
+      return sortedVersions[0];
+    }
     const targetId = viewingVersionId || co.currentVersionId;
     return co.versions?.find(v => v.id === targetId) || sortedVersions[0] || co;
-  }, [co, sortedVersions, viewingVersionId]);
+  }, [co, sortedVersions, viewingVersionId, canSeeAllVersions]);
 
   const isViewingCurrent = useMemo(() => {
+    if (!canSeeAllVersions) return true;
     return currentVersion?.id === co?.currentVersionId || (!co?.versions?.length);
-  }, [currentVersion, co]);
+  }, [currentVersion, co, canSeeAllVersions]);
 
   const encodedCO = useMemo(() => {
     if (!co || !currentVersion) return "";
@@ -217,16 +228,12 @@ const GetCOByID = ({ id, projectId }) => {
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-semibold ${co.isAproovedByAdmin === true
                     ? "bg-green-100 text-green-700"
-                    : co.isAproovedByAdmin === false
-                      ? "bg-red-100 text-red-700"
-                      : "bg-yellow-100 text-yellow-700"
+                    : "bg-yellow-100 text-yellow-700"
                     }`}
                 >
                   {co.isAproovedByAdmin === true
                     ? "Approved By Admin"
-                    : co.isAproovedByAdmin === false
-                      ? "Rejected"
-                      : "Pending"}
+                    : "Pending"}
                 </span>
               </div>
             </div>

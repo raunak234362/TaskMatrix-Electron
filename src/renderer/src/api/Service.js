@@ -3617,6 +3617,17 @@ class Service {
     }
   }
 
+  //unapproved CO
+  static async GetUnapprovedChangeOrders() {
+    try {
+      const response = await api.get(`changeOrder/unapproved`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching unapproved change orders:', error)
+      throw error
+    }
+  }
+
   //dashboard data operation executive
 
   //dashboard route :
