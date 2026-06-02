@@ -45,7 +45,7 @@ const Comment = ({ comments, onAddComment, staffData, onAcknowledge }) => {
           </div>
           <button
             type="submit"
-            className="flex items-center px-4 py-2 text-sm font-medium text-black border border-black transition-colors bg-green-100 rounded-lg hover:bg-green-200"
+            className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
           >
             <MessagesSquare className="w-4 h-4 mr-2" />
             Add Comment

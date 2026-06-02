@@ -17,21 +17,21 @@ const TaskLayout = () => {
   return (
     <div className="w-full overflow-y-hidden overflow-x-hidden">
       <div className="flex flex-col w-full h-full">
-        <div className="px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 rounded-t-2xl flex flex-wrap items-center justify-center md:justify-end gap-3">
+        <div className="px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 rounded-none flex flex-wrap items-center justify-center md:justify-end gap-3">
           <button
             onClick={() => setActiveTab("activeTask")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "activeTask"
-              ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-              : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+            className={`px-6 py-1.5 border-2 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm inline-flex items-center justify-center transition-all cursor-pointer ${activeTab === "activeTask"
+              ? "bg-green-200 text-black border-green-700/80"
+              : "bg-green-50 text-black border-green-700/80 hover:bg-green-100"
               }`}
           >
             Active Tasks
           </button>
           <button
             onClick={() => setActiveTab("allTask")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "allTask"
-              ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-              : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+            className={`px-6 py-1.5 border-2 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm inline-flex items-center justify-center transition-all cursor-pointer ${activeTab === "allTask"
+              ? "bg-green-200 text-black border-green-700/80"
+              : "bg-green-50 text-black border-green-700/80 hover:bg-green-100"
               }`}
           >
             All Task
@@ -39,9 +39,9 @@ const TaskLayout = () => {
           {userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" || userRole === "dept_manager" ? (
             <button
               onClick={() => setActiveTab("addTask")}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "addTask"
-                ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-                : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+              className={`px-6 py-1.5 border-2 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm inline-flex items-center justify-center transition-all cursor-pointer ${activeTab === "addTask"
+                ? "bg-green-200 text-black border-green-700/80"
+                : "bg-green-50 text-black border-green-700/80 hover:bg-green-100"
                 }`}
             >
               Add Task

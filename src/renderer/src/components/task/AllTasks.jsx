@@ -231,7 +231,7 @@ const AllTasks = () => {
         header: "Task Details",
         cell: ({ row }) => (
           <div className="flex flex-col">
-            <span className="font-semibold text-gray-700 group-hover:text-green-700 transition-colors">
+            <span className="font-semibold text-black group-hover:text-green-700 transition-colors">
               {row.original.name}
             </span>
           </div>
@@ -241,8 +241,8 @@ const AllTasks = () => {
         accessorKey: "project.name",
         header: "Project",
         cell: ({ row }) => (
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <Briefcase className="w-3.5 h-3.5 text-gray-400" />
+          <div className="flex items-center gap-2 text-sm text-black">
+            <Briefcase className="w-3.5 h-3.5 text-black" />
             <span className="font-medium">
               {row.original.project?.name || "N/A"}
             </span>
@@ -258,18 +258,18 @@ const AllTasks = () => {
         header: "Assigned To",
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-linear-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white text-xs  shadow-sm">
+            <div className="w-8 h-8 rounded-full bg-green-200 flex items-center justify-center text-black font-bold text-xs shadow-sm border border-green-300">
               {row.original.user?.firstName?.charAt(0) || (
-                <User className="w-4 h-4" />
+                <User className="w-4 h-4 text-black" />
               )}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-black">
                 {row.original.user
                   ? `${row.original.user.firstName} ${row.original.user.lastName}`
                   : "Unassigned"}
               </span>
-              {/* <span className="text-xs text-gray-400">
+              {/* <span className="text-xs text-black">
                 {row.original.department?.name || "General"}
               </span> */}
             </div>
@@ -314,8 +314,8 @@ const AllTasks = () => {
         id: "assignedHours",
         header: "Assigned Hrs",
         cell: ({ row }) => (
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <Clock className="w-4 h-4 text-gray-400" />
+          <div className="flex items-center gap-2 text-sm text-black">
+            <Clock className="w-4 h-4 text-black" />
             <span className="font-medium">
               {row.original.allocationLog?.allocatedHours || "—"}
             </span>
@@ -339,9 +339,9 @@ const AllTasks = () => {
           };
 
           return (
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <Clock className="w-4 h-4 text-gray-500" />
-              <span className="font-bold text-gray-700">
+            <div className="flex items-center gap-2 text-sm text-black">
+              <Clock className="w-4 h-4 text-black" />
+              <span className="font-bold text-black">
                 {formatSecondsToHHMM(totalSeconds)}
               </span>
             </div>
@@ -352,8 +352,8 @@ const AllTasks = () => {
         accessorKey: "due_date",
         header: "Due Date",
         cell: ({ row }) => (
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <Calendar className="w-4 h-4 text-gray-400" />
+          <div className="flex items-center gap-2 text-sm text-black">
+            <Calendar className="w-4 h-4 text-black" />
             {formatDate(row.original.due_date)}
           </div>
         ),
@@ -402,67 +402,66 @@ const AllTasks = () => {
         <div className="flex flex-wrap items-end gap-4">
           {/* Project Filter */}
           <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Project</label>
+            <label className="text-[10px] font-bold text-black uppercase tracking-wider">Project</label>
             <Select
               options={projectOptions}
               value={filters.projectName}
               onChange={(_, val) => setFilters(prev => ({ ...prev, projectName: val }))}
               placeholder="Select Project"
-              className="font-semibold text-gray-700 bg-gray-50"
+              className="font-semibold text-black bg-gray-50"
             />
           </div>
 
           {/* Stage Filter */}
           <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Stage</label>
+            <label className="text-[10px] font-bold text-black uppercase tracking-wider">Stage</label>
             <Select
               options={stageOptions}
               value={filters.stage}
               onChange={(_, val) => setFilters(prev => ({ ...prev, stage: val }))}
               placeholder="Select Stage"
-              className="font-semibold text-gray-700 bg-gray-50"
+              className="font-semibold text-black bg-gray-50"
             />
           </div>
 
           {/* Status Filter */}
           <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Status</label>
+            <label className="text-[10px] font-bold text-black uppercase tracking-wider">Status</label>
             <Select
               options={statusOptions}
               value={filters.status}
               onChange={(_, val) => setFilters(prev => ({ ...prev, status: val }))}
               placeholder="Select Status"
-              className="font-semibold text-gray-700 bg-gray-50"
+              className="font-semibold text-black bg-gray-50"
             />
           </div>
           {["admin", "project_manager", "operation_executive", "department_manager", "human_resource", "deputy_manager", "dept_manager"].includes(userRole) && (
             <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Assigned User</label>
+              <label className="text-[10px] font-bold text-black uppercase tracking-wider">Assigned User</label>
               <Select
                 options={userOptions}
                 value={filters.assignedUser}
                 onChange={(_, val) => setFilters(prev => ({ ...prev, assignedUser: val }))}
                 placeholder="Select User"
-                className="font-semibold text-gray-700 bg-gray-50"
+                className="font-semibold text-black bg-gray-50"
               />
             </div>
           )}
 
           {/* WBS Type Filter */}
           <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">WBS Type</label>
+            <label className="text-[10px] font-bold text-black uppercase tracking-wider">WBS Type</label>
             <Select
               options={wbsTypeOptions}
               value={filters.wbsType}
               onChange={(_, val) => setFilters(prev => ({ ...prev, wbsType: val }))}
               placeholder="Select Type"
-              className="font-semibold text-gray-700 bg-gray-50"
+              className="font-semibold text-black bg-gray-50"
             />
           </div>
 
           {/* Date Filter */}
           <div className="flex flex-col gap-1 w-full sm:w-auto">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date Period</label>
             <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
           </div>
         </div>

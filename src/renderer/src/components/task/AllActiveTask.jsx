@@ -136,11 +136,11 @@ const AllActiveTask = () => {
         header: "Task Details",
         cell: ({ row }) => (
           <div className="flex flex-col">
-            <span className="font-semibold text-gray-700">
+            <span className="font-semibold text-black">
               {row.original.name}
             </span>
             <div
-              className="text-xs text-gray-400 mt-1 line-clamp-1 prose prose-sm max-w-none"
+              className="text-xs text-black mt-1 line-clamp-1 prose prose-sm max-w-none"
               dangerouslySetInnerHTML={{
                 __html: row.original.description || "No description",
               }}
@@ -153,14 +153,14 @@ const AllActiveTask = () => {
         header: "Project & Stage",
         cell: ({ row }) => (
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <Briefcase className="w-3.5 h-3.5 text-gray-400" />
+            <div className="flex items-center gap-2 text-sm text-black">
+              <Briefcase className="w-3.5 h-3.5 text-black" />
               <span className="font-medium">
                 {row.original.project?.name || "N/A"}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-gray-700">
-              <Tag className="w-3.5 h-3.5 text-gray-400" />
+            <div className="flex items-center gap-2 text-xs text-black">
+              <Tag className="w-3.5 h-3.5 text-black" />
               <span>Stage: {row.original.Stage || "N/A"}</span>
             </div>
           </div>
@@ -171,18 +171,18 @@ const AllActiveTask = () => {
         header: "Assigned To",
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-linear-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white text-xs  shadow-sm">
+            <div className="w-8 h-8 rounded-full bg-green-200 flex items-center justify-center text-black font-bold text-xs shadow-sm border border-green-300">
               {row.original.user?.firstName?.charAt(0) || (
-                <User className="w-4 h-4" />
+                <User className="w-4 h-4 text-black" />
               )}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-black">
                 {row.original.user
                   ? `${row.original.user.firstName} ${row.original.user.lastName}`
                   : "Unassigned"}
               </span>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-black">
                 {row.original.department?.name || "General"}
               </span>
             </div>
@@ -226,8 +226,8 @@ const AllActiveTask = () => {
         accessorKey: "due_date",
         header: "Due Date",
         cell: ({ row }) => (
-          <div className="flex items-center gap-2 text-sm text-gray-700">
-            <Calendar className="w-4 h-4 text-gray-400" />
+          <div className="flex items-center gap-2 text-sm text-black">
+            <Calendar className="w-4 h-4 text-black" />
             {formatDate(row.original.due_date)}
           </div>
         ),
@@ -297,7 +297,7 @@ const AllActiveTask = () => {
         </div>
 
         <div className="flex flex-col gap-1 w-full sm:w-auto">
-          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date Period</label>
+
           <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
         </div>
       </div>

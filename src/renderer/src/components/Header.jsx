@@ -250,7 +250,7 @@ const Header = ({ isMinimized, toggleSidebar, isMobileOpen }) => {
 
           {/* Notifications Dropdown */}
           {showNotifications && (
-            <div className="absolute right-0 mt-3 w-80 md:w-96 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+            <div className="absolute right-0 mt-3 w-80 md:w-96 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden z-[1000] animate-in fade-in zoom-in-95 duration-200 origin-top-right">
               <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                 <h3 className="font-bold text-gray-900">Notifications</h3>
                 <div className="flex items-center gap-3">
