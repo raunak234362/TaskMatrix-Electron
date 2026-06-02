@@ -31,7 +31,12 @@ const NotificationReceiver = () => {
             console.log("📥 Notification received:", payload);
 
             const title = payload.title || "🔔 New Alert";
-            const message = payload.message || "You have a new notification.";
+            const rawMessage = payload.message || "You have a new notification.";
+            const message = rawMessage
+                .replace(/<[^>]*>/g, " ")
+                .replace(/&nbsp;/g, " ")
+                .replace(/\s+/g, " ")
+                .trim();
 
             // Normalize type and extract ID based on payload structure
             let type = payload.type;
