@@ -30,6 +30,8 @@ import WprToolbar from "./WprToolbar";
 import WprRfiTable from "./WprRfiTable";
 import WprScheduleTable from "./WprScheduleTable";
 import WprChangeOrderTable from "./WprChangeOrderTable";
+import Modal from "../../ui/Modal";
+import GetRFIByID from "../../rfi/GetRFIByID";
 
 const WorkProgressReport = ({
   projectId,
@@ -77,6 +79,8 @@ const WorkProgressReport = ({
   const [activeCell, setActiveCell] = useState<any>(null);
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef<any>(null);
+  
+  const [selectedRfiId, setSelectedRfiId] = useState<string | null>(null);
 
   // Date helper functions for week calculation
   const getMonday = (d) => {
@@ -1429,6 +1433,7 @@ const WorkProgressReport = ({
                 onCellSave={handleCellSave}
                 onKeyDown={handleKeyDown}
                 onAddRow={() => addRow("rfi")}
+                onRowClick={(id) => setSelectedRfiId(id)}
               />
             </div>
             <div id="section-schedule">
@@ -1462,6 +1467,16 @@ const WorkProgressReport = ({
             </div>
           </div>
         </div>
+      )}
+      {selectedRfiId && (
+        <Modal
+          isOpen={true}
+          onClose={() => setSelectedRfiId(null)}
+          title="RFI Details"
+          size="lg"
+        >
+          <GetRFIByID id={selectedRfiId} onUpdate={onUpdate} />
+        </Modal>
       )}
     </div>
   );

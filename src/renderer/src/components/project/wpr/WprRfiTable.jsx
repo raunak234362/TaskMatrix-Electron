@@ -11,8 +11,18 @@ const WprRfiTable = ({
   onCellClick,
   onCellSave,
   onKeyDown,
-  onAddRow
+  onAddRow,
+  onRowClick
 }) => {
+
+  const handleTdClick = (e, field, value, rowId) => {
+    if (canEdit) {
+      e.stopPropagation();
+      onCellClick("rfi", rowId, field, value);
+    } else if (onRowClick) {
+      onRowClick(rowId);
+    }
+  };
 
   return (
     <div className="space-y-3">
@@ -46,11 +56,11 @@ const WprRfiTable = ({
           </thead>
           <tbody className="divide-y divide-black/10">
             {rfis.map((row) => (
-              <tr key={row.id} className="hover:bg-slate-50 transition-colors">
+              <tr key={row.id} className="hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => onRowClick && onRowClick(row.id)}>
                 {/* RFI No. */}
                 <td
-                  onClick={() => onCellClick("rfi", row.id, "rfiNo", row.rfiNo)}
-                  className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
+                  onClick={(e) => handleTdClick(e, "rfiNo", row.rfiNo, row.id)}
+                  className="p-3 border-r border-black/10 font-bold text-black hover:bg-slate-100/50"
                 >
                   {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "rfiNo" ? (
                     <input
@@ -60,6 +70,7 @@ const WprRfiTable = ({
                       onChange={(e) => setEditValue(e.target.value)}
                       onBlur={onCellSave}
                       onKeyDown={onKeyDown}
+                      onClick={(e) => e.stopPropagation()}
                       className="w-full bg-white border border-black px-2 py-1 rounded-none font-bold text-xs text-black"
                     />
                   ) : (
@@ -69,8 +80,8 @@ const WprRfiTable = ({
 
                 {/* Sent Date */}
                 <td
-                  onClick={() => onCellClick("rfi", row.id, "sentDate", row.sentDate)}
-                  className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
+                  onClick={(e) => handleTdClick(e, "sentDate", row.sentDate, row.id)}
+                  className="p-3 border-r border-black/10 font-bold text-black hover:bg-slate-100/50"
                 >
                   {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "sentDate" ? (
                     <input
@@ -80,6 +91,7 @@ const WprRfiTable = ({
                       onChange={(e) => setEditValue(e.target.value)}
                       onBlur={onCellSave}
                       onKeyDown={onKeyDown}
+                      onClick={(e) => e.stopPropagation()}
                       className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                     />
                   ) : (
@@ -89,8 +101,8 @@ const WprRfiTable = ({
 
                 {/* Customer Response */}
                 <td
-                  onClick={() => onCellClick("rfi", row.id, "customerResponse", row.customerResponse)}
-                  className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
+                  onClick={(e) => handleTdClick(e, "customerResponse", row.customerResponse, row.id)}
+                  className="p-3 border-r border-black/10 font-bold text-black hover:bg-slate-100/50"
                 >
                   {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "customerResponse" ? (
                     <textarea
@@ -99,6 +111,7 @@ const WprRfiTable = ({
                       onChange={(e) => setEditValue(e.target.value)}
                       onBlur={onCellSave}
                       onKeyDown={onKeyDown}
+                      onClick={(e) => e.stopPropagation()}
                       className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                     />
                   ) : (
@@ -108,8 +121,8 @@ const WprRfiTable = ({
 
                 {/* Response Recd Date */}
                 <td
-                  onClick={() => onCellClick("rfi", row.id, "responseReceivedDate", row.responseReceivedDate)}
-                  className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
+                  onClick={(e) => handleTdClick(e, "responseReceivedDate", row.responseReceivedDate, row.id)}
+                  className="p-3 border-r border-black/10 font-bold text-black hover:bg-slate-100/50"
                 >
                   {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "responseReceivedDate" ? (
                     <input
@@ -119,6 +132,7 @@ const WprRfiTable = ({
                       onChange={(e) => setEditValue(e.target.value)}
                       onBlur={onCellSave}
                       onKeyDown={onKeyDown}
+                      onClick={(e) => e.stopPropagation()}
                       className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                     />
                   ) : (
@@ -128,8 +142,8 @@ const WprRfiTable = ({
 
                 {/* WBT Response */}
                 <td
-                  onClick={() => onCellClick("rfi", row.id, "wbtResponse", row.wbtResponse)}
-                  className="p-3 border-r border-black/10 font-bold text-black cursor-pointer hover:bg-slate-100/50"
+                  onClick={(e) => handleTdClick(e, "wbtResponse", row.wbtResponse, row.id)}
+                  className="p-3 border-r border-black/10 font-bold text-black hover:bg-slate-100/50"
                 >
                   {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "wbtResponse" ? (
                     <textarea
@@ -138,6 +152,7 @@ const WprRfiTable = ({
                       onChange={(e) => setEditValue(e.target.value)}
                       onBlur={onCellSave}
                       onKeyDown={onKeyDown}
+                      onClick={(e) => e.stopPropagation()}
                       className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
                     />
                   ) : (
@@ -147,8 +162,8 @@ const WprRfiTable = ({
 
                 {/* Status */}
                 <td
-                  onClick={() => onCellClick("rfi", row.id, "status", row.status)}
-                  className="p-3 font-bold text-xs cursor-pointer hover:bg-slate-100/50 text-black"
+                  onClick={(e) => handleTdClick(e, "status", row.status, row.id)}
+                  className="p-3 font-bold text-xs hover:bg-slate-100/50 text-black"
                 >
                   {activeCell?.table === "rfi" && activeCell.rowId === row.id && activeCell.field === "status" ? (
                     <select
@@ -157,23 +172,24 @@ const WprRfiTable = ({
                       onChange={(e) => setEditValue(e.target.value)}
                       onBlur={onCellSave}
                       onKeyDown={onKeyDown}
+                      onClick={(e) => e.stopPropagation()}
                       className="w-full bg-white border border-black px-1 py-1 rounded-none text-xs uppercase font-bold text-black"
                     >
                       <option value="OPEN">OPEN</option>
                       <option value="PARTIAL">PARTIAL</option>
-                      <option value="COMPLETE">COMPLETE</option>
+                      <option value="CLOSED">CLOSED</option>
                       <option value="PENDING">PENDING</option>
                       <option value="ANSWERED">ANSWERED</option>
                     </select>
                   ) : (
                     <span className={`px-2 py-1 rounded-none border border-black ${row.status === "OPEN" ? "bg-blue-50 text-blue-700" :
                       row.status === "PARTIAL" ? "bg-orange-50 text-orange-700" :
-                        row.status === "COMPLETE" ? "bg-green-50 text-green-700" :
+                        (row.status === "COMPLETE" || row.status === "CLOSED") ? "bg-green-50 text-green-700" :
                           row.status === "PENDING" ? "bg-green-50 text-green-700" :
                             row.status === "ANSWERED" ? "bg-orange-50 text-orange-700" :
                               "bg-slate-50 text-slate-700"
                       }`}>
-                      {row.status}
+                      {row.status === "COMPLETE" || row.status === "CLOSED" ? "CLOSE" : row.status}
                     </span>
                   )}
                 </td>
