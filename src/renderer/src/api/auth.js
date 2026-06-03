@@ -73,6 +73,31 @@ class AuthService {
       throw error;
     }
   }
+  static async getMeAnalytics() {
+    try {
+      const response = await api.get(`auth/analytics/me`);
+      return response?.data;
+    } catch (error) {
+      console.error(
+        "Error while fetching me analytics:",
+        error?.response?.data || error.message || error
+      );
+      throw error;
+    }
+  }
+
+  static async getAdminAnalytics() {
+    try {
+      const response = await api.get(`auth/analytics/admin`);
+      return response?.data;
+    } catch (error) {
+      console.error(
+        "Error while fetching admin analytics:",
+        error?.response?.data || error.message || error
+      );
+      throw error;
+    }
+  }
 }
 
-export default AuthService
+export default AuthService;

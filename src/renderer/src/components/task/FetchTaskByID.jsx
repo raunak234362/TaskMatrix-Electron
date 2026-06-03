@@ -182,10 +182,14 @@ const FetchTaskByID = ({
 
   const handleEndTask = async (e) => {
     if (e) e.preventDefault();
-    if (!endComment.trim()) {
-      toast.warning("Please provide a comment before ending the task");
+    
+    const cleanComment = endComment.replace(/[.,]/g, '').trim();
+    
+    if (cleanComment.length < 10) {
+      toast.warning("Please provide a meaningful summary of at least 10 characters before ending the task");
       return;
     }
+    
     if (!completionPercentage) {
       toast.warning("Please select the completion percentage");
       return;
@@ -508,7 +512,7 @@ const FetchTaskByID = ({
                           icon={<Square />}
                           color="red"
                           onClick={() => {
-                            setEndComment(`Achieved: \nCompleted: \nIssues: \nPending: `);
+                            setEndComment("");
                             setIsEndModalOpen(true);
                           }}
                           disabled={processing}
@@ -698,7 +702,7 @@ const FetchTaskByID = ({
               </Button>
               <Button
                 onClick={handleEndTask}
-                disabled={processing || !endComment.trim() || !completionPercentage}
+                disabled={processing || endComment.replace(/[.,]/g, '').trim().length < 10 || !completionPercentage}
                 className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center justify-center gap-2"
               >
                 {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Square className="w-4 h-4" />}

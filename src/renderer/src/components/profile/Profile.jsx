@@ -16,15 +16,29 @@ import { useState } from "react";
 import EditEmployee from "../manageTeam/employee/EditEmployee";
 import ChangePasswordModal from "./ChangePasswordModal";
 import Service from "../../api/Service";
+import AuthService from "../../api/auth";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../../store/userSlice";
 import { toast } from "react-toastify";
+import { useEffect } from "react";
 
 const Profile = () => {
   const dispatch = useDispatch();
   const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchMeAnalytics = async () => {
+      try {
+        const response = await AuthService.getMeAnalytics();
+        console.log("Me Analytics Score:", response);
+      } catch (error) {
+        console.error("Error fetching me analytics score:", error);
+      }
+    };
+    fetchMeAnalytics();
+  }, []);
 
   // Get user data from Redux
   const user = useSelector((state) => state.userInfo.userDetail);

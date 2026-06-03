@@ -8,6 +8,7 @@ import {
   decrementModalCount,
 } from "../../../store/uiSlice";
 import Service from "../../../api/Service";
+import AuthService from "../../../api/auth";
 import AddTeam from "../team/AddTeam";
 import GetTeamById from "../team/GetTeamById";
 import GetEmployeeByID from "../employee/GetEmployeeByID";
@@ -134,17 +135,17 @@ const TeamDashboard = () => {
     fetchTeams();
   }, [fetchTeams]);
 
-  // useCallback(() => {
-  //   const fetchAnalyticsScore = async () => {
-  //     try {
-  //       const response = await Service.GetAnalyticsScore();
-  //       console.log("Analytics Score:", response.data);
-  //     } catch (error) {
-  //       console.error("Error fetching analytics score:", error);
-  //     }
-  //   };
-  //   fetchAnalyticsScore();
-  // }, []);
+  useEffect(() => {
+    const fetchAnalyticsScore = async () => {
+      try {
+        const response = await AuthService.getAdminAnalytics();
+        console.log("Admin Analytics Score:", response);
+      } catch (error) {
+        console.error("Error fetching admin analytics score:", error);
+      }
+    };
+    fetchAnalyticsScore();
+  }, []);
 
   // Fetch all tasks once on mount to populate the dashboard faster
   useEffect(() => {
