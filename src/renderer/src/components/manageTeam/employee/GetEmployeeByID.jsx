@@ -284,6 +284,8 @@ const DetailCell = ({ label, value }) => (
   </div>
 );
 
+import { createPortal } from "react-dom";
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const GetEmployeeByID = ({ id, onClose }) => {
@@ -589,18 +591,19 @@ const GetEmployeeByID = ({ id, onClose }) => {
   // ── Guards ───────────────────────────────────────────────────────────────────
 
   if (loading) {
-    return (
-      <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    return createPortal(
+      <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
         <div className="flex items-center justify-center p-12 text-black bg-white rounded-2xl border border-gray-200 shadow-xl">
           <Loader2 className="w-8 h-8 animate-spin mr-3 text-[#6bbd45]" />
           <span className="text-sm font-black uppercase tracking-widest text-[#6bbd45]">Loading employee details...</span>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
   if (error || !employee) {
-    return (
-      <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    return createPortal(
+      <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
         <div className="flex flex-col items-center justify-center p-12 text-red-600 bg-white rounded-2xl border border-gray-200 shadow-xl gap-4">
           <div className="flex items-center">
             <AlertCircle className="w-8 h-8 mr-3" />
@@ -610,13 +613,14 @@ const GetEmployeeByID = ({ id, onClose }) => {
             <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">Close</button>
           )}
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
   // ── Render ───────────────────────────────────────────────────────────────────
-  return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[95vw] mx-auto flex flex-col h-[95vh]">
         {/* Header */}
         <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white sticky top-0 z-10 shrink-0">
@@ -1078,7 +1082,8 @@ const GetEmployeeByID = ({ id, onClose }) => {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

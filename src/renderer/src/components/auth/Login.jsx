@@ -83,6 +83,17 @@ const Login = () => {
 
     } catch (error) {
       console.error("Error While Logging in:", error);
+      if (error?.response?.status === 202) {
+        const responseData = error.response.data;
+        if (responseData?.requiresVerification) {
+          const token = responseData.challengeToken;
+          const msg = responseData.message || "A verification challenge has been sent to your registered email address.";
+          setChallengeToken(token);
+          setShowOTP(true);
+          alert(msg);
+          return;
+        }
+      }
       const errorMessage =
         error?.response?.data?.message ||
         error.message ||
