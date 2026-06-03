@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import AuthService from "../../api/auth";
 import Background from "../../assets/Green Banana Leaf Pattern Reminder Facebook Post(1).jpg";
@@ -10,9 +10,29 @@ import { useDispatch } from "react-redux";
 import { login, setUserData } from "../../store/userSlice";
 
 const Login = () => {
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, setValue } = useForm();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const fetchOSUser = async () => {
+      try {
+        if (window.api && window.api.getOSUser) {
+          const osUser = await window.api.getOSUser();
+          if (osUser) {
+            setValue("username", osUser, { 
+              shouldValidate: true,
+              shouldDirty: true,
+              shouldTouch: true
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch OS user:", error);
+      }
+    };
+    fetchOSUser();
+  }, [setValue]);
 
   const [showOTP, setShowOTP] = useState(false);
   const [challengeToken, setChallengeToken] = useState("");

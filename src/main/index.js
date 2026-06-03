@@ -97,6 +97,19 @@ ipcMain.handle('show-notification', async (_, data) => {
 })
 
 // ─────────────────────────────────────────────────────────────
+// 👤 USER IDENTITY HANDLER
+// ─────────────────────────────────────────────────────────────
+
+ipcMain.handle('get-os-user', () => {
+  try {
+    return process.env.USERNAME || require('os').userInfo().username || '';
+  } catch (err) {
+    console.error('Error fetching OS user:', err);
+    return '';
+  }
+})
+
+// ─────────────────────────────────────────────────────────────
 // 🚀 APP READY
 // ─────────────────────────────────────────────────────────────
 
