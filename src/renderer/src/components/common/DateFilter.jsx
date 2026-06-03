@@ -33,7 +33,7 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
     }, [showFilterDropdown]);
 
     return (
-        <div className="bg-white rounded-lg shadow border border-gray-200 z-99">
+        <div className="bg-white rounded-lg shadow border border-gray-200 z-50">
             <div className="flex items-center justify-between gap-5">
                 <div className="relative">
                     <button
@@ -60,7 +60,7 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
 
                     {showFilterDropdown && (
                         <div
-                            className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-100"
+                            className="absolute left-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
                             onClick={(e) => e.stopPropagation()} // ✅ prevent auto-close on inside click
                             onMouseDown={(e) => e.stopPropagation()}
                             onTouchStart={(e) => e.stopPropagation()}

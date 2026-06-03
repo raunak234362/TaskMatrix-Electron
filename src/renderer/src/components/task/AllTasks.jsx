@@ -11,7 +11,11 @@ import {
   Clock,
   Trash2,
   Filter,
+  Download,
 } from "lucide-react";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
 import DateFilter from "../common/DateFilter";
 import { matchesDateFilter } from "../../utils/dateFilter";
 
@@ -224,6 +228,97 @@ const AllTasks = () => {
     });
   }, [tasks, filters, dateFilter]);
 
+  const handleDownloadPDF = () => {
+    // Sort tasks by created date (oldest first, or newest first; using oldest first here)
+    const sortedTasks = [...filteredTasks].sort((a, b) => new Date(a.created_on) - new Date(b.created_on));
+
+    const tableColumn = [
+      "Task Detail", 
+      "Project Name", 
+      "Assigned User", 
+      "Status", 
+      "Allocated Hrs", 
+      "Working Hrs", 
+      "Due Date", 
+      "Ack?"
+    ];
+    const tableRows = [];
+
+    sortedTasks.forEach((task) => {
+      // Calculate working hours
+      const totalSeconds = task.workingHourTask?.reduce(
+        (acc, wh) => acc + (Number(wh.duration_seconds) || 0),
+        0
+      ) || 0;
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const formattedWorkingHours = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+
+      // Check unacknowledged comments
+      const hasUnacknowledgedComments = task.taskcomment?.some(
+        (c) => c.acknowledged === false
+      );
+
+      tableRows.push([
+        task.name || "N/A",
+        task.project?.name || "N/A",
+        task.user ? `${task.user.firstName} ${task.user.lastName}` : "Unassigned",
+        task.status || "Unknown",
+        task.allocationLog?.allocatedHours || "—",
+        formattedWorkingHours,
+        formatDate(task.due_date),
+        hasUnacknowledgedComments ? "No" : "Yes"
+      ]);
+    });
+
+    const doc = new jsPDF("landscape");
+    doc.text("Tasks Report", 14, 15);
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+      rowPageBreak: 'avoid', // Prevents rows from cutting across pages
+      headStyles: { fillColor: [22, 163, 74] } // Green-600 header
+    });
+    doc.save("Tasks_Report.pdf");
+  };
+
+  const handleDownloadExcel = () => {
+    const sortedTasks = [...filteredTasks].sort((a, b) => new Date(a.created_on) - new Date(b.created_on));
+    const reportData = sortedTasks.map((task) => {
+      // Calculate working hours
+      const totalSeconds = task.workingHourTask?.reduce(
+        (acc, wh) => acc + (Number(wh.duration_seconds) || 0),
+        0
+      ) || 0;
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const formattedWorkingHours = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+
+      // Check unacknowledged comments
+      const hasUnacknowledgedComments = task.taskcomment?.some(
+        (c) => c.acknowledged === false
+      );
+
+      return {
+        "Task Detail": task.name || "N/A",
+        "Project Name": task.project?.name || "N/A",
+        "Assigned User": task.user ? `${task.user.firstName} ${task.user.lastName}` : "Unassigned",
+        "Status": task.status || "Unknown",
+        "Allocated Hours": task.allocationLog?.allocatedHours || "—",
+        "Working Hours": formattedWorkingHours,
+        "Due Date": formatDate(task.due_date),
+        "Comment Acknowledged": hasUnacknowledgedComments ? "No" : "Yes"
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(reportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Tasks Report");
+    XLSX.writeFile(workbook, "Tasks_Report.xlsx");
+  };
+
   const columns = useMemo(
     () => [
       {
@@ -405,9 +500,29 @@ const AllTasks = () => {
     <div className="p-4 md:p-2 w-full mx-auto animate-in fade-in duration-700 flex flex-col gap-4">
       {/* Filters Section */}
       <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-        <div className="flex items-center gap-2 mb-3">
-          <Filter size={16} className="text-gray-400" />
-          <span className="text-xs font-black text-gray-500 uppercase tracking-widest">Filters</span>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Filter size={16} className="text-gray-400" />
+            <span className="text-xs font-black text-gray-500 uppercase tracking-widest">Filters</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDownloadExcel}
+              disabled={filteredTasks.length === 0}
+              className="flex w-fit items-center gap-1.5 px-3 py-1.5 border border-green-600 bg-green-50 text-green-700 hover:bg-green-100 rounded-md transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+            >
+              <Download size={14} />
+              <span className="font-bold">Excel</span>
+            </button>
+            <button
+              onClick={handleDownloadPDF}
+              disabled={filteredTasks.length === 0}
+              className="flex w-fit items-center gap-1.5 px-3 py-1.5 border border-red-600 bg-red-50 text-red-700 hover:bg-red-100 rounded-md transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+            >
+              <Download size={14} />
+              <span className="font-bold">PDF</span>
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-end gap-4">
@@ -479,13 +594,6 @@ const AllTasks = () => {
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        {/* <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full border border-green-100">
-          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-          <span className="text-sm font-semibold text-green-700">
-            {tasks.length} Total Tasks
-          </span>
-        </div> */}
-
         {Object.keys(rowSelection).length > 0 && (
           <button
             onClick={() => setShowBulkUpdateModal(true)}
