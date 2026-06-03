@@ -67,7 +67,11 @@ const AllTasks = () => {
             : [];
 
         // Fetch unread comments async
-        Service.FetchUnreadCommentsMyTasks()
+        const fetchUnread = ['admin', 'deputy_manager', 'dept_manager', 'project_manager'].includes(userRole)
+          ? Service.FetchUnreadCommentsMyTeam()
+          : Service.FetchUnreadCommentsMyTasks();
+
+        fetchUnread
           .then(res => setUnreadComments(res?.data || res || []))
           .catch(err => console.error("Failed to fetch unread comments", err));
 
@@ -99,7 +103,11 @@ const AllTasks = () => {
           : [];
 
       // Fetch unread comments async
-      Service.FetchUnreadCommentsMyTasks()
+      const fetchUnread = ['admin', 'deputy_manager', 'dept_manager', 'project_manager'].includes(userRole)
+        ? Service.FetchUnreadCommentsMyTeam()
+        : Service.FetchUnreadCommentsMyTasks();
+
+      fetchUnread
         .then(res => setUnreadComments(res?.data || res || []))
         .catch(err => console.error("Failed to fetch unread comments", err));
 

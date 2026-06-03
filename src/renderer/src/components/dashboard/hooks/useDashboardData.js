@@ -111,7 +111,11 @@ export const useDashboardData = () => {
     setLoading(true)
     
     // Fetch Unread Comments async without blocking other data
-    Service.FetchUnreadCommentsMyTasks()
+    const fetchUnread = ['admin', 'deputy_manager', 'dept_manager', 'project_manager'].includes(userRole)
+      ? Service.FetchUnreadCommentsMyTeam()
+      : Service.FetchUnreadCommentsMyTasks();
+
+    fetchUnread
       .then(res => {
         const comments = res?.data || res || [];
         setUnreadComments(comments);

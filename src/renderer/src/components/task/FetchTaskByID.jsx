@@ -64,7 +64,10 @@ const FetchTaskByID = ({
       async (entries) => {
         if (entries[0].isIntersecting) {
           try {
-            const unreadRes = await Service.FetchUnreadCommentsMyTasks();
+            const fetchUnread = ['admin', 'deputy_manager', 'dept_manager', 'project_manager'].includes(userRole)
+              ? Service.FetchUnreadCommentsMyTeam()
+              : Service.FetchUnreadCommentsMyTasks();
+            const unreadRes = await fetchUnread;
             const unreads = unreadRes?.data || unreadRes || [];
             const taskUnreads = unreads.filter(c => String(c.task_id) === String(id) || String(c.taskId) === String(id));
             if (taskUnreads.length > 0) {
