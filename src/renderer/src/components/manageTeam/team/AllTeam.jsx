@@ -137,16 +137,17 @@ const AllTeam = () => {
           onRowClick={handleRowClick}
           onDelete={handleDelete}
           pageSizeOptions={[10, 20, 50]}
-          detailComponent={({ row, close }) => <GetTeamById id={row.id} onClose={close} />}
         />
       </div>
 
-      {/* Optional: Close detail on backdrop */}
+      {/* Modal View for Team Details */}
       {selectedTeamId && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setSelectedTeamId(null)}
-        />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <GetTeamById 
+            id={selectedTeamId} 
+            onClose={() => setSelectedTeamId(null)} 
+          />
+        </div>
       )}
     </div>
   );

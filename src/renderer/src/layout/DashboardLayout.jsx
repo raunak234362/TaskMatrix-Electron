@@ -72,7 +72,7 @@ const Layout = () => {
       <div className="flex flex-col flex-1 min-w-0 min-h-0 relative z-50 bg-[#f9fafb]">
         {/* Header - Sticky top with border */}
         {!isAnyModalOpen && (
-          <div className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur-sm">
+          <div className="sticky top-0 z-20 w-full border-b border-gray-200 bg-white/95 backdrop-blur-sm">
             <Header isMinimized={isMinimized} toggleSidebar={toggleSidebar} isMobileOpen={isMobileOpen} />
           </div>
         )}

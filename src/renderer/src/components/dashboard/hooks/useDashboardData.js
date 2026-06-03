@@ -7,6 +7,7 @@ export const useDashboardData = () => {
   const [loading, setLoading] = useState(true)
   const [tasks, setTasks] = useState([])
   const [projectNotes, setProjectNotes] = useState([])
+  const [unreadComments, setUnreadComments] = useState([])
 
   // Role Based Logic
   const userRoleRaw = sessionStorage.getItem('userRole')
@@ -108,6 +109,15 @@ export const useDashboardData = () => {
   const fetchData = useCallback(async () => {
     console.log('🔍 fetchData called:', { userRole, isAdminRole })
     setLoading(true)
+    
+    // Fetch Unread Comments async without blocking other data
+    Service.FetchUnreadCommentsMyTasks()
+      .then(res => {
+        const comments = res?.data || res || [];
+        setUnreadComments(comments);
+      })
+      .catch(err => console.error('Failed to fetch unread comments', err));
+
     try {
       if (isAdminRole) {
         // Fetch Admin Data
@@ -568,6 +578,7 @@ export const useDashboardData = () => {
     adminData,
     fetchData,
     memberStats,
-    memberLoading
+    memberLoading,
+    unreadComments
   }
 }

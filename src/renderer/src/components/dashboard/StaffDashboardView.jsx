@@ -2,7 +2,8 @@ import React from 'react'
 import {
     Clock,
     Calendar,
-    Bell
+    Bell,
+    MessageCircleWarning
 } from 'lucide-react'
 import UserStatsWidget from './components/UserStatsWidget'
 import LiveTaskTimer from './components/LiveTaskTimer'
@@ -12,6 +13,7 @@ const StaffDashboardView = ({
     loading,
     tasks,
     projectNotes,
+    unreadComments,
     currentTask,
     handlers
 }) => {
@@ -25,7 +27,7 @@ const StaffDashboardView = ({
         <div className="flex flex-col gap-8 lg:gap-10 transition-all duration-300 ease-in-out">
             {/* Row 1: Priority Header Row */}
             <div className="relative">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 relative z-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 relative z-10">
                         {/* 1. Priority Focus */}
                         <div
                             className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-between hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group"
@@ -88,7 +90,25 @@ const StaffDashboardView = ({
                                     <span className="text-[13px] font-black text-gray-700 uppercase tracking-widest">Notes & Updates</span>
                                 </div>
                                 <span className="text-3xl font-black text-amber-600 tracking-tighter">
-                                    {projectNotes.length}
+                                    {projectNotes?.length || 0}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* 4. Unread Comments Trigger */}
+                        <div
+                            className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                            onClick={() => handlers.setShowUnreadCommentsPopup?.(true)}
+                        >
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2.5 bg-red-100/60 rounded-xl border border-red-200 shadow-sm group-hover:scale-110 transition-transform">
+                                        <MessageCircleWarning className="w-5 h-5 text-red-600" strokeWidth={2.5} />
+                                    </div>
+                                    <span className="text-[13px] font-black text-gray-700 uppercase tracking-widest">Unread Comments</span>
+                                </div>
+                                <span className="text-3xl font-black text-red-600 tracking-tighter">
+                                    {unreadComments?.length || 0}
                                 </span>
                             </div>
                         </div>

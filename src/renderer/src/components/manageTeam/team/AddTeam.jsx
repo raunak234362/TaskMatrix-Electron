@@ -29,10 +29,9 @@ const AddTeam = ({ onClose }) => {
       setLoading(true);
 
       const rolesToFetch = [
-        "ADMIN",
-        "DEPT_MANAGER",
         "PROJECT_MANAGER",
-        "PROJECT_MANAGER_OFFICER",
+        "DEPT_MANAGER",
+        "DEPUTY_MANAGER"
       ];
 
       const promises = rolesToFetch.map((role) =>
@@ -69,11 +68,9 @@ const AddTeam = ({ onClose }) => {
       .filter((user) => {
         const role = user.role?.toUpperCase();
         return [
-          "ADMIN",
-          "DEPT_MANAGER",
           "PROJECT_MANAGER",
-          "PROJECT_MANAGER_OFFICER",
-          "TEAM_LEAD",
+          "DEPT_MANAGER",
+          "DEPUTY_MANAGER"
         ].includes(role);
       })
       .map((user) => ({

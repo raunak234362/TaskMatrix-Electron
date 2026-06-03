@@ -34,6 +34,7 @@ const AllTasks = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [unreadComments, setUnreadComments] = useState([]);
 
   const [filters, setFilters] = useState({
     projectName: "All Projects",
@@ -65,6 +66,11 @@ const AllTasks = () => {
             ? Object.values(response.data)
             : [];
 
+        // Fetch unread comments async
+        Service.FetchUnreadCommentsMyTasks()
+          .then(res => setUnreadComments(res?.data || res || []))
+          .catch(err => console.error("Failed to fetch unread comments", err));
+
         setTasks(taskData);
         setLoading(false);
       } catch (err) {
@@ -91,6 +97,11 @@ const AllTasks = () => {
         : response.data
           ? Object.values(response.data)
           : [];
+
+      // Fetch unread comments async
+      Service.FetchUnreadCommentsMyTasks()
+        .then(res => setUnreadComments(res?.data || res || []))
+        .catch(err => console.error("Failed to fetch unread comments", err));
 
       setTasks(taskData);
       setRowSelection({});
@@ -328,6 +339,9 @@ const AllTasks = () => {
           const hasUnacknowledgedComments = row.original.taskcomment?.some(
             (c) => c.acknowledged === false
           );
+          const hasUnreadComments = unreadComments.some(
+            (c) => String(c.task_id) === String(row.original.id) || String(c.taskId) === String(row.original.id)
+          );
 
           return (
             <div className="flex flex-col">
@@ -337,6 +351,11 @@ const AllTasks = () => {
               {hasUnacknowledgedComments && (
                 <span className="text-[10px] text-red-500 font-bold flex items-center gap-1 mt-1 uppercase tracking-wider">
                   <AlertCircle className="w-3 h-3" /> Unacknowledged Comment
+                </span>
+              )}
+              {hasUnreadComments && (
+                <span className="text-[10px] text-red-600 font-bold flex items-center gap-1 mt-1 uppercase tracking-wider bg-red-50 w-fit px-1.5 py-0.5 rounded-sm border border-red-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span> New Comment
                 </span>
               )}
             </div>
@@ -465,7 +484,7 @@ const AllTasks = () => {
         ),
       },
     ],
-    [userRole]
+    [userRole, unreadComments]
   );
 
   if (loading) {

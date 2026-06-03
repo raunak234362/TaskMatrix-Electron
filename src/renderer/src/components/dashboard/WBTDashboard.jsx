@@ -13,6 +13,7 @@ import StaffDashboardView from './StaffDashboardView'
 import UpcomingSubmittals from './components/UpcomingSubmittals'
 import UpcomingDeadlinesWidget from './components/UpcomingDeadlinesWidget'
 import PersonalNotesWidget from './components/PersonalNotesWidget'
+import UnreadCommentsWidget from './components/UnreadCommentsWidget'
 
 // Lazy load components
 const FetchTaskByID = lazy(() => import('../task/FetchTaskByID'))
@@ -62,7 +63,8 @@ const WBTDashboard = () => {
     userStats,
     adminData,
     fetchData,
-    memberStats
+    memberStats,
+    unreadComments
   } = useDashboardData()
 
   // Modal States
@@ -85,6 +87,7 @@ const WBTDashboard = () => {
   const [showSubmittalsPopup, setShowSubmittalsPopup] = useState(false)
   const [showDeadlinesPopup, setShowDeadlinesPopup] = useState(false)
   const [showNotesPopup, setShowNotesPopup] = useState(false)
+  const [showUnreadCommentsPopup, setShowUnreadCommentsPopup] = useState(false)
 
   // Sync Modal State with Redux
   useEffect(() => {
@@ -96,7 +99,8 @@ const WBTDashboard = () => {
       selectedProject !== null ||
       showSubmittalsPopup ||
       showDeadlinesPopup ||
-      showNotesPopup
+      showNotesPopup ||
+      showUnreadCommentsPopup
     dispatch(setModalOpen(isAnyModalOpen))
   }, [
     projectModal.isOpen,
@@ -107,6 +111,7 @@ const WBTDashboard = () => {
     showSubmittalsPopup,
     showDeadlinesPopup,
     showNotesPopup,
+    showUnreadCommentsPopup,
     dispatch
   ])
 
@@ -240,6 +245,7 @@ const WBTDashboard = () => {
             userRole={userRole}
             currentTask={currentTask}
             memberStats={memberStats}
+            unreadComments={unreadComments}
             handlers={{
               handleProjectStatClick,
               handleActionClick,
@@ -247,6 +253,7 @@ const WBTDashboard = () => {
               setShowSubmittalsPopup,
               setShowDeadlinesPopup,
               setShowNotesPopup,
+              setShowUnreadCommentsPopup,
               handleInvoiceClick: (id) => setDetailModal({ isOpen: true, type: 'INVOICE', id }),
               onRFQClick: (id) => setDetailModal({ isOpen: true, type: 'RFQ', id })
             }}
@@ -257,11 +264,13 @@ const WBTDashboard = () => {
             loading={loading}
             tasks={tasks}
             projectNotes={projectNotes}
+            unreadComments={unreadComments}
             currentTask={currentTask}
             handlers={{
               setDetailTaskId,
               setShowDeadlinesPopup,
-              setShowNotesPopup
+              setShowNotesPopup,
+              setShowUnreadCommentsPopup
             }}
           />
         )}
@@ -371,6 +380,27 @@ const WBTDashboard = () => {
                 </div>
                 <div className="px-6 pb-6">
                   <PersonalNotesWidget projectNotes={projectNotes} />
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+        {showUnreadCommentsPopup && createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="bg-white w-full max-w-4xl max-h-[80vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+              <div className="flex-1 overflow-auto">
+                <div className="sticky top-0 right-0 p-3 flex justify-end z-20 bg-white/80 backdrop-blur-sm">
+                  <button
+                    onClick={() => setShowUnreadCommentsPopup(false)}
+                    className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+                  >
+                    Close
+                  </button>
+                </div>
+                <div className="px-6 pb-6">
+                  <UnreadCommentsWidget unreadComments={unreadComments} onTaskClick={(id) => { setDetailTaskId(id); setShowUnreadCommentsPopup(false); }} />
                 </div>
               </div>
             </div>
