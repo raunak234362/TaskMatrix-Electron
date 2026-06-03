@@ -1,3 +1,4 @@
+import React, { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import AuthService from "../../api/auth";
 import Background from "../../assets/Green Banana Leaf Pattern Reminder Facebook Post(1).jpg";
@@ -13,35 +14,73 @@ const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const [showOTP, setShowOTP] = useState(false);
+  const [challengeToken, setChallengeToken] = useState("");
+  const [otp, setOtp] = useState(new Array(6).fill(""));
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  const handleOtpChange = (element, index) => {
+    if (isNaN(element.value)) return false;
+
+    setOtp([...otp.map((d, idx) => (idx === index ? element.value : d))]);
+
+    // Focus next input
+    if (element.nextSibling) {
+      element.nextSibling.focus();
+    }
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Backspace") {
+      if (!otp[index] && e.target.previousSibling) {
+        e.target.previousSibling.focus();
+      }
+    }
+  };
+
+  const processLoginSuccess = (token, userDetail, responseData) => {
+    if (!token) {
+      throw new Error("Invalid Credentials: Token not found in response");
+    }
+
+    sessionStorage.setItem("token", token);
+    if (userDetail?.role) {
+      sessionStorage.setItem("userRole", userDetail.role);
+    }
+
+    dispatch(login(token));
+    if (userDetail) {
+      dispatch(setUserData(userDetail));
+    }
+
+    const role = userDetail?.role?.toLowerCase() || "";
+    if (role === "sales" || role === "sales_manager") {
+      navigate("/dashboard/sales");
+    } else if (role === "connection_designer_engineer") {
+      navigate("/dashboard/designer");
+    } else {
+      navigate("/dashboard");
+    }
+    console.log("Login Successful:", responseData);
+  };
+
   const Submit = async (data) => {
     try {
       const userLogin = await AuthService.login(data);
+
+      if (userLogin?.requiresVerification || userLogin?.data?.requiresVerification) {
+        const token = userLogin?.challengeToken || userLogin?.data?.challengeToken;
+        const msg = userLogin?.message || userLogin?.data?.message || "A verification challenge has been sent to your registered email address.";
+        setChallengeToken(token);
+        setShowOTP(true);
+        alert(msg);
+        return;
+      }
+
       const token = userLogin?.data?.token || userLogin?.token;
       const userDetail = userLogin?.data?.user || userLogin?.user;
+      processLoginSuccess(token, userDetail, userLogin);
 
-      if (!token) {
-        throw new Error("Invalid Credentials: Token not found in response");
-      }
-
-      sessionStorage.setItem("token", token);
-      if (userDetail?.role) {
-        sessionStorage.setItem("userRole", userDetail.role);
-      }
-
-      dispatch(login(token));
-      if (userDetail) {
-        dispatch(setUserData(userDetail));
-      }
-
-      const role = userDetail?.role?.toLowerCase() || "";
-      if (role === "sales" || role === "sales_manager") {
-        navigate("/dashboard/sales");
-      } else if (role === "connection_designer_engineer") {
-        navigate("/dashboard/designer");
-      } else {
-        navigate("/dashboard");
-      }
-      console.log("Login Successful:", userLogin);
     } catch (error) {
       console.error("Error While Logging in:", error);
       const errorMessage =
@@ -49,6 +88,33 @@ const Login = () => {
         error.message ||
         "Login failed. Please check your credentials.";
       alert(errorMessage);
+    }
+  };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    const otpValue = otp.join("");
+    if (otpValue.length !== 6) {
+      alert("Please enter a 6-digit OTP.");
+      return;
+    }
+    try {
+      setIsVerifying(true);
+      const verifyResponse = await AuthService.verifyChallenge({ otp: otpValue, challengeToken });
+      
+      const token = verifyResponse?.data?.token || verifyResponse?.token;
+      const userDetail = verifyResponse?.data?.user || verifyResponse?.user;
+
+      processLoginSuccess(token, userDetail, verifyResponse);
+    } catch (error) {
+      console.error("Error While Verifying:", error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        error.message ||
+        "Verification failed. Please check your OTP.";
+      alert(errorMessage);
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -77,47 +143,89 @@ const Login = () => {
               <p className="text-center text-4xl md:text-5xl text-gray-700 font-light leading-tight">
                 Welcome to <br />
                 <span className=" text-green-700">Task Matrix <span className=" text-green-700 text-xs">verion: 1.1.0</span></span>
-                
               </p>
               <p className="text-center text-lg text-gray-500 mt-4">
-                Please login to continue
+                {showOTP ? "Verify your identity" : "Please login to continue"}
               </p>
             </div>
 
-            <form onSubmit={handleSubmit(Submit)} className="flex flex-col w-full gap-6">
-              <div>
-                <Input
-                  label="Username"
-                  placeholder="USERNAME"
-                  className="rounded-[6px] border-gray-200 focus:border-green-600 focus:ring-green-600"
-                  type="text"
-                  {...register("username", {
-                    required: "Username is required",
-                  })}
-                />
-              </div>
+            {!showOTP ? (
+              <form onSubmit={handleSubmit(Submit)} className="flex flex-col w-full gap-6">
+                <div>
+                  <Input
+                    label="Username"
+                    placeholder="USERNAME"
+                    className="rounded-[6px] border-gray-200 focus:border-green-600 focus:ring-green-600"
+                    type="text"
+                    {...register("username", {
+                      required: "Username is required",
+                    })}
+                  />
+                </div>
 
-              <div>
-                <Input
-                  label="Password"
-                  placeholder="PASSWORD"
-                  type="password"
-                  className="rounded-[6px] border-gray-200 focus:border-green-600 focus:ring-green-600"
-                  {...register("password", {
-                    required: "Password is required",
-                  })}
-                />
-              </div>
+                <div>
+                  <Input
+                    label="Password"
+                    placeholder="PASSWORD"
+                    type="password"
+                    className="rounded-[6px] border-gray-200 focus:border-green-600 focus:ring-green-600"
+                    {...register("password", {
+                      required: "Password is required",
+                    })}
+                  />
+                </div>
 
-              <div className="mt-4">
-                <Button
-                  type="submit"
-                  className="w-full text-2xl  py-4 rounded-[6px] bg-green-600 hover:bg-green-700 transition-all duration-300 shadow-lg shadow-green-600/30 text-white"
+                <div className="mt-4">
+                  <Button
+                    type="submit"
+                    className="w-full text-2xl py-4 rounded-[6px] bg-green-600 hover:bg-green-700 transition-all duration-300 shadow-lg shadow-green-600/30 text-white"
+                  >
+                    Login
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleVerify} className="flex flex-col w-full gap-6 items-center">
+                <p className="text-sm text-gray-600 text-center mb-2">
+                  Enter the 6-digit OTP sent to your registered email address.
+                </p>
+                <div className="flex gap-2 justify-center">
+                  {otp.map((data, index) => {
+                    return (
+                      <input
+                        className="w-12 h-14 text-center text-xl font-bold border border-gray-300 rounded-[6px] focus:border-green-600 focus:ring-green-600 outline-none"
+                        type="text"
+                        name="otp"
+                        maxLength="1"
+                        key={index}
+                        value={data}
+                        onChange={(e) => handleOtpChange(e.target, index)}
+                        onFocus={(e) => e.target.select()}
+                        onKeyDown={(e) => handleKeyDown(e, index)}
+                      />
+                    );
+                  })}
+                </div>
+
+                <div className="mt-4 w-full">
+                  <Button
+                    type="submit"
+                    disabled={isVerifying}
+                    className="w-full text-2xl py-4 rounded-[6px] bg-green-600 hover:bg-green-700 transition-all duration-300 shadow-lg shadow-green-600/30 text-white disabled:opacity-50"
+                  >
+                    {isVerifying ? "Verifying..." : "Verify OTP"}
+                  </Button>
+                </div>
+                
+                <button
+                  type="button"
+                  onClick={() => setShowOTP(false)}
+                  className="mt-2 text-green-600 hover:text-green-700 underline text-sm font-medium"
                 >
-                  Login
-                </Button>
-              </div>
-            </form>
+                  Back to Login
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </div>
