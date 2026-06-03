@@ -90,8 +90,11 @@ const Comment = ({ comments, onAddComment, staffData, onAcknowledge }) => {
                         <Check className="w-3 h-3" />
                         <span>Read</span>
                         {comment.acknowledgedTime && (
-                          <span className="text-gray-400 font-normal">
+                          <span className="text-gray-400 font-normal ml-1 uppercase">
                             at {new Date(comment.acknowledgedTime).toLocaleString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
                               hour: "2-digit",
                               minute: "2-digit",
                             })}

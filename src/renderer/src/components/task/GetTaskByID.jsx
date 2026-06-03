@@ -478,6 +478,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
         <UpdateStatusModal
           taskId={task.id}
           currentStatus={task.status}
+          hasUnacknowledgedComments={task.taskcomment?.some(c => c.acknowledged === false)}
           onClose={() => setIsUpdatingStatus(false)}
           refresh={() => {
             fetchTask()

@@ -229,13 +229,24 @@ const AllTasks = () => {
       {
         accessorKey: "name",
         header: "Task Details",
-        cell: ({ row }) => (
-          <div className="flex flex-col">
-            <span className="font-semibold text-black group-hover:text-green-700 transition-colors">
-              {row.original.name}
-            </span>
-          </div>
-        ),
+        cell: ({ row }) => {
+          const hasUnacknowledgedComments = row.original.taskcomment?.some(
+            (c) => c.acknowledged === false
+          );
+
+          return (
+            <div className="flex flex-col">
+              <span className="font-semibold text-black group-hover:text-green-700 transition-colors">
+                {row.original.name}
+              </span>
+              {hasUnacknowledgedComments && (
+                <span className="text-[10px] text-red-500 font-bold flex items-center gap-1 mt-1 uppercase tracking-wider">
+                  <AlertCircle className="w-3 h-3" /> Unacknowledged Comment
+                </span>
+              )}
+            </div>
+          );
+        },
       },
       {
         accessorKey: "project.name",
@@ -531,6 +542,12 @@ const AllTasks = () => {
       {showBulkUpdateModal && (
         <BulkUpdateStatusModal
           selectedIds={Object.keys(rowSelection)}
+          hasUnacknowledgedComments={
+            Object.keys(rowSelection).some(id => {
+              const task = tasks.find(t => t.id.toString() === id.toString());
+              return task?.taskcomment?.some(c => c.acknowledged === false);
+            })
+          }
           onClose={() => setShowBulkUpdateModal(false)}
           refresh={refreshTasks}
         />

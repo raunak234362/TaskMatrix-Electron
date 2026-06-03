@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import Service from "../../../api/Service";
 import { Button } from "../../ui/button";
 
-const UpdateStatusModal = ({ taskId, currentStatus, onClose, refresh }) => {
+const UpdateStatusModal = ({ taskId, currentStatus, hasUnacknowledgedComments, onClose, refresh }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const statusOptions = [
@@ -53,12 +53,13 @@ const UpdateStatusModal = ({ taskId, currentStatus, onClose, refresh }) => {
                         {statusOptions.map((option) => (
                             <button
                                 key={option.value}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || (option.value === "COMPLETED" && hasUnacknowledgedComments)}
                                 onClick={() => handleUpdate(option.value)}
+                                title={option.value === "COMPLETED" && hasUnacknowledgedComments ? "Cannot mark as completed with unacknowledged comments" : undefined}
                                 className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all duration-200 ${currentStatus === option.value
                                     ? "border-green-600 bg-green-50 text-green-700"
                                     : "border-slate-100 hover:border-green-200 hover:bg-slate-50 text-slate-700 font-medium"
-                                    }`}
+                                    } ${(option.value === "COMPLETED" && hasUnacknowledgedComments) ? "opacity-50 cursor-not-allowed" : ""}`}
                             >
                                 <div className="flex items-center gap-3">
                                     <div className={`p-2 rounded-lg ${currentStatus === option.value ? "bg-green-100" : "bg-slate-100"}`}>

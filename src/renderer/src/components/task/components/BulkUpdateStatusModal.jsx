@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import Service from "../../../api/Service";
 import { Button } from "../../ui/button";
 
-const BulkUpdateStatusModal = ({ selectedIds, onClose, refresh }) => {
+const BulkUpdateStatusModal = ({ selectedIds, hasUnacknowledgedComments, onClose, refresh }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [progress, setProgress] = useState(0);
 
@@ -87,12 +87,13 @@ const BulkUpdateStatusModal = ({ selectedIds, onClose, refresh }) => {
                                 {statusOptions.map((option) => (
                                     <button
                                         key={option.value}
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || (option.value === "COMPLETED" && hasUnacknowledgedComments)}
                                         onClick={() => handleBulkUpdate(option.value)}
-                                        className="flex items-center justify-between px-4 text-black py-3 rounded-xl border-2 transition-all duration-200 border-slate-100  hover:border-green-200  hover:bg-slate-50   font-medium group"
+                                        title={option.value === "COMPLETED" && hasUnacknowledgedComments ? "Cannot mark as completed: one or more selected tasks have unacknowledged comments" : undefined}
+                                        className={`flex items-center justify-between px-4 text-black py-3 rounded-xl border-2 transition-all duration-200 border-slate-100 hover:border-green-200 hover:bg-slate-50 font-medium group ${(option.value === "COMPLETED" && hasUnacknowledgedComments) ? "opacity-50 cursor-not-allowed" : ""}`}
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="p-2 rounded-lg bg-slate-100  group-hover:bg-green-100  transition-colors">
+                                            <div className="p-2 rounded-lg bg-slate-100 group-hover:bg-green-100 transition-colors">
                                                 {option.icon}
                                             </div>
                                             <span className="">{option.label}</span>
