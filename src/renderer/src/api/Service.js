@@ -2502,6 +2502,58 @@ class Service {
     }
   }
 
+  // Fetch My Comments
+  static async FetchMyComments() {
+    try {
+      const response = await api.get(`comment/myComments`, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching my comments:', error)
+      throw error
+    }
+  }
+
+  // Fetch Unread Comments for My Tasks
+  static async FetchUnreadCommentsMyTasks() {
+    try {
+      const response = await api.get(`comment/unread/my-tasks`, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching unread comments for my tasks:', error)
+      throw error
+    }
+  }
+
+  // Fetch Unread Comments for My Team
+  static async FetchUnreadCommentsMyTeam() {
+    try {
+      const response = await api.get(`comment/unread/my-team`, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching unread comments for my team:', error)
+      throw error
+    }
+  }
+
+  // Mark Comments as Read
+  static async MarkCommentsAsRead(data) {
+    try {
+      const response = await api.patch(`comment/read`, data, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error marking comments as read:', error)
+      throw error
+    }
+  }
+
   // Add Acknowledged by comment ID
   static async AddTaskCommentAcknowledged(id, data) {
     try {

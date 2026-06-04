@@ -23,35 +23,34 @@ const EditTeamById = ({ id, onClose, onSuccess }) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [teamRes, empRes] = await Promise.all([
-          Service.GetTeamByID(id),
-          Service.FetchAllEmployee(),
-        ]);
-
+        const teamRes = await Service.GetTeamByID(id);
         const team = teamRes?.data || teamRes;
-        const allEmps = empRes?.data || empRes || [];
 
         if (team) {
           reset({
             name: team.name || "",
-            managerId: team.managerId || team.manager?._id || team.manager?.id || "",
+            managerId: team.managerID || team.managerId || team.manager?._id || team.manager?.id || "",
           });
         }
 
-        // Filter employees based on the required roles for team manager
-        const allowedRoles = [
-          "project_manager",
-          "dept_manager",
-          "deputy_manager",
-          "operation_executive",
-          "admin",
+        const rolesToFetch = [
+          "PROJECT_MANAGER",
+          "DEPT_MANAGER",
+          "DEPUTY_MANAGER",
         ];
-        
-        const filteredEmps = allEmps.filter((emp) =>
-          allowedRoles.includes(emp.userType?.toLowerCase())
-        );
-        setEmployees(filteredEmps);
 
+        const promises = rolesToFetch.map((role) =>
+          Service.FetchEmployeeByRole(role).catch(() => ({
+            data: { employees: [] },
+          }))
+        );
+
+        const responses = await Promise.all(promises);
+        const allStaffs = responses
+          .flatMap((res) => res?.data?.employees || [])
+          .filter(Boolean);
+
+        setEmployees(allStaffs);
       } catch (error) {
         console.error("Error fetching team data:", error);
         toast.error("Failed to load team details");
@@ -135,7 +134,7 @@ const EditTeamById = ({ id, onClose, onSuccess }) => {
               <option value="">Select Manager</option>
               {employees.map((emp) => (
                 <option key={emp.id || emp._id} value={emp.id || emp._id}>
-                  {emp.firstName} {emp.lastName} ({emp.userType})
+                  {emp.firstName} {emp.lastName} {emp.role ? `(${emp.role.replace(/_/g, " ")})` : ""}
                 </option>
               ))}
             </select>

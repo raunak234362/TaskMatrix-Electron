@@ -9,7 +9,8 @@ import {
     Activity,
     CheckCircle2,
     Loader2,
-    RefreshCw
+    RefreshCw,
+    MessageCircleWarning
 } from 'lucide-react'
 import UserStatsWidget from './components/UserStatsWidget'
 import ProjectStats from './components/ProjectStats'
@@ -226,6 +227,7 @@ const AdminDashboardView = ({
     userRole,
     currentTask,
     handlers,
+    unreadComments,
     memberStats = []
 }) => {
     const {
@@ -355,6 +357,24 @@ const AdminDashboardView = ({
                                 </div>
                                     <span className="text-3xl font-black text-amber-600 tracking-tighter">
                                         {projectNotes.length}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            {/* Unread Comments Trigger */}
+                            <div
+                                className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                                onClick={() => handlers.setShowUnreadCommentsPopup?.(true)}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2.5 bg-red-100/60 rounded-xl border border-red-200 shadow-sm group-hover:scale-110 transition-transform">
+                                            <MessageCircleWarning className="w-5 h-5 text-red-600" strokeWidth={2.5} />
+                                        </div>
+                                        <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">Unread Comments</span>
+                                    </div>
+                                    <span className="text-3xl font-black text-red-600 tracking-tighter">
+                                        {unreadComments?.length || 0}
                                     </span>
                                 </div>
                             </div>

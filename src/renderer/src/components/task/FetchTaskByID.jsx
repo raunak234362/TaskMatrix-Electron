@@ -56,6 +56,36 @@ const FetchTaskByID = ({
     }
   };
 
+  const commentsRef = React.useRef(null);
+
+  useEffect(() => {
+    if (!task?.id) return;
+    const observer = new IntersectionObserver(
+      async (entries) => {
+        if (entries[0].isIntersecting) {
+          try {
+            const fetchUnread = ['admin', 'deputy_manager', 'dept_manager', 'project_manager'].includes(userRole)
+              ? Service.FetchUnreadCommentsMyTeam()
+              : Service.FetchUnreadCommentsMyTasks();
+            const unreadRes = await fetchUnread;
+            const unreads = unreadRes?.data || unreadRes || [];
+            const taskUnreads = unreads.filter(c => String(c.task_id) === String(id) || String(c.taskId) === String(id));
+            if (taskUnreads.length > 0) {
+              await Service.MarkCommentsAsRead({ commentIds: taskUnreads.map(c => c.id || c._id) });
+              if (refresh) refresh();
+            }
+          } catch (err) {
+            console.error("Failed to mark comments as read on scroll", err);
+          }
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (commentsRef.current) observer.observe(commentsRef.current);
+    return () => observer.disconnect();
+  }, [task?.id, id, refresh]);
+
   useEffect(() => {
     fetchTask();
     const fetchStaff = async () => {
@@ -621,7 +651,7 @@ const FetchTaskByID = ({
                 )}
 
               {/* Comments Section */}
-              <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-6">
+              <div ref={commentsRef} className="bg-white rounded-2xl p-6 border border-gray-200 mt-6">
                 <Comment
                   comments={task.taskcomment}
                   onAddComment={handleAddComment}
