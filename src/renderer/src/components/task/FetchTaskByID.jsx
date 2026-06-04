@@ -600,7 +600,7 @@ const FetchTaskByID = ({
                         />
                         <SummaryCardSession
                           icon={<Users />}
-                          label="Breaks"
+                          label="Sessions"
                           value={task.workingHourTask.length}
                         />
                         <SummaryCardStatus
