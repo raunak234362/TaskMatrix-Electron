@@ -110,17 +110,15 @@ const GetTeamByID = ({ id, onClose, onSuccess }) => {
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-black tracking-normal uppercase">
+            <h2 className="text-xl font-semibold text-black tracking-normal uppercase">
               {team.name}
             </h2>
-            <p className="text-[10px] font-bold text-black uppercase tracking-normal mt-1">
-              TEAM DETAILS AND MANAGEMENT
-            </p>
+         
           </div>
         </div>
         <button
           onClick={onClose}
-          className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+          className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
         >
           Close
         </button>
@@ -140,27 +138,27 @@ const GetTeamByID = ({ id, onClose, onSuccess }) => {
               {team.manager && (
                 <>
                   <div className="flex flex-col gap-1">
-                    <span className="text-black font-bold uppercase tracking-normal text-[10px] flex items-center gap-2">
+                    <span className="text-black font-semibold uppercase tracking-normal text-xs flex items-center gap-2">
                       <Mail className="w-3 h-3" /> Email
                     </span>
                     <a
                       href={`mailto:${team.manager.email}`}
-                      className="text-black font-semibold text-sm tracking-normal hover:text-[#6bbd45] transition-colors"
+                      className="text-black font-semibold text-base tracking-normal hover:text-[#6bbd45] transition-colors"
                     >
                       {team.manager.email}
                     </a>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-black font-bold uppercase tracking-normal text-[10px] flex items-center gap-2">
+                    <span className="text-black font-semibold uppercase tracking-normal text-xs flex items-center gap-2">
                       <Phone className="w-3 h-3" /> Phone
                     </span>
                     <a
                       href={`tel:${team.manager.phone}`}
-                      className="text-black font-semibold text-sm tracking-normal hover:text-[#6bbd45] transition-colors"
+                      className="text-black font-semibold text-base tracking-normal hover:text-[#6bbd45] transition-colors"
                     >
                       {team.manager.phone}
                       {team.manager.extension && (
-                        <span className="text-black text-[10px] ml-2 font-bold">
+                        <span className="text-black text-xs ml-2 font-semibold">
                           (EXT: {team.manager.extension})
                         </span>
                       )}
@@ -224,10 +222,10 @@ const GetTeamByID = ({ id, onClose, onSuccess }) => {
 // ── Reusable InfoRow ──
 const InfoRow = ({ label, value, icon }) => (
   <div className="flex flex-col gap-1">
-    <span className="text-black font-bold uppercase tracking-normal text-[10px] flex items-center gap-2">
+    <span className="text-black font-semibold uppercase tracking-normal text-xs flex items-center gap-2">
       {icon} {label}
     </span>
-    <span className="text-black font-semibold text-sm tracking-normal">{value}</span>
+    <span className="text-black font-semibold text-base tracking-normal">{value}</span>
   </div>
 );
 

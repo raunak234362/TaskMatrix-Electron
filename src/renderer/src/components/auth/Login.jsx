@@ -166,33 +166,33 @@ const Login = () => {
 
       <div className="relative z-10 grid w-screen min-h-screen grid-cols-1 md:grid-cols-2 overflow-x-hidden">
         {/* Logo section */}
-        <div className="flex items-center justify-center md:min-h-screen p-6">
-          <div className="flex items-center justify-center p-6 md:p-16 shadow-2xl shadow-green-950/20 bg-white/90 backdrop-blur-sm border-4 border-white rounded-[6px] w-full max-w-md">
+        <div className="flex items-center justify-center p-4 md:p-6">
+          <div className="flex items-center justify-center p-6 md:p-12 shadow-2xl shadow-green-950/20 bg-white/90 backdrop-blur-sm border-2 border-white rounded-[6px] w-full max-w-sm">
             <img src={LOGO} alt="Logo" className="w-full h-auto" />
           </div>
         </div>
 
         {/* Login form */}
-        <div className="flex items-center md:bg-white/10 md:backdrop-blur-xl justify-center p-6 md:p-0">
-          <div className="bg-white/95 h-fit w-full max-w-lg md:w-3/4 lg:w-2/3 rounded-[6px] border border-green-900/10 p-8 md:p-12 shadow-2xl shadow-green-950/20">
+        <div className="flex items-center md:bg-white/10 md:backdrop-blur-xl justify-center p-4 md:p-6">
+          <div className="bg-white/95 h-fit w-full max-w-md rounded-[6px] border border-green-900/10 p-6 sm:p-8 md:p-10 shadow-2xl shadow-green-950/20">
             {/* Welcome Message */}
-            <div className="mb-8">
-              <p className="text-center text-4xl md:text-5xl text-gray-700 font-light leading-tight">
+            <div className="mb-6">
+              <p className="text-center text-2xl sm:text-3xl text-gray-700 font-light leading-tight">
                 Welcome to <br />
-                <span className=" text-green-700">Task Matrix <span className=" text-green-700 text-xs">verion: 1.1.0</span></span>
+                <span className="text-green-700 font-normal">Task Matrix <span className="text-green-700 text-[10px] font-light">version: 1.1.0</span></span>
               </p>
-              <p className="text-center text-lg text-gray-500 mt-4">
+              <p className="text-center text-sm text-gray-500 mt-2">
                 {showOTP ? "Verify your identity" : "Please login to continue"}
               </p>
             </div>
 
             {!showOTP ? (
-              <form onSubmit={handleSubmit(Submit)} className="flex flex-col w-full gap-6">
+              <form onSubmit={handleSubmit(Submit)} className="flex flex-col w-full gap-4">
                 <div>
                   <Input
                     label="Username"
                     placeholder="USERNAME"
-                    className="rounded-[6px] border-gray-200 focus:border-green-600 focus:ring-green-600"
+                    className="rounded-[6px] border-gray-200 focus:border-green-600 focus:ring-green-600 py-2 text-sm"
                     type="text"
                     {...register("username", {
                       required: "Username is required",
@@ -205,22 +205,22 @@ const Login = () => {
                     label="Password"
                     placeholder="PASSWORD"
                     type="password"
-                    className="rounded-[6px] border-gray-200 focus:border-green-600 focus:ring-green-600"
+                    className="rounded-[6px] border-gray-200 focus:border-green-600 focus:ring-green-600 py-2 text-sm"
                     {...register("password", {
                       required: "Password is required",
                     })}
                   />
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-2">
                   <Button
                     type="submit"
                     disabled={isLoggingIn}
-                    className="w-full text-2xl py-4 rounded-[6px] bg-green-600 hover:bg-green-700 transition-all duration-300 shadow-lg shadow-green-600/30 text-white disabled:opacity-50 flex items-center justify-center"
+                    className="w-full text-lg py-2.5 rounded-[6px] bg-green-600 hover:bg-green-700 transition-all duration-300 shadow-lg shadow-green-600/30 text-white disabled:opacity-50 flex items-center justify-center cursor-pointer font-semibold"
                   >
                     {isLoggingIn ? (
                       <>
-                        <Loader2 className="w-6 h-6 mr-3 animate-spin" />
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                         Logging in...
                       </>
                     ) : (
@@ -230,15 +230,15 @@ const Login = () => {
                 </div>
               </form>
             ) : (
-              <form onSubmit={handleVerify} className="flex flex-col w-full gap-6 items-center">
-                <p className="text-sm text-gray-600 text-center mb-2">
+              <form onSubmit={handleVerify} className="flex flex-col w-full gap-4 items-center">
+                <p className="text-xs text-gray-600 text-center mb-1">
                   Enter the 6-digit OTP sent to your registered email address.
                 </p>
-                <div className="flex gap-2 justify-center">
+                <div className="flex gap-1.5 justify-center">
                   {otp.map((data, index) => {
                     return (
                       <input
-                        className="w-12 h-14 text-center text-xl font-bold border border-gray-300 rounded-[6px] focus:border-green-600 focus:ring-green-600 outline-none"
+                        className="w-10 h-12 text-center text-lg font-bold border border-gray-300 rounded-[6px] focus:border-green-600 focus:ring-green-600 outline-none"
                         type="text"
                         name="otp"
                         maxLength="1"
@@ -252,11 +252,11 @@ const Login = () => {
                   })}
                 </div>
 
-                <div className="mt-4 w-full">
+                <div className="mt-2 w-full">
                   <Button
                     type="submit"
                     disabled={isVerifying}
-                    className="w-full text-2xl py-4 rounded-[6px] bg-green-600 hover:bg-green-700 transition-all duration-300 shadow-lg shadow-green-600/30 text-white disabled:opacity-50"
+                    className="w-full text-lg py-2.5 rounded-[6px] bg-green-600 hover:bg-green-700 transition-all duration-300 shadow-lg shadow-green-600/30 text-white disabled:opacity-50 cursor-pointer font-semibold"
                   >
                     {isVerifying ? "Verifying..." : "Verify OTP"}
                   </Button>
@@ -265,7 +265,7 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowOTP(false)}
-                  className="mt-2 text-green-600 hover:text-green-700 underline text-sm font-medium"
+                  className="mt-2 text-green-600 hover:text-green-700 underline text-xs font-medium cursor-pointer"
                 >
                   Back to Login
                 </button>

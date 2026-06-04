@@ -81,68 +81,61 @@ const EfficiencyAnalytics = ({
 
   return (
     <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-none border border-black shadow-soft h-full flex flex-col">
-      <div className="flex-shrink-0">
-          <h3 className="text-2xl font-semibold text-black uppercase tracking-tight whitespace-nowrap">
-            Efficiency Analytics
-          </h3>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-black/5 pb-4">
+        <h3 className="text-xl sm:text-2xl font-semibold text-black uppercase tracking-tight whitespace-nowrap">
+          Efficiency Analytics
+        </h3>
+        <div className="w-full md:w-48 z-20">
+          <Select
+            isMulti
+            options={teamOptions}
+            value={selectedTeamOptions}
+            onChange={handleTeamChange}
+            placeholder="Compare Teams +"
+            className="text-xs font-semibold"
+            styles={customStyles}
+            components={{
+              DropdownIndicator: () => null,
+              IndicatorSeparator: () => null,
+            }}
+          />
         </div>
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-10 gap-6">
-        
+      </div>
 
-        <div className="flex flex-wrap items-center lg:justify-end gap-3 w-full lg:w-auto">
-          <div className="w-40 z-20">
-            <Select
-              isMulti
-              options={teamOptions}
-              value={selectedTeamOptions}
-              onChange={handleTeamChange}
-              placeholder="Compare Teams +"
-              className="text-sm rounded-none"
-              styles={customStyles}
-              components={{
-                DropdownIndicator: () => null,
-                IndicatorSeparator: () => null,
-              }}
-            />
-          </div>
-          <div className="flex bg-gray-100/50 p-1.5 rounded-none border border-black">
-            {["1D", "1W", "1M", "1Y", "ALL"].map((tf) => (
-              <button
-                key={tf}
-                onClick={() => onTimeFilterChange(tf)}
-                className={`px-4 py-1.5 text-xs font-bold rounded-none transition-all cursor-pointer border ${timeFilter === tf
-                  ? "bg-green-50 text-black border-green-700/80 shadow-medium"
-                  : "text-black/40 hover:text-black border-transparent"
-                  }`}
-              >
-                {tf}
-              </button>
-            ))}
-          </div>
+      <div className="flex flex-wrap items-center gap-3 mb-6 bg-gray-50/70 p-2.5 border border-black/10 rounded-lg justify-between sm:justify-start">
+        <div className="flex bg-white p-1 rounded border border-black/10 shadow-sm shrink-0">
+          {["1D", "1W", "1M", "1Y", "ALL"].map((tf) => (
+            <button
+              key={tf}
+              onClick={() => onTimeFilterChange(tf)}
+              className={`px-3 py-1 text-[10px] font-bold rounded transition-all cursor-pointer ${timeFilter === tf
+                ? "bg-green-700 text-white shadow-sm"
+                : "text-black/55 hover:text-black"
+                }`}
+            >
+              {tf}
+            </button>
+          ))}
+        </div>
 
-          <div className="flex items-center gap-3 bg-white border border-black rounded-none px-4 py-2 shadow-sm">
-            <div className="relative group">
-              <input
-                type="date"
-                value={dateRange.start}
-                onChange={(e) =>
-                  onDateRangeChange({ ...dateRange, start: e.target.value })
-                }
-                className="pl-2 pr-1 py-1 text-xs font-bold border-none bg-transparent text-black focus:ring-0 outline-none w-[110px]"
-              />
-            </div>
-            <span className="text-black/20 font-black">-</span>
-            <div className="relative group">
-              <input
-                type="date"
-                value={dateRange.end}
-                onChange={(e) =>
-                  onDateRangeChange({ ...dateRange, end: e.target.value })
-                }
-                className="pl-2 pr-1 py-1 text-xs font-bold border-none bg-transparent text-black focus:ring-0 outline-none w-[110px]"
-              />
-            </div>
-          </div>
+        <div className="flex items-center gap-2 bg-white border border-black/10 rounded px-2.5 py-1 shadow-sm shrink-0">
+          <input
+            type="date"
+            value={dateRange.start}
+            onChange={(e) =>
+              onDateRangeChange({ ...dateRange, start: e.target.value })
+            }
+            className="text-[10px] font-bold border-none bg-transparent text-black outline-none w-[95px] p-0 focus:ring-0"
+          />
+          <span className="text-black/20 font-black text-xs">-</span>
+          <input
+            type="date"
+            value={dateRange.end}
+            onChange={(e) =>
+              onDateRangeChange({ ...dateRange, end: e.target.value })
+            }
+            className="text-[10px] font-bold border-none bg-transparent text-black outline-none w-[95px] p-0 focus:ring-0"
+          />
         </div>
       </div>
 

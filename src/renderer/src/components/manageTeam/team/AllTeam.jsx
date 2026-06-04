@@ -68,7 +68,7 @@ const AllTeam = () => {
       accessorKey: "name",
       header: "Team Name",
       cell: ({ row }) => (
-        <span className="font-black text-black uppercase tracking-tight text-sm">
+        <span className="font-semibold text-black uppercase tracking-tight text-sm">
           {row.original.name}
         </span>
       ),
@@ -83,7 +83,7 @@ const AllTeam = () => {
       cell: ({ getValue }) => {
         const value = getValue();
         return (
-          <span className="text-black/60 font-bold uppercase tracking-wide text-xs">
+          <span className="text-black font-semibold uppercase tracking-wide text-xs">
             {value || "—"}
           </span>
         );
@@ -94,7 +94,7 @@ const AllTeam = () => {
       header: "Department",
       id: "department",
       cell: ({ getValue }) => (
-        <span className="px-5 py-1.5 bg-gray-100 text-black font-black uppercase tracking-widest rounded-full text-[10px] border border-black/5 shadow-sm">
+        <span className="px-5 py-1.5 bg-gray-100 text-black font-semibold uppercase tracking-widest rounded-full text-[10px] border border-black/5 shadow-sm">
           {String(getValue() ?? "—")}
         </span>
       ),
@@ -104,10 +104,10 @@ const AllTeam = () => {
   // ── Loading / Error States ──
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-20 bg-white rounded-[2.5rem] border border-black/5 shadow-soft">
+      <div className="flex items-center justify-center p-20 bg-white rounded-xl border border-black/10 shadow-sm">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-black/5 border-t-black"></div>
-          <span className="text-black font-black uppercase tracking-widest text-xs">Loading teams...</span>
+          <span className="text-black font-semibold uppercase tracking-widest text-xs">Loading teams...</span>
         </div>
       </div>
     );
@@ -115,22 +115,22 @@ const AllTeam = () => {
 
   if (error) {
     return (
-      <div className="p-12 text-center bg-red-50 rounded-[2.5rem] border border-red-100">
+      <div className="p-12 text-center bg-red-50 rounded-xl border border-red-100">
         <p className="text-red-600 font-bold">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-[2.5rem] shadow-soft border border-black/5 overflow-hidden">
-      <div className="p-10 border-b border-black/5 bg-gray-50/30">
-        <h2 className="text-3xl font-black text-black uppercase tracking-tight">All Teams</h2>
-        <p className="text-black/60 text-sm font-bold tracking-wide mt-2">
+    <div className="w-full">
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-black uppercase tracking-tight">All Teams</h2>
+        <p className="text-black text-xs font-semibold tracking-wide mt-1">
           Manage and view all project teams in the system
         </p>
       </div>
 
-      <div className="p-8">
+      <div className="bg-white">
         <DataTable
           columns={columns}
           data={teams}

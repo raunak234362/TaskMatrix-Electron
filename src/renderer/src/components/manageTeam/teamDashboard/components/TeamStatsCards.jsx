@@ -42,35 +42,35 @@ const TeamStatsCards = ({ teamStats }) => {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
       {stats.map((stat, index) => (
         <motion.div
           key={index}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: index * 0.1 }}
-          className="bg-white p-6 rounded-none border border-green-400 shadow-soft hover:shadow-medium transition-all duration-500 relative overflow-hidden group"
+          className="bg-white p-4 sm:p-5 rounded-none border border-green-400 shadow-soft hover:shadow-medium transition-all duration-500 relative overflow-hidden group"
         >
           {/* Decorative Gradient Blob */}
           <div className={`absolute -right-8 -top-8 w-32 h-32 ${stat.bg} rounded-none opacity-40 blur-2xl group-hover:scale-125 transition-transform duration-700`} />
-          <div className="flex justify-between items-center mb-8 relative z-10 w-full">
-            <div className="flex items-center gap-3">
-              <div className={`p-2.5 rounded-none bg-green-50 text-green-700 transition-all duration-500`}>
+          <div className="flex justify-between items-center mb-4 sm:mb-6 relative z-10 w-full gap-2 flex-wrap sm:flex-nowrap">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="p-1 rounded-none bg-green-50 text-green-700 transition-all duration-500 shrink-0">
                 {stat.icon}
               </div>
-              <span className="text-black text-lg font-bold uppercase tracking-normal">{stat.label}</span>
+              <span className="text-black text-xs sm:text-sm font-bold uppercase tracking-wider shrink-0">{stat.label}</span>
             </div>
-            <h3 className="text-2xl font-bold text-black tracking-normal">{stat.value}</h3>
+            <h3 className="text-base sm:text-lg md:text-xl font-bold text-black tracking-normal whitespace-nowrap shrink-0">{stat.value}</h3>
           </div>
 
-          <div className="space-y-4 relative z-10">
-            <div className="flex justify-between items-end">
-              <span className="text-sm font-semibold text-black uppercase tracking-normal">{stat.subValue}</span>
+          <div className="space-y-3 relative z-10">
+            <div className="flex justify-between items-end gap-2">
+              <span className="text-[9px] sm:text-xs font-semibold text-black uppercase tracking-normal truncate" title={stat.subValue}>{stat.subValue}</span>
               {stat.label !== "Projects" && (
-                <span className="text-base font-bold text-black">{Math.round(stat.progress)}%</span>
+                <span className="text-xs sm:text-sm font-bold text-black shrink-0">{Math.round(stat.progress)}%</span>
               )}
             </div>
-            <div className="h-3 w-full bg-gray-50 rounded-none border border-green-800 overflow-hidden p-0.5">
+            <div className="h-2.5 w-full bg-gray-50 rounded-none border border-green-800 overflow-hidden p-0.5">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${stat.progress}%` }}
