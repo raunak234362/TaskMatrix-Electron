@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
 import AuthService from "../../api/auth";
 import Background from "../../assets/Green Banana Leaf Pattern Reminder Facebook Post(1).jpg";
 import LOGO from "../../assets/logo.png";
@@ -38,6 +40,7 @@ const Login = () => {
   const [challengeToken, setChallengeToken] = useState("");
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const handleOtpChange = (element, index) => {
     if (isNaN(element.value)) return false;
@@ -86,6 +89,7 @@ const Login = () => {
 
   const Submit = async (data) => {
     try {
+      setIsLoggingIn(true);
       const userLogin = await AuthService.login(data);
 
       if (userLogin?.requiresVerification || userLogin?.data?.requiresVerification) {
@@ -93,7 +97,7 @@ const Login = () => {
         const msg = userLogin?.message || userLogin?.data?.message || "A verification challenge has been sent to your registered email address.";
         setChallengeToken(token);
         setShowOTP(true);
-        alert(msg);
+        toast.info(msg);
         return;
       }
 
@@ -110,7 +114,7 @@ const Login = () => {
           const msg = responseData.message || "A verification challenge has been sent to your registered email address.";
           setChallengeToken(token);
           setShowOTP(true);
-          alert(msg);
+          toast.info(msg);
           return;
         }
       }
@@ -118,7 +122,9 @@ const Login = () => {
         error?.response?.data?.message ||
         error.message ||
         "Login failed. Please check your credentials.";
-      alert(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -126,7 +132,7 @@ const Login = () => {
     e.preventDefault();
     const otpValue = otp.join("");
     if (otpValue.length !== 6) {
-      alert("Please enter a 6-digit OTP.");
+      toast.warning("Please enter a 6-digit OTP.");
       return;
     }
     try {
@@ -143,7 +149,7 @@ const Login = () => {
         error?.response?.data?.message ||
         error.message ||
         "Verification failed. Please check your OTP.";
-      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsVerifying(false);
     }
@@ -209,9 +215,17 @@ const Login = () => {
                 <div className="mt-4">
                   <Button
                     type="submit"
-                    className="w-full text-2xl py-4 rounded-[6px] bg-green-600 hover:bg-green-700 transition-all duration-300 shadow-lg shadow-green-600/30 text-white"
+                    disabled={isLoggingIn}
+                    className="w-full text-2xl py-4 rounded-[6px] bg-green-600 hover:bg-green-700 transition-all duration-300 shadow-lg shadow-green-600/30 text-white disabled:opacity-50 flex items-center justify-center"
                   >
-                    Login
+                    {isLoggingIn ? (
+                      <>
+                        <Loader2 className="w-6 h-6 mr-3 animate-spin" />
+                        Logging in...
+                      </>
+                    ) : (
+                      "Login"
+                    )}
                   </Button>
                 </div>
               </form>

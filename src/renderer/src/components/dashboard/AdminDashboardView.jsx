@@ -380,7 +380,7 @@ const AdminDashboardView = ({
                             </div>
 
                             {/* 5. Unapproved Change Orders */}
-                            {['admin', 'deputy_manager', 'operation_executive', 'project_manager_officer'].includes(userRole?.toLowerCase()) && (
+                            {['admin', 'deputy_manager', 'operation_executive', 'project_manager_officer', 'project_manager', 'dept_manager'].includes(userRole?.toLowerCase()) && (
                                 <div
                                     className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                                     onClick={() => handlers.handleActionClick && handlers.handleActionClick('UNAPPROVED_CHANGE_ORDERS')}

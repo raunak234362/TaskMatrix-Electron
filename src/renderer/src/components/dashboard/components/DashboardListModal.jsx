@@ -131,7 +131,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             header: 'Subject / Title',
             cell: ({ row }) => (
                 <span className="font-semibold text-gray-800 truncate max-w-[250px] inline-block">
-                    {row.original.subject || row.original.title || row.original.name || 'No Subject'}
+                    {row.original.subject || row.original.title || row.original.name || row.original.remarks || row.original.remark || 'No Subject'}
                 </span>
             )
         },
@@ -149,26 +149,66 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             header: 'Sent By',
             cell: ({ row }) => {
                 const item = row.original.submittal || row.original.data || row.original;
-                let senderObj = item.sender || item.senders || item.createdBy || item.created_by || item.fabricator;
-                let senderName = '';
-                if (senderObj && typeof senderObj === 'object') {
-                    senderName = `${senderObj.firstName || ''} ${senderObj.lastName || ''}`.trim() || senderObj.username || senderObj.fabName || senderObj.email || '';
+                
+                let senderObj = null;
+                const possibleSenders = [item.senders, item.sender, item.createdBy, item.created_by, item.fabricator];
+                for (const p of possibleSenders) {
+                    if (p && typeof p === 'object') {
+                        senderObj = p;
+                        break;
+                    }
+                }
+                if (!senderObj) {
+                    for (const p of possibleSenders) {
+                        if (p && typeof p === 'string') {
+                            senderObj = p;
+                            break;
+                        }
+                    }
+                }
+
+                let senderName = item.senderName || item.sender_name || '';
+                
+                if (!senderName && senderObj && typeof senderObj === 'object') {
+                    senderName = `${senderObj.firstName || ''} ${senderObj.middleName || ''} ${senderObj.lastName || ''}`.replace(/\s+/g, ' ').trim() || senderObj.username || senderObj.fabName || senderObj.email || '';
+                }
+                if (!senderName && typeof senderObj === 'string') {
+                    senderName = senderObj;
                 }
                 if (!senderName) {
                     const versions = item.versions || [];
                     for (const v of versions) {
-                        const vSender = v.sender || v.createdBy || v.created_by || v.fabricator;
+                        let vSender = null;
+                        const vPossibleSenders = [v.senders, v.sender, v.createdBy, v.created_by, v.fabricator];
+                        for (const p of vPossibleSenders) {
+                            if (p && typeof p === 'object') {
+                                vSender = p;
+                                break;
+                            }
+                        }
+                        if (!vSender) {
+                            for (const p of vPossibleSenders) {
+                                if (p && typeof p === 'string') {
+                                    vSender = p;
+                                    break;
+                                }
+                            }
+                        }
+
                         if (vSender && typeof vSender === 'object') {
-                            const name = `${vSender.firstName || ''} ${vSender.lastName || ''}`.trim() || vSender.username || vSender.fabName || vSender.email || '';
+                            const name = `${vSender.firstName || ''} ${vSender.middleName || ''} ${vSender.lastName || ''}`.replace(/\s+/g, ' ').trim() || vSender.username || vSender.fabName || vSender.email || '';
                             if (name) {
                                 senderName = name;
                                 break;
                             }
+                        } else if (typeof vSender === 'string' && vSender) {
+                            senderName = vSender;
+                            break;
                         }
                     }
                 }
                 if (!senderName && (item.firstName || item.lastName || item.username || item.fabName)) {
-                    senderName = `${item.firstName || ''} ${item.lastName || ''}`.trim() || item.username || item.fabName || '';
+                    senderName = `${item.firstName || ''} ${item.middleName || ''} ${item.lastName || ''}`.replace(/\s+/g, ' ').trim() || item.username || item.fabName || '';
                 }
                 return (
                     <span className="text-gray-700 font-semibold truncate max-w-[200px] inline-block">
@@ -182,55 +222,99 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             header: 'Sent To',
             cell: ({ row }) => {
                 const item = row.original.submittal || row.original.data || row.original;
-                let recs = item.multipleRecipients || item.recepients || item.recipients;
-                if (!Array.isArray(recs) || recs.length === 0) {
-                    const versions = item.versions || [];
-                    for (const v of versions) {
-                        const vRecs = v.multipleRecipients || v.recepients || v.recipients;
-                        if (Array.isArray(vRecs) && vRecs.length > 0) {
-                            recs = vRecs;
-                            break;
-                        }
-                    }
-                }
-                if (!Array.isArray(recs) || recs.length === 0) {
-                    const resps = item.submittalsResponse || [];
-                    for (const r of resps) {
-                        const rRecs = r.multipleRecipients || r.recepients || r.recipients;
-                        if (Array.isArray(rRecs) && rRecs.length > 0) {
-                            recs = rRecs;
-                            break;
-                        }
-                    }
-                }
-
-                if (Array.isArray(recs) && recs.length > 0) {
-                    const names = recs.map(r => `${r.firstName || ''} ${r.lastName || ''}`.trim() || r.username || r.email || r.fabName || 'Unknown').filter(Boolean);
+                
+                let recipientName = item.recipientName || item.receipntName || item.recipient_name || item.recepientName || '';
+                if (recipientName) {
                     return (
-                        <span className="text-gray-700 font-medium truncate max-w-[320px] inline-block" title={names.join(', ')}>
-                            {names.join(', ')}
+                        <span className="text-gray-700 font-medium truncate max-w-[320px] inline-block" title={recipientName}>
+                            {recipientName}
                         </span>
                     );
                 }
 
-                let singleRec = item.recipient || item.recepient;
-                if (!singleRec) {
-                    const versions = item.versions || [];
-                    for (const v of versions) {
-                        const vRec = v.recipient || v.recepient;
-                        if (vRec && typeof vRec === 'object') {
-                            singleRec = vRec;
-                            break;
+                const possibleRecs = [
+                    item.multipleRecipients, 
+                    item.recepients, 
+                    item.recipients, 
+                    item.Recipients,
+                    item.recipient,
+                    item.recepient
+                ];
+                
+                // Try array of objects
+                for (const p of possibleRecs) {
+                    if (Array.isArray(p) && p.length > 0) {
+                        const names = p.map(r => {
+                            if (r && typeof r === 'object') {
+                                return `${r.firstName || ''} ${r.middleName || ''} ${r.lastName || ''}`.replace(/\s+/g, ' ').trim() || r.username || r.email || r.fabName || 'Unknown';
+                            }
+                            return typeof r === 'string' ? r : '';
+                        }).filter(Boolean);
+                        if (names.length > 0) {
+                            return <span className="text-gray-700 font-medium truncate max-w-[320px] inline-block" title={names.join(', ')}>{names.join(', ')}</span>;
                         }
                     }
                 }
-                if (singleRec && typeof singleRec === 'object') {
-                    const name = `${singleRec.firstName || ''} ${singleRec.lastName || ''}`.trim() || singleRec.username || singleRec.email || singleRec.fabName || 'Unknown';
-                    return (
-                        <span className="text-gray-700 font-medium truncate max-w-[320px] inline-block" title={name}>
-                            {name}
-                        </span>
-                    );
+
+                // Try single object
+                for (const p of possibleRecs) {
+                    if (p && typeof p === 'object' && !Array.isArray(p)) {
+                        const name = `${p.firstName || ''} ${p.middleName || ''} ${p.lastName || ''}`.replace(/\s+/g, ' ').trim() || p.username || p.email || p.fabName || 'Unknown';
+                        return <span className="text-gray-700 font-medium truncate max-w-[320px] inline-block" title={name}>{name}</span>;
+                    }
+                }
+
+                // Check versions
+                const versions = item.versions || [];
+                for (const v of versions) {
+                    const vPossible = [v.multipleRecipients, v.recepients, v.recipients, v.Recipients, v.recipient, v.recepient];
+                    for (const p of vPossible) {
+                        if (Array.isArray(p) && p.length > 0) {
+                            const names = p.map(r => {
+                                if (r && typeof r === 'object') {
+                                    return `${r.firstName || ''} ${r.middleName || ''} ${r.lastName || ''}`.replace(/\s+/g, ' ').trim() || r.username || r.email || r.fabName || 'Unknown';
+                                }
+                                return typeof r === 'string' ? r : '';
+                            }).filter(Boolean);
+                            if (names.length > 0) {
+                                return <span className="text-gray-700 font-medium truncate max-w-[320px] inline-block" title={names.join(', ')}>{names.join(', ')}</span>;
+                            }
+                        }
+                        if (p && typeof p === 'object' && !Array.isArray(p)) {
+                            const name = `${p.firstName || ''} ${p.middleName || ''} ${p.lastName || ''}`.replace(/\s+/g, ' ').trim() || p.username || p.email || p.fabName || 'Unknown';
+                            return <span className="text-gray-700 font-medium truncate max-w-[320px] inline-block" title={name}>{name}</span>;
+                        }
+                    }
+                }
+
+                // Check responses
+                const resps = item.submittalsResponse || [];
+                for (const r of resps) {
+                    const rPossible = [r.multipleRecipients, r.recepients, r.recipients, r.Recipients, r.recipient, r.recepient];
+                    for (const p of rPossible) {
+                        if (Array.isArray(p) && p.length > 0) {
+                            const names = p.map(rec => {
+                                if (rec && typeof rec === 'object') {
+                                    return `${rec.firstName || ''} ${rec.middleName || ''} ${rec.lastName || ''}`.replace(/\s+/g, ' ').trim() || rec.username || rec.email || rec.fabName || 'Unknown';
+                                }
+                                return typeof rec === 'string' ? rec : '';
+                            }).filter(Boolean);
+                            if (names.length > 0) {
+                                return <span className="text-gray-700 font-medium truncate max-w-[320px] inline-block" title={names.join(', ')}>{names.join(', ')}</span>;
+                            }
+                        }
+                        if (p && typeof p === 'object' && !Array.isArray(p)) {
+                            const name = `${p.firstName || ''} ${p.middleName || ''} ${p.lastName || ''}`.replace(/\s+/g, ' ').trim() || p.username || p.email || p.fabName || 'Unknown';
+                            return <span className="text-gray-700 font-medium truncate max-w-[320px] inline-block" title={name}>{name}</span>;
+                        }
+                    }
+                }
+
+                // Finally fall back to strings
+                for (const p of possibleRecs) {
+                    if (typeof p === 'string' && p) {
+                        return <span className="text-gray-700 font-medium truncate max-w-[320px] inline-block" title={p}>{p}</span>;
+                    }
                 }
 
                 return <span className="text-gray-400 font-medium">—</span>;
