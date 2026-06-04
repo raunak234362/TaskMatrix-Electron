@@ -55,7 +55,7 @@ const AllTasks = () => {
       try {
         setLoading(true);
         const response =
-          userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" || userRole === "deputy_manager" || userRole === "dept_manager"
+          userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" || userRole === "deputy_manager" || userRole === "dept_manager" || userRole === "human_resource"
             ? await Service.GetAllTask()
             : await Service.GetMyTask();
 
@@ -67,7 +67,7 @@ const AllTasks = () => {
             : [];
 
         // Fetch unread comments async
-        const fetchUnread = ['admin', 'deputy_manager', 'dept_manager', 'project_manager'].includes(userRole)
+        const fetchUnread = ['admin', 'deputy_manager', 'dept_manager', 'project_manager', 'human_resource'].includes(userRole)
           ? Service.FetchUnreadCommentsMyTeam()
           : Service.FetchUnreadCommentsMyTasks();
 
@@ -92,7 +92,7 @@ const AllTasks = () => {
     try {
       setLoading(true);
       const response =
-        userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" || userRole === "deputy_manager" || userRole === "dept_manager"
+        userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" || userRole === "deputy_manager" || userRole === "dept_manager" || userRole === "human_resource"
           ? await Service.GetAllTask()
           : await Service.GetMyTask();
 
@@ -103,7 +103,7 @@ const AllTasks = () => {
           : [];
 
       // Fetch unread comments async
-      const fetchUnread = ['admin', 'deputy_manager', 'dept_manager', 'project_manager'].includes(userRole)
+      const fetchUnread = ['admin', 'deputy_manager', 'dept_manager', 'project_manager', 'human_resource'].includes(userRole)
         ? Service.FetchUnreadCommentsMyTeam()
         : Service.FetchUnreadCommentsMyTasks();
 

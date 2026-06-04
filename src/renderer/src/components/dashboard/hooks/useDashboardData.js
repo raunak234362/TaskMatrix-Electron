@@ -18,7 +18,8 @@ export const useDashboardData = () => {
     'operation_executive',
     'project_manager',
     'deputy_manager',
-    'project_manager_officer'
+    'project_manager_officer',
+    'human_resource'
   ].includes(userRole)
 
   console.log('🏁 useDashboardData Hook Init:', { userRoleRaw, userRole, isAdminRole })
