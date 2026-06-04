@@ -33,22 +33,13 @@ const AddMileStone = ({
   });
 
   const selectedSubject = watch("subject");
-  const customSubject = watch("customSubject");
   const isConnectionDesigner = watch("isConnectionDesigner");
 
   useEffect(() => {
     if (selectedSubject) {
-      if (selectedSubject === "Others") {
-        if (customSubject) {
-          setValue("types", customSubject.toUpperCase().replace(/\s+/g, "_"));
-        } else {
-          setValue("types", "");
-        }
-      } else {
-        setValue("types", selectedSubject.toUpperCase().replace(/\s+/g, "_"));
-      }
+      setValue("types", selectedSubject.toUpperCase().replace(/\s+/g, "_"));
     }
-  }, [selectedSubject, customSubject, setValue]);
+  }, [selectedSubject, setValue]);
 
   const statusOptions = [
     { label: "Pending", value: "PENDING" },
@@ -80,8 +71,8 @@ const AddMileStone = ({
 
   const onSubmit = async (data) => {
     try {
-      const finalSubject = data.subject === "Others" ? data.customSubject : data.subject;
-      const computedTypes = finalSubject ? finalSubject.toUpperCase().replace(/\s+/g, "_") : "ANCHOR_BOLT";
+      const finalSubject = data.subject || "Others";
+      const computedTypes = finalSubject.toUpperCase().replace(/\s+/g, "_");
       const payload = {
         ...data,
         subject: finalSubject,
@@ -161,25 +152,6 @@ const AddMileStone = ({
               </p>
             )}
           </div>
-
-          {selectedSubject === "Others" && (
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Custom Milestone *
-              </label>
-              <Input
-                {...register("customSubject", {
-                  required: selectedSubject === "Others" ? "Custom subject is required" : false,
-                })}
-                placeholder="Type your subject here"
-              />
-              {errors.customSubject && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.customSubject.message}
-                </p>
-              )}
-            </div>
-          )}
 
           <div>
             <Input
