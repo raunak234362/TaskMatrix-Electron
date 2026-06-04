@@ -33,39 +33,37 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
     }, [showFilterDropdown]);
 
     return (
-        <div className="bg-white rounded-lg shadow border border-gray-200 z-50">
-            <div className="flex items-center justify-between gap-5">
-                <div className="relative">
-                    <button
-                        className="flex items-center gap-2 px-3 py-2 text-sm bg-green-50 text-green-900 font-semibold rounded-lg hover:bg-green-100"
-                        onClick={() => setShowFilterDropdown((prev) => !prev)}
-                        type="button"
-                    >
-                        <Filter size={16} />
-                        {dateFilter?.type === "all"
-                            ? "All Time"
-                            : dateFilter?.type === "month"
-                                ? `${months[dateFilter.month]} ${dateFilter.year}`
-                                : dateFilter?.type === "week"
-                                    ? `Week of ${new Date(dateFilter.weekStart).toLocaleDateString()}`
-                                    : dateFilter?.type === "range"
-                                        ? `${months[dateFilter.startMonth]} - ${months[dateFilter.endMonth]} ${dateFilter.year}`
-                                        : dateFilter?.type === "dateRange"
-                                            ? `${new Date(dateFilter.startDate).toLocaleDateString()} - ${new Date(dateFilter.endDate).toLocaleDateString()}`
-                                            : dateFilter?.type === "specificDate"
-                                                ? `${new Date(dateFilter.date).toLocaleDateString()}`
-                                                : `Year ${dateFilter.year}`}
-                        <ChevronDown size={16} />
-                    </button>
+        <div className="relative z-50">
+            <button
+                className="flex items-center gap-2 px-4 py-2 text-xs bg-green-50 text-black font-bold rounded-none border-2 border-gray-200 hover:border-black transition-all uppercase tracking-widest cursor-pointer"
+                onClick={() => setShowFilterDropdown((prev) => !prev)}
+                type="button"
+            >
+                <Filter size={14} />
+                {dateFilter?.type === "all"
+                    ? "All Time"
+                    : dateFilter?.type === "month"
+                        ? `${months[dateFilter.month]} ${dateFilter.year}`
+                        : dateFilter?.type === "week"
+                            ? `Week of ${new Date(dateFilter.weekStart).toLocaleDateString()}`
+                            : dateFilter?.type === "range"
+                                ? `${months[dateFilter.startMonth]} - ${months[dateFilter.endMonth]} ${dateFilter.year}`
+                                : dateFilter?.type === "dateRange"
+                                    ? `${new Date(dateFilter.startDate).toLocaleDateString()} - ${new Date(dateFilter.endDate).toLocaleDateString()}`
+                                    : dateFilter?.type === "specificDate"
+                                        ? `${new Date(dateFilter.date).toLocaleDateString()}`
+                                        : `Year ${dateFilter.year}`}
+                <ChevronDown size={14} />
+            </button>
 
-                    {showFilterDropdown && (
-                        <div
-                            className="absolute left-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
-                            onClick={(e) => e.stopPropagation()} // ✅ prevent auto-close on inside click
-                            onMouseDown={(e) => e.stopPropagation()}
-                            onTouchStart={(e) => e.stopPropagation()}
-                        >
-                            <div className="p-3">
+            {showFilterDropdown && (
+                <div
+                    className="absolute left-0 mt-2 w-72 bg-white rounded-none shadow-lg border-2 border-black z-50"
+                    onClick={(e) => e.stopPropagation()} // ✅ prevent auto-close on inside click
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                >
+                    <div className="p-3">
                                 {/* Filter Type */}
                                 <div className="mb-3">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -303,15 +301,13 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                                         setDateFilter(localDateFilter);
                                         setShowFilterDropdown(false);
                                     }}
-                                    className="mt-2 w-full bg-green-200 hover:bg-green-700 text-black text-sm font-semibold py-2 rounded-md"
+                                    className="mt-4 w-full bg-green-50 text-black border-2 border-green-700/80 rounded-none font-bold text-xs uppercase tracking-wider hover:bg-green-100 py-2 cursor-pointer transition-all"
                                 >
                                     Apply
                                 </button>
                             </div>
                         </div>
                     )}
-                </div>
-            </div>
         </div>
     );
 };

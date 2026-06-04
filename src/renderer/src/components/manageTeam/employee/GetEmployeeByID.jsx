@@ -95,10 +95,10 @@ const statusMeta = (s) =>
 // ─── StatCard ────────────────────────────────────────────────────────────────
 
 const StatCard = ({ icon: Icon, label, value, sub, accent }) => (
-  <div className="relative bg-white rounded-2xl border border-black/5 p-5 shadow-sm overflow-hidden">
-    <p className="text-sm font-black text-black/40 uppercase tracking-widest mb-1">{label}</p>
-    <p className="text-2xl font-black text-black tracking-tight">{value}</p>
-    {sub && <p className="text-sm text-black/30 font-bold mt-1 uppercase tracking-wide">{sub}</p>}
+  <div className="relative bg-white rounded-none border-2 border-black p-5 shadow-sm overflow-hidden">
+    <p className="text-xs font-bold text-black uppercase mb-1">{label}</p>
+    <p className="text-2xl font-bold text-black tracking-tight">{value}</p>
+    {sub && <p className="text-[10px] text-black font-semibold mt-1 uppercase">{sub}</p>}
   </div>
 );
 
@@ -117,46 +117,46 @@ const TaskRow = ({ task }) => {
 
   return (
     <div
-      className={`border rounded-2xl overflow-hidden transition-all duration-200 ${isOverrun ? "border-red-200 bg-red-50/20" : "border-black/5 bg-white"
+      className={`border-2 rounded-none overflow-hidden transition-all duration-200 ${isOverrun ? "border-red-700 bg-red-50/10" : "border-black bg-white"
         }`}
     >
       {/* Main Row */}
       <div
-        className="flex items-start justify-between p-4 cursor-pointer hover:bg-black/20 transition-colors gap-4"
+        className="flex items-start justify-between p-4 cursor-pointer hover:bg-green-50/20 transition-colors gap-4"
         onClick={() => setExpanded((p) => !p)}
       >
         {/* Left */}
         <div className="flex-1 min-w-0">
-          <p className="text-md font-semibold text-black tracking-widest leading-snug">
+          <p className="text-md font-bold text-black leading-snug">
             {task.name || "Untitled Task"}
           </p>
           {task.description && task.description !== task.name && (
-            <p className="text-sm text-black/40 font-medium mt-0.5 line-clamp-1">{task.description}</p>
+            <p className="text-sm text-black font-medium mt-0.5 line-clamp-1">{task.description}</p>
           )}
 
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             {task.created_on && (
-              <span className="inline-flex items-center gap-1 text-sm text-black/30 font-bold uppercase tracking-widest">
-                <CalendarDays className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 text-sm text-black font-bold uppercase">
+                <CalendarDays className="w-3 h-3 text-black" />
                 {new Date(task.created_on).toLocaleDateString("en-GB", {
                   day: "2-digit", month: "short", year: "numeric",
                 })}
               </span>
             )}
             {task.project?.name && (
-              <span className="text-sm font-bold text-indigo-400 uppercase tracking-widest truncate max-w-[200px]">
+              <span className="text-sm font-bold text-black uppercase truncate max-w-[200px]">
                 📁 {task.project.name}
               </span>
             )}
             {task.wbsType && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-black/30 uppercase tracking-widest">
-                <Layers className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-black uppercase">
+                <Layers className="w-3 h-3 text-black" />
                 {task.wbsType}
               </span>
             )}
             {task.Stage && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-400 uppercase tracking-widest">
-                <Tag className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-700 uppercase">
+                <Tag className="w-3 h-3 text-purple-700" />
                 {task.Stage}
               </span>
             )}
@@ -166,42 +166,36 @@ const TaskRow = ({ task }) => {
         {/* Right */}
         <div className="flex flex-col items-end gap-1.5 shrink-0">
           <span
-            className={`text-[10px] font-black uppercase tracking-widest px-3 py-0.5 rounded-full border ${meta.color}`}
+            className={`text-[10px] font-bold uppercase px-3 py-0.5 rounded-none border-2 ${meta.color.replace(/rounded-full/g, 'rounded-none')}`}
           >
             {meta.label}
           </span>
 
           <div className="text-right space-y-0.5">
-            <p className="text-sm text-black/40 font-bold uppercase tracking-widest">
+            <p className="text-sm text-black font-bold uppercase">
               Assigned:{" "}
-              <span className="text-black/60">{secToHms(assignedSec)}</span>
+              <span className="text-black">{secToHms(assignedSec)}</span>
             </p>
-            <p className={`text-sm font-bold uppercase tracking-widest ${isOverrun ? "text-red-500" : "text-black/40"}`}>
+            <p className={`text-sm font-bold uppercase ${isOverrun ? "text-red-700" : "text-black"}`}>
               Worked:{" "}
-              <span className={` ${isOverrun ? "text-red-600" : "text-black/60"}`}>
+              <span className={` ${isOverrun ? "text-red-700" : "text-black"}`}>
                 {secToHms(workedSec)}
               </span>
             </p>
-            {/* {efficiency !== null && (
-              <p className={`text-[10px] font-black uppercase tracking-widest ${efficiency > 100 ? "text-red-500" : efficiency >= 80 ? "text-green-600" : "text-yellow-600"
-                }`}>
-                {efficiency}% efficiency
-              </p>
-            )} */}
           </div>
           {expanded ? (
-            <ChevronUp className="w-3.5 h-3.5 text-black/20 mt-1" />
+            <ChevronUp className="w-3.5 h-3.5 text-black mt-1" />
           ) : (
-            <ChevronDown className="w-3.5 h-3.5 text-black/20 mt-1" />
+            <ChevronDown className="w-3.5 h-3.5 text-black mt-1" />
           )}
         </div>
       </div>
 
       {/* Expanded Details */}
       {expanded && (
-        <div className="border-t border-black/5 bg-gray-50/60 animate-in slide-in-from-top-1 fade-in duration-150">
+        <div className="border-t-2 border-black bg-gray-50/60 animate-in slide-in-from-top-1 fade-in duration-150">
           {/* Meta Grid */}
-          <div className="px-4 py-3 grid grid-cols-2 md:grid-cols-4 gap-3 border-b border-black/5">
+          <div className="px-4 py-3 grid grid-cols-2 md:grid-cols-4 gap-3 border-b-2 border-black">
             <DetailCell label="Priority" value={task.priority != null ? `P${task.priority}` : "—"} />
             <DetailCell
               label="Completion"
@@ -234,17 +228,17 @@ const TaskRow = ({ task }) => {
           {/* Work Sessions */}
           {sessions.length > 0 && (
             <div className="px-4 py-3">
-              <p className="text-[9px] font-black text-black/30 uppercase tracking-widest mb-2">
+              <p className="text-[9px] font-bold text-black uppercase mb-2">
                 Work Sessions ({sessions.length})
               </p>
               <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
                 {sessions.map((s, i) => (
                   <div
                     key={s.id || i}
-                    className="flex items-center justify-between bg-white rounded-xl px-3 py-2 border border-black/5 text-[11px]"
+                    className="flex items-center justify-between bg-white rounded-none px-3 py-2 border-2 border-black text-[11px]"
                   >
-                    <div className="flex items-center gap-2 text-black/50 font-bold">
-                      <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[9px] font-black shrink-0">
+                    <div className="flex items-center gap-2 text-black font-bold">
+                      <span className="w-5 h-5 rounded-none bg-green-50 text-black border border-black flex items-center justify-center text-[9px] font-bold shrink-0">
                         {i + 1}
                       </span>
                       <span>
@@ -254,7 +248,7 @@ const TaskRow = ({ task }) => {
                           })
                           : "—"}
                       </span>
-                      <span className="text-black/20">→</span>
+                      <span className="text-black/40">→</span>
                       <span>
                         {s.ended_at
                           ? new Date(s.ended_at).toLocaleString("en-GB", {
@@ -263,7 +257,7 @@ const TaskRow = ({ task }) => {
                           : "In Progress"}
                       </span>
                     </div>
-                    <span className="font-black text-black/70 shrink-0 ml-4">
+                    <span className="font-bold text-black shrink-0 ml-4">
                       {secToHms(Number(s.duration_seconds) || 0)}
                     </span>
                   </div>
@@ -279,8 +273,8 @@ const TaskRow = ({ task }) => {
 
 const DetailCell = ({ label, value }) => (
   <div>
-    <p className="text-[9px] font-black text-black/30 uppercase tracking-widest mb-0.5">{label}</p>
-    <p className="text-xs font-bold text-black">{value}</p>
+    <p className="text-[9px] font-bold text-black uppercase mb-0.5">{label}</p>
+    <p className="text-xs font-medium text-black">{value}</p>
   </div>
 );
 
@@ -593,9 +587,9 @@ const GetEmployeeByID = ({ id, onClose }) => {
   if (loading) {
     return createPortal(
       <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="flex items-center justify-center p-12 text-black bg-white rounded-2xl border border-gray-200 shadow-xl">
-          <Loader2 className="w-8 h-8 animate-spin mr-3 text-[#6bbd45]" />
-          <span className="text-sm font-black uppercase tracking-widest text-[#6bbd45]">Loading employee details...</span>
+        <div className="flex items-center justify-center p-12 text-black bg-white rounded-none border-2 border-black shadow-xl">
+          <Loader2 className="w-8 h-8 animate-spin mr-3 text-black" />
+          <span className="text-sm font-bold uppercase text-black">Loading employee details...</span>
         </div>
       </div>,
       document.body
@@ -604,13 +598,13 @@ const GetEmployeeByID = ({ id, onClose }) => {
   if (error || !employee) {
     return createPortal(
       <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="flex flex-col items-center justify-center p-12 text-red-600 bg-white rounded-2xl border border-gray-200 shadow-xl gap-4">
+        <div className="flex flex-col items-center justify-center p-12 text-red-600 bg-white rounded-none border-2 border-black shadow-xl gap-4">
           <div className="flex items-center">
-            <AlertCircle className="w-8 h-8 mr-3" />
-            <span className="text-sm font-black uppercase tracking-widest">{error || "Employee not found"}</span>
+            <AlertCircle className="w-8 h-8 mr-3 text-black" />
+            <span className="text-sm font-bold uppercase text-black">{error || "Employee not found"}</span>
           </div>
           {onClose && (
-            <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">Close</button>
+            <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase shadow-sm cursor-pointer">Close</button>
           )}
         </div>
       </div>,
@@ -621,23 +615,23 @@ const GetEmployeeByID = ({ id, onClose }) => {
   // ── Render ───────────────────────────────────────────────────────────────────
   return createPortal(
     <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[95vw] mx-auto flex flex-col h-[95vh]">
+      <div className="bg-white rounded-none shadow-2xl border-2 border-black overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[95vw] mx-auto flex flex-col h-[95vh]">
         {/* Header */}
-        <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white sticky top-0 z-10 shrink-0">
+        <header className="flex items-center justify-between p-6 border-b-2 border-black bg-white sticky top-0 z-10 shrink-0">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-[#6bbd45]/15 rounded-xl text-[#6bbd45]">
+            <div className="p-3 bg-green-50 rounded-none text-black border border-black shadow-sm">
               <Zap className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-black tracking-tight uppercase">
+              <h2 className="text-xl font-bold text-black uppercase">
                 {employee.firstName} {employee.middleName} {employee.lastName}
               </h2>
               <div className="flex items-center gap-2 mt-1">
-                <p className="text-[10px] font-black text-black uppercase tracking-[0.2em]">
+                <p className="text-[10px] font-bold text-black uppercase">
                   {employee.designation || "EMPLOYEE PROFILE"}
                 </p>
                 <span
-                  className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${employee.isActive ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-700 border-red-200"
+                  className={`px-2 py-0.5 rounded-none text-[8px] font-bold uppercase border-2 ${employee.isActive ? "bg-green-50 text-black border-green-700" : "bg-red-50 text-black border-red-700"
                     }`}
                 >
                   {employee.isActive ? "Active" : "Inactive"}
@@ -649,15 +643,15 @@ const GetEmployeeByID = ({ id, onClose }) => {
             {(userRole === "admin" || userRole === "deputy_manager" || userRole === "operation_executive" || userRole === "human_resource") && (
               <button
                 onClick={() => handleModel(employee)}
-                className="flex items-center gap-2 px-6 py-2 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all active:scale-95"
+                className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase shadow-sm cursor-pointer"
               >
-                <Edit2 className="w-4 h-4 text-[#6bbd45]" />
+                <Edit2 className="w-4 h-4 text-black" />
                 Edit Profile
               </button>
             )}
             <button
               onClick={onClose}
-              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase shadow-sm cursor-pointer"
             >
               Close
             </button>
@@ -699,12 +693,12 @@ const GetEmployeeByID = ({ id, onClose }) => {
           {employee?.role !== "CLIENT" && employee?.role !== "CLIENT_ADMIN" && (
             <div className="pt-8 border-t border-black/5">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <h3 className="text-xl text-black uppercase tracking-tight">Employee Performance Score</h3>
+                <h3 className="text-lg font-bold text-black uppercase">Employee Performance Score</h3>
                 <div className="flex items-center gap-2">
                   <select
                     value={selectedMonth}
                     onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                    className="px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-black/5"
+                    className="px-4 py-1.5 bg-white border-2 border-black rounded-none text-xs font-bold focus:outline-none focus:ring-4 focus:ring-green-500/10 cursor-pointer"
                   >
                     {Array.from({ length: 12 }, (_, i) => (
                       <option key={i + 1} value={i + 1}>
@@ -715,14 +709,14 @@ const GetEmployeeByID = ({ id, onClose }) => {
                   <select
                     value={selectedYear}
                     onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                    className="px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-black/5"
+                    className="px-4 py-1.5 bg-white border-2 border-black rounded-none text-xs font-bold focus:outline-none focus:ring-4 focus:ring-green-500/10 cursor-pointer"
                   >
                     {[2024, 2025, 2026].map((y) => <option key={y} value={y}>{y}</option>)}
                   </select>
 
                   <button
                     onClick={fetchMonthlyTrend}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-200 text-black rounded-xl text-xs font-black uppercase tracking-widest hover:bg-green-300 transition-all shadow-md active:scale-95 ml-2"
+                    className="flex items-center gap-2 px-4 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-xs uppercase shadow-sm cursor-pointer ml-2"
                   >
                     <TrendingUp className="w-3.5 h-3.5" />
                     Generate Efficiency Graph
@@ -731,17 +725,17 @@ const GetEmployeeByID = ({ id, onClose }) => {
               </div>
 
               {trendLoading || showTrend ? (
-                <div className="mt-8 mb-8 bg-white p-8 rounded-4xl border border-black/5 shadow-sm animate-in slide-in-from-top-2 fade-in">
+                <div className="mt-8 mb-8 bg-white p-8 rounded-none border-2 border-black shadow-sm animate-in slide-in-from-top-2 fade-in">
                   <div className="flex items-center justify-between mb-8">
                     <div>
-                      <h4 className="text-lg font-black text-black uppercase tracking-tight">Efficiency Trendline</h4>
-                      <p className="text-[10px] font-bold text-black/30 uppercase tracking-widest mt-1">
+                      <h4 className="text-lg font-bold text-black uppercase">Efficiency Trendline</h4>
+                      <p className="text-[10px] font-bold text-black uppercase mt-1">
                         Monthly Performance Score for {selectedYear}
                       </p>
                     </div>
                     <button
                       onClick={() => setShowTrend(false)}
-                      className="p-2 hover:bg-gray-100 rounded-lg text-gray-400"
+                      className="p-2 hover:bg-gray-100 rounded-none border border-black/10 text-black"
                     >
                       <X size={16} />
                     </button>
@@ -750,7 +744,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
                   {trendLoading ? (
                     <div className="h-64 flex flex-col items-center justify-center gap-3">
                       <Loader2 className="w-8 h-8 animate-spin text-[#6bbd45]" />
-                      <span className="text-[10px] font-black text-black/20 uppercase tracking-widest">Analyzing Trend Data...</span>
+                      <span className="text-[10px] font-bold text-black uppercase">Analyzing Trend Data...</span>
                     </div>
                   ) : (
                     <div className="h-80 w-full">
@@ -761,23 +755,23 @@ const GetEmployeeByID = ({ id, onClose }) => {
                             dataKey="month"
                             axisLine={false}
                             tickLine={false}
-                            tick={{ fontSize: 10, fontWeight: 800, fill: "#00000040" }}
+                            tick={{ fontSize: 10, fontWeight: 700, fill: "#000000" }}
                             dy={10}
                           />
                           <YAxis
                             axisLine={false}
                             tickLine={false}
-                            tick={{ fontSize: 10, fontWeight: 800, fill: "#00000040" }}
+                            tick={{ fontSize: 10, fontWeight: 700, fill: "#000000" }}
                             domain={[0, 100]}
                             dx={-10}
                           />
                           <Tooltip
                             contentStyle={{
-                              borderRadius: '16px',
-                              border: '1px solid rgba(0,0,0,0.05)',
+                              borderRadius: '0px',
+                              border: '2px solid black',
                               boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
                               fontSize: '11px',
-                              fontWeight: '900',
+                              fontWeight: '700',
                               textTransform: 'uppercase',
                               padding: '12px'
                             }}
@@ -800,14 +794,14 @@ const GetEmployeeByID = ({ id, onClose }) => {
               ) : null}
 
               {epsLoading ? (
-                <div className="flex items-center justify-center py-10 bg-white/50 rounded-2xl border border-dashed border-black/5">
-                  <Loader2 className="w-6 h-6 animate-spin text-black/20" />
+                <div className="flex items-center justify-center py-10 bg-white/50 rounded-none border border-dashed border-black">
+                  <Loader2 className="w-6 h-6 animate-spin text-black" />
                 </div>
               ) : epsData ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  <div className="col-span-2 md:col-span-3 lg:col-span-4 bg-linear-to-br from-green-50 to-emerald-100/50 p-6 rounded-2xl border border-black/5 shadow-sm">
-                    <span className="text-[10px] font-black text-black/40 uppercase tracking-widest block mb-2">Overall Score</span>
-                    <span className="text-4xl font-black text-green-700">
+                  <div className="col-span-2 md:col-span-3 lg:col-span-4 bg-green-50/30 p-6 rounded-none border-2 border-green-700 shadow-sm">
+                    <span className="text-[10px] font-bold text-black uppercase block mb-2">Overall Score</span>
+                    <span className="text-4xl font-bold text-green-700">
                       {epsData.score !== undefined ? Number(epsData.score).toFixed(2) : "0.00"}
                     </span>
                   </div>
@@ -819,17 +813,17 @@ const GetEmployeeByID = ({ id, onClose }) => {
                     ["Rework Score", epsData.components?.reworkScore],
                     ["Overrun Score", epsData.components?.overrunScore],
                   ].map(([label, val]) => (
-                    <div key={label} className="bg-white p-6 rounded-2xl border border-black/5 shadow-sm">
-                      <span className="text-[10px] font-black text-black/40 uppercase tracking-widest block mb-2">{label}</span>
-                      <span className="text-2xl font-black text-black">
+                    <div key={label} className="bg-white p-6 rounded-none border-2 border-black shadow-sm">
+                      <span className="text-[10px] font-bold text-black uppercase block mb-2">{label}</span>
+                      <span className="text-2xl font-bold text-black">
                         {val !== undefined ? Number(val).toFixed(2) : "0"}
                       </span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="bg-white/50 rounded-2xl border border-dashed border-black/5 p-10 text-center">
-                  <p className="text-black/40 font-bold text-sm tracking-tight">No EPS data for selected period</p>
+                <div className="bg-white/50 rounded-none border border-dashed border-black p-10 text-center">
+                  <p className="text-black font-bold text-sm tracking-tight">No EPS data for selected period</p>
                 </div>
               )}
             </div>
@@ -842,232 +836,232 @@ const GetEmployeeByID = ({ id, onClose }) => {
             "connection_designer_engineer",
             "connection_designer_admin",
           ].includes(userRole) && (
-            <div className="pt-8 border-t border-black/5">
+              <div className="pt-8 border-t border-black/5">
 
-              {/* Section Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-indigo-50 rounded-xl">
-                    <BarChart3 className="w-5 h-5 text-indigo-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl text-black uppercase tracking-tight">Task Performance Report</h3>
-                    <p className="text-[10px] font-bold text-black/30 uppercase tracking-widest mt-0.5" title={(stats.projectNames || []).join(", ")}>
-                      {allTasks.length} tasks · {stats.projectCount} project{stats.projectCount !== 1 ? "s" : ""}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 relative">
-                  <button
-                    onClick={() => setShowExportMenu(!showExportMenu)}
-                    className="flex items-center gap-2 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-sm"
-                  >
-                    <FileText className="w-3.5 h-3.5" />
-                    Generate Report
-                    <ChevronDown className={`w-3 h-3 transition-transform ${showExportMenu ? "rotate-180" : ""}`} />
-                  </button>
-
-                  {showExportMenu && (
-                    <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-2xl border border-black/5 shadow-xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2">
-                      <div className="px-3 py-2 text-[10px] font-black text-black/20 uppercase tracking-widest border-b border-black/5 flex items-center justify-between">
-                        Format & Period
-                        <X size={10} className="cursor-pointer" onClick={() => setShowExportMenu(false)} />
-                      </div>
-                      {["Excel", "PDF"].map((fmt) => (
-                        <div key={fmt} className="space-y-1 mt-2 mb-2 p-1 border-b border-black/5 last:border-0 pb-2">
-                          <div className="flex items-center gap-2 px-2 py-1">
-                            {fmt === "Excel" ? <FileSpreadsheet size={12} className="text-green-600" /> : <FilePdf size={12} className="text-red-600" />}
-                            <span className="text-[11px] font-black uppercase tracking-widest">{fmt} Report</span>
-                          </div>
-                          {["all", "month", "year"].map((scope) => (
-                            <button
-                              key={scope}
-                              onClick={() => handleExport(fmt.toLowerCase(), scope)}
-                              className="w-full text-left px-4 py-2 hover:bg-gray-50 text-[10px] font-bold text-black/60 hover:text-black rounded-lg transition-all capitalize"
-                            >
-                              Export by {scope}
-                            </button>
-                          ))}
-                        </div>
-                      ))}
+                {/* Section Header */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-green-50 rounded-none border border-black shadow-sm">
+                      <BarChart3 className="w-5 h-5 text-black" />
                     </div>
-                  )}
-
-                  <button
-                    onClick={fetchAllTasks}
-                    disabled={tasksLoading}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-black uppercase tracking-widest text-black/40 hover:bg-gray-50 transition-all disabled:opacity-40"
-                  >
-                    <RefreshCw className={`w-3.5 h-3.5 ${tasksLoading ? "animate-spin" : ""}`} />
-                    Refresh
-                  </button>
-                </div>
-              </div>
-
-              {tasksLoading ? (
-                <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-dashed border-black/5 gap-2">
-                  <Loader2 className="w-7 h-7 animate-spin text-indigo-400" />
-                  <p className="text-[11px] font-black text-black/20 uppercase tracking-widest">Loading tasks…</p>
-                </div>
-              ) : allTasks.length === 0 ? (
-                <div className="bg-white rounded-2xl border border-dashed border-black/5 p-12 text-center">
-                  <ListTodo className="w-10 h-10 text-black/10 mx-auto mb-3" />
-                  <p className="text-black/40 font-bold text-sm uppercase tracking-tight">No tasks found for this employee</p>
-                </div>
-              ) : (
-                <>
-                  {/* ── Stat Cards ── */}
-                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-                    <StatCard icon={ListTodo} label="Total Tasks" value={allTasks.length} accent="bg-indigo-500" />
-                    <StatCard icon={Clock} label="Assigned" value={`${Math.floor(stats.totalAssignedSec / 3600)}h`} sub={secToHms(stats.totalAssignedSec)} accent="bg-blue-500" />
-                    <StatCard icon={TrendingUp} label="Worked" value={`${Math.floor(stats.totalWorkedSec / 3600)}h`} sub={secToHms(stats.totalWorkedSec)} accent="bg-violet-500" />
-                    <StatCard
-                      icon={CheckCircle2}
-                      label="Completed"
-                      value={stats.completed}
-                      sub={`${allTasks.length > 0 ? Math.round((stats.completed / allTasks.length) * 100) : 0}% of total`}
-                      accent="bg-green-500"
-                    />
-                    <StatCard
-                      icon={AlertTriangle}
-                      label="Overrun"
-                      value={stats.overrunCount}
-                      sub={stats.overrunCount > 0 ? "needs attention" : "all good"}
-                      accent={stats.overrunCount > 0 ? "bg-red-500" : "bg-green-500"}
-                    />
-                  </div>
-
-                  {/* Project Names List */}
-                  {stats.projectNames?.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-8">
-                      {stats.projectNames.map((name) => (
-                        <span
-                          key={name}
-                          className="px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-lg border border-indigo-100"
-                        >
-                          📁 {name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* ── Filter Bar ── */}
-                  <div className="bg-white rounded-2xl border border-black/5 shadow-sm p-4 mb-5 flex flex-col md:flex-row gap-3 items-start md:items-center flex-wrap">
-                    {/* Search */}
-                    <div className="relative flex-1 min-w-[200px]">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black/20" />
-                      <input
-                        type="text"
-                        placeholder="Search tasks or projects…"
-                        value={taskSearch}
-                        onChange={(e) => { setTaskSearch(e.target.value); setTaskPage(1); }}
-                        className="w-full pl-9 pr-4 py-2.5 text-xs font-bold rounded-xl border border-black/5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
-                      />
-                    </div>
-
-                    {/* Status */}
-                    <div className="relative">
-                      <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black/20 pointer-events-none" />
-                      <select
-                        value={taskStatusFilter}
-                        onChange={(e) => { setTaskStatusFilter(e.target.value); setTaskPage(1); }}
-                        className="pl-9 pr-4 py-2.5 bg-gray-50 border border-black/5 rounded-xl text-xs font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-indigo-200 appearance-none cursor-pointer"
-                      >
-                        {uniqueStatuses.map((s) => (
-                          <option key={s} value={s}>
-                            {s === "ALL" ? "All Statuses" : (STATUS_META[s]?.label || s)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* From */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black text-black/30 uppercase tracking-widest">From</span>
-                      <input
-                        type="date"
-                        value={taskDateFrom}
-                        onChange={(e) => { setTaskDateFrom(e.target.value); setTaskPage(1); }}
-                        className="px-3 py-2.5 bg-gray-50 border border-black/5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                      />
-                    </div>
-
-                    {/* To */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black text-black/30 uppercase tracking-widest">To</span>
-                      <input
-                        type="date"
-                        value={taskDateTo}
-                        onChange={(e) => { setTaskDateTo(e.target.value); setTaskPage(1); }}
-                        className="px-3 py-2.5 bg-gray-50 border border-black/5 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                      />
-                    </div>
-
-                    {/* Clear */}
-                    {(taskSearch || taskStatusFilter !== "ALL" || taskDateFrom || taskDateTo) && (
-                      <button
-                        onClick={() => {
-                          setTaskSearch(""); setTaskStatusFilter("ALL");
-                          setTaskDateFrom(""); setTaskDateTo(""); setTaskPage(1);
-                        }}
-                        className="px-4 py-2.5 bg-red-50 text-red-500 border border-red-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-100 transition-colors whitespace-nowrap"
-                      >
-                        Clear
-                      </button>
-                    )}
-
-                    {/* Result count */}
-                    <span className="text-[10px] font-black text-black/20 uppercase tracking-widest ml-auto">
-                      {filteredTasks.length} result{filteredTasks.length !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-
-                  {/* ── Task List ── */}
-                  <div className="space-y-2 mb-5">
-                    {filteredTasks.length === 0 ? (
-                      <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-black/5">
-                        <p className="text-black/30 font-bold text-sm uppercase tracking-tight">No tasks match your filters</p>
-                      </div>
-                    ) : (
-                      pagedTasks.map((task, idx) => <TaskRow key={task.id || idx} task={task} />)
-                    )}
-                  </div>
-
-                  {/* ── Pagination ── */}
-                  {filteredTasks.length > TASKS_PER_PAGE && (
-                    <div className="flex items-center justify-between pt-4 border-t border-black/5">
-                      <p className="text-[10px] font-bold text-black/30 uppercase tracking-widest">
-                        {(taskPage - 1) * TASKS_PER_PAGE + 1}–{Math.min(taskPage * TASKS_PER_PAGE, filteredTasks.length)} of {filteredTasks.length}
+                    <div>
+                      <h3 className="text-lg font-bold text-black uppercase">Task Performance Report</h3>
+                      <p className="text-[10px] font-bold text-black uppercase mt-0.5" title={(stats.projectNames || []).join(", ")}>
+                        {allTasks.length} tasks · {stats.projectCount} project{stats.projectCount !== 1 ? "s" : ""}
                       </p>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setTaskPage((p) => Math.max(1, p - 1))}
-                          disabled={taskPage === 1}
-                          className="px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-black text-black/50 hover:bg-gray-50 disabled:opacity-30 transition-all"
-                        >
-                          ← Prev
-                        </button>
-                        <span className="px-3 py-1.5 bg-black text-white text-xs font-black rounded-lg">
-                          {taskPage} / {totalPages}
-                        </span>
-                        <button
-                          onClick={() => setTaskPage((p) => Math.min(totalPages, p + 1))}
-                          disabled={taskPage === totalPages}
-                          className="px-4 py-2 bg-white border border-black/5 rounded-xl text-xs font-black text-black/50 hover:bg-gray-50 disabled:opacity-30 transition-all"
-                        >
-                          Next →
-                        </button>
-                      </div>
                     </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
+                  </div>
+                  <div className="flex items-center gap-2 relative">
+                    <button
+                      onClick={() => setShowExportMenu(!showExportMenu)}
+                      className="flex items-center gap-2 px-4 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-xs uppercase shadow-sm cursor-pointer"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      Generate Report
+                      <ChevronDown className={`w-3 h-3 transition-transform ${showExportMenu ? "rotate-180" : ""}`} />
+                    </button>
+
+                    {showExportMenu && (
+                      <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-none border-2 border-black shadow-xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                        <div className="px-3 py-2 text-[10px] font-bold text-black uppercase border-b border-black flex items-center justify-between">
+                          Format & Period
+                          <X size={10} className="cursor-pointer text-black" onClick={() => setShowExportMenu(false)} />
+                        </div>
+                        {["Excel", "PDF"].map((fmt) => (
+                          <div key={fmt} className="space-y-1 mt-2 mb-2 p-1 border-b border-black last:border-0 pb-2">
+                            <div className="flex items-center gap-2 px-2 py-1">
+                              {fmt === "Excel" ? <FileSpreadsheet size={12} className="text-black" /> : <FilePdf size={12} className="text-black" />}
+                              <span className="text-[11px] font-bold uppercase">{fmt} Report</span>
+                            </div>
+                            {["all", "month", "year"].map((scope) => (
+                              <button
+                                key={scope}
+                                onClick={() => handleExport(fmt.toLowerCase(), scope)}
+                                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[10px] font-bold text-black hover:text-green-700 rounded-none transition-all capitalize cursor-pointer"
+                              >
+                                Export by {scope}
+                              </button>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <button
+                      onClick={fetchAllTasks}
+                      disabled={tasksLoading}
+                      className="flex items-center gap-2 px-4 py-1.5 bg-white border-2 border-black rounded-none text-xs font-bold text-black hover:bg-gray-50 transition-all disabled:opacity-40 cursor-pointer"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${tasksLoading ? "animate-spin" : ""}`} />
+                      Refresh
+                    </button>
+                  </div>
+                </div>
+
+                {tasksLoading ? (
+                  <div className="flex flex-col items-center justify-center py-16 bg-white rounded-none border border-dashed border-black gap-2">
+                    <Loader2 className="w-7 h-7 animate-spin text-black" />
+                    <p className="text-[11px] font-bold text-black uppercase">Loading tasks…</p>
+                  </div>
+                ) : allTasks.length === 0 ? (
+                  <div className="bg-white rounded-none border border-dashed border-black p-12 text-center">
+                    <ListTodo className="w-10 h-10 text-black mx-auto mb-3" />
+                    <p className="text-black font-bold text-sm uppercase">No tasks found for this employee</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* ── Stat Cards ── */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+                      <StatCard icon={ListTodo} label="Total Tasks" value={allTasks.length} accent="bg-indigo-500" />
+                      <StatCard icon={Clock} label="Assigned" value={`${Math.floor(stats.totalAssignedSec / 3600)}h`} sub={secToHms(stats.totalAssignedSec)} accent="bg-blue-500" />
+                      <StatCard icon={TrendingUp} label="Worked" value={`${Math.floor(stats.totalWorkedSec / 3600)}h`} sub={secToHms(stats.totalWorkedSec)} accent="bg-violet-500" />
+                      <StatCard
+                        icon={CheckCircle2}
+                        label="Completed"
+                        value={stats.completed}
+                        sub={`${allTasks.length > 0 ? Math.round((stats.completed / allTasks.length) * 100) : 0}% of total`}
+                        accent="bg-green-500"
+                      />
+                      <StatCard
+                        icon={AlertTriangle}
+                        label="Overrun"
+                        value={stats.overrunCount}
+                        sub={stats.overrunCount > 0 ? "needs attention" : "all good"}
+                        accent={stats.overrunCount > 0 ? "bg-red-500" : "bg-green-500"}
+                      />
+                    </div>
+
+                    {/* Project Names List */}
+                    {stats.projectNames?.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-8">
+                        {stats.projectNames.map((name) => (
+                          <span
+                            key={name}
+                            className="px-3 py-1 bg-green-50 text-black text-[10px] font-bold uppercase rounded-none border border-green-700"
+                          >
+                            📁 {name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* ── Filter Bar ── */}
+                    <div className="bg-white rounded-none border-2 border-black shadow-sm p-4 mb-5 flex flex-col md:flex-row gap-3 items-start md:items-center flex-wrap">
+                      {/* Search */}
+                      <div className="relative flex-1 min-w-[200px]">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black" />
+                        <input
+                          type="text"
+                          placeholder="Search tasks or projects…"
+                          value={taskSearch}
+                          onChange={(e) => { setTaskSearch(e.target.value); setTaskPage(1); }}
+                          className="w-full pl-9 pr-4 py-2 bg-white text-xs font-bold rounded-none border-2 border-black focus:outline-none focus:ring-4 focus:ring-green-500/10 transition-all placeholder:text-black/30"
+                        />
+                      </div>
+
+                      {/* Status */}
+                      <div className="relative">
+                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black pointer-events-none" />
+                        <select
+                          value={taskStatusFilter}
+                          onChange={(e) => { setTaskStatusFilter(e.target.value); setTaskPage(1); }}
+                          className="pl-9 pr-8 py-2 bg-white border-2 border-black rounded-none text-xs font-bold uppercase focus:outline-none focus:ring-4 focus:ring-green-500/10 cursor-pointer"
+                        >
+                          {uniqueStatuses.map((s) => (
+                            <option key={s} value={s}>
+                              {s === "ALL" ? "All Statuses" : (STATUS_META[s]?.label || s)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* From */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-black uppercase">From</span>
+                        <input
+                          type="date"
+                          value={taskDateFrom}
+                          onChange={(e) => { setTaskDateFrom(e.target.value); setTaskPage(1); }}
+                          className="px-3 py-2 bg-white border-2 border-black rounded-none text-xs font-bold focus:outline-none focus:ring-4 focus:ring-green-500/10"
+                        />
+                      </div>
+
+                      {/* To */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-black uppercase">To</span>
+                        <input
+                          type="date"
+                          value={taskDateTo}
+                          onChange={(e) => { setTaskDateTo(e.target.value); setTaskPage(1); }}
+                          className="px-3 py-2 bg-white border-2 border-black rounded-none text-xs font-bold focus:outline-none focus:ring-4 focus:ring-green-500/10"
+                        />
+                      </div>
+
+                      {/* Clear */}
+                      {(taskSearch || taskStatusFilter !== "ALL" || taskDateFrom || taskDateTo) && (
+                        <button
+                          onClick={() => {
+                            setTaskSearch(""); setTaskStatusFilter("ALL");
+                            setTaskDateFrom(""); setTaskDateTo(""); setTaskPage(1);
+                          }}
+                          className="px-4 py-2 bg-red-50 text-black border-2 border-red-700/80 rounded-none text-[10px] font-bold uppercase hover:bg-red-100 transition-colors whitespace-nowrap cursor-pointer"
+                        >
+                          Clear
+                        </button>
+                      )}
+
+                      {/* Result count */}
+                      <span className="text-[10px] font-bold text-black uppercase ml-auto">
+                        {filteredTasks.length} result{filteredTasks.length !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+
+                    {/* ── Task List ── */}
+                    <div className="space-y-2 mb-5">
+                      {filteredTasks.length === 0 ? (
+                        <div className="text-center py-12 bg-white rounded-none border border-dashed border-black">
+                          <p className="text-black font-bold text-sm uppercase">No tasks match your filters</p>
+                        </div>
+                      ) : (
+                        pagedTasks.map((task, idx) => <TaskRow key={task.id || idx} task={task} />)
+                      )}
+                    </div>
+
+                    {/* ── Pagination ── */}
+                    {filteredTasks.length > TASKS_PER_PAGE && (
+                      <div className="flex items-center justify-between pt-4 border-t border-black">
+                        <p className="text-[10px] font-bold text-black uppercase">
+                          {(taskPage - 1) * TASKS_PER_PAGE + 1}–{Math.min(taskPage * TASKS_PER_PAGE, filteredTasks.length)} of {filteredTasks.length}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setTaskPage((p) => Math.max(1, p - 1))}
+                            disabled={taskPage === 1}
+                            className="px-4 py-2 bg-white border-2 border-black rounded-none text-xs font-bold text-black hover:bg-gray-50 disabled:opacity-30 transition-all cursor-pointer"
+                          >
+                            ← Prev
+                          </button>
+                          <span className="px-3 py-1.5 bg-black text-white text-xs font-bold rounded-none">
+                            {taskPage} / {totalPages}
+                          </span>
+                          <button
+                            onClick={() => setTaskPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={taskPage === totalPages}
+                            className="px-4 py-2 bg-white border-2 border-black rounded-none text-xs font-bold text-black hover:bg-gray-50 disabled:opacity-30 transition-all cursor-pointer"
+                          >
+                            Next →
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
           {/* ── Address ── */}
           {(employee.address || employee.city || employee.state || employee.country || employee.zipCode) && (
             <div className="pt-8 border-t border-black/5">
-              <h4 className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em] mb-4">Address Information</h4>
+              <h4 className="text-[10px] font-bold text-black uppercase mb-4">Address Information</h4>
               <div className="text-sm space-y-2 text-black font-bold tracking-tight">
                 {employee.address && <p>{employee.address}</p>}
                 <p>{[employee.city, employee.state, employee.zipCode].filter(Boolean).join(", ") || "—"}</p>
@@ -1091,13 +1085,13 @@ const GetEmployeeByID = ({ id, onClose }) => {
 
 const InfoRow = ({ label, value, href }) => (
   <div className="flex justify-between items-center py-1">
-    <span className="text-black font-semibold uppercase tracking-[0.15em] text-xs">{label}</span>
+    <span className="text-black font-medium uppercase text-xs">{label}</span>
     {href ? (
-      <a href={href} className="text-black font-semibold text-sm tracking-tight hover:underline">
+      <a href={href} className="text-black text-sm hover:underline">
         {value}
       </a>
     ) : (
-      <span className="text-black text-sm tracking-tight">{value}</span>
+      <span className="text-black text-sm">{value}</span>
     )}
   </div>
 );

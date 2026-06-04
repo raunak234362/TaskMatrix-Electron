@@ -875,12 +875,12 @@ const TeamDashboard = () => {
                   </div>
 
                   <div className="flex items-center gap-4 relative z-10">
-                    <span className="px-6 py-2 bg-green-100 text-black font-semibold text-xs uppercase tracking-widest rounded-xl cursor-pointer hover:bg-black/10 transition-all border border-black">
+                    <span className="px-6 py-2 bg-green-100 text-black font-semibold text-xs uppercase tracking-widest rounded-xl cursor-pointer hover:bg-green-200/70 transition-all border-2 border-green-700">
                       Overview
                     </span>
                     <button
                       onClick={() => setIsViewModalOpen(true)}
-                      className="px-6 py-2 bg-white text-black font-semibold text-xs uppercase tracking-widest rounded-xl cursor-pointer hover:bg-black/10 transition-all border border-black">
+                      className="px-6 py-2 bg-white text-black font-semibold text-xs uppercase tracking-widest rounded-xl cursor-pointer hover:bg-green-200/70 transition-all border-2 border-green-700">
                       View Details
                     </button>
                   </div>

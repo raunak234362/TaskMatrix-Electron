@@ -1,103 +1,111 @@
-import { UserMinus, Clock } from "lucide-react";
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-const WorkloadAlerts = ({ memberStats, onFilterChange }) => {
+const WorkloadAlerts = ({ memberStats }) => {
   const notAssigned = memberStats.filter(m => Number(m.assignedHours) === 0);
   const underAssigned = memberStats.filter(m => Number(m.assignedHours) > 0 && Number(m.assignedHours) < 8);
+
+  const [isNotAssignedOpen, setIsNotAssignedOpen] = useState(false);
+  const [isUnderAssignedOpen, setIsUnderAssignedOpen] = useState(false);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
       {/* Not Assigned Card */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg border border-black/5 shadow-soft overflow-hidden"
-      >
-        <div className="px-8 py-6 border-b border-black/5 flex items-center justify-between bg-green-50/30">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-green-100 text-[#6bbd45] rounded-lg border border-green-200">
-              <UserMinus size={24} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h3 className="text-xl font-black text-black uppercase tracking-tight">Not Assigned</h3>
-            </div>
+      <div className="bg-white rounded-none border-2 border-green-700 shadow-soft overflow-hidden h-fit">
+        <button 
+          type="button"
+          onClick={() => setIsNotAssignedOpen(!isNotAssignedOpen)}
+          className="w-full px-8 py-6 flex items-center justify-between bg-green-200 text-left cursor-pointer hover:bg-green-50/50 transition-all "
+        >
+          <span className="text-xl font-semibold text-black uppercase tracking-normal">Not Assigned</span>
+          <div className="flex items-center gap-3">
+            <span className="text-lg font-bold text-black">{notAssigned.length}</span>
+            <ChevronDown size={20} className={`text-black transition-transform duration-300 ${isNotAssignedOpen ? 'rotate-180' : ''}`} />
           </div>
-          <button 
-            type="button"
-            onClick={() => onFilterChange("not_assigned")}
-            className="text-[10px] font-black text-black uppercase tracking-tight hover:underline"
-          >
-            See all ({notAssigned.length})
-          </button>
-        </div>
-        <div className="p-8 max-h-[250px] overflow-y-auto custom-scrollbar">
-          {notAssigned.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {notAssigned.map(m => (
-                <div key={m.id} className="px-4 py-2 bg-gray-100 border border-black/5 rounded-lg text-[11px] font-black uppercase tracking-wider text-black shadow-sm transition-all hover:bg-white hover:border-black/20">
-                  {m.name}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-black/20 font-black uppercase tracking-widest text-xs">
-              Everyone has tasks assigned
-            </div>
+        </button>
+        
+        <AnimatePresence initial={false}>
+          {isNotAssignedOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="p-8 max-h-[250px] overflow-y-auto custom-scrollbar border-t border-black/5 bg-white">
+                {notAssigned.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {notAssigned.map(m => (
+                      <div key={m.id} className="px-4 py-2 bg-gray-100 border border-black/10 rounded-none text-xs font-semibold uppercase tracking-normal text-black shadow-sm transition-all hover:bg-white hover:border-black/20">
+                        {m.name}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-black/40 font-bold uppercase tracking-normal text-xs">
+                    Everyone has tasks assigned
+                  </div>
+                )}
+              </div>
+            </motion.div>
           )}
-        </div>
-      </motion.div>
+        </AnimatePresence>
+      </div>
 
       {/* Under Assigned Card */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="bg-white rounded-lg border border-black/5 shadow-soft overflow-hidden"
-      >
-        <div className="px-8 py-6 border-b border-black/5 flex items-center justify-between bg-green-50/30">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-green-100 text-[#6bbd45] rounded-lg border border-green-200">
-              <Clock size={24} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h3 className="text-xl font-black text-black uppercase tracking-tight">Under Assigned</h3>
-            
-            </div>
+      <div className="bg-white rounded-none border-2 border-green-700 shadow-soft overflow-hidden h-fit">
+        <button 
+          type="button"
+          onClick={() => setIsUnderAssignedOpen(!isUnderAssignedOpen)}
+          className="w-full px-8 py-6 flex items-center justify-between bg-green-200 text-left cursor-pointer hover:bg-green-50/50 transition-all border-b border-black/5"
+        >
+          <span className="text-xl font-semibold text-black uppercase tracking-normal">Under Assigned</span>
+          <div className="flex items-center gap-3">
+            <span className="text-lg font-bold text-black">{underAssigned.length}</span>
+            <ChevronDown size={20} className={`text-black transition-transform duration-300 ${isUnderAssignedOpen ? 'rotate-180' : ''}`} />
           </div>
-          <button 
-            type="button"
-            onClick={() => onFilterChange("under_assigned")}
-            className="text-[10px] font-black text-black uppercase tracking-tight hover:underline"
-          >
-            See all ({underAssigned.length})
-          </button>
-        </div>
-        <div className="p-8 max-h-[250px] overflow-y-auto custom-scrollbar">
-          {underAssigned.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3">
-              {underAssigned.map(m => (
-                <div key={m.id} className="flex items-center justify-between px-5 py-3 relative bg-gray-50 border border-black/5 rounded-lg shadow-sm overflow-hidden group hover:border-[#6bbd45]/30 transition-all">
-                  <div className="absolute left-0 top-0 w-1 h-full bg-[#6bbd45]/50" />
-                  <span className="text-xs font-black uppercase tracking-tight text-black">{m.name}</span>
-                  <div className="flex items-center gap-4">
-                    <span className="text-[10px] font-black text-black/40 uppercase tracking-widest">{m.assignedHours} hrs</span>
-                    <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden border border-black/5">
-                      <div 
-                        className="bg-[#6bbd45] h-full shadow-[0_0_8px_rgba(107,189,69,0.4)]" 
-                        style={{ width: `${Math.min(100, (Number(m.assignedHours) / 8) * 100)}%` }}
-                      ></div>
-                    </div>
+        </button>
+
+        <AnimatePresence initial={false}>
+          {isUnderAssignedOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="p-8 max-h-[250px] overflow-y-auto custom-scrollbar border-t border-black/5 bg-white">
+                {underAssigned.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-3">
+                    {underAssigned.map(m => (
+                      <div key={m.id} className="flex items-center justify-between px-5 py-3 relative bg-gray-50 border border-black/10 rounded-none shadow-sm overflow-hidden group hover:border-green-600/30 transition-all">
+                        <div className="absolute left-0 top-0 w-1 h-full bg-green-600/50" />
+                        <span className="text-xs font-bold uppercase tracking-normal text-black">{m.name}</span>
+                        <div className="flex items-center gap-4">
+                          <span className="text-xs font-bold text-black uppercase tracking-normal">{m.assignedHours} hrs</span>
+                          <div className="w-20 h-2 bg-gray-200 rounded-none overflow-hidden border border-black/10">
+                            <div 
+                              className="bg-green-600 h-full shadow-[0_0_8px_rgba(107,189,69,0.4)]" 
+                              style={{ width: `${Math.min(100, (Number(m.assignedHours) / 8) * 100)}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-black/20 font-black uppercase tracking-widest text-xs">
-              No workload capacity issues
-            </div>
+                ) : (
+                  <div className="text-center py-8 text-black/40 font-bold uppercase tracking-normal text-xs">
+                    No workload capacity issues
+                  </div>
+                )}
+              </div>
+            </motion.div>
           )}
-        </div>
-      </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 };

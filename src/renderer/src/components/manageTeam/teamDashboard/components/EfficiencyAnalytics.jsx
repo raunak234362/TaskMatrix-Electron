@@ -81,14 +81,15 @@ const EfficiencyAnalytics = ({
 
   return (
     <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-none border border-black shadow-soft h-full flex flex-col">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
-        <div>
-          <h3 className="text-2xl font-black text-black uppercase tracking-tight">
+      <div className="flex-shrink-0">
+          <h3 className="text-2xl font-semibold text-black uppercase tracking-tight whitespace-nowrap">
             Efficiency Analytics
           </h3>
         </div>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-10 gap-6">
+        
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center lg:justify-end gap-3 w-full lg:w-auto">
           <div className="w-40 z-20">
             <Select
               isMulti

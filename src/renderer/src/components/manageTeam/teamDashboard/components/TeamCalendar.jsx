@@ -171,11 +171,11 @@ const TeamCalendar = ({
       <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-[2.5rem] border border-black/5 shadow-soft mb-8 sm:mb-12">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 sm:mb-10">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-green-200 text-black border border-black/5 rounded-2xl shadow-sm">
+            <div className="p-3 bg-green-50 text-green-700 border border-black/5 rounded-2xl shadow-sm">
               <CalendarIcon size={24} strokeWidth={2.5} />
             </div>
             <div>
-              <h3 className="text-lg sm:text-xl font-black text-black uppercase tracking-tight">
+              <h3 className="text-lg sm:text-xl font-semibold text-black uppercase tracking-tight">
                 Team Calendar - {selectedTeamName}
               </h3>
             </div>

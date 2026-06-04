@@ -19,14 +19,14 @@ const DashboardHeader = ({
         <div className="relative group">
           <Search
             className="absolute left-4 top-1/2 -translate-y-1/2 text-black/40 group-focus-within:text-black transition-colors"
-            size={20}
+            size={16}
           />
           <input
             type="text"
             placeholder="Search teams..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-12 pr-6 py-3 bg-white border border-black rounded-none text-sm font-bold text-black focus:outline-none focus:ring-4 focus:ring-green-500/10 transition-all w-full md:w-64 placeholder:text-black/30 placeholder:font-normal"
+            className="pl-12 pr-6 py-2 bg-white border-2 border-black/30 focus:border-black rounded-none text-xs font-bold text-black focus:outline-none focus:ring-4 focus:ring-green-500/10 transition-all w-full md:w-64 placeholder:text-black/30 placeholder:font-normal"
           />
         </div>
 
@@ -54,26 +54,26 @@ const DashboardHeader = ({
         {onAddTeam && (
           <Button
             onClick={onAddTeam}
-            className="flex items-center gap-2 px-6 py-3 bg-green-50 text-black border-2 border-green-700/80 rounded-none font-bold text-xs uppercase tracking-wider hover:bg-green-100 transition-all shadow-sm cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 bg-green-50 text-black border-2 border-green-700/80 rounded-none font-bold text-xs uppercase tracking-wider hover:bg-green-100 transition-all shadow-sm cursor-pointer"
           >
-            <Plus size={20} strokeWidth={3} />
+            <Plus size={16} strokeWidth={3} />
             <span>Add Team</span>
           </Button>
         )}
 
         <Button
           onClick={onGenerateReport}
-          className="flex items-center gap-2 px-6 py-3 bg-green-50 text-black border-2 border-green-700/80 rounded-none font-bold text-xs uppercase tracking-wider hover:bg-green-100 transition-all shadow-sm cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 bg-green-50 text-black border-2 border-green-700/80 rounded-none font-bold text-xs uppercase tracking-wider hover:bg-green-100 transition-all shadow-sm cursor-pointer"
         >
-          <FileText size={20} className="text-black" />
+          <FileText size={16} className="text-black" />
           <span>Report</span>
         </Button>
 
         <Button
           onClick={onDailyReport}
-          className="flex items-center gap-2 px-6 py-3 bg-green-50 text-black border-2 border-green-700/80 rounded-none font-bold text-xs uppercase tracking-wider hover:bg-green-100 transition-all shadow-sm cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 bg-green-50 text-black border-2 border-green-700/80 rounded-none font-bold text-xs uppercase tracking-wider hover:bg-green-100 transition-all shadow-sm cursor-pointer"
         >
-          <Calendar size={20} className="text-black" />
+          <Calendar size={16} className="text-black" />
           <span>Daily Report</span>
         </Button>
       </div>

@@ -7,33 +7,26 @@ const TeamsList = ({
 }) => {
   return (
     <div className="space-y-6">
-      <h3 className="text-2xl font-black text-black flex items-center gap-3 uppercase tracking-tight">
-        <Users size={24} strokeWidth={2.5} className="text-[#6bbd45]" />
+      <h3 className="text-2xl font-bold text-black flex items-center gap-3 uppercase tracking-tight">
+        <Users size={24} strokeWidth={2.5} className="text-black" />
         Teams
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
+      <div className="flex flex-wrap w-full gap-4">
         {filteredTeams.map((team) => (
           <div
             key={team.id}
             onClick={() => onTeamSelect(team.id)}
-            className={`p-5 rounded-none border-2 transition-all cursor-pointer group flex flex-col justify-between  ${selectedTeam === team.id
+            className={`p-5 rounded-none border transition-all cursor-pointer group flex-1 min-w-[250px] flex items-center justify-between ${selectedTeam === team.id
               ? "bg-green-50 border-green-700/80 shadow-sm"
               : "bg-white border-black/15 hover:border-black hover:shadow-sm"
               }`}
           >
-            <div className="flex items-start justify-between">
-              <div>
-                <h4 className={`text-xl font-black tracking-tight text-black/80 transition-colors uppercase ${selectedTeam === team.id ? 'text-black' : ''}`}>
-                  {team.name}
-                </h4>
-                <p className="text-sm font-bold text-black/40">
-                  {team.members?.length || 0} members
-                </p>
-              </div>
-              <div className={`p-2.5 rounded-none border transition-all ${selectedTeam === team.id ? 'bg-[#6bbd45]/20 text-[#6bbd45] border-green-700/50' : 'bg-gray-50 text-black/10 border-black/5 group-hover:text-[#6bbd45] group-hover:bg-[#6bbd45]/5'}`}>
-                <Users size={16} strokeWidth={2.5} />
-              </div>
-            </div>
+            <h4 className={`text-lg font-bold tracking-tight text-black transition-colors uppercase`}>
+              {team.name}
+            </h4>
+            <p className="text-xs font-bold text-black/60 uppercase">
+              {team.members?.length || 0} members
+            </p>
           </div>
         ))}
       </div>

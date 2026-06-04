@@ -54,12 +54,12 @@ const TeamPage = () => {
     <div className="h-full w-full overflow-y-auto overflow-x-hidden">
       <div className="flex flex-col w-full h-full">
         {/* ---------- TOP TABS ---------- */}
-        <div className="px-6 py-4 bg-white/50 backdrop-blur-xl border-b border-gray-100 flex flex-wrap items-center justify-center md:justify-end gap-3">
+        <div className="px-6 py-4  backdrop-blur-xl border-b border-gray-100 flex flex-wrap items-center justify-center md:justify-end gap-3">
           <button
             onClick={() => setActiveTab("teamDashboard")}
-            className={`px-6 py-2.5 rounded-none text-[11px] font-bold uppercase tracking-widest transition-all shadow-sm border-2 cursor-pointer ${activeTab === "teamDashboard"
+            className={`px-6 py-2.5 rounded-none text-[13px] font-bold uppercase transition-all shadow-lg border-2 cursor-pointer ${activeTab === "teamDashboard"
               ? "bg-green-50 text-black border-green-700/80"
-              : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
+              : "bg-white text-black border-gray-200 hover:border-black hover:text-black shadow-lg"
               }`}
           >
             Team Dashboard
@@ -68,9 +68,9 @@ const TeamPage = () => {
           {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
             <button
               onClick={() => setActiveTab("manageEmployee")}
-              className={`px-6 py-2.5 rounded-none text-[11px] font-bold uppercase tracking-widest transition-all shadow-sm border-2 cursor-pointer ${activeTab === "manageEmployee"
+              className={`px-6 py-2.5 rounded-none text-[13px] font-bold uppercase transition-all shadow-sm border-2 cursor-pointer ${activeTab === "manageEmployee"
                 ? "bg-green-50 text-black border-green-700/80"
-                : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
+                : "bg-white text-black border-gray-200 hover:border-black hover:text-black"
                 }`}
             >
               Manage Employee
@@ -80,9 +80,9 @@ const TeamPage = () => {
           {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
             <button
               onClick={() => setActiveTab("manageDepartment")}
-              className={`px-6 py-2.5 rounded-none text-[11px] font-bold uppercase tracking-widest transition-all shadow-sm border-2 cursor-pointer ${activeTab === "manageDepartment"
+              className={`px-6 py-2.5 rounded-none text-[13px] font-bold uppercase transition-all shadow-sm border-2 cursor-pointer ${activeTab === "manageDepartment"
                 ? "bg-green-50 text-black border-green-700/80"
-                : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
+                : "bg-white text-black border-gray-200 hover:border-black hover:text-black"
                 }`}
             >
               Manage Department
@@ -92,9 +92,9 @@ const TeamPage = () => {
           {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
             <button
               onClick={() => setActiveTab("manageTeam")}
-              className={`px-6 py-2.5 rounded-none text-[11px] font-bold uppercase tracking-widest transition-all shadow-sm border-2 cursor-pointer ${activeTab === "manageTeam"
+              className={`px-6 py-2.5 rounded-none text-[13px] font-bold uppercase transition-all shadow-sm border-2 cursor-pointer ${activeTab === "manageTeam"
                 ? "bg-green-50 text-black border-green-700/80"
-                : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
+                : "bg-white  border-gray-200 hover:border-black hover:text-black"
                 }`}
             >
               Manage Team
