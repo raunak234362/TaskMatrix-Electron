@@ -387,9 +387,9 @@ const GetInvoiceById = ({
         }}
       />
 
-      <div className="modal-root fixed inset-0 z-[1000] flex items-start justify-center overflow-auto bg-black/80 backdrop-blur-xl pt-0 pb-0">
+      <div className="modal-root fixed inset-0 z-[10001] flex items-start justify-center overflow-auto bg-black/80 backdrop-blur-xl pt-0 pb-0">
         {/* Action Header */}
-        <div className="fixed top-6 right-10 z-[1010] flex gap-4 no-print">
+        <div className="fixed top-6 right-10 z-[10002] flex gap-4 no-print">
           <button
             onClick={handleHtmlPrint}
             className="flex items-center gap-2 px-8 py-3 bg-green-600 text-white rounded-full shadow-2xl hover:bg-green-700 transition-all font-bold group scale-110"
@@ -822,7 +822,7 @@ const GetInvoiceById = ({
 
       {/* Edit Mode — render UpdateInvoice as overlay */}
       {editMode && invoice && (
-        <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 overflow-auto">
+        <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 overflow-auto">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-gray-100">
               <h2 className="text-lg font-black text-black uppercase tracking-tight">Edit Invoice</h2>

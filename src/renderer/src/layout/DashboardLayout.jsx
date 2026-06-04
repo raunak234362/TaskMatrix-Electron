@@ -77,7 +77,7 @@ const Layout = () => {
           </div>
         )}
 
-        <main className={`flex flex-col flex-1 w-full min-w-0 min-h-0 custom-scrollbar relative z-10 ${isAnyModalOpen ? 'p-0' : 'p-6'} ${isChatPage ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden'}`}>
+        <main className={`flex flex-col flex-1 w-full min-w-0 min-h-0 custom-scrollbar relative ${isAnyModalOpen ? 'p-0' : 'p-6'} ${isChatPage ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden'}`}>
           <Outlet />
         </main>
       </div>

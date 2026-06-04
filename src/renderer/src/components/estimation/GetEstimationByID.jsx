@@ -126,7 +126,7 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[10001] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl px-8 py-6 shadow-2xl border border-slate-200 flex items-center gap-4">
           <Loader2 className="animate-spin text-slate-700" />
           <div>
@@ -144,7 +144,7 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
 
   if (error || !estimation) {
     return (
-      <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[10001] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl p-8 shadow-2xl border border-slate-200 w-full max-w-md">
           <div className="flex items-start gap-4">
             <div className="bg-red-100 p-3 rounded-2xl">
@@ -198,7 +198,7 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
   } = estimation;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-3">
+    <div className="fixed inset-0 z-[10001] bg-black/40 backdrop-blur-sm flex items-center justify-center p-3">
       <div className="w-full max-w-7xl h-[95vh] bg-slate-50 rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
         {/* HEADER */}
         <div className="bg-white border-b border-slate-200 px-8 py-6 shrink-0">

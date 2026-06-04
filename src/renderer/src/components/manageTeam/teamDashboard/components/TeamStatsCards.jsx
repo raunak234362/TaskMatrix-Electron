@@ -49,16 +49,16 @@ const TeamStatsCards = ({ teamStats }) => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: index * 0.1 }}
-          className="bg-white p-6 rounded-lg border border-black/5 shadow-soft hover:shadow-medium transition-all duration-500 relative overflow-hidden group"
+          className="bg-white p-6 rounded-none border border-black shadow-soft hover:shadow-medium transition-all duration-500 relative overflow-hidden group"
         >
           {/* Decorative Gradient Blob */}
-          <div className={`absolute -right-8 -top-8 w-32 h-32 ${stat.bg} rounded-full opacity-40 blur-2xl group-hover:scale-125 transition-transform duration-700`} />
+          <div className={`absolute -right-8 -top-8 w-32 h-32 ${stat.bg} rounded-none opacity-40 blur-2xl group-hover:scale-125 transition-transform duration-700`} />
           <div className="flex justify-between items-start mb-8 relative z-10">
             <div>
               <p className="text-black text-xl uppercase tracking-widest mb-1.5">{stat.label}</p>
               <h3 className="text-2xl font-black text-black tracking-tight">{stat.value}</h3>
             </div>
-            <div className={`p-4 rounded-lg ${stat.bg} ${stat.color} border border-black/5 shadow-sm group-hover:bg-[#6bbd45] group-hover:text-white group-hover:border-transparent transition-all duration-500`}>
+            <div className={`p-4 rounded-none ${stat.bg} ${stat.color} border border-black shadow-sm group-hover:bg-[#6bbd45] group-hover:text-white group-hover:border-transparent transition-all duration-500`}>
               {stat.icon}
             </div>
           </div>
@@ -70,12 +70,12 @@ const TeamStatsCards = ({ teamStats }) => {
                 <span className="text-base text-black">{Math.round(stat.progress)}%</span>
               )}
             </div>
-            <div className="h-3 w-full bg-gray-50 rounded-full border border-black/5 overflow-hidden p-0.5">
+            <div className="h-3 w-full bg-gray-50 rounded-none border border-black overflow-hidden p-0.5">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${stat.progress}%` }}
                 transition={{ duration: 1, delay: index * 0.1 }}
-                className="h-full bg-[#6bbd45] rounded-full shadow-[0_0_10px_rgba(107,189,69,0.3)]"
+                className="h-full bg-[#6bbd45] rounded-none shadow-[0_0_10px_rgba(107,189,69,0.3)]"
               />
             </div>
           </div>

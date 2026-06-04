@@ -71,11 +71,11 @@ const TaskDistribution = ({ teamStats }) => {
   }, [teamStats.taskTypeCounts, teamStats.taskTypeDetails]);
 
   return (
-    <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-lg border border-black/5 shadow-soft h-full flex flex-col">
+    <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-none border border-black shadow-soft h-full flex flex-col">
       <h3 className="text-2xl font-black text-black mb-8 flex items-center gap-3 uppercase tracking-tight">
         <Layers className="text-[#6bbd45]" size={24} strokeWidth={2.5} />
         Task Distribution
-        <span className="text-[10px] font-black text-[#4b8a2e] ml-auto bg-green-50 px-3 py-1.5 rounded-full border border-[#6bbd45]/20 uppercase tracking-widest">
+        <span className="text-[10px] font-black text-[#4b8a2e] ml-auto bg-green-50 px-3 py-1.5 rounded-none border border-[#6bbd45]/20 uppercase tracking-widest">
           Task Counts
         </span>
       </h3>
@@ -86,7 +86,7 @@ const TaskDistribution = ({ teamStats }) => {
           return (
             <div
               key={index}
-              className={`rounded-2xl border transition-all duration-300 ${expandedIndex === index ? "border-black/10 bg-gray-50/30 shadow-sm" : "border-transparent hover:border-black/5 hover:bg-gray-50/50"}`}
+              className={`rounded-none border transition-all duration-300 ${expandedIndex === index ? "border-black/20 bg-gray-50/30 shadow-sm" : "border-transparent hover:border-black/10 hover:bg-gray-50/50"}`}
             >
               <div
                 onClick={() =>
@@ -96,7 +96,7 @@ const TaskDistribution = ({ teamStats }) => {
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className={`p-3 rounded-xl ${item.bg} ${item.color} shadow-sm group-hover:scale-105 transition-transform`}
+                    className={`p-3 rounded-none border border-black/10 ${item.bg} ${item.color} shadow-sm group-hover:scale-105 transition-transform`}
                   >
                     <Icon size={20} strokeWidth={2.5} />
                   </div>
@@ -105,7 +105,7 @@ const TaskDistribution = ({ teamStats }) => {
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-black font-black bg-white border border-black/10 px-5 py-2 rounded-xl text-sm shadow-sm group-hover:border-black/20 transition-all">
+                  <span className="text-black font-black bg-white border border-black px-5 py-2 rounded-none text-sm shadow-sm group-hover:border-black transition-all">
                     {item.value || 0}
                   </span>
                   {item.tasks.length > 0 && (
@@ -120,18 +120,18 @@ const TaskDistribution = ({ teamStats }) => {
               {/* Expandable Task List */}
               {expandedIndex === index && item.tasks.length > 0 && (
                 <div className="px-5 pb-5 pt-1 animate-in slide-in-from-top-2 fade-in duration-200">
-                  <div className="bg-white border border-black/5 rounded-xl shadow-inner max-h-[300px] overflow-y-auto custom-scrollbar p-3 space-y-2">
+                  <div className="bg-white border border-black rounded-none shadow-inner max-h-[300px] overflow-y-auto custom-scrollbar p-3 space-y-2">
                     {item.tasks.map((task, tIdx) => (
                       <div
                         key={tIdx}
-                        className="p-3 bg-gray-50 rounded-lg border border-black/5 hover:border-black/10 transition-colors"
+                        className="p-3 bg-gray-50 rounded-none border border-black/10 hover:border-black/20 transition-colors"
                       >
                         <div className="flex justify-between items-start gap-4 mb-2">
                           <h4 className="text-xs font-black text-black leading-tight line-clamp-2">
                             {task.name || task.title || "Untitled Task"}
                           </h4>
                           <span
-                            className={`px-2 py-1 text-[9px] font-black uppercase tracking-widest rounded-md shrink-0 border ${task.status === "COMPLETE"
+                            className={`px-2 py-1 text-[9px] font-black uppercase tracking-widest rounded-none shrink-0 border ${task.status === "COMPLETE"
                               ? "bg-green-100/50 text-green-700 border-green-200"
                               : task.status === "IN_PROGRESS"
                                 ? "bg-blue-100/50 text-blue-700 border-blue-200"

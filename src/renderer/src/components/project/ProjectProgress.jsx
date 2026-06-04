@@ -82,7 +82,7 @@ const ProjectProgress = ({ projectId }) => {
         </div>
         <button
           onClick={() => setIsAdding(true)}
-          className="flex items-center gap-2 px-6 py-2 border-2 border-[#6bbd45] text-[#6bbd45] hover:bg-[#6bbd45] hover:text-white rounded-none text-xs font-black uppercase tracking-widest transition-all shadow-none"
+          className="flex items-center gap-2 px-6 py-1.5 border-2 border-green-700/80 bg-green-300 text-black hover:bg-green-100 rounded-none text-xs font-black uppercase tracking-widest transition-all shadow-none"
         >
           <Plus className="w-4 h-4" />
           Add Report

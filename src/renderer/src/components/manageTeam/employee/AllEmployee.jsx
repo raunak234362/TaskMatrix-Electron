@@ -109,7 +109,7 @@ const AllEmployee = () => {
       cell: ({ row }) => {
         const active = isTrue(row.original.isActive);
         return (
-          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.1em] border ${
+          <span className={`px-3 py-1 rounded-none text-[10px] font-black uppercase tracking-[0.1em] border ${
             active 
               ? "bg-green-50 text-green-700 border-green-200" 
               : "bg-red-50 text-red-700 border-red-200"
@@ -123,7 +123,7 @@ const AllEmployee = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-20 bg-white rounded-[2.5rem] border border-black/5 shadow-soft">
+      <div className="flex items-center justify-center p-20 bg-white rounded-none border border-black shadow-soft">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-black/5 border-t-black"></div>
           <span className="text-black font-black uppercase tracking-widest text-xs">Loading employees...</span>
@@ -134,14 +134,14 @@ const AllEmployee = () => {
 
   if (error) {
     return (
-      <div className="p-12 text-center bg-red-50 rounded-[2.5rem] border border-red-100">
+      <div className="p-12 text-center bg-red-50 rounded-none border border-red-100">
         <p className="text-red-600 font-bold">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-[2.5rem] shadow-soft border border-black/5 overflow-hidden mt-6">
+    <div className="bg-white rounded-none shadow-soft border border-black/10 overflow-hidden mt-6">
 
       {/* Search and Filters */}
       <div className="px-8 pt-6 pb-2 flex flex-wrap items-center gap-6">
@@ -155,7 +155,7 @@ const AllEmployee = () => {
             placeholder="Search by username, name, email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-11 pr-10 py-2.5 bg-gray-50 border border-black/10 rounded-full text-sm font-medium text-black placeholder:text-black/30 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-300 transition-all"
+            className="w-full pl-11 pr-10 py-2.5 bg-gray-50 border border-black rounded-none text-sm font-medium text-black placeholder:text-black/30 focus:outline-none focus:border-green-300 transition-all"
           />
           {searchTerm && (
             <button

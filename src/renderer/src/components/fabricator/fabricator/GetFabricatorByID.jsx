@@ -87,7 +87,7 @@ const GetFabricatorByID = ({ id, onClose }) => {
 
   if (error || !fabricator) {
     return (
-      <div className="fixed inset-0 z-10001 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}>
         <div className="bg-white p-8 rounded-2xl shadow-xl flex items-center text-red-600" onClick={(e) => e.stopPropagation()}>
           <AlertCircle className="w-5 h-5 mr-2" />
           {error || "Fabricator not found"}
@@ -99,7 +99,7 @@ const GetFabricatorByID = ({ id, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-10001 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
       onClick={onClose}
     >
       <motion.div

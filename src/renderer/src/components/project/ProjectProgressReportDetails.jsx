@@ -156,7 +156,7 @@ const ProjectProgressReportDetails = ({ reportId, onBack }) => {
             </button>
             <button
               onClick={onBack}
-              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+              className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
             >
               Close
             </button>

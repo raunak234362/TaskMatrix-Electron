@@ -469,7 +469,7 @@ const ResponseModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[10002] p-4">
       <div className="bg-white shadow-2xl rounded-2xl border border-gray-200 w-[90%] max-w-7xl relative overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-black shrink-0 bg-white">

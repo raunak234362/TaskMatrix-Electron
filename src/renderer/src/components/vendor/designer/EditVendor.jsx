@@ -204,7 +204,7 @@ const EditConnectionDesigner = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/40 p-4"
       onClick={onClose}
     >
       <div

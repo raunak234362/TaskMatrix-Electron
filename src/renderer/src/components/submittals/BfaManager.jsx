@@ -241,7 +241,7 @@ const BfaManager = ({ submittalId }) => {
     <div className="bg-gray-100 p-6 rounded-xl border border-gray-100 space-y-6">
       <div className="flex justify-between items-center border-b border-gray-200 pb-4">
         <div>
-          <h2 className="text-xl font-semibold text-[#6bbd45] flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-black flex items-center gap-2">
             BFA
           </h2>
         </div>
@@ -329,7 +329,7 @@ const BfaManager = ({ submittalId }) => {
           {hasMultipleVersions && (
             <div className="space-y-3 pt-4 border-t border-gray-200">
               <div className="flex items-center gap-2">
-                <History className="w-4 h-4 text-[#6bbd45]" />
+                <History className="w-4 h-4 text-black" />
                 <h3 className="text-sm font-semibold text-gray-700">Version History</h3>
                 <span className="ml-auto text-[10px] font-black text-gray-400 uppercase tracking-widest bg-white border border-gray-200 px-2 py-0.5 rounded-md">
                   {sortedVersions.length} versions
@@ -356,7 +356,7 @@ const BfaManager = ({ submittalId }) => {
           <p className="text-sm text-gray-500 italic">No bacK FROM APPROVAL (BFA) associated with this submittal yet.</p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="text-xs font-bold text-[#6bbd45] mt-2 hover:underline"
+            className="text-xs font-bold text-black mt-2 hover:underline"
           >
             Raise BFA Now
           </button>
