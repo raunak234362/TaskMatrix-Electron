@@ -12,9 +12,10 @@ import {
   Trash2,
   Filter,
   Download,
+  Search,
 } from "lucide-react";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import DateFilter from "../common/DateFilter";
 import { matchesDateFilter } from "../../utils/dateFilter";
@@ -49,6 +50,8 @@ const AllTasks = () => {
     year: new Date().getFullYear(),
     month: new Date().getMonth(),
   });
+
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -243,9 +246,28 @@ const AllTasks = () => {
       // Filter by Date (using created_on)
       if (!matchesDateFilter(task.created_on, dateFilter)) return false;
 
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const taskName = (task.name || "").toLowerCase();
+        
+        if (!taskName.includes(query)) {
+          return false;
+        }
+      }
+
       return true;
     });
-  }, [tasks, filters, dateFilter]);
+  }, [tasks, filters, dateFilter, searchQuery]);
+
+  const stripHtml = (html) => {
+    if (!html) return '';
+    return html.replace(/<br\s*[\/]?>/gi, '\n')
+               .replace(/<\/(div|p|h[1-6]|li)>/gi, '\n')
+               .replace(/<[^>]*>?/gm, '')
+               .replace(/&nbsp;/g, ' ')
+               .replace(/\n\s*\n/g, '\n')
+               .trim();
+  };
 
   const handleDownloadPDF = () => {
     // Sort tasks by created date (oldest first, or newest first; using oldest first here)
@@ -259,7 +281,8 @@ const AllTasks = () => {
       "Allocated Hrs", 
       "Working Hrs", 
       "Due Date", 
-      "Ack?"
+      "Ack?",
+      "Comments"
     ];
     const tableRows = [];
 
@@ -273,10 +296,9 @@ const AllTasks = () => {
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const formattedWorkingHours = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 
-      // Check unacknowledged comments
-      const hasUnacknowledgedComments = task.taskcomment?.some(
-        (c) => c.acknowledged === false
-      );
+      const unacknowledgedComments = task.taskcomment?.filter(c => c.acknowledged === false) || [];
+      const hasUnacknowledgedComments = unacknowledgedComments.length > 0;
+      const commentsText = unacknowledgedComments.map(c => stripHtml(c.data)).join('\n---\n');
 
       tableRows.push([
         task.name || "N/A",
@@ -286,13 +308,14 @@ const AllTasks = () => {
         task.allocationLog?.allocatedHours || "—",
         formattedWorkingHours,
         formatDate(task.due_date),
-        hasUnacknowledgedComments ? "No" : "Yes"
+        hasUnacknowledgedComments ? "No" : "Yes",
+        commentsText
       ]);
     });
 
     const doc = new jsPDF("landscape");
     doc.text("Tasks Report", 14, 15);
-    doc.autoTable({
+    autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 20,
@@ -315,10 +338,9 @@ const AllTasks = () => {
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const formattedWorkingHours = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 
-      // Check unacknowledged comments
-      const hasUnacknowledgedComments = task.taskcomment?.some(
-        (c) => c.acknowledged === false
-      );
+      const unacknowledgedComments = task.taskcomment?.filter(c => c.acknowledged === false) || [];
+      const hasUnacknowledgedComments = unacknowledgedComments.length > 0;
+      const commentsText = unacknowledgedComments.map(c => stripHtml(c.data)).join('\n---\n');
 
       return {
         "Task Detail": task.name || "N/A",
@@ -328,7 +350,8 @@ const AllTasks = () => {
         "Allocated Hours": task.allocationLog?.allocatedHours || "—",
         "Working Hours": formattedWorkingHours,
         "Due Date": formatDate(task.due_date),
-        "Comment Acknowledged": hasUnacknowledgedComments ? "No" : "Yes"
+        "Comment Acknowledged": hasUnacknowledgedComments ? "No" : "Yes",
+        "Comments": commentsText
       };
     });
 
@@ -358,7 +381,7 @@ const AllTasks = () => {
               </span>
               {hasUnacknowledgedComments && (
                 <span className="text-[10px] text-red-500 font-bold flex items-center gap-1 mt-1 uppercase tracking-wider">
-                  <AlertCircle className="w-3 h-3" /> Unacknowledged Comment
+                  <AlertCircle className="w-3 h-3" /> Comment Available
                 </span>
               )}
               {hasUnreadComments && (
@@ -553,6 +576,21 @@ const AllTasks = () => {
         </div>
 
         <div className="flex flex-wrap items-end gap-4">
+          {/* Search Filter */}
+          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
+            <label className="text-[10px] font-bold text-black uppercase tracking-wider">Search</label>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search tasks..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-8 pr-3 py-[7px] text-sm font-semibold text-black bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
+              />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            </div>
+          </div>
+
           {/* Project Filter */}
           <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
             <label className="text-[10px] font-bold text-black uppercase tracking-wider">Project</label>
