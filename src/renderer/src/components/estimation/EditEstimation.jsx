@@ -106,14 +106,14 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 backdrop-blur-sm">
+      <div className="fixed inset-0 z-[10002] grid place-items-center bg-black/40 backdrop-blur-sm">
         <Loader2 className="w-8 h-8 animate-spin text-green-600" />
       </div>
     )
   }
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+    <div className="fixed inset-0 z-[10002] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
       <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-gray-200 max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* HEADER */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">

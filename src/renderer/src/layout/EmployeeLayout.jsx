@@ -8,13 +8,13 @@ const EmployeeLayout = () => {
   return (
     <div className="w-full overflow-y-hidden overflow-x-hidden">
       <div className="flex flex-col w-full h-full">
-        <div className="px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 rounded-t-2xl flex flex-col md:flex-row items-center justify-end gap-4">
+        <div className="px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 border-b flex flex-col md:flex-row items-center justify-end gap-4">
           <div className="flex flex-row gap-3 items-end justify-end">
             <button
               onClick={() => setActiveTab("allEmployee")}
-              className={`px-1.5 md:px-4 py-2 border border-black rounded-lg ${activeTab === "allEmployee"
-                  ? "bg-green-200 text-black shadow-medium"
-                : "text-black hover:bg-green-50"
+              className={`px-1.5 md:px-4 py-2 border-2 rounded-none transition-all cursor-pointer text-xs font-bold uppercase tracking-widest shadow-sm ${activeTab === "allEmployee"
+                ? "bg-green-50 text-black border-green-700/80"
+                : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
                 }`}
             >
               All Employee
@@ -23,9 +23,9 @@ const EmployeeLayout = () => {
             {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
               <button
                 onClick={() => setActiveTab("addEmployee")}
-                className={`px-1.5 md:px-4 py-2 rounded-lg ${activeTab === "addEmployee"
-                    ? "bg-green-200 text-black shadow-medium"
-                : "text-black hover:bg-green-50"
+                className={`px-1.5 md:px-4 py-2 border-2 rounded-none transition-all cursor-pointer text-xs font-bold uppercase tracking-widest shadow-sm ${activeTab === "addEmployee"
+                  ? "bg-green-50 text-black border-green-700/80"
+                  : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
                   }`}
               >
                 Add Employee

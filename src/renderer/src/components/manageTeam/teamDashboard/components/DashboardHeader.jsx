@@ -26,7 +26,7 @@ const DashboardHeader = ({
             placeholder="Search teams..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-12 pr-6 py-3 bg-white border border-black/10 rounded-full text-sm font-bold text-black focus:outline-none focus:ring-4 focus:ring-green-500/10 transition-all w-full md:w-64 placeholder:text-black/30 placeholder:font-normal"
+            className="pl-12 pr-6 py-3 bg-white border border-black rounded-none text-sm font-bold text-black focus:outline-none focus:ring-4 focus:ring-green-500/10 transition-all w-full md:w-64 placeholder:text-black/30 placeholder:font-normal"
           />
         </div>
 
@@ -39,10 +39,10 @@ const DashboardHeader = ({
           <button
             onClick={() => onDateFilterChange({ type: "specificDate", date: new Date().toISOString() })}
             className={`
-              px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all border
+              px-4 py-2 rounded-none text-xs font-bold uppercase tracking-widest transition-all border-2 cursor-pointer
               ${dateFilter?.type === "specificDate" && new Date(dateFilter.date).toDateString() === new Date().toDateString()
-                ? "bg-black text-white border-black"
-                : "bg-white text-black border-black/10 hover:border-black/30"
+                ? "bg-green-50 text-black border-green-700/80"
+                : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
               }
             `}
           >
@@ -54,7 +54,7 @@ const DashboardHeader = ({
         {onAddTeam && (
           <Button
             onClick={onAddTeam}
-            className="flex items-center gap-2 px-6 py-3 bg-green-200 text-black border border-black rounded-full font-black text-xs uppercase tracking-wider hover:bg-[#6bbd45]/90 transition-all shadow-sm active:scale-95"
+            className="flex items-center gap-2 px-6 py-3 bg-green-50 text-black border-2 border-green-700/80 rounded-none font-bold text-xs uppercase tracking-wider hover:bg-green-100 transition-all shadow-sm cursor-pointer"
           >
             <Plus size={20} strokeWidth={3} />
             <span>Add Team</span>
@@ -63,17 +63,17 @@ const DashboardHeader = ({
 
         <Button
           onClick={onGenerateReport}
-          className="flex items-center gap-2 px-6 py-3 bg-white border border-black/10 rounded-full text-black font-black text-xs uppercase tracking-wider hover:bg-gray-50 transition-all shadow-sm active:scale-95"
+          className="flex items-center gap-2 px-6 py-3 bg-green-50 text-black border-2 border-green-700/80 rounded-none font-bold text-xs uppercase tracking-wider hover:bg-green-100 transition-all shadow-sm cursor-pointer"
         >
-          <FileText size={20} className="text-black/40" />
+          <FileText size={20} className="text-black" />
           <span>Report</span>
         </Button>
 
         <Button
           onClick={onDailyReport}
-          className="flex items-center gap-2 px-6 py-3 bg-white border border-black/10 rounded-full text-black font-black text-xs uppercase tracking-wider hover:bg-gray-50 transition-all shadow-sm active:scale-95"
+          className="flex items-center gap-2 px-6 py-3 bg-green-50 text-black border-2 border-green-700/80 rounded-none font-bold text-xs uppercase tracking-wider hover:bg-green-100 transition-all shadow-sm cursor-pointer"
         >
-          <Calendar size={20} className="text-black/40" />
+          <Calendar size={20} className="text-black" />
           <span>Daily Report</span>
         </Button>
       </div>

@@ -182,7 +182,7 @@ const GetRFQByID = ({ id, onClose }) => {
 
     if (loading) {
         return (
-            <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
                 <div className="bg-white rounded-2xl shadow-2xl border flex flex-col items-center justify-center border-gray-100 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-sm mx-auto h-[200px] relative">
                     <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                     <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
@@ -194,7 +194,7 @@ const GetRFQByID = ({ id, onClose }) => {
 
     if (error || !rfq) {
         return (
-            <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
                 <div className="bg-white rounded-2xl shadow-2xl border flex flex-col items-center justify-center border-gray-100 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-sm mx-auto h-[200px] relative">
                     <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
                     <AlertCircle className="w-6 h-6 mb-2 text-red-600" />
@@ -324,7 +324,7 @@ const GetRFQByID = ({ id, onClose }) => {
     // Removed redundant useDataTable hook
 
     return (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[95vw] mx-auto flex flex-col h-[95vh]">
                 {/* Header */}
                 <div className="flex-none p-4 sm:p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -809,7 +809,7 @@ const GetRFQByID = ({ id, onClose }) => {
 
                 {/* Estimation Modal */}
                 {showEstimationModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
                             <AddEstimation
                                 initialRfqId={id}
@@ -825,7 +825,7 @@ const GetRFQByID = ({ id, onClose }) => {
 
                 {/* Delete Confirmation Modal */}
                 {showDeleteModal && (
-                    <div className="fixed inset-0 z-70 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                         <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-xl  text-red-600 flex items-center gap-2">
@@ -879,7 +879,7 @@ const GetRFQByID = ({ id, onClose }) => {
 
                 {/* Status Change Modal */}
                 {showStatusModal && (
-                    <div className="fixed inset-0 z-70 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                         <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-xl  text-blue-600 flex items-center gap-2">

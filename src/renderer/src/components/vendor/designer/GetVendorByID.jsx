@@ -185,7 +185,7 @@ const EditVendorModal = ({ vendorData, onClose, onSuccess }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center p-5 border-b bg-gray-50 shrink-0">
           <h2 className="text-lg font-bold text-gray-800">Edit Vendor</h2>
@@ -242,7 +242,7 @@ const EditVendorModal = ({ vendorData, onClose, onSuccess }) => {
 // ─── Archive Confirmation ─────────────────────────────────────────────────────
 
 const ArchiveConfirmModal = ({ vendorName, onConfirm, onCancel, deleting }) => (
-  <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4" onClick={onCancel}>
+  <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/70 p-4" onClick={onCancel}>
     <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 text-center" onClick={(e) => e.stopPropagation()}>
       <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
         <Trash2 size={28} className="text-red-600" />
@@ -311,7 +311,7 @@ const GetVendorByID = ({ id, onClose, onDeleted }) => {
 
   // ── Loading ──
   if (loading) return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-2xl p-12 flex flex-col items-center gap-4 shadow-2xl">
         <Loader2 className="w-12 h-12 animate-spin text-green-600" />
         <p className="text-gray-400 font-black uppercase tracking-widest text-xs">Loading Vendor Profile...</p>
@@ -321,7 +321,7 @@ const GetVendorByID = ({ id, onClose, onDeleted }) => {
 
   // ── Error ──
   if (error || !vendor) return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-2xl p-12 flex flex-col items-center gap-4 shadow-2xl">
         <AlertCircle className="w-12 h-12 text-red-500" />
         <p className="font-bold uppercase tracking-widest text-xs text-red-500">{error || 'Vendor not found'}</p>
@@ -333,7 +333,7 @@ const GetVendorByID = ({ id, onClose, onDeleted }) => {
   return (
     <>
       {/* Full-screen overlay — same pattern as Connection Designer */}
-      <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-8">
+      <div className="fixed inset-0 z-[10001] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-8">
         <div className="w-full h-full max-w-6xl max-h-[92vh] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden">
 
           {/* ── Header ── */}

@@ -71,11 +71,11 @@ const TeamMembersTable = ({
         accessorKey: "role",
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold uppercase tracking-widest rounded-full bg-gray-100 text-black border border-black/5">
+            <span className="px-3 py-1 inline-flex text-xs leading-5 font-bold uppercase tracking-widest rounded-none bg-gray-100 text-black border border-black">
               {row.original.role}
             </span>
             {dateFilter?.type === "specificDate" && row.original.isAbsent && (
-              <span className="px-3 py-1 inline-flex text-[10px] leading-5 font-black uppercase tracking-widest rounded-full bg-red-100 text-red-600 border border-red-200 shadow-sm animate-pulse">
+              <span className="px-3 py-1 inline-flex text-[10px] leading-5 font-black uppercase tracking-widest rounded-none bg-red-100 text-red-600 border border-red-200 shadow-sm animate-pulse">
                 Absent
               </span>
             )}
@@ -105,7 +105,7 @@ const TeamMembersTable = ({
   );
 
   return (
-    <div className="bg-white rounded-lg border border-black/5 shadow-soft overflow-hidden mb-8 sm:mb-12">
+    <div className="bg-white rounded-none border-none shadow-soft overflow-hidden mb-8 sm:mb-12">
       <div className="px-4 sm:px-8 py-5 sm:py-6 border-b border-black/5 bg-gray-50/30 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
         <div className="flex-shrink-0">
           <h3 className="text-lg sm:text-xl lg:text-lg xl:text-2xl text-black uppercase tracking-tight font-bold">
@@ -124,18 +124,18 @@ const TeamMembersTable = ({
               key={tab.id}
               onClick={() => onFilterChange(tab.id)}
               className={`
-                w-full px-3 py-2 rounded-xl text-[10px] sm:text-[10px] font-bold uppercase tracking-widest flex items-center justify-between gap-2 transition-all border
+                w-full px-3 py-2 rounded-none text-[10px] sm:text-[10px] font-bold uppercase tracking-widest flex items-center justify-between gap-2 transition-all border-2 cursor-pointer
                 ${activeFilter === tab.id
-                  ? "bg-primary/50 text-black border-black shadow-lg scale-[1.02]"
-                  : "bg-primary/10 text-black border-black/10 hover:border-black/30 hover:text-black"
+                  ? "bg-green-50 text-black border-green-700/80 shadow-lg scale-[1.02]"
+                  : "bg-white text-black/50 border-gray-200 hover:border-black hover:text-black"
                 }
               `}
             >
               <span className="whitespace-nowrap">{tab.label}</span>
               <span className={`
-                flex-shrink-0 px-1.5 py-0.5 rounded-md text-[10px] font-bold
+                flex-shrink-0 px-1.5 py-0.5 rounded-none text-[10px] font-bold
                 ${activeFilter === tab.id
-                  ? "bg-white/20 text-black"
+                  ? "bg-black/10 text-black"
                   : "bg-gray-100 text-black/60"
                 }
               `}>
@@ -155,7 +155,7 @@ const TeamMembersTable = ({
               placeholder="Search by name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-4 py-2.5 sm:py-3 bg-white border border-black/10 rounded-lg text-[10px] sm:text-xs font-bold focus:outline-none focus:border-black/30 transition-all placeholder:text-gray-400 shadow-sm"
+              className="w-full pl-11 pr-4 py-2.5 sm:py-3 bg-white border border-black rounded-none text-[10px] sm:text-xs font-bold focus:outline-none focus:border-black transition-all placeholder:text-gray-400 shadow-sm"
             />
           </div>
 
@@ -163,9 +163,9 @@ const TeamMembersTable = ({
           <button
             onClick={handleDownloadCSV}
             title="Download CSV"
-            className="p-2.5 sm:p-3 bg-primary/10 border border-black/60 rounded-full hover:border-black/30 hover:bg-black group transition-all duration-300 shadow-sm flex-shrink-0"
+            className="p-2.5 sm:p-3 bg-green-50 border-2 border-green-700/80 rounded-none hover:bg-green-100 text-black group transition-all duration-300 shadow-sm flex-shrink-0 cursor-pointer"
           >
-            <Download className="w-4 h-4 text-black group-hover:text-white transition-colors" />
+            <Download className="w-4 h-4 text-black" />
           </button>
         </div>
       </div>

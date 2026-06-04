@@ -47,7 +47,7 @@ const AddProjectProgressReport = ({ projectId, onCancel, onSuccess }) => {
     <div className="bg-white rounded-2xl h-[90vh] border border-black shadow-sm overflow-hidden animate-in fade-in zoom-in duration-300">
       <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-slate-50">
         <h3 className="text-sm font-black uppercase tracking-widest text-slate-700">Add Weekly Progress Report</h3>
-        <button onClick={onCancel} className="text-slate-900 font-semibold bg-red-200 px-2 py-1 rounded-lg border border-red-500 shadow-sm hover:bg-red-500 hover:text-white transition-colors">
+        <button onClick={onCancel} className="text-slate-900 font-semibold bg-green-200 px-2 py-1 rounded-lg border border-green-500 shadow-sm hover:bg-green-500 hover:text-white transition-colors">
           CLOSE
         </button>
       </div>

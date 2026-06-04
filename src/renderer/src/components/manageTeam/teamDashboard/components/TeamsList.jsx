@@ -16,9 +16,9 @@ const TeamsList = ({
           <div
             key={team.id}
             onClick={() => onTeamSelect(team.id)}
-            className={`p-5 rounded-[1.25rem] border transition-all cursor-pointer group flex flex-col justify-between  ${selectedTeam === team.id
-              ? "bg-green-50 border-[#6bbd45]/40 shadow-sm ring-1 ring-[#6bbd45]/5"
-              : "bg-white border-black/10 hover:border-black/20 hover:shadow-sm"
+            className={`p-5 rounded-none border-2 transition-all cursor-pointer group flex flex-col justify-between  ${selectedTeam === team.id
+              ? "bg-green-50 border-green-700/80 shadow-sm"
+              : "bg-white border-black/15 hover:border-black hover:shadow-sm"
               }`}
           >
             <div className="flex items-start justify-between">
@@ -30,7 +30,7 @@ const TeamsList = ({
                   {team.members?.length || 0} members
                 </p>
               </div>
-              <div className={`p-2.5 rounded-xl transition-all ${selectedTeam === team.id ? 'bg-[#6bbd45]/20 text-[#6bbd45]' : 'bg-gray-50 text-black/10 group-hover:text-[#6bbd45] group-hover:bg-[#6bbd45]/5'}`}>
+              <div className={`p-2.5 rounded-none border transition-all ${selectedTeam === team.id ? 'bg-[#6bbd45]/20 text-[#6bbd45] border-green-700/50' : 'bg-gray-50 text-black/10 border-black/5 group-hover:text-[#6bbd45] group-hover:bg-[#6bbd45]/5'}`}>
                 <Users size={16} strokeWidth={2.5} />
               </div>
             </div>

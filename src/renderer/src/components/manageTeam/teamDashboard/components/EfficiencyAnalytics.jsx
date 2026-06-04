@@ -15,7 +15,7 @@ const customStyles = {
     ...base,
     backgroundColor: "#f3f4f6",
     borderColor: "transparent",
-    borderRadius: "0.5rem",
+    borderRadius: "0",
     minHeight: "32px",
     boxShadow: "none",
     "&:hover": { backgroundColor: "#e5e7eb" },
@@ -33,7 +33,7 @@ const customStyles = {
   menu: (base) => ({
     ...base,
     zIndex: 50,
-    borderRadius: "0.75rem",
+    borderRadius: "0",
     overflow: "hidden",
     boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)",
   }),
@@ -80,7 +80,7 @@ const EfficiencyAnalytics = ({
   ];
 
   return (
-    <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-lg border border-black/5 shadow-soft h-full flex flex-col">
+    <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-none border border-black shadow-soft h-full flex flex-col">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
         <div>
           <h3 className="text-2xl font-black text-black uppercase tracking-tight">
@@ -96,7 +96,7 @@ const EfficiencyAnalytics = ({
               value={selectedTeamOptions}
               onChange={handleTeamChange}
               placeholder="Compare Teams +"
-              className="text-sm"
+              className="text-sm rounded-none"
               styles={customStyles}
               components={{
                 DropdownIndicator: () => null,
@@ -104,14 +104,14 @@ const EfficiencyAnalytics = ({
               }}
             />
           </div>
-          <div className="flex bg-gray-100/50 p-1.5 rounded-2xl border border-black/5">
+          <div className="flex bg-gray-100/50 p-1.5 rounded-none border border-black">
             {["1D", "1W", "1M", "1Y", "ALL"].map((tf) => (
               <button
                 key={tf}
                 onClick={() => onTimeFilterChange(tf)}
-                className={`px-4 py-1.5 text-xs font-black rounded-xl transition-all ${timeFilter === tf
-                  ? "bg-white text-black shadow-medium border border-black/5"
-                  : "text-black/40 hover:text-black"
+                className={`px-4 py-1.5 text-xs font-bold rounded-none transition-all cursor-pointer border ${timeFilter === tf
+                  ? "bg-green-50 text-black border-green-700/80 shadow-medium"
+                  : "text-black/40 hover:text-black border-transparent"
                   }`}
               >
                 {tf}
@@ -119,7 +119,7 @@ const EfficiencyAnalytics = ({
             ))}
           </div>
 
-          <div className="flex items-center gap-3 bg-white border border-black/5 rounded-2xl px-4 py-2 shadow-sm">
+          <div className="flex items-center gap-3 bg-white border border-black rounded-none px-4 py-2 shadow-sm">
             <div className="relative group">
               <input
                 type="date"
@@ -248,7 +248,7 @@ const EfficiencyAnalytics = ({
 
       {/* Check if no data */}
       {(!data || data.length === 0) && (
-        <div className="flex flex-col items-center justify-center p-12 text-black/40 bg-gray-50/50 rounded-3xl mt-6 border border-dashed border-black/10">
+        <div className="flex flex-col items-center justify-center p-12 text-black/40 bg-gray-50/50 rounded-none mt-6 border border-dashed border-black">
           <p className="text-xs font-black uppercase tracking-widest">No efficiency data available.</p>
         </div>
       )}
