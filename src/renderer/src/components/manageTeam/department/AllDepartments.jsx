@@ -20,10 +20,10 @@ const AllDepartments = () => {
   console.log(departmentID)
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-20 bg-white rounded-[2.5rem] border border-black/5 shadow-soft">
+      <div className="flex items-center justify-center p-20 bg-white rounded-xl border border-black/10 shadow-sm">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-black/5 border-t-black"></div>
-          <span className="text-black font-black uppercase tracking-widest text-xs">Loading departments...</span>
+          <span className="text-black font-semibold uppercase tracking-widest text-xs">Loading departments...</span>
         </div>
       </div>
     );
@@ -31,7 +31,7 @@ const AllDepartments = () => {
 
   if (error) {
     return (
-      <div className="p-12 text-center bg-red-50 rounded-[2.5rem] border border-red-100">
+      <div className="p-12 text-center bg-red-50 rounded-xl border border-red-100">
         <p className="text-red-600 font-bold">{error}</p>
       </div>
     );
@@ -42,7 +42,7 @@ const AllDepartments = () => {
       accessorKey: "name",
       header: "Department Name",
       cell: ({ row }) => (
-        <span className="font-black text-black uppercase tracking-tight text-sm">
+        <span className="font-semibold text-black uppercase tracking-tight text-sm">
           {row.original.name}
         </span>
       ),
@@ -67,7 +67,7 @@ const AllDepartments = () => {
         }
 
         return (
-          <span className="text-black/60 font-bold uppercase tracking-wide text-xs">
+          <span className="text-black font-semibold uppercase tracking-wide text-xs">
             {managerName || "No Manager Assigned"}
           </span>
         );
@@ -76,20 +76,32 @@ const AllDepartments = () => {
   ];
 
   return (
-    <div className="bg-white rounded-[2.5rem] shadow-soft border border-black/5 overflow-hidden mt-6">
-      <div className="p-10 border-b border-black/5 bg-gray-50/30">
-        
+    <div className="w-full">
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-black uppercase tracking-tight">All Departments</h2>
+        <p className="text-black text-xs font-semibold tracking-wide mt-1">
+          Manage and view all department structures in the system
+        </p>
       </div>
 
-      <div className="p-8">
+      <div className="bg-white">
         <DataTable
           columns={columns}
           data={departments}
           onRowClick={handleRowClick}
-          detailComponent={({ row }) => <GetDepartmentById id={row.id || ""} />}
-          pageSizeOptions={[5, 10, 25]}
+          pageSizeOptions={[10, 20, 50]}
         />
       </div>
+
+      {/* Modal View for Department Details */}
+      {departmentID && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <GetDepartmentById
+            id={departmentID}
+            onClose={() => setDepartmentID(null)}
+          />
+        </div>
+      )}
     </div>
   );
 };

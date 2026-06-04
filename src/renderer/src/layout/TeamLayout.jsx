@@ -8,7 +8,7 @@ const TeamLayout = () => {
   return (
     <div className="w-full overflow-y-hidden overflow-x-hidden">
       <div className="flex flex-col w-full h-full">
-        <div className="px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 border-b flex flex-col md:flex-row items-center justify-end gap-4">
+        <div className="px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 flex flex-col md:flex-row items-center justify-end gap-4">
           <div className="flex flex-row gap-3 items-end justify-end">
             <button
               onClick={() => setActiveTab("allTeam")}
@@ -33,7 +33,7 @@ const TeamLayout = () => {
             )}
           </div>
         </div>
-        <div className="grow p-2 bg-white border border-black/10">
+        <div className="grow p-4 md:p-6 bg-white">
           {activeTab === "allTeam" && (
             <div>
               <AllTeam />
