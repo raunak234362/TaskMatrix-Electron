@@ -296,12 +296,14 @@ const GetSubmittalByID = ({ id, onClose }) => {
                   <h1 className="text-2xl text-black font-semibold">
                     {submittal.subject}
                   </h1>
-                  <Button
-                    className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
-                    onClick={() => setShowUpdateModal(true)}
-                  >
-                    Update Submittal
-                  </Button>
+                  {userRole !== "STAFF" && (
+                    <Button
+                      className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
+                      onClick={() => setShowUpdateModal(true)}
+                    >
+                      Update Submittal
+                    </Button>
+                  )}
                 </div>
 
                 <Info label="Project" value={submittal.project?.name || "—"} />

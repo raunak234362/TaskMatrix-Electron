@@ -521,43 +521,45 @@ const GetProjectById = ({ id, onClose }) => {
                 {/* Section 1: Hours Statistics */}
                 <div className="space-y-4 mb-8">
                   {/* Row 1: Estimations */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="flex items-center justify-between bg-blue-50/40 p-4 rounded-none border border-black">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-none bg-blue-100/50 flex items-center justify-center text-blue-600 shrink-0">
-                          <Clock size={18} />
+                  {userRole !== "staff" && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="flex items-center justify-between bg-blue-50/40 p-4 rounded-none border border-black">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-none bg-blue-100/50 flex items-center justify-center text-blue-600 shrink-0">
+                            <Clock size={18} />
+                          </div>
+                          <div>
+                            <span className="text-sm font-bold text-black uppercase tracking-wider block">Estimated Hours</span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-sm font-bold text-black uppercase tracking-wider block">Estimated Hours</span>
-                        </div>
+                        <h3 className="text-sm font-bold text-black tracking-tight">{projectStats.assigned.toFixed(2)}H</h3>
                       </div>
-                      <h3 className="text-sm font-bold text-black tracking-tight">{projectStats.assigned.toFixed(2)}H</h3>
-                    </div>
 
-                    <div className="flex items-center justify-between bg-blue-50/40 p-4 rounded-none border border-black">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-none bg-blue-100/50 flex items-center justify-center text-blue-600 shrink-0">
-                          <CheckCircle2 size={18} />
+                      <div className="flex items-center justify-between bg-blue-50/40 p-4 rounded-none border border-black">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-none bg-blue-100/50 flex items-center justify-center text-blue-600 shrink-0">
+                            <CheckCircle2 size={18} />
+                          </div>
+                          <div>
+                            <span className="text-sm font-bold text-black uppercase tracking-wider block">Estimated Hours for Approval</span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-sm font-bold text-black uppercase tracking-wider block">Estimated Hours for Approval</span>
-                        </div>
+                        <h3 className="text-sm font-bold text-black tracking-tight">{(projectStats.assigned * 0.8).toFixed(2)}H</h3>
                       </div>
-                      <h3 className="text-sm font-bold text-black tracking-tight">{(projectStats.assigned * 0.8).toFixed(2)}H</h3>
-                    </div>
 
-                    <div className="flex items-center justify-between bg-blue-50/40 p-4 rounded-none border border-black">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-none bg-blue-100/50 flex items-center justify-center text-blue-600 shrink-0">
-                          <CheckCircle2 size={18} />
+                      <div className="flex items-center justify-between bg-blue-50/40 p-4 rounded-none border border-black">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-none bg-blue-100/50 flex items-center justify-center text-blue-600 shrink-0">
+                            <CheckCircle2 size={18} />
+                          </div>
+                          <div>
+                            <span className="text-sm font-bold text-black uppercase tracking-wider block">Estimated Hours for Fabrication</span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-sm font-bold text-black uppercase tracking-wider block">Estimated Hours for Fabrication</span>
-                        </div>
+                        <h3 className="text-sm font-bold text-black tracking-tight">{(projectStats.assigned * 0.2).toFixed(2)}H</h3>
                       </div>
-                      <h3 className="text-sm font-bold text-black tracking-tight">{(projectStats.assigned * 0.2).toFixed(2)}H</h3>
                     </div>
-                  </div>
+                  )}
 
                   {/* Row 2: Completion & Overrun */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
