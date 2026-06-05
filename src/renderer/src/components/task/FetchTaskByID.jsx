@@ -706,7 +706,7 @@ const FetchTaskByID = ({
                   <ul className="list-disc ml-4 mt-1 space-y-1">
                     <li>What you achieved?</li>
                     <li>What are the things you completed?</li>
-                    <li>What are the issues you phased during completion?</li>
+                    <li>What are the issues you faced during completion?</li>
                     <li>What are pending things left?</li>
                   </ul>
                 </div>
