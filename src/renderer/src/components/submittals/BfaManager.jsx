@@ -112,7 +112,7 @@ const BfaVersionRow = ({ version, index, total, isCurrent, bfaId }) => {
 };
 
 // ── Main BfaManager Component ────────────────────────────────────────────────
-const BfaManager = ({ submittalId }) => {
+const BfaManager = ({ submittalId, isAssist }) => {
   const [bfa, setBfa] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -247,7 +247,7 @@ const BfaManager = ({ submittalId }) => {
           </h2>
         </div>
         {bfa ? (
-          userRole !== "STAFF" && (
+          (userRole !== "STAFF" || isAssist) && (
             <Button
               className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30 font-bold text-sm"
               onClick={() => {
@@ -261,7 +261,7 @@ const BfaManager = ({ submittalId }) => {
             </Button>
           )
         ) : (
-          userRole !== "STAFF" && (
+          (userRole !== "STAFF" || isAssist) && (
             <Button
               className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30 font-bold text-sm"
               onClick={() => {

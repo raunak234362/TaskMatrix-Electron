@@ -123,16 +123,20 @@ const GetProjectById = ({ id, onClose }) => {
 
   // Check if current user is an assist for this project
   const isAssist = useMemo(() => {
-    if (!project?.assists || !currentUserId) return false;
-    return project.assists.some(assist => 
-      String(assist.userId) === String(currentUserId) || 
-      String(assist.user?.id) === String(currentUserId)
-    );
+    const userId = currentUserId || sessionStorage.getItem("userId");
+    if (!project?.assists || !userId || !Array.isArray(project.assists)) return false;
+    return project.assists.some(assist => {
+      if (!assist) return false;
+      const aId = String(assist.userId || assist.user?.id || assist.user || "").trim();
+      const uId = String(userId).trim();
+      return aId === uId;
+    });
   }, [project, currentUserId]);
 
   const canCreate = useMemo(() => {
     if (isAssist) return true;
-    return !["client", "staff", "estimator"].includes(userRole);
+    const role = (userRole || sessionStorage.getItem("userRole") || "").toLowerCase().trim();
+    return !["client", "staff", "estimator"].includes(role);
   }, [isAssist, userRole]);
 
   const fetchProjectTasks = async () => {
