@@ -150,7 +150,7 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
             {...register("changeOrderNumber", { required: true })}
           />
           <Input
-            label="Remarks *"
+            label="Subject *"
             {...register("remarks", { required: true })}
           />
           {["admin", "deputy_manager", "operation_executive"].includes(userDetail?.role?.toLowerCase()) && (
