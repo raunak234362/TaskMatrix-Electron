@@ -43,6 +43,7 @@ const AllTasks = () => {
     status: "All Status",
     assignedUser: "All Users",
     wbsType: "All Types",
+    taskName: "All Tasks",
   });
 
   const [dateFilter, setDateFilter] = useState({
@@ -161,19 +162,21 @@ const AllTasks = () => {
   };
 
   /* -------------------- Filters Options -------------------- */
-  const { projectOptions, stageOptions, statusOptions, userOptions, wbsTypeOptions } =
+  const { projectOptions, stageOptions, statusOptions, userOptions, wbsTypeOptions, taskOptions } =
     useMemo(() => {
       const projects = new Set();
       const stages = new Set();
       const statuses = new Set();
       const users = new Set();
       const wbsTypes = new Set();
+      const tasksList = new Set();
 
       tasks.forEach((task) => {
         if (task.project?.name) projects.add(task.project.name);
         if (task.Stage) stages.add(task.Stage);
         if (task.status) statuses.add(task.status);
         if (task.wbsType) wbsTypes.add(task.wbsType);
+        if (task.name) tasksList.add(task.name);
         const userName = task.user
           ? `${task.user.firstName} ${task.user.lastName}`
           : "Unassigned";
@@ -201,6 +204,10 @@ const AllTasks = () => {
           { label: "All Types", value: "All Types" },
           ...Array.from(wbsTypes).map((w) => ({ label: w, value: w })),
         ],
+        taskOptions: [
+          { label: "All Tasks", value: "All Tasks" },
+          ...Array.from(tasksList).map((t) => ({ label: t, value: t })),
+        ],
       };
     }, [tasks]);
 
@@ -214,6 +221,11 @@ const AllTasks = () => {
       if (
         filters.projectName !== "All Projects" &&
         projectName !== filters.projectName
+      )
+        return false;
+      if (
+        filters.taskName !== "All Tasks" &&
+        task.name !== filters.taskName
       )
         return false;
       if (
@@ -599,6 +611,18 @@ const AllTasks = () => {
               value={filters.projectName}
               onChange={(_, val) => setFilters(prev => ({ ...prev, projectName: val }))}
               placeholder="Select Project"
+              className="font-semibold text-black bg-gray-50"
+            />
+          </div>
+
+          {/* Task Filter */}
+          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
+            <label className="text-[10px] font-bold text-black uppercase tracking-wider">Task</label>
+            <Select
+              options={taskOptions}
+              value={filters.taskName}
+              onChange={(_, val) => setFilters(prev => ({ ...prev, taskName: val }))}
+              placeholder="Select Task"
               className="font-semibold text-black bg-gray-50"
             />
           </div>
