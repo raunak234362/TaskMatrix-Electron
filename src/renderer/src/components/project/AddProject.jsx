@@ -41,6 +41,8 @@ const AddProject = () => {
   const teamDatas = useSelector((state) => state.userInfo?.teamData || []);
   console.log("teamDatas", teamDatas)
   const rfqData = useSelector((state) => state.RFQInfos?.RFQData || []);
+  const projectData = useSelector((state) => state.projectInfo?.projectData || []);
+  const usedRfqIds = projectData.map((p) => p.rfqId).filter(Boolean);
   const managerOption = useSelector((state) =>
     (state.userInfo?.staffData || [])
       .filter((user) =>
@@ -101,10 +103,12 @@ const AddProject = () => {
   }, [watchedFabricatorId]);
 
   const options = {
-    rfqs: rfqData.map((r) => ({
-      label: `${r.projectName} • ${r.fabricator?.fabName}`,
-      value: r.id,
-    })),
+    rfqs: rfqData
+      .filter((r) => !usedRfqIds.includes(r.id))
+      .map((r) => ({
+        label: `${r.projectName} • ${r.fabricator?.fabName}`,
+        value: r.id,
+      })),
     fabricators: fabricators.map((f) => ({
       label: f.fabName,
       value: f.id,
