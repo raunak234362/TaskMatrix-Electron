@@ -186,7 +186,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
                           {getStatesList(designer.state).map((state, idx) => (
                             <span
                               key={idx}
-                              className="px-3.5 py-1 bg-green-50 text-black border border-green-700 rounded-lg font-semibold text-xs uppercase tracking-tight shadow-sm inline-flex items-center"
+                              className="px-3.5 py-1 bg-green-50 text-black border border-green-700 rounded-lg font-medium text-xs uppercase tracking-tight shadow-sm inline-flex items-center"
                             >
                               {state}
                             </span>
