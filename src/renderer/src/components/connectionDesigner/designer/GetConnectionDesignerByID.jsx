@@ -177,7 +177,21 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12 p-8 rounded-2xl border border-gray-300">
                     <DetailItem label="Email Address" value={designer.email} />
-                    <DetailItem label="Website Link" value={designer.websiteLink || '-'} />
+                    <div className="space-y-1.5">
+                      <p className="text-sm font-bold text-black uppercase tracking-wider">Website Link</p>
+                      {designer.websiteLink ? (
+                        <a
+                          href={designer.websiteLink.startsWith("http") ? designer.websiteLink : `https://${designer.websiteLink}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-green-700 hover:text-green-900 underline font-semibold break-all"
+                        >
+                          {designer.websiteLink}
+                        </a>
+                      ) : (
+                        <p className="text-sm text-black">-</p>
+                      )}
+                    </div>
                     <DetailItem label="Contact" value={designer.contactInfo || '-'} />
                     <div className="space-y-1.5">
                       <p className="text-sm font-bold text-black uppercase tracking-wider">Coverage</p>
