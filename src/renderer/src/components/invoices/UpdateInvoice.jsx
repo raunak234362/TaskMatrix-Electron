@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import Input from "../fields/input";
-import Button from "../fields/Button";
 import Service from "../../api/Service";
 import { toast } from "react-toastify";
 import { Plus, Trash2, X, Save, Loader2 } from "lucide-react";
@@ -325,13 +324,13 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
                   </div>
                 </div>
               ))}
-              <Button
+              <button
                 type="button"
                 onClick={() => append({ description: "", unit: 1, rateUSD: 0, totalUSD: 0, sacCode: 0, remarks: "" })}
-                className="flex items-center gap-2 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200"
+                className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
               >
                 <Plus size={18} /> Add Item
-              </Button>
+              </button>
             </div>
           </fieldset>
 
@@ -344,13 +343,13 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
                   <span>Total Value:</span>
                   <span>{watch("currencyType")} {Number(watch("totalInvoiceValue")).toLocaleString()}</span>
                 </div>
-                <Button
+                <button
                   type="button"
                   onClick={handleCalculateTotal}
-                  className="w-full bg-green-600 text-white hover:bg-green-700 py-3 font-bold uppercase tracking-wider"
+                  className="w-full px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
                 >
                   Regenerate Total & Words
-                </Button>
+                </button>
                 <Input label="Total in Words" readOnly {...register("totalInvoiceValueInWords")} />
               </div>
             </fieldset>
@@ -391,20 +390,20 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
           </div>
 
           <div className="sticky bottom-0 bg-white pt-4 pb-2 border-t border-gray-100 flex gap-4">
-             <Button
+             <button
                 type="button"
-                className="bg-gray-100 text-gray-700 hover:bg-gray-200 flex-1 py-4 font-bold uppercase tracking-widest border border-gray-200"
+                className="flex-1 px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm text-center"
                 onClick={onClose}
               >
                 Discard Changes
-              </Button>
-              <Button
+              </button>
+              <button
                 type="submit"
-                className="bg-green-700 hover:bg-green-800 text-white flex-[2] py-4 font-bold uppercase tracking-widest shadow-lg transition-all hover:scale-[1.01] flex items-center justify-center gap-3"
+                className="flex-[2] flex items-center justify-center gap-3 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? <><Loader2 className="animate-spin w-5 h-5"/> Updating...</> : <><Save className="w-5 h-5"/> Save Updates</>}
-              </Button>
+                {isSubmitting ? <><Loader2 className="animate-spin w-4 h-4"/> Updating...</> : <><Save className="w-4 h-4"/> Save Updates</>}
+              </button>
           </div>
         </form>
       </div>

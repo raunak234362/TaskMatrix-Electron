@@ -147,34 +147,21 @@ const AllInvoices = () => {
           const isActive = activeType === value;
           const count = countByType[value] ?? 0;
 
-          const activeColors = {
-            ALL: "bg-gray-900 text-white border-gray-900",
-            APPROVAL: "bg-blue-600 text-white border-blue-600",
-            FABRICATION: "bg-purple-600 text-white border-purple-600",
-            MTO: "bg-orange-500 text-white border-orange-500",
-            CHANGE_ORDER: "bg-cyan-600 text-white border-cyan-600",
-          };
-          const inactiveColors = {
-            ALL: "bg-white text-gray-600 border-gray-200 hover:bg-gray-50",
-            APPROVAL: "bg-white text-blue-600 border-blue-200 hover:bg-blue-50",
-            FABRICATION: "bg-white text-purple-600 border-purple-200 hover:bg-purple-50",
-            MTO: "bg-white text-orange-600 border-orange-200 hover:bg-orange-50",
-            CHANGE_ORDER: "bg-white text-cyan-600 border-cyan-200 hover:bg-cyan-50",
-          };
-
           return (
             <button
               key={value}
               onClick={() => setActiveType(value)}
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border transition-all cursor-pointer ${
-                isActive ? activeColors[value] : inactiveColors[value]
+              className={`flex items-center gap-2 px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all duration-300 active:scale-95 cursor-pointer ${
+                isActive
+                  ? "bg-green-50 text-black border-green-700/80"
+                  : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
               }`}
             >
               {label}
               <span
                 className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black ${
                   isActive
-                    ? "bg-white/20 text-white"
+                    ? "bg-green-700/20 text-black"
                     : "bg-gray-100 text-gray-500"
                 }`}
               >

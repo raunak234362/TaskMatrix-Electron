@@ -94,13 +94,13 @@ const InvoiceStatsCards = ({ invoices }) => {
             
             {/* Title / Label */}
             <div>
-              <p className="text-[11px] font-bold text-BLACK uppercase tracking-wider">{stat.title}</p>
+              <p className="text-sm font-bold text-black uppercase tracking-wider">{stat.title}</p>
             </div>
           </div>
 
           {/* Value / Number */}
           <div className="text-right">
-            <h3 className="text-xl font-extrabold text-gray-900 tracking-tight">
+            <h3 className="text-sm font-bold text-black tracking-tight">
               {stat.value}
             </h3>
           </div>

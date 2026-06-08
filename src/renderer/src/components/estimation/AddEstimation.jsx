@@ -138,20 +138,9 @@ const AddEstimation = ({ initialRfqId = null, onClose, onSuccess = () => { } }) 
   return (
     <div className="w-full mx-auto bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200">
       {/* Header */}
-      <header className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-white gap-4">
-        <div className="flex items-center gap-3">
-          <h2 className="text-lg font-black text-black">Add Estimation</h2>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
-        >
-          CLOSE
-        </button>
-      </header>
+    
 
-      <div className="p-8 h-[75vh] overflow-y-auto custom-scrollbar">
+      <div className="p-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* RFQ Selection */}
           <SectionTitle title="Select RFQ" />
@@ -254,26 +243,19 @@ const AddEstimation = ({ initialRfqId = null, onClose, onSuccess = () => { } }) 
           {files.length > 0 && (
             <p className="text-sm text-black font-bold mt-2 uppercase tracking-widest text-[10px]">{files.length} file(s) attached</p>
           )}
+
+          <div className="pt-6 border-t border-gray-200 flex justify-center">
+            <button
+              type="submit"
+              onClick={handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+              className="w-full max-w-md px-8 py-2.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm text-center disabled:opacity-50 active:scale-95"
+            >
+              {isSubmitting ? 'Creating...' : 'Create Estimation'}
+            </button>
+          </div>
         </form>
       </div>
-
-      <footer className="p-4 sm:p-6 border-t border-gray-200 bg-white flex flex-col sm:flex-row justify-end gap-3 shrink-0">
-        <button
-          type="button"
-          onClick={onClose}
-          className="w-full sm:w-auto px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          onClick={handleSubmit(onSubmit)}
-          disabled={isSubmitting}
-          className="w-full sm:w-auto px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all active:scale-95 disabled:opacity-50"
-        >
-          {isSubmitting ? 'Creating...' : 'Create Estimation'}
-        </button>
-      </footer>
     </div>
   )
 }

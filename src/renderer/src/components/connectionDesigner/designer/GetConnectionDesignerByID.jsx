@@ -26,6 +26,19 @@ import EditConnectionDesigner from './EditConnectionDesigner'
 import { AllCDEngineer } from '../..'
 import RenderFiles from '../../common/RenderFiles'
 
+const getStatesList = (stateVal) => {
+  let states = []
+  if (Array.isArray(stateVal)) states = stateVal
+  else if (typeof stateVal === 'string') {
+    try {
+      states = stateVal.startsWith('[') ? JSON.parse(stateVal) : [stateVal]
+    } catch {
+      states = [stateVal]
+    }
+  }
+  return states.filter(Boolean)
+}
+
 const GetConnectionDesignerByID = ({ id, onClose }) => {
   const [designer, setDesigner] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -72,7 +85,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
     )
 
   return (
-    <div className="flex flex-col h-full bg-white select-none overflow-x-hidden font-roboto" style={{ fontSize: 'clamp(11px, 1vw, 14px)' }}>
+    <div className="flex flex-col h-full bg-white select-none overflow-x-hidden font-roboto text-sm">
       {/* 1. Header Section */}
       <div className="p-8 flex flex-row items-center justify-between gap-6 border-b border-gray-200 shrink-0">
         <div className="flex items-center gap-5">
@@ -95,7 +108,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setActiveTab('DASHBOARD')}
-            className={`px-6 py-2 rounded-lg text-[1em] font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'DASHBOARD'
+            className={`px-6 py-2 rounded-lg text-sm font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'DASHBOARD'
               ? 'bg-green-50 border-green-400 text-green-700 shadow-sm'
               : 'bg-white border-gray-300 text-black hover:bg-gray-50'
               }`}
@@ -104,7 +117,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
           </button>
           <button
             onClick={() => setActiveTab('FILES')}
-            className={`px-6 py-2 rounded-lg text-[1em] font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'FILES'
+            className={`px-6 py-2 rounded-lg text-sm font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'FILES'
               ? 'bg-green-50 border-green-400 text-green-700 shadow-sm'
               : 'bg-white border-gray-300 text-black hover:bg-gray-50'
               }`}
@@ -113,7 +126,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
           </button>
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-black text-[0.9em] uppercase tracking-tight shadow-sm"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
             Close
           </button>
@@ -134,7 +147,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
               <StatBox label="Status" value="Active" icon={ShieldCheck} isStatus />
               <StatBox
                 label="Availability"
-                value={Array.isArray(designer.state) ? designer.state.length : 0}
+                value={getStatesList(designer.state).length}
                 icon={Globe}
               />
             </div>
@@ -144,7 +157,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
               <div className="lg:col-span-8 space-y-12">
                 {/* Pending Actions Section */}
                 <div>
-                  <h3 className="text-lg font-black uppercase mb-6 flex items-center gap-2">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-black mb-6 flex items-center gap-2">
                     <ClipboardList size={16} className="text-green-600" />
                     Pending Actions
                   </h3>
@@ -158,22 +171,31 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
 
                 {/* Profile Details Section */}
                 <div>
-                  <h3 className="text-lg font-black uppercase mb-6 flex items-center gap-2">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-black mb-6 flex items-center gap-2">
                     <Users size={16} className="text-green-600" />
                     Profile Details
                   </h3>
-                  <div className="grid grid-cols-2 gap-y-8 gap-x-12 bg-gray-50 p-8 rounded-2xl border border-gray-300">
+                  <div className="grid grid-cols-2 gap-y-8 gap-x-12  p-8 rounded-2xl border border-gray-300">
                     <DetailItem label="Email Address" value={designer.email} />
                     <DetailItem label="Website Link" value={designer.websiteLink || '-'} />
                     <DetailItem label="Contact" value={designer.contactInfo || '-'} />
-                    <DetailItem
-                      label="Coverage"
-                      value={
-                        Array.isArray(designer.state)
-                          ? designer.state.join(', ')
-                          : designer.state || '-'
-                      }
-                    />
+                    <div className="space-y-1.5">
+                      <p className="text-sm font-bold text-black uppercase tracking-wider">Coverage</p>
+                      {getStatesList(designer.state).length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {getStatesList(designer.state).map((state, idx) => (
+                            <span
+                              key={idx}
+                              className="px-3.5 py-1 bg-green-50 text-black border border-green-700 rounded-lg font-semibold text-xs uppercase tracking-tight shadow-sm inline-flex items-center"
+                            >
+                              {state}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm font-semibold text-gray-900">-</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -181,7 +203,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
               {/* Right Column: Administrative Control */}
               <div className="lg:col-span-4">
                 <div className="p-8 rounded-2xl border-2 border-gray-300 flex flex-col gap-5 bg-white shadow-sm sticky top-0">
-                  <h3 className="text-lg font-black uppercase tracking-wide mb-2">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-black mb-2">
                     Administrative Control
                   </h3>
 
@@ -233,7 +255,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
       </div>
 
       {editModel && (
-        <EditConnectionDesigner onClose={() => setEditModel(null)} designerData={designer} />
+        <EditConnectionDesigner onClose={() => setEditModel(null)} designerData={designer} onSuccess={fetchDesigner} />
       )}
       {engineerModel && (
         <AllCDEngineer onClose={() => setEnginnerModel(null)} designerData={designer} refresh={fetchDesigner} />
@@ -248,23 +270,23 @@ const StatBox = ({ label, value, unit, icon: Icon, isStatus, subtext }) => (
       <div className="p-3 bg-green-50 rounded-xl text-green-600 border border-green-300 flex items-center justify-center shadow-sm">
         <Icon size={20} strokeWidth={2.5} />
       </div>
-      <p className="text-[1.4em] font-black text-gray-800 uppercase tracking-tight">
+      <p className="text-sm font-bold text-black uppercase tracking-wider">
         {label}
       </p>
     </div>
     <div className="flex items-baseline gap-1">
-      <p className={`text-[1.4em] font-black ${isStatus ? 'text-green-600' : 'text-gray-900'} tracking-tight`}>
+      <p className={`text-sm font-bold ${isStatus ? 'text-green-600' : 'text-black'} tracking-wider`}>
         {value}
       </p>
       {unit && (
-        <span className="text-[0.9em] font-bold text-gray-400 uppercase tracking-widest leading-none">
+        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
           {unit}
         </span>
       )}
     </div>
     {subtext && (
       <div className="text-right flex flex-col items-end opacity-70">
-        <p className="text-[9px] font-black text-black uppercase tracking-[0.1em] leading-none mb-1.5">
+        <p className="text-[9px] font-semibold text-black uppercatracking-widestem] leading-none mb-1.5">
           {subtext}
         </p>
         <div className="w-6 h-1 bg-green-500 rounded-full"></div>
@@ -288,10 +310,10 @@ const ActionCard = ({ icon: Icon, label, count, color }) => {
           <Icon size={20} strokeWidth={2.5} />
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-[1.05em] font-bold text-gray-700 uppercase tracking-widest transition-colors line-clamp-1">
+          <span className="text-sm font-bold text-black uppercase tracking-wider transition-colors line-clamp-1">
             {label}
           </span>
-          <span className={`text-[1.1em] font-black ${s.text} bg-white px-2 py-0.5 rounded-md border ${s.border}`}>{count}</span>
+          <span className={`text-sm font-bold ${s.text} bg-white px-2 py-0.5 rounded-md border ${s.border}`}>{count}</span>
         </div>
       </div>
     </div>
@@ -300,8 +322,8 @@ const ActionCard = ({ icon: Icon, label, count, color }) => {
 
 const DetailItem = ({ label, value }) => (
   <div className="space-y-1.5">
-    <p className="text-[0.85em] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
-    <p className="text-[1.1em] font-black text-gray-900 break-all">{value || '-'}</p>
+    <p className="text-sm font-bold text-black uppercase tracking-wider">{label}</p>
+    <p className="text-sm text-black break-all">{value || '-'}</p>
   </div>
 )
 

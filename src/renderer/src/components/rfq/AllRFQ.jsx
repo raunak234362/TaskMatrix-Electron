@@ -246,15 +246,15 @@ const AllRFQ = ({ rfq }) => {
 
           <div className="flex flex-wrap items-center gap-4">
             {/* RFQ Type Toggle */}
-            <div className="flex items-center bg-gray-50/50 p-1.5 rounded-2xl border border-black/5 shadow-sm">
+            <div className="flex items-center bg-gray-50/50 p-1.5 rounded-xl border border-black/5 shadow-sm gap-2">
               {['ALL', 'MTO', 'DETAILING', 'BOTH'].map((type) => (
                 <button
                   key={type}
                   onClick={() => setSelectedType(type)}
-                  className={`px-6 py-2 rounded-xl text-sm font-semibold uppercase tracking-[0.2em] transition-all duration-300 active:scale-95 ${
+                  className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all duration-300 active:scale-95 ${
                     selectedType === type
-                      ? 'bg-green-200 text-black shadow-md border border-black/5'
-                      : 'text-black hover:text-black/60'
+                      ? 'bg-green-50 text-black border-green-700/80'
+                      : 'bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black'
                   }`}
                 >
                   {type}
@@ -263,23 +263,23 @@ const AllRFQ = ({ rfq }) => {
             </div>
 
             {/* Status Tabs */}
-            <div className="flex items-center bg-gray-50/50 p-1.5 rounded-2xl border border-black/5 shadow-sm">
+            <div className="flex items-center bg-gray-50/50 p-1.5 rounded-xl border border-black/5 shadow-sm gap-2">
               <button
                 onClick={() => setActiveTab("all")}
-                className={`flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-semibold uppercase tracking-[0.2em] transition-all duration-300 active:scale-95 ${
+                className={`flex items-center gap-2 px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all duration-300 active:scale-95 ${
                   activeTab === "all"
-                    ? 'bg-green-200 text-black shadow-md border border-black/5'
-                    : 'text-black hover:text-black/60'
+                    ? 'bg-green-50 text-black border-green-700/80'
+                    : 'bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black'
                 }`}
               >
                 All RFQs
               </button>
               <button
                 onClick={() => setActiveTab("awarded")}
-                className={`flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-semibold uppercase tracking-[0.2em] transition-all duration-300 active:scale-95 ${
+                className={`flex items-center gap-2 px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all duration-300 active:scale-95 ${
                   activeTab === "awarded"
-                    ? 'bg-green-200 text-black shadow-md border border-black/5'
-                    : 'text-black hover:text-black/60'
+                    ? 'bg-green-50 text-black border-green-700/80'
+                    : 'bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black'
                 }`}
               >
                 Awarded

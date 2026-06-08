@@ -299,9 +299,9 @@ export default function DataTable({
               ))}
             <button
               onClick={() => table.resetColumnFilters()}
-              className="h-[38px] px-4 border border-gray-300 rounded-none bg-white hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all text-xs font-bold uppercase tracking-wider flex items-center shadow-sm"
+              className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm flex items-center"
             >
-              <X className="w-4 h-4 mr-2 text-gray-500 hover:text-red-600" /> Clear Filters
+              <X className="w-4 h-4 mr-2 text-black" /> Clear Filters
             </button>
           </div>
         )}

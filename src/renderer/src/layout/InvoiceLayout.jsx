@@ -11,9 +11,9 @@ const InvoiceLayout = () => {
         <div className="px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 rounded-t-2xl flex flex-wrap items-center justify-center md:justify-end gap-3">
           <button
             onClick={() => setActiveTab("dashboard")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "dashboard"
-              ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-              : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+            className={`flex items-center gap-2 px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-tight transition-all border-2 shadow-sm ${activeTab === "dashboard"
+              ? "bg-green-50 text-black border-green-700/80"
+              : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
               }`}
           >
             Invoice Home
@@ -21,9 +21,9 @@ const InvoiceLayout = () => {
 
           <button
             onClick={() => setActiveTab("allInvoices")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "allInvoices"
-              ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-              : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+            className={`flex items-center gap-2 px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-tight transition-all border-2 shadow-sm ${activeTab === "allInvoices"
+              ? "bg-green-50 text-black border-green-700/80"
+              : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
               }`}
           >
             All Invoices
@@ -31,9 +31,9 @@ const InvoiceLayout = () => {
 
           <button
             onClick={() => setActiveTab("addInvoice")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "addInvoice"
-              ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-              : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+            className={`flex items-center gap-2 px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-tight transition-all border-2 shadow-sm ${activeTab === "addInvoice"
+              ? "bg-green-50 text-black border-green-700/80"
+              : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
               }`}
           >
             Add Invoice
@@ -41,9 +41,9 @@ const InvoiceLayout = () => {
 
           <button
             onClick={() => setActiveTab("wireTransfers")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "wireTransfers"
-              ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-              : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+            className={`flex items-center gap-2 px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-tight transition-all border-2 shadow-sm ${activeTab === "wireTransfers"
+              ? "bg-green-50 text-black border-green-700/80"
+              : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
               }`}
           >
             Wire Transfers
@@ -51,9 +51,9 @@ const InvoiceLayout = () => {
 
           <button
             onClick={() => setActiveTab("accounts")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "accounts"
-              ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-              : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+            className={`flex items-center gap-2 px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-tight transition-all border-2 shadow-sm ${activeTab === "accounts"
+              ? "bg-green-50 text-black border-green-700/80"
+              : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
               }`}
           >
             Accounts

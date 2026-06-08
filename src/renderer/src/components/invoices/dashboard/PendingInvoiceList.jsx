@@ -90,10 +90,10 @@ const PendingInvoiceList = ({ invoices }) => {
   ];
 
   return (
-    <div className="bg-green-100 p-6 rounded-3xl border border-black shadow-sm h-full">
+    <div className="bg-[#f4f9f1] p-6 rounded-3xl border border-black shadow-sm h-full">
       <div className="flex items-center justify-between mb-8">
         <h3 className="text-sm font-bold text-black uppercase tracking-widest">Pending Invoices</h3>
-        <button className="text-xs font-black text-black/40 uppercase tracking-widest hover:text-black transition-colors">
+        <button className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
           View All
         </button>
       </div>

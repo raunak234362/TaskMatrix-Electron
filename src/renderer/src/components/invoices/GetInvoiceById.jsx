@@ -392,9 +392,9 @@ const GetInvoiceById = ({
         <div className="fixed top-6 right-10 z-[10002] flex gap-4 no-print">
           <button
             onClick={handleHtmlPrint}
-            className="flex items-center gap-2 px-8 py-3 bg-green-600 text-white rounded-full shadow-2xl hover:bg-green-700 transition-all font-bold group scale-110"
+            className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
           >
-            <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
+            <Download className="w-4 h-4" />
             Download PDF
           </button>
 
@@ -402,9 +402,9 @@ const GetInvoiceById = ({
           {canEdit && invoice && (
             <button
               onClick={() => setEditMode(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-amber-500 text-white rounded-full shadow-2xl hover:bg-amber-600 transition-all font-bold group scale-110"
+              className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
             >
-              <Pencil className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              <Pencil className="w-4 h-4" />
               Edit
             </button>
           )}
@@ -412,9 +412,9 @@ const GetInvoiceById = ({
           {handleClose && (
             <button
               onClick={handleClose}
-              className="flex items-center gap-2 px-3 py-3 bg-white text-gray-900 rounded-full shadow-2xl hover:bg-red-50 hover:text-red-600 transition-all border border-gray-100 scale-110 "
+              className="flex items-center gap-2 px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
             >
-              <X className="w-5 h-3" />
+              <X className="w-4 h-4" />
               Close
             </button>
           )}

@@ -44,12 +44,12 @@ const EstimationStats = ({ stats }) => {
               className="flex items-center justify-between p-6 rounded-lg border border-black shadow-sm transition-all hover:shadow-md bg-white"
             >
               <div className="flex items-center gap-5">
-                <div className="p-3.5 rounded-lg bg-green-200 text-black shrink-0 shadow-sm">
-                  <card.icon size={32} className="stroke-[2.5]" />
+                <div className="p-3.5 rounded-lg bg-gray-100 text-green-500 shrink-0 shadow-sm">
+                  <card.icon size={32} className="stroke-[1.5]" />
                 </div>
-                <span className="text-base font-black text-black uppercase tracking-widest leading-none">{card.label}</span>
+                <span className="text-lg font-semibold text-black uppercase tracking-normal leading-tight">{card.label}</span>
               </div>
-              <span className="text-5xl font-black text-black tracking-tight">{card.value}</span>
+              <span className="text-3xl font-semibold text-black tracking-tight">{card.value}</span>
             </div>
           )
         })}

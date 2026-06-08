@@ -50,7 +50,7 @@ const CDNetworkOverview = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-white rounded-3xl shadow-sm border border-gray-500 flex flex-col overflow-hidden"
+        className="bg-white rounded-3xl shadow-sm border border-gray-500 flex flex-col"
       >
         <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <input

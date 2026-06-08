@@ -12,9 +12,9 @@ const ConnectionLayout = () => {
 
           <button
             onClick={() => setActiveTab("dashboard")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "dashboard"
-              ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-              : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+            className={`flex items-center gap-2 px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-tight transition-all border-2 shadow-sm ${activeTab === "dashboard"
+              ? "bg-green-50 text-black border-green-700/80"
+              : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
               }`}
           >
             Connection Designer Home
@@ -23,23 +23,15 @@ const ConnectionLayout = () => {
           {(userRole === "ADMIN" || userRole === "DEPUTY_MANAGER" || userRole === "OPERATION_EXECUTIVE") && (
             <button
               onClick={() => setActiveTab("AddConnectionDesigner")}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "AddConnectionDesigner"
-                ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-                : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+              className={`flex items-center gap-2 px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-tight transition-all border-2 shadow-sm ${activeTab === "AddConnectionDesigner"
+                ? "bg-green-50 text-black border-green-700/80"
+                : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
                 }`}
             >
               Add Connection Designer
             </button>
           )}
-          <button
-            onClick={() => setActiveTab("moreInfo")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "moreInfo"
-              ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-              : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
-              }`}
-          >
-            More Info
-          </button>
+    
         </div>
         <div className="grow p-2 bg-white rounded-b-2xl">
           {activeTab === "dashboard" && (

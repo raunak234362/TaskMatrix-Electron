@@ -16,9 +16,9 @@ const RfqLayout = () => {
           <div className="flex flex-row gap-4 items-center justify-end">
             <button
               onClick={() => setActiveTab("allRFQ")}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "allRFQ"
-                ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-                : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+              className={`flex items-center gap-2 px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-tight transition-all border-2 shadow-sm ${activeTab === "allRFQ"
+                ? "bg-green-50 text-black border-green-700/80"
+                : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
                 }`}
             >
               All RFQ
@@ -27,9 +27,9 @@ const RfqLayout = () => {
             {userRole !== "connection_designer_engineer" && userRole !== "connection_designer_admin" && (
               <button
                 onClick={() => setActiveTab("addRFQ")}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "addRFQ"
-                  ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-                  : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+                className={`flex items-center gap-2 px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-tight transition-all border-2 shadow-sm ${activeTab === "addRFQ"
+                  ? "bg-green-50 text-black border-green-700/80"
+                  : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
                   }`}
               >
                 Create RFQ

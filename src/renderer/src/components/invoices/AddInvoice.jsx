@@ -700,15 +700,13 @@ const AddInvoice = ({
                 </div>
                 <div className="md:col-span-1 flex justify-center">
                   {fields.length > 1 && (
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="icon"
                       onClick={() => remove(index)}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all"
                     >
                       <Trash2 size={20} />
-                    </Button>
+                    </button>
                   )}
                 </div>
                 <div className="md:col-span-12">
@@ -720,7 +718,7 @@ const AddInvoice = ({
                 </div>
               </div>
             ))}
-            <Button
+            <button
               type="button"
               onClick={() => {
                 const selectedFab = fabricators.find(f => f.id === selectedFabricatorId || f._id === selectedFabricatorId);
@@ -733,10 +731,10 @@ const AddInvoice = ({
                   remarks: "",
                 });
               }}
-              className="flex items-center gap-2 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200"
+              className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
             >
               <Plus size={18} /> Add Item
-            </Button>
+            </button>
           </div>
         </fieldset>
 
@@ -754,13 +752,13 @@ const AddInvoice = ({
                   {watch("totalInvoiceValue").toLocaleString()}
                 </span>
               </div>
-              <Button
+              <button
                 type="button"
                 onClick={handleCalculateTotal}
-                className="w-full bg-green-100 text-green-700 hover:bg-green-200 border border-green-300 py-2 text-sm font-semibold"
+                className="w-full px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
               >
                 Calculate Total & Words
-              </Button>
+              </button>
               <Input
                 label="Total in Words"
                 placeholder="e.g. One Thousand Dollars"
@@ -803,12 +801,14 @@ const AddInvoice = ({
           </fieldset>
         </div>
 
-        <Button
-          type="submit"
-          className="mt-8 bg-green-700 hover:bg-green-800 text-white w-full py-4 text-xl  shadow-lg transition transform hover:scale-[1.01]"
-        >
-          Create Invoice
-        </Button>
+        <div className="flex justify-center pt-6">
+          <button
+            type="submit"
+            className="w-full max-w-md px-8 py-2.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm text-center active:scale-95"
+          >
+            Create Invoice
+          </button>
+        </div>
       </form>
     </div>
   );

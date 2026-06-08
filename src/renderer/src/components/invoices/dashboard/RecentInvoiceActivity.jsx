@@ -54,7 +54,7 @@ const RecentInvoiceActivity = ({ invoices }) => {
     }, [invoices]);
 
     return (
-        <div className="bg-green-100 p-6 rounded-3xl border border-black shadow-sm h-full">
+        <div className="bg-[#f4f9f1] p-6 rounded-3xl border border-black shadow-sm h-full">
             <h3 className="text-sm font-bold text-black uppercase tracking-widest mb-8">Recent Activity</h3>
             <div className="space-y-8">
                 {activities.length === 0 ? (

@@ -324,7 +324,7 @@ const GetRFQByID = ({ id, onClose }) => {
     // Removed redundant useDataTable hook
 
     return (
-        <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 font-roboto text-sm">
             <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[95vw] mx-auto flex flex-col h-[95vh]">
                 {/* Header */}
                 <div className="flex-none p-4 sm:p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -347,14 +347,14 @@ const GetRFQByID = ({ id, onClose }) => {
                             <>
                                 <button
                                     onClick={() => setShowEditModal(true)}
-                                    className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-gray-200 border-2 border-black text-black font-bold uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-xs shadow-sm hover:shadow-md active:scale-95"
+                                    className="flex-1 sm:flex-none px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
                                 >
                                     Edit
                                 </button>
 
                                 <button
                                     onClick={() => setShowStatusModal(true)}
-                                    className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-green-200 border-2 border-black text-black font-bold uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all text-xs shadow-sm hover:shadow-md active:scale-95"
+                                    className="flex-1 sm:flex-none px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
                                 >
                                     Status
                                 </button>
@@ -389,31 +389,34 @@ const GetRFQByID = ({ id, onClose }) => {
                       {/* ---------------- RIGHT COLUMN — RESPONSES & CD QUOTAS ---------------- */}
                         <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8 flex flex-col min-h-0">
                             {/* Header + Add Response Button */}
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-gray-300 pb-1">
-                                <div className="flex gap-6 items-center">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-300 pb-4">
+                                <div className="flex flex-wrap gap-3 items-center">
                                     <button
                                         onClick={() => setActiveTab("responses")}
-                                        className={`text-sm md:text-xl font-bold uppercase tracking-tight transition-all relative ${activeTab === "responses" ? "text-black" : "text-black opacity-40 hover:opacity-100"
+                                        className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "responses"
+                                            ? "bg-green-50 text-black border-green-700/80"
+                                            : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
                                             }`}
                                     >
                                         Responses
-                                        {activeTab === "responses" && <div className="absolute left-0 w-full h-1 bg-black rounded-t-full bottom-[-4px]"></div>}
                                     </button>
                                     <button
                                         onClick={() => setActiveTab("cdQuotas")}
-                                        className={`text-sm md:text-xl font-bold uppercase tracking-tight transition-all relative ${activeTab === "cdQuotas" ? "text-black" : "text-black opacity-40 hover:opacity-100"
+                                        className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "cdQuotas"
+                                            ? "bg-green-50 text-black border-green-700/80"
+                                            : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
                                             }`}
                                     >
                                         CD Quotes
-                                        {activeTab === "cdQuotas" && <div className="absolute left-0 w-full h-1 bg-black rounded-t-full bottom-[-4px]"></div>}
                                     </button>
                                     <button
                                         onClick={() => setActiveTab("cdSent")}
-                                        className={`text-sm md:text-xl font-bold uppercase tracking-tight transition-all relative ${activeTab === "cdSent" ? "text-black" : "text-black opacity-40 hover:opacity-100"
+                                        className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "cdSent"
+                                            ? "bg-green-50 text-black border-green-700/80"
+                                            : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
                                             }`}
                                     >
                                         Sent to CD
-                                        {activeTab === "cdSent" && <div className="absolute left-0 w-full h-1 bg-black rounded-t-full bottom-[-4px]"></div>}
                                     </button>
                                 </div>
 
@@ -423,7 +426,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                     userRole === "ESTIMATION_HEAD") && (
                                         <button
                                             onClick={() => setShowResponseModal(true)}
-                                            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#6bbd45]/15 text-black font-bold rounded-lg shadow-sm hover:bg-[#6bbd45]/80 transition text-sm border-2 border-[#6bbd45]/50 whitespace-nowrap"
+                                            className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm whitespace-nowrap"
                                         >
                                             + Add Response
                                         </button>
@@ -474,7 +477,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                         <div className="space-y-4">
                                             <div className="flex items-center gap-2">
                                                 <User size={16} className="text-black" />
-                                                <h4 className="text-sm font-bold text-black uppercase tracking-widest">Recipients</h4>
+                                                <h4 className="text-sm font-bold text-black uppercase tracking-wider">Recipients</h4>
                                             </div>
                                             <div className="flex flex-wrap gap-2">
                                                 {rfq?.connectionDesignerRFQ?.length ? (
@@ -492,7 +495,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                         <div className="space-y-4 pt-4 border-t border-gray-200">
                                             <div className="flex items-center gap-2">
                                                 <Layout size={16} className="text-black" />
-                                                <h4 className="text-sm font-bold text-black uppercase tracking-widest">Sent Package Description</h4>
+                                                <h4 className="text-sm font-bold text-black uppercase tracking-wider">Sent Package Description</h4>
                                             </div>
                                             <div 
                                                 className="bg-white p-5 rounded-2xl border border-black prose prose-sm max-w-none text-sm font-medium text-black"
@@ -503,7 +506,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                         <div className="space-y-4 pt-4 border-t border-gray-200">
                                             <div className="flex items-center gap-2">
                                                 <Paperclip size={16} className="text-black" />
-                                                <h4 className="text-sm font-bold text-black uppercase tracking-widest">Sent Attachments</h4>
+                                                <h4 className="text-sm font-bold text-black uppercase tracking-wider">Sent Attachments</h4>
                                             </div>
                                             <RenderFiles
                                                 files={rfq?.CDAttachments || []}
@@ -547,7 +550,7 @@ const GetRFQByID = ({ id, onClose }) => {
                             <div className="space-y-2">
                                 <button
                                     onClick={() => setShowDescription((prev) => !prev)}
-                                    className="text-sm font-bold text-black uppercase tracking-widest hover:underline transition-colors flex items-center gap-1"
+                                    className="text-sm font-bold text-black uppercase tracking-wider hover:underline transition-colors flex items-center gap-1"
                                 >
                                     {showDescription ? 'Hide Description' : 'Show Description'}
                                 </button>
@@ -564,12 +567,12 @@ const GetRFQByID = ({ id, onClose }) => {
                             {/* ---------------- FOLLOW-UPS SECTION ---------------- */}
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <h4 className="text-sm font-bold text-black flex items-center gap-2 uppercase tracking-widest">
+                                    <h4 className="text-sm font-bold text-black flex items-center gap-2 uppercase tracking-wider">
                                         <MessageSquare className="w-4 h-4" /> RFQ Follow-ups
                                     </h4>
                                     <button
                                         onClick={() => setShowFollowUpForm(!showFollowUpForm)}
-                                        className="text-xs font-bold text-blue-600 uppercase tracking-widest hover:underline flex items-center gap-1"
+                                        className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                                     >
                                         {showFollowUpForm ? "Cancel" : "+ Add Follow-up"}
                                     </button>
@@ -599,7 +602,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                             <button
                                                 type="submit"
                                                 disabled={isSubmittingFollowUp}
-                                                className="px-6 py-2 bg-green-200 border-2 border-black text-black font-bold uppercase tracking-widest rounded-lg hover:bg-green-300 transition-all text-xs flex items-center gap-2 disabled:opacity-50"
+                                                className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm flex items-center gap-2 disabled:opacity-50"
                                             >
                                                 {isSubmittingFollowUp ? (
                                                     <Loader2 className="w-3 h-3 animate-spin" />
@@ -625,7 +628,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                                         <div className="w-6 h-6 rounded-full bg-gray-100 border border-black flex items-center justify-center">
                                                             <User className="w-3 h-3 text-black" />
                                                         </div>
-                                                        <span className="text-xs font-bold text-black uppercase tracking-widest">
+                                                        <span className="text-xs font-bold text-black uppercase tracking-wider">
                                                             {fu.createdByRole === "CLIENT"
                                                                 ? rfq?.sender?.fabricator?.fabName || "Client"
                                                                 : fu.user
@@ -633,7 +636,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                                                 : "WBT Team"}
                                                         </span>
                                                     </div>
-                                                    <div className="flex items-center gap-1 text-xs font-bold text-black uppercase tracking-widest">
+                                                    <div className="flex items-center gap-1 text-xs font-bold text-black uppercase tracking-wider">
                                                         <Clock className="w-3 h-3" />
                                                         {new Date(fu.createdAt).toLocaleString("en-IN", {
                                                             day: '2-digit',
@@ -674,7 +677,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                                                 className="flex items-center gap-2 px-3 py-1 bg-gray-50 border border-black rounded-full hover:bg-gray-100 transition-all group"
                                                             >
                                                                 <Paperclip className="w-3 h-3 text-black" />
-                                                                <span className="text-xs font-bold text-black uppercase tracking-widest truncate max-w-[150px]">
+                                                                <span className="text-xs font-bold text-black uppercase tracking-wider truncate max-w-[150px]">
                                                                     {file.originalName || file.fileName || "File"}
                                                                 </span>
                                                             </button>
@@ -748,28 +751,28 @@ const GetRFQByID = ({ id, onClose }) => {
                                 formatDate={(date) => new Date(date).toLocaleDateString()}
                             />
                             {userRole !== "CLIENT" && (
-                                <div className="flex flex-col gap-2 pt-2">
+                                <div className="flex flex-col gap-3 pt-2">
                                     {rfq?.estimations && rfq.estimations.length > 0 ? (
-                                        <Button
+                                        <button
                                             onClick={() => setShowEstimationDetails(true)}
-                                            className="w-full sm:w-auto h-auto py-2.5 px-4 text-sm  bg-[#6bbd45]/15 text-black rounded-md hover:bg-[#6bbd45]/80 transition text-sm"
+                                            className="w-full px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm text-center"
                                         >
                                             View Estimation Details
-                                        </Button>
+                                        </button>
                                     ) : (
-                                        <Button
+                                        <button
                                             onClick={() => setShowEstimationModal(true)}
-                                            className="w-full sm:w-auto h-auto py-2.5 px-4 text-sm  bg-[#6bbd45]/15 text-black rounded-md hover:bg-[#6bbd45]/80 transition text-sm"
+                                            className="w-full px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm text-center"
                                         >
                                             Raise For Estimation
-                                        </Button>
+                                        </button>
                                     )}
-                                    <Button
+                                    <button
                                         onClick={() => handleCDQuotationModal()}
-                                        className="w-full sm:w-auto h-auto py-2.5 px-4 text-xs sm:text-sm bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 whitespace-normal leading-tight "
+                                        className="w-full px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm text-center"
                                     >
                                         Raise for Connection Designer Quotation
-                                    </Button>
+                                    </button>
                                 </div>
                             )}
                         </div>
@@ -962,10 +965,10 @@ const GetRFQByID = ({ id, onClose }) => {
 
 const Info = ({ label, value }) => (
     <div className="flex justify-between items-center gap-4 py-2 border-b border-black/5 last:border-0">
-        <p className="text-black text-xs font-bold uppercase tracking-widest ">
+        <p className="text-black text-sm font-bold uppercase tracking-wider">
             {label}:
         </p>
-        <p className="text-black text-xs font-bold uppercase tracking-tight text-right">{value}</p>
+        <p className="text-black text-sm font-bold uppercase tracking-tight text-right">{value}</p>
     </div>
 );
 
@@ -976,7 +979,7 @@ const ScopeList = ({ title, icon, items, className = "" }) => {
 
     return (
         <div className={`p-4 bg-white rounded-2xl border border-black shadow-sm space-y-4 animate-in fade-in zoom-in duration-200 ${className}`}>
-            <h4 className="text-xs font-black text-black flex items-center gap-2 uppercase tracking-widest">
+            <h4 className="text-sm font-bold text-black flex items-center gap-2 uppercase tracking-wider">
                 {icon} {title}
             </h4>
             <div className="flex flex-wrap gap-2">
@@ -990,7 +993,7 @@ const ScopeList = ({ title, icon, items, className = "" }) => {
 
 const Scope = ({ label, enabled }) => (
     <div
-        className={`px-4 py-1.5 rounded-full border border-black text-[10px] font-bold uppercase tracking-widest shadow-sm transition-all ${enabled
+        className={`px-4 py-1.5 rounded-full border border-black text-xs font-bold uppercase tracking-wider shadow-sm transition-all ${enabled
             ? "bg-green-100 text-black"
             : "bg-gray-100 text-black/40"
             }`}
