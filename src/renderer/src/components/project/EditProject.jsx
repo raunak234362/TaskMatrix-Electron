@@ -59,6 +59,7 @@ const EditProject = ({
         customerDesign: false,
         detailingMain: false,
         detailingMisc: false,
+        isAwarded: false,
         clientProjectManagers: [],
         connectionDesignerID: "",
         pocOfConnectionDesigner: "",
@@ -113,12 +114,25 @@ const EditProject = ({
               ? new Date(project.endDate).toISOString().split("T")[0]
               : ""
           );
+          setValue(
+            "approvalDate",
+            project.approvalDate
+              ? new Date(project.approvalDate).toISOString().split("T")[0]
+              : ""
+          );
+          setValue(
+            "fabricationDate",
+            project.fabricationDate
+              ? new Date(project.fabricationDate).toISOString().split("T")[0]
+              : ""
+          );
 
           setValue("connectionDesign", project.connectionDesign);
           setValue("miscDesign", project.miscDesign);
           setValue("customerDesign", project.customerDesign);
           setValue("detailingMain", project.detailingMain);
           setValue("detailingMisc", project.detailingMisc);
+          setValue("isAwarded", project.isAwarded || false);
           setValue("connectionDesignerID", project.connectionDesignerID || "");
           const pocId = project.pocOfConnectionDesigner?.id || project.pocOfConnectionDesigner?._id || (typeof project.pocOfConnectionDesigner === 'string' ? project.pocOfConnectionDesigner : "");
           setValue("pocOfConnectionDesigner", pocId);
@@ -587,6 +601,46 @@ const EditProject = ({
               </div>
             </div>
 
+            {/* Project Status */}
+            <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+              <div className="flex items-center gap-2 mb-4">
+                <UserCheck className="w-5 h-5 text-blue-600" />
+                <h3 className="text-lg  text-blue-900">
+                  Award Status
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Controller
+                  name="isAwarded"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="bg-white rounded-lg p-3 shadow-sm border border-blue-100">
+                      <ToggleField
+                        label="Is Awarded"
+                        checked={!!field.value}
+                        onChange={(e) => {
+                          const newValue = e.target.checked;
+                          if (newValue && !field.value) {
+                            Service.AwardProject(projectId)
+                              .then(() => {
+                                toast.success("Project awarded successfully");
+                                field.onChange(newValue);
+                              })
+                              .catch((err) => {
+                                console.error(err);
+                                toast.error("Failed to award project");
+                              });
+                          } else {
+                            field.onChange(newValue);
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+                />
+              </div>
+            </div>
+
             {/* Tools & Timeline */}
             <SectionTitle title="Tools & Timeline" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -653,6 +707,16 @@ const EditProject = ({
                 label="Target End Date"
                 type="date"
                 {...register("endDate")}
+              />
+              <Input
+                label="Approval Date"
+                type="date"
+                {...register("approvalDate")}
+              />
+              <Input
+                label="Fabrication Date"
+                type="date"
+                {...register("fabricationDate")}
               />
             </div>
 

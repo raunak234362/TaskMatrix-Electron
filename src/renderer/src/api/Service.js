@@ -1133,6 +1133,17 @@ class Service {
     }
   }
 
+  // Award Project By ID
+  static async AwardProject(id) {
+    try {
+      const response = await api.patch(`project/projects/${id}/award`)
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   // Add Project Manager Assists
   static async AddProjectManagerAssists(id, data) {
     try {
