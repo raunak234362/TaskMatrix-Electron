@@ -77,7 +77,7 @@ const CDNetworkOverview = ({
                 states = [designer.state];
               }
             }
-            states = states.filter(Boolean);
+            states = states.filter(Boolean).sort();
 
             return (
               <motion.div
@@ -136,14 +136,21 @@ const CDNetworkOverview = ({
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {states.length > 0 ? (
-                          states.slice(0, 10).map((s, i) => (
-                            <span
-                              key={i}
-                              className="text-[10px] font-bold bg-green-50/50 text-green-700 px-2.5 py-1 rounded-lg border border-green-100"
-                            >
-                              {s}
-                            </span>
-                          ))
+                          <>
+                            {states.slice(0, 10).map((s, i) => (
+                              <span
+                                key={i}
+                                className="text-[10px] font-bold bg-green-50/50 text-green-700 px-2.5 py-1 rounded-lg border border-green-100"
+                              >
+                                {s}
+                              </span>
+                            ))}
+                            {states.length > 10 && (
+                              <span className="text-[10px] font-bold bg-gray-50 text-gray-500 px-2.5 py-1 rounded-lg border border-gray-200">
+                                +{states.length - 10} more
+                              </span>
+                            )}
+                          </>
                         ) : (
                           <span className="text-[10px] font-bold text-gray-400 uppercase">
                             No states listed
