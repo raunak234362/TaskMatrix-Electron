@@ -240,52 +240,46 @@ const FabricatorDashboard = ({ fabricator }) => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <StatCard
-          icon={<Briefcase className="text-blue-600" size={20} />}
+          icon={Briefcase}
           label="Total Projects"
           value={stats.totalProjects}
-          color="bg-blue-50"
           onClick={() => setActiveTab("projects")}
         />
         <StatCard
-          icon={<TrendingUp className="text-green-600" size={20} />}
+          icon={TrendingUp}
           label="Active Projects"
           value={stats.activeProjects}
-          color="bg-green-50"
           onClick={() => setActiveTab("projects")}
         />
         <StatCard
-          icon={<MessageSquare className="text-orange-600" size={20} />}
+          icon={MessageSquare}
           label="Pending RFIs"
           value={stats.pendingRFIs}
-          color="bg-orange-50"
           onClick={() => setActiveTab("rfis")}
         />
         <StatCard
-          icon={<FileCheck className="text-purple-600" size={20} />}
+          icon={FileCheck}
           label="Submittals"
           value={stats.pendingSubmittals}
-          color="bg-purple-50"
           onClick={() => setActiveTab("submittals")}
         />
         <StatCard
-          icon={<AlertCircle className="text-red-600" size={20} />}
+          icon={AlertCircle}
           label="Change Orders"
           value={stats.pendingCOs}
-          color="bg-red-50"
           onClick={() => setActiveTab("cos")}
         />
         <StatCard
-          icon={<FileText className="text-cyan-600" size={20} />}
+          icon={FileText}
           label="Total RFQs"
           value={stats.totalRFQs}
-          color="bg-cyan-50"
         />
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide border-b border-black/5">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide border-b border-gray-200">
         {tabs.map(({ id, label, icon: Icon, count }) => (
           <button
             key={id}
@@ -293,8 +287,8 @@ const FabricatorDashboard = ({ fabricator }) => {
             className={`
               flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all whitespace-nowrap border
               ${activeTab === id
-                ? "bg-green-100 text-black border-black shadow-sm"
-                : "bg-white text-black/50 border-transparent hover:bg-gray-50 hover:text-black"
+                ? "bg-green-50 text-green-700 border-green-400 shadow-sm"
+                : "bg-white text-black/50 border-gray-300 hover:bg-gray-50 hover:text-black"
               }
             `}
           >
@@ -315,10 +309,10 @@ const FabricatorDashboard = ({ fabricator }) => {
           <div className="space-y-8 animate-in slide-in-from-bottom-2 duration-300">
             {/* Recent Activity Summary */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-2xl shadow-sm border border-black/10 overflow-hidden">
-                <div className="px-6 py-4 border-b border-black/5 bg-gray-50/50 flex items-center justify-between">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
                   <h3 className="text-sm font-black text-black uppercase tracking-widest flex items-center gap-2">
-                    <FileText size={18} className="text-cyan-600" />
+                    <FileText size={18} className="text-green-600" />
                     Recent RFQs
                   </h3>
                 </div>
@@ -334,7 +328,7 @@ const FabricatorDashboard = ({ fabricator }) => {
                           {new Date(rfq.createdAt).toLocaleDateString()}
                         </p>
                       </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-cyan-700 bg-cyan-50 px-3 py-1 rounded-full border border-cyan-200">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200">
                         {rfq.status || "PENDING"}
                       </span>
                     </div>
@@ -348,10 +342,10 @@ const FabricatorDashboard = ({ fabricator }) => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl shadow-sm border border-black/10 overflow-hidden">
-                <div className="px-6 py-4 border-b border-black/5 bg-gray-50/50">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50">
                   <h3 className="text-sm font-black text-black uppercase tracking-widest flex items-center gap-2">
-                    <Clock size={18} className="text-orange-600" />
+                    <Clock size={18} className="text-green-600" />
                     Timeline Summary
                   </h3>
                 </div>
@@ -366,15 +360,15 @@ const FabricatorDashboard = ({ fabricator }) => {
                     label="Upcoming Deadline"
                     value={projects.find((p) => p.status === "ACTIVE")?.name || "N/A"}
                     date={projects.find((p) => p.status === "ACTIVE")?.endDate}
-                    icon={<Clock className="text-orange-500" size={20} />}
+                    icon={<Clock className="text-green-500" size={20} />}
                   />
                 </div>
               </div>
             </div>
 
             {/* Project Quick View */}
-            <div className="bg-white rounded-2xl shadow-sm border border-black/10 overflow-hidden">
-              <div className="px-6 py-4 border-b border-black/5 bg-gray-50/50 flex items-center justify-between">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
                 <h3 className="text-sm font-black text-black uppercase tracking-widest flex items-center gap-2">
                   <FolderOpen size={18} className="text-black" />
                   Project Quick View
@@ -396,8 +390,8 @@ const FabricatorDashboard = ({ fabricator }) => {
         )}
 
         {activeTab === "projects" && (
-          <div className="bg-white rounded-2xl shadow-sm border border-black/10 overflow-hidden animate-in slide-in-from-right-2 duration-300">
-            <div className="px-6 py-4 border-b border-black/5 bg-gray-50/50">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden animate-in slide-in-from-right-2 duration-300">
+            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50">
               <h3 className="text-sm font-black text-black uppercase tracking-widest flex items-center gap-2">
                 <Briefcase size={18} />
                 All Projects
@@ -433,37 +427,28 @@ const FabricatorDashboard = ({ fabricator }) => {
   );
 };
 
-const StatCard = ({ icon, label, value, color, onClick }) => (
+const StatCard = ({ icon: Icon, label, value, onClick }) => (
   <button
     onClick={onClick}
+    disabled={!onClick}
     className={`
-      ${color}
-      px-4 py-5
-      rounded-2xl
-      border border-black/5
-      shadow-sm
-      flex flex-col
-      items-center
-      justify-center
-      text-center
-      transition-all
-      hover:shadow-md
-      hover:-translate-y-1
-      active:scale-95
-      group
-      ${onClick ? "cursor-pointer" : "cursor-default"}
+      bg-white p-6 rounded-2xl border border-gray-300 flex items-center justify-between shadow-sm w-full transition-all
+      ${onClick 
+        ? "cursor-pointer hover:shadow-md hover:border-green-300 active:scale-95" 
+        : "cursor-default"
+      }
     `}
   >
-    <div className="mb-3 p-2.5 bg-white rounded-xl shadow-sm border border-black/5 group-hover:border-black/10 transition-colors">
-      {icon}
+    <div className="flex items-center gap-5 flex-1 min-w-0">
+      <div className="p-3 bg-green-50 rounded-xl text-green-600 border border-green-300 flex items-center justify-center shadow-sm shrink-0">
+        <Icon size={20} strokeWidth={2.5} />
+      </div>
+      <p className="text-sm font-bold text-black uppercase tracking-wider text-left truncate">
+        {label}
+      </p>
     </div>
-
-    <p className="text-2xl font-black text-black tracking-tight mb-1">
+    <p className="text-sm font-bold text-black tracking-wider ml-4">
       {value}
-    </p>
-
-    <p className="text-[10px] uppercase tracking-widest font-black text-black/40">
-      {label}
     </p>
   </button>
 );
@@ -482,7 +467,7 @@ const TimelineItem = ({
       <p className="text-[10px] font-black text-black/40 uppercase tracking-widest mb-1">{label}</p>
       <p className="text-xs font-bold text-black uppercase tracking-tight">{value}</p>
       {date && (
-        <p className="text-[10px] font-black text-orange-600/60 uppercase tracking-widest mt-1">
+        <p className="text-[10px] font-black text-green-700/60 uppercase tracking-widest mt-1">
           {new Date(date).toLocaleDateString("en-IN", {
             day: "2-digit",
             month: "short",

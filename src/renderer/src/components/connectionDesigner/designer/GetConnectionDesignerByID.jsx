@@ -108,7 +108,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setActiveTab('DASHBOARD')}
-            className={`px-6 py-2 rounded-lg text-sm font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'DASHBOARD'
+            className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'DASHBOARD'
               ? 'bg-green-50 border-green-400 text-green-700 shadow-sm'
               : 'bg-white border-gray-300 text-black hover:bg-gray-50'
               }`}
@@ -117,7 +117,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
           </button>
           <button
             onClick={() => setActiveTab('FILES')}
-            className={`px-6 py-2 rounded-lg text-sm font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'FILES'
+            className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'FILES'
               ? 'bg-green-50 border-green-400 text-green-700 shadow-sm'
               : 'bg-white border-gray-300 text-black hover:bg-gray-50'
               }`}
