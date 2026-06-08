@@ -55,7 +55,7 @@ const AllCO = ({ changeOrderData = [] }) => {
     },
     {
       accessorKey: "remarks",
-      header: "remarks",
+      header: "Subject",
     },
     {
       accessorKey: "senders",

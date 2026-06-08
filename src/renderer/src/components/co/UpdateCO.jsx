@@ -145,12 +145,9 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                 {...register("changeOrderNumber", { required: true })}
               />
               <Input
-                label="Remarks *"
+                label="Subject *"
                 {...register("remarks", { required: true })}
               />
-              <Input label="Reason" {...register("reason")} />
-              <Input label="Reference Link" {...register("link")} />
-
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700">Status</label>
                 <select

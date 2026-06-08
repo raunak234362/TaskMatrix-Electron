@@ -216,7 +216,7 @@ const GetCOByID = ({ id, projectId }) => {
               </h1>
 
               <div className="flex items-center gap-2">
-                {userRole !== "CLIENT" && (
+                {userRole !== "CLIENT" && userRoleLower !== "project_manager" && userRoleLower !== "staff" && (
                   <Button
                     variant="outline"
                     className="border-green-600 px-4 bg-green-50 text-black rounded-lg "
@@ -276,7 +276,7 @@ const GetCOByID = ({ id, projectId }) => {
             />
 
             <div>
-              <h4 className="font-semibold text-gray-700 mb-1">Remarks</h4>
+              <h4 className="font-semibold text-gray-700 mb-1">Subject</h4>
               <p className="bg-gray-50 p-3 rounded-lg border">
                 {currentVersion?.remarks || co.remarks || "—"}
               </p>
