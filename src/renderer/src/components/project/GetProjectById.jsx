@@ -123,16 +123,20 @@ const GetProjectById = ({ id, onClose }) => {
 
   // Check if current user is an assist for this project
   const isAssist = useMemo(() => {
-    if (!project?.assists || !currentUserId) return false;
-    return project.assists.some(assist => 
-      String(assist.userId) === String(currentUserId) || 
-      String(assist.user?.id) === String(currentUserId)
-    );
+    const userId = currentUserId || sessionStorage.getItem("userId");
+    if (!project?.assists || !userId || !Array.isArray(project.assists)) return false;
+    return project.assists.some(assist => {
+      if (!assist) return false;
+      const aId = String(assist.userId || assist.user?.id || assist.user || "").trim();
+      const uId = String(userId).trim();
+      return aId === uId;
+    });
   }, [project, currentUserId]);
 
   const canCreate = useMemo(() => {
     if (isAssist) return true;
-    return !["client", "staff", "estimator"].includes(userRole);
+    const role = (userRole || sessionStorage.getItem("userRole") || "").toLowerCase().trim();
+    return !["client", "staff", "estimator"].includes(role);
   }, [isAssist, userRole]);
 
   const fetchProjectTasks = async () => {
@@ -521,43 +525,45 @@ const GetProjectById = ({ id, onClose }) => {
                 {/* Section 1: Hours Statistics */}
                 <div className="space-y-4 mb-8">
                   {/* Row 1: Estimations */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="flex items-center justify-between bg-blue-50/40 p-4 rounded-none border border-black">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-none bg-blue-100/50 flex items-center justify-center text-blue-600 shrink-0">
-                          <Clock size={18} />
+                  {userRole !== "staff" && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="flex items-center justify-between bg-blue-50/40 p-4 rounded-none border border-black">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-none bg-blue-100/50 flex items-center justify-center text-blue-600 shrink-0">
+                            <Clock size={18} />
+                          </div>
+                          <div>
+                            <span className="text-sm font-bold text-black uppercase tracking-wider block">Estimated Hours</span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-sm font-bold text-black uppercase tracking-wider block">Estimated Hours</span>
-                        </div>
+                        <h3 className="text-sm font-bold text-black tracking-tight">{projectStats.assigned.toFixed(2)}H</h3>
                       </div>
-                      <h3 className="text-sm font-bold text-black tracking-tight">{projectStats.assigned.toFixed(2)}H</h3>
-                    </div>
 
-                    <div className="flex items-center justify-between bg-blue-50/40 p-4 rounded-none border border-black">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-none bg-blue-100/50 flex items-center justify-center text-blue-600 shrink-0">
-                          <CheckCircle2 size={18} />
+                      <div className="flex items-center justify-between bg-blue-50/40 p-4 rounded-none border border-black">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-none bg-blue-100/50 flex items-center justify-center text-blue-600 shrink-0">
+                            <CheckCircle2 size={18} />
+                          </div>
+                          <div>
+                            <span className="text-sm font-bold text-black uppercase tracking-wider block">Estimated Hours for Approval</span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-sm font-bold text-black uppercase tracking-wider block">Estimated Hours for Approval</span>
-                        </div>
+                        <h3 className="text-sm font-bold text-black tracking-tight">{(projectStats.assigned * 0.8).toFixed(2)}H</h3>
                       </div>
-                      <h3 className="text-sm font-bold text-black tracking-tight">{(projectStats.assigned * 0.8).toFixed(2)}H</h3>
-                    </div>
 
-                    <div className="flex items-center justify-between bg-blue-50/40 p-4 rounded-none border border-black">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-none bg-blue-100/50 flex items-center justify-center text-blue-600 shrink-0">
-                          <CheckCircle2 size={18} />
+                      <div className="flex items-center justify-between bg-blue-50/40 p-4 rounded-none border border-black">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-none bg-blue-100/50 flex items-center justify-center text-blue-600 shrink-0">
+                            <CheckCircle2 size={18} />
+                          </div>
+                          <div>
+                            <span className="text-sm font-bold text-black uppercase tracking-wider block">Estimated Hours for Fabrication</span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-sm font-bold text-black uppercase tracking-wider block">Estimated Hours for Fabrication</span>
-                        </div>
+                        <h3 className="text-sm font-bold text-black tracking-tight">{(projectStats.assigned * 0.2).toFixed(2)}H</h3>
                       </div>
-                      <h3 className="text-sm font-bold text-black tracking-tight">{(projectStats.assigned * 0.2).toFixed(2)}H</h3>
                     </div>
-                  </div>
+                  )}
 
                   {/* Row 2: Completion & Overrun */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

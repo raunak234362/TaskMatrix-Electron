@@ -112,11 +112,12 @@ const BfaVersionRow = ({ version, index, total, isCurrent, bfaId }) => {
 };
 
 // ── Main BfaManager Component ────────────────────────────────────────────────
-const BfaManager = ({ submittalId }) => {
+const BfaManager = ({ submittalId, isAssist }) => {
   const [bfa, setBfa] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const userRole = sessionStorage.getItem("userRole")?.toUpperCase();
 
   // Form Fields State
   const [subject, setSubject] = useState("");
@@ -246,30 +247,34 @@ const BfaManager = ({ submittalId }) => {
           </h2>
         </div>
         {bfa ? (
-          <Button
-            className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30 font-bold text-sm"
-            onClick={() => {
-              setDescription("");
-              setFiles([]);
-              setStatus(bfa.status || "partial");
-              setShowUpdateModal(true);
-            }}
-          >
-            Update BFA
-          </Button>
+          (userRole !== "STAFF" || isAssist) && (
+            <Button
+              className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30 font-bold text-sm"
+              onClick={() => {
+                setDescription("");
+                setFiles([]);
+                setStatus(bfa.status || "partial");
+                setShowUpdateModal(true);
+              }}
+            >
+              Update BFA
+            </Button>
+          )
         ) : (
-          <Button
-            className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30 font-bold text-sm"
-            onClick={() => {
-              setSubject("");
-              setDescription("");
-              setFiles([]);
-              setStatus("partial");
-              setShowCreateModal(true);
-            }}
-          >
-            + Upload BFA
-          </Button>
+          (userRole !== "STAFF" || isAssist) && (
+            <Button
+              className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30 font-bold text-sm"
+              onClick={() => {
+                setSubject("");
+                setDescription("");
+                setFiles([]);
+                setStatus("partial");
+                setShowCreateModal(true);
+              }}
+            >
+              + Upload BFA
+            </Button>
+          )
         )}
       </div>
 

@@ -72,7 +72,22 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
         user_id: Number(user_id),
         data: data.comment,
       };
-      await Service.AddTaskComment(payload);
+      const res = await Service.AddTaskComment(payload);
+
+      if (userRole === "project_manager" || userRole === "dept_manager" || userRole === "deputy_manager" || userRole === "human_resource") {
+        const newCommentId = res?.id || res?.data?.id || res?.comment?.id || res?.commentId || res?.taskComment?.id;
+        if (newCommentId) {
+          try {
+            await Service.AddTaskCommentAcknowledged(newCommentId, {
+              acknowledged: true,
+              acknowledgedTime: new Date()
+            });
+          } catch (ackError) {
+            console.error("Failed to auto-acknowledge comment", ackError);
+          }
+        }
+      }
+
       toast.success("Comment added successfully");
       fetchTask();
     } catch (error) {

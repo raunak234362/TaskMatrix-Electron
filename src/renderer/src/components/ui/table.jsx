@@ -61,8 +61,10 @@ function ColumnFilter({ column }) {
   const { filterType, filterOptions } = columnDef;
   const cleanLabel = getFilterLabel(column);
 
+  let filterElement = null;
+
   if (filterType === "select") {
-    return (
+    filterElement = (
       <select
         value={column.getFilterValue() ?? ""}
         onChange={(e) => column.setFilterValue(e.target.value || undefined)}
@@ -76,10 +78,8 @@ function ColumnFilter({ column }) {
         ))}
       </select>
     );
-  }
-
-  if (filterType === "date") {
-    return (
+  } else if (filterType === "date") {
+    filterElement = (
       <input
         type="date"
         value={column.getFilterValue() ?? ""}
@@ -87,17 +87,24 @@ function ColumnFilter({ column }) {
         className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-none px-3 py-2 cursor-pointer focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm"
       />
     );
+  } else {
+    filterElement = (
+      <div className="relative group">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-green-600 transition-colors" />
+        <input
+          value={column.getFilterValue() ?? ""}
+          onChange={(e) => column.setFilterValue(e.target.value || undefined)}
+          className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-none pl-9 pr-3 py-2 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all placeholder:text-gray-500 placeholder:font-normal shadow-sm"
+          placeholder={`Search ${cleanLabel}...`}
+        />
+      </div>
+    );
   }
 
   return (
-    <div className="relative group">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-green-600 transition-colors" />
-      <input
-        value={column.getFilterValue() ?? ""}
-        onChange={(e) => column.setFilterValue(e.target.value || undefined)}
-        className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-none pl-9 pr-3 py-2 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all placeholder:text-gray-500 placeholder:font-normal shadow-sm"
-        placeholder={`Search ${cleanLabel}...`}
-      />
+    <div className="flex flex-col gap-1 w-full">
+      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">{cleanLabel}</label>
+      {filterElement}
     </div>
   );
 }

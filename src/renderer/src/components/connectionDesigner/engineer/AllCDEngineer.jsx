@@ -2,12 +2,12 @@ import { useEffect, useState, useMemo } from "react";
 import Button from "../../fields/Button";
 import { X, Users, Plus, UserPlus, Info } from "lucide-react";
 import DataTable from "../../ui/table";
-import GetEmployeeByID from "../../manageTeam/employee/GetEmployeeByID";
 import AddCDEngineer from "./AddCDEngineer";
+import EditEmployee from "../../manageTeam/employee/EditEmployee";
 
 const AllCDEngineer = ({ onClose, designerData, refresh }) => {
   const [addEngineerModal, setAddEngineerModal] = useState(false);
-  const [selectedEngineerId, setSelectedEngineerId] = useState(null);
+  const [editEngineer, setEditEngineer] = useState(null);
   const [engineers, setEngineers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -73,7 +73,7 @@ const AllCDEngineer = ({ onClose, designerData, refresh }) => {
               <DataTable
                 columns={columns}
                 data={engineers}
-                onRowClick={(row) => setSelectedEngineerId(row.id || row._id)}
+                onRowClick={(row) => setEditEngineer(row)}
               />
             </div>
           ) : (
@@ -96,8 +96,8 @@ const AllCDEngineer = ({ onClose, designerData, refresh }) => {
           <AddCDEngineer designer={designerData} onClose={() => setAddEngineerModal(false)} onSuccess={refresh} />
         )}
 
-        {selectedEngineerId && (
-          <GetEmployeeByID id={selectedEngineerId} onClose={() => setSelectedEngineerId(null)} />
+        {editEngineer && (
+          <EditEmployee employeeData={editEngineer} onClose={() => setEditEngineer(null)} onSuccess={refresh} />
         )}
       </div>
     </div>

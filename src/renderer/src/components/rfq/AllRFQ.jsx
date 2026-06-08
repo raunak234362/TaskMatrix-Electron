@@ -154,6 +154,15 @@ const AllRFQ = ({ rfq }) => {
     {
       accessorKey: "createdAt",
       header: "Created Date",
+      enableColumnFilter: true,
+      filterType: "date",
+      filterFn: (row, columnId, filterValue) => {
+        if (!filterValue) return true;
+        if (!row.original.createdAt) return false;
+        const d = new Date(row.original.createdAt);
+        const rowDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return rowDate === filterValue;
+      },
       cell: ({ row }) => (
         <span className="text-sm font-bold text-gray-600">
           {row.original.createdAt
@@ -169,6 +178,15 @@ const AllRFQ = ({ rfq }) => {
     {
       accessorKey: "estimationDate",
       header: "Due Date",
+      enableColumnFilter: true,
+      filterType: "date",
+      filterFn: (row, columnId, filterValue) => {
+        if (!filterValue) return true;
+        if (!row.original.estimationDate) return false;
+        const d = new Date(row.original.estimationDate);
+        const rowDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return rowDate === filterValue;
+      },
       cell: ({ row }) => (
         <span className="text-sm font-bold text-gray-600">
           {row.original.estimationDate

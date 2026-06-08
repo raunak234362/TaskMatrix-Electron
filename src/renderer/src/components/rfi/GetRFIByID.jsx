@@ -61,6 +61,11 @@ const GetRFIByID = ({ id, onUpdate }) => {
     );
   }
   const userRole = sessionStorage.getItem("userRole")?.toUpperCase();
+  const currentUserId = sessionStorage.getItem("userId");
+  const isAssist = rfi?.project?.assists?.some(assist => 
+    String(assist.userId) === String(currentUserId) || 
+    String(assist.user?.id) === String(currentUserId)
+  );
 
   const responseColumns = [
     {
@@ -147,13 +152,15 @@ const GetRFIByID = ({ id, onUpdate }) => {
                 {rfi.subject}
               </h1>
               <div className="flex gap-5">
-                <Button
-                  onClick={() => setShowEditModal(true)}
-                  className="bg-white text-black border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-all duration-200 flex items-center gap-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pencil"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
-                  Edit RFI
-                </Button>
+                {(userRole !== "STAFF" || isAssist) && (
+                  <Button
+                    onClick={() => setShowEditModal(true)}
+                    className="bg-white text-black border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-all duration-200 flex items-center gap-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pencil"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
+                    Edit RFI
+                  </Button>
+                )}
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-semibold ${rfi.isAproovedByAdmin
                     ? "bg-[#6bbd45]/15 text-black"
@@ -208,7 +215,7 @@ const GetRFIByID = ({ id, onUpdate }) => {
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>
 
-              {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole?.includes("MANAGER") || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole === "DEPUTY_MANAGER") && (
+              {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole?.includes("MANAGER") || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole === "DEPUTY_MANAGER" || isAssist) && (
                 <div className="flex gap-2">
 
                   <Button

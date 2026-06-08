@@ -204,7 +204,7 @@ const ProjectMilestoneMetrics = ({
                               {ms.progress}%
                             </span>
                             {userRole !== "client" &&
-                              userRole !== "client_admin" && userRole !== "connection_designer_admin" && userRole !== "connection_designer_engineer" && (
+                              userRole !== "client_admin" && userRole !== "staff" && userRole !== "connection_designer_admin" && userRole !== "connection_designer_engineer" && (
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();

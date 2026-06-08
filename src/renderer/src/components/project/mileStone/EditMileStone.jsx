@@ -36,6 +36,7 @@ const EditMileStone = ({
       reason: "",
       types: "ANCHOR_BOLT",
       subSubject: "string",
+      isConnectionDesign: false,
     },
   });
 
@@ -108,6 +109,7 @@ const EditMileStone = ({
           reason: data.reason || "",
           types: data.types || "ANCHOR_BOLT",
           subSubject: data.subSubject || "string",
+          isConnectionDesign: data.isConnectionDesign || false,
         });
       }
     };
@@ -357,6 +359,21 @@ const EditMileStone = ({
                   />
                 )}
               />
+            </div>
+
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="checkbox"
+                id="isConnectionDesign"
+                {...register("isConnectionDesign")}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+              />
+              <label
+                htmlFor="isConnectionDesign"
+                className="text-sm font-semibold text-gray-700 cursor-pointer"
+              >
+                Is Connection Design
+              </label>
             </div>
           </div>
 

@@ -145,6 +145,11 @@ const GetSubmittalByID = ({ id, onClose }) => {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedResponse, setSelectedResponse] = useState(null);
   const userRole = sessionStorage.getItem("userRole")?.toUpperCase();
+  const currentUserId = sessionStorage.getItem("userId");
+  const isAssist = submittal?.project?.assists?.some(assist => 
+    String(assist.userId) === String(currentUserId) || 
+    String(assist.user?.id) === String(currentUserId)
+  );
 
   const fetchData = async () => {
     try {
@@ -225,40 +230,6 @@ const GetSubmittalByID = ({ id, onClose }) => {
         );
       },
     },
-    // {
-    //   accessorKey: "status",
-    //   header: "Status",
-    //   cell: ({ row }) => {
-    //     const status = row.original.status || "—";
-    //     const formatStatus = (s) => s.replace(/_/g, " ");
-
-    //     const getStatusStyles = (s) => {
-    //       switch (s) {
-    //         case "RELEASE_FOR_FABRICATION":
-    //           return "bg-green-100 text-green-700 border-green-200";
-    //         case "NOT_APPROVED":
-    //           return "bg-red-100 text-red-700 border-red-200";
-    //         case "REVISED_RESUBMITTAL":
-    //         case "REVISED_RESUBMIT_FOR_FABRICATION":
-    //           return "bg-orange-100 text-orange-700 border-orange-200";
-    //         case "SUBMITTED_TO_EOR":
-    //           return "bg-blue-100 text-blue-700 border-blue-200";
-    //         default:
-    //           return "bg-gray-100 text-gray-600 border-gray-200";
-    //       }
-    //     };
-
-    //     return (
-    //       <span
-    //         className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tight border ${getStatusStyles(
-    //           status
-    //         )}`}
-    //       >
-    //         {formatStatus(status)}
-    //       </span>
-    //     );
-    //   },
-    // },
     {
       accessorKey: "createdAt",
       header: "Created",
@@ -296,12 +267,14 @@ const GetSubmittalByID = ({ id, onClose }) => {
                   <h1 className="text-2xl text-black font-semibold">
                     {submittal.subject}
                   </h1>
-                  <Button
-                    className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
-                    onClick={() => setShowUpdateModal(true)}
-                  >
-                    Update Submittal
-                  </Button>
+                  {(userRole !== "STAFF" || isAssist) && (
+                    <Button
+                      className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
+                      onClick={() => setShowUpdateModal(true)}
+                    >
+                      Update Submittal
+                    </Button>
+                  )}
                 </div>
 
                 <Info label="Project" value={submittal.project?.name || "—"} />
@@ -407,7 +380,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
               <div className="lg:col-span-2 bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-xl font-semibold text-black">Responses</h2>
-                  {(userRole === "CLIENT_ADMIN" || userRole === "CLIENT" || userRole === "ADMIN" || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole== "DEPUTY_MANAGER") && (
+                  {(userRole === "CLIENT_ADMIN" || userRole === "CLIENT" || userRole === "ADMIN" || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole== "DEPUTY_MANAGER" || isAssist) && (
                     <Button
                       className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
                       onClick={() => setShowResponseModal(true)}
@@ -429,7 +402,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
               </div>
 
               {/* RIGHT PANEL - BFA Manager */}
-              <BfaManager submittalId={submittal.id} />
+              <BfaManager submittalId={submittal.id} isAssist={isAssist} />
              
             </div>
 

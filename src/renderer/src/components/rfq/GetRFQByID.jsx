@@ -387,6 +387,7 @@ const GetRFQByID = ({ id, onClose }) => {
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
                     <div className="grid grid-cols-1 gap-4 sm:gap-6">
                       {/* ---------------- RIGHT COLUMN — RESPONSES & CD QUOTAS ---------------- */}
+                      {userRole !== "ESTIMATOR" && userRole !== "ESTIMATION_HEAD" && (
                         <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8 flex flex-col min-h-0">
                             {/* Header + Add Response Button */}
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-300 pb-4">
@@ -519,6 +520,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                 )}
                             </div>
                         </div>
+                      )}
                         {/* ---------------- LEFT COLUMN — RFQ DETAILS ---------------- */}
                         <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8">
 
@@ -536,7 +538,9 @@ const GetRFQByID = ({ id, onClose }) => {
                                             : "N/A"
                                     }
                                 />
-                                <Info label="Bid Amount (USD)" value={rfq?.bidPrice ?? "—"} />
+                                {userRole !== "ESTIMATOR" && userRole !== "ESTIMATION_HEAD" && (
+                                    <Info label="Bid Amount (USD)" value={rfq?.bidPrice ?? "—"} />
+                                )}
                                 {(() => {
                                     const approvedQuota = rfq?.CDQuotas?.find(q => q.approvalStatus === true);
                                     if (approvedQuota) {
