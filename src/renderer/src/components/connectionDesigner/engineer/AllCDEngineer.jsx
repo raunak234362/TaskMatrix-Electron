@@ -38,7 +38,7 @@ const AllCDEngineer = ({ onClose, designerData, refresh }) => {
         <div className="p-8 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-black text-gray-800 tracking-tight">All Engineers</h2>
+              <h2 className="text-2xl font-semibold text-gray-800 tracking-tight">Connection Designer Engineers</h2>
 
             </div>
             <button
@@ -56,9 +56,9 @@ const AllCDEngineer = ({ onClose, designerData, refresh }) => {
 
             <button
               onClick={() => setAddEngineerModal(true)}
-              className="px-8 py-2 border border-black bg-green-200 hover:bg-green-300 text-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-green-100 transition-all flex items-center gap-3 active:scale-95"
+              className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
             >
-              <Plus size={16} strokeWidth={3} /> Add New Engineer
+              <Plus size={16} strokeWidth={3} className="text-green-700" /> Add New Engineer
             </button>
           </div>
 
@@ -84,9 +84,9 @@ const AllCDEngineer = ({ onClose, designerData, refresh }) => {
               <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] mb-4">No Engineers found in this network</h3>
               <button
                 onClick={() => setAddEngineerModal(true)}
-                className="px-8 py-3 bg-white border border-gray-200 hover:border-green-500 rounded-xl text-[10px] font-black text-gray-400 hover:text-green-600 uppercase tracking-[0.2em] shadow-sm transition-all"
+                className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
               >
-                Add New Engineer
+                <Plus size={16} strokeWidth={3} className="text-green-700" /> Add New Engineer
               </button>
             </div>
           )}

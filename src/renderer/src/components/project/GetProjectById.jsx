@@ -467,9 +467,9 @@ const GetProjectById = ({ id, onClose }) => {
         </div>
 
         {/* Main Content Layout with Sidebar */}
-        <div className="flex flex-col md:flex-row gap-6 items-start">
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* Sidebar */}
-          <div className="w-full md:w-64 shrink-0 flex flex-col gap-1 border-r border-gray-100 pr-4 sticky top-[120px] self-start">
+          <div className="w-full lg:w-64 shrink-0 flex flex-row lg:flex-col gap-1 border-b lg:border-b-0 lg:border-r border-gray-100 pb-4 lg:pb-0 lg:pr-4 overflow-x-auto lg:overflow-x-visible sticky top-[120px] bg-[#fcfdfc] z-20 self-start no-scrollbar">
             {[
               { key: "overview", label: "Overview", icon: ClipboardList },
               { key: "wpr", label: "WPR", icon: FileSpreadsheet },
@@ -506,9 +506,9 @@ const GetProjectById = ({ id, onClose }) => {
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
-                  className={`flex items-center gap-3 w-full px-4 py-2.5 text-sm font-semibold tracking-normal rounded-none transition-all text-left cursor-pointer ${activeTab === key
-                    ? "bg-green-50 text-green-700 font-bold border-l-4 border-green-600 pl-3"
-                    : "text-black hover:bg-gray-50 hover:text-black border-l-4 border-transparent"
+                  className={`flex items-center gap-3 px-4 py-2.5 text-sm font-semibold tracking-normal rounded-none transition-all text-left cursor-pointer shrink-0 ${activeTab === key
+                    ? "bg-green-50 text-green-700 font-bold border-b-4 lg:border-b-0 lg:border-l-4 border-green-600 pl-3"
+                    : "text-black hover:bg-gray-50 hover:text-black border-b-4 lg:border-b-0 lg:border-l-4 border-transparent"
                     }`}
                 >
                   <TabIcon className={`w-4 h-4 shrink-0 ${activeTab === key ? "text-green-600" : "text-black"}`} />
@@ -526,7 +526,7 @@ const GetProjectById = ({ id, onClose }) => {
                 <div className="space-y-4 mb-8">
                   {/* Row 1: Estimations */}
                   {userRole !== "staff" && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div className="flex items-center justify-between bg-blue-50/40 p-4 rounded-none border border-black">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-none bg-blue-100/50 flex items-center justify-center text-blue-600 shrink-0">
@@ -566,7 +566,7 @@ const GetProjectById = ({ id, onClose }) => {
                   )}
 
                   {/* Row 2: Completion & Overrun */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex items-center justify-between bg-green-50/40 p-4 rounded-none border border-black">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-none bg-green-100/50 flex items-center justify-center text-green-600 shrink-0">
@@ -608,7 +608,7 @@ const GetProjectById = ({ id, onClose }) => {
 
                 {/* Section 2: Counts */}
                 <div className="mb-8">
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                     <button
                       onClick={() => setActiveTab("rfi")}
                       className="w-full flex items-center justify-between bg-green-50/20 p-3 rounded-none border border-black hover:bg-green-50/40 transition-colors text-left cursor-pointer"
@@ -679,7 +679,7 @@ const GetProjectById = ({ id, onClose }) => {
                 </div>                {/* Section 3: Project Details & Scopes */}
                 <div className="bg-[#f4faf0] p-6 rounded-none mt-8">
                   {/* Project Details Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-base">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-base">
                     {/* Left Column */}
                     <div className="space-y-4">
                       <div className="flex justify-between items-center pb-2 border-b border-gray-200">

@@ -87,7 +87,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
   return (
     <div className="flex flex-col h-full bg-white select-none overflow-x-hidden font-roboto text-sm">
       {/* 1. Header Section */}
-      <div className="p-8 flex flex-row items-center justify-between gap-6 border-b border-gray-200 shrink-0">
+      <div className="p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-200 shrink-0">
         <div className="flex items-center gap-5">
 
           <div>
@@ -137,7 +137,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
         {activeTab === 'DASHBOARD' ? (
           <>
             {/* 2. Stats Row */}
-            <div className="grid grid-cols-4 gap-4 mb-10 shrink-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10 shrink-0">
               <StatBox
                 label="Total Engineers"
                 value={designer.CDEngineers?.length || 0}
@@ -154,14 +154,14 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
 
             <div className="grid grid-cols-12 gap-10">
               {/* Left Column: Pending Actions & Profile Details */}
-              <div className="lg:col-span-8 space-y-12">
+              <div className="col-span-12 lg:col-span-8 space-y-12">
                 {/* Pending Actions Section */}
                 <div>
                   <h3 className="text-sm font-bold uppercase tracking-wider text-black mb-6 flex items-center gap-2">
                     <ClipboardList size={16} className="text-green-600" />
                     Pending Actions
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <ActionCard icon={FileText} label="RFI" count={0} color="green" />
                     <ActionCard icon={RefreshCcw} label="SUBMITTALS" count={0} color="green" />
                     <ActionCard icon={Briefcase} label="CHANGE ORDERS" count={0} color="green" />
@@ -175,7 +175,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
                     <Users size={16} className="text-green-600" />
                     Profile Details
                   </h3>
-                  <div className="grid grid-cols-2 gap-y-8 gap-x-12  p-8 rounded-2xl border border-gray-300">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12 p-8 rounded-2xl border border-gray-300">
                     <DetailItem label="Email Address" value={designer.email} />
                     <DetailItem label="Website Link" value={designer.websiteLink || '-'} />
                     <DetailItem label="Contact" value={designer.contactInfo || '-'} />
@@ -201,8 +201,8 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
               </div>
 
               {/* Right Column: Administrative Control */}
-              <div className="lg:col-span-4">
-                <div className="p-8 rounded-2xl border-2 border-gray-300 flex flex-col gap-5 bg-white shadow-sm sticky top-0">
+              <div className="col-span-12 lg:col-span-4">
+                <div className="p-8 rounded-2xl border-2 border-gray-300 flex flex-col gap-5 bg-white shadow-sm lg:sticky lg:top-8">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-black mb-2">
                     Administrative Control
                   </h3>
@@ -227,7 +227,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
                       <Users size={16} />
                     </div>
                     <span className="text-sm font-black uppercase tracking-widest">
-                      Manage Workforce
+                      View Connection designer POC 
                     </span>
                   </button>
 
