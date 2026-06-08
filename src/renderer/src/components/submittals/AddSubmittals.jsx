@@ -353,11 +353,12 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
           />
         </div>
         <label className="text-sm font-medium text-gray-700">
-          Select Milestone
+          Select Milestone *
         </label>
         <Controller
           name="mileStoneIds"
           control={control}
+          rules={{ required: "Milestone required" }}
           render={({ field }) => {
             // field.value is an array; display the first selected milestone
             const selectedId = Array.isArray(field.value) ? field.value[0] : field.value;
