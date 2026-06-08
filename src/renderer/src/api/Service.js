@@ -24,15 +24,14 @@ class Service {
     try {
       const response = await api.post(`employee`, employeeData, {
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         }
       })
       console.log(response)
       return response?.data
     } catch (error) {
-      //alert(error);
       console.log('Error while adding New User', error)
+      throw error
     }
   }
 
