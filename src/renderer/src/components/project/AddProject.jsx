@@ -41,6 +41,8 @@ const AddProject = () => {
   const teamDatas = useSelector((state) => state.userInfo?.teamData || []);
   console.log("teamDatas", teamDatas)
   const rfqData = useSelector((state) => state.RFQInfos?.RFQData || []);
+  const projectData = useSelector((state) => state.projectInfo?.projectData || []);
+  const usedRfqIds = projectData.map((p) => p.rfqId).filter(Boolean);
   const managerOption = useSelector((state) =>
     (state.userInfo?.staffData || [])
       .filter((user) =>
@@ -67,6 +69,7 @@ const AddProject = () => {
         customerDesign: false,
         detailingMain: false,
         detailingMisc: false,
+        isAwarded: false,
         files: [],
         clientProjectManagers: [],
       },
@@ -101,10 +104,12 @@ const AddProject = () => {
   }, [watchedFabricatorId]);
 
   const options = {
-    rfqs: rfqData.map((r) => ({
-      label: `${r.projectName} • ${r.fabricator?.fabName}`,
-      value: r.id,
-    })),
+    rfqs: rfqData
+      .filter((r) => !usedRfqIds.includes(r.id))
+      .map((r) => ({
+        label: `${r.projectName} • ${r.fabricator?.fabName}`,
+        value: r.id,
+      })),
     fabricators: fabricators.map((f) => ({
       label: f.fabName,
       value: f.id,
@@ -325,6 +330,8 @@ const AddProject = () => {
                     <Input label="Estimated Hours" type="number" className="bg-gray-50/50" {...register("estimatedHours")} />
                     <Input label="Start Date *" type="date" className="bg-gray-50/50" {...register("startDate", { required: "Required" })} />
                     <Input label="Deadline" type="date" className="bg-gray-50/50" {...register("endDate")} />
+                    <Input label="Approval Date" type="date" className="bg-gray-50/50" {...register("approvalDate")} />
+                    <Input label="Fabrication Date" type="date" className="bg-gray-50/50" {...register("fabricationDate")} />
                   </div>
                 </section>
 
@@ -536,6 +543,34 @@ const AddProject = () => {
                             />
                           );
                         })}
+                      </div>
+                    </div>
+
+                    {/* Project Award Status */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-green-600">
+                        <UserCheck size={14} />
+                        <h4 className="text-[10px] font-black uppercase tracking-widest">Project Award Status</h4>
+                      </div>
+                      <div className="space-y-2">
+                        <Controller
+                          name="isAwarded"
+                          control={control}
+                          render={({ field }) => (
+                            <div
+                              onClick={() => field.onChange(!field.value)}
+                              className={`
+                                flex items-center justify-between px-4 py-3 rounded-xl border transition-all cursor-pointer text-xs
+                                ${field.value ? "bg-green-50 border-green-200 text-green-800" : "bg-gray-50/50 border-gray-100 text-gray-600 hover:border-gray-200"}
+                              `}
+                            >
+                              <span className="font-bold">Is Awarded</span>
+                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${field.value ? "border-green-600 bg-green-600" : "border-gray-300 bg-white"}`}>
+                                {field.value && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                              </div>
+                            </div>
+                          )}
+                        />
                       </div>
                     </div>
                   </div>
