@@ -219,7 +219,7 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
         ...data,
         fabricator_id: fabricatorId,
         project_id: projectId,
-
+        isConnectionDesign: isCDMode,
         description,
         files,
       };

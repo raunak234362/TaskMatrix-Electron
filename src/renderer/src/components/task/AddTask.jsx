@@ -17,7 +17,7 @@ import Service from "../../api/Service";
 import Input from "../fields/input";
 import Button from "../fields/Button";
 import Select from "../fields/Select";
-import SectionTitle from "../ui/SectionTitle";
+import SectionTitle from "../ui/SectionTitle"; 
 import RichTextEditor from "../fields/RichTextEditor";
 
 import { setProjectData, updateProject } from "../../store/projectSlice";
@@ -50,6 +50,7 @@ const AddTask = () => {
   const [existingWbsHours, setExistingWbsHours] = useState(0);
   const [bundles, setBundles] = useState([]);
   const [projectSubmittals, setProjectSubmittals] = useState([]);
+  const [overdueEmployees, setOverdueEmployees] = useState({});
 
   const dispatch = useDispatch();
   const projects = useSelector(
@@ -364,6 +365,64 @@ const AddTask = () => {
   const availableHours = isOtherWbs ? Infinity : (totalWbsHours - existingWbsHours);
   const remainingHours = isOtherWbs ? Infinity : (availableHours - totalAssignedHours);
 
+  // Check for 24hr uncompleted tasks dynamically to disable button
+  useEffect(() => {
+    assignments.forEach(async (assignment) => {
+      const empId = assignment.employeeId;
+      if (empId && overdueEmployees[empId] === undefined) {
+        setOverdueEmployees((prev) => ({ ...prev, [empId]: false })); // Prevent multiple calls
+        try {
+          const res = await Service.GetAllTaskByUserID(empId);
+          const tasks = Array.isArray(res) ? res : (res?.data || []);
+          const now = new Date();
+          const completedStatuses = ["VALIDATE_COMPLETE", "COMPLETE_OTHER", "WRONG_ALLOCATION", "ABSENT", "USER_FAULT", "IN_REVIEW"];
+          
+          const hasOverdue = tasks.some(task => {
+            if (completedStatuses.includes(String(task.status).toUpperCase())) return false;
+            
+            const taskDate = task.created_at || task.createdAt;
+            if (!taskDate) return false;
+            
+            const createdAt = new Date(taskDate);
+            if (isNaN(createdAt.getTime())) return false;
+            
+            let current = new Date(createdAt);
+            let totalMs = 0;
+            
+            while (current < now) {
+              let nextDay = new Date(current);
+              nextDay.setDate(nextDay.getDate() + 1);
+              nextDay.setHours(0, 0, 0, 0);
+              let stepEnd = nextDay < now ? nextDay : now;
+              
+              if (current.getDay() !== 0 && current.getDay() !== 6) {
+                totalMs += (stepEnd - current);
+              }
+              current = stepEnd;
+            }
+            
+            const totalHours = totalMs / (1000 * 60 * 60);
+            return totalHours > 24;
+          });
+
+          const hasInReview = tasks.some(task => String(task.status).toUpperCase() === "IN_REVIEW");
+          let errorType = false;
+          if (hasInReview) {
+            errorType = "IN_REVIEW";
+          } else if (hasOverdue) {
+            errorType = "OVERDUE";
+          }
+
+          setOverdueEmployees((prev) => ({ ...prev, [empId]: errorType }));
+        } catch (err) {
+          console.error("Error checking employee tasks:", err);
+        }
+      }
+    });
+  }, [assignments, overdueEmployees]);
+  
+  const hasAnyOverdue = assignments.some(a => a.employeeId && overdueEmployees[a.employeeId]);
+
   const onSubmit = async (data) => {
     console.log("Form Data Submitted:", data);
 
@@ -371,6 +430,61 @@ const AddTask = () => {
 
     try {
       setIsSubmitting(true);
+
+      // 24hr uncompleted task check
+      for (const assignment of data.assignments) {
+        if (!assignment.employeeId) continue;
+        try {
+          const res = await Service.GetAllTaskByUserID(assignment.employeeId);
+          const tasks = Array.isArray(res) ? res : (res?.data || []);
+          const now = new Date();
+          const completedStatuses = ["VALIDATE_COMPLETE", "COMPLETE_OTHER", "WRONG_ALLOCATION", "ABSENT", "USER_FAULT", "IN_REVIEW"];
+          
+          const hasOverdue = tasks.some(task => {
+            if (completedStatuses.includes(String(task.status).toUpperCase())) return false;
+            
+            const taskDate = task.created_at || task.createdAt;
+            if (!taskDate) return false;
+            
+            const createdAt = new Date(taskDate);
+            if (isNaN(createdAt.getTime())) return false;
+            
+            let current = new Date(createdAt);
+            let totalMs = 0;
+            
+            while (current < now) {
+              let nextDay = new Date(current);
+              nextDay.setDate(nextDay.getDate() + 1);
+              nextDay.setHours(0, 0, 0, 0);
+              let stepEnd = nextDay < now ? nextDay : now;
+              
+              if (current.getDay() !== 0 && current.getDay() !== 6) {
+                totalMs += (stepEnd - current);
+              }
+              current = stepEnd;
+            }
+            
+            const totalHours = totalMs / (1000 * 60 * 60);
+            return totalHours > 24;
+          });
+
+          const hasInReview = tasks.some(task => String(task.status).toUpperCase() === "IN_REVIEW");
+
+          if (hasInReview) {
+            const empName = employees.find(e => e.id === assignment.employeeId)?.firstName || "This employee";
+            toast.error(`${empName} has tasks currently in review. Cannot assign new tasks.`);
+            setIsSubmitting(false);
+            return;
+          } else if (hasOverdue) {
+            const empName = employees.find(e => e.id === assignment.employeeId)?.firstName || "This employee";
+            toast.error(`${empName} has incomplete tasks older than 24 hours. Cannot assign new tasks.`);
+            setIsSubmitting(false);
+            return;
+          }
+        } catch (err) {
+          console.error("Error checking employee tasks:", err);
+        }
+      }
 
       // Create a task for each assignment
       const promises = data.assignments.map((assignment) => {
@@ -419,11 +533,24 @@ const AddTask = () => {
         return Service.AddTask(payload);
       });
 
-      await Promise.all(promises);
-      toast.success("Tasks assigned successfully!");
-      // Reset only the task description and assignments — keep project/milestone/WBS context
-      setValue("name", "");
-      setValue("assignments", [{ employeeId: "", hours: "", minutes: "" }]);
+      const results = await Promise.all(promises);
+
+      const hasError = results.some(res => 
+        !res || 
+        res.success === false || 
+        res.status === false || 
+        res.status === "error" ||
+        res.error
+      );
+
+      if (hasError) {
+        toast.error("Failed to assign one or more tasks. Please check your data.");
+      } else {
+        toast.success("Tasks assigned successfully!");
+        // Reset only the task description and assignments — keep project/milestone/WBS context
+        setValue("name", "");
+        setValue("assignments", [{ employeeId: "", hours: "", minutes: "" }]);
+      }
     } catch (error) {
       toast.error("Failed to assign tasks");
       console.error(error);
@@ -963,13 +1090,31 @@ const AddTask = () => {
                                   const isOverLimitValue =
                                     !isOtherWbs && (existingWbsHours + totalAssignedHours >
                                       totalWbsHours);
-                                  if (isDuplicate || isOverLimitValue) {
+                                  const employeeError = overdueEmployees[field.value];
+
+                                  if (isDuplicate || isOverLimitValue || employeeError) {
                                     return (
-                                      <div className="flex items-center gap-1 text-[10px]  text-amber-600 uppercase">
-                                        <AlertCircle className="w-3 h-3" />
-                                        Will be marked
-                                        {isDuplicate && " (Duplicate User)"}
-                                        {isOverLimitValue && " (Hours Exceeded)"}
+                                      <div className="flex flex-col gap-1 mt-1">
+                                        {(isDuplicate || isOverLimitValue) && (
+                                          <div className="flex items-center gap-1 text-[10px] text-amber-600 uppercase">
+                                            <AlertCircle className="w-3 h-3" />
+                                            Will be marked
+                                            {isDuplicate && " (Duplicate User)"}
+                                            {isOverLimitValue && " (Hours Exceeded)"}
+                                          </div>
+                                        )}
+                                        {employeeError === "OVERDUE" && (
+                                          <div className="flex items-center gap-1 text-[10px] text-red-600 uppercase">
+                                            <AlertCircle className="w-3 h-3" />
+                                            Has overdue tasks ({">"}24h)
+                                          </div>
+                                        )}
+                                        {employeeError === "IN_REVIEW" && (
+                                          <div className="flex items-center gap-1 text-[10px] text-red-600 uppercase">
+                                            <AlertCircle className="w-3 h-3" />
+                                            Has tasks currently in review
+                                          </div>
+                                        )}
                                       </div>
                                     );
                                   }
@@ -1061,7 +1206,7 @@ const AddTask = () => {
                 <div className="flex justify-center w-full pt-6 border-t border-slate-100">
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || hasAnyOverdue}
                     className="w-full py-3 bg-[#6bbd45]/50 hover:bg-primary/80 text-black  shadow-lg shadow-indigo-200 transition-all active:scale-95 disabled:opacity-50"
                   >
                     {isSubmitting ? "Assigning..." : "Confirm & Assign Tasks"}

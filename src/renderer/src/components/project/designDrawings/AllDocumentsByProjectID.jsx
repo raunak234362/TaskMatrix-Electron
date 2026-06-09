@@ -116,11 +116,6 @@ const AllDocumentsByProjectID = ({ projectId }) => {
         description: `Submittal: ${sub.subject}`,
         files: sub.currentVersion?.files || sub.files || [],
       }))),
-      rfqs: filterNestedItems((data.rfq || []).map((rfq) => ({
-        ...rfq,
-        description: `RFQ: ${rfq.subject}`,
-        files: rfq.files || [],
-      }))),
       coordinationDrawings: filterNestedItems((data.coordinationDrawings || []).map((cd) => ({
         ...cd,
         description: `Coordination Drawing: ${cd.title || cd.description || "No Description"}`,
@@ -143,16 +138,15 @@ const AllDocumentsByProjectID = ({ projectId }) => {
     );
   }
 
-  const { projectFiles, designDrawings, changeOrders, notes, rfis, submittals, rfqs, coordinationDrawings, progressReports } = processedData;
+  const { projectFiles, designDrawings, changeOrders, notes, rfis, submittals, coordinationDrawings, progressReports } = processedData;
 
   const categories = [
-    { id: "All", label: "All Files", count: (projectFiles.length + designDrawings.length + changeOrders.length + rfis.length + submittals.length + notes.length + rfqs.length + coordinationDrawings.length + progressReports.length) },
+    { id: "All", label: "All Files", count: (projectFiles.length + designDrawings.length + changeOrders.length + rfis.length + submittals.length + notes.length + coordinationDrawings.length + progressReports.length) },
     { id: "Project Documents", label: "Project Documents", count: projectFiles.length },
     { id: "Documents", label: "Design Drawings", count: designDrawings.length },
     { id: "Change Orders", label: "Change Orders", count: changeOrders.length },
     { id: "Requests for Information (RFI)", label: "RFI", count: rfis.length },
     { id: "Submittals", label: "Submittals", count: submittals.length },
-    { id: "RFQ", label: "RFQ", count: rfqs.length },
     { id: "Coordination Drawings", label: "Coordination Drawings", count: coordinationDrawings.length },
     { id: "Progress Reports", label: "Progress Reports", count: progressReports.length },
     { id: "Notes", label: "Notes", count: notes.length },
@@ -293,11 +287,6 @@ const AllDocumentsByProjectID = ({ projectId }) => {
         {submittals.length > 0 && (selectedCategory === "All" || selectedCategory === "Submittals") && (
           <Section title="Submittals">
             <RenderFiles files={submittals} table="submittals" parentId={finalId || ""} hideHeader={true} formatDate={formatDate} />
-          </Section>
-        )}
-        {rfqs.length > 0 && (selectedCategory === "All" || selectedCategory === "RFQ") && (
-          <Section title="Request for Quotation (RFQ)">
-            <RenderFiles files={rfqs} table="rFQ" parentId={finalId || ""} hideHeader={true} formatDate={formatDate} />
           </Section>
         )}
         {coordinationDrawings.length > 0 && (selectedCategory === "All" || selectedCategory === "Coordination Drawings") && (

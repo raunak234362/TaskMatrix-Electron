@@ -84,6 +84,7 @@ const Login = () => {
     } else {
       navigate("/dashboard");
     }
+    toast.success("Login Successful");
     console.log("Login Successful:", responseData);
   };
 

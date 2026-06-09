@@ -426,7 +426,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                         <p className="text-lg font-black text-slate-700 mt-1">{task.workingHourTask.length}</p>
                       </div>
                     </div>
-                    {["admin", "project_manager", "human_resource", "department_manager", "deputy_manager"].includes(userRole) && (
+                    {["admin", "project_manager", "human_resource", "department_manager", "deputy_manager", "dept_manager"].includes(userRole) && (
                       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                         <table className="w-full text-left text-xs">
                           <thead className="bg-slate-100 text-slate-500 font-bold uppercase">

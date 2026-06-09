@@ -213,25 +213,28 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                   {fields.map((field, index) => (
                     <tr key={field.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="p-3 font-medium text-slate-400">{index + 1}</td>
-                      <td className="p-2">
-                        <input
+                      <td className="p-2 min-w-[250px]">
+                        <textarea
                           {...register(`rows.${index}.description`)}
-                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
+                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none min-h-[32px] text-xs resize-y"
                           placeholder="Doc desc..."
+                          rows={1}
                         />
                       </td>
                       <td className="p-2">
-                        <input
+                        <textarea
                           {...register(`rows.${index}.referenceDoc`)}
-                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
+                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none min-h-[32px] text-xs resize-y"
                           placeholder="Ref..."
+                          rows={1}
                         />
                       </td>
                       <td className="p-2">
-                        <input
+                        <textarea
                           {...register(`rows.${index}.elements`)}
-                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
+                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none min-h-[32px] text-xs resize-y"
                           placeholder="Elements..."
+                          rows={1}
                         />
                       </td>
                       <td className="p-2">
@@ -256,10 +259,11 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                         />
                       </td>
                       <td className="p-2">
-                        <input
+                        <textarea
                           {...register(`rows.${index}.remarks`)}
-                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
+                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none min-h-[32px] text-xs resize-y"
                           placeholder="Remarks..."
+                          rows={1}
                         />
                       </td>
                       <td className="p-2 text-center">
@@ -307,14 +311,14 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
               type="button"
               variant="outline"
               onClick={onClose}
-              className="px-6 border-gray-200 text-gray-600 hover:bg-gray-50 uppercase tracking-widest text-[10px] font-black"
+              className="px-6 border-gray-200 text-gray-600 hover:bg-gray-50 uppercase tracking-widest text-sm font-semibold"
               disabled={isSubmitting}
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 px-8 uppercase tracking-widest text-[10px] font-black shadow-lg shadow-green-200 disabled:opacity-50"
+              className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 px-8 uppercase tracking-widest text-sm font-semibold shadow-lg shadow-green-200 disabled:opacity-50"
               disabled={isSubmitting}
             >
               {isSubmitting ? (

@@ -1093,12 +1093,22 @@ class Service {
         }
       })
       if (response && response.data && response.data.data) {
-        const [submittals, assists] = await Promise.all([
-          this.GetSubmittalByProjectId(id),
-          this.GetProjectManagerAssists(id)
-        ])
-        response.data.data.submittals = submittals || []
-        response.data.data.assists = assists || []
+        const userRole = sessionStorage.getItem('userRole')?.toLowerCase()
+        const promises = [this.GetSubmittalByProjectId(id)]
+        
+        if (userRole !== 'staff') {
+          promises.push(this.GetProjectManagerAssists(id))
+        }
+
+        const results = await Promise.all(promises)
+        response.data.data.submittals = results[0] || []
+        
+        if (userRole !== 'staff' && results[1] && results[1].length > 0) {
+          response.data.data.assists = results[1];
+        } else if (userRole === 'staff') {
+          // If staff, and they shouldn't see assists, we can clear it or leave it. 
+          // Leaving it as it comes from backend unless requested to clear.
+        }
       }
       return response.data
     } catch (error) {
@@ -4212,6 +4222,15 @@ class Service {
   static GetBFAFileViewUrl(bfaId, versionId, fileId) {
     const baseURL = api.defaults.baseURL || ''
     return `${baseURL}bfa/viewFile/${bfaId}/${versionId}/${fileId}`
+  }
+  static async RemoveProjectAssist(projectId, userId) {
+    try {
+      const response = await api.delete(`project/projects/${projectId}/assists/${userId}`)
+      return response.data
+    } catch (error) {
+      console.error('Error removing project assist', error)
+      throw error
+    }
   }
 
 }

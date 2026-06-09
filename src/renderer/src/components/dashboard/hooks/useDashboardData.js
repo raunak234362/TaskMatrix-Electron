@@ -196,7 +196,7 @@ export const useDashboardData = () => {
           )
         }
 
-        const fetchUnapprovedCO = ['admin', 'deputy_manager', 'operation_executive', 'project_manager_officer'].includes(userRole);
+        const fetchUnapprovedCO = ['admin', 'deputy_manager', 'operation_executive', 'project_manager_officer', 'project_manager', 'dept_manager'].includes(userRole);
         if (fetchUnapprovedCO) {
           requests.push(Service.GetUnapprovedChangeOrders().catch(e => { console.error('Failed to fetch unapproved COs', e); return [] }));
         }

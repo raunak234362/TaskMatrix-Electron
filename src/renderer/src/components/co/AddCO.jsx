@@ -19,8 +19,15 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
     (state) => state.fabricatorInfo.fabricatorData,
   );
 
+  const userRoleStr = sessionStorage.getItem('userRole')?.toLowerCase() || "";
+  const isAdminRole = ["admin", "deputy_manager", "operation_executive"].includes(userRoleStr);
+
   const { register, handleSubmit, control, reset, setValue } =
-    useForm();
+    useForm({
+      defaultValues: {
+        isAproovedByAdmin: isAdminRole
+      }
+    });
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
 
@@ -47,10 +54,10 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
     const prefilledCO = `CO#${String(nextNum).padStart(3, "0")} `;
     setValue("changeOrderNumber", prefilledCO);
 
-    if (["admin", "deputy_manager", "operation_executive"].includes(userDetail?.role?.toLowerCase())) {
+    if (isAdminRole) {
       setValue("isAproovedByAdmin", true);
     }
-  }, [project, changeOrderData, setValue, userDetail]);
+  }, [project, changeOrderData, setValue, userDetail, isAdminRole]);
 
   const pocOptions =
     selectedFabricator?.pointOfContact?.map((p) => ({
@@ -89,7 +96,9 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
       formData.append("link", data.link || "");
       formData.append("description", description);
       formData.append("sentOn", new Date().toISOString());
-      formData.append("isAproovedByAdmin", data.isAproovedByAdmin || false);
+      
+      const isApproved = data.isAproovedByAdmin !== undefined ? data.isAproovedByAdmin : isAdminRole;
+      formData.append("isAproovedByAdmin", isApproved);
 
       files.forEach((file) => formData.append("files", file));
 
@@ -153,7 +162,7 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
             label="Subject *"
             {...register("remarks", { required: true })}
           />
-          {["admin", "deputy_manager", "operation_executive"].includes(userDetail?.role?.toLowerCase()) && (
+          {isAdminRole && (
             <div className="flex items-center gap-2 pt-6">
               <input
                 type="checkbox"

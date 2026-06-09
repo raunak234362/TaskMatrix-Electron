@@ -151,6 +151,21 @@ const GetProjectById = ({ id, onClose }) => {
     }
   };
 
+  const handleRemoveAssist = async (assistUserId) => {
+    try {
+      if (window.confirm("Are you sure you want to remove this assist?")) {
+        await Service.RemoveProjectAssist(id, assistUserId);
+        toast.success("Assist removed successfully");
+        fetchProject();
+      }
+    } catch (error) {
+      console.error("Error removing assist:", error);
+      import("react-toastify").then(({ toast }) => {
+        toast.error(error?.response?.data?.message || "Failed to remove assist");
+      });
+    }
+  };
+
   const projectStats = useMemo(() => {
     if (!project)
       return {
@@ -490,7 +505,7 @@ const GetProjectById = ({ id, onClose }) => {
                   if (userRole === "human_resource") {
                     return ["analytics", "teamAnalytics"].includes(tab.key);
                   }
-                  if (userRole === "staff" && !isAssist && ["wbs", "changeOrder", "milestones", "analytics", "teamAnalytics", "CDrfi", "CDsubmittals"].includes(tab.key)) {
+                  if (userRole === "staff" && ["wbs", "changeOrder", "milestones", "analytics", "teamAnalytics", "CDrfi", "CDsubmittals"].includes(tab.key)) {
                     return false;
                   }
                   if (tab.key === "projectNotes") {
@@ -698,14 +713,26 @@ const GetProjectById = ({ id, onClose }) => {
                             : "—"}
                         </span>
                       </div>
-                      {project.assists && project.assists.length > 0 && (
+                      {project.assists && project.assists.length >= 0 && (
                         <div className="flex justify-between items-center pb-2 border-b border-gray-200">
                           <span className="font-bold text-black uppercase tracking-wider">Assists:</span>
-                          <span className="font-bold text-black uppercase">
-                            {project.assists.map(assist =>
-                              `${assist.user?.firstName || ''} ${assist.user?.lastName || ''}`.trim()
-                            ).join(", ")}
-                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            {project.assists.map(assist => {
+                              const fName = assist.user?.firstName || assist.firstName || '';
+                              const lName = assist.user?.lastName || assist.lastName || '';
+                              const assistId = assist.userId || assist.user?.id || assist.user;
+                              return (
+                                <span key={assistId} className="flex items-center gap-1 bg-green-100/50 px-2 py-0.5 rounded text-xs font-bold text-black uppercase border border-green-200">
+                                  {`${fName} ${lName}`.trim()}
+                                  {(userRole === "admin" || userRole === "system_admin" || userRole === "project_manager") && (
+                                    <button onClick={() => handleRemoveAssist(assistId)} className="text-red-500 hover:text-red-700 p-0.5 rounded-full hover:bg-red-50 transition-colors ml-1" title="Remove Assist">
+                                      <X size={12} strokeWidth={3} />
+                                    </button>
+                                  )}
+                                </span>
+                              );
+                            })}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1000,12 +1027,25 @@ const GetProjectById = ({ id, onClose }) => {
                   : "Not assigned."}
               </p>
               {project.assists && project.assists.length > 0 && (
-                <p>
-                  Assists:{" "}
-                  {project.assists.map(assist =>
-                    `${assist.user?.firstName || ''} ${assist.user?.middleName || ''} ${assist.user?.lastName || ''}`.trim()
-                  ).join(", ")}
-                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-medium">Assists:</span>
+                  {project.assists.map(assist => {
+                    const fName = assist.user?.firstName || assist.firstName || '';
+                    const mName = assist.user?.middleName || assist.middleName || '';
+                    const lName = assist.user?.lastName || assist.lastName || '';
+                    const assistId = assist.userId || assist.user?.id || assist.user;
+                    return (
+                      <span key={assistId} className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md text-xs font-bold text-gray-800 uppercase border border-gray-200">
+                        {`${fName} ${mName} ${lName}`.trim()}
+                        {(userRole === "admin" || userRole === "system_admin" || userRole === "project_manager") && (
+                          <button onClick={() => handleRemoveAssist(assistId)} className="text-red-500 hover:text-red-700 p-0.5 rounded-full hover:bg-red-100 transition-colors ml-1" title="Remove Assist">
+                            <X size={12} strokeWidth={3} />
+                          </button>
+                        )}
+                      </span>
+                    );
+                  })}
+                </div>
               )}
             </div>
           )}

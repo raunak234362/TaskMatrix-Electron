@@ -6,6 +6,8 @@ import { Provider } from 'react-redux'
 import store from './store/store'
 import routes from './routes/routes'
 import { checkBackendHealth } from './api/backendConfig'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const router = createHashRouter(routes)
 
@@ -15,6 +17,7 @@ checkBackendHealth().finally(() => {
     <>
       <Provider store={store}>
         <RouterProvider router={router} />
+        <ToastContainer position="top-right" autoClose={5000} newestOnTop />
       </Provider>
     </>
   )

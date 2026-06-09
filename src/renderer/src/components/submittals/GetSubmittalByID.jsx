@@ -341,7 +341,11 @@ const GetSubmittalByID = ({ id, onClose }) => {
                       }
                     };
 
-                    return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tight border ${getStatusStyles(key)}">${label}</span>`;
+                    return (
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-sm font-bold uppercase tracking-tight border ${getStatusStyles(key)}`}>
+                        {label}
+                      </span>
+                    );
                   })()}
                 />
                 <Info

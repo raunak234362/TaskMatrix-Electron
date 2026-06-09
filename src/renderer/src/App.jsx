@@ -4,8 +4,7 @@ import Layout from './layout/DashboardLayout'
 import Service from './api/Service'
 import { setUserData, showStaff } from './store/userSlice'
 import { useEffect } from 'react'
-import { ToastContainer, toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import { toast } from 'react-toastify'
 import socket, { connectSocket } from './socket'
 import { loadFabricator } from './store/fabricatorSlice'
 import { setRFQData } from './store/rfqSlice'
@@ -149,7 +148,6 @@ const AppContent = () => {
 
   return (
     <>
-      <ToastContainer position="top-right" autoClose={5000} newestOnTop />
       <NotificationReceiver />
 
       {/* Main Layout */}
