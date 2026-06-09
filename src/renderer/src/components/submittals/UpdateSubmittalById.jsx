@@ -164,7 +164,9 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
             setError(null);
 
             const formData = new FormData();
+            formData.append("subject", subject);
             formData.append("description", description);
+            formData.append("isConnectionDesign", String(isCDMode));
             if (files && files.length > 0) {
                 files.forEach((f) => formData.append("files", f));
             }
@@ -255,6 +257,20 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                         >
                             Connection Designer
                         </button>
+                    </div>
+
+                    {/* Subject */}
+                    <div className="space-y-2">
+                        <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
+                            Subject *
+                        </label>
+                        <input
+                            type="text"
+                            value={subject}
+                            onChange={(e) => setSubject(e.target.value)}
+                            placeholder="Enter subject"
+                            className="w-full px-4 py-2.5 text-sm font-medium text-black bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:border-[#6bbd45] focus:ring-2 focus:ring-[#6bbd45]/20 hover:border-gray-400 transition-all placeholder:text-gray-400"
+                        />
                     </div>
 
                     {/* Description */}
