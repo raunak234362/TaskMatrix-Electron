@@ -108,71 +108,71 @@ const GetFabricatorByID = ({ id, onClose }) => {
         exit={{ scale: 0.95, opacity: 0, y: 30 }}
         onClick={(e) => e.stopPropagation()}
         className="
-          bg-zinc-100
-          w-full max-w-5xl
+          bg-white
+          w-full max-w-9xl
           rounded-2xl shadow-2xl
           overflow-hidden
-          max-h-[95vh]
+          h-[90vh]
           flex flex-col
           relative
-          border border-gray-100
+          border border-gray-200
         "
       >
-        <div className="overflow-y-auto p-6 sm:p-10 flex flex-col gap-8 custom-scrollbar">
-          {/* Header */}
-          <div className="flex items-center justify-between flex-wrap gap-4 border-b border-green-100 pb-4">
-            <div className="flex items-center gap-3">
-              <h3 className="text-2xl font-bold text-green-800">{fabricator.fabName}</h3>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${fabricator.isDeleted
-                  ? "bg-red-100 text-red-700"
-                  : "bg-green-100 text-green-800"
-                  }`}
-              >
-                {fabricator.isDeleted ? "Inactive" : "Active"}
-              </span>
-            </div>
-            <button
-              onClick={onClose}
-              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+        {/* Header Section */}
+        <div className="p-8 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-200 shrink-0">
+          <div className="flex items-center gap-3">
+            <h3 className="text-3xl font-black text-black tracking-tight uppercase">{fabricator.fabName}</h3>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${fabricator.isDeleted
+                ? "bg-red-50 text-red-700 border-red-200"
+                : "bg-green-50 text-green-700 border-green-200"
+                }`}
             >
-              Close
-            </button>
+              {fabricator.isDeleted ? "Inactive" : "Active"}
+            </span>
           </div>
+          <button
+            onClick={onClose}
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
+          >
+            Close
+          </button>
+        </div>
 
-          {/* Tabs */}
-          <div className="flex flex-wrap gap-x-6 gap-y-2 border-b border-green-200">
-            <button
-              onClick={() => setActiveTab("dashboard")}
-              className={`pb-3 px-2 text-sm font-semibold transition-colors ${activeTab === "dashboard"
-                ? "text-green-700 border-b-2 border-green-600"
-                : "text-gray-500 hover:text-green-600"
-                }`}
-            >
-              Dashboard
-            </button>
-            <button
-              onClick={() => setActiveTab("details")}
-              className={`pb-3 px-2 text-sm font-semibold transition-colors ${activeTab === "details"
-                ? "text-green-700 border-b-2 border-green-600"
-                : "text-gray-500 hover:text-green-600"
-                }`}
-            >
-              Basic Details
-            </button>
-            <button
-              onClick={() => setActiveTab("account")}
-              className={`pb-3 px-2 text-sm font-semibold transition-colors ${activeTab === "account"
-                ? "text-green-700 border-b-2 border-green-600"
-                : "text-gray-500 hover:text-green-600"
-                }`}
-            >
-              Account Details
-            </button>
-          </div>
+        {/* Tabs Section */}
+        <div className="px-8 pt-4 flex gap-6 border-b border-gray-200 shrink-0">
+          <button
+            onClick={() => setActiveTab("dashboard")}
+            className={`pb-3 text-[10px] font-black uppercase tracking-widest transition-colors border-b-2 ${activeTab === "dashboard"
+              ? "text-green-700 border-green-600 font-bold"
+              : "text-gray-500 border-transparent hover:text-green-600"
+              }`}
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => setActiveTab("details")}
+            className={`pb-3 text-[10px] font-black uppercase tracking-widest transition-colors border-b-2 ${activeTab === "details"
+              ? "text-green-700 border-green-600 font-bold"
+              : "text-gray-500 border-transparent hover:text-green-600"
+              }`}
+          >
+            Basic Details
+          </button>
+          <button
+            onClick={() => setActiveTab("account")}
+            className={`pb-3 text-[10px] font-black uppercase tracking-widest transition-colors border-b-2 ${activeTab === "account"
+              ? "text-green-700 border-green-600 font-bold"
+              : "text-gray-500 border-transparent hover:text-green-600"
+              }`}
+          >
+            Account Details
+          </button>
+        </div>
 
-          {/* Content Wrapper (IMPORTANT FIX) */}
-          <div className="pt-2">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto p-8 pt-6 no-scrollbar flex flex-col gap-6 bg-white">
+          <div className="flex-1">
             {activeTab === "dashboard" ? (
               <FabricatorDashboard fabricator={fabricator} />
             ) : activeTab === "account" ? (
@@ -190,8 +190,8 @@ const GetFabricatorByID = ({ id, onClose }) => {
                 ) : account ? (
                   <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     {/* Account Header Card */}
-                    <div className="bg-white p-6 rounded-2xl border border-green-100 shadow-sm flex items-center gap-4">
-                      <div className="p-4 bg-green-50 rounded-2xl text-green-700">
+                    <div className="bg-white p-6 rounded-2xl border border-gray-300 shadow-sm flex items-center gap-4">
+                      <div className="p-4 bg-green-50 rounded-2xl text-green-700 border border-green-300">
                         <Building2 className="w-8 h-8" />
                       </div>
                       <div>
@@ -235,7 +235,7 @@ const GetFabricatorByID = ({ id, onClose }) => {
                     </div>
 
                     {account.bankAddress && (
-                      <div className="p-6 bg-white border border-green-100 rounded-2xl shadow-sm">
+                      <div className="p-6 bg-white border border-gray-300 rounded-2xl shadow-sm">
                         <p className="text-[10px] font-black text-green-700 uppercase tracking-[0.2em] mb-3">Bank Address</p>
                         <p className="text-sm font-semibold text-gray-800 leading-relaxed italic">
                           {account.bankAddress}
@@ -252,73 +252,70 @@ const GetFabricatorByID = ({ id, onClose }) => {
               </div>
             ) : (
               <div className="flex flex-col gap-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-6">
-                  {/* Identification & Assignments */}
-                  <div className="space-y-5 bg-white p-6 rounded-2xl border border-green-50 shadow-sm">
-                    <p className="text-md font-semibold text-green-700 uppercase tracking-[0.2em] mb-4">Partner Details</p>
-                    <InfoRow label="Partner Stage" value={fabricator.fabStage || "—"} />
-                    <InfoRow 
-                      label="WBT Contact" 
-                      value={
-                        Array.isArray(fabricator.wbtFabricatorPointOfContact) && fabricator.wbtFabricatorPointOfContact.length > 0
-                          ? fabricator.wbtFabricatorPointOfContact
-                              .map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : String(c).replace(/^Contact:/i, ""))
-                              .filter(Boolean)
-                              .join(", ")
-                          : "—"
-                      } 
-                    />
-                    <InfoRow 
-                      label="Point of Contact" 
-                      value={
-                        Array.isArray(fabricator.pointOfContact) && fabricator.pointOfContact.length > 0
-                          ? fabricator.pointOfContact
-                              .map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : String(c).replace(/^Contact:/i, ""))
-                              .filter(Boolean)
-                              .join(", ")
-                          : "—"
-                      } 
-                    />
-                    {fabricator.website && (
-                      <InfoRow
-                        label="Website"
-                        value={
-                          <a href={fabricator.website} target="_blank" rel="noreferrer" className="text-cyan-700 underline hover:text-cyan-900">
-                            {truncateText(fabricator.website, 25)}
-                          </a>
-                        }
-                      />
-                    )}
-                    {fabricator.drive && (
-                      <InfoRow
-                        label="Drive Link"
-                        value={
-                          <a href={fabricator.drive} target="_blank" rel="noreferrer" className="text-cyan-700 underline hover:text-cyan-900 flex items-center gap-1">
-                            <Link2 className="w-3.5 h-3.5" />
-                            {truncateText(fabricator.drive, 25)}
-                          </a>
-                        }
-                      />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12 p-8 rounded-2xl border border-gray-300 bg-white shadow-sm py-6">
+                  <DetailItem label="Partner Stage" value={fabricator.fabStage || "—"} />
+                  <DetailItem
+                    label="WBT Contact"
+                    value={
+                      Array.isArray(fabricator.wbtFabricatorPointOfContact) && fabricator.wbtFabricatorPointOfContact.length > 0
+                        ? fabricator.wbtFabricatorPointOfContact
+                            .map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : String(c).replace(/^Contact:/i, ""))
+                            .filter(Boolean)
+                            .join(", ")
+                        : "—"
+                    }
+                  />
+                  <DetailItem
+                    label="Point of Contact"
+                    value={
+                      Array.isArray(fabricator.pointOfContact) && fabricator.pointOfContact.length > 0
+                        ? fabricator.pointOfContact
+                            .map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : String(c).replace(/^Contact:/i, ""))
+                            .filter(Boolean)
+                            .join(", ")
+                        : "—"
+                    }
+                  />
+                  <div className="space-y-1.5">
+                    <p className="text-sm font-bold text-black uppercase tracking-wider">Website</p>
+                    {fabricator.website ? (
+                      <a
+                        href={fabricator.website.startsWith("http") ? fabricator.website : `https://${fabricator.website}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-green-700 hover:text-green-900 underline font-semibold break-all"
+                      >
+                        {fabricator.website}
+                      </a>
+                    ) : (
+                      <p className="text-sm text-black">-</p>
                     )}
                   </div>
-
-                  {/* Financial Terms & Metadata */}
-                  <div className="space-y-5 bg-white p-6 rounded-2xl border border-green-50 shadow-sm">
-                    <p className="text-md font-semibold text-green-700 uppercase tracking-[0.2em] mb-4">Terms & Activity</p>
-                    <InfoRow label="Approval %" value={<span className="font-bold text-green-600">{fabricator.approvalPercentage || 0}%</span>} />
-                    <InfoRow label="Fabrication %" value={<span className="font-bold text-green-600">{fabricator.fabricatPercentage || 0}%</span>} />
-                    <InfoRow label="Settlement Cycle" value={<span className="font-bold">{fabricator.paymenTDueDate || 0} Days</span>} />
-                    <div className="pt-4 mt-4 border-t border-slate-50 space-y-4">
-                      <InfoRow label="Created" value={formatDate(fabricator.createdAt)} />
-                      <InfoRow label="Updated" value={formatDate(fabricator.updatedAt)} />
-                      <InfoRow label="Total Files" value={Array.isArray(fabricator.files) ? fabricator.files.length : 0} />
+                  {fabricator.drive && (
+                    <div className="space-y-1.5">
+                      <p className="text-sm font-bold text-black uppercase tracking-wider">Drive Link</p>
+                      <a
+                        href={fabricator.drive.startsWith("http") ? fabricator.drive : `https://${fabricator.drive}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-green-700 hover:text-green-900 underline font-semibold break-all flex items-center gap-1"
+                      >
+                        <Link2 className="w-3.5 h-3.5" />
+                        {fabricator.drive}
+                      </a>
                     </div>
-                  </div>
+                  )}
+                  <DetailItem label="Approval Percentage" value={fabricator.approvalPercentage ? `${fabricator.approvalPercentage}%` : "0%"} />
+                  <DetailItem label="Fabrication Percentage" value={fabricator.fabricatPercentage ? `${fabricator.fabricatPercentage}%` : "0%"} />
+                  <DetailItem label="Settlement Cycle" value={fabricator.paymenTDueDate ? `${fabricator.paymenTDueDate} Days` : "0 Days"} />
+                  <DetailItem label="Created" value={formatDate(fabricator.createdAt)} />
+                  <DetailItem label="Updated" value={formatDate(fabricator.updatedAt)} />
+                  <DetailItem label="Total Files" value={Array.isArray(fabricator.files) ? String(fabricator.files.length) : "0"} />
                 </div>
 
                 {/* Files Section */}
                 {Array.isArray(fabricator.files) && fabricator.files.length > 0 && (
-                  <div className="pt-8 border-t border-green-100">
+                  <div className="pt-8 border-t border-gray-200">
                     <div className="flex items-center gap-2 mb-6 text-green-700">
                       <FileText className="w-4 h-4" />
                       <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">Resource Documents</h4>
@@ -331,15 +328,30 @@ const GetFabricatorByID = ({ id, onClose }) => {
           </div>
 
           {/* Buttons */}
-          <div className="mt-2 pt-6 flex flex-wrap gap-4 border-t border-green-100">
-            <Button onClick={() => setBranch(fabricator)}>View Branches</Button>
-            <Button onClick={() => setPoc(fabricator)}>View POC</Button>
-            <Button onClick={() => setEditModel(fabricator)}>
+          <div className="pt-6 flex flex-wrap gap-4 border-t border-gray-200 shrink-0">
+            <button
+              onClick={() => setBranch(fabricator)}
+              className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
+            >
+              View Branches
+            </button>
+            <button
+              onClick={() => setPoc(fabricator)}
+              className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
+            >
+              View POC
+            </button>
+            <button
+              onClick={() => setEditModel(fabricator)}
+              className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
+            >
               Edit Fabricator
-            </Button>
-            <Button className="bg-red-100 text-red-700 hover:bg-red-200">
+            </button>
+            <button
+              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
+            >
               Archive
-            </Button>
+            </button>
           </div>
 
           {editModel && (
@@ -368,18 +380,18 @@ const GetFabricatorByID = ({ id, onClose }) => {
   );
 };
 
-const InfoRow = ({ label, value }) => (
-  <div className="grid grid-cols-3 gap-4 py-1.5 border-b border-gray-50 last:border-0 items-start">
-    <span className="text-gray-500 text-[11px] font-bold uppercase tracking-wider whitespace-nowrap pt-0.5">{label}:</span>
-    <span className="text-gray-800 text-sm font-semibold col-span-2 text-left break-words leading-relaxed">{value}</span>
+const DetailItem = ({ label, value }) => (
+  <div className="space-y-1.5">
+    <p className="text-sm font-bold text-black uppercase tracking-wider">{label}</p>
+    <p className="text-sm text-black break-all">{value || '-'}</p>
   </div>
 );
 
 const AccountInfoCard = ({ icon, label, value }) => (
-  <div className="bg-white p-5 rounded-2xl border border-green-50 shadow-sm hover:shadow-md transition-all duration-200 border-l-4 border-l-green-400">
-    <div className="flex items-center gap-2 text-gray-500 mb-2">
+  <div className="bg-white p-5 rounded-2xl border border-gray-300 shadow-sm hover:shadow-md transition-all duration-200">
+    <div className="flex items-center gap-2 text-black/50 mb-2">
       {icon}
-      <span className="text-[10px] uppercase font-bold tracking-widest">{label}</span>
+      <span className="text-[10px] uppercase font-black tracking-widest">{label}</span>
     </div>
     <p className="font-bold text-gray-900 break-all">{value}</p>
   </div>
