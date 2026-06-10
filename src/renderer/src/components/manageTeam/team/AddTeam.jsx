@@ -31,7 +31,8 @@ const AddTeam = ({ onClose }) => {
       const rolesToFetch = [
         "PROJECT_MANAGER",
         "DEPT_MANAGER",
-        "DEPUTY_MANAGER"
+        "DEPUTY_MANAGER",
+        "ADMIN"
       ];
 
       const promises = rolesToFetch.map((role) =>
@@ -70,7 +71,8 @@ const AddTeam = ({ onClose }) => {
         return [
           "PROJECT_MANAGER",
           "DEPT_MANAGER",
-          "DEPUTY_MANAGER"
+          "DEPUTY_MANAGER",
+          "ADMIN",
         ].includes(role);
       })
       .map((user) => ({

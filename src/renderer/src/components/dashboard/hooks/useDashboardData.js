@@ -427,7 +427,7 @@ export const useDashboardData = () => {
             totalProjects: pmDashboard?.totalProjects ?? projects.length,
             activeProjects:
               pmDashboard?.totalActiveProjects ??
-              activeProjects.length,
+              projects.filter((p) => p.status?.toUpperCase() === 'ACTIVE' || p.status?.toUpperCase() === 'IN_PROGRESS').length,
             completedProjects:
               pmDashboard?.totalCompleteProject ??
               projects.filter((p) => p.status?.toUpperCase() === 'COMPLETED').length,
@@ -468,8 +468,8 @@ export const useDashboardData = () => {
             dashboardStats: {
               pendingRFI: pmDashboard?.pendingRFI ?? rfis.length,
               pendingSubmittals: pmDashboard?.pendingSubmittals ?? pendingSubmittals.length,
-              pendingChangeOrders: pmDashboard?.pendingChangeOrders ?? pendingChangeOrders.length,
-              pendingRFQ: pmDashboard?.pendingRFQ ?? rfqs.length
+              pendingChangeOrders: pmDashboard?.pendingChangeOrders ?? coList.length,
+              pendingRFQ: pmDashboard?.pendingRFQ ?? rfqList.length
             }
           })
         }

@@ -95,8 +95,10 @@ export const downloadFileSecurely = async (type, id, fileId, originalName, versi
     a.download = originalName || 'download'
     document.body.appendChild(a)
     a.click()
-    window.URL.revokeObjectURL(url)
-    document.body.removeChild(a)
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    }, 1000)
     toast.success('Download started')
   } catch (error) {
     console.error('Error downloading file:', error)

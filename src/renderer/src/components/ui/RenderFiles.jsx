@@ -143,8 +143,10 @@ const RenderFiles = ({
       a.download = file.originalName || "download";
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 1000);
     } catch (error) {
       console.error("Error downloading file:", error);
       toast.error("Error downloading file");
