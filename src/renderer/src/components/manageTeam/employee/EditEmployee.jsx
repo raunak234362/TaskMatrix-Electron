@@ -298,12 +298,12 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
               {deleting ? (
                 <>
                   <Loader2 className="w-3 h-3 animate-spin" />
-                  Deleting...
+                  Archiving...
                 </>
               ) : (
                 <>
                   <Trash2 className="w-4 h-4" />
-                  Delete Employee
+                  Archive Employee
                 </>
               )}
             </button>

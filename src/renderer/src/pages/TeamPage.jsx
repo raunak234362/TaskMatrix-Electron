@@ -65,7 +65,7 @@ const TeamPage = () => {
             Team Dashboard
           </button>
 
-          {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
+          {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE" || userRole === "OPERATION_EXECUTIVE" || userRole === "DEPUTY_MANAGER") && (
             <button
               onClick={() => setActiveTab("manageEmployee")}
               className={`px-6 py-2.5 rounded-none text-[13px] font-bold uppercase transition-all shadow-sm border-2 cursor-pointer ${activeTab === "manageEmployee"
@@ -89,7 +89,7 @@ const TeamPage = () => {
             </button>
           )}
 
-          {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE") && (
+          {(userRole === "ADMIN" || userRole === "HUMAN_RESOURCE" || userRole === "OPERATION_EXECUTIVE") && (
             <button
               onClick={() => setActiveTab("manageTeam")}
               className={`px-6 py-2.5 rounded-none text-[13px] font-bold uppercase transition-all shadow-sm border-2 cursor-pointer ${activeTab === "manageTeam"
