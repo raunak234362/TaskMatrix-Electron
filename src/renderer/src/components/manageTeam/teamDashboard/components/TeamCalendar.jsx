@@ -420,7 +420,7 @@ const TeamCalendar = ({
       {/* Selected Date Tasks Modal */}
       {selectedDateModal && (
         <div className="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-[90%] max-w-2xl max-h-[85vh] rounded-4xl shadow-2xl overflow-hidden flex flex-col border border-black/10 animate-in zoom-in-95 duration-200">
+          <div className="bg-white w-[90%] max-h-[85vh] rounded-4xl shadow-2xl overflow-hidden flex flex-col border border-black/10 animate-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-black/5 flex justify-between items-center bg-gray-50/50">
               <div>
                 <h3 className="text-xl font-black text-black uppercase tracking-tight">
@@ -446,163 +446,142 @@ const TeamCalendar = ({
               </button>
             </div>
             <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-gray-50/20">
-              <div className="space-y-4">
-                {selectedDateModal.tasks.map((task, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => setSelectedTaskId(task.id || task._id)}
-                    className="bg-white p-6 rounded-2xl border border-black/5 shadow-sm hover:border-black/10 transition-colors cursor-pointer"
-                  >
-                    <div className="flex justify-between items-start gap-4 mb-4">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-primary/10 shrink-0 rounded-2xl border border-primary/50">
-                          <FileText size={20} className="text-primary" />
+              <div className="space-y-6">
+                {Object.values(
+                  (selectedDateModal.tasks || []).reduce((acc, task) => {
+                    const userName = task.userName || "Unknown";
+                    if (!acc[userName]) acc[userName] = { userName, tasks: [], worked: 0, assigned: 0 };
+                    const { worked, assigned } = getTaskHours(task);
+                    acc[userName].worked += worked;
+                    acc[userName].assigned += assigned;
+                    acc[userName].tasks.push(task);
+                    return acc;
+                  }, {})
+                ).map((userGroup, idx) => (
+                  <div key={idx} className="bg-white rounded-[1.5rem] border border-black/5 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300" style={{ animationDelay: `${idx * 50}ms` }}>
+                    {/* User Header */}
+                    <div className={`p-4 sm:p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-black/5 transition-colors ${
+                       userGroup.worked > 8.5 
+                        ? "bg-blue-50/50"
+                        : userGroup.tasks.some(t => t.status === "ABSENT" || (t.name || t.title || "").toUpperCase().includes("ABSENT"))
+                        ? "bg-red-50/50"
+                        : userGroup.worked === 0 && userGroup.tasks.some(t => (t.name || t.title || "").toUpperCase().includes("NOT ASSIGNED"))
+                        ? "bg-orange-50/50"
+                        : "bg-green-50/30"
+                    }`}>
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border flex flex-col items-center justify-center shadow-sm shrink-0 ${
+                          userGroup.worked > 8.5 
+                           ? "bg-white border-blue-200 text-blue-600"
+                           : userGroup.tasks.some(t => t.status === "ABSENT" || (t.name || t.title || "").toUpperCase().includes("ABSENT"))
+                           ? "bg-white border-red-200 text-red-600"
+                           : userGroup.worked === 0 && userGroup.tasks.some(t => (t.name || t.title || "").toUpperCase().includes("NOT ASSIGNED"))
+                           ? "bg-white border-orange-200 text-orange-600"
+                           : "bg-white border-green-200 text-green-600"
+                        }`}>
+                          <User size={24} strokeWidth={2.5} />
                         </div>
                         <div>
-                          <h4 className="text-base font-black text-black leading-tight mb-1">
-                            {task.name || task.title || "Untitled Task"}
+                          <h4 className={`text-base font-black uppercase tracking-wider ${
+                             userGroup.worked > 8.5 
+                               ? "text-blue-900"
+                               : userGroup.tasks.some(t => t.status === "ABSENT" || (t.name || t.title || "").toUpperCase().includes("ABSENT"))
+                               ? "text-red-900"
+                               : userGroup.worked === 0 && userGroup.tasks.some(t => (t.name || t.title || "").toUpperCase().includes("NOT ASSIGNED"))
+                               ? "text-orange-900"
+                               : "text-green-900"
+                          }`}>
+                            {userGroup.userName}
                           </h4>
-                          <p className="text-[10px] font-black text-black/40 uppercase tracking-widest">
-                            {task.project?.name ||
-                              task.projectName ||
-                              `Project ${task.project_id || ""}` ||
-                              "Project"}
-                          </p>
+                          <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                            <span className="text-sm font-bold text-black/60 uppercase tracking-widest bg-white border border-black/5 px-2.5 py-1 rounded-lg shadow-sm">
+                              A: {formatHours(userGroup.assigned)}
+                            </span>
+                            <span className="text-sm font-bold text-black/60 uppercase tracking-widest bg-white border border-black/5 px-2.5 py-1 rounded-lg shadow-sm">
+                              W: {formatHours(userGroup.worked)}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      <span
-                        className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-xl border ${task.status === "COMPLETE"
-                          ? "bg-green-50 text-green-700 border-green-200"
-                          : task.status === "IN_PROGRESS"
-                            ? "bg-primary/10 text-primary border-primary"
-                            : "bg-gray-100 text-gray-600 border-gray-200"
-                          }`}
-                      >
-                        {task.status || "Pending"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-5 mt-5 pt-5 border-t border-black/5">
-                      <div
-                        className={`flex items-center gap-3 px-4 py-2 rounded-xl border transition-colors ${
-                          (userTotalHoursMap[task.userName || "Unknown"]?.worked || 0) > 8.5
-                            ? "bg-blue-50 border-blue-200 shadow-sm"
-                            : task.status === "ABSENT" ||
-                              (task.name || task.title || "")
-                                .toUpperCase()
-                                .includes("ABSENT")
-                              ? "bg-red-50 border-red-200 shadow-sm"
-                              : (userTotalHoursMap[
-                                task.userName || "Unknown"
-                              ]?.worked || 0) === 0 &&
-                                (task.name || task.title || "")
-                                  .toUpperCase()
-                                  .includes("NOT ASSIGNED")
-                                ? "bg-orange-50 border-orange-200 shadow-sm"
-                                : "bg-green-50 border-green-200 shadow-sm"
-                          }`}
-                        title={
-                          (userTotalHoursMap[task.userName || "Unknown"]?.worked || 0) > 8.5
-                            ? "User is stretching (> 8 hrs 30 mins)"
-                            : ""
-                        }
-                      >
-                        <div
-                          className={`w-6 h-6 rounded-full border flex items-center justify-center ${
-                            (userTotalHoursMap[task.userName || "Unknown"]?.worked || 0) > 8.5
-                              ? "bg-white border-blue-200 text-blue-600"
-                              : task.status === "ABSENT" ||
-                                (task.name || task.title || "")
-                                  .toUpperCase()
-                                  .includes("ABSENT")
-                                ? "bg-white border-red-200 text-red-600"
-                                : (userTotalHoursMap[
-                                  task.userName || "Unknown"
-                                ]?.worked || 0) === 0 &&
-                                  (task.name || task.title || "")
-                                    .toUpperCase()
-                                    .includes("NOT ASSIGNED")
-                                  ? "bg-white border-orange-200 text-orange-600"
-                                  : "bg-white border-green-200 text-green-600"
-                            }`}
-                        >
-                          <User size={12} />
-                        </div>
-                        <div className="flex flex-col">
-                          <span
-                            className={`text-xs font-black uppercase tracking-wider ${
-                              (userTotalHoursMap[task.userName || "Unknown"]?.worked || 0) > 8.5
-                                ? "text-blue-900"
-                                : task.status === "ABSENT" ||
-                                  (task.name || task.title || "")
-                                    .toUpperCase()
-                                    .includes("ABSENT")
-                                  ? "text-red-900"
-                                  : (userTotalHoursMap[
-                                    task.userName || "Unknown"
-                                  ]?.worked || 0) === 0 &&
-                                    (task.name || task.title || "")
-                                      .toUpperCase()
-                                      .includes("NOT ASSIGNED")
-                                    ? "text-orange-900"
-                                    : "text-green-900"
-                                }`}
-                          >
-                            {task.userName}
-                          </span>
-                          {(userTotalHoursMap[task.userName || "Unknown"]?.worked || 0) > 8.5 && (
-                              <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none mt-0.5 animate-pulse">
+                      
+                      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 sm:gap-1.5 w-full sm:w-auto">
+                        <div className="flex gap-2">
+                            {userGroup.worked > 8.5 && (
+                              <span className="px-3 py-1.5 bg-blue-100 text-blue-700 text-[10px] font-black uppercase tracking-widest rounded-xl border border-blue-200 animate-pulse shadow-sm">
                                 Stretching
                               </span>
-                          )}
-                          {(task.status === "ABSENT" ||
-                            (task.name || task.title || "")
-                              .toUpperCase()
-                              .includes("ABSENT")) && (
-                              <span className="text-[9px] font-black text-red-600 uppercase tracking-widest leading-none mt-0.5">
+                            )}
+                            {userGroup.tasks.some(t => t.status === "ABSENT" || (t.name || t.title || "").toUpperCase().includes("ABSENT")) && (
+                              <span className="px-3 py-1.5 bg-red-100 text-red-700 text-[10px] font-black uppercase tracking-widest rounded-xl border border-red-200 shadow-sm">
                                 Absent
                               </span>
                             )}
-                          {userTotalHoursMap[task.userName || "Unknown"] ===
-                            0 &&
-                            (task.name || task.title || "")
-                              .toUpperCase()
-                              .includes("NOT ASSIGNED") && (
-                              <span className="text-[9px] font-black text-orange-600 uppercase tracking-widest leading-none mt-0.5">
+                            {userGroup.worked === 0 && userGroup.tasks.some(t => (t.name || t.title || "").toUpperCase().includes("NOT ASSIGNED")) && (
+                              <span className="px-3 py-1.5 bg-orange-100 text-orange-700 text-[10px] font-black uppercase tracking-widest rounded-xl border border-orange-200 shadow-sm">
                                 Not Assigned
                               </span>
                             )}
                         </div>
+                        <span className="text-[10px] font-black text-black/40 uppercase tracking-widest">
+                          {userGroup.tasks.length} {userGroup.tasks.length === 1 ? "Task" : "Tasks"}
+                        </span>
                       </div>
-                      <div className="h-6 w-px bg-black/5"></div>
-                      <div className="flex flex-col gap-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-gray-100 px-2 py-0.5 rounded">
-                            A: {formatHours(getTaskHours(task).assigned)}
-                          </span>
-                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-gray-100 px-2 py-0.5 rounded">
-                            W: {formatHours(getTaskHours(task).worked)}
-                          </span>
+                    </div>
+
+                    {/* User's Tasks */}
+                    <div className="p-3 sm:p-4 flex flex-col gap-3 bg-white">
+                      {userGroup.tasks.map((task, tIdx) => (
+                        <div
+                          key={task.id || task._id || tIdx}
+                          onClick={() => setSelectedTaskId(task.id || task._id)}
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border border-black/5 hover:border-black/15 transition-all cursor-pointer bg-gray-50/50 hover:bg-gray-50 shadow-sm group"
+                        >
+                          <div className="flex items-start gap-4">
+                            <div className="p-2.5 bg-primary/10 shrink-0 rounded-xl border border-primary/20 group-hover:bg-primary/20 transition-colors">
+                              <FileText size={18} className="text-primary" />
+                            </div>
+                            <div>
+                              <h5 className="text-sm font-semibold text-black leading-tight mb-1 group-hover:text-primary transition-colors">
+                                {task.name || task.title || "Untitled Task"}
+                              </h5>
+                              <p className="text-[10px] font-bold text-black/40 uppercase tracking-widest flex items-center gap-1.5">
+                                <Layout size={10} />
+                                {task.project?.name || task.projectName || `Project ${task.project_id || ""}` || "Project"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-black/5">
+                            <div className="flex flex-col gap-1.5">
+                               <div className="flex items-center gap-2">
+                                  <span className="text-sm font-bold text-black/50 uppercase tracking-widest bg-white border border-black/5 px-2 py-0.5 rounded shadow-sm">
+                                    A: {formatHours(getTaskHours(task).assigned)}
+                                  </span>
+                                  <span className="text-sm font-bold text-black/50 uppercase tracking-widest bg-white border border-black/5 px-2 py-0.5 rounded shadow-sm">
+                                    W: {formatHours(getTaskHours(task).worked)}
+                                  </span>
+                               </div>
+                               <div className="flex items-center gap-1.5 text-[12px] font-bold text-black/40 uppercase tracking-widest">
+                                  <CalendarIcon size={10} />
+                                  <span>
+                                    {new Date(task.start_date || new Date()).toLocaleDateString(undefined, { month: "short", day: "numeric" })} - {new Date(task.due_date || new Date()).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                                  </span>
+                               </div>
+                            </div>
+                            <span
+                              className={`px-3 py-1.5 text-[12px] font-black uppercase tracking-widest rounded-xl border shrink-0 ${
+                                task.status === "COMPLETE" || task.status === "COMPLETED"
+                                ? "bg-green-50 text-green-700 border-green-200"
+                                : task.status === "IN_PROGRESS"
+                                  ? "bg-primary/10 text-primary border-primary/30"
+                                  : "bg-gray-100 text-gray-600 border-gray-200"
+                                }`}
+                            >
+                              {task.status || "Pending"}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <CalendarIcon size={14} className="text-black/40" />
-                          <span className="text-[11px] font-bold text-black/60 tracking-wide">
-                            {new Date(
-                              task.start_date || new Date(),
-                            ).toLocaleDateString(undefined, {
-                              month: "short",
-                              day: "numeric",
-                            })}
-                            <span className="mx-2 text-black/20">-</span>
-                            {new Date(
-                              task.due_date || new Date(),
-                            ).toLocaleDateString(undefined, {
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </span>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
                 ))}

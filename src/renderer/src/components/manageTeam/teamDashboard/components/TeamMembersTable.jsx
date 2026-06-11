@@ -106,14 +106,14 @@ const TeamMembersTable = ({
 
   return (
     <div className="bg-white rounded-none border-none shadow-soft overflow-hidden mb-8 sm:mb-12">
-      <div className="px-4 sm:px-8 py-5 sm:py-6 border-b border-black/5 bg-gray-50/30 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
+      <div className="px-4 sm:px-8 py-5 sm:py-6 border-b border-black/5 bg-gray-50/30 flex flex-col justify-between gap-4 sm:gap-6">
         <div className="flex-shrink-0">
-          <h3 className="text-lg sm:text-xl lg:text-lg xl:text-2xl text-black uppercase tracking-tight font-bold">
+          <h3 className="text-lg sm:text-xl text-semibold uppercase tracking-tight font-bold">
             Team Members Performance
           </h3>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 w-full lg:w-[450px] flex-shrink-0">
+        <div className="grid md:grid-cols-4 grid-cols-2 gap-2 w-full flex-shrink-0">
           {[
             { id: "all", label: "All Members", count: memberCounts?.all || 0, color: "gray" },
             { id: "not_assigned", label: "Not Assigned", count: memberCounts?.not_assigned || 0, color: "orange" },

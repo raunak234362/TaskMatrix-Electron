@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const WorkloadAlerts = ({ memberStats }) => {
+const WorkloadAlerts = ({ memberStats, onMemberClick }) => {
   const notAssigned = memberStats.filter(m => Number(m.assignedHours) === 0);
   const underAssigned = memberStats.filter(m => Number(m.assignedHours) > 0 && Number(m.assignedHours) < 8);
 
@@ -38,7 +38,7 @@ const WorkloadAlerts = ({ memberStats }) => {
                 {notAssigned.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {notAssigned.map(m => (
-                      <div key={m.id} className="px-4 py-2 bg-gray-100 border border-black/10 rounded-none text-xs font-semibold uppercase tracking-normal text-black shadow-sm transition-all hover:bg-white hover:border-black/20">
+                      <div key={m.id} onClick={() => onMemberClick?.(m.id)} className="px-4 py-2 bg-gray-100 border border-black/10 rounded-none text-xs font-semibold uppercase tracking-normal text-black shadow-sm transition-all hover:bg-white hover:border-black/20 cursor-pointer">
                         {m.name}
                       </div>
                     ))}
@@ -81,18 +81,36 @@ const WorkloadAlerts = ({ memberStats }) => {
                 {underAssigned.length > 0 ? (
                   <div className="grid grid-cols-1 gap-3">
                     {underAssigned.map(m => (
-                      <div key={m.id} className="flex items-center justify-between px-5 py-3 relative bg-gray-50 border border-black/10 rounded-none shadow-sm overflow-hidden group hover:border-green-600/30 transition-all">
+                      <div key={m.id} onClick={() => onMemberClick?.(m.id)} className="flex flex-col px-5 py-3 relative bg-gray-50 border border-black/10 rounded-none shadow-sm overflow-hidden group hover:border-green-600/30 transition-all cursor-pointer">
                         <div className="absolute left-0 top-0 w-1 h-full bg-green-600/50" />
-                        <span className="text-xs font-bold uppercase tracking-normal text-black">{m.name}</span>
-                        <div className="flex items-center gap-4">
-                          <span className="text-xs font-bold text-black uppercase tracking-normal">{m.assignedHours} hrs</span>
-                          <div className="w-20 h-2 bg-gray-200 rounded-none overflow-hidden border border-black/10">
-                            <div 
-                              className="bg-green-600 h-full shadow-[0_0_8px_rgba(107,189,69,0.4)]" 
-                              style={{ width: `${Math.min(100, (Number(m.assignedHours) / 8) * 100)}%` }}
-                            ></div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold uppercase tracking-normal text-black">{m.name}</span>
+                          <div className="flex items-center gap-4">
+                            <span className="text-xs font-bold text-black uppercase tracking-normal">{m.assignedHours} hrs</span>
+                            <div className="w-20 h-2 bg-gray-200 rounded-none overflow-hidden border border-black/10">
+                              <div 
+                                className="bg-green-600 h-full shadow-[0_0_8px_rgba(107,189,69,0.4)]" 
+                                style={{ width: `${Math.min(100, (Number(m.assignedHours) / 8) * 100)}%` }}
+                              ></div>
+                            </div>
                           </div>
                         </div>
+                        {m.tasks && m.tasks.length > 0 && (
+                          <div className="mt-3 flex flex-col gap-1.5 border-t border-black/5 pt-3">
+                            {m.tasks.map((task, tIdx) => (
+                              <div key={task.id || task._id || tIdx} className="text-[10px] font-bold text-black/60 uppercase tracking-widest flex items-center justify-between bg-white border border-black/5 p-2 rounded-sm shadow-sm">
+                                <span className="truncate max-w-[70%] text-black">{task.name || task.title || "Untitled Task"}</span>
+                                <span className={`px-2 py-0.5 rounded border ${
+                                  task.status === "COMPLETE" || task.status === "COMPLETED"
+                                    ? "bg-green-50 text-green-700 border-green-200"
+                                    : task.status === "IN_PROGRESS"
+                                    ? "bg-blue-50 text-blue-700 border-blue-200"
+                                    : "bg-gray-100 text-gray-600 border-gray-200"
+                                }`}>{task.status || "PENDING"}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

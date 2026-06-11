@@ -33,7 +33,20 @@ const TeamPage = () => {
   const fetchTeam = async () => {
     try {
       const response = await Service.AllTeam();
-      dispatch(showTeam(response?.data));
+      const teamsData = response?.data || [];
+      const teamOrder = ["tekla", "sds/2", "pemb", "pemb designing", "software team"];
+      
+      teamsData.sort((a, b) => {
+        const indexA = teamOrder.indexOf((a.name || "").toLowerCase());
+        const indexB = teamOrder.indexOf((b.name || "").toLowerCase());
+        
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        if (indexA !== -1) return -1;
+        if (indexB !== -1) return 1;
+        return (a.name || "").localeCompare(b.name || "");
+      });
+      
+      dispatch(showTeam(teamsData));
     } catch (error) {
       console.log("Error fetching teams", error);
     }

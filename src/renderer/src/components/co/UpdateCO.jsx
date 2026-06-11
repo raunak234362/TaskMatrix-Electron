@@ -9,7 +9,7 @@ import RichTextEditor from "../fields/RichTextEditor";
 import Service from "../../api/Service";
 import Modal from "../ui/Modal";
 import SectionTitle from "../ui/SectionTitle";
-import { Loader2, Save, Plus, Trash2 } from "lucide-react";
+import { Loader2, Save, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
 const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,10 +38,11 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
     },
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append, remove, replace, move } = useFieldArray({
     control,
     name: "rows",
   });
+
 
   const watchedRows = watch("rows") || [];
   const totalHours = watchedRows.reduce((sum, r) => sum + (Number(r.hours) || 0), 0);
@@ -88,6 +89,16 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
       fetchTableRows();
     }
   }, [coData, reset, replace]);
+
+  // Auto-resize all table textareas whenever rows load or change
+  useEffect(() => {
+    if (loadingRows) return;
+    const textareas = document.querySelectorAll('.ref-table-textarea');
+    textareas.forEach((ta) => {
+      ta.style.height = 'auto';
+      ta.style.height = ta.scrollHeight + 'px';
+    });
+  }, [fields, loadingRows]);
 
   const onSubmit = async (data) => {
     try {
@@ -198,7 +209,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
               <table className="w-full text-xs text-left">
                 <thead className="bg-[#f8fafc] text-slate-700 font-bold uppercase tracking-wider border-b border-gray-200">
                   <tr>
-                    <th className="p-3 w-10">#</th>
+                    <th className="p-3 w-8 text-center"></th>
                     <th className="p-3 min-w-[200px]">Description</th>
                     <th className="p-3">Reference</th>
                     <th className="p-3">Elements</th>
@@ -211,30 +222,55 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {fields.map((field, index) => (
-                    <tr key={field.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="p-3 font-medium text-slate-400">{index + 1}</td>
+                    <tr
+                      key={field.id}
+                      className="hover:bg-slate-50/50 transition-colors group"
+                    >
+                      <td className="p-1 text-center">
+                        <div className="flex flex-col gap-0.5 items-center">
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={() => move(index, index - 1)}
+                            className="p-0.5 text-slate-300 hover:text-slate-600 disabled:opacity-20 disabled:cursor-not-allowed transition-colors rounded"
+                          >
+                            <ChevronUp size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={index === fields.length - 1}
+                            onClick={() => move(index, index + 1)}
+                            className="p-0.5 text-slate-300 hover:text-slate-600 disabled:opacity-20 disabled:cursor-not-allowed transition-colors rounded"
+                          >
+                            <ChevronDown size={14} />
+                          </button>
+                        </div>
+                      </td>
                       <td className="p-2 min-w-[250px]">
                         <textarea
                           {...register(`rows.${index}.description`)}
-                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none min-h-[32px] text-xs resize-y"
+                          className="ref-table-textarea w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none text-xs resize-none overflow-hidden"
                           placeholder="Doc desc..."
                           rows={1}
+                          onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
                         />
                       </td>
                       <td className="p-2">
                         <textarea
                           {...register(`rows.${index}.referenceDoc`)}
-                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none min-h-[32px] text-xs resize-y"
+                          className="ref-table-textarea w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none text-xs resize-none overflow-hidden"
                           placeholder="Ref..."
                           rows={1}
+                          onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
                         />
                       </td>
                       <td className="p-2">
                         <textarea
                           {...register(`rows.${index}.elements`)}
-                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none min-h-[32px] text-xs resize-y"
+                          className="ref-table-textarea w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none text-xs resize-none overflow-hidden"
                           placeholder="Elements..."
                           rows={1}
+                          onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
                         />
                       </td>
                       <td className="p-2">
@@ -261,9 +297,10 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                       <td className="p-2">
                         <textarea
                           {...register(`rows.${index}.remarks`)}
-                          className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none min-h-[32px] text-xs resize-y"
+                          className="ref-table-textarea w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none text-xs resize-none overflow-hidden"
                           placeholder="Remarks..."
                           rows={1}
+                          onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
                         />
                       </td>
                       <td className="p-2 text-center">
@@ -279,7 +316,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                   ))}
                   {fields.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="p-8 text-center text-slate-400 italic bg-slate-50/30">
+                      <td colSpan={10} className="p-8 text-center text-slate-400 italic bg-slate-50/30">
                         No rows added. Click "Add Row" to contribute to the table.
                       </td>
                     </tr>

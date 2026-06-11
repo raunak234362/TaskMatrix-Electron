@@ -52,6 +52,25 @@ const RichTextEditor = ({
 
   return (
     <div className={`rich-text-editor ${className}`}>
+      <style>
+        {`
+          .rich-text-editor .jodit-wysiwyg ul {
+            list-style-type: disc !important;
+            padding-left: 40px !important;
+            margin-top: 8px !important;
+            margin-bottom: 8px !important;
+          }
+          .rich-text-editor .jodit-wysiwyg ol {
+            list-style-type: decimal !important;
+            padding-left: 40px !important;
+            margin-top: 8px !important;
+            margin-bottom: 8px !important;
+          }
+          .rich-text-editor .jodit-wysiwyg li {
+            display: list-item !important;
+          }
+        `}
+      </style>
       <JoditEditor
         ref={editor}
         value={value}
