@@ -17,6 +17,10 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState(null);
+  
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
+  const [archiveLastWorkingDay, setArchiveLastWorkingDay] = useState("");
+  const [archiveReason, setArchiveReason] = useState("");
 
   const {
     register,
@@ -154,28 +158,30 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
   };
 
   // ── Delete handler ──
-  const handleDelete = async () => {
+  const handleDelete = () => {
+    setShowArchiveConfirm(true);
+  };
+
+  const executeArchive = async () => {
     if (!employeeData?.id) return;
-
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${employeeData.firstName} ${employeeData.lastName}? This action cannot be undone.`
-    );
-
-    if (!confirmed) return;
 
     try {
       setDeleting(true);
-      const res = await Service.DeleteEmployeeByID(employeeData.id);
+      const res = await Service.DeleteEmployeeByID(employeeData.id, {
+        lastWorkingDay: archiveLastWorkingDay,
+        reason: archiveReason
+      });
       
       if (res && res.success !== false) {
-        toast.success("Employee deleted successfully");
+        toast.success("Employee archived successfully");
+        setShowArchiveConfirm(false);
         onSuccess?.();
         onClose();
       } else {
-        toast.error(res?.message || "Failed to delete employee");
+        toast.error(res?.message || "Failed to archive employee");
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Error deleting employee");
+      toast.error(err?.response?.data?.message || "Error archiving employee");
       console.error(err);
     } finally {
       setDeleting(false);
@@ -337,6 +343,60 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
             )}
           </button>
         </footer>
+
+        {/* Archive Confirmation Modal */}
+        {showArchiveConfirm && (
+          <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 w-full max-w-md animate-in zoom-in-95">
+              <h3 className="text-xl font-bold text-red-600 mb-4 uppercase tracking-tight">Archive Employee</h3>
+              <p className="text-sm text-gray-600 mb-6">
+                Are you sure you want to archive {employeeData?.firstName} {employeeData?.lastName}? Please provide the following details:
+              </p>
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Last Working Day *</label>
+                  <input 
+                    type="date" 
+                    value={archiveLastWorkingDay}
+                    onChange={(e) => setArchiveLastWorkingDay(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Reason *</label>
+                  <textarea 
+                    value={archiveReason}
+                    onChange={(e) => setArchiveReason(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 min-h-[100px]"
+                    placeholder="Enter reason for archiving..."
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowArchiveConfirm(false)}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs uppercase rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={executeArchive}
+                  disabled={deleting || !archiveLastWorkingDay || !archiveReason.trim()}
+                  className={`px-4 py-2 font-bold text-xs uppercase rounded-lg flex items-center gap-2 transition-colors ${
+                    deleting || !archiveLastWorkingDay || !archiveReason.trim()
+                      ? "bg-red-200 text-red-50 cursor-not-allowed"
+                      : "bg-red-600 hover:bg-red-700 text-white"
+                  }`}
+                >
+                  {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                  Confirm Archive
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

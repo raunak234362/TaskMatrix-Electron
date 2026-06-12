@@ -246,14 +246,12 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
           >
             General RFIs
           </button>
-          {connectionDesignerRfis.length > 0 && (
-            <button
-              className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === "CONNECTION_DESIGNER" ? "border-green-600 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
-              onClick={() => setActiveTab("CONNECTION_DESIGNER")}
-            >
-              Connection Designer's RFI
-            </button>
-          )}
+          <button
+            className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === "CONNECTION_DESIGNER" ? "border-green-600 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+            onClick={() => setActiveTab("CONNECTION_DESIGNER")}
+          >
+            Connection Designer's RFI
+          </button>
         </div>
         <div className="relative pb-2 sm:pb-0 sm:mt-2">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

@@ -121,9 +121,10 @@ class Service {
   }
 
   //delete employee by id
-  static async DeleteEmployeeByID(id) {
+  static async DeleteEmployeeByID(id, data = {}) {
     try {
       const response = await api.delete(`employee/id/${id}`, {
+        data: data,
         headers: {
           'Content-Type': 'application/json'
         }
@@ -133,6 +134,7 @@ class Service {
     } catch (error) {
       //alert(error);
       console.log('Error deleting Employee by ID', error)
+      throw error
     }
   }
 
