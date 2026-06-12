@@ -27,7 +27,7 @@ const AddMileStone = ({
       fabricator_id: fabricatorId,
       status: "ACTIVE",
       types: "ANCHOR_BOLT",
-      subSubject: "string",
+      subSubject: "",
       isConnectionDesigner: false,
     },
   });
@@ -157,7 +157,7 @@ const AddMileStone = ({
             <Input
               label="Subject"
               {...register("subSubject")}
-              placeholder="e.g. string"
+              placeholder="Please write the subject"
             />
           </div>
 
