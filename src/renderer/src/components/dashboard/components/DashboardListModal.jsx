@@ -16,6 +16,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             case 'PENDING_SUBMITTALS': return { title: 'Pending Action on Submittals', icon: ClipboardList, color: 'text-purple-600', iconBg: 'bg-purple-100' }
             case 'CHANGE_ORDERS': return { title: 'Pending Action on Change Orders', icon: RefreshCw, color: 'text-rose-600', iconBg: 'bg-rose-100' }
             case 'PENDING_RFQ': return { title: 'Pending Action on RFQ ', icon: Search, color: 'text-cyan-600', iconBg: 'bg-cyan-100' }
+            case 'UNAPPROVED_CHANGE_ORDERS': return { title: 'Unapproved Change Orders', icon: RefreshCw, color: 'text-red-600', iconBg: 'bg-red-100' }
             default: return { title: 'Items', icon: FileText, color: 'text-gray-600', iconBg: 'bg-gray-100' }
         }
     }
@@ -141,6 +142,15 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             cell: ({ row }) => (
                 <span className="text-gray-600 font-medium truncate max-w-[280px] inline-block">
                     {row.original.Project?.name || row.original.project?.name || row.original.project || '—'}
+                </span>
+            )
+        },
+        {
+            id: 'fabricator',
+            header: 'Fabricator',
+            cell: ({ row }) => (
+                <span className="text-gray-600 font-medium truncate max-w-[200px] inline-block">
+                    {row.original.Project?.fabricator?.fabName || row.original.project?.fabricator?.fabName || '—'}
                 </span>
             )
         },
