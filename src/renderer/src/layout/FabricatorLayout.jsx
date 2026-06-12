@@ -12,9 +12,9 @@ const FabricatorLayout = () => {
           <div className="flex flex-row gap-4 items-center justify-end">
             <button
               onClick={() => setActiveTab("allFabricator")}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "allFabricator"
-                ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-                : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+              className={`px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-normal transition-all border-2 shadow-sm active:scale-95 ${activeTab === "allFabricator"
+                ? "bg-green-50 text-black border-green-700/80 hover:bg-green-100"
+                : "bg-white text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-black hover:border-gray-400"
                 }`}
             >
               All Fabricator
@@ -22,9 +22,9 @@ const FabricatorLayout = () => {
 
             <button
               onClick={() => setActiveTab("addFabricator")}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "addFabricator"
-                ? "bg-[#ebf5ea] text-black border-black shadow-sm"
-                : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+              className={`px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-normal transition-all border-2 shadow-sm active:scale-95 ${activeTab === "addFabricator"
+                ? "bg-green-50 text-black border-green-700/80 hover:bg-green-100"
+                : "bg-white text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-black hover:border-gray-400"
                 }`}
             >
               Add Fabricator

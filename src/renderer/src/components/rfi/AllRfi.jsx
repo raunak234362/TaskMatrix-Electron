@@ -118,7 +118,7 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
         return (
           <div className="flex flex-col gap-1">
             {recipients.map((r, i) => (
-              <span key={i} className="text-xs font-medium text-gray-700">
+              <span key={i} className="text-sm font-medium tracking-normal text-gray-700">
                 {`${r.firstName ?? ""} ${r.lastName ?? ""}`.trim() || r.email || "—"}
               </span>
             ))}
@@ -170,7 +170,7 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
         const statusInfo = getStatusInfo(row.original);
         return (
           <span
-            className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border border-black ${statusInfo.className}`}
+            className={`px-3 py-1 text-sm font-black uppercase tracking-normal rounded-full border border-black ${statusInfo.className}`}
           >
             {statusInfo.label}
           </span>
@@ -206,7 +206,7 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
             });
             setIsFollowUpOpen(true);
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors shadow-sm"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors shadow-sm tracking-normal"
           title="Create Follow-up"
         >
           <MessageSquare className="w-3.5 h-3.5" />
@@ -241,14 +241,14 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 px-4 mb-4 gap-4 pb-2 sm:pb-0">
         <div className="flex space-x-6">
           <button
-            className={`py-3 px-1 text-sm font-semibold border-b-2 transition-colors ${activeTab === "GENERAL" ? "border-green-600 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+            className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === "GENERAL" ? "border-green-600 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
             onClick={() => setActiveTab("GENERAL")}
           >
             General RFIs
           </button>
           {connectionDesignerRfis.length > 0 && (
             <button
-              className={`py-3 px-1 text-sm font-semibold border-b-2 transition-colors ${activeTab === "CONNECTION_DESIGNER" ? "border-green-600 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+              className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === "CONNECTION_DESIGNER" ? "border-green-600 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
               onClick={() => setActiveTab("CONNECTION_DESIGNER")}
             >
               Connection Designer's RFI
@@ -262,7 +262,7 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
             placeholder="Search by subject..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500 w-full sm:w-64"
+            className="pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm tracking-normal focus:outline-none focus:ring-1 focus:ring-green-500 w-full sm:w-64"
           />
         </div>
       </div>
@@ -270,8 +270,8 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
       {!finalRfis || finalRfis.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-gray-700">
           <Inbox className="w-10 h-10 mb-3 text-gray-400" />
-          <p className="text-lg font-medium">No RFIs Available</p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm font-medium tracking-normal">No RFIs Available</p>
+          <p className="text-sm tracking-normal text-gray-400">
             {userRole === "CLIENT"
               ? "You haven’t sent any RFIs yet."
               : "No RFIs have been received yet."}

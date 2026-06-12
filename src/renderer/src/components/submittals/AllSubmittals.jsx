@@ -104,7 +104,7 @@ const AllSubmittals = ({ submittalData, projectId }) => {
         return (
           <div className="flex flex-col gap-1">
             {recipients.map((r, i) => (
-              <span key={i} className="text-xs font-medium text-gray-700">
+              <span key={i} className="text-sm font-medium tracking-normal text-gray-700">
                 {`${r.firstName ?? ""} ${r.lastName ?? ""}`.trim() || r.email || "—"}
               </span>
             ))}
@@ -160,7 +160,7 @@ const AllSubmittals = ({ submittalData, projectId }) => {
 
         return (
           <span
-            className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${getStatusStyles(key)}`}
+            className={`inline-flex items-center px-2.5 py-1 rounded-md text-sm font-black uppercase tracking-normal border ${getStatusStyles(key)}`}
           >
             {label}
           </span>
@@ -192,7 +192,7 @@ const AllSubmittals = ({ submittalData, projectId }) => {
             });
             setIsFollowUpOpen(true);
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors shadow-sm"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors shadow-sm tracking-normal"
           title="Create Follow-up"
         >
           <MessageSquare className="w-3.5 h-3.5" />
@@ -224,14 +224,14 @@ const AllSubmittals = ({ submittalData, projectId }) => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 px-4 mb-4 gap-4 pb-2 sm:pb-0">
         <div className="flex space-x-6">
           <button
-            className={`py-3 px-1 text-sm font-semibold border-b-2 transition-colors ${activeTab === "GENERAL" ? "border-green-600 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+            className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === "GENERAL" ? "border-green-600 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
             onClick={() => setActiveTab("GENERAL")}
           >
             General Submittals
           </button>
           {connectionDesignerSubmittals.length > 0 && (
             <button
-              className={`py-3 px-1 text-sm font-semibold border-b-2 transition-colors ${activeTab === "CONNECTION_DESIGNER" ? "border-green-600 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+              className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === "CONNECTION_DESIGNER" ? "border-green-600 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
               onClick={() => setActiveTab("CONNECTION_DESIGNER")}
             >
               Connection Designer's Submittals
@@ -245,7 +245,7 @@ const AllSubmittals = ({ submittalData, projectId }) => {
             placeholder="Search by subject..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-green-500 w-full sm:w-64"
+            className="pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm tracking-normal focus:outline-none focus:ring-1 focus:ring-green-500 w-full sm:w-64"
           />
         </div>
       </div>
@@ -254,12 +254,12 @@ const AllSubmittals = ({ submittalData, projectId }) => {
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-2 py-8 text-gray-700 bg-gray-50 rounded-xl border border-dashed border-gray-200">
             <Inbox className="w-10 h-10 text-gray-400" />
-            <p className="font-medium">No Submittals Available</p>
+            <p className="text-sm font-medium tracking-normal">No Submittals Available</p>
           </div>
 
           {upcomingSubmittals.length > 0 && (
             <div className="space-y-4">
-              <h3 className="text-sm font-black text-green-700 uppercase tracking-widest flex items-center gap-2">
+              <h3 className="text-sm font-black text-green-700 tracking-normal flex items-center gap-2">
                 <ClipboardList className="w-4 h-4" />
                 Upcoming Submittals (Planned Milestones)
               </h3>
@@ -282,11 +282,11 @@ const AllSubmittals = ({ submittalData, projectId }) => {
                             {milestone.name || milestone.subject || "Untitled Milestone"}
                           </h4>
                           <div className="flex items-center gap-3 mt-1">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2 py-0.5 bg-gray-100 rounded-md">
+                            <span className="text-sm font-black uppercase tracking-normal text-gray-400 px-2 py-0.5 bg-gray-100 rounded-md">
                               {milestone.category}
                             </span>
                             {dueDate && (
-                              <span className={`text-[10px] font-bold flex items-center gap-1 ${isOverdue ? 'text-red-500' : 'text-gray-500'}`}>
+                              <span className={`text-sm font-bold flex items-center gap-1 ${isOverdue ? 'text-red-500' : 'text-gray-500'} tracking-normal`}>
                                 {isOverdue && <AlertCircle size={10} />}
                                 Due: {new Date(dueDate).toLocaleDateString()}
                               </span>
@@ -296,7 +296,7 @@ const AllSubmittals = ({ submittalData, projectId }) => {
                       </div>
                       
                       <div className="mt-4 md:mt-0 flex items-center gap-3">
-                         <span className="text-xs font-semibold text-gray-400 italic">
+                         <span className="text-sm font-semibold tracking-normal text-gray-400 italic">
                           Not yet submitted
                          </span>
                       </div>

@@ -161,23 +161,23 @@ const AllFabricator = () => {
   return (
     <div className="bg-[#fcfdfc] min-h-[500px]">
       {/* Search Bar & Filters - Premium Style */}
-      <div className="mb-8 px-2 space-y-6">
-        <div className="flex flex-wrap items-center gap-6">
-          <div className="relative group flex-1 max-w-xl">
+      <div className="mb-8 px-2">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="relative group flex-grow max-w-xl min-w-[280px]">
             <div className="absolute -inset-1 bg-linear-to-r from-green-100 to-emerald-100 rounded-xl blur-sm opacity-25 group-hover:opacity-40 transition-duration-1000"></div>
-            <div className="relative bg-white border border-gray-100 rounded-xl p-1 flex items-center shadow-sm hover:border-green-200 transition-colors">
-              <Search className="ml-3 w-5 h-5 text-gray-400" />
+            <div className="relative bg-white border border-gray-200 rounded-xl px-3 flex items-center shadow-sm hover:border-green-200 transition-colors h-11">
+              <Search className="w-5 h-5 text-gray-400 shrink-0" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search fabricators by name..."
-                className="flex-1 px-4 py-2 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none font-medium"
+                className="flex-1 px-3 py-1 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none font-medium text-sm"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="p-1 px-3 text-gray-300 hover:text-gray-500 transition-colors"
+                  className="p-1 text-gray-300 hover:text-gray-500 transition-colors shrink-0"
                 >
                   <X size={16} />
                 </button>
@@ -185,18 +185,10 @@ const AllFabricator = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm hover:border-green-100 transition-all">
-            <Filter size={16} className="text-gray-400" />
-            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Quick Filters</span>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-4 items-end animate-in fade-in slide-in-from-top-2 duration-500">
           {/* Stage Filter */}
-          <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[200px]">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Partner Stage</label>
+          <div className="w-full sm:w-auto min-w-[200px]">
             <select
-              className="w-full text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl px-4 py-2.5 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/5 transition-all shadow-sm"
+              className="w-full h-11 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl px-4 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/5 transition-all shadow-sm"
               value={filters.fabStage}
               onChange={(e) => setFilters(prev => ({ ...prev, fabStage: e.target.value }))}
             >
@@ -205,10 +197,9 @@ const AllFabricator = () => {
           </div>
 
           {/* WBT Contact Filter */}
-          <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[220px]">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">WBT Contact</label>
+          <div className="w-full sm:w-auto min-w-[220px]">
             <select
-              className="w-full text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl px-4 py-2.5 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/5 transition-all shadow-sm"
+              className="w-full h-11 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl px-4 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/5 transition-all shadow-sm"
               value={filters.wbtContact}
               onChange={(e) => setFilters(prev => ({ ...prev, wbtContact: e.target.value }))}
             >
@@ -217,10 +208,9 @@ const AllFabricator = () => {
           </div>
 
           {/* POC Filter */}
-          <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[220px]">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Point of Contact</label>
+          <div className="w-full sm:w-auto min-w-[220px]">
             <select
-              className="w-full text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl px-4 py-2.5 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/5 transition-all shadow-sm"
+              className="w-full h-11 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl px-4 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/5 transition-all shadow-sm"
               value={filters.poc}
               onChange={(e) => setFilters(prev => ({ ...prev, poc: e.target.value }))}
             >
@@ -235,7 +225,7 @@ const AllFabricator = () => {
                 setFilters({ fabStage: "All Stages", wbtContact: "All WBT Contacts", poc: "All POCs" });
                 setSearchQuery("");
               }}
-              className="px-4 py-2.5 text-xs font-bold text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all flex items-center gap-2 mb-0.5"
+              className="h-11 px-4 text-xs font-bold text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all flex items-center gap-2 shrink-0"
             >
               <X size={14} />
               Clear Filters

@@ -84,7 +84,7 @@ const AllCO = ({ changeOrderData = [] }) => {
         const statusClass = status ? (map[status] ?? "") : "";
 
         return (
-          <span className={`px-2 py-1 text-xs rounded-full ${statusClass}`}>
+          <span className={`px-2 py-1 text-sm rounded-full tracking-normal ${statusClass}`}>
             {status ?? "—"}
           </span>
         );
@@ -120,7 +120,7 @@ const AllCO = ({ changeOrderData = [] }) => {
             });
             setIsFollowUpOpen(true);
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors shadow-sm"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors shadow-sm tracking-normal"
           title="Create Follow-up"
         >
           <MessageSquare className="w-3.5 h-3.5" />
@@ -145,8 +145,8 @@ const AllCO = ({ changeOrderData = [] }) => {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-700">
         <Inbox className="w-10 h-10 mb-3 text-gray-400" />
-        <p className="text-lg font-medium">No Change Orders Available</p>
-        <p className="text-sm text-gray-400">
+        <p className="text-sm font-medium tracking-normal">No Change Orders Available</p>
+        <p className="text-sm tracking-normal text-gray-400">
           {userRole === "CLIENT"
             ? "You haven’t created any Change Orders yet."
             : "No Change Orders have been received yet."}
