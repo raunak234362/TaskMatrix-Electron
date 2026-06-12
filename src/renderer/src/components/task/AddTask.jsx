@@ -366,6 +366,7 @@ const AddTask = () => {
   const remainingHours = isOtherWbs ? Infinity : (availableHours - totalAssignedHours);
 
   // Check for 24hr uncompleted tasks dynamically to disable button
+  // IN_REVIEW tasks are NOT a blocker — only tasks overdue >24 working hours (Mon–Fri) block assignment
   useEffect(() => {
     assignments.forEach(async (assignment) => {
       const empId = assignment.employeeId;
@@ -375,10 +376,14 @@ const AddTask = () => {
           const res = await Service.GetAllTaskByUserID(empId);
           const tasks = Array.isArray(res) ? res : (res?.data || []);
           const now = new Date();
-          const completedStatuses = ["VALIDATE_COMPLETE", "COMPLETE_OTHER", "WRONG_ALLOCATION", "ABSENT", "USER_FAULT", "IN_REVIEW"];
+          // IN_REVIEW is intentionally excluded from completedStatuses so those tasks
+          // still count toward elapsed time, but they do NOT block on their own.
+          const completedStatuses = ["VALIDATE_COMPLETE", "COMPLETE_OTHER", "WRONG_ALLOCATION", "ABSENT", "USER_FAULT"];
           
           const hasOverdue = tasks.some(task => {
             if (completedStatuses.includes(String(task.status).toUpperCase())) return false;
+            // IN_REVIEW tasks are fine — skip them for the overdue block check
+            if (String(task.status).toUpperCase() === "IN_REVIEW") return false;
             
             const taskDate = task.created_at || task.createdAt;
             if (!taskDate) return false;
@@ -395,6 +400,7 @@ const AddTask = () => {
               nextDay.setHours(0, 0, 0, 0);
               let stepEnd = nextDay < now ? nextDay : now;
               
+              // Only count weekdays (Mon–Fri), skip Saturday (6) and Sunday (0)
               if (current.getDay() !== 0 && current.getDay() !== 6) {
                 totalMs += (stepEnd - current);
               }
@@ -405,15 +411,7 @@ const AddTask = () => {
             return totalHours > 24;
           });
 
-          const hasInReview = tasks.some(task => String(task.status).toUpperCase() === "IN_REVIEW");
-          let errorType = false;
-          if (hasInReview) {
-            errorType = "IN_REVIEW";
-          } else if (hasOverdue) {
-            errorType = "OVERDUE";
-          }
-
-          setOverdueEmployees((prev) => ({ ...prev, [empId]: errorType }));
+          setOverdueEmployees((prev) => ({ ...prev, [empId]: hasOverdue ? "OVERDUE" : false }));
         } catch (err) {
           console.error("Error checking employee tasks:", err);
         }
@@ -431,17 +429,20 @@ const AddTask = () => {
     try {
       setIsSubmitting(true);
 
-      // 24hr uncompleted task check
+      // 24-hour overdue check (weekdays only — Saturday & Sunday are excluded)
+      // IN_REVIEW tasks are fine and do NOT block assignment.
       for (const assignment of data.assignments) {
         if (!assignment.employeeId) continue;
         try {
           const res = await Service.GetAllTaskByUserID(assignment.employeeId);
           const tasks = Array.isArray(res) ? res : (res?.data || []);
           const now = new Date();
-          const completedStatuses = ["VALIDATE_COMPLETE", "COMPLETE_OTHER", "WRONG_ALLOCATION", "ABSENT", "USER_FAULT", "IN_REVIEW"];
+          const completedStatuses = ["VALIDATE_COMPLETE", "COMPLETE_OTHER", "WRONG_ALLOCATION", "ABSENT", "USER_FAULT"];
           
           const hasOverdue = tasks.some(task => {
             if (completedStatuses.includes(String(task.status).toUpperCase())) return false;
+            // IN_REVIEW tasks are acceptable — they do not block new assignments
+            if (String(task.status).toUpperCase() === "IN_REVIEW") return false;
             
             const taskDate = task.created_at || task.createdAt;
             if (!taskDate) return false;
@@ -458,6 +459,7 @@ const AddTask = () => {
               nextDay.setHours(0, 0, 0, 0);
               let stepEnd = nextDay < now ? nextDay : now;
               
+              // Skip Saturday (6) and Sunday (0)
               if (current.getDay() !== 0 && current.getDay() !== 6) {
                 totalMs += (stepEnd - current);
               }
@@ -468,16 +470,9 @@ const AddTask = () => {
             return totalHours > 24;
           });
 
-          const hasInReview = tasks.some(task => String(task.status).toUpperCase() === "IN_REVIEW");
-
-          if (hasInReview) {
+          if (hasOverdue) {
             const empName = employees.find(e => e.id === assignment.employeeId)?.firstName || "This employee";
-            toast.error(`${empName} has tasks currently in review. Cannot assign new tasks.`);
-            setIsSubmitting(false);
-            return;
-          } else if (hasOverdue) {
-            const empName = employees.find(e => e.id === assignment.employeeId)?.firstName || "This employee";
-            toast.error(`${empName} has incomplete tasks older than 24 hours. Cannot assign new tasks.`);
+            toast.error(`${empName} has incomplete tasks older than 24 working hours. Cannot assign new tasks.`);
             setIsSubmitting(false);
             return;
           }
