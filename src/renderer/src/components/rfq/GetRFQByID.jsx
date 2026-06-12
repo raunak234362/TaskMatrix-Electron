@@ -410,15 +410,17 @@ const GetRFQByID = ({ id, onClose }) => {
                                     >
                                         CD Quotes
                                     </button>
-                                    <button
-                                        onClick={() => setActiveTab("cdSent")}
-                                        className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "cdSent"
-                                            ? "bg-green-50 text-black border-green-700/80"
-                                            : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
-                                            }`}
-                                    >
-                                        Sent to CD
-                                    </button>
+                                    {(userRole === "ESTIMATOR" || userRole === "ESTIMATION_HEAD" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole === "DEPUTY_MANAGER") && (
+                                        <button
+                                            onClick={() => setActiveTab("cdSent")}
+                                            className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "cdSent"
+                                                ? "bg-green-50 text-black border-green-700/80"
+                                                : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
+                                                }`}
+                                        >
+                                            Sent to CD
+                                        </button>
+                                    )}
                                 </div>
 
                                 {activeTab === "responses" && (userRole === "ADMIN" ||

@@ -218,7 +218,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                     {flag}
                                                 </span>
                                             ))}
-                                            {(() => {
+                                            {!['connection_designer_engineer', 'connection_designer_admin'].includes(userRole) && (() => {
                                                 const rawList = [...(note.taggedUsers || []), ...(note.taggedUserIds || [])];
                                                 const seenIds = new Set();
                                                 const uniqueList = [];

@@ -576,6 +576,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
       const to = new Date(taskDateTo + "T23:59:59");
       list = list.filter((t) => t.created_on && new Date(t.created_on) <= to);
     }
+    list.sort((a, b) => new Date(b.created_on || b.createdAt || 0) - new Date(a.created_on || a.createdAt || 0));
     return list;
   }, [allTasks, taskSearch, taskStatusFilter, taskDateFrom, taskDateTo, taskProjectFilter]);
 
@@ -1047,9 +1048,10 @@ const GetEmployeeByID = ({ id, onClose }) => {
                             <thead>
                               <tr className="bg-[#f2f7f0] border-b border-black/8">
                                 <th className="text-left px-4 py-3 text-[10px] font-bold text-black uppercase tracking-wider w-[5%]">S.No</th>
-                                <th className="text-left px-4 py-3 text-[10px] font-bold text-black uppercase tracking-wider w-[30%]">Task</th>
-                                <th className="text-left px-4 py-3 text-[10px] font-bold text-black uppercase tracking-wider w-[22%]">Project Name</th>
-                                <th className="text-left px-4 py-3 text-[10px] font-bold text-black uppercase tracking-wider w-[12%]">WBS Type</th>
+                                <th className="text-left px-4 py-3 text-[10px] font-bold text-black uppercase tracking-wider w-[25%]">Task</th>
+                                <th className="text-left px-4 py-3 text-[10px] font-bold text-black uppercase tracking-wider w-[18%]">Project Name</th>
+                                <th className="text-left px-4 py-3 text-[10px] font-bold text-black uppercase tracking-wider w-[10%]">WBS Type</th>
+                                <th className="text-left px-4 py-3 text-[10px] font-bold text-black uppercase tracking-wider">Created Date</th>
                                 <th className="text-left px-4 py-3 text-[10px] font-bold text-black uppercase tracking-wider">Est. Hours</th>
                                 <th className="text-left px-4 py-3 text-[10px] font-bold text-black uppercase tracking-wider">Worked Hours</th>
                                 <th className="text-left px-4 py-3 text-[10px] font-bold text-black uppercase tracking-wider">Overrun</th>
@@ -1080,6 +1082,11 @@ const GetEmployeeByID = ({ id, onClose }) => {
                                     </td>
                                     <td className="px-4 py-3">
                                       <span className="text-xs text-black/60 font-semibold uppercase">{task.wbsType || "—"}</span>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                      <span className="text-xs text-black/80 font-semibold whitespace-nowrap">
+                                        {task.created_on ? new Date(task.created_on).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : (task.createdAt ? new Date(task.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—")}
+                                      </span>
                                     </td>
                                     <td className="px-4 py-3">
                                       <span className="text-xs font-semibold text-black/70 whitespace-nowrap">{secToHms(assignedSec)}</span>
@@ -1224,6 +1231,27 @@ const GetEmployeeByID = ({ id, onClose }) => {
                                           </span>
                                         </div>
                                         <span className="font-semibold text-black shrink-0 ml-3">{secToHms(Number(s.duration_seconds) || 0)}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Comments */}
+                              {t.taskcomment && t.taskcomment.length > 0 && (
+                                <div className="border border-black/8 border-l-4 border-l-green-600 rounded-lg overflow-hidden">
+                                  <div className="px-4 py-2 bg-gray-50 border-b border-black/5 flex items-center justify-between">
+                                    <p className="text-[10px] font-semibold text-black/50 uppercase tracking-wider">Comments</p>
+                                    <span className="text-[10px] font-semibold text-black/30">{t.taskcomment.length} comment{t.taskcomment.length !== 1 ? "s" : ""}</span>
+                                  </div>
+                                  <div className="divide-y divide-black/5 max-h-48 overflow-y-auto">
+                                    {t.taskcomment.map((c, i) => (
+                                      <div key={c.id || i} className="px-4 py-3 text-xs flex flex-col gap-1.5">
+                                        <div className="flex justify-between items-start">
+                                          <span className="font-bold text-black">{c.user?.firstName || "User"} {c.user?.lastName || ""}</span>
+                                          <span className="text-[9px] text-black/40 font-semibold uppercase tracking-widest">{c.created_on || c.createdAt ? new Date(c.created_on || c.createdAt).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : ""}</span>
+                                        </div>
+                                        <div className="text-black/80 font-medium whitespace-pre-wrap text-[11px]" dangerouslySetInnerHTML={{ __html: c.data || c.comment || "" }} />
                                       </div>
                                     ))}
                                   </div>

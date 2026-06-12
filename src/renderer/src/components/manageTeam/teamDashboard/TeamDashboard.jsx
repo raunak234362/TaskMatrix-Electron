@@ -117,6 +117,18 @@ const TeamDashboard = () => {
         });
       }
 
+      // Sort teams according to requested order
+      const teamOrder = ["tekla", "sds/2", "pemb", "pemb designing", "software team"];
+      teamsData.sort((a, b) => {
+        const indexA = teamOrder.indexOf((a.name || "").toLowerCase());
+        const indexB = teamOrder.indexOf((b.name || "").toLowerCase());
+        
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        if (indexA !== -1) return -1;
+        if (indexB !== -1) return 1;
+        return (a.name || "").localeCompare(b.name || "");
+      });
+
       setTeams(teamsData);
       setFilteredTeams(teamsData);
 
@@ -896,6 +908,7 @@ const TeamDashboard = () => {
                       const el = document.getElementById('members-table-section');
                       if (el) el.scrollIntoView({ behavior: 'smooth' });
                     }}
+                    onMemberClick={handleMemberClick}
                   />
                 )}
 

@@ -15,7 +15,7 @@ const AllEmployee = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("All");
   const [selectedDesignation, setSelectedDesignation] = useState("All");
-  const [selectedStatus, setSelectedStatus] = useState("All");
+  const [selectedStatus, setSelectedStatus] = useState("Active");
 
   const roles = useMemo(() => {
     const r = new Set((employees || []).map((emp) => emp.role).filter(Boolean));
@@ -81,7 +81,7 @@ const AllEmployee = () => {
         emp?.role?.toLowerCase().includes(q)
       );
     });
-  }, [employees, searchTerm, selectedRole, selectedDesignation]);
+  }, [employees, searchTerm, selectedRole, selectedDesignation, selectedStatus]);
 
   const columns = [
     { accessorKey: "username", header: "Username" },

@@ -505,9 +505,13 @@ const EditProject = ({
                     const selectedDeptId = watch("departmentID");
                     const filteredTeams = (Array.isArray(teamDatas) ? teamDatas : [])
                       .filter(
-                        (t) =>
-                          !selectedDeptId ||
-                          String(t.departmentID) === String(selectedDeptId)
+                        (t) => {
+                          const isDeleted = t.isDeleted === true || t.isDeleted === "true" || String(t.isDeleted).toLowerCase() === "true";
+                          if (isDeleted) return false;
+                          if (!selectedDeptId) return true;
+                          const tDeptId = t.departmentID || t.department?.id || t.department?._id || t.departmentId;
+                          return String(tDeptId) === String(selectedDeptId);
+                        }
                       )
                       .map((t) => ({
                         label: t.name,

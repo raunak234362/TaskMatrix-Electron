@@ -173,9 +173,10 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
       )
         return false;
       if (filters.overrunOnly && !isOverrun) return false;
-
-      // Filter by Date (assuming created_on as default)
-      if (!matchesDateFilter(project.created_on, dateFilter)) return false;
+ 
+      // Filter by Date
+      const dateToMatch = project.startDate || project.start_date || project.created_on || project.createdAt;
+      if (!matchesDateFilter(dateToMatch, dateFilter)) return false;
 
       return true;
     });
@@ -379,7 +380,7 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
 
           {/* Date Filter */}
           <div className="flex flex-col gap-1.5 w-full sm:w-auto">
-            
+            <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">Start Date</label>
             <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
           </div>
         </div>
