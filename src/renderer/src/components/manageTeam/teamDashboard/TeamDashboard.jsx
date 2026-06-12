@@ -22,6 +22,7 @@ import WorkloadAlerts from "../../dashboard/components/WorkloadAlerts";
 import DailyWorkReportModal from "./components/DailyWorkReportModal";
 import TeamCalendar from "./components/TeamCalendar";
 import { toast } from "react-toastify";
+import GithubDashboard from "./components/githubTracking/GithubDashboard";
 
 const TeamDashboard = () => {
   const dispatch = useDispatch();
@@ -42,6 +43,7 @@ const TeamDashboard = () => {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [memberFilter, setMemberFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     const isAnyModal =
@@ -887,9 +889,18 @@ const TeamDashboard = () => {
                   </div>
 
                   <div className="flex items-center gap-4 relative z-10">
-                    <span className="px-6 py-2 bg-green-100 text-black font-semibold text-xs uppercase tracking-widest rounded-xl cursor-pointer hover:bg-green-200/70 transition-all border-2 border-green-700">
+                    <button
+                      onClick={() => setActiveTab("overview")}
+                      className={`px-6 py-2 font-semibold text-xs uppercase tracking-widest rounded-xl cursor-pointer transition-all border-2 border-green-700 ${activeTab === "overview" ? "bg-green-100 text-black hover:bg-green-200/70" : "bg-white text-black hover:bg-green-50"}`}>
                       Overview
-                    </span>
+                    </button>
+                    {teams?.find((t) => t.id === selectedTeam)?.name?.toLowerCase() === "software team" && (
+                      <button
+                        onClick={() => setActiveTab("github")}
+                        className={`px-6 py-2 font-semibold text-xs uppercase tracking-widest rounded-xl cursor-pointer transition-all border-2 border-indigo-700 ${activeTab === "github" ? "bg-indigo-100 text-black hover:bg-indigo-200/70" : "bg-white text-black hover:bg-indigo-50"}`}>
+                        GitHub Tracking
+                      </button>
+                    )}
                     <button
                       onClick={() => setIsViewModalOpen(true)}
                       className="px-6 py-2 bg-white text-black font-semibold text-xs uppercase tracking-widest rounded-xl cursor-pointer hover:bg-green-200/70 transition-all border-2 border-green-700">
@@ -898,57 +909,63 @@ const TeamDashboard = () => {
                   </div>
                 </div>
 
-                <TeamStatsCards teamStats={teamStats} />
+                {activeTab === "github" ? (
+                  <GithubDashboard />
+                ) : (
+                  <>
+                    <TeamStatsCards teamStats={teamStats} />
 
-                {dateFilter.type === "specificDate" && (
-                  <WorkloadAlerts
-                    memberStats={fullTableData}
-                    onFilterChange={(f) => {
-                      setMemberFilter(f);
-                      const el = document.getElementById('members-table-section');
-                      if (el) el.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    onMemberClick={handleMemberClick}
-                  />
-                )}
+                    {dateFilter.type === "specificDate" && (
+                      <WorkloadAlerts
+                        memberStats={fullTableData}
+                        onFilterChange={(f) => {
+                          setMemberFilter(f);
+                          const el = document.getElementById('members-table-section');
+                          if (el) el.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        onMemberClick={handleMemberClick}
+                      />
+                    )}
 
-                <TeamCalendar
-                  members={allMemberStats}
-                  selectedTeamName={
-                    teams?.find((t) => t.id === selectedTeam)?.name
-                  }
-                />
-
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8 sm:mb-12">
-                  <div className="xl:col-span-2">
-                    <EfficiencyAnalytics
-                      data={efficiencyData}
-                      teams={teams}
-                      selectedTeams={selectedComparisonTeams}
-                      onTeamSelectionChange={setSelectedComparisonTeams}
-                      timeFilter={timeFilter}
-                      onTimeFilterChange={handleTimeFilterChange}
-                      dateRange={analyticsDateRange}
-                      onDateRangeChange={setAnalyticsDateRange}
+                    <TeamCalendar
+                      members={allMemberStats}
+                      selectedTeamName={
+                        teams?.find((t) => t.id === selectedTeam)?.name
+                      }
                     />
-                  </div>
-                  <div>
-                    <TaskDistribution teamStats={teamStats} />
-                  </div>
-                </div>
 
-                <div id="members-table-section">
-                  <TeamMembersTable
-                    tableData={tableData}
-                    onMemberClick={handleMemberClick}
-                    formatToHoursMinutes={formatToHoursMinutes}
-                    getEfficiencyColorClass={getEfficiencyColorClass}
-                    activeFilter={memberFilter}
-                    onFilterChange={setMemberFilter}
-                    memberCounts={memberCounts}
-                    dateFilter={dateFilter}
-                  />
-                </div>
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8 sm:mb-12">
+                      <div className="xl:col-span-2">
+                        <EfficiencyAnalytics
+                          data={efficiencyData}
+                          teams={teams}
+                          selectedTeams={selectedComparisonTeams}
+                          onTeamSelectionChange={setSelectedComparisonTeams}
+                          timeFilter={timeFilter}
+                          onTimeFilterChange={handleTimeFilterChange}
+                          dateRange={analyticsDateRange}
+                          onDateRangeChange={setAnalyticsDateRange}
+                        />
+                      </div>
+                      <div>
+                        <TaskDistribution teamStats={teamStats} />
+                      </div>
+                    </div>
+
+                    <div id="members-table-section">
+                      <TeamMembersTable
+                        tableData={tableData}
+                        onMemberClick={handleMemberClick}
+                        formatToHoursMinutes={formatToHoursMinutes}
+                        getEfficiencyColorClass={getEfficiencyColorClass}
+                        activeFilter={memberFilter}
+                        onFilterChange={setMemberFilter}
+                        memberCounts={memberCounts}
+                        dateFilter={dateFilter}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
