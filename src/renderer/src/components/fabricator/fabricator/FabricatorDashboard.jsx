@@ -5,20 +5,17 @@ import {
   Briefcase,
   TrendingUp,
   FileText,
-  MessageSquare,
-  FileCheck,
-  AlertCircle,
-  Clock,
-  CheckCircle2,
   Search,
   X,
 } from "lucide-react";
 
 import DataTable from "../../ui/table";
 import GetProjectById from "../../project/GetProjectById";
+import Modal from "../../ui/Modal";
 
 const FabricatorDashboard = ({ fabricator }) => {
   const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
   const [rfqs, setRfqs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -51,10 +48,30 @@ const FabricatorDashboard = ({ fabricator }) => {
       setProjects(fabProjects);
 
       // 2. Fetch RFQs for this fabricator
-      const rfqReceived = await Service.RFQRecieved();
-      const fabRfqs = (rfqReceived?.data || rfqReceived || []).filter(
+      let allRfqs = [];
+      try {
+        const allRfqsResponse = await Service.FetchAllRFQ();
+        allRfqs = allRfqsResponse?.data || allRfqsResponse || [];
+      } catch (err) {
+        console.error("Error fetching all RFQs:", err);
+      }
+
+      if (allRfqs.length === 0) {
+        try {
+          const rfqReceived = await Service.RFQRecieved();
+          allRfqs = rfqReceived?.data || rfqReceived || [];
+        } catch (err) {
+          console.error("Error fetching received RFQs:", err);
+        }
+      }
+
+      const fabRfqs = allRfqs.filter(
         (r) =>
-          r.recipientId === fabricator.id || r.senderId === fabricator.id
+          String(r.fabricatorId) === String(fabricator.id) ||
+          String(r.fabricator?.id) === String(fabricator.id) ||
+          String(r.fabricator?._id) === String(fabricator.id) ||
+          r.recipientId === fabricator.id ||
+          r.senderId === fabricator.id
       );
       setRfqs(fabRfqs);
 
@@ -123,38 +140,7 @@ const FabricatorDashboard = ({ fabricator }) => {
         </div>
       ),
     },
-    {
-      accessorKey: "IFAComepletionPercentage",
-      header: "IFA %",
-      cell: ({ row }) => (
-        <div className="flex flex-col gap-1 w-20">
-          <div className="flex justify-between text-sm font-black italic tracking-normal">
-            <span>{row.original.IFAComepletionPercentage || 0}%</span>
-          </div>
-          <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden border border-black/5">
-            <div
-              className="h-full bg-green-500 transition-all duration-500"
-              style={{ width: `${Math.min(100, row.original.IFAComepletionPercentage || 0)}%` }}
-            />
-          </div>
-        </div>
-      )
-    },
     { accessorKey: "stage", header: "Stage" },
-    {
-      accessorKey: "dates",
-      header: "Timeline",
-      cell: ({ row }) => (
-        <div className="flex flex-col text-sm font-bold text-black/50 uppercase tracking-normal leading-tight">
-          <div className="flex items-center gap-1">
-            <span className="text-sm opacity-40">S:</span> {row.original.startDate ? new Date(row.original.startDate).toLocaleDateString() : "—"}
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-sm opacity-40">E:</span> {row.original.endDate ? new Date(row.original.endDate).toLocaleDateString() : "—"}
-          </div>
-        </div>
-      )
-    },
     {
       accessorKey: "status",
       header: "Status",
@@ -169,27 +155,6 @@ const FabricatorDashboard = ({ fabricator }) => {
         </span>
       ),
     },
-    {
-      id: "stats",
-      header: "Stats",
-      cell: ({ row }) => (
-        <div className="flex gap-4 text-sm font-bold text-black/60 uppercase tracking-normal">
-          <span title="RFIs" className="flex items-center gap-1.5">
-            <MessageSquare size={13} className="text-orange-500" /> {row.original.rfi?.length || 0}
-          </span>
-          <span title="Submittals" className="flex items-center gap-1.5">
-            <FileCheck size={13} className="text-purple-500" /> {row.original.submittals?.length || 0}
-          </span>
-          <span title="Change Orders" className="flex items-center gap-1.5">
-            <AlertCircle size={13} className="text-red-500" /> {
-              Array.isArray(row.original.changeOrders)
-                ? row.original.changeOrders.length
-                : row.original.changeOrders ? 1 : 0
-            }
-          </span>
-        </div>
-      ),
-    },
   ];
 
   if (loading) {
@@ -202,7 +167,7 @@ const FabricatorDashboard = ({ fabricator }) => {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="flex flex-col gap-8 animate-in fade-in duration-500">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <StatCard
@@ -211,7 +176,7 @@ const FabricatorDashboard = ({ fabricator }) => {
           value={stats.totalProjects}
         />
         <StatCard
-          icon={TrendingUp}Total Project
+          icon={TrendingUp}
           label="Active Projects"
           value={stats.activeProjects}
         />
@@ -223,7 +188,7 @@ const FabricatorDashboard = ({ fabricator }) => {
       </div>
 
       {/* Projects Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden animate-in fade-in duration-300">
+      <div className="bg-white rounded-2xl shadow-sm overflow-hidden animate-in fade-in duration-300 mt-4">
         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <h3 className="text-sm font-black text-black uppercase tracking-normal flex items-center gap-2">
             <Briefcase size={18} className="text-green-600" />
@@ -295,70 +260,22 @@ const FabricatorDashboard = ({ fabricator }) => {
         <DataTable
           columns={columns}
           data={filteredProjects}
-          detailComponent={({ row, close }) => <GetProjectById id={row.id} onClose={close} />}
+          onRowClick={(row) => setSelectedProject(row)}
         />
       </div>
 
-      {/* Grid for Recent RFQs and Timeline Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent RFQs */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
-            <h3 className="text-sm font-black text-black uppercase tracking-normal flex items-center gap-2">
-              <FileText size={18} className="text-green-600" />
-              Recent RFQs
-            </h3>
-          </div>
-          <div className="p-4 space-y-3">
-            {rfqs.slice(0, 5).map((rfq) => (
-              <div
-                key={rfq.id}
-                className="flex items-center justify-between px-4 py-3 rounded-xl bg-gray-50 hover:bg-green-50/50 transition-all border border-transparent hover:border-black/5 group"
-              >
-                <div>
-                  <p className="font-bold text-black uppercase text-sm tracking-normal">{rfq.projectName}</p>
-                  <p className="text-sm text-black/40 font-black uppercase tracking-normal mt-1">
-                    {new Date(rfq.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <span className="text-sm font-black uppercase tracking-normal text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-200">
-                  {rfq.status || "PENDING"}
-                </span>
-              </div>
-            ))}
-            {rfqs.length === 0 && (
-              <div className="text-center py-10">
-                <FileText size={40} className="mx-auto text-gray-200 mb-2" />
-                <p className="text-black/40 font-black uppercase tracking-normal text-sm">No RFQs Found</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Timeline Summary */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50">
-            <h3 className="text-sm font-black text-black uppercase tracking-normal flex items-center gap-2">
-              <Clock size={18} className="text-green-600" />
-              Timeline Summary
-            </h3>
-          </div>
-          <div className="p-6 space-y-6">
-            <TimelineItem
-              label="Latest Project"
-              value={projects[0]?.name || "N/A"}
-              date={projects[0]?.startDate}
-              icon={<CheckCircle2 className="text-green-500" size={20} />}
-            />
-            <TimelineItem
-              label="Upcoming Deadline"
-              value={projects.find((p) => p.status === "ACTIVE")?.name || "N/A"}
-              date={projects.find((p) => p.status === "ACTIVE")?.endDate}
-              icon={<Clock className="text-green-500" size={20} />}
-            />
-          </div>
-        </div>
-      </div>
+      {selectedProject && (
+        <Modal
+          isOpen={!!selectedProject}
+          onClose={() => setSelectedProject(null)}
+          hideHeader={true}
+        >
+          <GetProjectById
+            id={selectedProject.id}
+            onClose={() => setSelectedProject(null)}
+          />
+        </Modal>
+      )}
     </div>
   );
 };
@@ -378,32 +295,6 @@ const StatCard = ({ icon: Icon, label, value }) => (
     <p className="text-xl font-bold text-black tracking-normal ml-4">
       {value}
     </p>
-  </div>
-);
-
-const TimelineItem = ({
-  label,
-  value,
-  date,
-  icon,
-}) => (
-  <div className="flex gap-4 group">
-    <div className="mt-1 transition-transform group-hover:scale-110 duration-300">
-      {icon}
-    </div>
-    <div className="flex-1">
-      <p className="text-sm font-black text-black/40 uppercase tracking-normal mb-1">{label}</p>
-      <p className="text-sm font-bold text-black uppercase tracking-normal">{value}</p>
-      {date && (
-        <p className="text-sm font-black text-green-700/60 uppercase tracking-normal mt-1">
-          {new Date(date).toLocaleDateString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-          })}
-        </p>
-      )}
-    </div>
   </div>
 );
 

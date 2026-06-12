@@ -694,7 +694,7 @@ const GetProjectById = ({ id, onClose }) => {
                 </div>                {/* Section 3: Project Details & Scopes */}
                 <div className="bg-[#f4faf0] p-6 rounded-none mt-8">
                   {/* Project Details Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-base">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm">
                     {/* Left Column */}
                     <div className="space-y-4">
                       <div className="flex justify-between items-center pb-2 border-b border-gray-200">
