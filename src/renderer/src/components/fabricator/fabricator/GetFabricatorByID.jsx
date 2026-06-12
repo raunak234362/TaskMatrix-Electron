@@ -144,7 +144,7 @@ const GetFabricatorByID = ({ id, onClose }) => {
             <button
               onClick={() => setActiveTab("details")}
               className={`px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-normal transition-all border-2 shadow-sm active:scale-95 ${activeTab === "details"
-                ? "bg-green-50 text-green-700 border-green-700/80 hover:bg-green-100"
+                ? "bg-green-50 text-black border-green-700/80 hover:bg-green-100"
                 : "bg-white text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-black hover:border-gray-400"
                 }`}
             >
@@ -153,7 +153,7 @@ const GetFabricatorByID = ({ id, onClose }) => {
             <button
               onClick={() => setActiveTab("account")}
               className={`px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-normal transition-all border-2 shadow-sm active:scale-95 ${activeTab === "account"
-                ? "bg-green-50 text-green-700 border-green-700/80 hover:bg-green-100"
+                ? "bg-green-50 text-black border-green-700/80 hover:bg-green-100"
                 : "bg-white text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-black hover:border-gray-400"
                 }`}
             >
