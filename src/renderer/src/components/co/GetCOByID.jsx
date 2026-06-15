@@ -1,11 +1,12 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Service from "../../api/Service";
 
-import { AlertCircle, ChevronDown, ChevronUp, Clock, History, Loader2 } from "lucide-react";
-import { openFileSecurely } from "../../utils/openFileSecurely";
+import { AlertCircle, Loader2, X } from "lucide-react";
+
 
 import DataTable from "../ui/table";
 import Button from "../fields/Button";
+import CoTableView from "./CoTableView";
 import CoResponseModal from "./CoResponseModal";
 import COResponseDetailsModal from "./CoResponseDetailsModal";
 
@@ -36,6 +37,9 @@ const GetCOByID = ({ id, projectId }) => {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedResponse, setSelectedResponse] = useState(null);
   const [viewingVersionId, setViewingVersionId] = useState(null);
+  const [showTableModal, setShowTableModal] = useState(false);
+  const [tableRows, setTableRows] = useState([]);
+  const [tableLoading, setTableLoading] = useState(false);
 
   const userRole = sessionStorage.getItem("userRole");
   console.log(id);
@@ -71,16 +75,7 @@ const GetCOByID = ({ id, projectId }) => {
     return currentVersion?.id === co?.currentVersionId || (!co?.versions?.length);
   }, [currentVersion, co, canSeeAllVersions]);
 
-  const encodedCO = useMemo(() => {
-    if (!co || !currentVersion) return "";
-    // We want to pass the current version's table data and files
-    const dataToEncode = {
-      ...co,
-      ...currentVersion,
-      changeOrderTables: currentVersion.changeOrderTables || co.CoRefersTo || []
-    };
-    return encodeURIComponent(JSON.stringify(dataToEncode));
-  }, [co, currentVersion]);
+
 
   const responses = useMemo(() => {
     try {
@@ -122,6 +117,41 @@ const GetCOByID = ({ id, projectId }) => {
   useEffect(() => {
     fetchCO();
   }, [id, projectId]);
+
+  /* -------------------- FETCH TABLE ROWS FOR POPUP -------------------- */
+  useEffect(() => {
+    if (!showTableModal) return;
+    const coId = co?.id || co?._id;
+    if (!coId) return;
+
+    const fetchTableRows = async () => {
+      try {
+        setTableLoading(true);
+        const response = await Service.GetAllCOTableRows(coId);
+        const rows = response?.data || [];
+        if (rows.length > 0) {
+          setTableRows(rows);
+        } else {
+          // Fallback to inline data if API returns nothing
+          const fallbackData = currentVersion
+            ? currentVersion.changeOrderTables || co.CoRefersTo || []
+            : co.CoRefersTo || [];
+          setTableRows(fallbackData);
+        }
+      } catch (err) {
+        console.error("Failed to fetch table rows for popup:", err);
+        // Fallback to inline data
+        const fallbackData = currentVersion
+          ? currentVersion.changeOrderTables || co.CoRefersTo || []
+          : co.CoRefersTo || [];
+        setTableRows(fallbackData);
+      } finally {
+        setTableLoading(false);
+      }
+    };
+
+    fetchTableRows();
+  }, [showTableModal]);
 
   /* -------------------- EARLY RETURNS -------------------- */
   if (loading) {
@@ -301,9 +331,7 @@ const GetCOByID = ({ id, projectId }) => {
             {isViewingCurrent && (
               <div className="pt-2">
                 <button
-                  onClick={() =>
-                    window.open(`/#/co-table?coData=${encodedCO}`, "_blank")
-                  }
+                  onClick={() => setShowTableModal(true)}
                   className="px-6 py-2 bg-green-50 text-green-700 border border-green-600 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-green-100 transition-all shadow-sm"
                 >
                   View Change Order Reference Table
@@ -373,6 +401,72 @@ const GetCOByID = ({ id, projectId }) => {
           onSuccess={fetchCO}
         />
       )}
+
+      {/* ================= CO TABLE POPUP ================= */}
+      {showTableModal && (() => {
+        const totalQty = tableRows.reduce((s, r) => s + (Number(r.QtyNo) || 0), 0);
+        const totalHours = tableRows.reduce((s, r) => s + (Number(r.hours) || 0), 0);
+        const totalCost = tableRows.reduce((s, r) => s + (Number(r.cost) || 0), 0);
+
+        return (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-gray-50 rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-200">
+              {/* Modal Header */}
+              <div className="bg-white px-6 py-4 flex justify-between items-center border-b border-gray-200 shrink-0">
+                <div>
+                  <h1 className="text-xl font-bold text-green-700">
+                    Change Order Reference Table
+                  </h1>
+                  <p className="text-sm text-gray-500">
+                    COR-{co.changeOrderNumber?.slice(-3) || "—"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-semibold">
+                    Read Only
+                  </span>
+                  <button
+                    onClick={() => setShowTableModal(false)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Body */}
+              <div className="overflow-y-auto flex-1 p-6 space-y-6">
+                {tableLoading ? (
+                  <div className="flex items-center justify-center py-12 text-gray-500">
+                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                    Loading table data...
+                  </div>
+                ) : (
+                  <>
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {[{ label: "Total Quantity", value: totalQty }, { label: "Total Hours", value: `${totalHours} hrs` }, { label: "Total Cost", value: `$${totalCost}` }].map((card) => (
+                        <div key={card.label} className="bg-white rounded-xl shadow-sm border p-4">
+                          <p className="text-xs uppercase text-gray-700 font-semibold">{card.label}</p>
+                          <p className="text-2xl text-gray-700 mt-1">{card.value}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Table */}
+                    <CoTableView rows={tableRows} />
+
+                    {/* Footer */}
+                    <div className="text-xs text-gray-400 text-center pt-2">
+                      This table is auto-generated from the Change Order and is read-only.
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </>
   );
 };
