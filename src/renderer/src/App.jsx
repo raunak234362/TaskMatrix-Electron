@@ -26,6 +26,48 @@ const AppContent = () => {
     }
   }, [userDetail?.id])
 
+  // Listen for auto-update events from the main process
+  useEffect(() => {
+    if (window?.electron?.ipcRenderer) {
+      const handleUpdateAvailable = (_, info) => {
+        toast.info(`📢 A new version (${info?.version || ''}) is available! Downloading update...`, {
+          autoClose: 8000,
+          toastId: 'update-available'
+        })
+      }
+
+      const handleUpdateDownloaded = (_, info) => {
+        toast.success(
+          <div className="flex flex-col gap-2">
+            <span>🎉 Update version ${info?.version || ''} downloaded successfully!</span>
+            <button
+              onClick={() => window.electron.ipcRenderer.send('restart_app')}
+              className="mt-1 bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded text-xs transition cursor-pointer"
+            >
+              Restart & Apply Update
+            </button>
+          </div>,
+          {
+            position: "top-right",
+            autoClose: false,
+            closeOnClick: false,
+            draggable: false,
+            closeButton: true,
+            toastId: 'update-downloaded'
+          }
+        )
+      }
+
+      window.electron.ipcRenderer.on('update-available', handleUpdateAvailable)
+      window.electron.ipcRenderer.on('update-downloaded', handleUpdateDownloaded)
+
+      return () => {
+        window.electron.ipcRenderer.removeListener('update-available', handleUpdateAvailable)
+        window.electron.ipcRenderer.removeListener('update-downloaded', handleUpdateDownloaded)
+      }
+    }
+  }, [])
+
   /*
   // Electron IPC test handler
   const ipcHandle = () => {

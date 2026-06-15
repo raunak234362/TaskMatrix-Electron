@@ -38,5 +38,6 @@ appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://project-station.whiteboardtec.com:5160/auto-updates/
+  provider: github
+  owner: raunak234362
+  repo: TaskMatrix-Electron
