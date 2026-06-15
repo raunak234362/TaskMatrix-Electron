@@ -1,7 +1,12 @@
 import axios from "axios";
 
-const TOKEN_WBTIT = import.meta.env.VITE_GITHUB_TOKEN_WBTIT;
-const TOKEN_RAUNAK = import.meta.env.VITE_GITHUB_TOKEN_RAUNAK;
+const cleanToken = (val) => {
+  if (!val) return null;
+  return val.trim().replace(/^["']|["']$/g, "").trim();
+};
+
+const TOKEN_WBTIT = cleanToken(import.meta.env.VITE_GITHUB_TOKEN_WBTIT);
+const TOKEN_RAUNAK = cleanToken(import.meta.env.VITE_GITHUB_TOKEN_RAUNAK);
 
 const getTokenForOwner = (owner) => {
   if (!owner) return null;
