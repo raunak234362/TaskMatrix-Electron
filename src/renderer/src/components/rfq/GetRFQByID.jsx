@@ -45,7 +45,11 @@ const GetRFQByID = ({ id, onClose }) => {
     const [statusReason, setStatusReason] = useState("");
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
     const [showDescription, setShowDescription] = useState(false);
-    const [activeTab, setActiveTab] = useState("responses");
+    const [activeTab, setActiveTab] = useState(
+        sessionStorage.getItem("userRole") === "ESTIMATOR" || sessionStorage.getItem("userRole") === "ESTIMATION_HEAD"
+            ? "cdSent"
+            : "responses"
+    );
     const [followUpDescription, setFollowUpDescription] = useState("");
     const [followUpFiles, setFollowUpFiles] = useState([]);
     const [isSubmittingFollowUp, setIsSubmittingFollowUp] = useState(false);
@@ -391,142 +395,144 @@ const GetRFQByID = ({ id, onClose }) => {
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
                     <div className="grid grid-cols-1 gap-4 sm:gap-6">
                       {/* ---------------- RIGHT COLUMN — RESPONSES & CD QUOTAS ---------------- */}
-                      {userRole !== "ESTIMATOR" && userRole !== "ESTIMATION_HEAD" && (
-                        <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8 flex flex-col min-h-0">
-                            {/* Header + Add Response Button */}
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-300 pb-4">
-                                <div className="flex flex-wrap gap-3 items-center">
-                                    <button
-                                        onClick={() => setActiveTab("responses")}
-                                        className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "responses"
-                                            ? "bg-green-50 text-black border-green-700/80"
-                                            : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
-                                            }`}
-                                    >
-                                        Responses
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveTab("cdQuotas")}
-                                        className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "cdQuotas"
-                                            ? "bg-green-50 text-black border-green-700/80"
-                                            : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
-                                            }`}
-                                    >
-                                        CD Quotes
-                                    </button>
-                                    {(userRole === "ESTIMATOR" || userRole === "ESTIMATION_HEAD" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole === "DEPUTY_MANAGER") && (
-                                        <button
-                                            onClick={() => setActiveTab("cdSent")}
-                                            className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "cdSent"
-                                                ? "bg-green-50 text-black border-green-700/80"
-                                                : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
-                                                }`}
-                                        >
-                                            Sent to CD
-                                        </button>
-                                    )}
-                                </div>
+                      <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8 flex flex-col min-h-0">
+                          {/* Header + Add Response Button */}
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-300 pb-4">
+                              <div className="flex flex-wrap gap-3 items-center">
+                                  {userRole !== "ESTIMATOR" && userRole !== "ESTIMATION_HEAD" && (
+                                      <>
+                                          <button
+                                              onClick={() => setActiveTab("responses")}
+                                              className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "responses"
+                                                  ? "bg-green-50 text-black border-green-700/80"
+                                                  : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
+                                                  }`}
+                                          >
+                                              Responses
+                                          </button>
+                                          <button
+                                              onClick={() => setActiveTab("cdQuotas")}
+                                              className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "cdQuotas"
+                                                  ? "bg-green-50 text-black border-green-700/80"
+                                                  : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
+                                                  }`}
+                                          >
+                                              CD Quotes
+                                          </button>
+                                      </>
+                                  )}
+                                  {(userRole === "ESTIMATOR" || userRole === "ESTIMATION_HEAD" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole === "DEPUTY_MANAGER") && (
+                                      <button
+                                          onClick={() => setActiveTab("cdSent")}
+                                          className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "cdSent"
+                                              ? "bg-green-50 text-black border-green-700/80"
+                                              : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
+                                              }`}
+                                      >
+                                          Sent to CD
+                                      </button>
+                                  )}
+                              </div>
 
-                                {activeTab === "responses" && (userRole === "ADMIN" ||
-                                    userRole === "DEPUTY_MANAGER" ||
-                                    userRole === "OPERATION_EXECUTIVE" ||
-                                    userRole === "ESTIMATION_HEAD") && (
-                                        <button
-                                            onClick={() => setShowResponseModal(true)}
-                                            className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm whitespace-nowrap"
-                                        >
-                                            + Add Response
-                                        </button>
-                                    )}
-                            </div>
+                              {activeTab === "responses" && (userRole === "ADMIN" ||
+                                  userRole === "DEPUTY_MANAGER" ||
+                                  userRole === "OPERATION_EXECUTIVE" ||
+                                  userRole === "ESTIMATION_HEAD") && (
+                                      <button
+                                          onClick={() => setShowResponseModal(true)}
+                                          className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm whitespace-nowrap"
+                                      >
+                                          + Add Response
+                                      </button>
+                                  )}
+                          </div>
 
-                            <div className="flex-1 overflow-auto">
-                                {activeTab === "responses" && (
-                                    <>
-                                        {showResponseModal && (
-                                            <ResponseModal
-                                                rfqId={id}
-                                                onClose={() => setShowResponseModal(false)}
-                                                onSuccess={fetchRfq}
-                                            />
-                                        )}
+                          <div className="flex-1 overflow-auto">
+                              {activeTab === "responses" && (
+                                  <>
+                                      {showResponseModal && (
+                                          <ResponseModal
+                                              rfqId={id}
+                                              onClose={() => setShowResponseModal(false)}
+                                              onSuccess={fetchRfq}
+                                          />
+                                      )}
 
-                                        {/* ---- RESPONSE TABLE ---- */}
-                                        {rfq?.responses?.length ? (
-                                            <DataTable
-                                                columns={responseColumns}
-                                                data={rfq.responses}
-                                                onRowClick={(row) => setSelectedResponse(row)}
-                                            />
-                                        ) : (
-                                            <p className="text-black italic font-bold p-4 text-center">No responses yet.</p>
-                                        )}
-                                    </>
-                                )}
+                                      {/* ---- RESPONSE TABLE ---- */}
+                                      {rfq?.responses?.length ? (
+                                          <DataTable
+                                              columns={responseColumns}
+                                              data={rfq.responses}
+                                              onRowClick={(row) => setSelectedResponse(row)}
+                                          />
+                                      ) : (
+                                          <p className="text-black italic font-bold p-4 text-center">No responses yet.</p>
+                                      )}
+                                  </>
+                              )}
 
-                                {activeTab === "cdQuotas" && (
-                                    <>
-                                        {/* ---- CDQUOTAS TABLE ---- */}
-                                        {rfq?.CDQuotas?.length ? (
-                                            <DataTable
-                                                columns={cdQuotasColumns}
-                                                data={rfq.CDQuotas}
-                                                onRowClick={(row) => setSelectedCDQuota(row)}
-                                            />
-                                        ) : (
-                                            <p className="text-black italic font-bold p-4 text-center">No CD Quotas available.</p>
-                                        )}
-                                    </>
-                                )}
+                              {activeTab === "cdQuotas" && (
+                                  <>
+                                      {/* ---- CDQUOTAS TABLE ---- */}
+                                      {rfq?.CDQuotas?.length ? (
+                                          <DataTable
+                                              columns={cdQuotasColumns}
+                                              data={rfq.CDQuotas}
+                                              onRowClick={(row) => setSelectedCDQuota(row)}
+                                          />
+                                      ) : (
+                                          <p className="text-black italic font-bold p-4 text-center">No CD Quotas available.</p>
+                                      )}
+                                  </>
+                              )}
 
-                                {activeTab === "cdSent" && (
-                                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-2">
-                                                <User size={16} className="text-black" />
-                                                <h4 className="text-sm font-bold text-black uppercase tracking-wider">Recipients</h4>
-                                            </div>
-                                            <div className="flex flex-wrap gap-2">
-                                                {rfq?.connectionDesignerRFQ?.length ? (
-                                                    rfq.connectionDesignerRFQ.map((cd) => (
-                                                        <div key={cd.id} className="px-3 py-1.5 bg-white border border-black rounded-xl text-sm font-bold text-black shadow-sm">
-                                                            {cd.name}
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <p className="text-sm text-black italic">No recipients assigned</p>
-                                                )}
-                                            </div>
-                                        </div>
+                              {activeTab === "cdSent" && (
+                                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                      <div className="space-y-4">
+                                          <div className="flex items-center gap-2">
+                                              <User size={16} className="text-black" />
+                                              <h4 className="text-sm font-bold text-black uppercase tracking-wider">Recipients</h4>
+                                          </div>
+                                          <div className="flex flex-wrap gap-2">
+                                              {rfq?.connectionDesignerRFQ?.length ? (
+                                                  rfq.connectionDesignerRFQ.map((cd) => (
+                                                      <div key={cd.id} className="px-3 py-1.5 bg-white border border-black rounded-xl text-sm font-bold text-black shadow-sm">
+                                                          {cd.name}
+                                                      </div>
+                                                  ))
+                                              ) : (
+                                                  <p className="text-sm text-black italic">No recipients assigned</p>
+                                              )}
+                                          </div>
+                                      </div>
 
-                                        <div className="space-y-4 pt-4 border-t border-gray-200">
-                                            <div className="flex items-center gap-2">
-                                                <Layout size={16} className="text-black" />
-                                                <h4 className="text-sm font-bold text-black uppercase tracking-wider">Sent Package Description</h4>
-                                            </div>
-                                            <div 
-                                                className="bg-white p-5 rounded-2xl border border-black prose prose-sm max-w-none text-sm font-medium text-black"
-                                                dangerouslySetInnerHTML={{ __html: rfq?.CDDescription || "No description provided" }}
-                                            />
-                                        </div>
+                                      <div className="space-y-4 pt-4 border-t border-gray-200">
+                                          <div className="flex items-center gap-2">
+                                              <Layout size={16} className="text-black" />
+                                              <h4 className="text-sm font-bold text-black uppercase tracking-wider">Sent Package Description</h4>
+                                          </div>
+                                          <div 
+                                              className="bg-white p-5 rounded-2xl border border-black prose prose-sm max-w-none text-sm font-medium text-black"
+                                              dangerouslySetInnerHTML={{ __html: rfq?.CDDescription || "No description provided" }}
+                                          />
+                                      </div>
 
-                                        <div className="space-y-4 pt-4 border-t border-gray-200">
-                                            <div className="flex items-center gap-2">
-                                                <Paperclip size={16} className="text-black" />
-                                                <h4 className="text-sm font-bold text-black uppercase tracking-wider">Sent Attachments</h4>
-                                            </div>
-                                            <RenderFiles
-                                                files={rfq?.CDAttachments || []}
-                                                table="rFQ"
-                                                parentId={rfq?.id}
-                                                formatDate={(date) => new Date(date).toLocaleDateString()}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                      )}
+                                      <div className="space-y-4 pt-4 border-t border-gray-200">
+                                          <div className="flex items-center gap-2">
+                                              <Paperclip size={16} className="text-black" />
+                                              <h4 className="text-sm font-bold text-black uppercase tracking-wider">Sent Attachments</h4>
+                                          </div>
+                                          <RenderFiles
+                                              files={rfq?.CDAttachments || []}
+                                              table="rFQ"
+                                              parentId={rfq?.id}
+                                              formatDate={(date) => new Date(date).toLocaleDateString()}
+                                          />
+                                      </div>
+                                  </div>
+                              )}
+                          </div>
+                      </div>
                         {/* ---------------- LEFT COLUMN — RFQ DETAILS ---------------- */}
                         <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8">
 
