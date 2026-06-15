@@ -1,49 +1,125 @@
 
+const EDITABLE_COLS = ["description", "referenceDoc", "elements", "QtyNo", "hours", "cost", "remarks"];
+
 const CoTableView = ({ rows }) => {
+  // Compute cell spans dynamically
+  const cellSpans = [];
+  for (let r = 0; r < rows.length; r++) {
+    const rowSpans = [];
+    for (let c = 0; c < EDITABLE_COLS.length; c++) {
+      rowSpans.push({ rowSpan: 1, colSpan: 1, isSpanned: false });
+    }
+    cellSpans.push(rowSpans);
+  }
+
+  for (let r = 0; r < rows.length; r++) {
+    for (let c = 0; c < EDITABLE_COLS.length; c++) {
+      if (cellSpans[r]?.[c]?.isSpanned) continue;
+
+      let colSpan = 1;
+      let nextCol = c + 1;
+      while (nextCol < EDITABLE_COLS.length) {
+        const fieldName = EDITABLE_COLS[nextCol];
+        if (rows[r]?.[fieldName] === "_MERGED_LEFT_") {
+          colSpan++;
+          nextCol++;
+        } else {
+          break;
+        }
+      }
+
+      let rowSpan = 1;
+      let nextRow = r + 1;
+      while (nextRow < rows.length) {
+        let allMergedUp = true;
+        for (let offset = 0; offset < colSpan; offset++) {
+          const fieldName = EDITABLE_COLS[c + offset];
+          if (rows[nextRow]?.[fieldName] !== "_MERGED_UP_") {
+            allMergedUp = false;
+            break;
+          }
+        }
+        if (allMergedUp) {
+          rowSpan++;
+          nextRow++;
+        } else {
+          break;
+        }
+      }
+
+      for (let ri = r; ri < r + rowSpan; ri++) {
+        for (let ci = c; ci < c + colSpan; ci++) {
+          if (ri === r && ci === c) continue;
+          if (cellSpans[ri]?.[ci]) {
+            cellSpans[ri][ci].isSpanned = true;
+          }
+        }
+      }
+
+      if (cellSpans[r]?.[c]) {
+        cellSpans[r][c].rowSpan = rowSpan;
+        cellSpans[r][c].colSpan = colSpan;
+      }
+    }
+  }
+
   return (
     <div className="bg-white rounded-xl shadow-md border overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full text-sm text-left">
+        <table className="min-w-full text-sm text-left border-collapse">
           <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
             <tr>
-              <th className="px-4 py-3">#</th>
-              <th className="px-4 py-3">Description</th>
-              <th className="px-4 py-3">Reference</th>
-              <th className="px-4 py-3">Elements</th>
-              <th className="px-4 py-3 text-center">Qty</th>
-              <th className="px-4 py-3 text-center">Hours</th>
-              <th className="px-4 py-3 text-right">Cost ($)</th>
-              <th className="px-4 py-3">Remarks</th>
+              <th className="px-4 py-3 border border-gray-200">#</th>
+              <th className="px-4 py-3 border border-gray-200">Description</th>
+              <th className="px-4 py-3 border border-gray-200">Reference</th>
+              <th className="px-4 py-3 border border-gray-200">Elements</th>
+              <th className="px-4 py-3 text-center border border-gray-200">Qty</th>
+              <th className="px-4 py-3 text-center border border-gray-200">Hours</th>
+              <th className="px-4 py-3 text-right border border-gray-200">Cost ($)</th>
+              <th className="px-4 py-3 border border-gray-200">Remarks</th>
             </tr>
           </thead>
 
           <tbody className="divide-y">
             {rows.map((r, i) => (
-              <tr key={r.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3 text-gray-700">{i + 1}</td>
+              <tr key={r.id || i} className="hover:bg-gray-50">
+                <td className="px-4 py-3 text-gray-700 border border-gray-200">{i + 1}</td>
 
-                <td className="px-4 py-3 max-w-xs">
-                  <p className="line-clamp-2">{r.description}</p>
-                </td>
+                {EDITABLE_COLS.map((colName, colIndex) => {
+                  const spanInfo = cellSpans[i]?.[colIndex] || { rowSpan: 1, colSpan: 1, isSpanned: false };
+                  if (spanInfo.isSpanned) return null;
 
-                <td className="px-4 py-3">{r.referenceDoc}</td>
-                <td className="px-4 py-3">{r.elements}</td>
+                  const cellVal = r[colName];
+                  
+                  let formattedVal = cellVal;
+                  if (cellVal === "_MERGED_LEFT_" || cellVal === "_MERGED_UP_") {
+                    formattedVal = "";
+                  } else if (colName === "cost" && typeof cellVal === "number") {
+                    formattedVal = `$${cellVal.toLocaleString()}`;
+                  } else if (colName === "cost" && cellVal && !isNaN(Number(cellVal))) {
+                    formattedVal = `$${Number(cellVal).toLocaleString()}`;
+                  } else if (colName === "remarks" && (!cellVal || String(cellVal).trim() === "")) {
+                    formattedVal = "—";
+                  }
 
-                <td className="px-4 py-3 text-center font-medium">
-                  {r.QtyNo}
-                </td>
+                  let alignmentClass = "text-left";
+                  if (["QtyNo", "hours"].includes(colName)) {
+                    alignmentClass = "text-center font-medium";
+                  } else if (colName === "cost") {
+                    alignmentClass = "text-right font-semibold";
+                  }
 
-                <td className="px-4 py-3 text-center">
-                  {r.hours}
-                </td>
-
-                <td className="px-4 py-3 text-right font-semibold">
-                  ${r.cost}
-                </td>
-
-                <td className="px-4 py-3 max-w-xs text-gray-700">
-                  {r.remarks || "—"}
-                </td>
+                  return (
+                    <td
+                      key={colName}
+                      colSpan={spanInfo.colSpan}
+                      rowSpan={spanInfo.rowSpan}
+                      className={`px-4 py-3 border border-gray-200 max-w-xs ${alignmentClass}`}
+                    >
+                      <span className="whitespace-pre-line">{formattedVal}</span>
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
