@@ -16,7 +16,7 @@ const AddCoordinationDrawing = ({ projectId, onCancel, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.description) {
+    if (!formData.title || !formData.message ) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -26,7 +26,7 @@ const AddCoordinationDrawing = ({ projectId, onCancel, onSuccess }) => {
       const data = new FormData();
       data.append('projectId', projectId);
       data.append('title', formData.title);
-      data.append('description', formData.description);
+      data.append('message', formData.message );
       data.append('stage', formData.stage);
       files.forEach((file) => {
         data.append('files', file);
@@ -92,8 +92,8 @@ const AddCoordinationDrawing = ({ projectId, onCancel, onSuccess }) => {
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Description *</label>
             <RichTextEditor
-              value={formData.description}
-              onChange={(content) => setFormData({ ...formData, description: content })}
+              value={formData.message }
+              onChange={(content) => setFormData({ ...formData, message : content })}
               placeholder="Enter details..."
             />
           </div>
