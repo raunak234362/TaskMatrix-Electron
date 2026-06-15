@@ -12,6 +12,7 @@ permissions:
 jobs:
   build-windows:
     runs-on: windows-latest
+    environment: PROD_BASE_URL
 
     steps:
       - name: Checkout code
@@ -27,7 +28,8 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo VITE_BASE_URL=${{ secrets.PROD_BASE_URL }} > .env
+          echo VITE_BASE_URL=${{ secrets.VITE_BASE_URL }} > .env
+          echo VITE_SOCKET_URL=${{ secrets.VITE_SOCKET_URL }} >> .env
           echo VITE_GITHUB_TOKEN_WBTIT=${{ secrets.VITE_GITHUB_TOKEN_WBTIT }} >> .env
           echo VITE_GITHUB_TOKEN_RAUNAK=${{ secrets.VITE_GITHUB_TOKEN_RAUNAK }} >> .env
 
@@ -44,6 +46,7 @@ jobs:
 
   build-mac:
     runs-on: macos-latest
+    environment: PROD_BASE_URL
 
     steps:
       - name: Checkout code
@@ -59,7 +62,8 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo VITE_BASE_URL=${{ secrets.PROD_BASE_URL }} > .env
+          echo VITE_BASE_URL=${{ secrets.VITE_BASE_URL }} > .env
+          echo VITE_SOCKET_URL=${{ secrets.VITE_SOCKET_URL }} >> .env
           echo VITE_GITHUB_TOKEN_WBTIT=${{ secrets.VITE_GITHUB_TOKEN_WBTIT }} >> .env
           echo VITE_GITHUB_TOKEN_RAUNAK=${{ secrets.VITE_GITHUB_TOKEN_RAUNAK }} >> .env
 
@@ -76,6 +80,7 @@ jobs:
 
   build-linux:
     runs-on: ubuntu-latest
+    environment: PROD_BASE_URL
 
     steps:
       - name: Checkout code
@@ -91,7 +96,8 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo VITE_BASE_URL=${{ secrets.PROD_BASE_URL }} > .env
+          echo VITE_BASE_URL=${{ secrets.VITE_BASE_URL }} > .env
+          echo VITE_SOCKET_URL=${{ secrets.VITE_SOCKET_URL }} >> .env
           echo VITE_GITHUB_TOKEN_WBTIT=${{ secrets.VITE_GITHUB_TOKEN_WBTIT }} >> .env
           echo VITE_GITHUB_TOKEN_RAUNAK=${{ secrets.VITE_GITHUB_TOKEN_RAUNAK }} >> .env
 
