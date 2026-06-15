@@ -1,6 +1,5 @@
 const PRIMARY_URL =
-  import.meta.env.VITE_BASE_URL?.replace('/v1/', '') ||
-  'https://project-station.whiteboardtec.com:5160'
+  import.meta.env.VITE_BASE_URL?.replace('/v1/', '')
 
 let activeBaseURL = PRIMARY_URL
 
