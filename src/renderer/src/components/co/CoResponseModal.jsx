@@ -33,7 +33,21 @@ const CoResponseModal = ({ CoId, onClose, onSuccess }) => {
         });
       }
 
-      await Service.addCOResponse(formData, CoId);
+      let fabricatorName = "";
+      let projectName = "";
+      if (CoId) {
+        const coRes = await Service.GetChangeOrderByID(CoId);
+        const co = coRes?.data || coRes;
+        const pid = co?.projectId || co?.project_id || co?.project?.id;
+        if (pid) {
+          const projectRes = await Service.GetProjectById(pid);
+          const project = projectRes?.data || projectRes;
+          fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
+          projectName = project?.projectName || project?.name || "";
+        }
+      }
+
+      await Service.addCOResponse(formData, CoId, fabricatorName, projectName);
 
       onSuccess();
       onClose();

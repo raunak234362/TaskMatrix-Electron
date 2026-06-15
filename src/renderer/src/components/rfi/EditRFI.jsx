@@ -115,7 +115,10 @@ const EditRFI = ({ id, onSuccess }) => {
         files.forEach((f) => formData.append('files', f))
       }
 
-      await Service.EditRFIByID(id, formData)
+      const fabricatorName = selectedFabricator?.fabName || rfi?.fabricatorName || rfi?.fabricator?.fabName || "";
+      const projectName = rfi?.project?.projectName || rfi?.project?.name || "";
+
+      await Service.EditRFIByID(id, formData, fabricatorName, projectName)
       toast.success('RFI Updated Successfully')
       onSuccess?.()
     } catch (err) {

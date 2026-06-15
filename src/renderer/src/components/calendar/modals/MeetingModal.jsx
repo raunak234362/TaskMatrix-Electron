@@ -162,7 +162,7 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
                 await Service.UpdateMeetingById(meeting.id || meeting._id, payload);
                 toast.success("Meeting updated successfully");
             } else {
-                await Service.CreateMeeting(payload);
+                await Service.CreateMeeting(payload, "", "");
                 toast.success("Meeting scheduled successfully");
             }
             refresh();

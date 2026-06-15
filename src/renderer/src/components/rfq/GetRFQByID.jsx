@@ -136,7 +136,9 @@ const GetRFQByID = ({ id, onClose }) => {
                 wbtStatus: newStatus,
                 reason: statusReason,
             };
-            await Service.UpdateRFQById(id, payload);
+            const fabricatorName = rfq?.fabricator?.fabName || rfq?.sender?.fabricator?.fabName || rfq?.fabricatorName || "";
+            const rfqProjectName = rfq?.projectName || "";
+            await Service.UpdateRFQById(id, payload, fabricatorName, rfqProjectName);
             toast.success("RFQ status updated successfully");
             setShowStatusModal(false);
             setNewStatus("");
@@ -166,7 +168,9 @@ const GetRFQByID = ({ id, onClose }) => {
                 });
             }
 
-            await Service.addRFQFollowups(formData, id);
+            const fabricatorName = rfq?.fabricator?.fabName || rfq?.sender?.fabricator?.fabName || rfq?.fabricatorName || "";
+            const rfqProjectName = rfq?.projectName || "";
+            await Service.addRFQFollowups(formData, id, fabricatorName, rfqProjectName);
             toast.success("Follow-up added successfully");
             setFollowUpDescription("");
             setFollowUpFiles([]);

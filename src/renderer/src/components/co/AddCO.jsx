@@ -102,7 +102,9 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
 
       files.forEach((file) => formData.append("files", file));
 
-      const response = await Service.ChangeOrder(formData);
+      const fabricatorName = selectedFabricator?.fabName || project?.fabricatorName || project?.fabricator?.fabName || "";
+      const projectName = project?.projectName || project?.name || "";
+      const response = await Service.ChangeOrder(formData, fabricatorName, projectName);
       const createdCO = response.data?.data ?? response.data;
 
       if (createdCO) {

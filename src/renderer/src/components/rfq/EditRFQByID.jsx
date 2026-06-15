@@ -43,6 +43,7 @@ const selectStyles = {
 
 const EditRFQByID = ({ id, onSuccess, onCancel }) => {
     const [loading, setLoading] = useState(true)
+    const [fabricatorName, setFabricatorName] = useState('')
 
     const {
         register,
@@ -76,6 +77,7 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                         MTOManual: d.MTOManual ?? false,
                         MTOStickModel: d.MTOStickModel || ""
                     })
+                    setFabricatorName(d.fabricator?.fabName || d.sender?.fabricator?.fabName || d.fabricatorName || '')
                 }
             } catch (error) {
                 console.error('Fetch RFQ error:', error)
@@ -102,7 +104,7 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                 payload.status = payload.wbtStatus;
             }
 
-            await Service.UpdateRFQById(id, payload)
+            await Service.UpdateRFQById(id, payload, fabricatorName, data.projectName || '')
             toast.success('RFQ updated successfully')
             onSuccess?.()
         } catch (error) {

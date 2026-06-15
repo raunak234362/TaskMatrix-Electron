@@ -129,7 +129,17 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
       }));
 
       // 3. Sequential Updates
-      await Service.EditCoById(coId, formData);
+      let fabricatorName = "";
+      let projectName = "";
+      const pid = projectId || coData.project?._id || coData.project?.id;
+      if (pid) {
+        const projectRes = await Service.GetProjectById(pid);
+        const project = projectRes?.data || projectRes;
+        fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
+        projectName = project?.projectName || project?.name || "";
+      }
+
+      await Service.EditCoById(coId, formData, fabricatorName, projectName);
       await Service.UpdateCOTableById(coId, formattedRows);
 
       toast.success("Change Order and Table updated successfully!");

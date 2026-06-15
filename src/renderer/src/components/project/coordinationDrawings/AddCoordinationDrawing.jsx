@@ -32,7 +32,16 @@ const AddCoordinationDrawing = ({ projectId, onCancel, onSuccess }) => {
         data.append('files', file);
       });
 
-      await Service.createCoordinationDrawing(data);
+      let fabricatorName = "";
+      let projectName = "";
+      if (projectId) {
+        const projectRes = await Service.GetProjectById(projectId);
+        const project = projectRes?.data || projectRes;
+        fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
+        projectName = project?.projectName || project?.name || "";
+      }
+
+      await Service.createCoordinationDrawing(data, fabricatorName, projectName);
       toast.success('Coordination Drawing created successfully');
       onSuccess();
     } catch (error) {

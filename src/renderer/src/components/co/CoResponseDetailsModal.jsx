@@ -30,7 +30,22 @@ const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
 
     replyFiles.forEach((f) => formData.append("files", f));
 
-    await Service.addCOResponse(formData, response.id);
+    let fabricatorName = "";
+    let projectName = "";
+    const coId = response.CoId;
+    if (coId) {
+      const coRes = await Service.GetChangeOrderByID(coId);
+      const co = coRes?.data || coRes;
+      const pid = co?.projectId || co?.project_id || co?.project?.id;
+      if (pid) {
+        const projectRes = await Service.GetProjectById(pid);
+        const project = projectRes?.data || projectRes;
+        fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
+        projectName = project?.projectName || project?.name || "";
+      }
+    }
+
+    await Service.addCOResponse(formData, response.id, fabricatorName, projectName);
 
     onSuccess();
     onClose();

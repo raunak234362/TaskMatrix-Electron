@@ -239,7 +239,11 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
         }
       });
 
-      await Service.AddSubmittal(formData);
+      const selectedFabricator = fabricators?.find((f) => String(f.id) === String(fabricatorId));
+      const fabricatorName = selectedFabricator?.fabName || project?.fabricatorName || project?.fabricator?.fabName || "";
+      const projectName = project?.projectName || project?.name || "";
+
+      await Service.AddSubmittal(formData, fabricatorName, projectName);
       toast.success("Submittal Created Successfully!");
 
       reset();

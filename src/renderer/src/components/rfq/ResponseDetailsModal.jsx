@@ -1,5 +1,5 @@
 import { X, CalendarDays } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Service from "../../api/Service";
 import Button from "../fields/Button";
 import RichTextEditor from "../fields/RichTextEditor";
@@ -17,6 +17,23 @@ const ResponseDetailsModal = ({
   const [replyMessage, setReplyMessage] = useState("");
   const [replyStatus, setReplyStatus] = useState("PENDING");
   const [replyFiles, setReplyFiles] = useState([]);
+  const [rfqDetails, setRfqDetails] = useState(null);
+
+  useEffect(() => {
+    const fetchRfq = async () => {
+      try {
+        const res = await Service.GetRFQbyId(response.rfqId);
+        if (res?.data) {
+          setRfqDetails(res.data);
+        }
+      } catch (err) {
+        console.error("Error fetching RFQ in response modal reply:", err);
+      }
+    };
+    if (response?.rfqId) {
+      fetchRfq();
+    }
+  }, [response?.rfqId]);
 
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   // const handleReplySubmit = async () => {
@@ -57,7 +74,9 @@ const ResponseDetailsModal = ({
     replyFiles.forEach((file) => formData.append("files", file));
 
     try {
-      await Service.addResponse(formData, response.rfqId);
+      const fabricatorName = rfqDetails?.fabricator?.fabName || rfqDetails?.sender?.fabricator?.fabName || rfqDetails?.fabricatorName || "";
+      const rfqProjectName = rfqDetails?.projectName || "";
+      await Service.addResponse(formData, response.rfqId, fabricatorName, rfqProjectName);
 
       setReplyMode(false);
       setReplyMessage("");

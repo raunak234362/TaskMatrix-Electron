@@ -33,7 +33,16 @@ const AddNotes = ({ projectId, onNoteAdded, onClose }) => {
         formData.append("files", file);
       });
 
-      await Service.CreateProjectNote(projectId, formData);
+      let fabricatorName = "";
+      let projectName = "";
+      if (projectId) {
+        const projectRes = await Service.GetProjectById(projectId);
+        const project = projectRes?.data || projectRes;
+        fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
+        projectName = project?.projectName || project?.name || "";
+      }
+
+      await Service.CreateProjectNote(projectId, formData, fabricatorName, projectName);
       toast.success("Note added successfully");
       onNoteAdded();
       onClose();

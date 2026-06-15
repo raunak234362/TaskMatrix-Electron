@@ -806,6 +806,8 @@ const WorkProgressReport = ({
   // Save WPR Data to Server/API
   const [saving, setSaving] = useState(false);
   const handleSaveChanges = async () => {
+    const fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
+    const projectName = project?.projectName || project?.name || "";
     try {
       setSaving(true);
       // Sync milestones to backend
@@ -834,14 +836,14 @@ const WorkProgressReport = ({
             subject: row.rfiNo,
             status: ["OPEN", "PENDING", "PARTIAL"].includes(row.status?.toUpperCase()),
           };
-          await Service.EditRFIByID(row.id, payload as any);
+          await Service.EditRFIByID(row.id, payload as any, fabricatorName, projectName);
         } else {
           const formData = new FormData();
           formData.append("projectId", projectId);
           formData.append("subject", row.rfiNo);
           formData.append("description", "Created from Weekly Progress Report");
           formData.append("date", row.sentDate !== "—" ? new Date(row.sentDate).toISOString() : new Date().toISOString());
-          await Service.addRFI(formData);
+          await Service.addRFI(formData, fabricatorName, projectName);
         }
       }
 
@@ -853,7 +855,7 @@ const WorkProgressReport = ({
             stage: row.stage,
             status: row.status
           };
-          await Service.updateCoordinationDrawing(row.id, payload);
+          await Service.updateCoordinationDrawing(row.id, payload, fabricatorName, projectName);
         } else {
           const formData = new FormData();
           formData.append("projectId", projectId);
@@ -861,11 +863,11 @@ const WorkProgressReport = ({
           formData.append("description", `Created from Weekly Progress Report on ${new Date().toLocaleDateString()}`);
           formData.append("stage", row.stage || "IFA");
 
-          const res = await Service.createCoordinationDrawing(formData);
+          const res = await Service.createCoordinationDrawing(formData, fabricatorName, projectName);
           if (res && res.data && row.status !== "Pending") {
             const newId = res.data.id || res.data._id;
             if (newId) {
-              await Service.updateCoordinationDrawing(newId, { status: row.status });
+              await Service.updateCoordinationDrawing(newId, { status: row.status }, fabricatorName, projectName);
             }
           }
         }
@@ -885,7 +887,7 @@ const WorkProgressReport = ({
             if (val) sum += Number(val);
           });
           formData.append("totalCost", sum.toString());
-          await Service.ChangeOrder(formData);
+          await Service.ChangeOrder(formData, fabricatorName, projectName);
         }
       }
 

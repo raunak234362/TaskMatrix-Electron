@@ -32,7 +32,16 @@ const AddDesignDrawing = ({ projectId, onSuccess }) => {
         });
       }
 
-      await Service.CreateDesignDrawing(formData);
+      let fabricatorName = "";
+      let projectName = "";
+      if (projectId) {
+        const projectRes = await Service.GetProjectById(projectId);
+        const project = projectRes?.data || projectRes;
+        fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
+        projectName = project?.projectName || project?.name || "";
+      }
+
+      await Service.CreateDesignDrawing(formData, fabricatorName, projectName);
       reset();
       setFiles([]);
       setFormKey((prev) => prev + 1);

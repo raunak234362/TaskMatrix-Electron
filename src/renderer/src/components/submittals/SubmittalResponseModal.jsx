@@ -52,7 +52,16 @@ const SubmittalResponseModal = ({
     files.forEach((file) => formData.append("files", file));
 
     try {
-      await Service.addSubmittalResponse(formData);
+      let fabricatorName = "";
+      let projectName = "";
+      const submittalDetails = await Service.GetSubmittalbyId(submittalId);
+      const pid = submittalDetails?.projectId || submittalDetails?.project_id || submittalDetails?.data?.projectId || submittalDetails?.data?.project_id;
+      if (pid) {
+        const project = await Service.GetProjectById(pid);
+        fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
+        projectName = project?.projectName || project?.name || "";
+      }
+      await Service.addSubmittalResponse(formData, fabricatorName, projectName);
       toast.success("Response submitted successfully");
       if (onSuccess) onSuccess();
       if (onClose) onClose();

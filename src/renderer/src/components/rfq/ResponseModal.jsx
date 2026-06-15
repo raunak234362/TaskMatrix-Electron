@@ -28,6 +28,24 @@ const ResponseModal = ({
 
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [rfqDetails, setRfqDetails] = useState(null);
+
+  useEffect(() => {
+    const fetchRfqDetails = async () => {
+      try {
+        const res = await Service.GetRFQbyId(rfqId);
+        if (res?.data) {
+          setRfqDetails(res.data);
+        }
+      } catch (error) {
+        console.error("Error fetching RFQ details in response modal:", error);
+      }
+    };
+    if (rfqId) {
+      fetchRfqDetails();
+    }
+  }, [rfqId]);
+
   const [estimations, setEstimations] = useState([]);
   const [selectedEstimationId, setSelectedEstimationId] = useState("");
   const [selectedEstimation, setSelectedEstimation] = useState(null);
@@ -449,7 +467,9 @@ const ResponseModal = ({
         files.forEach((file) => formData.append("files", file));
       }
 
-      await Service.addResponse(formData, rfqId);
+      const fabricatorName = rfqDetails?.fabricator?.fabName || rfqDetails?.sender?.fabricator?.fabName || rfqDetails?.fabricatorName || "";
+      const rfqProjectName = rfqDetails?.projectName || "";
+      await Service.addResponse(formData, rfqId, fabricatorName, rfqProjectName);
 
       reset();
       setFiles([]);

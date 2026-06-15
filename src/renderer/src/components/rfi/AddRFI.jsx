@@ -126,7 +126,11 @@ const AddRFI = ({
         files.forEach((f) => formData.append("files", f));
       }
 
-      await Service.addRFI(formData);
+      const selectedFabricator = fabricators?.find((f) => String(f.id) === String(fabricatorID));
+      const fabricatorName = selectedFabricator?.fabName || project?.fabricatorName || project?.fabricator?.fabName || "";
+      const projectName = project?.projectName || project?.name || "";
+
+      await Service.addRFI(formData, fabricatorName, projectName);
       toast.success("RFI Submitted Successfully");
       setDescription("");
       setFiles([]);

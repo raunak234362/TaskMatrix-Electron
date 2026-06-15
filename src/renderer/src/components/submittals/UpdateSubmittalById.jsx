@@ -180,7 +180,9 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                 }
             }
 
-            await Service.updateSubmittalVersionById(submittal.id, formData);
+            const fabricatorName = selectedFabricator?.fabName || submittal?.fabricatorName || "";
+            const projectName = submittal?.project?.projectName || submittal?.project?.name || "";
+            await Service.updateSubmittalVersionById(submittal.id, formData, fabricatorName, projectName);
 
             onSuccess?.();
             onClose();

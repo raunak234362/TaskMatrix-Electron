@@ -34,7 +34,17 @@ const EditDesignDrawing = ({
         });
       }
 
-      await Service.UpdateDesignDrawing(drawing.id, formData);
+      let fabricatorName = "";
+      let projectName = "";
+      const pid = drawing.projectId || drawing.project_id;
+      if (pid) {
+        const projectRes = await Service.GetProjectById(pid);
+        const project = projectRes?.data || projectRes;
+        fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
+        projectName = project?.projectName || project?.name || "";
+      }
+
+      await Service.UpdateDesignDrawing(drawing.id, formData, fabricatorName, projectName);
       onSuccess();
     } catch (error) {
       console.error("Error updating design drawing:", error);

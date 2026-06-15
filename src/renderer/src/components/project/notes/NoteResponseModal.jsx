@@ -36,7 +36,20 @@ const NoteResponseModal = ({
                 files.forEach((file) => formData.append("files", file));
             }
 
-            await Service.AddTeamMeetingResponse(noteId, formData);
+            let fabricatorName = "";
+            let projectName = "";
+            if (noteId) {
+                const note = await Service.GetTeamMeetingNotesById(noteId);
+                const pid = note?.projectId || note?.project_id || note?.data?.projectId || note?.data?.project_id;
+                if (pid) {
+                    const projectRes = await Service.GetProjectById(pid);
+                    const project = projectRes?.data || projectRes;
+                    fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
+                    projectName = project?.projectName || project?.name || "";
+                }
+            }
+
+            await Service.AddTeamMeetingResponse(noteId, formData, fabricatorName, projectName);
             toast.success("Response added successfully!");
             reset();
             setFiles([]);

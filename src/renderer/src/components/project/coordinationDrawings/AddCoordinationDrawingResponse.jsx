@@ -29,7 +29,19 @@ const AddCoordinationDrawingResponse = ({ drawingId, parentResponseId, onCancel,
         data.append('files', file);
       });
 
-      await Service.createCoordinationDrawingResponse(data);
+      let fabricatorName = "";
+      let projectName = "";
+      const drawingRes = await Service.getCoordinationDrawingById(drawingId);
+      const drawing = drawingRes?.data || drawingRes;
+      const pid = drawing?.projectId || drawing?.project_id;
+      if (pid) {
+        const projectRes = await Service.GetProjectById(pid);
+        const project = projectRes?.data || projectRes;
+        fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
+        projectName = project?.projectName || project?.name || "";
+      }
+
+      await Service.createCoordinationDrawingResponse(data, fabricatorName, projectName);
       toast.success('Response added successfully');
       onSuccess();
     } catch (error) {

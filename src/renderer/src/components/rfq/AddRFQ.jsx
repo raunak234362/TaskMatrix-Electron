@@ -319,7 +319,13 @@ const AddRFQ = ({ onSuccess }) => {
         }
       }
 
-      const response = await Service.addRFQ(formData);
+      const selectedFab = fabricators?.find(
+        (f) => String(f.id) === String(data.fabricatorId),
+      );
+      const fabricatorName = selectedFab?.fabName || "";
+      const rfqProjectName = data.projectName || "";
+
+      const response = await Service.addRFQ(formData, fabricatorName, rfqProjectName);
       const createdRFQ = response.data || response.rfq || response;
 
       if (createdRFQ && !createdRFQ.error) {

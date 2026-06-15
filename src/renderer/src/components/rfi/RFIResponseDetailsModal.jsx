@@ -38,7 +38,21 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
 
     replyFiles.forEach((file) => formData.append("files", file));
 
-    await Service.addRFIResponse(formData, response.rfiId);
+    let fabricatorName = "";
+    let projectName = "";
+    if (response.rfiId) {
+      const rfiRes = await Service.GetRFIbyId(response.rfiId);
+      const rfi = rfiRes?.data || rfiRes;
+      const pid = rfi?.projectId || rfi?.project_id || rfi?.project?.id;
+      if (pid) {
+        const projectRes = await Service.GetProjectById(pid);
+        const project = projectRes?.data || projectRes;
+        fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
+        projectName = project?.projectName || project?.name || "";
+      }
+    }
+
+    await Service.addRFIResponse(formData, response.rfiId, fabricatorName, projectName);
 
     // Reset Form UI
     setReplyMode(false);

@@ -136,7 +136,9 @@ const AddProjectNote = ({
             taggedUserIds.forEach(opt => formData.append("taggedUserIds[]", opt.value));
             files.forEach((file) => formData.append("files", file));
 
-            await Service.AddTeamMeetingNotes(formData);
+            const fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
+            const projectName = project?.projectName || project?.name || "";
+            await Service.AddTeamMeetingNotes(formData, fabricatorName, projectName);
             onSuccess();
         } catch (err) {
             console.error("Error adding note:", err);
