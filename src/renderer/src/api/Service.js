@@ -1422,6 +1422,22 @@ class Service {
     }
   }
 
+  // Add WBS Template Item
+  static async AddWBSTemplateItem(data) {
+    try {
+      const response = await api.post(`wbsTemplates/admin/templates/wbs`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
   // fetch bundle by ProjectID
   static async GetBundleByProjectId(projectId) {
     try {

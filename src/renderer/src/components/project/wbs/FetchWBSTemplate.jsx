@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Service from "../../../api/Service";
-import { Check, Loader2, Search } from "lucide-react";
+import { Check, Loader2, Search, ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { Button } from "../../ui/button";
 
 
@@ -10,9 +10,11 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedId, setExpandedId] = useState(null);
+  const [newItemName, setNewItemName] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
 
-  useEffect(() => {
-    const fetchWbsTemplate = async () => {
+  const fetchWbsTemplate = async () => {
       try {
         setLoading(true);
         const response = await Service.GetWBSTemplate();
@@ -43,8 +45,34 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
         setLoading(false);
       }
     };
+
+  useEffect(() => {
     fetchWbsTemplate();
   }, []);
+
+  const handleAddItem = async (template, e) => {
+    e.stopPropagation();
+    if (!newItemName.trim()) return;
+
+    try {
+      setIsAdding(true);
+      const payload = {
+        name: newItemName,
+        templateKey: newItemName.trim().replace(/\s+/g, "_").toUpperCase(),
+        bundleKey: template.bundleKey || "",
+        discipline: template.discipline || "EXECUTION"
+      };
+
+      await Service.AddWBSTemplateItem(payload);
+      setNewItemName("");
+      // Refresh the templates silently
+      await fetchWbsTemplate();
+    } catch (error) {
+      console.error("Error adding template item:", error);
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   const toggleSelection = (id) => {
     const newSelectedIds = new Set(selectedIds);
@@ -127,63 +155,109 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
         <div className="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
           {filteredTemplates.length > 0 ? (
             filteredTemplates.map((template) => (
-              <div
-                key={template.id}
-                onClick={() => toggleSelection(template.id)}
-                className={`group relative flex items-center p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${selectedIds.has(template.id)
-                  ? "border-green-500 bg-green-50/50 shadow-sm"
-                  : "border-gray-100 hover:border-green-200 hover:bg-gray-50"
-                  }`}
-              >
+              <div key={template.id} className={`flex flex-col border-2 rounded-2xl transition-all duration-200 bg-white overflow-hidden ${selectedIds.has(template.id) ? "border-green-500 shadow-sm" : "border-gray-100 hover:border-green-200"}`}>
                 <div
-                  className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${selectedIds.has(template.id)
-                    ? "bg-green-500 border-green-500"
-                    : "border-gray-300 group-hover:border-green-400"
+                  onClick={() => toggleSelection(template.id)}
+                  className={`group relative flex items-center p-4 cursor-pointer transition-all duration-200 ${selectedIds.has(template.id)
+                    ? "bg-green-50/50"
+                    : "hover:bg-gray-50"
                     }`}
                 >
-                  {selectedIds.has(template.id) && (
-                    <Check className="w-4 h-4 text-white" />
-                  )}
-                </div>
-
-                <div className="ml-4 grow">
-                  <h3
-                    className={` transition-colors ${selectedIds.has(template.id)
-                      ? "text-green-900"
-                      : "text-gray-700"
+                  <div
+                    className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${selectedIds.has(template.id)
+                      ? "bg-green-500 border-green-500"
+                      : "border-gray-300 group-hover:border-green-400"
                       }`}
                   >
-                    {template.name}
-                  </h3>
-                  {/* Tooltip for Line Items */}
-                  <div className="invisible group-hover:visible absolute left-full ml-4 top-0 z-50 w-64 p-4 bg-white/90 backdrop-blur-md border border-gray-100 rounded-2xl shadow-2xl transition-all duration-300 opacity-0 group-hover:opacity-100 pointer-events-none">
-                    <h4 className="text-xs  text-green-600 uppercase tracking-widest mb-2">
-                      Line Items
+                    {selectedIds.has(template.id) && (
+                      <Check className="w-4 h-4 text-white" />
+                    )}
+                  </div>
+
+                  <div className="ml-4 grow">
+                    <h3
+                      className={` transition-colors ${selectedIds.has(template.id)
+                        ? "text-green-900"
+                        : "text-gray-700"
+                        }`}
+                    >
+                      {template.name}
+                    </h3>
+                    
+                    <div className="flex items-center mt-1 space-x-3">
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-200 text-gray-700 uppercase tracking-wider">
+                        {template.category}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {template.wbsTemplates?.length || 0} Line Items
+                      </span>
+                    </div>
+                  </div>
+
+                  {selectedIds.has(template.id) && (
+                    <div className="absolute right-14 top-1/2 -translate-y-1/2">
+                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    </div>
+                  )}
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedId(expandedId === template.id ? null : template.id);
+                      setNewItemName(""); // reset input when toggling
+                    }}
+                    className="p-2 ml-2 shrink-0 rounded-full hover:bg-gray-200 transition-colors z-10"
+                  >
+                    {expandedId === template.id ? (
+                      <ChevronUp className="w-5 h-5 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-500" />
+                    )}
+                  </button>
+                </div>
+
+                {expandedId === template.id && (
+                  <div className="p-4 bg-gray-50/50 border-t border-gray-100">
+                    <h4 className="text-xs text-green-600 uppercase tracking-widest mb-2 font-semibold">
+                      Existing Items
                     </h4>
-                    <ul className="space-y-1">
+                    <ul className="space-y-1 mb-4 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                       {template.wbsTemplates?.map((item, index) => (
                         <li
                           key={index}
-                          className="text-sm text-gray-700 border-l-2 border-green-200 pl-2"
+                          className="text-sm text-gray-700 flex items-center border-l-2 border-green-300 pl-3 py-1"
                         >
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-400 mr-2 shrink-0"></span>
                           {item.name || item.title || "Unnamed Item"}
                         </li>
                       ))}
+                      {(!template.wbsTemplates || template.wbsTemplates.length === 0) && (
+                        <li className="text-sm text-gray-400 italic pl-3">No existing items.</li>
+                      )}
                     </ul>
-                  </div>
-                  <div className="flex items-center mt-1 space-x-3">
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-200 text-gray-700 uppercase tracking-wider">
-                      {template.category}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {template.wbsTemplates?.length || 0} Line Items
-                    </span>
-                  </div>
-                </div>
 
-                {selectedIds.has(template.id) && (
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center mt-2 space-y-2 sm:space-y-0 sm:space-x-2 bg-white rounded-lg border border-gray-200 p-1 pl-3 shadow-sm">
+                      <input
+                        type="text"
+                        placeholder="Add new WBS template item..."
+                        className="flex-grow bg-transparent outline-none text-sm py-1.5"
+                        value={newItemName}
+                        onChange={(e) => setNewItemName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleAddItem(template, e);
+                        }}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={!newItemName.trim() || isAdding}
+                        onClick={(e) => handleAddItem(template, e)}
+                        className="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-1.5 rounded-md h-auto transition-colors font-semibold shadow-sm shrink-0"
+                      >
+                        {isAdding ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
+                        {isAdding ? "Adding..." : "Add Item"}
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
