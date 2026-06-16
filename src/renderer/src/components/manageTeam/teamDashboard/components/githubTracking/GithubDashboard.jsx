@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { fetchGitHubCommits } from "../../../../../api/githubApi";
 import TeamOverviewCards from "./TeamOverviewCards";
 import CommitTimeline from "./CommitTimeline";
@@ -184,16 +184,16 @@ const GithubDashboard = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-5 border-b border-black/10 pb-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-800">GitHub Commit Tracking</h2>
+          <h2 className="text-base font-black text-black uppercase tracking-tight">GitHub Commit Tracking</h2>
           {lastRefreshed && (
-            <p className="text-sm text-slate-500">
+            <p className="text-[10px] text-black/50 font-black uppercase tracking-widest mt-1">
               Last refreshed: {lastRefreshed.toLocaleTimeString()}
             </p>
           )}
         </div>
-        <div className="flex gap-4 items-center w-full sm:w-auto">
+        <div className="flex flex-wrap gap-4 items-end w-full xl:w-auto">
           <GithubFilters
             selectedEmployee={selectedEmployee}
             setSelectedEmployee={setSelectedEmployee}
@@ -207,17 +207,17 @@ const GithubDashboard = () => {
           <button
             onClick={() => fetchAllData(true)}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors border border-slate-200 disabled:opacity-50 h-10"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-green-50 text-black border-2 border-green-700/80 rounded-none font-bold text-xs uppercase tracking-wider hover:bg-green-100 transition-all shadow-sm cursor-pointer disabled:opacity-50 h-10 w-full sm:w-auto shrink-0"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
           </button>
         </div>
       </div>
 
       {loading && commits.length === 0 ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+        <div className="flex items-center justify-center h-64 border border-black/10 bg-white">
+          <div className="w-8 h-8 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
         </div>
       ) : (
         <div className="space-y-8">

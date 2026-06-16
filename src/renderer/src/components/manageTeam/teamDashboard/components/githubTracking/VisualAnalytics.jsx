@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -16,7 +16,7 @@ import {
 } from "recharts";
 import { BarChart2, PieChart as PieChartIcon, TrendingUp } from "lucide-react";
 
-const COLORS = ["#4f46e5", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+const COLORS = ["#10b981", "#4f46e5", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 const VisualAnalytics = ({ commits, teamMembers, repos, dateFilter }) => {
   const trendData = useMemo(() => {
@@ -56,7 +56,6 @@ const VisualAnalytics = ({ commits, teamMembers, repos, dateFilter }) => {
     commits.forEach(c => {
       const d = new Date(c.commit.author.date);
       const dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-      // It's possible a commit falls exactly on the boundary, we just increment it.
       dataMap[dateStr] = (dataMap[dateStr] || 0) + 1;
     });
 
@@ -98,28 +97,28 @@ const VisualAnalytics = ({ commits, teamMembers, repos, dateFilter }) => {
   }, [commits, teamMembers]);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm h-full max-h-[600px] flex flex-col overflow-y-auto custom-scrollbar">
-      <div className="flex items-center gap-2 mb-6 pb-4 border-b border-slate-100 shrink-0">
-        <TrendingUp className="w-5 h-5 text-indigo-600" />
-        <h3 className="text-lg font-bold text-slate-800">Visual Analytics</h3>
+    <div className="bg-white border border-black rounded-none p-5 shadow-sm h-full max-h-[600px] flex flex-col overflow-y-auto custom-scrollbar">
+      <div className="flex items-center gap-2 mb-6 pb-4 border-b border-black/10 shrink-0">
+        <TrendingUp className="w-4 h-4 text-black" />
+        <h3 className="text-xs font-black uppercase tracking-widest text-black">Visual Analytics</h3>
       </div>
 
       <div className="space-y-8">
         {/* Trend Chart */}
         <div>
-          <h4 className="text-sm font-bold text-slate-600 mb-4 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" /> Commit Trend
+          <h4 className="text-[10px] font-black uppercase tracking-widest text-black/60 mb-4 flex items-center gap-1.5">
+            <TrendingUp className="w-3.5 h-3.5" /> Commit Trend
           </h4>
           <div className="h-48 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="date" tick={{fontSize: 12, fill: '#64748b'}} tickLine={false} axisLine={false} />
-                <YAxis tick={{fontSize: 12, fill: '#64748b'}} tickLine={false} axisLine={false} allowDecimals={false} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                <XAxis dataKey="date" tick={{fontSize: 10, fill: '#000', fontWeight: 'bold'}} tickLine={false} axisLine={false} />
+                <YAxis tick={{fontSize: 10, fill: '#000', fontWeight: 'bold'}} tickLine={false} axisLine={false} allowDecimals={false} />
                 <Tooltip 
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  contentStyle={{ borderRadius: '0px', border: '1px solid black', boxShadow: 'none' }}
                 />
-                <Line type="monotone" dataKey="commits" stroke="#4f46e5" strokeWidth={3} dot={{r: 4, strokeWidth: 2}} activeDot={{r: 6}} />
+                <Line type="monotone" dataKey="commits" stroke="#10b981" strokeWidth={2.5} dot={{r: 3, strokeWidth: 1.5}} activeDot={{r: 5}} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -128,8 +127,8 @@ const VisualAnalytics = ({ commits, teamMembers, repos, dateFilter }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Repo Contribution */}
           <div>
-            <h4 className="text-sm font-bold text-slate-600 mb-4 flex items-center gap-2">
-              <PieChartIcon className="w-4 h-4" /> Repo Contribution
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-black/60 mb-4 flex items-center gap-1.5">
+              <PieChartIcon className="w-3.5 h-3.5" /> Repo Contribution
             </h4>
             <div className="h-48 w-full">
               {repoData.length > 0 ? (
@@ -139,38 +138,38 @@ const VisualAnalytics = ({ commits, teamMembers, repos, dateFilter }) => {
                       data={repoData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={40}
-                      outerRadius={70}
-                      paddingAngle={5}
+                      innerRadius={35}
+                      outerRadius={60}
+                      paddingAngle={4}
                       dataKey="value"
                     >
                       {repoData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                    <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+                    <Tooltip contentStyle={{ borderRadius: '0px', border: '1px solid black', boxShadow: 'none' }} />
+                    <Legend verticalAlign="bottom" height={36} iconType="rect" wrapperStyle={{ fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold' }} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center text-sm text-slate-400">No data available</div>
+                <div className="h-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-black/40">No data available</div>
               )}
             </div>
           </div>
 
           {/* Team Contribution */}
           <div>
-            <h4 className="text-sm font-bold text-slate-600 mb-4 flex items-center gap-2">
-              <BarChart2 className="w-4 h-4" /> Team Contribution
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-black/60 mb-4 flex items-center gap-1.5">
+              <BarChart2 className="w-3.5 h-3.5" /> Team Contribution
             </h4>
             <div className="h-48 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={teamData} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                  <XAxis type="number" tick={{fontSize: 12, fill: '#64748b'}} tickLine={false} axisLine={false} allowDecimals={false} />
-                  <YAxis dataKey="name" type="category" tick={{fontSize: 11, fill: '#475569'}} tickLine={false} axisLine={false} width={80} />
-                  <Tooltip cursor={{fill: '#f1f5f9'}} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                  <Bar dataKey="commits" fill="#10b981" radius={[0, 4, 4, 0]} barSize={20} />
+                <BarChart data={teamData} layout="vertical" margin={{ top: 0, right: 0, left: 10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+                  <XAxis type="number" tick={{fontSize: 10, fill: '#000', fontWeight: 'bold'}} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <YAxis dataKey="name" type="category" tick={{fontSize: 9, fill: '#000', fontWeight: 'bold'}} tickLine={false} axisLine={false} width={80} />
+                  <Tooltip cursor={{fill: '#f4faf0'}} contentStyle={{ borderRadius: '0px', border: '1px solid black', boxShadow: 'none' }} />
+                  <Bar dataKey="commits" fill="#10b981" radius={[0, 0, 0, 0]} barSize={15} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

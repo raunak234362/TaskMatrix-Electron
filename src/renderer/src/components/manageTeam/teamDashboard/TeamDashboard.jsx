@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
@@ -13,6 +12,7 @@ import AddTeam from "../team/AddTeam";
 import GetTeamById from "../team/GetTeamById";
 import GetEmployeeByID from "../employee/GetEmployeeByID";
 import DashboardHeader from "./components/DashboardHeader";
+import { LayoutDashboard, GitBranch, Shield, Users } from "lucide-react";
 import TeamsList from "./components/TeamsList";
 import TeamStatsCards from "./components/TeamStatsCards";
 import EfficiencyAnalytics from "./components/EfficiencyAnalytics";
@@ -22,7 +22,6 @@ import WorkloadAlerts from "../../dashboard/components/WorkloadAlerts";
 import DailyWorkReportModal from "./components/DailyWorkReportModal";
 import TeamReportModal from "./components/TeamReportModal";
 import TeamCalendar from "./components/TeamCalendar";
-import { toast } from "react-toastify";
 import GithubDashboard from "./components/githubTracking/GithubDashboard";
 
 const TeamDashboard = () => {
@@ -283,7 +282,12 @@ const TeamDashboard = () => {
     };
 
     loadTeamData();
-  }, [selectedTeam, fetchTeamStats]);
+
+    const teamName = (teams?.find((t) => t.id === selectedTeam)?.name || "").toLowerCase().trim();
+    if (activeTab === "github" && teamName !== "software team") {
+      setActiveTab("overview");
+    }
+  }, [selectedTeam, fetchTeamStats, teams, activeTab]);
 
   // Apply filters and calculate stats (existing logic for stats cards)
   useEffect(() => {
@@ -877,96 +881,136 @@ const TeamDashboard = () => {
             />
 
             {selectedTeam && (
-              <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {/* Premium Header Bar */}
-                <div className="w-full bg-green-50/70 rounded-lg p-5 border border-[#6bbd45]/20 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-
-
-                  <div className="relative z-10">
-                    <h1 className="text-2xl font-semibold text-black tracking-tight uppercase">
-                      {teams?.find((t) => t.id === selectedTeam)?.name ||
-                        "Team Detail"}
-                    </h1>
-                  </div>
-
-                  <div className="flex items-center gap-4 relative z-10">
-                    <button
-                      onClick={() => setActiveTab("overview")}
-                      className={`px-6 py-2 font-semibold text-xs uppercase tracking-widest rounded-xl cursor-pointer transition-all border-2 border-green-700 ${activeTab === "overview" ? "bg-green-100 text-black hover:bg-green-200/70" : "bg-white text-black hover:bg-green-50"}`}>
-                      Overview
-                    </button>
-                    {teams?.find((t) => t.id === selectedTeam)?.name?.toLowerCase() === "software team" && (
-                      <button
-                        onClick={() => setActiveTab("github")}
-                        className={`px-6 py-2 font-semibold text-xs uppercase tracking-widest rounded-xl cursor-pointer transition-all border-2 border-indigo-700 ${activeTab === "github" ? "bg-indigo-100 text-black hover:bg-indigo-200/70" : "bg-white text-black hover:bg-indigo-50"}`}>
-                        GitHub Tracking
-                      </button>
-                    )}
-                    <button
-                      onClick={() => setIsViewModalOpen(true)}
-                      className="px-6 py-2 bg-white text-black font-semibold text-xs uppercase tracking-widest rounded-xl cursor-pointer hover:bg-green-200/70 transition-all border-2 border-green-700">
-                      View Details
-                    </button>
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {/* High Contrast Header Bar */}
+                <div className="w-full bg-[#f4faf0] p-4 border border-black flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden rounded-none">
+                  <div className="relative z-10 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-50 text-green-600 border border-green-300 flex items-center justify-center shrink-0">
+                      <Users className="w-5 h-5 text-green-700" />
+                    </div>
+                    <div>
+                      <h1 className="text-lg font-black text-black tracking-tight uppercase">
+                        {teams?.find((t) => t.id === selectedTeam)?.name || "Team Detail"}
+                      </h1>
+                      <p className="text-[10px] font-bold text-black/50 uppercase tracking-widest">
+                        {(teams?.find((t) => t.id === selectedTeam)?.members?.length || 0)} Members
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                {activeTab === "github" ? (
-                  <GithubDashboard />
-                ) : (
-                  <>
-                    <TeamStatsCards teamStats={teamStats} />
+                <div className="flex flex-col lg:flex-row gap-6 items-start">
+                  {/* Left Tabs Sidebar */}
+                  <div className="w-full lg:w-60 bg-white border border-gray-300 flex flex-row lg:flex-col shrink-0 overflow-x-auto lg:overflow-x-visible rounded-none shadow-sm">
+                    <button
+                      onClick={() => setActiveTab("overview")}
+                      className={`flex items-center gap-3 px-4 py-2.5 text-sm font-semibold tracking-normal rounded-none transition-all text-left cursor-pointer shrink-0 ${activeTab === "overview"
+                        ? "bg-green-50 text-green-700 font-bold border-b-4 lg:border-b-0 lg:border-l-4 border-green-600 pl-3"
+                        : "text-black hover:bg-gray-50 hover:text-black border-b-4 lg:border-b-0 lg:border-l-4 border-transparent"
+                        }`}
+                    >
+                      <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === "overview" ? "text-green-600" : "text-black"}`} />
+                      Overview
+                    </button>
 
-                    {dateFilter.type === "specificDate" && (
-                      <WorkloadAlerts
-                        memberStats={fullTableData}
-                        onFilterChange={(f) => {
-                          setMemberFilter(f);
-                          const el = document.getElementById('members-table-section');
-                          if (el) el.scrollIntoView({ behavior: 'smooth' });
-                        }}
-                        onMemberClick={handleMemberClick}
-                      />
+                    {teams?.find((t) => t.id === selectedTeam)?.name?.toLowerCase() === "software team" && (
+                      <button
+                        onClick={() => setActiveTab("github")}
+                        className={`flex items-center gap-3 px-4 py-2.5 text-sm font-semibold tracking-normal rounded-none transition-all text-left cursor-pointer shrink-0 ${activeTab === "github"
+                          ? "bg-indigo-50 text-indigo-700 font-bold border-b-4 lg:border-b-0 lg:border-l-4 border-indigo-600 pl-3"
+                          : "text-black hover:bg-gray-50 hover:text-black border-b-4 lg:border-b-0 lg:border-l-4 border-transparent"
+                          }`}
+                      >
+                        <GitBranch className={`w-4 h-4 shrink-0 ${activeTab === "github" ? "text-indigo-600" : "text-black"}`} />
+                        GitHub Tracking
+                      </button>
                     )}
 
-                    <TeamCalendar
-                      members={allMemberStats}
-                      selectedTeamName={
-                        teams?.find((t) => t.id === selectedTeam)?.name
-                      }
-                    />
+                    <button
+                      onClick={() => setActiveTab("details")}
+                      className={`flex items-center gap-3 px-4 py-2.5 text-sm font-semibold tracking-normal rounded-none transition-all text-left cursor-pointer shrink-0 ${activeTab === "details"
+                        ? "bg-green-50 text-green-700 font-bold border-b-4 lg:border-b-0 lg:border-l-4 border-green-600 pl-3"
+                        : "text-black hover:bg-gray-50 hover:text-black border-b-4 lg:border-b-0 lg:border-l-4 border-transparent"
+                        }`}
+                    >
+                      <Shield className={`w-4 h-4 shrink-0 ${activeTab === "details" ? "text-green-600" : "text-black"}`} />
+                      Team Info
+                    </button>
+                  </div>
 
-                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8 sm:mb-12">
-                      <div className="xl:col-span-2">
-                        <EfficiencyAnalytics
-                          data={efficiencyData}
-                          teams={teams}
-                          selectedTeams={selectedComparisonTeams}
-                          onTeamSelectionChange={setSelectedComparisonTeams}
-                          timeFilter={timeFilter}
-                          onTimeFilterChange={handleTimeFilterChange}
-                          dateRange={analyticsDateRange}
-                          onDateRangeChange={setAnalyticsDateRange}
+                  {/* Right Tab Content */}
+                  <div className="flex-1 w-full min-w-0">
+                    {activeTab === "github" && (
+                      <GithubDashboard />
+                    )}
+
+                    {activeTab === "details" && (
+                      <div className="bg-white border border-gray-300 p-6 animate-in slide-in-from-top-2 duration-500 rounded-none shadow-sm">
+                        <GetTeamById
+                          id={selectedTeam}
+                          isInline={true}
+                          onSuccess={fetchTeams}
                         />
                       </div>
-                      <div>
-                        <TaskDistribution teamStats={teamStats} />
-                      </div>
-                    </div>
+                    )}
 
-                    <div id="members-table-section">
-                      <TeamMembersTable
-                        tableData={tableData}
-                        onMemberClick={handleMemberClick}
-                        formatToHoursMinutes={formatToHoursMinutes}
-                        getEfficiencyColorClass={getEfficiencyColorClass}
-                        activeFilter={memberFilter}
-                        onFilterChange={setMemberFilter}
-                        memberCounts={memberCounts}
-                        dateFilter={dateFilter}
-                      />
-                    </div>
-                  </>
-                )}
+                    {activeTab === "overview" && (
+                      <div className="space-y-8 animate-in slide-in-from-top-2 duration-500">
+                        <TeamStatsCards teamStats={teamStats} />
+
+                        {dateFilter.type === "specificDate" && (
+                          <WorkloadAlerts
+                            memberStats={fullTableData}
+                            onFilterChange={(f) => {
+                              setMemberFilter(f);
+                              const el = document.getElementById('members-table-section');
+                              if (el) el.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            onMemberClick={handleMemberClick}
+                          />
+                        )}
+
+                        <TeamCalendar
+                          members={allMemberStats}
+                          selectedTeamName={
+                            teams?.find((t) => t.id === selectedTeam)?.name
+                          }
+                        />
+
+                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8 sm:mb-12">
+                          <div className="xl:col-span-2">
+                            <EfficiencyAnalytics
+                              data={efficiencyData}
+                              teams={teams}
+                              selectedTeams={selectedComparisonTeams}
+                              onTeamSelectionChange={setSelectedComparisonTeams}
+                              timeFilter={timeFilter}
+                              onTimeFilterChange={handleTimeFilterChange}
+                              dateRange={analyticsDateRange}
+                              onDateRangeChange={setAnalyticsDateRange}
+                            />
+                          </div>
+                          <div>
+                            <TaskDistribution teamStats={teamStats} />
+                          </div>
+                        </div>
+
+                        <div id="members-table-section">
+                          <TeamMembersTable
+                            tableData={tableData}
+                            onMemberClick={handleMemberClick}
+                            formatToHoursMinutes={formatToHoursMinutes}
+                            getEfficiencyColorClass={getEfficiencyColorClass}
+                            activeFilter={memberFilter}
+                            onFilterChange={setMemberFilter}
+                            memberCounts={memberCounts}
+                            dateFilter={dateFilter}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -1013,22 +1057,6 @@ const TeamDashboard = () => {
   );
 };
 
-const XIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M18 6 6 18" />
-    <path d="m6 6 12 12" />
-  </svg>
-);
 
 const parseDurationToMinutes = (duration) => {
   if (!duration) return 0;

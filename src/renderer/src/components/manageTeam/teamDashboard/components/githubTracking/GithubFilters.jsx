@@ -1,4 +1,3 @@
-import React from "react";
 import DateFilter from "../../../../common/DateFilter";
 
 const GithubFilters = ({
@@ -12,42 +11,44 @@ const GithubFilters = ({
   repos,
 }) => {
   return (
-    <div className="flex items-end gap-3 w-full">
-      <div className="flex flex-col">
-        <span className="text-[10px] text-slate-500 font-bold uppercase ml-1 mb-1">Employee</span>
+    <div className="flex flex-wrap items-end gap-5 w-full sm:w-auto">
+      <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[180px]">
+        <span className="text-[10px] text-black font-black uppercase tracking-widest">Employee</span>
         <select
           value={selectedEmployee}
           onChange={(e) => setSelectedEmployee(e.target.value)}
-          className="h-10 px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-auto"
+          className="w-full text-sm font-semibold text-black bg-white border-2 border-black/30 rounded-none px-3 py-2 cursor-pointer focus:outline-none focus:border-green-600 hover:border-black/50 transition-all shadow-sm"
         >
           <option value="ALL">All Employees</option>
           {teamMembers.map((m) => (
             <option key={m.id} value={m.id}>
-              {m.name} ({m.id})
+              {m.name}
             </option>
           ))}
         </select>
       </div>
 
-      <div className="flex flex-col">
-        <span className="text-[10px] text-slate-500 font-bold uppercase ml-1 mb-1">Repository</span>
+      <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[200px]">
+        <span className="text-[10px] text-black font-black uppercase tracking-widest">Repository</span>
         <select
           value={selectedRepo}
           onChange={(e) => setSelectedRepo(e.target.value)}
-          className="h-10 px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-auto"
+          className="w-full text-sm font-semibold text-black bg-white border-2 border-black/30 rounded-none px-3 py-2 cursor-pointer focus:outline-none focus:border-green-600 hover:border-black/50 transition-all shadow-sm"
         >
           <option value="ALL">All Repositories</option>
           {repos.map((r) => (
             <option key={`${r.owner}/${r.name}`} value={`${r.owner}/${r.name}`}>
-              {r.owner}/{r.name}
+              {r.name}
             </option>
           ))}
         </select>
       </div>
 
-      <div className="flex flex-col pb-[1px]">
-        <span className="text-[10px] text-slate-500 font-bold uppercase ml-1 mb-1">Date Filter</span>
-        <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
+      <div className="flex flex-col gap-1.5 w-full sm:w-auto">
+        <span className="text-[10px] text-black font-black uppercase tracking-widest">Date Filter</span>
+        <div className="h-10 flex items-center">
+          <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
+        </div>
       </div>
     </div>
   );
