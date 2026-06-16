@@ -184,7 +184,9 @@ const ConnectionDesignerQuotaByID = ({ id, onClose }) => {
 
             const formData = new FormData();
             formData.append("quotaId", quota.id || id);
-            formData.append("parentId", selectedParentId || quota.id || id);
+            if (selectedParentId && selectedParentId !== quota.id && selectedParentId !== id) {
+                formData.append("parentId", selectedParentId);
+            }
             formData.append("description", replyMessage);
             formData.append("status", replyStatus);
             formData.append("mainSteelPrice", mainSteelPriceInput || "0");
@@ -270,7 +272,7 @@ const ConnectionDesignerQuotaByID = ({ id, onClose }) => {
                         {canReply && (
                             <button
                                 onClick={() => {
-                                    setSelectedParentId(quota.id);
+                                    setSelectedParentId(null);
                                     setMainSteelPriceInput(quota.mainSteelPrice || "0");
                                     setMiscSteelPriceInput(quota.miscSteelPrice || "0");
                                     setReplyStatus("IN_REVIEW");

@@ -127,7 +127,7 @@ const TeamDashboard = () => {
       teamsData.sort((a, b) => {
         const indexA = teamOrder.indexOf((a.name || "").toLowerCase());
         const indexB = teamOrder.indexOf((b.name || "").toLowerCase());
-        
+
         if (indexA !== -1 && indexB !== -1) return indexA - indexB;
         if (indexA !== -1) return -1;
         if (indexB !== -1) return 1;
