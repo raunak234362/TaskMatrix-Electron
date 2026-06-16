@@ -196,7 +196,7 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
+        <div className="fixed inset-0 z-10001 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">

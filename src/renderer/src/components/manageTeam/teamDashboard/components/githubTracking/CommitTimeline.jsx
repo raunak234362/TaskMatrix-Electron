@@ -97,7 +97,7 @@ const TimelineCommit = ({ c }) => {
               )}
             </div>
           ) : (
-            <p className="text-[10px] font-bold uppercase text-red-600 font-black">Failed to load details.</p>
+            <p className="text-[10px] font-bold uppercase text-red-600">Failed to load details.</p>
           )}
         </div>
       )}

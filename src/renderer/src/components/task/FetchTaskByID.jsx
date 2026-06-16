@@ -337,7 +337,7 @@ const FetchTaskByID = ({
 
   if (loading) {
     return createPortal(
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-100">
         <div className="bg-white rounded-2xl shadow-2xl p-10 flex flex-col items-center">
           <Loader2 className="w-12 h-12 animate-spin text-[#6bbd45]" />
           <p className="mt-4 text-lg font-medium text-gray-700">
@@ -351,7 +351,7 @@ const FetchTaskByID = ({
 
   if (!task) {
     return createPortal(
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-100">
         <div className="bg-white rounded-2xl shadow-2xl p-10 text-center w-full max-w-md">
           <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
             <FileText className="w-10 h-10 text-gray-400" />
@@ -376,7 +376,7 @@ const FetchTaskByID = ({
   const priority = getPriorityLabel(task.priority);
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] overflow-hidden flex flex-col relative">
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50">
@@ -675,7 +675,7 @@ const FetchTaskByID = ({
 
       {/* End Task Comment Modal */}
       {isEndModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/60 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-6">
             <div className="flex items-center gap-3 text-red-600">
               <Square className="w-6 h-6 fill-current" />

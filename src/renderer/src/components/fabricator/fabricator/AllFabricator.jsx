@@ -163,7 +163,7 @@ const AllFabricator = () => {
       {/* Search Bar & Filters - Premium Style */}
       <div className="mb-8 px-2">
         <div className="flex flex-wrap items-center gap-4">
-          <div className="relative group flex-grow max-w-xl min-w-[280px]">
+          <div className="relative group grow max-w-xl min-w-[280px]">
             <div className="absolute -inset-1 bg-linear-to-r from-green-100 to-emerald-100 rounded-xl blur-sm opacity-25 group-hover:opacity-40 transition-duration-1000"></div>
             <div className="relative bg-white border border-gray-200 rounded-xl px-3 flex items-center shadow-sm hover:border-green-200 transition-colors h-11">
               <Search className="w-5 h-5 text-gray-400 shrink-0" />
