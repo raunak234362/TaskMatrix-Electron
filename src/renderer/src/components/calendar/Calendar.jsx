@@ -95,24 +95,7 @@ const Calendar = () => {
     };
 
     const handleSelectDate = (date) => {
-        // When clicking a date cell in month view, set selected date for sidebar filtering
-        // Double click or similar could be used for creating meeting, but let's keep it simple for now
-        // If exact date click behavior for creating meeting is desired, we can add a specific handler
-
-        // For now, let's say single click filters the sidebar list, 
-        // and we provide a way to open modal manually or via slot click in other views
-
-        // Actually, previous behavior was opening modal immediately. 
-        // Let's modify: Click -> Filter List. 
-        // If user wants to create, they can use header button or drag/double click (if implemented). 
-        // OR we differentiate based on where they click.
-
-        // To preserve "Click date to create meeting" flow:
-        // We can just set selected date to filter the list. 
-        // And have a separate "Create Meeting" button or double click.
-
-        // However, standard calendar behavior: 
-        // Click date -> Show day view or list for that day.
+      
 
         setSelectedDate(date);
 
@@ -226,7 +209,7 @@ const Calendar = () => {
 
             {/* Modal Component */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                <div className="fixed inset-0 z-10001 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
                         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                             <h2 className="text-xl font-bold text-gray-800">
