@@ -121,11 +121,7 @@ const Calendar = () => {
         setIsModalOpen(true);
     };
 
-    // New wrapper to handle creating from month view specifically if needed, 
-    // replacing the old handleSelectDate if strictly creating meeting was the only goal.
-    // For now, let's assume filtering sidebar is the priority for date selection.
-
-    // Helper to open modal for specific date (e.g. from Sidebar "Add" button if we added one, or double click)
+   
     const handleCreateForDate = (date) => {
         const start = new Date(date);
         start.setHours(9, 0, 0, 0);
