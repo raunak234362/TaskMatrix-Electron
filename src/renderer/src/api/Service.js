@@ -647,6 +647,53 @@ class Service {
     }
   }
 
+  // Add CD Quota Response
+  static async addCDQuotaResponse(data) {
+    try {
+      const isFormData = data instanceof FormData;
+      const response = await api.post(`CDQuotaResponse`, data, {
+        headers: {
+          "Content-Type": isFormData ? "multipart/form-data" : "application/json",
+        },
+      });
+      console.log("CD Quota Response added:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("cannot add CD Quota Response", error);
+      throw error;
+    }
+  }
+
+  // Get CD Quota Responses by Quota ID
+  static async getCDQuotaResponsesByQuotaId(quotaId) {
+    try {
+      const response = await api.get(`CDQuotaResponse/quota/${quotaId}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log("CD Quota Responses by Quota ID fetched:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("cannot get CD Quota Responses by Quota ID", error);
+    }
+  }
+
+  // Add CD Quota Response by ID (optional/unused but present in PWA)
+  static async getCDQuotaResponseById(id) {
+    try {
+      const response = await api.get(`CDQuotaResponse/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log("CD Quota Response by ID fetched:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("cannot get CD Quota Response by ID", error);
+    }
+  }
+
   // Add Estimation
   static async AddEstimation(formData) {
     try {
@@ -1097,14 +1144,14 @@ class Service {
       if (response && response.data && response.data.data) {
         const userRole = sessionStorage.getItem('userRole')?.toLowerCase()
         const promises = [this.GetSubmittalByProjectId(id)]
-        
+
         if (userRole !== 'staff') {
           promises.push(this.GetProjectManagerAssists(id))
         }
 
         const results = await Promise.all(promises)
         response.data.data.submittals = results[0] || []
-        
+
         if (userRole !== 'staff' && results[1] && results[1].length > 0) {
           response.data.data.assists = results[1];
         } else if (userRole === 'staff') {

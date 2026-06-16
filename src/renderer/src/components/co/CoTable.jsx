@@ -8,6 +8,12 @@ import { Merge } from "lucide-react";
 
 const EDITABLE_COLS = ["description", "referenceDoc", "elements", "QtyNo", "hours", "cost", "remarks"];
 
+const sumCellValue = (val) => {
+  if (val === undefined || val === null) return 0;
+  if (val === "_MERGED_LEFT_" || val === "_MERGED_UP_" || val === -999999 || val === -999998) return 0;
+  return Number(val) || 0;
+};
+
 const CoTable = ({ coId, onSuccess }) => {
   const [loading, setLoading] = useState(true);
   const [selectedRowIds, setSelectedRowIds] = useState(new Set());
@@ -43,9 +49,9 @@ const CoTable = ({ coId, onSuccess }) => {
             description: r.description || "",
             referenceDoc: r.referenceDoc || "",
             elements: r.elements || "",
-            QtyNo: r.QtyNo || "0",
-            hours: r.hours || "0",
-            cost: r.cost || "0",
+            QtyNo: r.QtyNo === -999999 ? "_MERGED_LEFT_" : r.QtyNo === -999998 ? "_MERGED_UP_" : String(r.QtyNo ?? 0),
+            hours: r.hours === -999999 ? "_MERGED_LEFT_" : r.hours === -999998 ? "_MERGED_UP_" : String(r.hours ?? 0),
+            cost: r.cost === -999999 ? "_MERGED_LEFT_" : r.cost === -999998 ? "_MERGED_UP_" : String(r.cost ?? 0),
             remarks: r.remarks || "",
           }))
         );
@@ -153,17 +159,27 @@ const CoTable = ({ coId, onSuccess }) => {
       return;
     }
 
+    const selectedCols = Array.from(new Set(coords.map((co) => co.colName)));
+    const isNumericMerge = selectedCols.some((col) => ["QtyNo", "hours", "cost"].includes(col));
+
     const valuesToMerge = [];
     for (let r = minR; r <= maxR; r++) {
       for (let c = minC; c <= maxC; c++) {
         const fieldName = EDITABLE_COLS[c];
         const val = currentRows[r]?.[fieldName];
-        if (val && val !== "_MERGED_LEFT_" && val !== "_MERGED_UP_") {
+        if (val !== undefined && val !== null && val !== "" && val !== "_MERGED_LEFT_" && val !== "_MERGED_UP_") {
           valuesToMerge.push(val);
         }
       }
     }
-    const combinedText = valuesToMerge.filter((v) => String(v).trim() !== "").join("\n");
+    
+    let combinedText;
+    if (isNumericMerge) {
+      const sum = valuesToMerge.reduce((acc, v) => acc + (Number(v) || 0), 0);
+      combinedText = String(sum);
+    } else {
+      combinedText = valuesToMerge.filter((v) => String(v).trim() !== "").join("\n");
+    }
 
     const updatedRows = JSON.parse(JSON.stringify(currentRows));
     for (let r = minR; r <= maxR; r++) {
@@ -247,12 +263,23 @@ const CoTable = ({ coId, onSuccess }) => {
   const onSubmit = async (data) => {
     console.log(data);
     try {
+      const formatSaveValue = (val) => {
+        if (val === undefined || val === null) return 0;
+        const trimmed = String(val).trim();
+        if (trimmed === "_MERGED_LEFT_") return -999999;
+        if (trimmed === "_MERGED_UP_") return -999998;
+        if (trimmed === "") return 0;
+        const num = Number(trimmed);
+        return isNaN(num) ? 0 : num;
+      };
+
       // Explicitly convert numeric strings to Numbers for backend validation
+      // But preserve merge tags and multiline merged values
       const formattedRows = data.rows.map((row) => ({
         ...row,
-        QtyNo: Number(row.QtyNo) || 0,
-        hours: Number(row.hours) || 0,
-        cost: Number(row.cost) || 0,
+        QtyNo: formatSaveValue(row.QtyNo),
+        hours: formatSaveValue(row.hours),
+        cost: formatSaveValue(row.cost),
         remarks: row.remarks && row.remarks.trim().length >= 2 ? row.remarks : "— "
       }));
 
@@ -270,8 +297,8 @@ const CoTable = ({ coId, onSuccess }) => {
   };
 
   const rows = watch("rows") || [];
-  const totalHours = rows.reduce((sum, r) => sum + (Number(r.hours) || 0), 0);
-  const totalCost = rows.reduce((sum, r) => sum + (Number(r.cost) || 0), 0);
+  const totalHours = rows.reduce((sum, r) => sum + sumCellValue(r.hours), 0);
+  const totalCost = rows.reduce((sum, r) => sum + sumCellValue(r.cost), 0);
 
   // Compute cell spans dynamically
   const cellSpans = [];

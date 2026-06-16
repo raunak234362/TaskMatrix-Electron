@@ -20,6 +20,7 @@ import TeamMembersTable from "./components/TeamMembersTable";
 import TaskDistribution from "./components/TaskDistribution";
 import WorkloadAlerts from "../../dashboard/components/WorkloadAlerts";
 import DailyWorkReportModal from "./components/DailyWorkReportModal";
+import TeamReportModal from "./components/TeamReportModal";
 import TeamCalendar from "./components/TeamCalendar";
 import { toast } from "react-toastify";
 import GithubDashboard from "./components/githubTracking/GithubDashboard";
@@ -41,13 +42,14 @@ const TeamDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isTeamReportModalOpen, setIsTeamReportModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [memberFilter, setMemberFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     const isAnyModal =
-      isModalOpen || isViewModalOpen || isReportModalOpen || !!selectedEmployee;
+      isModalOpen || isViewModalOpen || isReportModalOpen || isTeamReportModalOpen || !!selectedEmployee;
     if (isAnyModal) {
       dispatch(incrementModalCount());
       return () => {
@@ -58,6 +60,7 @@ const TeamDashboard = () => {
     isModalOpen,
     isViewModalOpen,
     isReportModalOpen,
+    isTeamReportModalOpen,
     selectedEmployee,
     dispatch,
   ]);
@@ -845,9 +848,7 @@ const TeamDashboard = () => {
   };
 
   const handleGenerateReport = () => {
-    toast.info(
-      "PDF generation is currently being set up. Please try again later.",
-    );
+    setIsTeamReportModalOpen(true);
   };
 
   return (
@@ -998,6 +999,16 @@ const TeamDashboard = () => {
         onClose={() => setIsReportModalOpen(false)}
         members={teamStats.memberStats || []}
       />
+
+      {isTeamReportModalOpen && (
+        <TeamReportModal
+          isOpen={isTeamReportModalOpen}
+          onClose={() => setIsTeamReportModalOpen(false)}
+          teamName={teams?.find((t) => t.id === selectedTeam)?.name || "Team"}
+          members={teamStats.memberStats || []}
+          dateFilter={dateFilter}
+        />
+      )}
     </div>
   );
 };

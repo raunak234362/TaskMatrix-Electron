@@ -44,6 +44,7 @@ const AllTasks = () => {
     assignedUser: "All Users",
     wbsType: "All Types",
     taskName: "All Tasks",
+    manager: "All Managers",
   });
 
   const [dateFilter, setDateFilter] = useState({
@@ -162,7 +163,7 @@ const AllTasks = () => {
   };
 
   /* -------------------- Filters Options -------------------- */
-  const { projectOptions, stageOptions, statusOptions, userOptions, wbsTypeOptions, taskOptions } =
+  const { projectOptions, stageOptions, statusOptions, userOptions, wbsTypeOptions, taskOptions, managerOptions } =
     useMemo(() => {
       const projects = new Set();
       const stages = new Set();
@@ -170,6 +171,7 @@ const AllTasks = () => {
       const users = new Set();
       const wbsTypes = new Set();
       const tasksList = new Set();
+      const managers = new Set();
 
       tasks.forEach((task) => {
         if (task.project?.name) projects.add(task.project.name);
@@ -181,6 +183,12 @@ const AllTasks = () => {
           ? `${task.user.firstName} ${task.user.lastName}`
           : "Unassigned";
         users.add(userName);
+
+        const mObj = task.project?.manager;
+        const managerName = mObj
+          ? `${mObj.firstName || ""} ${mObj.lastName || ""}`.trim() || "Unnamed Manager"
+          : "No Manager";
+        managers.add(managerName);
       });
 
       return {
@@ -207,6 +215,10 @@ const AllTasks = () => {
         taskOptions: [
           { label: "All Tasks", value: "All Tasks" },
           ...Array.from(tasksList).map((t) => ({ label: t, value: t })),
+        ],
+        managerOptions: [
+          { label: "All Managers", value: "All Managers" },
+          ...Array.from(managers).map((m) => ({ label: m, value: m })),
         ],
       };
     }, [tasks]);
@@ -255,6 +267,16 @@ const AllTasks = () => {
       )
         return false;
 
+      const mObj = task.project?.manager;
+      const managerName = mObj
+        ? `${mObj.firstName || ""} ${mObj.lastName || ""}`.trim() || "Unnamed Manager"
+        : "No Manager";
+      if (
+        filters.manager !== "All Managers" &&
+        managerName !== filters.manager
+      )
+        return false;
+
       // Filter by Date (using created_on)
       if (!matchesDateFilter(task.created_on, dateFilter)) return false;
 
@@ -288,6 +310,7 @@ const AllTasks = () => {
     const tableColumn = [
       "Task Detail", 
       "Project Name", 
+      "Manager",
       "Assigned User", 
       "Status", 
       "Allocated Hrs", 
@@ -312,9 +335,15 @@ const AllTasks = () => {
       const hasUnacknowledgedComments = unacknowledgedComments.length > 0;
       const commentsText = unacknowledgedComments.map(c => stripHtml(c.data)).join('\n---\n');
 
+      const mObj = task.project?.manager;
+      const managerName = mObj
+        ? `${mObj.firstName || ""} ${mObj.lastName || ""}`.trim() || "Unnamed Manager"
+        : "No Manager";
+
       tableRows.push([
         task.name || "N/A",
         task.project?.name || "N/A",
+        managerName,
         task.user ? `${task.user.firstName} ${task.user.lastName}` : "Unassigned",
         task.status || "Unknown",
         task.allocationLog?.allocatedHours || "—",
@@ -354,9 +383,15 @@ const AllTasks = () => {
       const hasUnacknowledgedComments = unacknowledgedComments.length > 0;
       const commentsText = unacknowledgedComments.map(c => stripHtml(c.data)).join('\n---\n');
 
+      const mObj = task.project?.manager;
+      const managerName = mObj
+        ? `${mObj.firstName || ""} ${mObj.lastName || ""}`.trim() || "Unnamed Manager"
+        : "No Manager";
+
       return {
         "Task Detail": task.name || "N/A",
         "Project Name": task.project?.name || "N/A",
+        "Manager": managerName,
         "Assigned User": task.user ? `${task.user.firstName} ${task.user.lastName}` : "Unassigned",
         "Status": task.status || "Unknown",
         "Allocated Hours": task.allocationLog?.allocatedHours || "—",
@@ -408,14 +443,27 @@ const AllTasks = () => {
       {
         accessorKey: "project.name",
         header: "Project",
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2 text-sm text-black">
-            <Briefcase className="w-3.5 h-3.5 text-black" />
-            <span className="font-medium">
-              {row.original.project?.name || "N/A"}
-            </span>
-          </div>
-        ),
+        cell: ({ row }) => {
+          const mObj = row.original.project?.manager;
+          const managerName = mObj
+            ? `${mObj.firstName || ""} ${mObj.lastName || ""}`.trim() || "Unnamed Manager"
+            : "";
+          return (
+            <div className="flex flex-col text-sm text-black">
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-3.5 h-3.5 text-black" />
+                <span className="font-medium text-black">
+                  {row.original.project?.name || "N/A"}
+                </span>
+              </div>
+              {managerName && (
+                <span className="text-[10px] text-gray-500 font-bold ml-[22px] uppercase">
+                  Mgr: {managerName}
+                </span>
+              )}
+            </div>
+          );
+        },
       },
       {
         accessorFn: (row) =>
@@ -611,6 +659,18 @@ const AllTasks = () => {
               value={filters.projectName}
               onChange={(_, val) => setFilters(prev => ({ ...prev, projectName: val }))}
               placeholder="Select Project"
+              className="font-semibold text-black bg-gray-50"
+            />
+          </div>
+
+          {/* Manager Filter */}
+          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
+            <label className="text-[10px] font-bold text-black uppercase tracking-wider">Manager</label>
+            <Select
+              options={managerOptions}
+              value={filters.manager}
+              onChange={(_, val) => setFilters(prev => ({ ...prev, manager: val }))}
+              placeholder="Select Manager"
               className="font-semibold text-black bg-gray-50"
             />
           </div>

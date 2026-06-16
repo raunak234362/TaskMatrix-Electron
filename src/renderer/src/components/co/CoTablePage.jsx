@@ -31,9 +31,15 @@ const CoTablePage = () => {
 
   const rows = co.changeOrderTables || co.CoRefersTo || [];
 
-  const totalQty = rows.reduce((s, r) => s + (r.QtyNo || 0), 0);
-  const totalHours = rows.reduce((s, r) => s + (r.hours || 0), 0);
-  const totalCost = rows.reduce((s, r) => s + (r.cost || 0), 0);
+  const sumCellValue = (val) => {
+    if (val === undefined || val === null) return 0;
+    if (val === "_MERGED_LEFT_" || val === "_MERGED_UP_" || val === -999999 || val === -999998) return 0;
+    return Number(val) || 0;
+  };
+
+  const totalQty = rows.reduce((s, r) => s + sumCellValue(r.QtyNo), 0);
+  const totalHours = rows.reduce((s, r) => s + sumCellValue(r.hours), 0);
+  const totalCost = rows.reduce((s, r) => s + sumCellValue(r.cost), 0);
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">

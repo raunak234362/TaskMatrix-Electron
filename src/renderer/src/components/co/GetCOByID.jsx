@@ -404,9 +404,15 @@ const GetCOByID = ({ id, projectId }) => {
 
       {/* ================= CO TABLE POPUP ================= */}
       {showTableModal && (() => {
-        const totalQty = tableRows.reduce((s, r) => s + (Number(r.QtyNo) || 0), 0);
-        const totalHours = tableRows.reduce((s, r) => s + (Number(r.hours) || 0), 0);
-        const totalCost = tableRows.reduce((s, r) => s + (Number(r.cost) || 0), 0);
+        const sumCellValue = (val) => {
+          if (val === undefined || val === null) return 0;
+          if (val === "_MERGED_LEFT_" || val === "_MERGED_UP_" || val === -999999 || val === -999998) return 0;
+          return Number(val) || 0;
+        };
+
+        const totalQty = tableRows.reduce((s, r) => s + sumCellValue(r.QtyNo), 0);
+        const totalHours = tableRows.reduce((s, r) => s + sumCellValue(r.hours), 0);
+        const totalCost = tableRows.reduce((s, r) => s + sumCellValue(r.cost), 0);
 
         return (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">

@@ -12,6 +12,12 @@ import { Loader2, Save, Plus, Trash2, ChevronUp, ChevronDown, Merge } from "luci
 
 const EDITABLE_COLS = ["description", "referenceDoc", "elements", "QtyNo", "hours", "cost", "remarks"];
 
+const sumCellValue = (val) => {
+  if (val === undefined || val === null) return 0;
+  if (val === "_MERGED_LEFT_" || val === "_MERGED_UP_" || val === -999999 || val === -999998) return 0;
+  return Number(val) || 0;
+};
+
 const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingRows, setLoadingRows] = useState(true);
@@ -49,8 +55,8 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
 
 
   const watchedRows = watch("rows") || [];
-  const totalHours = watchedRows.reduce((sum, r) => sum + (Number(r.hours) || 0), 0);
-  const totalCost = watchedRows.reduce((sum, r) => sum + (Number(r.cost) || 0), 0);
+  const totalHours = watchedRows.reduce((sum, r) => sum + sumCellValue(r.hours), 0);
+  const totalCost = watchedRows.reduce((sum, r) => sum + sumCellValue(r.cost), 0);
 
   useEffect(() => {
     const fetchTableRows = async () => {
@@ -66,9 +72,9 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
               description: r.description || "",
               referenceDoc: r.referenceDoc || "",
               elements: r.elements || "",
-              QtyNo: r.QtyNo || 0,
-              hours: r.hours || 0,
-              cost: r.cost || 0,
+              QtyNo: r.QtyNo === -999999 ? "_MERGED_LEFT_" : r.QtyNo === -999998 ? "_MERGED_UP_" : String(r.QtyNo ?? 0),
+              hours: r.hours === -999999 ? "_MERGED_LEFT_" : r.hours === -999998 ? "_MERGED_UP_" : String(r.hours ?? 0),
+              cost: r.cost === -999999 ? "_MERGED_LEFT_" : r.cost === -999998 ? "_MERGED_UP_" : String(r.cost ?? 0),
               remarks: r.remarks || "",
             }))
           );
@@ -186,17 +192,27 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
       return;
     }
 
+    const selectedCols = Array.from(new Set(coords.map((co) => co.colName)));
+    const isNumericMerge = selectedCols.some((col) => ["QtyNo", "hours", "cost"].includes(col));
+
     const valuesToMerge = [];
     for (let r = minR; r <= maxR; r++) {
       for (let c = minC; c <= maxC; c++) {
         const fieldName = EDITABLE_COLS[c];
         const val = currentRows[r]?.[fieldName];
-        if (val && val !== "_MERGED_LEFT_" && val !== "_MERGED_UP_") {
+        if (val !== undefined && val !== null && val !== "" && val !== "_MERGED_LEFT_" && val !== "_MERGED_UP_") {
           valuesToMerge.push(val);
         }
       }
     }
-    const combinedText = valuesToMerge.filter((v) => String(v).trim() !== "").join("\n");
+    
+    let combinedText;
+    if (isNumericMerge) {
+      const sum = valuesToMerge.reduce((acc, v) => acc + (Number(v) || 0), 0);
+      combinedText = String(sum);
+    } else {
+      combinedText = valuesToMerge.filter((v) => String(v).trim() !== "").join("\n");
+    }
 
     const updatedRows = JSON.parse(JSON.stringify(currentRows));
     for (let r = minR; r <= maxR; r++) {
@@ -296,12 +312,22 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
 
       files.forEach((file) => formData.append("files", file));
 
+      const formatSaveValue = (val) => {
+        if (val === undefined || val === null) return 0;
+        const trimmed = String(val).trim();
+        if (trimmed === "_MERGED_LEFT_") return -999999;
+        if (trimmed === "_MERGED_UP_") return -999998;
+        if (trimmed === "") return 0;
+        const num = Number(trimmed);
+        return isNaN(num) ? 0 : num;
+      };
+
       // 2. Prepare Table Rows Data
       const formattedRows = data.rows.map((row) => ({
         ...row,
-        QtyNo: Number(row.QtyNo) || 0,
-        hours: Number(row.hours) || 0,
-        cost: Number(row.cost) || 0,
+        QtyNo: formatSaveValue(row.QtyNo),
+        hours: formatSaveValue(row.hours),
+        cost: formatSaveValue(row.cost),
         remarks: row.remarks && row.remarks.trim().length >= 1 ? row.remarks : "—"
       }));
 
@@ -316,15 +342,28 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
         projectName = project?.projectName || project?.name || "";
       }
 
-      await Service.EditCoById(coId, formData, fabricatorName, projectName);
-      await Service.UpdateCOTableById(coId, formattedRows);
+      const coRes = await Service.EditCoById(coId, formData, fabricatorName, projectName);
+      const tableRes = await Service.UpdateCOTableById(coId, formattedRows);
 
-      toast.success("Change Order and Table updated successfully!");
-      if (onSuccess) onSuccess();
-      onClose();
+      if (coRes) {
+        toast.success("Change Order details updated successfully!");
+      } else {
+        toast.error("Failed to update Change Order details");
+      }
+
+      if (tableRes) {
+        toast.success("Table updated successfully!");
+      } else {
+        toast.error("Failed to update table data");
+      }
+
+      if (coRes || tableRes) {
+        if (onSuccess) onSuccess();
+        onClose();
+      }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update Change Order or Table");
+      toast.error("An unexpected error occurred during update");
     } finally {
       setIsSubmitting(false);
     }

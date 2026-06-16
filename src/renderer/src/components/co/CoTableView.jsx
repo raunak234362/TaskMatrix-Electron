@@ -2,9 +2,16 @@
 const EDITABLE_COLS = ["description", "referenceDoc", "elements", "QtyNo", "hours", "cost", "remarks"];
 
 const CoTableView = ({ rows }) => {
+  const normalizedRows = rows.map((r) => ({
+    ...r,
+    QtyNo: r.QtyNo === -999999 ? "_MERGED_LEFT_" : r.QtyNo === -999998 ? "_MERGED_UP_" : r.QtyNo,
+    hours: r.hours === -999999 ? "_MERGED_LEFT_" : r.hours === -999998 ? "_MERGED_UP_" : r.hours,
+    cost: r.cost === -999999 ? "_MERGED_LEFT_" : r.cost === -999998 ? "_MERGED_UP_" : r.cost,
+  }));
+
   // Compute cell spans dynamically
   const cellSpans = [];
-  for (let r = 0; r < rows.length; r++) {
+  for (let r = 0; r < normalizedRows.length; r++) {
     const rowSpans = [];
     for (let c = 0; c < EDITABLE_COLS.length; c++) {
       rowSpans.push({ rowSpan: 1, colSpan: 1, isSpanned: false });
@@ -12,7 +19,7 @@ const CoTableView = ({ rows }) => {
     cellSpans.push(rowSpans);
   }
 
-  for (let r = 0; r < rows.length; r++) {
+  for (let r = 0; r < normalizedRows.length; r++) {
     for (let c = 0; c < EDITABLE_COLS.length; c++) {
       if (cellSpans[r]?.[c]?.isSpanned) continue;
 
@@ -20,7 +27,7 @@ const CoTableView = ({ rows }) => {
       let nextCol = c + 1;
       while (nextCol < EDITABLE_COLS.length) {
         const fieldName = EDITABLE_COLS[nextCol];
-        if (rows[r]?.[fieldName] === "_MERGED_LEFT_") {
+        if (normalizedRows[r]?.[fieldName] === "_MERGED_LEFT_") {
           colSpan++;
           nextCol++;
         } else {
@@ -30,11 +37,11 @@ const CoTableView = ({ rows }) => {
 
       let rowSpan = 1;
       let nextRow = r + 1;
-      while (nextRow < rows.length) {
+      while (nextRow < normalizedRows.length) {
         let allMergedUp = true;
         for (let offset = 0; offset < colSpan; offset++) {
           const fieldName = EDITABLE_COLS[c + offset];
-          if (rows[nextRow]?.[fieldName] !== "_MERGED_UP_") {
+          if (normalizedRows[nextRow]?.[fieldName] !== "_MERGED_UP_") {
             allMergedUp = false;
             break;
           }
@@ -81,7 +88,7 @@ const CoTableView = ({ rows }) => {
           </thead>
 
           <tbody className="divide-y">
-            {rows.map((r, i) => (
+            {normalizedRows.map((r, i) => (
               <tr key={r.id || i} className="hover:bg-gray-50">
                 <td className="px-4 py-3 text-gray-700 border border-gray-200">{i + 1}</td>
 
