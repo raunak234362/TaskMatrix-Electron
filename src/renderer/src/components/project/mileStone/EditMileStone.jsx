@@ -71,6 +71,7 @@ const EditMileStone = ({
     { label: "IFC", value: "IFC" },
     { label: "RIFA", value: "RIFA" },
     { label: "RIFC", value: "RIFC" },
+    { label: "CO", value: "CO" },
   ];
 
   useEffect(() => {
@@ -209,7 +210,7 @@ const EditMileStone = ({
   return (
     <div className="flex flex-col h-full bg-white rounded-2xl shadow-xl overflow-hidden z-40">
       {/* Header */}
-      <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-100">
+      <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-100 shrink-0">
         <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
          
           Edit Milestone
@@ -223,8 +224,8 @@ const EditMileStone = ({
       </div>
 
       {/* Form Content */}
-      <div className="flex-1 overflow-y-auto p-6">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Subject *
@@ -376,35 +377,34 @@ const EditMileStone = ({
               </label>
             </div>
           </div>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-between items-center pt-6 mt-4 border-t border-gray-100">
-            <div>
-              {milestoneId && (
-                <Button
-                  type="button"
-                  onClick={handleDelete}
-                  className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:text-red-700 px-4 font-bold flex items-center gap-2 h-10 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete
-                </Button>
-              )}
-            </div>
-            <div className="flex gap-3">
-          
+        {/* Action Buttons */}
+        <div className="flex justify-between items-center p-6 border-t border-gray-100 bg-gray-50/50 shrink-0">
+          <div>
+            {milestoneId && (
               <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-green-200 border-2 border-green-700 hover:bg-green-500 text-black px-8 flex items-center gap-2 h-10 font-bold shadow-sm"
+                type="button"
+                onClick={handleDelete}
+                className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:text-red-700 px-4 font-bold flex items-center gap-2 h-10 transition-colors"
               >
-                <Save className="w-4 h-4" />
-                {isSubmitting ? "Saving..." : "Save Changes"}
+                <Trash2 className="w-4 h-4" />
+                Delete
               </Button>
-            </div>
+            )}
           </div>
-        </form>
-      </div>
+          <div className="flex gap-3">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-green-200 border-2 border-green-700 hover:bg-green-500 text-black px-8 flex items-center gap-2 h-10 font-bold shadow-sm"
+            >
+              <Save className="w-4 h-4" />
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </div>
+      </form>
     </div>
   );
 };

@@ -101,10 +101,10 @@ const AddMileStone = ({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] border border-gray-200 overflow-y-auto flex flex-col relative">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[85vh] h-full border border-gray-200 flex flex-col overflow-hidden relative">
 
         {/* Header */}
-        <div className="flex justify-between items-center p-5 border-b bg-gray-50">
+        <div className="flex justify-between items-center p-5 border-b bg-gray-50 shrink-0">
           <h3 className="text-xl  text-gray-700 flex items-center gap-2">
             <CheckCircle className="w-6 h-6 text-green-600" />
             Add New Milestone
@@ -118,152 +118,154 @@ const AddMileStone = ({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5 overflow-y-auto h-[80vh]">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Milestone *
-            </label>
-            <Controller
-              name="subject"
-              control={control}
-              rules={{ required: "Subject is required" }}
-              defaultValue={subjectOptions[0].value}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  options={subjectOptions}
-                  value={subjectOptions.find((opt) => opt.value === field.value)}
-                  onChange={(opt) => field.onChange(opt?.value || "")}
-                  className="text-sm"
-                  menuPlacement="bottom"
-                  styles={{
-                    control: (base) => ({
-                      ...base,
-                      borderRadius: "0.5rem",
-                      padding: "2px",
-                    }),
-                  }}
-                />
-              )}
-            />
-            {errors.subject && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.subject.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <Input
-              label="Subject"
-              {...register("subSubject")}
-              placeholder="Please write the subject"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="isConnectionDesigner"
-              {...register("isConnectionDesigner")}
-              className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-            />
-            <label htmlFor="isConnectionDesigner" className="text-sm font-medium text-gray-700">
-              Is Connection Designer
-            </label>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Description *
-            </label>
-            <Controller
-              name="description"
-              control={control}
-              rules={{ required: "Required" }}
-              render={({ field }) => (
-                <RichTextEditor
-                  value={field.value || ""}
-                  onChange={field.onChange}
-                  placeholder=""
-                />
-              )}
-            />
-            {errors.description && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
-
-          {isConnectionDesigner ? (
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="CD Submission Date By WBT"
-                type="date"
-                {...register("CDApprovalDate")}
+        <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-6 space-y-5">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Milestone *
+              </label>
+              <Controller
+                name="subject"
+                control={control}
+                rules={{ required: "Subject is required" }}
+                defaultValue={subjectOptions[0].value}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    options={subjectOptions}
+                    value={subjectOptions.find((opt) => opt.value === field.value)}
+                    onChange={(opt) => field.onChange(opt?.value || "")}
+                    className="text-sm"
+                    menuPlacement="bottom"
+                    styles={{
+                      control: (base) => ({
+                        ...base,
+                        borderRadius: "0.5rem",
+                        padding: "2px",
+                      }),
+                    }}
+                  />
+                )}
               />
-              <Input
-                label="CD Approval Submission By"
-                type="date"
-                {...register("CDTargetDate")}
-              />
+              {errors.subject && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.subject.message}
+                </p>
+              )}
             </div>
-          ) : (
+
             <div>
               <Input
-                label="Approval Date/Reapproved Date/Fabrication Date"
-                type="date"
-                {...register("approvalDate")}
+                label="Subject"
+                {...register("subSubject")}
+                placeholder="Please write the subject"
               />
             </div>
-          )}
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Status
-            </label>
-            <Select
-              options={statusOptions}
-              defaultValue={statusOptions[0]}
-              onChange={(opt) => setValue("status", opt?.value || "PENDING")}
-              className="text-sm"
-              menuPlacement="top"
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  borderRadius: "0.5rem",
-                  padding: "2px",
-                }),
-              }}
-            />
-          </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="isConnectionDesigner"
+                {...register("isConnectionDesigner")}
+                className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+              />
+              <label htmlFor="isConnectionDesigner" className="text-sm font-medium text-gray-700">
+                Is Connection Designer
+              </label>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Description *
+              </label>
+              <Controller
+                name="description"
+                control={control}
+                rules={{ required: "Required" }}
+                render={({ field }) => (
+                  <RichTextEditor
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    placeholder=""
+                  />
+                )}
+              />
+              {errors.description && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.description.message}
+                </p>
+              )}
+            </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Stage
-            </label>
-            <Select
-              options={stageOptions}
-              defaultValue={stageOptions[0]}
-              onChange={(opt) => setValue("stage", opt?.value || "IFA")}
-              className="text-sm"
-              menuPlacement="top"
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  borderRadius: "0.5rem",
-                  padding: "2px",
-                }),
-              }}
-            />
+            {isConnectionDesigner ? (
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="CD Submission Date By WBT"
+                  type="date"
+                  {...register("CDApprovalDate")}
+                />
+                <Input
+                  label="CD Approval Submission By"
+                  type="date"
+                  {...register("CDTargetDate")}
+                />
+              </div>
+            ) : (
+              <div>
+                <Input
+                  label="Approval Date/Reapproved Date/Fabrication Date"
+                  type="date"
+                  {...register("approvalDate")}
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Status
+              </label>
+              <Select
+                options={statusOptions}
+                defaultValue={statusOptions[0]}
+                onChange={(opt) => setValue("status", opt?.value || "PENDING")}
+                className="text-sm"
+                menuPlacement="top"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    borderRadius: "0.5rem",
+                    padding: "2px",
+                  }),
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Stage
+              </label>
+              <Select
+                options={stageOptions}
+                defaultValue={stageOptions[0]}
+                onChange={(opt) => setValue("stage", opt?.value || "IFA")}
+                className="text-sm"
+                menuPlacement="top"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    borderRadius: "0.5rem",
+                    padding: "2px",
+                  }),
+                }}
+              />
+            </div>
           </div>
 
           {/* Footer */}
-          <div className="flex flex-col sm:flex-row justify-center gap-3 pt-4 border-t mt-2">
+          <div className="flex justify-center p-6 border-t border-gray-100 bg-gray-50/50 shrink-0 w-full">
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-green-600 hover:bg-green-700 text-white px-6"
+              className="w-full max-w-md bg-green-600 hover:bg-green-700 text-white px-6 h-10 font-bold"
             >
               {isSubmitting ? "Adding..." : "Add Milestone"}
             </Button>
