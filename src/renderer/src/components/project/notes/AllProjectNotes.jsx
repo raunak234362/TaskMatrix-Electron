@@ -202,15 +202,6 @@ const AllProjectNotes = ({ projectId, project }) => {
                                     className="w-full flex items-center justify-between p-5 text-left transition-colors hover:bg-gray-50/50"
                                 >
                                     <div className="flex-1 min-w-0 pr-4">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            {note.serialNo && (
-                                                <span className="text-sm font-normal bg-gray-100 text-black px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase border border-gray-200">
-                                                    {note.serialNo}
-                                                </span>
-                                            )}
-
-                                            {getPriorityBadge(note.priority)}
-                                        </div>
                                         <div className="flex flex-wrap gap-1.5 mb-2">
                                             {note.flags && note.flags.length > 0 && note.flags.map((flag, idx) => (
                                                 <span key={idx} className="text-sm font-normal bg-gray-100 text-black px-1.5 py-0.5 rounded tracking-widest whitespace-nowrap uppercase border border-gray-200 flex items-center gap-1">
