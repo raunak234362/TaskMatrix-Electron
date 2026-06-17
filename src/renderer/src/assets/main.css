@@ -156,3 +156,40 @@ select {
 div[class*="-menu"] {
   z-index: 9999 !important;
 }
+
+/* Fix lists inside prose from default resets */
+.prose ul, .prose-sm ul {
+  list-style-type: disc !important;
+  padding-left: 1.25rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.prose ol, .prose-sm ol {
+  list-style-type: decimal !important;
+  padding-left: 1.25rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.prose li, .prose-sm li {
+  display: list-item !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Enforce font size matching sidebar (text-sm, 14px) for editor and overview scope */
+.jodit-wysiwyg,
+.jodit-wysiwyg p,
+.jodit-wysiwyg li,
+.jodit-wysiwyg span,
+.prose,
+.prose-sm,
+.prose p,
+.prose-sm p,
+.prose li,
+.prose-sm li {
+  font-size: 0.875rem !important; /* 14px */
+  line-height: 1.5rem !important;
+}
+
+

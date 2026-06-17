@@ -313,440 +313,437 @@ const EditProject = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
       onClick={onCancel}
     >
       <div
-        className="bg-white w-full max-w-5xl rounded-xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+        className="bg-[#fcfdfc] w-full max-w-[96vw] rounded-3xl shadow-2xl overflow-hidden max-h-[96vh] flex flex-col p-6 border border-gray-100"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Scrollable Content */}
-        <div className="flex p-4 justify-between items-center mb-6 border-b pb-4 sticky top-0 bg-white z-10">
-          <h2 className="text-2xl  text-gray-700">Edit Project</h2>
+        {/* Header-less Top Bar with Close Button */}
+        <div className="flex justify-end mb-4 shrink-0">
           <button
             onClick={onCancel}
-            className="text-sm tracking-wider text-gray-900 font-semibold px-3 py-1 rounded-lg border-2 border-black bg-red-200 hover:text-gray-700"
+            type="button"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
           >
-            CLOSE
+            Close
           </button>
         </div>
-        <div className="overflow-y-auto p-6">
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-1">
-            {/* Project Info */}
-            <SectionTitle title="Project Details" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Project Number"
-                placeholder="PROJ-2025-089"
-                {...register("projectNumber")}
-              />
-              <Input
-                label="Project Name"
-                placeholder="Empire State Tower - Phase II"
-                {...register("name")}
-              />
-              <div className="md:col-span-2">
-                <label className="text-sm font-semibold text-gray-700 mb-2 block">
-                  Description
-                </label>
-                <Controller
-                  name="description"
-                  control={control}
-                  render={({ field }) => (
-                    <RichTextEditor
-                      value={field.value || ""}
-                      onChange={field.onChange}
-                      placeholder="Full structural steel detailing for 40-story commercial building..."
-                    />
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Team Assignment */}
-            <SectionTitle title="Team & Assignments" />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
-                  <Building2 className="w-4 h-4 text-blue-600" /> Fabricator
-                </label>
-                <Controller
-                  name="fabricatorID"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      options={options.fabricators}
-                      value={options.fabricators.find(
-                        (o) => o.value === field.value
-                      )}
-                      onChange={(o) => field.onChange(o?.value || "")}
-                      placeholder="Select..."
-                      isSearchable
-                    />
-                  )}
-                />
-              </div>
-              <div>
-                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
-                  <HardHat className="w-4 h-4 text-amber-600" /> Project Manager
-                </label>
-                <Controller
-                  name="managerID"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      options={options.managers}
-                      value={options.managers.find(
-                        (o) => o.value === field.value
-                      )}
-                      onChange={(o) => field.onChange(o?.value || "")}
-                      placeholder="Assign manager"
-                      isSearchable
-                    />
-                  )}
-                />
-              </div>
-              <div>
-                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
-                  <UserCheck className="w-4 h-4 text-green-600" /> Department
-                </label>
-                <Controller
-                  name="departmentID"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      options={options.departments}
-                      value={options.departments.find(
-                        (o) => o.value === field.value
-                      )}
-                      onChange={(o) => field.onChange(o?.value || "")}
-                      placeholder="Select dept"
-                    />
-                  )}
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
-                  <Users className="w-4 h-4 text-indigo-600" /> Client Project Managers
-                </label>
-                <Controller
-                  name="clientProjectManagers"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      isMulti
-                      options={options.clientProjectManagers}
-                      value={options.clientProjectManagers.filter((o) =>
-                        (Array.isArray(field.value) ? field.value : []).includes(o.value)
-                      )}
-                      onChange={(selectedOptions) =>
-                        field.onChange(selectedOptions ? selectedOptions.map((o) => o.value) : [])
-                      }
-                      placeholder={isFetchingClients ? "Loading clients..." : "Select managers..."}
-                      isLoading={isFetchingClients}
-                      isDisabled={!watchedFabricatorId || isFetchingClients}
-                      isSearchable
-                    />
-                  )}
-                />
-              </div>
-              <div>
-                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
-                  <Wrench className="w-4 h-4 text-cyan-600" /> Connection Designer
-                </label>
-                <Controller
-                  name="connectionDesignerID"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      options={options.connectionDesigners}
-                      value={options.connectionDesigners.find(
-                        (o) => o.value === field.value
-                      )}
-                      onChange={(o) => field.onChange(o?.value || "")}
-                      placeholder="Select Designer"
-                      isSearchable
-                      isClearable
-                    />
-                  )}
-                />
-              </div>
-              <div>
-                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
-                  <UserPlus className="w-4 h-4 text-cyan-600" /> CD POC
-                </label>
-                <Controller
-                  name="pocOfConnectionDesigner"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      options={options.pocOfConnectionDesigner}
-                      value={options.pocOfConnectionDesigner.find(
-                        (o) => o.value === field.value
-                      )}
-                      onChange={(o) => field.onChange(o?.value || "")}
-                      placeholder={isFetchingEngineers ? "Loading..." : "Select POC"}
-                      isSearchable
-                      isClearable
-                      isDisabled={!watchedCdId || isFetchingEngineers}
-                    />
-                  )}
-                />
-              </div>
-              <div>
-                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
-                  <Users className="w-4 h-4 text-purple-600" /> Team
-                </label>
-                <Controller
-                  name="teamID"
-                  control={control}
-                  render={({ field }) => {
-                    const selectedDeptId = watch("departmentID");
-                    const filteredTeams = (Array.isArray(teamDatas) ? teamDatas : [])
-                      .filter(
-                        (t) => {
-                          const isDeleted = t.isDeleted === true || t.isDeleted === "true" || String(t.isDeleted).toLowerCase() === "true";
-                          if (isDeleted) return false;
-                          if (!selectedDeptId) return true;
-                          const tDeptId = t.departmentID || t.department?.id || t.department?._id || t.departmentId;
-                          return String(tDeptId) === String(selectedDeptId);
-                        }
-                      )
-                      .map((t) => ({
-                        label: t.name,
-                        value: t.id,
-                      }));
-
-                    return (
-                      <Select
-                        options={filteredTeams}
-                        value={filteredTeams.find(
-                          (o) => o.value === field.value
-                        )}
-                        onChange={(o) => field.onChange(o?.value || "")}
-                        placeholder="Select team"
-                        isSearchable
-                        isClearable
-                        isDisabled={!selectedDeptId}
+        {/* Scrollable Content Form */}
+        <div className="overflow-y-auto pr-2 flex-1">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-12"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+              {/* Row 1, Col 1: Project Details */}
+              <section className="bg-zinc-100 rounded-2xl border border-gray-50 p-8 flex flex-col justify-between lg:col-span-7">
+                <div className="flex flex-col flex-1">
+                  <SectionTitle title="Project Details" className="mb-6 shrink-0" />
+                  <div className="flex flex-col flex-1 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 shrink-0">
+                      <Input
+                        label="Project Number *"
+                        placeholder="Give a unique project number..."
+                        className="bg-gray-50/50 border-gray-200 focus:bg-white transition-all"
+                        {...register("projectNumber", { required: "Required" })}
                       />
-                    );
-                  }}
-                />
-              </div>
-            </div>
+                      <Input
+                        label="Project Name *"
+                        placeholder="Enter project name..."
+                        className="bg-gray-50/50 border-gray-200 focus:bg-white transition-all"
+                        {...register("name", { required: "Required" })}
+                      />
+                    </div>
+                    <div className="space-y-3 flex-1 flex flex-col">
+                      <label className="text-sm font-medium text-gray-700 uppercase shrink-0">
+                        Project Scope *
+                      </label>
+                      <div className="flex-1 flex flex-col">
+                        <Controller
+                          name="description"
+                          control={control}
+                          rules={{ required: "Required" }}
+                          render={({ field }) => (
+                            <RichTextEditor
+                              value={field.value || ""}
+                              onChange={field.onChange}
+                              placeholder=""
+                              height={540}
+                            />
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
 
-            {/* Connection Design */}
-            <div className="bg-cyan-50/50 rounded-xl p-4 border border-cyan-100">
-              <div className="flex items-center gap-2 mb-4">
-                <Layers className="w-5 h-5 text-cyan-600" />
-                <h3 className="text-lg  text-cyan-900">
-                  Connection Design Scope
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  "connectionDesign::Connection Design",
-                  "miscDesign::Misc Design",
-                  "customerDesign::Customer Design",
-                ].map((item) => {
-                  const [key, label] = item.split("::");
-                  return (
-                    <Controller
-                      key={key}
-                      name={key}
-                      control={control}
-                      render={({ field }) => (
-                        <div className="bg-white rounded-lg p-3 shadow-sm border border-cyan-100">
-                          <ToggleField
-                            label={label}
-                            checked={!!field.value}
-                            onChange={field.onChange}
+              {/* Row 1, Col 2: POC */}
+              <section className="bg-zinc-100 rounded-2xl border border-gray-50 p-8 space-y-6 flex flex-col justify-between lg:col-span-5">
+                <div>
+                  <SectionTitle title="POC" className="mb-6" />
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 uppercase">Fabricator</label>
+                      <Controller
+                        name="fabricatorID"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            options={options.fabricators}
+                            value={options.fabricators.find((o) => o.value === field.value)}
+                            onChange={(o) => field.onChange(o?.value || "")}
+                            placeholder="Select..."
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
                           />
-                        </div>
-                      )}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Detailing Scope */}
-            <div className="bg-amber-50/50 rounded-xl p-4 border border-amber-100">
-              <div className="flex items-center gap-2 mb-4">
-                <Wrench className="w-5 h-5 text-amber-600" />
-                <h3 className="text-lg  text-amber-900">
-                  Detailing Scope
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  "detailingMain::Detailing Main",
-                  "detailingMisc::Detailing Misc",
-                ].map((item) => {
-                  const [key, label] = item.split("::");
-                  return (
-                    <Controller
-                      key={key}
-                      name={key}
-                      control={control}
-                      render={({ field }) => (
-                        <div className="bg-white rounded-lg p-3 shadow-sm border border-amber-100">
-                          <ToggleField
-                            label={label}
-                            checked={!!field.value}
-                            onChange={field.onChange}
+                        )}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 uppercase">Tools *</label>
+                      <Controller
+                        name="tools"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            options={options.tools}
+                            value={options.tools.find((o) => o.value === field.value)}
+                            onChange={(o) => field.onChange(o?.value || "")}
+                            placeholder="Select..."
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
                           />
-                        </div>
-                      )}
-                    />
-                  );
-                })}
-              </div>
-            </div>
+                        )}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 uppercase">Project Manager</label>
+                      <Controller
+                        name="managerID"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            options={options.managers}
+                            value={options.managers.find((o) => String(o.value) === String(field.value))}
+                            onChange={(o) => field.onChange(o?.value || "")}
+                            placeholder="Assign..."
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 uppercase">Department</label>
+                      <Controller
+                        name="departmentID"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            options={options.departments}
+                            value={options.departments.find((o) => o.value === field.value)}
+                            onChange={(o) => field.onChange(o?.value || "")}
+                            placeholder="Select..."
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 uppercase">Team</label>
+                      <Controller
+                        name="teamID"
+                        control={control}
+                        render={({ field }) => {
+                          const selectedDeptId = watch("departmentID");
+                          const filteredTeams = (Array.isArray(teamDatas) ? teamDatas : [])
+                            .filter(
+                              (t) => {
+                                const isDeleted = t.isDeleted === true || t.isDeleted === "true" || String(t.isDeleted).toLowerCase() === "true";
+                                if (isDeleted) return false;
+                                if (!selectedDeptId) return true;
+                                const tDeptId = t.departmentID || t.department?.id || t.department?._id || t.departmentId;
+                                return String(tDeptId) === String(selectedDeptId);
+                              }
+                            )
+                            .map((t) => ({
+                              label: t.name,
+                              value: t.id,
+                            }));
 
-            {/* Project Status */}
-            <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
-              <div className="flex items-center gap-2 mb-4">
-                <UserCheck className="w-5 h-5 text-blue-600" />
-                <h3 className="text-lg  text-blue-900">
-                  Award Status
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Controller
-                  name="isAwarded"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="bg-white rounded-lg p-3 shadow-sm border border-blue-100">
-                      <ToggleField
-                        label="Is Awarded"
-                        checked={!!field.value}
-                        onChange={(e) => {
-                          const newValue = e.target.checked;
-                          if (newValue && !field.value) {
-                            Service.AwardProject(projectId)
-                              .then(() => {
-                                toast.success("Project awarded successfully");
-                                field.onChange(newValue);
-                              })
-                              .catch((err) => {
-                                console.error(err);
-                                toast.error("Failed to award project");
-                              });
-                          } else {
-                            field.onChange(newValue);
-                          }
+                          return (
+                            <Select
+                              options={filteredTeams}
+                              value={filteredTeams.find((o) => o.value === field.value)}
+                              onChange={(o) => field.onChange(o?.value || "")}
+                              placeholder="Select team"
+                              isSearchable
+                              isClearable
+                              isDisabled={!selectedDeptId}
+                              className="text-sm"
+                              styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
+                            />
+                          );
                         }}
                       />
                     </div>
-                  )}
-                />
-              </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 uppercase">Client Project Managers</label>
+                      <Controller
+                        name="clientProjectManagers"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            isMulti
+                            options={options.clientProjectManagers}
+                            value={options.clientProjectManagers.filter((o) =>
+                              (Array.isArray(field.value) ? field.value : []).includes(o.value)
+                            )}
+                            onChange={(selectedOptions) =>
+                              field.onChange(selectedOptions ? selectedOptions.map((o) => o.value) : [])
+                            }
+                            placeholder={isFetchingClients ? "Loading clients..." : "Select..."}
+                            isLoading={isFetchingClients}
+                            isDisabled={!watchedFabricatorId || isFetchingClients}
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 uppercase">Connection Designer</label>
+                      <Controller
+                        name="connectionDesignerID"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            options={options.connectionDesigners}
+                            value={options.connectionDesigners.find((o) => o.value === field.value)}
+                            onChange={(o) => field.onChange(o?.value || "")}
+                            placeholder="Select Designer"
+                            isSearchable
+                            isClearable
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 uppercase">CD POC</label>
+                      <Controller
+                        name="pocOfConnectionDesigner"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            options={options.pocOfConnectionDesigner}
+                            value={options.pocOfConnectionDesigner.find((o) => o.value === field.value)}
+                            onChange={(o) => field.onChange(o?.value || "")}
+                            placeholder={isFetchingEngineers ? "Loading..." : "Select POC"}
+                            isSearchable
+                            isClearable
+                            isDisabled={!watchedCdId || isFetchingEngineers}
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Row 2, Col 1: Timeline */}
+              <section className="bg-zinc-100 rounded-2xl border border-gray-50 p-8 space-y-8 flex flex-col justify-between lg:col-span-7">
+                <div>
+                  <SectionTitle title="Timeline" className="mb-6" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <Input label="Estimated Hours" type="number" className="bg-gray-50/50" {...register("estimatedHours")} />
+                    <Input label="Start Date *" type="date" className="bg-gray-50/50" {...register("startDate", { required: "Required" })} />
+                    <Input label="Deadline" type="date" className="bg-gray-50/50" {...register("endDate")} />
+                    <Input label="Approval Date" type="date" className="bg-gray-50/50" {...register("approvalDate")} />
+                    <Input label="Fabrication Date" type="date" className="bg-gray-50/50" {...register("fabricationDate")} />
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 uppercase">Stage</label>
+                      <Controller
+                        name="stage"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            options={options.stage}
+                            value={options.stage.find((o) => o.value === field.value)}
+                            onChange={(o) => field.onChange(o?.value || "IFA")}
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
+                          />
+                        )}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 uppercase">Status</label>
+                      <Controller
+                        name="status"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            options={options.status}
+                            value={options.status.find((o) => o.value === field.value)}
+                            onChange={(o) => field.onChange(o?.value || "ACTIVE")}
+                            className="text-sm"
+                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Row 2, Col 2: Scope */}
+              <section className="bg-zinc-100 rounded-2xl border border-gray-50 p-8 space-y-8 flex flex-col justify-between lg:col-span-5">
+                <div>
+                  <SectionTitle title="Scope" className="mb-6" />
+
+                  <div className="space-y-8">
+                    {/* Connection Design */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-green-600">
+                        <Layers size={14} />
+                        <h4 className="text-sm font-bold uppercase tracking-wider">Connection Design Scope</h4>
+                      </div>
+                      <div className="space-y-2">
+                        {[
+                          "connectionDesign::Connection Design",
+                          "miscDesign::Misc Design",
+                          "customerDesign::Customer Design",
+                        ].map((item) => {
+                          const [key, label] = item.split("::");
+                          return (
+                            <Controller
+                              key={key}
+                              name={key}
+                              control={control}
+                              render={({ field }) => (
+                                <div
+                                  onClick={() => field.onChange(!field.value)}
+                                  className={`
+                                    flex items-center justify-between px-4 py-3 rounded-xl border transition-all cursor-pointer text-sm
+                                    ${field.value ? "bg-green-50 border-green-200 text-green-800" : "bg-gray-50/50 border-gray-100 text-gray-600 hover:border-gray-200"}
+                                  `}
+                                >
+                                  <span className="font-bold">{label}</span>
+                                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${field.value ? "border-green-600 bg-green-600" : "border-gray-300 bg-white"}`}>
+                                    {field.value && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                  </div>
+                                </div>
+                              )}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Detailing */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-green-600">
+                        <Wrench size={14} />
+                        <h4 className="text-sm font-bold uppercase tracking-wider">Detailing Scope</h4>
+                      </div>
+                      <div className="space-y-2">
+                        {[
+                          "detailingMain::Detailing Main",
+                          "detailingMisc::Detailing Misc",
+                        ].map((item) => {
+                          const [key, label] = item.split("::");
+                          return (
+                            <Controller
+                              key={key}
+                              name={key}
+                              control={control}
+                              render={({ field }) => (
+                                <div
+                                  onClick={() => field.onChange(!field.value)}
+                                  className={`
+                                    flex items-center justify-between px-4 py-3 rounded-xl border transition-all cursor-pointer text-sm
+                                    ${field.value ? "bg-green-50 border-green-200 text-green-800" : "bg-gray-50/50 border-gray-100 text-gray-600 hover:border-gray-200"}
+                                  `}
+                                >
+                                  <span className="font-bold">{label}</span>
+                                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${field.value ? "border-green-600 bg-green-600" : "border-gray-300 bg-white"}`}>
+                                    {field.value && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                  </div>
+                                </div>
+                              )}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Project Award Status */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 text-green-600">
+                        <UserCheck size={14} />
+                        <h4 className="text-sm font-bold uppercase tracking-wider">Project Award Status</h4>
+                      </div>
+                      <div className="space-y-2">
+                        <Controller
+                          name="isAwarded"
+                          control={control}
+                          render={({ field }) => (
+                            <div
+                              onClick={() => {
+                                const newValue = !field.value;
+                                if (newValue) {
+                                  Service.AwardProject(projectId)
+                                    .then(() => {
+                                      toast.success("Project awarded successfully");
+                                      field.onChange(newValue);
+                                    })
+                                    .catch((err) => {
+                                      console.error(err);
+                                      toast.error("Failed to award project");
+                                    });
+                                } else {
+                                  field.onChange(newValue);
+                                }
+                              }}
+                              className={`
+                                flex items-center justify-between px-4 py-3 rounded-xl border transition-all cursor-pointer text-sm
+                                ${field.value ? "bg-green-50 border-green-200 text-green-800" : "bg-gray-50/50 border-gray-100 text-gray-600 hover:border-gray-200"}
+                              `}
+                            >
+                              <span className="font-bold">Is Awarded</span>
+                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${field.value ? "border-green-600 bg-green-600" : "border-gray-300 bg-white"}`}>
+                                {field.value && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                              </div>
+                            </div>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
             </div>
 
-            {/* Tools & Timeline */}
-            <SectionTitle title="Tools & Timeline" />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div>
-                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
-                  <Wrench className="w-4 h-4 text-purple-600" /> Tool
-                </label>
-                <Controller
-                  name="tools"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      options={options.tools}
-                      value={options.tools.find((o) => o.value === field.value)}
-                      onChange={(o) => field.onChange(o?.value || "TEKLA")}
-                    />
-                  )}
-                />
-              </div>
-              <div>
-                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
-                  <Layers className="w-4 h-4 text-cyan-600" /> Stage
-                </label>
-                <Controller
-                  name="stage"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      options={options.stage}
-                      value={options.stage.find((o) => o.value === field.value)}
-                      onChange={(o) => field.onChange(o?.value || "IFA")}
-                    />
-                  )}
-                />
-              </div>
-              <div>
-                <label className="flex items-center gap-2 font-semibold text-gray-700 mb-2">
-                  <Layers className="w-4 h-4 text-emerald-600" /> Status
-                </label>
-                <Controller
-                  name="status"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      options={options.status}
-                      value={options.status.find((o) => o.value === field.value)}
-                      onChange={(o) => field.onChange(o?.value || "ACTIVE")}
-                    />
-                  )}
-                />
-              </div>
-              <Input
-                label="Estimated Hours"
-                type="number"
-                placeholder="1200"
-                {...register("estimatedHours")}
-              />
-              <Input
-                label="Start Date"
-                type="date"
-                {...register("startDate")}
-              />
-              <Input
-                label="Target End Date"
-                type="date"
-                {...register("endDate")}
-              />
-              <Input
-                label="Approval Date"
-                type="date"
-                {...register("approvalDate")}
-              />
-              <Input
-                label="Fabrication Date"
-                type="date"
-                {...register("fabricationDate")}
-              />
-            </div>
-
-            {/* Submit */}
-            <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
-              <Button
-                className="bg-gray-500 hover:bg-gray-600"
-                onClick={onCancel}
-                type="button"
-              >
-                Cancel
-              </Button>
-              <Button
-                className="flex items-center gap-2"
+            {/* Submit Actions */}
+            <div className="pt-8 flex justify-end">
+              <button
                 type="submit"
                 disabled={isSubmitting}
+                className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer disabled:opacity-50"
               >
-                {isSubmitting ? (
-                  <>Saving...</>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    Save Changes
-                  </>
-                )}
-              </Button>
+                {isSubmitting ? "Saving..." : "Save Changes"}
+              </button>
             </div>
           </form>
         </div>
