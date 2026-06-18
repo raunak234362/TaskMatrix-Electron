@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import Service from "../../../api/Service";
-import { AlertCircle, Loader2, Users, Mail, Phone, Shield, Edit2, Trash2, UserPlus, X } from "lucide-react";
-import Button from "../../fields/Button";
+import { AlertCircle, Loader2, Users, Mail, Phone, Shield, Edit2, Trash2, UserPlus } from "lucide-react";
 import TeamMember from "./TeamMember";
 import EditTeamById from "./EditTeamById";
 
-const GetTeamByID = ({ id, onClose, onSuccess }) => {
+const GetTeamByID = ({ id, onClose, onSuccess, isInline = false }) => {
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -102,29 +101,31 @@ const GetTeamByID = ({ id, onClose, onSuccess }) => {
   const memberCount = team.members?.length ?? 0;
 
   return (
-    <div className="bg-white rounded-none shadow-2xl  overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-4xl mx-auto flex flex-col max-h-[90vh]">
+    <div className={isInline ? "bg-white w-full flex flex-col" : "bg-white rounded-none shadow-2xl  overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-4xl mx-auto flex flex-col max-h-[90vh]"}>
       {/* Header */}
-      <header className="flex items-center justify-between p-6 border-b border-black/10 bg-white sticky top-0 z-10 shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-green-50 rounded-none border border-black/10 text-black">
-            <Users className="w-6 h-6" />
+      {!isInline && (
+        <header className="flex items-center justify-between p-6 border-b border-black/10 bg-white sticky top-0 z-10 shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-green-50 rounded-none border border-black/10 text-black">
+              <Users className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-black tracking-normal uppercase">
+                {team.name}
+              </h2>
+            
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl font-semibold text-black tracking-normal uppercase">
-              {team.name}
-            </h2>
-         
-          </div>
-        </div>
-        <button
-          onClick={onClose}
-          className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
-        >
-          Close
-        </button>
-      </header>
+          <button
+            onClick={onClose}
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+          >
+            Close
+          </button>
+        </header>
+      )}
 
-      <div className="p-8 overflow-y-auto custom-scrollbar flex-1">
+      <div className={isInline ? "p-0 flex-1" : "p-8 overflow-y-auto custom-scrollbar flex-1"}>
         <div className="mb-8 p-6 bg-gray-50 rounded-none shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">

@@ -1,4 +1,3 @@
-import React from "react";
 import { GitCommit, Calendar, Layers, Clock } from "lucide-react";
 
 const TeamOverviewCards = ({ commits, teamMembers, onUserClick }) => {
@@ -44,56 +43,62 @@ const TeamOverviewCards = ({ commits, teamMembers, onUserClick }) => {
           <div 
             key={member.id} 
             onClick={() => onUserClick && onUserClick(member.id)}
-            className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all cursor-pointer hover:border-indigo-300 group"
+            className="bg-white border-2 border-black/10 rounded-none p-5 shadow-sm hover:shadow-md hover:border-green-600 transition-all cursor-pointer group flex flex-col justify-between"
           >
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h3 className="text-lg font-bold text-slate-800 group-hover:text-indigo-700 transition-colors">{member.name}</h3>
-                <p className="text-sm text-slate-500 font-medium">Employee ID: {member.id}</p>
+            <div>
+              <div className="flex justify-between items-start mb-5 gap-4">
+                <div>
+                  <h3 className="text-sm font-black text-black uppercase tracking-tight group-hover:text-green-700 transition-colors">
+                    {member.name}
+                  </h3>
+                  <p className="text-[10px] text-black/50 font-black uppercase tracking-widest mt-1">
+                    Employee ID: {member.id}
+                  </p>
+                </div>
+                <div className="bg-gray-50 border border-black/15 px-3 py-1 rounded-none flex items-center gap-1.5 shrink-0">
+                  <span className="text-[10px] text-black/60 font-black uppercase tracking-widest">GitHub</span>
+                  <span className="text-xs text-green-700 font-bold">@{member.github}</span>
+                </div>
               </div>
-              <div className="bg-slate-100 px-3 py-1 rounded-full flex items-center gap-2">
-                <span className="text-xs text-slate-600 font-semibold uppercase tracking-wider">GitHub</span>
-                <span className="text-sm text-indigo-600 font-medium">@{member.github}</span>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                <div className="bg-green-50/30 p-3 rounded-none border border-black/5 flex flex-col justify-between min-h-[70px]">
+                  <div className="flex items-center gap-1 text-green-700 mb-1">
+                    <GitCommit className="w-3.5 h-3.5" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-black/60">Today</span>
+                  </div>
+                  <p className="text-lg font-black text-black">{stats.today}</p>
+                </div>
+                
+                <div className="bg-blue-50/30 p-3 rounded-none border border-black/5 flex flex-col justify-between min-h-[70px]">
+                  <div className="flex items-center gap-1 text-blue-700 mb-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-black/60">Week</span>
+                  </div>
+                  <p className="text-lg font-black text-black">{stats.thisWeek}</p>
+                </div>
+                
+                <div className="bg-indigo-50/30 p-3 rounded-none border border-black/5 flex flex-col justify-between min-h-[70px]">
+                  <div className="flex items-center gap-1 text-indigo-700 mb-1">
+                    <Layers className="w-3.5 h-3.5" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-black/60">Month</span>
+                  </div>
+                  <p className="text-lg font-black text-black">{stats.thisMonth}</p>
+                </div>
+
+                <div className="bg-amber-50/30 p-3 rounded-none border border-black/5 flex flex-col justify-between min-h-[70px]">
+                  <div className="flex items-center gap-1 text-amber-700 mb-1">
+                    <Layers className="w-3.5 h-3.5" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-black/60">Repos</span>
+                  </div>
+                  <p className="text-lg font-black text-black">{stats.repos}</p>
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
-                <div className="flex items-center gap-2 text-indigo-600 mb-1">
-                  <GitCommit className="w-4 h-4" />
-                  <span className="text-xs font-semibold uppercase">Today</span>
-                </div>
-                <p className="text-2xl font-bold text-slate-800">{stats.today}</p>
-              </div>
-              
-              <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                <div className="flex items-center gap-2 text-blue-600 mb-1">
-                  <Calendar className="w-4 h-4" />
-                  <span className="text-xs font-semibold uppercase">Week</span>
-                </div>
-                <p className="text-2xl font-bold text-slate-800">{stats.thisWeek}</p>
-              </div>
-              
-              <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
-                <div className="flex items-center gap-2 text-emerald-600 mb-1">
-                  <Layers className="w-4 h-4" />
-                  <span className="text-xs font-semibold uppercase">Month</span>
-                </div>
-                <p className="text-2xl font-bold text-slate-800">{stats.thisMonth}</p>
-              </div>
-
-              <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-100">
-                <div className="flex items-center gap-2 text-amber-600 mb-1">
-                  <Layers className="w-4 h-4" />
-                  <span className="text-xs font-semibold uppercase">Repos</span>
-                </div>
-                <p className="text-2xl font-bold text-slate-800">{stats.repos}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
-              <Clock className="w-4 h-4 text-slate-400" />
-              <span>Last Commit: <span className="font-semibold text-slate-800">{stats.lastCommitDate}</span></span>
+            <div className="flex items-center gap-2 text-[10px] text-black/60 bg-gray-50/80 p-2.5 rounded-none border border-black/10 uppercase tracking-widest mt-2">
+              <Clock className="w-3.5 h-3.5 text-black/40" />
+              <span>Last Commit: <span className="font-bold text-black">{stats.lastCommitDate}</span></span>
             </div>
           </div>
         );

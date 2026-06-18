@@ -52,14 +52,14 @@ const Layout = () => {
       {/* Mobile Sidebar Overlay */}
       {isMobileOpen && !isAnyModalOpen && (
         <div
-          className="fixed inset-0 z-[60] bg-black/50 md:hidden backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 z-60 bg-black/50 md:hidden backdrop-blur-sm transition-opacity"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
 
       {/* Mobile Sidebar */}
       {!isAnyModalOpen && (
-        <div className={`md:hidden fixed inset-y-0 left-0 z-[70] bg-white shadow-xl transition-transform duration-300 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className={`md:hidden fixed inset-y-0 left-0 z-70 bg-white shadow-xl transition-transform duration-300 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <Sidebar
             isMinimized={false}
             toggleSidebar={() => setIsMobileOpen(false)}

@@ -568,7 +568,7 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
         {/* Edit Modal */}
         {isEditModalOpen && (
           <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="w-full max-w-2xl h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="w-full max-w-2xl max-h-[85vh] h-full bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
               <EditMileStone
                 milestoneId={id.toString()}
                 initialData={milestone}
