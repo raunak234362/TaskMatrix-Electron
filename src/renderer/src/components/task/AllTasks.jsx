@@ -56,9 +56,9 @@ const AllTasks = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const fetchTasks = async () => {
+    const fetchTasks = async (showLoader = true) => {
       try {
-        setLoading(true);
+        if (showLoader) setLoading(true);
         const response =
           userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" || userRole === "deputy_manager" || userRole === "dept_manager" || userRole === "human_resource"
             ? await Service.GetAllTask()
@@ -81,16 +81,16 @@ const AllTasks = () => {
           .catch(err => console.error("Failed to fetch unread comments", err));
 
         setTasks(taskData);
-        setLoading(false);
+        if (showLoader) setLoading(false);
       } catch (err) {
         setError(err);
-        setLoading(false);
+        if (showLoader) setLoading(false);
       }
     };
     fetchTasks();
 
     const handleTaskUpdated = () => {
-      fetchTasks();
+      fetchTasks(false);
     };
     window.addEventListener('task-updated', handleTaskUpdated);
     return () => window.removeEventListener('task-updated', handleTaskUpdated);

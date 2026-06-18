@@ -142,6 +142,7 @@ const EditTask = ({ id, onClose, refresh }) => {
       await Service.UpdateTaskById(id.toString(), payload);
 
       toast.success("Task updated successfully!");
+      window.dispatchEvent(new Event('task-updated'));
       refresh?.();
       onClose();
     } catch (error) {

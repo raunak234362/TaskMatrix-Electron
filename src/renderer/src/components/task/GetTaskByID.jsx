@@ -96,7 +96,8 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
       }
 
       toast.success("Comment added successfully");
-      fetchTask();
+      await fetchTask();
+      window.dispatchEvent(new Event('task-updated'));
     } catch (error) {
       console.error(error);
       toast.error("Failed to add comment");
@@ -110,7 +111,8 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
       };
       await Service.AddTaskCommentAcknowledged(commentId, payload);
       toast.success("Comment acknowledged");
-      fetchTask();
+      await fetchTask();
+      window.dispatchEvent(new Event('task-updated'));
     } catch (error) {
       console.error(error);
       toast.error("Failed to acknowledge comment");
@@ -189,6 +191,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
           break
       }
       await fetchTask()
+      window.dispatchEvent(new Event('task-updated'));
       if (refresh) refresh()
     } catch {
       toast.error('Action failed. Please try again.')
