@@ -161,7 +161,8 @@ const EditTask = ({ id, onClose, refresh }) => {
   const stageOptions = [
     { label: "IFA", value: "IFA" },
     { label: "IFC", value: "IFC" },
-    { label: "RE-IFA", value: "RE-IFA" },
+    { label: "R-IFA", value: "RIFA" },
+    { label: "COR", value: "COR" },
   ];
 
   const milestoneOptions = milestones.map((m) => {

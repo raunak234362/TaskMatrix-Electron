@@ -61,9 +61,67 @@ const AppContent = () => {
       window.electron.ipcRenderer.on('update-available', handleUpdateAvailable)
       window.electron.ipcRenderer.on('update-downloaded', handleUpdateDownloaded)
 
+      const handleSystemLocked = async () => {
+        toast.info("System Lock Detected: Checking for active tasks...", { autoClose: 10000 })
+        console.log("System lock detected")
+        try {
+          const response = await Service.GetNonCompletedTasks()
+          // Handle cases where response itself is the array, or response.data is the array
+          const tasks = Array.isArray(response) ? response : (Array.isArray(response?.data) ? response.data : Object.values(response?.data || response || {}))
+          const activeTask = tasks.find(t => t.status === 'IN_PROGRESS')
+          
+          if (activeTask) {
+            toast.info(`Found active task: ${activeTask.id}. Fetching details...`, { autoClose: 10000 })
+
+            // Fetch full task details to ensure we have workingHourTask
+            const fullTaskRes = await Service.GetTaskById(activeTask.id.toString())
+            const fullTask = fullTaskRes?.data || fullTaskRes || activeTask
+            
+            const activeWorkID = fullTask.workingHourTask?.find((wh) => wh.ended_at === null)?.id
+            if (activeWorkID) {
+              toast.info(`Sending pause request for task ${activeTask.id}...`, { autoClose: 10000 })
+              await Service.TaskPause(activeTask.id.toString(), { whId: activeWorkID })
+              toast.success(`Task paused automatically due to system lock.`, { autoClose: 10000 })
+              // Dispatch an event so any open modal can refresh. 
+              // Add a delay to avoid race condition where DB hasn't committed yet.
+              setTimeout(() => {
+                window.dispatchEvent(new Event('task-updated'))
+              }, 1500)
+            } else {
+              toast.warn(`Could not find an active working session (whId) for task ${activeTask.id}`, { autoClose: 10000 })
+            }
+          }
+
+          const estResponse = await Service.GetEstimationTaskForME()
+          const estTasks = Array.isArray(estResponse) ? estResponse : (Array.isArray(estResponse?.data) ? estResponse.data : Object.values(estResponse?.data || estResponse || {}))
+          const activeEstTask = estTasks.find(t => t.status === 'IN_PROGRESS')
+          if (activeEstTask) {
+            const fullEstTaskRes = await Service.GetEstimationTaskById(activeEstTask.id.toString())
+            const fullEstTask = fullEstTaskRes?.data || fullEstTaskRes || activeEstTask
+
+            const activeEstWorkID = fullEstTask.workinghours?.find((wh) => wh.ended_at === null)?.id
+
+            if (activeEstWorkID) {
+              toast.info(`Sending pause request for est task ${activeEstTask.id}...`, { autoClose: 10000 })
+              await Service.PauseEstimationTaskById(activeEstTask.id.toString(), { whId: activeEstWorkID })
+              toast.success(`Estimation task paused automatically due to system lock.`, { autoClose: 10000 })
+              setTimeout(() => {
+                window.dispatchEvent(new Event('task-updated'))
+              }, 1500)
+            }
+          }
+        } catch (error) {
+          toast.error(`Error pausing task: ${error?.message || error}`, { autoClose: 10000 })
+          console.error('Error pausing active task on lock', error)
+        }
+      }
+
+      window.electron.ipcRenderer.on('system-locked', handleSystemLocked)
+
       return () => {
         window.electron.ipcRenderer.removeListener('update-available', handleUpdateAvailable)
         window.electron.ipcRenderer.removeListener('update-downloaded', handleUpdateDownloaded)
+        window.electron.ipcRenderer.removeListener('system-locked', handleSystemLocked)
       }
     }
   }, [])

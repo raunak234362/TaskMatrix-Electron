@@ -88,6 +88,12 @@ const AllTasks = () => {
       }
     };
     fetchTasks();
+
+    const handleTaskUpdated = () => {
+      fetchTasks();
+    };
+    window.addEventListener('task-updated', handleTaskUpdated);
+    return () => window.removeEventListener('task-updated', handleTaskUpdated);
   }, [userRole]);
 
   const [rowSelection, setRowSelection] = useState({});

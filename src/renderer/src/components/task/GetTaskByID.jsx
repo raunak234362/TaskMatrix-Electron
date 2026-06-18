@@ -62,6 +62,13 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
       }
     };
     fetchStaff();
+
+    const handleTaskUpdated = () => {
+      fetchTask();
+      if (refresh) refresh();
+    };
+    window.addEventListener('task-updated', handleTaskUpdated);
+    return () => window.removeEventListener('task-updated', handleTaskUpdated);
   }, [id])
 
   const handleAddComment = async (data) => {

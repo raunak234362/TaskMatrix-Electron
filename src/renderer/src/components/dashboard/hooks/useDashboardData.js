@@ -570,6 +570,12 @@ export const useDashboardData = () => {
 
   useEffect(() => {
     fetchData()
+
+    const handleTaskUpdated = () => {
+      fetchData()
+    }
+    window.addEventListener('task-updated', handleTaskUpdated)
+    return () => window.removeEventListener('task-updated', handleTaskUpdated)
   }, [fetchData])
 
   return {

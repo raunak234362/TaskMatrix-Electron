@@ -109,6 +109,13 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
 
   useEffect(() => {
     fetchTask()
+
+    const handleTaskUpdated = () => {
+      fetchTask();
+      if (refresh) refresh();
+    };
+    window.addEventListener('task-updated', handleTaskUpdated);
+    return () => window.removeEventListener('task-updated', handleTaskUpdated);
   }, [id])
 
   const getActiveWorkID = () => {
