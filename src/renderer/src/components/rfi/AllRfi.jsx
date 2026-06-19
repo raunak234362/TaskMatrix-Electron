@@ -1,94 +1,121 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
-import DataTable from "../ui/table";
+import { useEffect, useState } from 'react'
+import DataTable from '../ui/table'
 
-
-import { useSelector } from "react-redux";
-import { Loader2, Inbox, MessageSquare, Search } from "lucide-react";
-import GetRFIByID from "./GetRFIByID";
-import Modal from "../ui/Modal";
-import AddCommunication from "../communication/AddCommunication";
-import Service from "../../api/Service";
-
+import { useSelector } from 'react-redux'
+import { Loader2, Inbox, MessageSquare, Search } from 'lucide-react'
+import GetRFIByID from './GetRFIByID'
+import Modal from '../ui/Modal'
+import AddCommunication from '../communication/AddCommunication'
+import Service from '../../api/Service'
 
 const AllRFI = ({ rfiData = [], onUpdate }) => {
-  const [rfis, setRFIs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
-  const [prefilledData, setPrefilledData] = useState(null);
+  const [rfis, setRFIs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [isFollowUpOpen, setIsFollowUpOpen] = useState(false)
+  const [prefilledData, setPrefilledData] = useState(null)
 
-  const projects = useSelector((state) => state.projectInfo?.projectData || []);
-  const fabricators = useSelector((state) => state.fabricatorInfo?.fabricatorData || []);
+  const projects = useSelector((state) => state.projectInfo?.projectData || [])
+  const fabricators = useSelector((state) => state.fabricatorInfo?.fabricatorData || [])
+  const users = useSelector((state) => state.userInfo?.staffData || [])
 
-  const userRole = sessionStorage.getItem("userRole");
+  const userRole = sessionStorage.getItem('userRole')
 
   const [activeTab, setActiveTab] = useState(
-    userRole && userRole.toUpperCase().includes("CONNECTION_DESIGNER") ? "CONNECTION_DESIGNER" : "GENERAL"
-  );
-  const [searchQuery, setSearchQuery] = useState("");
+    userRole && userRole.toUpperCase().includes('CONNECTION_DESIGNER')
+      ? 'CONNECTION_DESIGNER'
+      : 'GENERAL'
+  )
+  const [cdFilter, setCdFilter] = useState('sent')
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     const fetchRFIs = async () => {
       try {
-        setLoading(true);
-        let res;
-        if (userRole === "CLIENT") {
-          res = await Service.RfiSent();
-        } else {
-          res = await Service.RfiRecieved();
-        }
-        let rfiArray = [];
-        if (res) {
-          if (Array.isArray(res)) {
-            rfiArray = res;
-          } else if (res["show rfi"]) {
-            rfiArray = res["show rfi"];
-          } else if (res.data) {
-            rfiArray = res.data;
-          } else if (typeof res === "object") {
-            const firstArray = Object.values(res).find(Array.isArray);
-            if (firstArray) rfiArray = firstArray;
+        setLoading(true)
+        const [sentRes, receivedRes] = await Promise.all([Service.RfiSent(), Service.RfiRecieved()])
+
+        let sentArray = []
+        if (sentRes) {
+          if (Array.isArray(sentRes)) {
+            sentArray = sentRes
+          } else if (sentRes['show rfi']) {
+            sentArray = sentRes['show rfi']
+          } else if (sentRes.data) {
+            sentArray = sentRes.data
+          } else if (typeof sentRes === 'object') {
+            const firstArray = Object.values(sentRes).find(Array.isArray)
+            if (firstArray) sentArray = firstArray
           }
         }
-        let normalized = rfiArray.map((item) => ({
+
+        let receivedArray = []
+        if (receivedRes) {
+          if (Array.isArray(receivedRes)) {
+            receivedArray = receivedRes
+          } else if (receivedRes['show rfi']) {
+            receivedArray = receivedRes['show rfi']
+          } else if (receivedRes.data) {
+            receivedArray = receivedRes.data
+          } else if (typeof receivedRes === 'object') {
+            const firstArray = Object.values(receivedRes).find(Array.isArray)
+            if (firstArray) receivedArray = firstArray
+          }
+        }
+
+        const normalizedSent = sentArray.map((item) => ({
           ...item,
           createdAt: item.createdAt || item.date || null,
-        }));
-        setRFIs(normalized);
+          _flowType: 'sent'
+        }))
+
+        const normalizedReceived = receivedArray.map((item) => ({
+          ...item,
+          createdAt: item.createdAt || item.date || null,
+          _flowType: 'received'
+        }))
+
+        const combined = [...normalizedSent]
+        normalizedReceived.forEach((item) => {
+          if (!combined.some((c) => c.id === item.id)) {
+            combined.push(item)
+          }
+        })
+
+        setRFIs(combined)
       } catch (error) {
-        console.error("Error fetching RFIs:", error);
+        console.error('Error fetching RFIs:', error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
     if (!rfiData || rfiData.length === 0) {
-      fetchRFIs();
+      fetchRFIs()
     } else {
-      let rfiArray = [];
+      let rfiArray = []
       if (Array.isArray(rfiData)) {
-        rfiArray = rfiData;
-      } else if (rfiData && rfiData["show rfi"]) {
-        rfiArray = rfiData["show rfi"];
+        rfiArray = rfiData
+      } else if (rfiData && rfiData['show rfi']) {
+        rfiArray = rfiData['show rfi']
       } else if (rfiData && rfiData.data) {
-        rfiArray = rfiData.data;
-      } else if (rfiData && typeof rfiData === "object") {
-        const firstArray = Object.values(rfiData).find(Array.isArray);
-        if (firstArray) rfiArray = firstArray;
+        rfiArray = rfiData.data
+      } else if (rfiData && typeof rfiData === 'object') {
+        const firstArray = Object.values(rfiData).find(Array.isArray)
+        if (firstArray) rfiArray = firstArray
       }
 
       if (rfiArray.length > 0) {
         let normalized = rfiArray.map((item) => ({
           ...item,
-          createdAt: item.createdAt || item.date || null,
-        }));
-        setRFIs(normalized);
+          createdAt: item.createdAt || item.date || null
+        }))
+        setRFIs(normalized)
       } else {
-        setRFIs([]);
+        setRFIs([])
       }
-      setLoading(false);
+      setLoading(false)
     }
-  }, [rfiData, userRole]);
+  }, [rfiData, userRole])
 
   // const handleRowClick = (row) => {
   //   // setSelectedRfiID(row.id);
@@ -96,115 +123,112 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
 
   // ✅ Define columns
   const columns = [
-    { accessorKey: "subject", header: "Subject" },
+    { accessorKey: 'subject', header: 'Subject' },
     {
-      accessorKey: "sender",
-      header: "Sender",
+      accessorKey: 'sender',
+      header: 'Sender',
       cell: ({ row }) => {
-        const s = row.original.sender;
+        const s = row.original.sender
         return s
-          ? `${s.firstName ?? ""} ${s.middleName ?? ""} ${s.lastName ?? ""}`.trim() ||
-          s.username ||
-          "—"
-          : "—";
-      },
+          ? `${s.firstName ?? ''} ${s.middleName ?? ''} ${s.lastName ?? ''}`.trim() ||
+              s.username ||
+              '—'
+          : '—'
+      }
     },
     {
-      accessorKey: "multipleRecipients",
-      header: "To",
+      accessorKey: 'multipleRecipients',
+      header: 'To',
       cell: ({ row }) => {
-        const recipients = row.original.multipleRecipients;
-        if (!recipients || recipients.length === 0) return "—";
+        const recipients = row.original.multipleRecipients
+        if (!recipients || recipients.length === 0) return '—'
         return (
           <div className="flex flex-col gap-1">
             {recipients.map((r, i) => (
               <span key={i} className="text-sm font-medium tracking-normal text-gray-700">
-                {`${r.firstName ?? ""} ${r.lastName ?? ""}`.trim() || r.email || "—"}
+                {`${r.firstName ?? ''} ${r.lastName ?? ''}`.trim() || r.email || '—'}
               </span>
             ))}
           </div>
-        );
-      },
-    },
-    
-  ];
-
-
+        )
+      }
+    }
+  ]
 
   const getStatusInfo = (item) => {
-    const responses = item.rfiresponse || [];
+    const responses = item.rfiresponse || []
     if (responses.length > 0) {
       const sorted = [...responses].sort(
         (a, b) => new Date(b.createdAt || b.date || 0) - new Date(a.createdAt || a.date || 0)
-      );
-      const latest = sorted[0];
-      const rfiStatus = latest.wbtStatus || latest.status;
+      )
+      const latest = sorted[0]
+      const rfiStatus = latest.wbtStatus || latest.status
       if (rfiStatus) {
-        const statusStr = rfiStatus.toUpperCase();
+        const statusStr = rfiStatus.toUpperCase()
         switch (statusStr) {
-          case "OPEN":
-            return { label: "OPEN", className: "bg-blue-100 text-black shadow-sm" };
-          case "PARTIAL":
-            return { label: "PARTIAL", className: "bg-orange-100 text-black shadow-sm" };
-          case "COMPLETE":
-            return { label: "COMPLETE", className: "bg-green-100 text-black shadow-sm" };
+          case 'OPEN':
+            return { label: 'OPEN', className: 'bg-blue-100 text-black shadow-sm' }
+          case 'PARTIAL':
+            return { label: 'PARTIAL', className: 'bg-orange-100 text-black shadow-sm' }
+          case 'COMPLETE':
+            return { label: 'COMPLETE', className: 'bg-green-100 text-black shadow-sm' }
           default:
-            return { label: statusStr, className: "bg-gray-100 text-black shadow-sm" };
+            return { label: statusStr, className: 'bg-gray-100 text-black shadow-sm' }
         }
       }
     }
 
     // Fallback if no responses exist
-    if (item.status === true || item.status === "OPEN" || item.status === "PENDING") {
-      return { label: "PENDING", className: "bg-green-100 text-black shadow-sm" };
+    if (item.status === true || item.status === 'OPEN' || item.status === 'PENDING') {
+      return { label: 'PENDING', className: 'bg-green-100 text-black shadow-sm' }
     } else {
-      return { label: "ANSWERED", className: "bg-orange-100 text-black shadow-sm" };
+      return { label: 'ANSWERED', className: 'bg-orange-100 text-black shadow-sm' }
     }
-  };
+  }
 
   columns.push(
     {
-      accessorKey: "status",
-      header: "Status",
+      accessorKey: 'status',
+      header: 'Status',
       cell: ({ row }) => {
-        const statusInfo = getStatusInfo(row.original);
+        const statusInfo = getStatusInfo(row.original)
         return (
           <span
             className={`px-3 py-1 text-sm font-black uppercase tracking-normal rounded-full border border-black ${statusInfo.className}`}
           >
             {statusInfo.label}
           </span>
-        );
-      },
+        )
+      }
     },
     {
-      accessorKey: "createdAt",
-      header: "Created At",
+      accessorKey: 'createdAt',
+      header: 'Created At',
       cell: ({ row }) =>
         row.original.createdAt
-          ? new Date(row.original.createdAt).toLocaleDateString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          })
-          : "—",
+          ? new Date(row.original.createdAt).toLocaleDateString('en-IN', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric'
+            })
+          : '—'
     },
     {
-      id: "actions",
-      header: "Actions",
+      id: 'actions',
+      header: 'Actions',
       cell: ({ row }) => (
         <button
           onClick={(e) => {
-            e.stopPropagation();
-            const item = row.original;
+            e.stopPropagation()
+            const item = row.original
             setPrefilledData({
-              projectId: item.project?.id || item.project || "",
-              fabricatorId: item.fabricator?.id || item.fabricator || "",
-              clientId: item.client?.id || item.client || "",
-              subject: `Follow-up: ${item.subject || ""}`,
-              notes: `Ref: RFI ${item.subject || ""}`
-            });
-            setIsFollowUpOpen(true);
+              projectId: item.project?.id || item.project || '',
+              fabricatorId: item.fabricator?.id || item.fabricator || '',
+              clientId: item.client?.id || item.client || '',
+              subject: `Follow-up: ${item.subject || ''}`,
+              notes: `Ref: RFI ${item.subject || ''}`
+            })
+            setIsFollowUpOpen(true)
           }}
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors shadow-sm tracking-normal"
           title="Create Follow-up"
@@ -214,7 +238,7 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
         </button>
       )
     }
-  );
+  )
 
   // ✅ Loading state
   if (loading) {
@@ -223,17 +247,106 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
         <Loader2 className="w-6 h-6 animate-spin mb-2" />
         Loading RFIs...
       </div>
-    );
+    )
   }
 
-  const generalRfis = rfis.filter(item => item.isConnectionDesign !== true && String(item.isConnectionDesign).toLowerCase() !== "true");
-  const connectionDesignerRfis = rfis.filter(item => item.isConnectionDesign === true || String(item.isConnectionDesign).toLowerCase() === "true");
+  const isCDUser = (user) => {
+    if (!user) return false
 
-  const displayedRfis = activeTab === "CONNECTION_DESIGNER" ? connectionDesignerRfis : generalRfis;
+    const currentUserId = sessionStorage.getItem('userId')
+    const userId = typeof user === 'object' ? user.id || user._id || user.sender_id : user
 
-  const finalRfis = displayedRfis.filter(item => 
-    !searchQuery || (item.subject && item.subject.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+    if (userId && String(userId) === String(currentUserId)) {
+      const currentUserRole = sessionStorage.getItem('userRole') || ''
+      if (currentUserRole) {
+        const role = currentUserRole.toUpperCase()
+        if (role.includes('CONNECTION_DESIGNER') || role.includes('CD_')) return true
+      }
+    }
+
+    let role = ''
+    if (typeof user === 'object') {
+      role = String(user.role || '').toUpperCase()
+    }
+
+    if (!role && userId) {
+      const matchedUser = users.find((u) => String(u.id || u._id) === String(userId))
+      role = String(matchedUser?.role || '').toUpperCase()
+    }
+
+    return role.includes('CONNECTION_DESIGNER') || role.includes('CD_')
+  }
+
+  const getRFIFlowType = (item) => {
+    if (item._flowType) return item._flowType
+
+    const currentUserId = sessionStorage.getItem('userId')
+    const currentUserRole = sessionStorage.getItem('userRole') || ''
+    const isLoggedUserCD = currentUserRole.toUpperCase().includes('CONNECTION_DESIGNER')
+
+    const isSenderCurrentUser =
+      String(item.sender?.id || item.sender_id || item.sender) === String(currentUserId)
+    const isSenderCD = item.sender && isCDUser(item.sender)
+
+    if (isLoggedUserCD) {
+      if (isSenderCurrentUser || isSenderCD) {
+        return 'sent'
+      } else {
+        return 'received'
+      }
+    } else {
+      if (isSenderCurrentUser || !isSenderCD) {
+        return 'sent'
+      } else {
+        return 'received'
+      }
+    }
+  }
+
+  const isConnectionDesignerRFI = (item) => {
+    if (!item) return false
+    const isCDFlag =
+      item.isConnectionDesign === true || String(item.isConnectionDesign).toLowerCase() === 'true'
+    if (isCDFlag) return true
+
+    if (item.subject) {
+      const match = item.subject.match(/RFI#\d*[A-Za-z]+/i)
+      if (match) return true
+    }
+
+    if (item.sender && isCDUser(item.sender)) return true
+
+    if (Array.isArray(item.multipleRecipients) && item.multipleRecipients.some(isCDUser))
+      return true
+
+    return false
+  }
+
+  const generalRfis = rfis.filter((item) => {
+    if (isConnectionDesignerRFI(item)) return false
+
+    if (!rfiData || rfiData.length === 0) {
+      if (userRole === 'CLIENT') {
+        return getRFIFlowType(item) === 'sent'
+      } else {
+        return getRFIFlowType(item) === 'received'
+      }
+    }
+    return true
+  })
+
+  const connectionDesignerRfis = rfis.filter((item) => {
+    if (!isConnectionDesignerRFI(item)) return false
+    return getRFIFlowType(item) === cdFilter
+  })
+
+  const displayedRfis = activeTab === 'CONNECTION_DESIGNER' ? connectionDesignerRfis : generalRfis
+
+  const finalRfis = displayedRfis.filter(
+    (item) =>
+      !searchQuery ||
+      (item.subject && item.subject.toLowerCase().includes(searchQuery.toLowerCase()))
+  )
 
   // ✅ Empty state and Render DataTable
   return (
@@ -241,27 +354,55 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 px-4 mb-4 gap-4 pb-2 sm:pb-0">
         <div className="flex space-x-6">
           <button
-            className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === "GENERAL" ? "border-green-600 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
-            onClick={() => setActiveTab("GENERAL")}
+            className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === 'GENERAL' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            onClick={() => setActiveTab('GENERAL')}
           >
             General RFIs
           </button>
           <button
-            className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === "CONNECTION_DESIGNER" ? "border-green-600 text-green-700" : "border-transparent text-gray-500 hover:text-gray-700"}`}
-            onClick={() => setActiveTab("CONNECTION_DESIGNER")}
+            className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === 'CONNECTION_DESIGNER' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            onClick={() => setActiveTab('CONNECTION_DESIGNER')}
           >
-            Connection Designer's RFI
+            Connection Designer&apos;s RFI
           </button>
         </div>
-        <div className="relative pb-2 sm:pb-0 sm:mt-2">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search by subject..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm tracking-normal focus:outline-none focus:ring-1 focus:ring-green-500 w-full sm:w-64"
-          />
+        <div className="flex items-center gap-4 pb-2 sm:pb-0 sm:mt-2">
+          {activeTab === 'CONNECTION_DESIGNER' && (
+            <div className="flex bg-gray-100 p-1 rounded-lg gap-1 h-9 items-center">
+              <button
+                type="button"
+                onClick={() => setCdFilter('sent')}
+                className={`px-3 py-1 text-xs font-semibold rounded-md transition-all h-7 flex items-center ${
+                  cdFilter === 'sent'
+                    ? 'bg-white text-black shadow-sm border border-gray-200/50'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                SENT
+              </button>
+              <button
+                type="button"
+                onClick={() => setCdFilter('received')}
+                className={`px-3 py-1 text-xs font-semibold rounded-md transition-all h-7 flex items-center ${
+                  cdFilter === 'received'
+                    ? 'bg-white text-black shadow-sm border border-gray-200/50'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                RECEIVED
+              </button>
+            </div>
+          )}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by subject..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm tracking-normal focus:outline-none focus:ring-1 focus:ring-green-500 w-full sm:w-64"
+            />
+          </div>
         </div>
       </div>
 
@@ -270,9 +411,9 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
           <Inbox className="w-10 h-10 mb-3 text-gray-400" />
           <p className="text-sm font-medium tracking-normal">No RFIs Available</p>
           <p className="text-sm tracking-normal text-gray-400">
-            {userRole === "CLIENT"
-              ? "You haven’t sent any RFIs yet."
-              : "No RFIs have been received yet."}
+            {userRole === 'CLIENT'
+              ? 'You haven’t sent any RFIs yet.'
+              : 'No RFIs have been received yet.'}
           </p>
         </div>
       ) : (
@@ -299,7 +440,7 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
         </Modal>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default AllRFI;
+export default AllRFI
