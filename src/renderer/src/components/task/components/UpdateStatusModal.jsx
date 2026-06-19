@@ -24,6 +24,7 @@ const UpdateStatusModal = ({ taskId, currentStatus, hasUnacknowledgedComments, o
             setIsSubmitting(true);
             await Service.UpdateTaskById(taskId.toString(), { status: newStatus });
             toast.success(`Status updated to ${newStatus}`);
+            window.dispatchEvent(new Event('task-updated'));
             refresh?.();
             onClose();
         } catch (error) {

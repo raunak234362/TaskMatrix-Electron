@@ -51,6 +51,15 @@ const AllActiveTask = () => {
       }
     };
     fetchTasks();
+
+    const handleTaskUpdated = () => {
+      import('react-toastify').then(({ toast }) => {
+        toast.info("Auto-refreshing tasks table...", { autoClose: 3000 });
+      });
+      fetchTasks();
+    };
+    window.addEventListener('task-updated', handleTaskUpdated);
+    return () => window.removeEventListener('task-updated', handleTaskUpdated);
   }, []);
 
   const formatDate = (date) =>

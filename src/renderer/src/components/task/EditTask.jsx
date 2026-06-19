@@ -142,6 +142,7 @@ const EditTask = ({ id, onClose, refresh }) => {
       await Service.UpdateTaskById(id.toString(), payload);
 
       toast.success("Task updated successfully!");
+      window.dispatchEvent(new Event('task-updated'));
       refresh?.();
       onClose();
     } catch (error) {
@@ -161,7 +162,8 @@ const EditTask = ({ id, onClose, refresh }) => {
   const stageOptions = [
     { label: "IFA", value: "IFA" },
     { label: "IFC", value: "IFC" },
-    { label: "RE-IFA", value: "RE-IFA" },
+    { label: "R-IFA", value: "RIFA" },
+    { label: "COR", value: "COR" },
   ];
 
   const milestoneOptions = milestones.map((m) => {

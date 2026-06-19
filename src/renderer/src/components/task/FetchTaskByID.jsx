@@ -97,6 +97,16 @@ const FetchTaskByID = ({
       }
     };
     fetchStaff();
+
+    const handleTaskUpdated = () => {
+      import('react-toastify').then(({ toast }) => {
+        toast.info("Auto-refreshing task details...", { autoClose: 3000 });
+      });
+      fetchTask();
+      if (refresh) refresh();
+    };
+    window.addEventListener('task-updated', handleTaskUpdated);
+    return () => window.removeEventListener('task-updated', handleTaskUpdated);
   }, [id]);
 
   const handleAddComment = async (data) => {

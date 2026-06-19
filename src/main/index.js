@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { app, shell, BrowserWindow, Notification, ipcMain, session } from 'electron'
+import { app, shell, BrowserWindow, Notification, ipcMain, session, powerMonitor } from 'electron'
 import { join } from 'path'
 import { tmpdir } from 'os'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
@@ -126,6 +126,20 @@ app.whenReady().then(() => {
       ) {
         window.webContents.toggleDevTools()
       }
+    })
+  })
+
+  // Listen for system lock to pause tasks
+  powerMonitor.on('lock-screen', () => {
+    BrowserWindow.getAllWindows().forEach((win) => {
+      win.webContents.send('system-locked')
+    })
+  })
+  
+  // Also listen for system suspend (sleep)
+  powerMonitor.on('suspend', () => {
+    BrowserWindow.getAllWindows().forEach((win) => {
+      win.webContents.send('system-locked')
     })
   })
 
