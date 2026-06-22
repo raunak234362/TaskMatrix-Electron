@@ -201,12 +201,22 @@ const ConnectionDesignerQuotaByID = ({ id, onClose }) => {
             }
 
             await Service.addCDQuotaResponse(formData);
+
+            if (replyStatus === "AWARDED") {
+                try {
+                    await Service.ConnectionDesignerQuotaApproveByID(quota.id || id);
+                } catch (approveErr) {
+                    console.error("Failed to approve quota via reply:", approveErr);
+                    toast.error("Reply sent, but failed to approve quota");
+                }
+            }
+
             toast.success("Reply sent successfully!");
             setReplyMessage("");
             setReplyFiles([]);
             setReplyMode(false);
 
-            await fetchReplies(quota.id || id);
+            await fetchQuota();
         } catch (err) {
             console.error("Reply submission error:", err);
             toast.error("Failed to send reply");
@@ -298,8 +308,9 @@ const ConnectionDesignerQuotaByID = ({ id, onClose }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                             <Info label="Serial No" value={quota.serialNo || "—"} />
                             <Info label="Bid Price" value={quota.bidprice ? `$${quota.bidprice}` : "—"} />
-                            <Info label="Est. Hours" value={quota.estimatedHours || "—"} />
-                            <Info label="Weeks" value={quota.weeks || "—"} />
+                            <Info label="Main Steel Price" value={quota.mainSteelPrice ? `$${quota.mainSteelPrice}` : "—"} />
+                            <Info label="Misc Steel Price" value={quota.miscSteelPrice ? `$${quota.miscSteelPrice}` : "—"} />
+
                             <Info label="Approval Date" value={quota.approvalDate ? new Date(quota.approvalDate).toLocaleDateString() : "—"} />
                             <Info label="Created At" value={quota.createdAt ? new Date(quota.createdAt).toLocaleDateString() : "—"} />
                         </div>
@@ -319,7 +330,7 @@ const ConnectionDesignerQuotaByID = ({ id, onClose }) => {
                     {/* Threaded Replies Section */}
                     <div className="mt-8 border border-gray-200 rounded-3xl p-6 sm:p-8 bg-white shadow-sm space-y-6">
                         <h3 className="text-sm sm:text-base font-bold text-gray-900 uppercase tracking-tight">
-                            Threaded Communications ({replies.length})
+                        Communications ({replies.length})
                         </h3>
                         {loadingReplies ? (
                             <div className="flex justify-center p-4">
@@ -413,15 +424,6 @@ const ConnectionDesignerQuotaByID = ({ id, onClose }) => {
 
                 {/* Footer */}
                 <div className="p-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/50">
-                    {canApprove && !quota.approvalStatus && (
-                        <button
-                            onClick={handleApprove}
-                            disabled={isApproving}
-                            className="px-6 py-2 bg-green-200 border-2 border-black text-black font-black uppercase tracking-widest rounded-lg hover:bg-green-300 transition-all text-sm shadow-sm hover:shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isApproving ? "Approving..." : "Approve Quota"}
-                        </button>
-                    )}
                     <button
                         onClick={onClose}
                         className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
@@ -498,7 +500,7 @@ const ConnectionDesignerQuotaByID = ({ id, onClose }) => {
                                         className="w-full h-11 px-4 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-green-100 outline-none font-semibold uppercase text-xs tracking-widest appearance-none cursor-pointer text-black"
                                     >
                                         <option value="IN_REVIEW">In Review</option>
-                                        <option value="APPROVED">Approved</option>
+                                        <option value="AWARDED">APPROVED/AWARDED</option>
                                         <option value="REJECTED">Rejected</option>
                                     </select>
                                 </div>

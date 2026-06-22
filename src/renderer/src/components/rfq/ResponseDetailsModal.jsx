@@ -78,6 +78,18 @@ const ResponseDetailsModal = ({
       const rfqProjectName = rfqDetails?.projectName || "";
       await Service.addResponse(formData, response.rfqId, fabricatorName, rfqProjectName);
 
+      if (replyStatus === "APPROVED") {
+        try {
+          const payload = {
+            wbtStatus: "AWARDED",
+            reason: "RFQ Approved/Awarded via Response Details Reply",
+          };
+          await Service.UpdateRFQById(response.rfqId, payload, fabricatorName, rfqProjectName);
+        } catch (approveErr) {
+          console.error("Failed to auto-update RFQ status to AWARDED:", approveErr);
+        }
+      }
+
       setReplyMode(false);
       setReplyMessage("");
       setReplyFiles([]);
@@ -265,7 +277,7 @@ const ResponseDetailsModal = ({
                   className="w-full border-2 border-black rounded-lg p-3 text-sm font-bold uppercase outline-none bg-white"
                 >
                   <option value="PENDING">Pending</option>
-                  <option value="APPROVED">Approved</option>
+                  <option value="APPROVED">Approved/Awarded</option>
                   <option value="REJECTED">Rejected</option>
                   <option value="CLARIFICATION_REQUIRED">
                     Needs Clarification

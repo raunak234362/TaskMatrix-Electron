@@ -61,8 +61,8 @@ const EditProject = ({
         detailingMisc: false,
         isAwarded: false,
         clientProjectManagers: [],
-        connectionDesignerID: "",
-        pocOfConnectionDesigner: "",
+        connectionDesignerID: [],
+        pocOfConnectionDesigner: [],
         status: "ACTIVE",
       },
     });
@@ -133,9 +133,27 @@ const EditProject = ({
           setValue("detailingMain", project.detailingMain);
           setValue("detailingMisc", project.detailingMisc);
           setValue("isAwarded", project.isAwarded || false);
-          setValue("connectionDesignerID", project.connectionDesignerID || "");
-          const pocId = project.pocOfConnectionDesigner?.id || project.pocOfConnectionDesigner?._id || (typeof project.pocOfConnectionDesigner === 'string' ? project.pocOfConnectionDesigner : "");
-          setValue("pocOfConnectionDesigner", pocId);
+          const selectedCDs = Array.isArray(project.connectionDesignerID)
+            ? project.connectionDesignerID
+            : project.connectionDesignerID
+            ? [project.connectionDesignerID]
+            : [];
+          setValue("connectionDesignerID", selectedCDs);
+
+          let selectedPocs = [];
+          if (project.pocOfConnectionDesigner) {
+            if (Array.isArray(project.pocOfConnectionDesigner)) {
+              selectedPocs = project.pocOfConnectionDesigner.map(
+                (poc) => poc?.id || poc?._id || poc
+              );
+            } else {
+              const singleId = project.pocOfConnectionDesigner?.id || project.pocOfConnectionDesigner?._id || (typeof project.pocOfConnectionDesigner === 'string' ? project.pocOfConnectionDesigner : "");
+              if (singleId) {
+                selectedPocs = [singleId];
+              }
+            }
+          }
+          setValue("pocOfConnectionDesigner", selectedPocs);
 
           // Handle clientProjectManagers
           if (project.clientProjectManagers) {
@@ -180,11 +198,34 @@ const EditProject = ({
 
   useEffect(() => {
     const fetchEngineers = async () => {
-      if (watchedCdId) {
+      const cdIds = Array.isArray(watchedCdId) ? watchedCdId : (watchedCdId ? [watchedCdId] : []);
+      if (cdIds.length > 0) {
         setIsFetchingEngineers(true);
         try {
-          const res = await Service.FetchConnectionDesignerByID(watchedCdId);
-          setCdEngineers(Array.isArray(res?.data?.CDEngineers) ? res.data.CDEngineers : []);
+          const results = await Promise.all(
+            cdIds.map((id) => Service.FetchConnectionDesignerByID(id))
+          );
+          const allEngineers = [];
+          results.forEach((res) => {
+            const engineers = res?.data?.CDEngineers;
+            if (Array.isArray(engineers)) {
+              engineers.forEach((eng) => {
+                if (eng && !allEngineers.some((e) => (e.id || e._id) === (eng.id || eng._id))) {
+                  allEngineers.push(eng);
+                }
+              });
+            }
+          });
+          setCdEngineers(allEngineers);
+
+          // Safeguard: Filter out any selected POC that no longer belongs to the selected connection designers
+          const currentPocs = watch("pocOfConnectionDesigner") || [];
+          const updatedPocs = (Array.isArray(currentPocs) ? currentPocs : [currentPocs]).filter((pocId) =>
+            allEngineers.some((e) => (e.id || e._id) === pocId)
+          );
+          if (JSON.stringify(currentPocs) !== JSON.stringify(updatedPocs)) {
+            setValue("pocOfConnectionDesigner", updatedPocs);
+          }
         } catch (error) {
           console.error("Failed to fetch engineers", error);
           setCdEngineers([]);
@@ -523,9 +564,14 @@ const EditProject = ({
                         control={control}
                         render={({ field }) => (
                           <Select
+                            isMulti
                             options={options.connectionDesigners}
-                            value={options.connectionDesigners.find((o) => o.value === field.value)}
-                            onChange={(o) => field.onChange(o?.value || "")}
+                            value={options.connectionDesigners.filter((o) =>
+                              (Array.isArray(field.value) ? field.value : []).includes(o.value)
+                            )}
+                            onChange={(selectedOptions) =>
+                              field.onChange(selectedOptions ? selectedOptions.map((o) => o.value) : [])
+                            }
                             placeholder="Select Designer"
                             isSearchable
                             isClearable
@@ -540,19 +586,28 @@ const EditProject = ({
                       <Controller
                         name="pocOfConnectionDesigner"
                         control={control}
-                        render={({ field }) => (
-                          <Select
-                            options={options.pocOfConnectionDesigner}
-                            value={options.pocOfConnectionDesigner.find((o) => o.value === field.value)}
-                            onChange={(o) => field.onChange(o?.value || "")}
-                            placeholder={isFetchingEngineers ? "Loading..." : "Select POC"}
-                            isSearchable
-                            isClearable
-                            isDisabled={!watchedCdId || isFetchingEngineers}
-                            className="text-sm"
-                            styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
-                          />
-                        )}
+                        render={({ field }) => {
+                          const cdIds = Array.isArray(watchedCdId) ? watchedCdId : (watchedCdId ? [watchedCdId] : []);
+                          const hasCdSelected = cdIds.length > 0;
+                          return (
+                            <Select
+                              isMulti
+                              options={options.pocOfConnectionDesigner}
+                              value={options.pocOfConnectionDesigner.filter((o) =>
+                                (Array.isArray(field.value) ? field.value : []).includes(o.value)
+                              )}
+                              onChange={(selectedOptions) =>
+                                field.onChange(selectedOptions ? selectedOptions.map((o) => o.value) : [])
+                              }
+                              placeholder={isFetchingEngineers ? "Loading..." : "Select POC"}
+                              isSearchable
+                              isClearable
+                              isDisabled={!hasCdSelected || isFetchingEngineers}
+                              className="text-sm"
+                              styles={{ control: (b) => ({ ...b, borderRadius: '10px', backgroundColor: '#f9fafb' }) }}
+                            />
+                          );
+                        }}
                       />
                     </div>
                   </div>

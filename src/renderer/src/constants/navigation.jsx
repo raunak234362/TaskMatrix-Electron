@@ -14,7 +14,8 @@ import {
     DollarSign,
     Factory,
     FileText,
-    Calendar
+    Calendar,
+    FileSpreadsheet
 } from 'lucide-react'
 
 export const navItems = [
@@ -102,6 +103,28 @@ export const navItems = [
         label: 'Projects',
         to: 'projects',
         icon: <Briefcase />,
+        roles: [
+            'admin',
+            'dept_manager',
+            'deputy_manager',
+            'estimation_head',
+            'operation_executive',
+            'project_manager_officer',
+            'team_lead',
+            'staff',
+            'sales_manager',
+            'client_admin',
+            'connection_designer_engineer',
+            'client',
+            'project_manager',
+            'user',
+            'human_resource'
+        ]
+    },
+    {
+        label: 'Team Reports',
+        to: 'team-reports',
+        icon: <FileSpreadsheet />,
         roles: [
             'admin',
             'dept_manager',
