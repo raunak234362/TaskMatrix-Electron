@@ -25,6 +25,7 @@ import {
 import EditConnectionDesigner from './EditConnectionDesigner'
 import { AllCDEngineer } from '../..'
 import RenderFiles from '../../common/RenderFiles'
+import GetProjectById from '../../project/GetProjectById'
 
 const getStatesList = (stateVal) => {
   let states = []
@@ -46,6 +47,8 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
   const [editModel, setEditModel] = useState(null)
   const [engineerModel, setEnginnerModel] = useState(null)
   const [activeTab, setActiveTab] = useState('DASHBOARD')
+  const [statusFilter, setStatusFilter] = useState('ALL')
+  const [selectedProjectId, setSelectedProjectId] = useState(null)
 
   const fetchDesigner = async () => {
     if (!id) return
@@ -116,13 +119,22 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
             <LayoutDashboard size={14} /> Dashboard
           </button>
           <button
+            onClick={() => setActiveTab('PROJECTS')}
+            className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'PROJECTS'
+              ? 'bg-green-50 border-green-400 text-green-700 shadow-sm'
+              : 'bg-white border-gray-300 text-black hover:bg-gray-50'
+              }`}
+          >
+            <Briefcase size={14} /> Projects
+          </button>
+          <button
             onClick={() => setActiveTab('FILES')}
             className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'FILES'
               ? 'bg-green-50 border-green-400 text-green-700 shadow-sm'
               : 'bg-white border-gray-300 text-black hover:bg-gray-50'
               }`}
           >
-            <LayoutDashboard size={14} /> Files
+            <Files size={14} /> Files
           </button>
           <button
             onClick={onClose}
@@ -143,7 +155,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
                 value={designer.CDEngineers?.length || 0}
                 icon={HardHat}
               />
-              <StatBox label="Active Projects" value={0} icon={RefreshCcw} />
+              <StatBox label="All Projects" value={designer.project?.length || 0} icon={RefreshCcw} onClick={() => setActiveTab('PROJECTS')} />
               <StatBox label="Status" value="Active" icon={ShieldCheck} isStatus />
               <StatBox
                 label="Availability"
@@ -153,22 +165,8 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
             </div>
 
             <div className="grid grid-cols-12 gap-10">
-              {/* Left Column: Pending Actions & Profile Details */}
+              {/* Left Column: Profile Details */}
               <div className="col-span-12 lg:col-span-8 space-y-12">
-                {/* Pending Actions Section */}
-                <div>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-black mb-6 flex items-center gap-2">
-                    <ClipboardList size={16} className="text-green-600" />
-                    Pending Actions
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <ActionCard icon={FileText} label="RFI" count={0} color="green" />
-                    <ActionCard icon={RefreshCcw} label="SUBMITTALS" count={0} color="green" />
-                    <ActionCard icon={Briefcase} label="CHANGE ORDERS" count={0} color="green" />
-                    <ActionCard icon={Search} label="RFQ" count={0} color="green" />
-                  </div>
-                </div>
-
                 {/* Profile Details Section */}
                 <div>
                   <h3 className="text-sm font-bold uppercase tracking-wider text-black mb-6 flex items-center gap-2">
@@ -212,6 +210,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
                     </div>
                   </div>
                 </div>
+
               </div>
 
               {/* Right Column: Administrative Control */}
@@ -257,6 +256,57 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
               </div>
             </div>
           </>
+        ) : activeTab === 'PROJECTS' ? (
+          <div className="h-full min-h-[500px] bg-white rounded-2xl border border-gray-300 p-8 flex flex-col">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-sm font-black text-black uppercase tracking-widest flex items-center gap-3">
+                <Briefcase size={18} className="text-green-600" />
+                All Projects
+              </h3>
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-bold text-gray-500 uppercase">Filter by Status:</span>
+                <select
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-xs font-bold text-black uppercase outline-none focus:border-green-500 cursor-pointer bg-white"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="ALL">All Status</option>
+                  {Array.from(new Set(designer.project?.map(p => p.status).filter(Boolean))).map(status => (
+                    <option key={status} value={status}>{status}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {designer.project && designer.project.length > 0 ? (
+                designer.project
+                  .filter(proj => statusFilter === 'ALL' || proj.status === statusFilter)
+                  .map((proj) => (
+                  <div 
+                    key={proj.id} 
+                    onClick={() => setSelectedProjectId(proj.id)}
+                    className="p-5 rounded-2xl border border-gray-300 flex flex-col gap-2 bg-white hover:border-green-400 hover:shadow-md transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-black text-black uppercase tracking-widest">{proj.projectNumber || '-'}</span>
+                      {proj.status && (
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest ${proj.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                          {proj.status}
+                        </span>
+                      )}
+                    </div>
+                    {proj.name && <span className="text-sm text-gray-700 font-medium line-clamp-2 mt-1">{proj.name}</span>}
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full py-10 flex flex-col items-center justify-center text-gray-400">
+                  <Briefcase size={32} className="mb-3 opacity-20" />
+                  <p className="text-sm font-bold uppercase tracking-widest">No projects found</p>
+                </div>
+              )}
+            </div>
+          </div>
         ) : (
           <div className="h-full min-h-[500px] bg-white rounded-2xl border border-gray-300 p-8">
             <h3 className="text-sm font-black text-black uppercase tracking-widest mb-8 flex items-center gap-3">
@@ -274,12 +324,22 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
       {engineerModel && (
         <AllCDEngineer onClose={() => setEnginnerModel(null)} designerData={designer} refresh={fetchDesigner} />
       )}
+      {selectedProjectId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white w-full max-w-7xl h-full max-h-[95vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <GetProjectById id={selectedProjectId} onClose={() => setSelectedProjectId(null)} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-const StatBox = ({ label, value, unit, icon: Icon, isStatus, subtext }) => (
-  <div className="bg-white p-6 rounded-2xl border border-gray-300 flex items-center justify-between shadow-sm">
+const StatBox = ({ label, value, unit, icon: Icon, isStatus, subtext, onClick }) => (
+  <div 
+    onClick={onClick}
+    className={`bg-white p-6 rounded-2xl border border-gray-300 flex items-center justify-between shadow-sm ${onClick ? 'cursor-pointer hover:border-green-400 hover:shadow-md transition-all' : ''}`}
+  >
     <div className="flex items-center gap-5 flex-1">
       <div className="p-3 bg-green-50 rounded-xl text-green-600 border border-green-300 flex items-center justify-center shadow-sm">
         <Icon size={20} strokeWidth={2.5} />
@@ -308,31 +368,6 @@ const StatBox = ({ label, value, unit, icon: Icon, isStatus, subtext }) => (
     )}
   </div>
 )
-
-const ActionCard = ({ icon: Icon, label, count, color }) => {
-  const styles = {
-    green: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-300' },
-    purple: { bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-300' },
-    red: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-300' },
-    blue: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-300' }
-  }
-  const s = styles[color]
-  return (
-    <div className="p-6 rounded-2xl bg-white border border-gray-300 flex items-center justify-start gap-4 group hover:shadow-md hover:border-green-300 transition-all cursor-pointer">
-      <div className="flex items-center gap-4">
-        <div className={`p-4 rounded-2xl border transition-all ${s.bg} ${s.text} ${s.border}`}>
-          <Icon size={20} strokeWidth={2.5} />
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm font-bold text-black uppercase tracking-wider transition-colors line-clamp-1">
-            {label}
-          </span>
-          <span className={`text-sm font-bold ${s.text} bg-white px-2 py-0.5 rounded-md border ${s.border}`}>{count}</span>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 const DetailItem = ({ label, value }) => (
   <div className="space-y-1.5">
