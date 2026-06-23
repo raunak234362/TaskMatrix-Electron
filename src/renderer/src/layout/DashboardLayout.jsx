@@ -40,7 +40,7 @@ const Layout = () => {
     <div className="flex h-screen w-screen overflow-hidden bg-white font-sans text-[#1f2933]">
       {/* Sidebar Area - Desktop */}
       {!isAnyModalOpen && (
-        <div className="hidden md:flex relative z-20 h-full border-r border-gray-200 bg-white">
+        <div className="hidden md:flex relative z-20 h-full bg-white">
           <Sidebar
             isMinimized={isMinimized}
             toggleSidebar={toggleSidebar}

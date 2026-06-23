@@ -18,7 +18,6 @@ import PendingActions from './components/PendingActions'
 import InvoiceTrends from './components/InvoiceTrends'
 import LiveTaskTimer from './components/LiveTaskTimer'
 import AdminInvoiceGraph from './components/AdminInvoiceGraph'
-import AdminRFQGraph from './components/AdminRFQGraph'
 import WorkloadAlerts from './components/WorkloadAlerts'
 
 // ─── StatCard ────────────────────────────────────────────────────────────────
@@ -335,7 +334,8 @@ const AdminDashboardView = ({
                                     <div className="p-2.5 bg-indigo-100/60 rounded-xl border border-indigo-200 shadow-sm group-hover:scale-110 transition-transform">
                                         <Briefcase className="w-5 h-5 text-indigo-600" strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">Upcoming Submittal</span>
+                                    <span className="text-[14px] font-semibold
+                                     text-black uppercase tracking-widest">Upcoming Submittal</span>
                                 </div>
                                 <span className="text-3xl font-black text-indigo-600 tracking-tighter">
                                     {adminData?.upcomingMilestones?.length || 0}
@@ -353,7 +353,8 @@ const AdminDashboardView = ({
                                     <div className="p-2.5 bg-amber-100/60 rounded-xl border border-amber-200 shadow-sm group-hover:scale-110 transition-transform">
                                         <Bell className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">Notes & Updates</span>
+                                    <span className="text-[14px] font-semibold
+                                     text-black uppercase tracking-widest">Notes & Updates</span>
                                 </div>
                                     <span className="text-3xl font-black text-amber-600 tracking-tighter">
                                         {projectNotes.length}
@@ -371,7 +372,8 @@ const AdminDashboardView = ({
                                         <div className="p-2.5 bg-red-100/60 rounded-xl border border-red-200 shadow-sm group-hover:scale-110 transition-transform">
                                             <MessageCircleWarning className="w-5 h-5 text-red-600" strokeWidth={2.5} />
                                         </div>
-                                        <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">Unread Comments</span>
+                                        <span className="text-[15px] font-semibold
+                                     text-black uppercase tracking-widest">Unread Comments</span>
                                     </div>
                                     <span className="text-3xl font-black text-red-600 tracking-tighter">
                                         {unreadComments?.length || 0}
@@ -390,7 +392,8 @@ const AdminDashboardView = ({
                                             <div className="p-2.5 bg-red-100/60 rounded-xl border border-red-200 shadow-sm group-hover:scale-110 transition-transform">
                                                 <RefreshCw className="w-5 h-5 text-red-600" strokeWidth={2.5} />
                                             </div>
-                                            <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">Unapproved Change Orders</span>
+                                            <span className="text-[14px] font-semibold
+                                     text-black uppercase tracking-widest">Unapproved Change Orders</span>
                                         </div>
                                         <span className="text-3xl font-black text-red-600 tracking-tighter">
                                             {adminData?.dashboardStats?.unapprovedChangeOrders || 0}
@@ -400,23 +403,16 @@ const AdminDashboardView = ({
                             )}
                         </div>
                     </div>
-            {
-                (userRole === 'admin' || userRole === 'project_manager_officer' || userRole === 'deputy_manager') && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="lg:col-span-2">
-                            <AdminInvoiceGraph
-                                invoices={adminData.invoices}
-                                projects={adminData.projects}
-                                rfqs={adminData.allRfqs}
-                                onInvoiceClick={handleInvoiceClick}
-                            />
-                        </div>
-                        <div className="lg:col-span-1">
-                            <AdminRFQGraph rfqs={adminData.allRfqs || []} />
-                        </div>
-                    </div>
-                )
-            }
+            {(userRole === 'admin' || userRole === 'project_manager_officer' || userRole === 'deputy_manager') && (
+                <div className="w-full">
+                    <AdminInvoiceGraph
+                        invoices={adminData.invoices}
+                        projects={adminData.projects}
+                        rfqs={adminData.allRfqs}
+                        onInvoiceClick={handleInvoiceClick}
+                    />
+                </div>
+            )}
 
 
             {/* Row 3: User Stats (Compressed) - Hidden for OE */}
