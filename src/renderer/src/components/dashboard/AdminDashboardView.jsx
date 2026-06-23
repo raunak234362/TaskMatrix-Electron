@@ -18,7 +18,6 @@ import PendingActions from './components/PendingActions'
 import InvoiceTrends from './components/InvoiceTrends'
 import LiveTaskTimer from './components/LiveTaskTimer'
 import AdminInvoiceGraph from './components/AdminInvoiceGraph'
-import AdminRFQGraph from './components/AdminRFQGraph'
 import WorkloadAlerts from './components/WorkloadAlerts'
 
 // ─── StatCard ────────────────────────────────────────────────────────────────
@@ -404,23 +403,16 @@ const AdminDashboardView = ({
                             )}
                         </div>
                     </div>
-            {
-                (userRole === 'admin' || userRole === 'project_manager_officer' || userRole === 'deputy_manager') && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="lg:col-span-2">
-                            <AdminInvoiceGraph
-                                invoices={adminData.invoices}
-                                projects={adminData.projects}
-                                rfqs={adminData.allRfqs}
-                                onInvoiceClick={handleInvoiceClick}
-                            />
-                        </div>
-                        <div className="lg:col-span-1">
-                            <AdminRFQGraph rfqs={adminData.allRfqs || []} />
-                        </div>
-                    </div>
-                )
-            }
+            {(userRole === 'admin' || userRole === 'project_manager_officer' || userRole === 'deputy_manager') && (
+                <div className="w-full">
+                    <AdminInvoiceGraph
+                        invoices={adminData.invoices}
+                        projects={adminData.projects}
+                        rfqs={adminData.allRfqs}
+                        onInvoiceClick={handleInvoiceClick}
+                    />
+                </div>
+            )}
 
 
             {/* Row 3: User Stats (Compressed) - Hidden for OE */}

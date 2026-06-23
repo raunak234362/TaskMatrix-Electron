@@ -115,25 +115,25 @@ const AdminInvoiceGraph = ({
   return (
     <div className="w-full flex flex-col gap-6">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+      <div className="flex flex-col md:flex-row justify-start items-start gap-6 md:gap-20">
         <div className="w-full md:w-auto">
           <h2 className="text-[14px] font-bold text-black uppercase tracking-widest mb-6">
             INVOICE SUMMARY
           </h2>
           <div className="flex flex-wrap items-center gap-12">
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Raised</span>
-              <span className="text-2xl font-semibold text-gray-900">${totalRaised.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+              <span className="text-[14px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Raised</span>
+              <span className="text-[14px] font-semibold text-gray-900">${totalRaised.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
             </div>
             <div className="h-10 w-px bg-gray-100 hidden md:block"></div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Paid</span>
-              <span className="text-2xl font-semibold text-[#5da63c]">${totalPaid.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+              <span className="text-[14px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Paid</span>
+              <span className="text-[14px] font-semibold text-[#5da63c]">${totalPaid.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
             </div>
             <div className="h-10 w-px bg-gray-100 hidden md:block"></div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Pending</span>
-              <span className="text-2xl font-semibold text-red-500">${totalPending.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+              <span className="text-[14px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Pending</span>
+              <span className="text-[14px] font-semibold text-red-500">${totalPending.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
             </div>
           </div>
         </div>
