@@ -117,7 +117,7 @@ const AdminInvoiceGraph = ({
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start gap-6">
         <div className="w-full md:w-auto">
-          <h2 className="text-[14px] font-black text-gray-500 uppercase tracking-widest mb-6">
+          <h2 className="text-[14px] font-bold text-black uppercase tracking-widest mb-6">
             INVOICE SUMMARY
           </h2>
           <div className="flex flex-wrap items-center gap-12">
