@@ -883,7 +883,7 @@ const TeamDashboard = () => {
             {selectedTeam && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {/* High Contrast Header Bar */}
-                <div className="w-full bg-[#f4faf0] p-4 border border-black flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden rounded-none">
+                <div className="w-full bg-[#f4faf0] p-4 border border-black flex items-center justify-between gap-6 relative overflow-hidden rounded-none">
                   <div className="relative z-10 flex items-center gap-3">
                     <div className="w-10 h-10 bg-green-50 text-green-600 border border-green-300 flex items-center justify-center shrink-0">
                       <Users className="w-5 h-5 text-green-700" />
@@ -897,11 +897,7 @@ const TeamDashboard = () => {
                       </p>
                     </div>
                   </div>
-                </div>
-
-                <div className="flex flex-col lg:flex-row gap-6 items-start">
-                  {/* Left Tabs Sidebar */}
-                  <div className="w-full lg:w-60 bg-white border border-gray-300 flex flex-row lg:flex-col shrink-0 overflow-x-auto lg:overflow-x-visible rounded-none shadow-sm">
+                   <div className="bg-white border border-gray-300 flex flex-row shrink-0 overflow-x-auto lg:overflow-x-visible rounded-none shadow-sm">
                     <button
                       onClick={() => setActiveTab("overview")}
                       className={`flex items-center gap-3 px-4 py-2.5 text-sm font-semibold tracking-normal rounded-none transition-all text-left cursor-pointer shrink-0 ${activeTab === "overview"
@@ -937,6 +933,11 @@ const TeamDashboard = () => {
                       Team Info
                     </button>
                   </div>
+                </div>
+
+                <div className="flex flex-col lg:flex-row gap-6 items-start">
+                  {/* Left Tabs Sidebar */}
+                 
 
                   {/* Right Tab Content */}
                   <div className="flex-1 w-full min-w-0">

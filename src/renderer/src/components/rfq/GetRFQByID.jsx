@@ -281,9 +281,21 @@ const GetRFQByID = ({ id, onClose }) => {
 
     const cdQuotasColumns = [
         {
-            accessorKey: "serialNo",
-            header: "Serial No",
-            cell: ({ row }) => <span className="font-bold text-gray-900 text-sm">{row.original.serialNo}</span>,
+            accessorKey: "connectionDesigner",
+            header: "Connection Designer",
+            cell: ({ row }) => {
+                const name = row.original.connectionDesigner?.name || row.original.name || "—";
+                return <span className="font-bold text-gray-900 text-sm">{name}</span>;
+            },
+        },
+        {
+            accessorKey: "description",
+            header: "Description",
+            cell: ({ row }) => {
+                const plainText = (row.original.description || "").replace(/<[^>]*>/g, "");
+                const truncated = truncateWords(plainText, 20);
+                return <span className="text-gray-700 text-sm">{truncated || "—"}</span>;
+            },
         },
         {
             accessorKey: "bidprice",
@@ -291,15 +303,16 @@ const GetRFQByID = ({ id, onClose }) => {
             cell: ({ row }) => <span className="font-bold text-gray-700 text-sm">${row.original.bidprice || "0"}</span>,
         },
         {
-            accessorKey: "estimatedHours",
-            header: "Est. Hours",
-            cell: ({ row }) => <span className="font-bold text-gray-700 text-sm">{row.original.estimatedHours || "0"}</span>,
+            accessorKey: "mainSteelPrice",
+            header: "Main Steel Price",
+            cell: ({ row }) => <span className="font-bold text-gray-700 text-sm">${row.original.mainSteelPrice || "0"}</span>,
         },
         {
-            accessorKey: "weeks",
-            header: "Weeks",
-            cell: ({ row }) => <span className="font-bold text-gray-700 text-sm">{row.original.weeks || "0"}</span>,
+            accessorKey: "miscSteelPrice",
+            header: "Misc Steel Price",
+            cell: ({ row }) => <span className="font-bold text-gray-700 text-sm">${row.original.miscSteelPrice || "0"}</span>,
         },
+
         {
             accessorKey: "createdAt",
             header: "Created",
@@ -400,26 +413,15 @@ const GetRFQByID = ({ id, onClose }) => {
                           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-300 pb-4">
                               <div className="flex flex-wrap gap-3 items-center">
                                   {userRole !== "ESTIMATOR" && userRole !== "ESTIMATION_HEAD" && (
-                                      <>
-                                          <button
-                                              onClick={() => setActiveTab("responses")}
-                                              className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "responses"
-                                                  ? "bg-green-50 text-black border-green-700/80"
-                                                  : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
-                                                  }`}
-                                          >
-                                              Responses
-                                          </button>
-                                          <button
-                                              onClick={() => setActiveTab("cdQuotas")}
-                                              className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "cdQuotas"
-                                                  ? "bg-green-50 text-black border-green-700/80"
-                                                  : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
-                                                  }`}
-                                          >
-                                              CD Quotes
-                                          </button>
-                                      </>
+                                      <button
+                                          onClick={() => setActiveTab("responses")}
+                                          className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "responses"
+                                              ? "bg-green-50 text-black border-green-700/80"
+                                              : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
+                                              }`}
+                                      >
+                                          Responses
+                                      </button>
                                   )}
                                   {(userRole === "ESTIMATOR" || userRole === "ESTIMATION_HEAD" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole === "DEPUTY_MANAGER") && (
                                       <button
@@ -471,23 +473,8 @@ const GetRFQByID = ({ id, onClose }) => {
                                   </>
                               )}
 
-                              {activeTab === "cdQuotas" && (
-                                  <>
-                                      {/* ---- CDQUOTAS TABLE ---- */}
-                                      {rfq?.CDQuotas?.length ? (
-                                          <DataTable
-                                              columns={cdQuotasColumns}
-                                              data={rfq.CDQuotas}
-                                              onRowClick={(row) => setSelectedCDQuota(row)}
-                                          />
-                                      ) : (
-                                          <p className="text-black italic font-bold p-4 text-center">No CD Quotas available.</p>
-                                      )}
-                                  </>
-                              )}
-
                               {activeTab === "cdSent" && (
-                                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 font-roboto">
                                       <div className="space-y-4">
                                           <div className="flex items-center gap-2">
                                               <User size={16} className="text-black" />
@@ -529,6 +516,24 @@ const GetRFQByID = ({ id, onClose }) => {
                                               formatDate={(date) => new Date(date).toLocaleDateString()}
                                           />
                                       </div>
+
+                                      {userRole !== "ESTIMATOR" && userRole !== "ESTIMATION_HEAD" && (
+                                          <div className="space-y-4 pt-4 border-t border-gray-200">
+                                              <div className="flex items-center gap-2">
+                                                  <Layout size={16} className="text-black" />
+                                                  <h4 className="text-sm font-bold text-black uppercase tracking-wider">CD Quotes</h4>
+                                              </div>
+                                              {rfq?.CDQuotas?.length ? (
+                                                  <DataTable
+                                                      columns={cdQuotasColumns}
+                                                      data={rfq.CDQuotas}
+                                                      onRowClick={(row) => setSelectedCDQuota(row)}
+                                                  />
+                                              ) : (
+                                                  <p className="text-black italic font-bold p-4 text-center">No CD Quotas available.</p>
+                                              )}
+                                          </div>
+                                      )}
                                   </div>
                               )}
                           </div>

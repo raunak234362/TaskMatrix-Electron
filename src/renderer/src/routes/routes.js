@@ -16,6 +16,7 @@ import ConnectionPage from '../pages/ConnectionPage'
 import invoicePage from '../pages/invoicePage'
 import AccountPage from '../pages/AccountPage'
 import TeamPage from '../pages/TeamPage'
+import TeamReportPage from '../pages/TeamReportPage'
 import CoTablePage from '../components/co/CoTablePage'
 import SalesDashboard from '../components/sales/SalesDashboard'
 import DesignerLandingDashboard from '../components/dashboard/DesignerLandingDashboard'
@@ -51,6 +52,7 @@ const routes = [
           { path: 'invoices', Component: invoicePage },
           { path: 'accounts', Component: AccountPage },
           { path: 'manage-team', Component: TeamPage },
+          { path: 'team-reports', Component: TeamReportPage },
           { path: 'sales', Component: SalesDashboard },
           { path: 'designer', Component: DesignerLandingDashboard }
         ]

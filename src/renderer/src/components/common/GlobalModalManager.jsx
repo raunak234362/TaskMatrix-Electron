@@ -11,6 +11,7 @@ import GetTaskByID from '../task/GetTaskByID'
 import GetSubmittalByID from '../submittals/GetSubmittalByID'
 import GetMilestoneByID from '../project/mileStone/GetMilestoneByID'
 import GetProjectById from '../project/GetProjectById'
+import GetCOByID from '../co/GetCOByID'
 
 /**
  * GlobalModalManager listens to the Redux state (ui.activeDetail)
@@ -72,6 +73,27 @@ const GlobalModalManager = () => {
       case 'milestone':
         // GetMilestoneByID expects row object with id
         return <GetMilestoneByID row={{ id }} close={handleClose} />
+      case 'co':
+      case 'changeorder':
+      case 'changeorders':
+      case 'change_order':
+        return (
+          <div className="fixed inset-0 z-1000 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden w-full max-w-6xl max-h-[90vh] flex flex-col relative">
+               <div className="flex justify-end p-4 bg-gray-50/50 border-b">
+                 <button 
+                   onClick={handleClose} 
+                   className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+                 >
+                   Close
+                 </button>
+               </div>
+               <div className="flex-1 overflow-y-auto custom-scrollbar">
+                 <GetCOByID id={id} projectId={activeDetail.projectId} />
+               </div>
+            </div>
+          </div>
+        )
       case 'project':
       case 'projects':
         return (

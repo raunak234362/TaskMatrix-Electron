@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { AddProject, AllProjects, ProjectDashboard } from "../components";
 import ProjectStatusTabs from "../components/project/ProjectStatusTabs";
+import TeamProjectReport from "../components/report/TeamProjectReport";
 import Service from "../api/Service";
 import { useDispatch, useSelector } from "react-redux";
 import { showDepartment, showTeam } from "../store/userSlice";
@@ -127,6 +128,36 @@ const ProjectLayout = () => {
                   Add New Project
                 </button>
               )}
+
+            {[
+              "admin",
+              "dept_manager",
+              "deputy_manager",
+              "estimation_head",
+              "operation_executive",
+              "project_manager_officer",
+              "team_lead",
+              "staff",
+              "sales_manager",
+              "client_admin",
+              "connection_designer_engineer",
+              "client",
+              "project_manager",
+              "user",
+              "human_resource"
+            ].includes(
+              sessionStorage.getItem("userRole")?.toLowerCase() || "",
+            ) && (
+                <button
+                  onClick={() => setActiveTab("teamReports")}
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "teamReports"
+                    ? "bg-[#6bbd45]/15 text-black border-2 border-green-600 shadow-sm"
+                    : "bg-white text-gray-500 border-gray-300 hover:border-black hover:bg-gray-50 hover:text-black"
+                    }`}
+                >
+                  Team Reports
+                </button>
+              )}
           </div>
         </div>
       </div>
@@ -144,6 +175,11 @@ const ProjectLayout = () => {
         {activeTab === "projectDashboard" && (
           <div>
             <ProjectDashboard />
+          </div>
+        )}
+        {activeTab === "teamReports" && (
+          <div>
+            <TeamProjectReport />
           </div>
         )}
       </div>
