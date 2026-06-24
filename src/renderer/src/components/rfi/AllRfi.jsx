@@ -143,13 +143,10 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
         const recipients = row.original.multipleRecipients
         if (!recipients || recipients.length === 0) return '—'
         return (
-          <div className="flex flex-col gap-1">
-            {recipients.map((r, i) => (
-              <span key={i} className="text-sm font-medium tracking-normal text-gray-700">
-                {`${r.firstName ?? ''} ${r.lastName ?? ''}`.trim() || r.email || '—'}
-              </span>
-            ))}
-          </div>
+          recipients
+            .map((r) => `${r.firstName ?? ''} ${r.lastName ?? ''}`.trim() || r.email)
+            .filter(Boolean)
+            .join(', ') || '—'
         )
       }
     }
@@ -351,8 +348,8 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
   // ✅ Empty state and Render DataTable
   return (
     <div className="bg-white p-2 rounded-2xl shadow-md">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 px-4 mb-4 gap-4 pb-2 sm:pb-0">
-        <div className="flex space-x-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 mb-4 gap-4 pb-2 sm:pb-0">
+        <div className="flex space-x-6 border-b border-gray-200 w-full sm:w-auto">
           <button
             className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === 'GENERAL' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
             onClick={() => setActiveTab('GENERAL')}
@@ -400,7 +397,7 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
               placeholder="Search by subject..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm tracking-normal focus:outline-none focus:ring-1 focus:ring-green-500 w-full sm:w-64"
+              className="pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm tracking-normal focus:outline-none focus:ring-1 focus:ring-green-500 w-full sm:w-96"
             />
           </div>
         </div>

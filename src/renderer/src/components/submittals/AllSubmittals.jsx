@@ -102,13 +102,10 @@ const AllSubmittals = ({ submittalData, projectId }) => {
         const recipients = row.original.multipleRecipients
         if (!recipients || recipients.length === 0) return '—'
         return (
-          <div className="flex flex-col gap-1">
-            {recipients.map((r, i) => (
-              <span key={i} className="text-sm font-medium tracking-normal text-gray-700">
-                {`${r.firstName ?? ''} ${r.lastName ?? ''}`.trim() || r.email || '—'}
-              </span>
-            ))}
-          </div>
+          recipients
+            .map((r) => `${r.firstName ?? ''} ${r.lastName ?? ''}`.trim() || r.email)
+            .filter(Boolean)
+            .join(', ') || '—'
         )
       }
     },
