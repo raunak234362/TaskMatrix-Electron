@@ -62,14 +62,29 @@ const EditTask = ({ id, onClose, refresh }) => {
             }
           }
 
+          const rawDuration = task.allocationLog?.allocatedHours || task.duration || ''
+          let decimalHours = 0
+          if (rawDuration) {
+            const parts = String(rawDuration).split(/[:\s]+/)
+            let hVal = 0
+            let mVal = 0
+            if (parts.length >= 1) hVal = parseFloat(parts[0].replace(/[^\d.]/g, '')) || 0
+            if (parts.length >= 2) mVal = parseFloat(parts[1].replace(/[^\d.]/g, '')) || 0
+            decimalHours = hVal + mVal / 60
+          }
+
+          const totalMinutes = Math.round(decimalHours * 60)
+          const initialHours = totalMinutes > 0 ? String(Math.floor(totalMinutes / 60)) : ''
+          const initialMinutes = totalMinutes > 0 ? String(totalMinutes % 60) : ''
+
           reset({
             name: task.name || '',
             description: task.description || '',
             priority: task.priority || 2,
             start_date: task.start_date ? new Date(task.start_date).toISOString().slice(0, 16) : '',
             due_date: task.due_date ? new Date(task.due_date).toISOString().slice(0, 16) : '',
-            hours: task.duration?.includes(':') ? task.duration.split(':')[0] : '',
-            minutes: task.duration?.includes(':') ? task.duration.split(':')[1] : '',
+            hours: initialHours,
+            minutes: initialMinutes,
             Stage: task.Stage || 'IFA',
             user_id: task.user_id || task.user?.id || '',
             wbsType: task.wbsType || '',
@@ -191,7 +206,7 @@ const EditTask = ({ id, onClose, refresh }) => {
           color: black !important;
         }
       `}</style>
-      <div className="bg-[#fcfdfc] rounded-none shadow-xl w-full max-w-4xl h-[90vh] border-2 border-black overflow-hidden flex flex-col relative mx-auto my-auto py-0">
+      <div className="bg-[#fcfdfc] rounded-none shadow-xl w-full max-w-[95vw] lg:max-w-6xl h-[90vh] border-2 border-black overflow-hidden flex flex-col relative mx-auto my-auto py-0">
         <div className="bg-[#fcfdfc] px-8 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 shrink-0 z-10">
           <h2 className="text-xl font-semibold text-black tracking-tight uppercase flex items-center gap-2">
             <FileText className="w-5 h-5 text-[#6bbd45]" /> Edit Task
@@ -403,18 +418,11 @@ const EditTask = ({ id, onClose, refresh }) => {
               </section>
 
               {/* Footer */}
-              <div className="flex justify-end gap-4 pt-6 mt-6 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-8 py-3 bg-gray-50 border-2 border-black hover:bg-gray-100 text-black rounded-none text-sm font-bold uppercase tracking-wider transition-all"
-                >
-                  Cancel
-                </button>
+              <div className="flex justify-center pt-6 mt-6 border-t border-gray-100">
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-8 py-3 bg-green-50 hover:bg-green-100 text-black border-2 border-green-700/80 rounded-none text-sm font-bold uppercase tracking-wider shadow-sm transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50"
+                  className="w-64 py-1.5 bg-green-50 hover:bg-green-100 text-black border-2 border-green-700/80 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 cursor-pointer"
                 >
                   {isSubmitting ? 'Saving...' : 'Save Changes'}
                 </button>

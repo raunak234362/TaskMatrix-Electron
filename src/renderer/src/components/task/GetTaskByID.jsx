@@ -1,17 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  Loader2,
-  Calendar,
-  User,
-  FileText,
-  Building2,
-  Hash,
-  Timer,
-  ClipboardList,
-  Clock,
-  Edit
-} from 'lucide-react'
+import { Loader2, FileText, Timer, ClipboardList, Edit } from 'lucide-react'
 import Service from '../../api/Service'
 import { toast } from 'react-toastify'
 import EditTask from './EditTask'
@@ -281,36 +270,34 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
-          >
-            Close
-          </button>
-        </div>
-
-        {/* Action Bar (Top) */}
-        <div className="px-6 py-3 border-b border-gray-200 flex flex-wrap gap-3 items-center justify-end bg-white">
-          {(userRole === 'admin' ||
-            userRole === 'operation_executive' ||
-            userRole === 'project_manager' ||
-            userRole === 'dept_manager' ||
-            userRole === 'deputy_manager') && (
-            <>
-              <button
-                onClick={() => setIsUpdatingStatus(true)}
-                className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
-              >
-                <Timer className="w-4 h-4" /> Update Status
-              </button>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
-              >
-                <Edit className="w-4 h-4" /> Edit Task
-              </button>
-            </>
-          )}
+          <div className="flex items-center gap-3">
+            {(userRole === 'admin' ||
+              userRole === 'operation_executive' ||
+              userRole === 'project_manager' ||
+              userRole === 'dept_manager' ||
+              userRole === 'deputy_manager') && (
+              <>
+                <button
+                  onClick={() => setIsUpdatingStatus(true)}
+                  className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+                >
+                  <Timer className="w-4 h-4" /> Update Status
+                </button>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+                >
+                  <Edit className="w-4 h-4" /> Edit Task
+                </button>
+              </>
+            )}
+            <button
+              onClick={onClose}
+              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
+            >
+              Close
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Content */}
@@ -322,13 +309,8 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
               <div className="bg-[#f4faf0]/30 p-6 border border-green-600 rounded-none shadow-sm">
                 <LocalSectionTitle title="Task Details" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
+                  <InfoItem label="Project" value={task.project?.name || '—'} />
                   <InfoItem
-                  
-                    label="Project"
-                    value={task.project?.name || '—'}
-                  />
-                  <InfoItem
-                  
                     label="WBS Item"
                     value={task.projectBundle?.bundleKey?.replace(/_/g, ' ') || '—'}
                   />
@@ -347,7 +329,6 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                   />
                   <div className="flex items-center pb-2 border-b border-gray-200 text-sm gap-2">
                     <span className="font-semibold text-black uppercase tracking-wider flex items-center gap-2 shrink-0">
-                      
                       Status:
                     </span>
                     <div className="flex justify-start">
