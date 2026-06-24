@@ -355,7 +355,7 @@ const GetCOByID = ({ id, projectId, onClose }) => {
                 )}
 
                 {/* Subject Section */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="mt-6">
                   <SectionTitle title="Subject" />
                   <div className="text-sm text-black font-normal bg-white p-4 border border-gray-200 rounded-none mt-4">
                     {currentVersion?.remarks || co.remarks || "—"}
@@ -363,7 +363,7 @@ const GetCOByID = ({ id, projectId, onClose }) => {
                 </div>
 
                 {/* Description Section */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
+                <div className="mt-6">
                   <SectionTitle title="Description" />
                   <div
                     className="text-sm text-black font-normal prose prose-sm max-w-none bg-white p-4 border border-gray-200 rounded-none mt-4"
@@ -374,7 +374,7 @@ const GetCOByID = ({ id, projectId, onClose }) => {
                 </div>
 
                 {isViewingCurrent && (
-                  <div className="pt-6 border-t border-gray-200">
+                  <div className="pt-6">
                     <button
                       onClick={() => setShowTableModal(true)}
                       className="px-6 py-2 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-xs uppercase tracking-widest shadow-sm cursor-pointer"
