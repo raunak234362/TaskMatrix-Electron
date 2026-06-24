@@ -243,17 +243,13 @@ const BfaManager = ({ submittalId, isAssist }) => {
   const currentVersion = sortedVersions[0];
 
   return (
-    <div className="bg-gray-100 p-6 rounded-xl border border-gray-100 space-y-6">
+    <div className="bg-white p-6 rounded-none border border-gray-200 space-y-6">
       <div className="flex justify-between items-center border-b border-gray-200 pb-4">
-        <div>
-          <h2 className="text-xl font-semibold text-black flex items-center gap-2">
-            BFA
-          </h2>
-        </div>
+        <SectionTitle title="BFA" />
         {bfa ? (
           (userRole !== "STAFF" || isAssist) && (
-            <Button
-              className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30 font-bold text-sm"
+            <button
+              className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
               onClick={() => {
                 setDescription("");
                 setFiles([]);
@@ -262,12 +258,12 @@ const BfaManager = ({ submittalId, isAssist }) => {
               }}
             >
               Update BFA
-            </Button>
+            </button>
           )
         ) : (
           (userRole !== "STAFF" || isAssist) && (
-            <Button
-              className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30 font-bold text-sm"
+            <button
+              className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
               onClick={() => {
                 setSubject("");
                 setDescription("");
@@ -277,7 +273,7 @@ const BfaManager = ({ submittalId, isAssist }) => {
               }}
             >
               + Upload BFA
-            </Button>
+            </button>
           )
         )}
       </div>
@@ -286,9 +282,11 @@ const BfaManager = ({ submittalId, isAssist }) => {
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Info label="BFA Subject" value={bfa.subject} />
-            <div className="mb-2">
-              <h4 className="text-sm text-gray-700">BFA Status</h4>
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tight border mt-1 ${bfa.status === "APPROVED"
+            <div className="flex items-center pb-2 border-b border-gray-200 text-sm gap-2">
+              <span className="font-semibold text-black uppercase tracking-wider shrink-0">
+                BFA Status:
+              </span>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-xs font-bold uppercase tracking-tight border ${bfa.status === "APPROVED"
                 ? "bg-green-100 text-green-700 border-green-200"
                 : bfa.status === "REJECTED"
                   ? "bg-red-100 text-red-700 border-red-200"
@@ -300,10 +298,10 @@ const BfaManager = ({ submittalId, isAssist }) => {
           </div>
 
           {currentVersion?.description && (
-            <div className="space-y-2">
-              <h4 className="text-sm text-gray-700">Description</h4>
+            <div className="space-y-4">
+              <SectionTitle title="Description" />
               <div
-                className="p-4 bg-white border border-gray-200 rounded-xl prose prose-sm max-w-none text-sm text-gray-700"
+                className="p-4 bg-white border border-gray-200 rounded-none prose prose-sm max-w-none text-sm text-gray-700"
                 dangerouslySetInnerHTML={{ __html: currentVersion.description }}
               />
             </div>
@@ -313,8 +311,8 @@ const BfaManager = ({ submittalId, isAssist }) => {
             const currentFiles = currentVersion?.files || currentVersion?.file || [];
             const hasCurrentFiles = currentFiles.length > 0;
             return hasCurrentFiles ? (
-              <div className="space-y-2">
-                <h4 className="text-sm text-gray-700">Attachments</h4>
+              <div className="space-y-4">
+                <SectionTitle title="Attachments" />
                 <RenderFiles
                   files={[
                     {
@@ -336,11 +334,13 @@ const BfaManager = ({ submittalId, isAssist }) => {
 
           {/* Version History */}
           {hasMultipleVersions && (
-            <div className="space-y-3 pt-4 border-t border-gray-200">
-              <div className="flex items-center gap-2">
-                <History className="w-4 h-4 text-black" />
-                <h3 className="text-sm font-semibold text-gray-700">Version History</h3>
-                <span className="ml-auto text-[10px] font-black text-gray-400 uppercase tracking-widest bg-white border border-gray-200 px-2 py-0.5 rounded-md">
+            <div className="space-y-4 pt-4 border-t border-gray-200">
+              <div className="flex items-center gap-3 border-b border-gray-200 pb-4">
+                <div className="flex items-center gap-3">
+                  <History className="w-5 h-5 text-black" />
+                  <SectionTitle title="Version History" />
+                </div>
+                <span className="ml-auto text-[10px] font-black text-gray-400 uppercase tracking-widest bg-white border border-gray-200 px-2 py-0.5 rounded-none">
                   {sortedVersions.length} versions
                 </span>
               </div>
@@ -360,12 +360,12 @@ const BfaManager = ({ submittalId, isAssist }) => {
           )}
         </div>
       ) : (
-        <div className="text-center py-8 border border-dashed border-gray-300 rounded-xl bg-white flex flex-col items-center justify-center">
+        <div className="text-center py-8 border border-dashed border-gray-300 rounded-none bg-white flex flex-col items-center justify-center">
           <FileText className="w-10 h-10 text-gray-300 mb-2" />
-          <p className="text-sm text-gray-500 italic">No bacK FROM APPROVAL (BFA) associated with this submittal yet.</p>
+          <p className="text-sm font-semibold text-black uppercase tracking-wider">No BACK FROM APPROVAL (BFA) associated with this submittal yet.</p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="text-xs font-bold text-black mt-2 hover:underline"
+            className="mt-3 px-4 py-1.5 bg-gray-100 text-black border border-gray-300 rounded-none hover:bg-gray-200 transition-all font-bold text-xs uppercase tracking-wider cursor-pointer"
           >
             Raise BFA Now
           </button>
@@ -479,9 +479,20 @@ const BfaManager = ({ submittalId, isAssist }) => {
 };
 
 const Info = ({ label, value }) => (
-  <div className="mb-2">
-    <h4 className="text-sm text-gray-700 font-medium">{label}</h4>
-    <div className="text-sm text-gray-900 mt-1 font-semibold">{value || "—"}</div>
+  <div className="flex items-center pb-2 border-b border-gray-200 text-sm gap-2">
+    <span className="font-semibold text-black uppercase tracking-wider shrink-0">
+      {label}:
+    </span>
+    <span className="text-black font-normal uppercase text-left truncate flex-1" title={value}>
+      {value || "—"}
+    </span>
+  </div>
+);
+
+const SectionTitle = ({ title }) => (
+  <div className="flex items-center gap-3">
+    <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+    <h2 className="text-lg font-bold text-black tracking-wider uppercase">{title}</h2>
   </div>
 );
 

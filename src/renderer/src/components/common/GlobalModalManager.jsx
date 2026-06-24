@@ -47,24 +47,7 @@ const GlobalModalManager = () => {
       case 'rfq':
         return <GetRFQByID id={id} onClose={handleClose} />
       case 'rfi':
-        // Wrapper for RFI since it might not have an internal close button
-        return (
-          <div className="fixed inset-0 z-1000 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden w-full max-w-6xl max-h-[90vh] flex flex-col relative">
-               <div className="flex justify-end p-4 bg-gray-50/50 border-b">
-                 <button 
-                   onClick={handleClose} 
-                   className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
-                 >
-                   Close
-                 </button>
-               </div>
-               <div className="flex-1 overflow-y-auto custom-scrollbar">
-                 <GetRFIByID id={id} />
-               </div>
-            </div>
-          </div>
-        )
+        return <GetRFIByID id={id} onClose={handleClose} />
       case 'task':
         return <GetTaskByID id={id} onClose={handleClose} />
       case 'submittal':

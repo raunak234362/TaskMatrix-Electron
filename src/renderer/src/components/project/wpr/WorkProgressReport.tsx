@@ -1471,14 +1471,7 @@ const WorkProgressReport = ({
         </div>
       )}
       {selectedRfiId && (
-        <Modal
-          isOpen={true}
-          onClose={() => setSelectedRfiId(null)}
-          title="RFI Details"
-          size="lg"
-        >
-          <GetRFIByID id={selectedRfiId} onUpdate={onUpdate} />
-        </Modal>
+        <GetRFIByID id={selectedRfiId} onClose={() => setSelectedRfiId(null)} onUpdate={onUpdate} />
       )}
     </div>
   );

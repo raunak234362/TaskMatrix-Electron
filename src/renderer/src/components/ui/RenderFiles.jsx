@@ -189,13 +189,13 @@ const RenderFiles = ({
           return (
             <div
               key={description}
-              className="border border-black bg-white rounded-none p-4 space-y-3 shadow-none"
+              className="border border-[#6bbd45]/40 bg-white rounded-none p-4 space-y-3 shadow-none"
             >
               {/* Description + Stage */}
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1.5">
                 <div>
                   <h5
-                    className="text-sm border-l-4 border-black pl-2 sm:text-base font-bold text-black uppercase tracking-wider"
+                    className="text-sm sm:text-base font-bold text-black uppercase tracking-wider"
                     dangerouslySetInnerHTML={{ __html: description }}
                   />
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1.5">

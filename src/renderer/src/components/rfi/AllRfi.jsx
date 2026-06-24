@@ -417,7 +417,7 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
         <DataTable
           columns={columns}
           data={finalRfis}
-          detailComponent={({ row }) => <GetRFIByID id={row.id} onUpdate={onUpdate} />}
+          detailComponent={({ row, close }) => <GetRFIByID id={row.id} onClose={close} onUpdate={onUpdate} />}
         />
       )}
 

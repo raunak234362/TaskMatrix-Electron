@@ -1,23 +1,32 @@
 import React, { useEffect, useState } from "react";
 import Service from "../../api/Service";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, FileText } from "lucide-react";
 import DataTable from "../ui/table";
-import Button from "../fields/Button";
 import RenderFiles from "../common/RenderFiles";
 import RFIResponseModal from "./RFIResponseModal";
 import RFIResponseDetailsModal from "./RFIResponseDetailsModal";
 import { useSelector } from "react-redux";
 import EditRFI from "./EditRFI";
 
-const Info = ({ label, value }) => (
-  <div>
-    <h4 className="text-sm text-gray-700">{label}</h4>
-    <div className="text-gray-700 font-medium">{value}</div>
+const Info = ({ label, value, noBorder }) => (
+  <div className={`flex items-center pb-2 text-sm gap-2 ${noBorder ? "" : "border-b border-gray-200"}`}>
+    <span className="font-semibold text-black uppercase tracking-wider shrink-0">
+      {label}:
+    </span>
+    <span className="text-black font-normal uppercase text-left truncate flex-1" title={value}>
+      {value || "—"}
+    </span>
   </div>
 );
 
+const SectionTitle = ({ title }) => (
+  <div className="flex items-center gap-3 mb-4">
+    <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+    <h2 className="text-lg font-bold text-black tracking-wider uppercase">{title}</h2>
+  </div>
+);
 
-const GetRFIByID = ({ id, onUpdate }) => {
+const GetRFIByID = ({ id, onClose, onUpdate }) => {
   const [loading, setLoading] = useState(true);
   const [rfi, setRfi] = useState(null);
   const [error, setError] = useState(null);
@@ -25,7 +34,7 @@ const GetRFIByID = ({ id, onUpdate }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedResponse, setSelectedResponse] = useState(null);
   const users = useSelector((state) => state.userInfo?.staffData || []);
-  //
+
   const fetchRfi = async () => {
     try {
       setLoading(true);
@@ -38,28 +47,38 @@ const GetRFIByID = ({ id, onUpdate }) => {
     }
   };
 
-  console.log(rfi);
   useEffect(() => {
     if (id) fetchRfi();
   }, [id]);
-  console.log(id);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8 text-gray-700">
-        <Loader2 className="w-5 h-5 animate-spin mr-2" />
-        Loading RFI details...
+      <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="bg-white rounded-none p-8 flex items-center justify-center border border-gray-200 shadow-2xl">
+          <Loader2 className="w-5 h-5 animate-spin mr-2 text-black" />
+          <span className="text-sm font-bold uppercase tracking-wider text-black">Loading RFI details...</span>
+        </div>
       </div>
     );
   }
+
   if (error || !rfi) {
     return (
-      <div className="flex items-center justify-center py-8 text-red-600">
-        <AlertCircle className="w-5 h-5 mr-2" />
-        {error || "RFI not found"}
+      <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="bg-white rounded-none p-8 flex items-center justify-center border border-red-200 shadow-2xl text-red-600">
+          <AlertCircle className="w-5 h-5 mr-2" />
+          <span className="text-sm font-bold uppercase tracking-wider">{error || "RFI not found"}</span>
+          <button
+            onClick={onClose}
+            className="ml-4 px-4 py-1 bg-red-50 text-red-700 border border-red-200 rounded-none text-xs font-bold uppercase tracking-wider"
+          >
+            Close
+          </button>
+        </div>
       </div>
     );
   }
+
   const userRole = sessionStorage.getItem("userRole")?.toUpperCase();
   const currentUserId = sessionStorage.getItem("userId");
   const isAssist = rfi?.project?.assists?.some(assist => 
@@ -75,17 +94,17 @@ const GetRFIByID = ({ id, onUpdate }) => {
         const user = row.original.user;
         if (user) {
           return (
-            <span className="font-medium text-sm">
+            <span className="font-semibold text-sm text-black">
               {`${user.firstName || ""} ${user.lastName || ""}`.trim()}
             </span>
           );
         }
 
         if (row.original.userRole === "CLIENT" || row.original.userRole === "CLIENT_ADMIN") {
-          return <span className="font-medium text-sm">WBT Team</span>;
+          return <span className="font-semibold text-sm text-black">WBT Team</span>;
         }
 
-        return <span className="font-medium text-sm">Client</span>;
+        return <span className="font-semibold text-sm text-black">Client</span>;
       },
     },
     {
@@ -96,7 +115,7 @@ const GetRFIByID = ({ id, onUpdate }) => {
         const plainText = htmlContent.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ");
 
         return (
-          <p className="truncate max-w-[180px]" title={plainText}>
+          <p className="truncate max-w-[180px] text-black text-sm" title={plainText}>
             {plainText}
           </p>
         );
@@ -106,8 +125,8 @@ const GetRFIByID = ({ id, onUpdate }) => {
       accessorKey: "createdAt",
       header: "Created",
       cell: ({ row }) => (
-        <span className="text-gray-700 text-sm">
-          {new Date(row.original.createdAt).toLocaleString()} IST
+        <span className="text-black text-sm">
+          {new Date(row.original.createdAt).toLocaleString()}
         </span>
       ),
     },
@@ -119,19 +138,19 @@ const GetRFIByID = ({ id, onUpdate }) => {
         const getStatusStyles = (s) => {
           switch (s?.toUpperCase()) {
             case "OPEN":
-              return "bg-blue-100 text-blue-700 border-blue-200";
+              return "bg-blue-50 text-blue-700 border-blue-200";
             case "PARTIAL":
-              return "bg-orange-100 text-orange-700 border-orange-200";
+              return "bg-amber-50 text-amber-700 border-amber-200";
             case "COMPLETE":
-              return "bg-green-100 text-green-700 border-green-200";
+              return "bg-green-50 text-green-700 border-green-200";
             default:
-              return "bg-gray-100 text-gray-700 border-gray-200";
+              return "bg-gray-50 text-gray-700 border-gray-200";
           }
         };
 
         return (
           <span
-            className={`px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${getStatusStyles(status)}`}
+            className={`px-2 py-0.5 rounded-none text-[10px] font-bold border uppercase tracking-wider ${getStatusStyles(status)}`}
           >
             {status}
           </span>
@@ -142,148 +161,190 @@ const GetRFIByID = ({ id, onUpdate }) => {
 
   return (
     <>
-      <div className="p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* LEFT Details */}
-          <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-5">
-            {/* Header */}
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl  text-black font-semibold">
-                {rfi.subject}
-              </h1>
-              <div className="flex gap-5">
-                {(userRole !== "STAFF" || isAssist) && (
-                  <Button
-                    onClick={() => setShowEditModal(true)}
-                    className="bg-white text-black border border-gray-300 hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-all duration-200 flex items-center gap-2"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pencil"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
-                    Edit RFI
-                  </Button>
-                )}
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${rfi.isAproovedByAdmin
-                    ? "bg-[#6bbd45]/15 text-black"
-                    : "bg-[#6bbd45]/15 text-black"
-                    }`}
+      <div className="fixed inset-0 z-[110] flex items-center justify-center p-1 md:p-2 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="bg-white rounded-none shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[98%] flex flex-col h-full max-h-[98vh]">
+          {/* Header */}
+          <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+              <h1 className="text-xl font-bold text-black uppercase tracking-wider">RFI Details</h1>
+            </div>
+            <div className="flex items-center gap-3">
+              {(userRole !== "STAFF" || isAssist) && (
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
                 >
-                  {rfi.isAproovedByAdmin ? "Approved" : "Pending"}
-                </span>
-              </div>
-            </div>
-
-            {/* Basic Info */}
-            <Info label="Project" value={rfi.project?.name || "—"} />
-            <Info label="Fabricator" value={rfi?.fabricator?.fabName || "—"} />
-            <Info
-              label="Recipients"
-              value={
-                rfi.multipleRecipients?.length > 0
-                  ? rfi.multipleRecipients
-                    .map((r) => `${r.firstName} ${r.lastName}`)
-                    .join(", ")
-                  : "—"
-              }
-            />
-            <Info
-              label="Created At"
-              value={new Date(rfi?.date).toLocaleString()}
-            />
-
-            {/* Description */}
-            <div>
-              <h4 className="font-semibold text-gray-700 mb-1">Description</h4>
-              <div
-                className="text-gray-700 bg-white p-3 rounded-lg border prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{
-                  __html: rfi.description || "No description provided",
-                }}
-              />
-            </div>
-
-            {/* Files */}
-            <RenderFiles
-              files={rfi.files}
-              table="rFI"
-              parentId={rfi.id}
-            />
-          </div>
-
-          {/* RIGHT */}
-          <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
-            {/* Header + Add Response Button */}
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-[#6bbd45]">Responses</h2>
-
-              {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole?.includes("MANAGER") || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole === "DEPUTY_MANAGER" || isAssist) && (
-                <div className="flex gap-2">
-
-                  <Button
-                    onClick={() => setShowModal(true)}
-                    className="bg-[#6bbd45]/10 text-black border border-[#6bbd45] hover:bg-[#6bbd45]/20 shadow-sm transition-all duration-200"
-                  >
-                    + Add Response
-                  </Button>
-                </div>
+                  Edit RFI
+                </button>
               )}
+              <button
+                onClick={onClose}
+                className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+              >
+                Close
+              </button>
             </div>
+          </header>
 
-            {/* Table */}
-            {rfi.rfiresponse?.length > 0 ? (
-              <DataTable
-                columns={responseColumns}
-                data={rfi.rfiresponse}
+          {/* Modal Body */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/50">
+            <div className="grid grid-cols-1 gap-6">
+              {/* Card 1: Details, Description & Attachments */}
+              <div className="bg-zinc-50 p-6 rounded-none border border-gray-200 space-y-6">
+                <div className="space-y-4">
+                  <h1 className="text-xl font-bold text-black uppercase tracking-tight">
+                    {rfi.subject || "No Subject"}
+                  </h1>
 
-                onRowClick={(row) => setSelectedResponse(row)}
-              />
-            ) : (
-              <p className="text-gray-700 italic">No responses yet.</p>
-            )}
-          </div>
+                  {/* 2-Column Info Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 pt-2">
+                    <Info label="Project" value={rfi.project?.name || "—"} />
 
-          {/* Response Modal */}
-          {showModal && (
-            <RFIResponseModal
-              rfiId={id}
-              onClose={() => setShowModal(false)}
-              onSuccess={() => {
-                fetchRfi();
-                onUpdate?.();
-              }}
-            />
-          )}
+                    <div className="flex items-center pb-2 border-b border-gray-200 text-sm gap-2">
+                      <span className="font-semibold text-black uppercase tracking-wider shrink-0">
+                        Status:
+                      </span>
+                      {(() => {
+                        const status = rfi.isAproovedByAdmin ? "APPROVED" : "PENDING";
+                        const statusStyles = rfi.isAproovedByAdmin
+                          ? "bg-green-50 text-green-700 border-green-200"
+                          : "bg-yellow-50 text-yellow-700 border-yellow-200";
+                        return (
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-xs font-bold uppercase tracking-tight border ${statusStyles}`}>
+                            {status}
+                          </span>
+                        );
+                      })()}
+                    </div>
 
-          {/* Edit RFI Modal */}
-          {showEditModal && (
-            <div className="fixed inset-0 z-1000 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-              <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden w-full max-w-2xl max-h-[90vh] flex flex-col relative">
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-                  <EditRFI
-                    id={id}
-                    onSuccess={() => {
-                      setShowEditModal(false);
-                      fetchRfi();
-                      onUpdate?.();
+                    <Info label="Fabricator" value={rfi?.fabricator?.fabName || "—"} />
+
+                    <Info
+                      label="Created At"
+                      value={rfi?.date ? new Date(rfi.date).toLocaleString() : "—"}
+                      noBorder={true}
+                    />
+
+                    <Info
+                      label="Recipients"
+                      value={
+                        rfi.multipleRecipients?.length > 0
+                          ? rfi.multipleRecipients.map((r) => `${r.firstName} ${r.lastName}`).join(", ")
+                          : "—"
+                      }
+                      noBorder={true}
+                    />
+                  </div>
+                </div>
+
+                {/* Description Section */}
+                <div className="mt-6 pt-6">
+                  <SectionTitle title="Description" />
+                  <div
+                    className="text-sm text-black font-normal prose prose-sm max-w-none bg-white p-4 border border-gray-200 rounded-none"
+                    dangerouslySetInnerHTML={{
+                      __html: rfi.description || "No description provided",
                     }}
                   />
                 </div>
-              </div>
-            </div>
-          )}
 
-          {/* Details Modal */}
-          {selectedResponse && (
-            <RFIResponseDetailsModal
-              response={selectedResponse}
-              onClose={() => {
-                setSelectedResponse(null);
-                fetchRfi();
-                onUpdate?.();
-              }}
-            />
-          )}
+                {/* Attachments Section */}
+                {rfi.files?.length > 0 && (
+                  <div className="mt-6 pt-6">
+                    <SectionTitle title="Attachments" />
+                    <RenderFiles files={rfi.files} table="rFI" parentId={rfi.id} hideSectionTitle={true} />
+                  </div>
+                )}
+              </div>
+
+              {/* Card 2: Responses */}
+              <div className="bg-white p-6 rounded-none border border-gray-200 space-y-6">
+                <div className="flex justify-between items-center pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+                    <h2 className="text-lg font-bold text-black tracking-wider uppercase">Responses</h2>
+                  </div>
+                  {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole?.includes("MANAGER") || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole === "DEPUTY_MANAGER" || isAssist) && (
+                    <button
+                      className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+                      onClick={() => setShowModal(true)}
+                    >
+                      + Add Response
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex-1">
+                  {rfi.rfiresponse?.length > 0 ? (
+                    <DataTable
+                      columns={responseColumns}
+                      data={rfi.rfiresponse}
+                      onRowClick={(row) => setSelectedResponse(row)}
+                    />
+                  ) : (
+                    <div className="text-center py-8 border border-dashed border-gray-300 rounded-none bg-white flex flex-col items-center justify-center">
+                      <FileText className="w-10 h-10 text-gray-300 mb-2" />
+                      <p className="text-sm font-semibold text-black uppercase tracking-wider">No responses yet.</p>
+                      {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole?.includes("MANAGER") || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole === "DEPUTY_MANAGER" || isAssist) && (
+                        <button
+                          onClick={() => setShowModal(true)}
+                          className="mt-3 px-4 py-1.5 bg-gray-100 text-black border border-gray-300 rounded-none hover:bg-gray-200 transition-all font-bold text-xs uppercase tracking-wider cursor-pointer"
+                        >
+                          Add Response Now
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Response Modal */}
+      {showModal && (
+        <RFIResponseModal
+          rfiId={id}
+          onClose={() => setShowModal(false)}
+          onSuccess={() => {
+            fetchRfi();
+            onUpdate?.();
+          }}
+        />
+      )}
+
+      {/* Edit RFI Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-none shadow-2xl border border-gray-200 overflow-hidden w-full max-w-2xl max-h-[90vh] flex flex-col relative">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+              <EditRFI
+                id={id}
+                onSuccess={() => {
+                  setShowEditModal(false);
+                  fetchRfi();
+                  onUpdate?.();
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Details Modal */}
+      {selectedResponse && (
+        <RFIResponseDetailsModal
+          response={selectedResponse}
+          onClose={() => {
+            setSelectedResponse(null);
+            fetchRfi();
+            onUpdate?.();
+          }}
+        />
+      )}
     </>
   );
 };

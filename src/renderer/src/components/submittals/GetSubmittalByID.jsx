@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Service from "../../api/Service";
-import { Loader2, AlertCircle, ChevronDown, ChevronUp, Clock, History, X } from "lucide-react";
+import { Loader2, AlertCircle, ChevronDown, ChevronUp, Clock, History, X, FileText } from "lucide-react";
 import Button from "../fields/Button";
 import DataTable from "../ui/table";
 import RenderFiles from "../common/RenderFiles";
@@ -10,10 +10,21 @@ import SubmittalResponseDetailsModal from "./SubmittalResponseDetailsModal";
 import UpdateSubmittalById from "./UpdateSubmittalById";
 import BfaManager from "./BfaManager";
 
-const Info = ({ label, value }) => (
-  <div className="mb-2">
-    <h4 className="text-sm text-gray-700">{label}</h4>
-    <div className="font-medium text-gray-700">{value}</div>
+const Info = ({ label, value, noBorder }) => (
+  <div className={`flex items-center pb-2 text-sm gap-2 ${noBorder ? "" : "border-b border-gray-200"}`}>
+    <span className="font-semibold text-black uppercase tracking-wider shrink-0">
+      {label}:
+    </span>
+    <span className="text-black font-normal uppercase text-left truncate flex-1" title={value}>
+      {value || "—"}
+    </span>
+  </div>
+);
+
+const SectionTitle = ({ title }) => (
+  <div className="flex items-center gap-3 mb-4">
+    <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+    <h2 className="text-lg font-bold text-black tracking-wider uppercase">{title}</h2>
   </div>
 );
 
@@ -240,135 +251,149 @@ const GetSubmittalByID = ({ id, onClose }) => {
   return (
     <>
       <div className="fixed inset-0 z-[110] flex items-center justify-center p-1 md:p-2 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[98%] flex flex-col h-full max-h-[98vh]">
+        <div className="bg-white rounded-none shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[98%] flex flex-col h-full max-h-[98vh]">
           {/* Header */}
           <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
-            <div>
-              <h2 className="text-xl font-black text-black tracking-tight uppercase">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+              <h2 className="text-xl font-bold text-black tracking-tight uppercase">
                 Submittal Details
               </h2>
             </div>
-            {onClose && (
-              <button
-                onClick={onClose}
-                className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
-              >
-                Close
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {(userRole !== "STAFF" || isAssist) && (
+                <button
+                  className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+                  onClick={() => setShowUpdateModal(true)}
+                >
+                  Update Submittal
+                </button>
+              )}
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+                >
+                  Close
+                </button>
+              )}
+            </div>
           </header>
 
           {/* Body */}
           <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6 bg-gray-50">
             <div className="grid grid-cols-1 gap-6">
               {/* LEFT PANEL */}
-              <div className="bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-5">
-                <div className="flex justify-between items-center">
-                  <h1 className="text-2xl text-black font-semibold">
+              <div className="bg-white p-6 rounded-none border border-gray-200 space-y-6">
+                <div className="space-y-4">
+                  <h1 className="text-xl font-bold text-black uppercase tracking-tight">
                     {submittal.subject}
                   </h1>
-                  {(userRole !== "STAFF" || isAssist) && (
-                    <Button
-                      className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
-                      onClick={() => setShowUpdateModal(true)}
-                    >
-                      Update Submittal
-                    </Button>
-                  )}
-                </div>
 
-                <Info label="Project" value={submittal.project?.name || "—"} />
-                {submittal.mileStones && submittal.mileStones.length > 0 ? (
-                  <div className="mb-2">
-                    <h4 className="text-sm text-gray-700">Milestones</h4>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {submittal.mileStones.map((m) => (
-                        <span
-                          key={m.id || m._id}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#6bbd45]/15 text-[#48b614] border border-[#6bbd45]/30"
-                        >
-                          {getMilestoneLabel(m)}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : submittal.mileStoneBelongsTo ? (
-                  <div className="mb-2">
-                    <h4 className="text-sm text-gray-700">Milestone</h4>
-                    <div className="mt-1">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#6bbd45]/15 text-[#48b614] border border-[#6bbd45]/30">
-                        {getMilestoneLabel(submittal.mileStoneBelongsTo)}
+                  {/* 2-Column Info Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 pt-2">
+                    <Info label="Project" value={submittal.project?.name || "—"} />
+
+                    <div className="flex items-center pb-2 border-b border-gray-200 text-sm gap-2">
+                      <span className="font-semibold text-black uppercase tracking-wider shrink-0">
+                        Milestones:
                       </span>
+                      <div className="flex flex-wrap gap-1.5 flex-1 justify-start">
+                        {submittal.mileStones && submittal.mileStones.length > 0 ? (
+                          submittal.mileStones.map((m) => (
+                            <span
+                              key={m.id || m._id}
+                              className="inline-flex items-center px-2 py-0.5 rounded-none text-xs font-bold uppercase bg-green-50 text-green-700 border border-green-200"
+                            >
+                              {getMilestoneLabel(m)}
+                            </span>
+                          ))
+                        ) : submittal.mileStoneBelongsTo ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-none text-xs font-bold uppercase bg-green-50 text-green-700 border border-green-200">
+                            {getMilestoneLabel(submittal.mileStoneBelongsTo)}
+                          </span>
+                        ) : (
+                          <span className="text-black font-normal uppercase">—</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <Info label="Milestone" value="—" />
-                )}
-                <Info
-                  label="Submitted By"
-                  value={submittal.sender?.firstName || "—"}
-                />
-                <Info
-                  label="Status"
-                  value={(() => {
-                    const status = submittal.wbtStatus || submittal.status || "PENDING";
-                    const STATUS_LABELS = {
-                      WAITING_FOR_BFA: "Waiting for BFA",
-                      BFA_RECEIVED: "BFA RECEIVED",
-                      BFA_SENT: "BFA SENT",
-                      SUBMITTED_TO_EOR: "Submitted to EOR",
-                      RELEASE_FOR_FABRICATION: "Release for Fabrication",
-                      NOT_APPROVED: "Not Approved",
-                      REVISED_RESUBMITTAL: "Revised & Resubmitted",
-                      REVISED_RESUBMIT_FOR_FABRICATION: "Revised & Resubmit for Fabrication",
-                      PENDING: "Pending",
-                    };
-                    const key = String(status).replace(/\s+/g, "_").toUpperCase();
-                    const label = STATUS_LABELS[key] || String(status).replace(/_/g, " ");
-                    
-                    const getStatusStyles = (k) => {
-                      switch (k) {
-                        case "WAITING_FOR_BFA": return "bg-purple-100 text-purple-700 border-purple-200";
-                        case "BFA_RECEIVED": return "bg-emerald-100 text-emerald-700 border-emerald-200";
-                        case "BFA_SENT": return "bg-indigo-100 text-indigo-700 border-indigo-200";
-                        case "SUBMITTED_TO_EOR": return "bg-blue-100 text-blue-700 border-blue-200";
-                        case "RELEASE_FOR_FABRICATION": return "bg-green-100 text-green-700 border-green-200";
-                        case "NOT_APPROVED": return "bg-red-100 text-red-700 border-red-200";
-                        case "REVISED_RESUBMITTAL":
-                        case "REVISED_RESUBMIT_FOR_FABRICATION": return "bg-orange-100 text-orange-700 border-orange-200";
-                        case "PENDING": return "bg-yellow-100 text-yellow-700 border-yellow-200";
-                        default: return "bg-gray-100 text-gray-600 border-gray-200";
+
+                    <Info
+                      label="Submitted By"
+                      value={
+                        submittal.sender
+                          ? `${submittal.sender.firstName ?? ""} ${submittal.sender.lastName ?? ""}`.trim()
+                          : "—"
                       }
-                    };
+                    />
 
-                    return (
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-sm font-bold uppercase tracking-tight border ${getStatusStyles(key)}`}>
-                        {label}
+                    <div className="flex items-center pb-2 border-b border-gray-200 text-sm gap-2">
+                      <span className="font-semibold text-black uppercase tracking-wider shrink-0">
+                        Status:
                       </span>
-                    );
-                  })()}
-                />
-                <Info
-                  label="Recipients"
-                  value={
-                    submittal.multipleRecipients?.length > 0
-                      ? submittal.multipleRecipients
-                          .map((r) => `${r.firstName} ${r.lastName}`)
-                          .join(", ")
-                      : "—"
-                  }
-                />
-                <Info
-                  label="Created At"
-                  value={new Date(submittal.date).toLocaleString()}
-                />
+                      {(() => {
+                        const status = submittal.wbtStatus || submittal.status || "PENDING";
+                        const STATUS_LABELS = {
+                          WAITING_FOR_BFA: "Waiting for BFA",
+                          BFA_RECEIVED: "BFA RECEIVED",
+                          BFA_SENT: "BFA SENT",
+                          SUBMITTED_TO_EOR: "Submitted to EOR",
+                          RELEASE_FOR_FABRICATION: "Release for Fabrication",
+                          NOT_APPROVED: "Not Approved",
+                          REVISED_RESUBMITTAL: "Revised & Resubmitted",
+                          REVISED_RESUBMIT_FOR_FABRICATION: "Revised & Resubmit for Fabrication",
+                          PENDING: "Pending",
+                        };
+                        const key = String(status).replace(/\s+/g, "_").toUpperCase();
+                        const label = STATUS_LABELS[key] || String(status).replace(/_/g, " ");
+                        
+                        const getStatusStyles = (k) => {
+                          switch (k) {
+                            case "WAITING_FOR_BFA": return "bg-green-100 text-green-700 border-green-200";
+                            case "BFA_RECEIVED": return "bg-emerald-100 text-emerald-700 border-emerald-200";
+                            case "BFA_SENT": return "bg-indigo-100 text-indigo-700 border-indigo-200";
+                            case "SUBMITTED_TO_EOR": return "bg-blue-100 text-blue-700 border-blue-200";
+                            case "RELEASE_FOR_FABRICATION": return "bg-green-100 text-green-700 border-green-200";
+                            case "NOT_APPROVED": return "bg-red-100 text-red-700 border-red-200";
+                            case "REVISED_RESUBMITTAL":
+                            case "REVISED_RESUBMIT_FOR_FABRICATION": return "bg-orange-100 text-orange-700 border-orange-200";
+                            case "PENDING": return "bg-yellow-100 text-yellow-700 border-yellow-200";
+                            default: return "bg-gray-100 text-gray-600 border-gray-200";
+                          }
+                        };
+
+                        return (
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-xs font-bold uppercase tracking-tight border ${getStatusStyles(key)}`}>
+                            {label}
+                          </span>
+                        );
+                      })()}
+                    </div>
+
+                    <Info
+                      label="Recipients"
+                      value={
+                        submittal.multipleRecipients?.length > 0
+                          ? submittal.multipleRecipients
+                              .map((r) => `${r.firstName} ${r.lastName}`)
+                              .join(", ")
+                          : "—"
+                      }
+                      noBorder
+                    />
+
+                    <Info
+                      label="Created At"
+                      value={new Date(submittal.date).toLocaleString()}
+                      noBorder
+                    />
+                  </div>
+                </div>
 
                 {/* Single Version File Display */}
                 {!hasMultipleVersions && sortedVersions.length === 1 && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
-                      Attachments
-                    </h4>
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <SectionTitle title="Attachments" />
                     <RenderFiles
                       files={sortedVersions}
                       table="submittals"
@@ -381,16 +406,19 @@ const GetSubmittalByID = ({ id, onClose }) => {
               </div>
 
               {/* RESPONSES PANEL */}
-              <div className="lg:col-span-2 bg-gray-100 p-6 rounded-xl shadow-none border border-gray-100 space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-semibold text-black">Responses</h2>
+              <div className="lg:col-span-2 bg-white p-6 rounded-none border border-gray-200 space-y-6">
+                <div className="flex justify-between items-center border-b border-gray-200 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+                    <h2 className="text-lg font-bold text-black tracking-wider uppercase">Responses</h2>
+                  </div>
                   {(userRole === "CLIENT_ADMIN" || userRole === "CLIENT" || userRole === "ADMIN" || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole== "DEPUTY_MANAGER" || isAssist) && (
-                    <Button
-                      className="bg-[#6bbd45]/20 text-black border border-black hover:bg-[#6bbd45]/30"
+                    <button
+                      className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
                       onClick={() => setShowResponseModal(true)}
                     >
                       + Add Response
-                    </Button>
+                    </button>
                   )}
                 </div>
 
@@ -401,24 +429,37 @@ const GetSubmittalByID = ({ id, onClose }) => {
                     onRowClick={(row) => setSelectedResponse(row)}
                   />
                 ) : (
-                  <p className="text-gray-700 italic">No responses yet.</p>
+                  <div className="text-center py-8 border border-dashed border-gray-300 rounded-none bg-white flex flex-col items-center justify-center">
+                    <FileText className="w-10 h-10 text-gray-300 mb-2" />
+                    <p className="text-sm font-semibold text-black uppercase tracking-wider">No responses yet.</p>
+                    {(userRole === "CLIENT_ADMIN" || userRole === "CLIENT" || userRole === "ADMIN" || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole== "DEPUTY_MANAGER" || isAssist) && (
+                      <button
+                        onClick={() => setShowResponseModal(true)}
+                        className="mt-3 px-4 py-1.5 bg-gray-100 text-black border border-gray-300 rounded-none hover:bg-gray-200 transition-all font-bold text-xs uppercase tracking-wider cursor-pointer"
+                      >
+                        Add Response Now
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
 
               {/* RIGHT PANEL - BFA Manager */}
               <BfaManager submittalId={submittal.id} isAssist={isAssist} />
-             
+
             </div>
 
             {/* ── VERSION HISTORY (only when > 1 versions) ── */}
             {hasMultipleVersions && (
-              <div className="lg:col-span-2 bg-gray-100 border border-gray-100 rounded-xl p-6 space-y-4">
-                <div className="flex items-center gap-2">
-                  <History className="w-5 h-5 text-black" />
-                  <h2 className="text-lg font-black text-black uppercase tracking-tight">
-                    Version History
-                  </h2>
-                  <span className="ml-auto text-[10px] font-black text-gray-400 uppercase tracking-widest bg-white border border-gray-200 px-2 py-1 rounded-md">
+              <div className="lg:col-span-2 bg-white border border-gray-200 rounded-none p-6 space-y-4">
+                <div className="flex items-center gap-3 border-b border-gray-200 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+                    <h2 className="text-lg font-bold text-black tracking-wider uppercase">
+                      Version History
+                    </h2>
+                  </div>
+                  <span className="ml-auto text-[10px] font-black text-gray-400 uppercase tracking-widest bg-white border border-gray-200 px-2 py-1 rounded-none">
                     {sortedVersions.length} versions
                   </span>
                 </div>

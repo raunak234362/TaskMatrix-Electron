@@ -22,7 +22,7 @@ const getFileIcon = (filename) => {
     }
 };
 
-const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, versionId, hideHeader = false }) => {
+const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, versionId, hideHeader = false, hideSectionTitle = false }) => {
     // Step 1: Normalize and flatten files
     const projectFiles = Array.isArray(files)
         ? files.map((doc) => {
@@ -84,7 +84,7 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, vers
             {/* Header */}
             {!hideHeader && (
                 <div className="flex justify-between items-center mb-2">
-                    <h4 className="text-sm font-bold text-black uppercase tracking-widest">Project Files</h4>
+                   
                     {onAddFilesClick && (
                         <button
                             onClick={onAddFilesClick}
@@ -108,37 +108,43 @@ const RenderFiles = ({ files, onAddFilesClick, formatDate, table, parentId, vers
                     return (
                         <div
                             key={description}
-                            className="border border-black bg-white rounded-none p-4 space-y-3 shadow-none"
+                            className="border border-[#6bbd45]/40 bg-white rounded-none p-4 space-y-3 shadow-none"
                         >
                             {/* Description + Stage */}
-                            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                                <div>
-                                    <h5
-                                        className="text-sm border-l-4 border-black pl-2 sm:text-base font-bold text-black uppercase tracking-wider"
-                                        dangerouslySetInnerHTML={{ __html: description }}
-                                    />
-                                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1.5 ml-4">
-                                        {firstFile?.stage && (
-                                            <p className="text-xs text-blue-800 bg-blue-50 px-2 py-0.5 rounded-none border border-blue-200 font-semibold uppercase tracking-wider">
-                                                {firstFile.stage}
-                                            </p>
+                            {(!hideSectionTitle || firstFile?.stage || firstFile?.uploadedAt || uploaderName !== 'Unknown User') && (
+                                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                                    <div>
+                                        {!hideSectionTitle && (
+                                            <h5
+                                                className="text-sm sm:text-base font-bold text-black uppercase tracking-wider"
+                                                dangerouslySetInnerHTML={{ __html: description }}
+                                            />
                                         )}
-                                        {firstFile?.uploadedAt && (
-                                            <p className="text-xs text-black/60 font-medium">
-                                                {formatDate ? formatDate(firstFile.uploadedAt) : new Date(firstFile.uploadedAt).toLocaleString()}
-                                            </p>
-                                        )}
-                                        {uploaderName !== 'Unknown User' && (
-                                            <p className="text-xs text-black/60 font-medium">
-                                                by <span className="font-bold text-black">{uploaderName}</span>
-                                            </p>
+                                        {(firstFile?.stage || firstFile?.uploadedAt || uploaderName !== 'Unknown User') && (
+                                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1.5">
+                                                {firstFile?.stage && (
+                                                    <p className="text-xs text-blue-800 bg-blue-50 px-2 py-0.5 rounded-none border border-blue-200 font-semibold uppercase tracking-wider">
+                                                        {firstFile.stage}
+                                                    </p>
+                                                )}
+                                                {firstFile?.uploadedAt && (
+                                                    <p className="text-xs text-black/60 font-medium">
+                                                        {formatDate ? formatDate(firstFile.uploadedAt) : new Date(firstFile.uploadedAt).toLocaleString()}
+                                                    </p>
+                                                )}
+                                                {uploaderName !== 'Unknown User' && (
+                                                    <p className="text-xs text-black/60 font-medium">
+                                                        by <span className="font-bold text-black">{uploaderName}</span>
+                                                    </p>
+                                                )}
+                                            </div>
                                         )}
                                     </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* File List */}
-                            <div className="divide-y divide-black/5 border-t border-black/10 mt-3 bg-white">
+                            <div className={`divide-y divide-black/5 bg-white ${(!hideSectionTitle || firstFile?.stage || firstFile?.uploadedAt || uploaderName !== 'Unknown User') ? "border-t border-black/10 mt-3" : ""}`}>
                                 {files.map((file, index) => {
                                     const { icon: Icon, color, bgColor, text, textColor } = getFileIcon(file.originalName);
                                     return (
