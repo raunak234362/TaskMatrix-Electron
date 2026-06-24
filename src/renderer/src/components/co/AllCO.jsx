@@ -70,6 +70,20 @@ const AllCO = ({ changeOrderData = [] }) => {
       },
     },
     {
+      accessorKey: "Recipients",
+      header: "sent to",
+      cell: ({ row }) => {
+        const r = [row.original.Recipients, row.original.recipients, row.original.Recipient, row.original.recipient].find(
+          (x) => x && typeof x === "object"
+        );
+        return r
+          ? `${r.firstName ?? ""} ${r.middleName ?? ""} ${r.lastName ?? ""}`.trim() ||
+          r.username ||
+          "—"
+          : "—";
+      },
+    },
+    {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
@@ -162,8 +176,8 @@ const AllCO = ({ changeOrderData = [] }) => {
       <DataTable
         columns={columns}
         data={changeOrders}
-        detailComponent={({ row }) => (
-          <GetCOByID id={row.id} projectId={row.project} />
+        detailComponent={({ row, close }) => (
+          <GetCOByID id={row.id} projectId={row.project || row.Project} onClose={close} />
         )}
       />
 

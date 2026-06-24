@@ -405,9 +405,44 @@ const GetSubmittalByID = ({ id, onClose }) => {
                 )}
               </div>
 
+              {/* RIGHT PANEL - BFA Manager */}
+              <BfaManager submittalId={submittal.id} isAssist={isAssist} />
+
+              {/* ── VERSION HISTORY (only when > 1 versions) ── */}
+              {hasMultipleVersions && (
+                <div className="lg:col-span-2 bg-white border border-gray-200 rounded-none p-6 space-y-4">
+                  <div className="flex items-center gap-3 pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+                      <h2 className="text-lg font-bold text-black tracking-wider uppercase">
+                        Version History
+                      </h2>
+                    </div>
+                    <span className="ml-auto text-[10px] font-black text-gray-400 uppercase tracking-widest bg-white border border-gray-200 px-2 py-1 rounded-none">
+                      {sortedVersions.length} versions
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {sortedVersions.map((version, index) => (
+                      <VersionRow
+                        key={version.id || index}
+                        version={version}
+                        index={index}
+                        total={sortedVersions.length}
+                        isCurrent={
+                          version.id === submittal.currentVersionId ||
+                          index === 0
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* RESPONSES PANEL */}
               <div className="lg:col-span-2 bg-white p-6 rounded-none border border-gray-200 space-y-6">
-                <div className="flex justify-between items-center border-b border-gray-200 pb-4">
+                <div className="flex justify-between items-center pb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
                     <h2 className="text-lg font-bold text-black tracking-wider uppercase">Responses</h2>
@@ -444,42 +479,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
                 )}
               </div>
 
-              {/* RIGHT PANEL - BFA Manager */}
-              <BfaManager submittalId={submittal.id} isAssist={isAssist} />
-
             </div>
-
-            {/* ── VERSION HISTORY (only when > 1 versions) ── */}
-            {hasMultipleVersions && (
-              <div className="lg:col-span-2 bg-white border border-gray-200 rounded-none p-6 space-y-4">
-                <div className="flex items-center gap-3 border-b border-gray-200 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
-                    <h2 className="text-lg font-bold text-black tracking-wider uppercase">
-                      Version History
-                    </h2>
-                  </div>
-                  <span className="ml-auto text-[10px] font-black text-gray-400 uppercase tracking-widest bg-white border border-gray-200 px-2 py-1 rounded-none">
-                    {sortedVersions.length} versions
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  {sortedVersions.map((version, index) => (
-                    <VersionRow
-                      key={version.id || index}
-                      version={version}
-                      index={index}
-                      total={sortedVersions.length}
-                      isCurrent={
-                        version.id === submittal.currentVersionId ||
-                        index === 0
-                      }
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
