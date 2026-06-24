@@ -202,37 +202,41 @@ const AllRFQ = ({ rfq }) => {
   );
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedType, setSelectedType] = useState("ALL");
-  const [activeTab, setActiveTab] = useState("all");
+  const [mtoFilter, setMtoFilter] = useState("ALL");
+  const [showAwarded, setShowAwarded] = useState(false);
+
+  const MTO_TYPE_OPTIONS = [
+    { label: "All", value: "ALL" },
+    { label: "MTO", value: "MTO" },
+    { label: "Detailing", value: "DETAILING" },
+    { label: "Both", value: "BOTH" },
+  ];
 
   const filteredRfq = useMemo(() => {
     return (rfq || []).filter(item => {
       // 1. Search Filter
       const matchesSearch = item.projectName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.projectNumber?.toLowerCase().includes(searchQuery.toLowerCase());
-
       if (!matchesSearch) return false;
 
-      // 2. Tab Filter (Awarded vs All)
-      if (activeTab === "awarded") {
+      // 2. Awarded Toggle
+      if (showAwarded) {
         const isAwarded = item.wbtStatus === "AWARDED" || item.status === "AWARDED";
         if (!isAwarded) return false;
       }
 
-      // 3. Type Filter
-      if (selectedType === "ALL") return true;
-
+      // 3. MTO / Type Filter
       const isTrue = (val) => val === true || val === "true";
-      const isMTO = isTrue(item.MTOManual) || item.MTOStickModel || item.MTOValue;
+      const isMTO = isTrue(item.MTOManual) || !!item.MTOStickModel || !!item.MTOValue;
       const isDetailing = isTrue(item.detailingMain) || isTrue(item.detailingMisc) || isTrue(item.miscDesign) || isTrue(item.customerDesign) || isTrue(item.connectionDesign);
 
-      if (selectedType === "MTO") return isMTO;
-      if (selectedType === "DETAILING") return isDetailing;
-      if (selectedType === "BOTH") return isMTO && isDetailing;
+      if (mtoFilter === "MTO" && !isMTO) return false;
+      if (mtoFilter === "DETAILING" && !isDetailing) return false;
+      if (mtoFilter === "BOTH" && !(isMTO && isDetailing)) return false;
 
       return true;
     });
-  }, [rfq, searchQuery, selectedType, activeTab]);
+  }, [rfq, searchQuery, showAwarded, mtoFilter]);
 
   return (
     <div className="bg-[#fcfdfc] min-h-[600px] animate-in fade-in duration-700">
@@ -263,46 +267,45 @@ const AllRFQ = ({ rfq }) => {
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
-            {/* RFQ Type Toggle */}
-            <div className="flex items-center bg-gray-50/50 p-1.5 rounded-xl border border-black/5 shadow-sm gap-2">
-              {['ALL', 'MTO', 'DETAILING', 'BOTH'].map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
-                  className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all duration-300 active:scale-95 ${
-                    selectedType === type
-                      ? 'bg-green-50 text-black border-green-700/80'
-                      : 'bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black'
-                  }`}
-                >
-                  {type}
-                </button>
-              ))}
+            {/* Type / MTO Dropdown */}
+            <div className="relative">
+              <select
+                value={mtoFilter}
+                onChange={(e) => setMtoFilter(e.target.value)}
+                className="appearance-none bg-white border-2 border-gray-200 rounded-lg px-4 py-2 pr-9 text-sm font-bold text-gray-700 uppercase tracking-tight shadow-sm hover:border-purple-400 focus:outline-none focus:border-purple-500 transition-all duration-200 cursor-pointer"
+                style={{ minWidth: 150 }}
+              >
+                {MTO_TYPE_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-purple-400">
+                <svg width="14" height="14" fill="none" viewBox="0 0 20 20"><path d="M5 7l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </span>
             </div>
 
-            {/* Status Tabs */}
-            <div className="flex items-center bg-gray-50/50 p-1.5 rounded-xl border border-black/5 shadow-sm gap-2">
-              <button
-                onClick={() => setActiveTab("all")}
-                className={`flex items-center gap-2 px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all duration-300 active:scale-95 ${
-                  activeTab === "all"
-                    ? 'bg-green-50 text-black border-green-700/80'
-                    : 'bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black'
-                }`}
-              >
-                All RFQs
-              </button>
-              <button
-                onClick={() => setActiveTab("awarded")}
-                className={`flex items-center gap-2 px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all duration-300 active:scale-95 ${
-                  activeTab === "awarded"
-                    ? 'bg-green-50 text-black border-green-700/80'
-                    : 'bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black'
-                }`}
-              >
+
+
+            {/* Awarded Toggle */}
+            <label className="flex items-center gap-3 cursor-pointer select-none group">
+              <span className={`text-sm font-bold uppercase tracking-tight transition-colors duration-200 ${showAwarded ? 'text-green-700' : 'text-gray-400'}`}>
                 Awarded
-              </button>
-            </div>
+              </span>
+              <div
+                onClick={() => setShowAwarded(v => !v)}
+                className={`relative inline-flex items-center w-12 h-6 rounded-full border-2 transition-all duration-300 ${
+                  showAwarded
+                    ? 'bg-green-500 border-green-600 shadow-md shadow-green-200'
+                    : 'bg-gray-200 border-gray-300'
+                }`}
+              >
+                <span
+                  className={`absolute left-0.5 w-4 h-4 rounded-full bg-white shadow transition-all duration-300 ${
+                    showAwarded ? 'translate-x-6' : 'translate-x-0'
+                  }`}
+                />
+              </div>
+            </label>
           </div>
         </div>
       </div>
