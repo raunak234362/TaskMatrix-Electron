@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import React, { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Loader2,
   Calendar,
@@ -16,240 +16,237 @@ import {
   Play,
   Square,
   ClipboardList,
-  Clock,
-} from "lucide-react";
-import Service from "../../api/Service";
-import { toast } from "react-toastify";
-import { Button } from "../ui/button";
-import EditTask from "./EditTask";
-import { Edit } from "lucide-react";
-import Comment from "./comments/Comment";
+  Clock
+} from 'lucide-react'
+import Service from '../../api/Service'
+import { toast } from 'react-toastify'
+import { Button } from '../ui/button'
+import EditTask from './EditTask'
+import { Edit } from 'lucide-react'
+import Comment from './comments/Comment'
 
-
-
-const FetchTaskByID = ({
-  id,
-  onClose,
-  refresh,
-}) => {
-  const [task, setTask] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState(false);
-  const [showWorkSummary, setShowWorkSummary] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [staffData, setStaffData] = useState([]);
-  const [isEndModalOpen, setIsEndModalOpen] = useState(false);
-  const [endComment, setEndComment] = useState("");
-  const [completionPercentage, setCompletionPercentage] = useState("");
-  const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+const FetchTaskByID = ({ id, onClose, refresh }) => {
+  const [task, setTask] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [processing, setProcessing] = useState(false)
+  const [showWorkSummary, setShowWorkSummary] = useState(true)
+  const [isEditing, setIsEditing] = useState(false)
+  const [staffData, setStaffData] = useState([])
+  const [isEndModalOpen, setIsEndModalOpen] = useState(false)
+  const [endComment, setEndComment] = useState('')
+  const [completionPercentage, setCompletionPercentage] = useState('')
+  const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
   const fetchTask = async () => {
-    if (!id) return;
+    if (!id) return
     try {
-      setLoading(true);
-      const response = await Service.GetTaskById(id.toString());
-      setTask(response?.data || null);
+      setLoading(true)
+      const response = await Service.GetTaskById(id.toString())
+      setTask(response?.data || null)
     } catch (error) {
-      console.error("Error fetching task:", error);
-      toast.error("Failed to load task details");
+      console.error('Error fetching task:', error)
+      toast.error('Failed to load task details')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  const commentsRef = React.useRef(null);
+  const commentsRef = React.useRef(null)
 
   useEffect(() => {
-    if (!task?.id) return;
+    if (!task?.id) return
     const observer = new IntersectionObserver(
       async (entries) => {
         if (entries[0].isIntersecting) {
           try {
-            const fetchUnread = ['admin', 'deputy_manager', 'dept_manager', 'project_manager'].includes(userRole)
+            const fetchUnread = [
+              'admin',
+              'deputy_manager',
+              'dept_manager',
+              'project_manager'
+            ].includes(userRole)
               ? Service.FetchUnreadCommentsMyTeam()
-              : Service.FetchUnreadCommentsMyTasks();
-            const unreadRes = await fetchUnread;
-            const unreads = unreadRes?.data || unreadRes || [];
-            const taskUnreads = unreads.filter(c => String(c.task_id) === String(id) || String(c.taskId) === String(id));
+              : Service.FetchUnreadCommentsMyTasks()
+            const unreadRes = await fetchUnread
+            const unreads = unreadRes?.data || unreadRes || []
+            const taskUnreads = unreads.filter(
+              (c) => String(c.task_id) === String(id) || String(c.taskId) === String(id)
+            )
             if (taskUnreads.length > 0) {
-              await Service.MarkCommentsAsRead({ commentIds: taskUnreads.map(c => c.id || c._id) });
-              if (refresh) refresh();
+              await Service.MarkCommentsAsRead({
+                commentIds: taskUnreads.map((c) => c.id || c._id)
+              })
+              if (refresh) refresh()
             }
           } catch (err) {
-            console.error("Failed to mark comments as read on scroll", err);
+            console.error('Failed to mark comments as read on scroll', err)
           }
-          observer.disconnect();
+          observer.disconnect()
         }
       },
       { threshold: 0.1 }
-    );
-    if (commentsRef.current) observer.observe(commentsRef.current);
-    return () => observer.disconnect();
-  }, [task?.id, id, refresh]);
+    )
+    if (commentsRef.current) observer.observe(commentsRef.current)
+    return () => observer.disconnect()
+  }, [task?.id, id, refresh])
 
   useEffect(() => {
-    fetchTask();
+    fetchTask()
     const fetchStaff = async () => {
       try {
-        const data = await Service.FetchAllEmployee();
-        setStaffData(data || []);
+        const data = await Service.FetchAllEmployee()
+        setStaffData(data || [])
       } catch (err) {
-        console.error("Failed to fetch staff", err);
+        console.error('Failed to fetch staff', err)
       }
-    };
-    fetchStaff();
+    }
+    fetchStaff()
 
     const handleTaskUpdated = () => {
       import('react-toastify').then(({ toast }) => {
-        toast.info("Auto-refreshing task details...", { autoClose: 3000 });
-      });
-      fetchTask();
-      if (refresh) refresh();
-    };
-    window.addEventListener('task-updated', handleTaskUpdated);
-    return () => window.removeEventListener('task-updated', handleTaskUpdated);
-  }, [id]);
+        toast.info('Auto-refreshing task details...', { autoClose: 3000 })
+      })
+      fetchTask()
+      if (refresh) refresh()
+    }
+    window.addEventListener('task-updated', handleTaskUpdated)
+    return () => window.removeEventListener('task-updated', handleTaskUpdated)
+  }, [id])
 
   const handleAddComment = async (data) => {
     try {
-      const user_id = sessionStorage.getItem("userId");
+      const user_id = sessionStorage.getItem('userId')
       const payload = {
         task_id: task.id,
         user_id: Number(user_id),
-        data: data.comment,
-      };
-      await Service.AddTaskComment(payload);
-      toast.success("Comment added successfully");
-      fetchTask();
+        data: data.comment
+      }
+      await Service.AddTaskComment(payload)
+      toast.success('Comment added successfully')
+      fetchTask()
     } catch (error) {
-      console.error(error);
-      toast.error("Failed to add comment");
+      console.error(error)
+      toast.error('Failed to add comment')
     }
-  };
+  }
 
   const handleAcknowledgeComment = async (commentId, data) => {
     try {
       const payload = {
-        ...data,
-      };
-      await Service.AddTaskCommentAcknowledged(commentId, payload);
-      toast.success("Comment acknowledged");
-      fetchTask();
+        ...data
+      }
+      await Service.AddTaskCommentAcknowledged(commentId, payload)
+      toast.success('Comment acknowledged')
+      fetchTask()
     } catch (error) {
-      console.error(error);
-      toast.error("Failed to acknowledge comment");
+      console.error(error)
+      toast.error('Failed to acknowledge comment')
     }
-  };
+  }
 
   const getActiveWorkID = () => {
-    return (
-      task?.workingHourTask?.find((wh) => wh.ended_at === null)?.id || null
-    );
-  };
+    return task?.workingHourTask?.find((wh) => wh.ended_at === null)?.id || null
+  }
 
-  const activeWorkID = getActiveWorkID();
+  const activeWorkID = getActiveWorkID()
 
   const formatSecondsToHHMM = (totalSeconds) => {
-    if (!totalSeconds || isNaN(totalSeconds)) return "00:00";
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-      2,
-      "0"
-    )}`;
-  };
+    if (!totalSeconds || isNaN(totalSeconds)) return '00:00'
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+  }
 
   const totalDurationSeconds =
-    task?.workingHourTask?.reduce(
-      (acc, wh) => acc + (Number(wh.duration_seconds) || 0),
-      0
-    ) || 0;
+    task?.workingHourTask?.reduce((acc, wh) => acc + (Number(wh.duration_seconds) || 0), 0) || 0
 
   const toIST = (dateString) => {
-    if (!dateString) return "—";
-    return new Intl.DateTimeFormat("en-IN", {
-      timeZone: "Asia/Kolkata",
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(dateString));
-  };
+    if (!dateString) return '—'
+    return new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(new Date(dateString))
+  }
 
   const formatDate = (dateString) => {
-    if (!dateString) return "—";
-    return new Intl.DateTimeFormat("en-IN", {
-      timeZone: "Asia/Kolkata",
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(new Date(dateString));
-  };
+    if (!dateString) return '—'
+    return new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }).format(new Date(dateString))
+  }
 
   const handleAction = async (action) => {
-    if (!task?.id) return;
+    if (!task?.id) return
     try {
-      setProcessing(true);
-      const taskId = task.id.toString();
+      setProcessing(true)
+      const taskId = task.id.toString()
       switch (action) {
-        case "start":
-          await Service.TaskStart(taskId);
-          toast.success("Task started");
-          break;
-        case "pause":
-          if (!activeWorkID) return toast.warning("No active session to pause");
-          await Service.TaskPause(taskId, { whId: activeWorkID });
-          toast.info("Task paused");
-          break;
-        case "resume":
-          await Service.TaskResume(taskId);
-          toast.success("Task resumed");
-          break;
-        case "end":
-          if (!activeWorkID) return toast.warning("No active session to end");
-          await Service.TaskEnd(taskId, { whId: activeWorkID });
-          toast.success("Task completed");
-          break;
+        case 'start':
+          await Service.TaskStart(taskId)
+          toast.success('Task started')
+          break
+        case 'pause':
+          if (!activeWorkID) return toast.warning('No active session to pause')
+          await Service.TaskPause(taskId, { whId: activeWorkID })
+          toast.info('Task paused')
+          break
+        case 'resume':
+          await Service.TaskResume(taskId)
+          toast.success('Task resumed')
+          break
+        case 'end':
+          if (!activeWorkID) return toast.warning('No active session to end')
+          await Service.TaskEnd(taskId, { whId: activeWorkID })
+          toast.success('Task completed')
+          break
       }
-      await fetchTask();
-      if (refresh) refresh();
+      await fetchTask()
+      if (refresh) refresh()
     } catch (error) {
-      toast.error("Action failed. Please try again.");
+      toast.error('Action failed. Please try again.')
     } finally {
-      setProcessing(false);
+      setProcessing(false)
     }
-  };
+  }
 
   const handleEndTask = async (e) => {
-    if (e) e.preventDefault();
-    
-    const cleanComment = endComment.replace(/[.,]/g, '').trim();
-    
+    if (e) e.preventDefault()
+
+    const cleanComment = endComment.replace(/[.,]/g, '').trim()
+
     if (cleanComment.length < 10) {
-      toast.warning("Please provide a meaningful summary of at least 10 characters before ending the task");
-      return;
+      toast.warning(
+        'Please provide a meaningful summary of at least 10 characters before ending the task'
+      )
+      return
     }
-    
+
     if (!completionPercentage) {
-      toast.warning("Please select the completion percentage");
-      return;
+      toast.warning('Please select the completion percentage')
+      return
     }
-    if (!task?.id || !activeWorkID) return;
+    if (!task?.id || !activeWorkID) return
 
     try {
-      setProcessing(true);
-      const taskId = task.id.toString();
+      setProcessing(true)
+      const taskId = task.id.toString()
 
       // Step 1: Update Task Completion Percentage
       await Service.UpdateTaskById(taskId, {
         lineItemCompletion: completionPercentage
-      });
+      })
 
       // Step 2: Format the completion range (e.g., 81-90%)
-      const formattedRange = completionPercentage.replace("RANGE_", "").replace(/_/g, "-") + "%";
+      const formattedRange = completionPercentage.replace('RANGE_', '').replace(/_/g, '-') + '%'
 
       // Step 3: Add the structured comment
-      const user_id = sessionStorage.getItem("userId");
+      const user_id = sessionStorage.getItem('userId')
       const commentPayload = {
         task_id: task.id,
         user_id: Number(user_id),
@@ -262,101 +259,95 @@ const FetchTaskByID = ({
               ${endComment.replace(/\n/g, '<br/>')}
             </div>
           </div>
-        `,
-      };
-      await Service.AddTaskComment(commentPayload);
+        `
+      }
+      await Service.AddTaskComment(commentPayload)
 
       // Step 3: End the task session
-      await Service.TaskEnd(taskId, { whId: activeWorkID });
+      await Service.TaskEnd(taskId, { whId: activeWorkID })
 
-      toast.success("Task completed successfully");
-      setIsEndModalOpen(false);
-      setEndComment("");
-      setCompletionPercentage("");
-      await fetchTask();
-      if (refresh) refresh();
+      toast.success('Task completed successfully')
+      setIsEndModalOpen(false)
+      setEndComment('')
+      setCompletionPercentage('')
+      await fetchTask()
+      if (refresh) refresh()
     } catch (error) {
-      console.error(error);
-      toast.error("Failed to end task. Please try again.");
+      console.error(error)
+      toast.error('Failed to end task. Please try again.')
     } finally {
-      setProcessing(false);
+      setProcessing(false)
     }
-  };
+  }
 
   const getStatusConfig = (status) => {
     const configs = {
       ASSIGNED: {
-        label: "Assigned",
-        bg: "bg-purple-100",
-        text: "text-purple-700",
-        border: "border-purple-300",
+        label: 'Assigned',
+        bg: 'bg-purple-100',
+        text: 'text-purple-700',
+        border: 'border-purple-300'
       },
       IN_PROGRESS: {
-        label: "In Progress",
-        bg: "bg-blue-100",
-        text: "text-blue-700",
-        border: "border-blue-300",
+        label: 'In Progress',
+        bg: 'bg-blue-100',
+        text: 'text-blue-700',
+        border: 'border-blue-300'
       },
       BREAK: {
-        label: "On Break",
-        bg: "bg-orange-100",
-        text: "text-orange-700",
-        border: "border-orange-300",
+        label: 'On Break',
+        bg: 'bg-orange-100',
+        text: 'text-orange-700',
+        border: 'border-orange-300'
       },
       COMPLETED: {
-        label: "Completed",
-        bg: "bg-green-100",
-        text: "text-green-700",
-        border: "border-green-300",
+        label: 'Completed',
+        bg: 'bg-green-100',
+        text: 'text-green-700',
+        border: 'border-green-300'
       },
       PENDING: {
-        label: "Pending",
-        bg: "bg-yellow-100",
-        text: "text-yellow-700",
-        border: "border-yellow-300",
-      },
-    };
-    return (
-      configs[status?.toUpperCase() || ""] || {
-        label: status || "Unknown",
-        bg: "bg-gray-100",
-        text: "text-gray-700",
-        border: "border-gray-300",
+        label: 'Pending',
+        bg: 'bg-yellow-100',
+        text: 'text-yellow-700',
+        border: 'border-yellow-300'
       }
-    );
-  };
+    }
+    return (
+      configs[status?.toUpperCase() || ''] || {
+        label: status || 'Unknown',
+        bg: 'bg-gray-100',
+        text: 'text-gray-700',
+        border: 'border-gray-300'
+      }
+    )
+  }
 
   const getPriorityLabel = (priority) => {
     switch (priority) {
       case 1:
-        return { label: "Low", color: "text-green-600", bg: "bg-green-50" };
+        return { label: 'Low', color: 'text-yellow-600', bg: 'bg-yellow-50' }
       case 2:
-        return {
-          label: "Medium",
-          color: "text-orange-500",
-          bg: "bg-orange-50",
-        };
+        return { label: 'Medium', color: 'text-blue-600', bg: 'bg-blue-50' }
       case 3:
-        return { label: "High", color: "text-red-500", bg: "bg-red-50" };
+        return { label: 'High', color: 'text-orange-600', bg: 'bg-orange-50' }
       case 4:
-        return { label: "Critical", color: "text-gray-700", bg: "bg-gray-50" };
+        return { label: 'Critical', color: 'text-red-600', bg: 'bg-red-50' }
       default:
-        return { label: "Normal", color: "text-gray-500", bg: "bg-gray-50" };
+        return { label: 'Normal', color: 'text-gray-500', bg: 'bg-gray-50' }
     }
-  };
+  }
 
   if (loading) {
     return createPortal(
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-100">
         <div className="bg-white rounded-2xl shadow-2xl p-10 flex flex-col items-center">
           <Loader2 className="w-12 h-12 animate-spin text-[#6bbd45]" />
-          <p className="mt-4 text-lg font-medium text-gray-700">
-            Loading task details...
-          </p>
+          <p className="mt-4 text-lg font-medium text-gray-700">Loading task details...</p>
         </div>
       </div>,
       document.body
-    );
+    )
   }
 
   if (!task) {
@@ -367,9 +358,7 @@ const FetchTaskByID = ({
             <FileText className="w-10 h-10 text-gray-400" />
           </div>
           <p className="text-xl font-semibold text-gray-700">Task Not Found</p>
-          <p className="text-gray-700 mt-2">
-            This task may have been deleted or is inaccessible.
-          </p>
+          <p className="text-gray-700 mt-2">This task may have been deleted or is inaccessible.</p>
           <Button
             onClick={onClose}
             className="mt-6 px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
@@ -379,11 +368,11 @@ const FetchTaskByID = ({
         </div>
       </div>,
       document.body
-    );
+    )
   }
 
-  const statusConfig = getStatusConfig(task.status);
-  const priority = getPriorityLabel(task.priority);
+  const statusConfig = getStatusConfig(task.status)
+  const priority = getPriorityLabel(task.priority)
 
   return createPortal(
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
@@ -410,218 +399,202 @@ const FetchTaskByID = ({
 
         {/* Action Bar */}
         <div className="px-6 py-3 border-b border-gray-100 flex flex-wrap gap-3 items-center justify-end bg-white">
-          {(userRole === "admin" ||
-            userRole === "operation_executive" ||
-            userRole === "project_manager" ||
-            userRole === "department_manager" ||
-            userRole === "deputy_manager") && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-[#6bbd45]/20 text-black border border-black rounded-lg text-xs font-bold uppercase hover:bg-[#6bbd45]/30 transition-colors"
-              >
-                <Edit className="w-4 h-4" /> Edit Task
-              </button>
-            )}
+          {(userRole === 'admin' ||
+            userRole === 'operation_executive' ||
+            userRole === 'project_manager' ||
+            userRole === 'department_manager' ||
+            userRole === 'deputy_manager') && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#6bbd45]/20 text-black border border-black rounded-lg text-xs font-bold uppercase hover:bg-[#6bbd45]/30 transition-colors"
+            >
+              <Edit className="w-4 h-4" /> Edit Task
+            </button>
+          )}
         </div>
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto px-8 py-8 space-y-8">
-            <>
-              {/* Task Info Card */}
-              <div className="bg-green-50 rounded-2xl p-8 border border-green-200">
-                <h3 className="text-2xl  text-green-900 mb-6 flex items-center gap-3">
-                  
-                  Task Information
-                </h3>
+          <>
+            {/* Task Info Card */}
+            <div className="bg-green-50 rounded-2xl p-8 border border-green-200">
+              <h3 className="text-2xl  text-green-900 mb-6 flex items-center gap-3">
+                Task Information
+              </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  <InfoItem
-                    icon={<Building2 />}
-                    label="Project"
-                    value={task.project?.name || "—"}
-                  />
-                  <InfoItem
-                    icon={<Building2 />}
-                    label="WBS Item"
-                    value={task.projectBundle?.bundleKey.replace(/_/g, ' ') || '—'}
-                  />
-                  <InfoItem
-                    icon={<Hash />}
-                    label="Stage"
-                    value={task.Stage || "—"}
-                  />
-                  <InfoItem
-                    icon={<User />}
-                    label="Assigned To"
-                    value={
-                      task.user
-                        ? `${task.user.firstName} ${task.user.lastName}`
-                        : "Unassigned"
-                    }
-                  />
-                  <InfoItem
-                    icon={<Calendar />}
-                    label="Due Date"
-                    value={formatDate(task.due_date)}
-                  />
-                  <InfoItem
-                    icon={<Clock />}
-                    label="Assigned Hrs"
-                    value={task.allocationLog?.allocatedHours}
-                  />
-                  <InfoItem
-                    icon={<Clock />}
-                    label="Assigned WBS Item Completion %"
-                    value={task.LineItemCompletion ? task.LineItemCompletion.replace("RANGE_", "").replace(/_/g, "-") + "%" : "—"}
-                  />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <InfoItem icon={<Building2 />} label="Project" value={task.project?.name || '—'} />
+                <InfoItem
+                  icon={<Building2 />}
+                  label="WBS Item"
+                  value={task.projectBundle?.bundleKey.replace(/_/g, ' ') || '—'}
+                />
+                <InfoItem icon={<Hash />} label="Stage" value={task.Stage || '—'} />
+                <InfoItem
+                  icon={<User />}
+                  label="Assigned To"
+                  value={task.user ? `${task.user.firstName} ${task.user.lastName}` : 'Unassigned'}
+                />
+                <InfoItem icon={<Calendar />} label="Due Date" value={formatDate(task.due_date)} />
+                <InfoItem
+                  icon={<Clock />}
+                  label="Assigned Hrs"
+                  value={task.allocationLog?.allocatedHours}
+                />
+                <InfoItem
+                  icon={<Clock />}
+                  label="Assigned WBS Item Completion %"
+                  value={
+                    task.LineItemCompletion
+                      ? task.LineItemCompletion.replace('RANGE_', '').replace(/_/g, '-') + '%'
+                      : '—'
+                  }
+                />
 
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
-                      <div
-                        className={`w-6 h-6 rounded-full ${priority.color.replace(
-                          "text",
-                          "bg"
-                        )}`}
-                      ></div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">
-                        Priority
-                      </p>
-                      <p className={` mt-1 ${priority.color}`}>
-                        {priority.label}
-                      </p>
-                    </div>
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
+                    <div
+                      className={`w-6 h-6 rounded-full ${priority.color.replace('text', 'bg')}`}
+                    ></div>
                   </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">
-                        Status
-                      </p>
-                      <span
-                        className={`inline-block mt-1 px-4 py-2 rounded-full font-semibold text-sm border-2 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
-                      >
-                        {statusConfig.label.replace(/_/g, ' ') || '—'}
-                      </span>
-                    </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Priority</p>
+                    <p className={` mt-1 ${priority.color}`}>{priority.label}</p>
                   </div>
                 </div>
 
-                {/* Description */}
-                {task.description && (
-                  <div className="mt-8 p-6 bg-white/70 backdrop-blur rounded-xl border border-green-100">
-                    <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-green-600" />
-                      Description
-                    </h4>
-                    <div
-                      className="text-gray-700 leading-relaxed prose prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{ __html: task.description }}
-                    />
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
+                    <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
                   </div>
-                )}
-
-                {/* Actions */}
-                <div className="mt-8 pt-6 border-t border-green-200">
-                  <div className="flex flex-wrap items-center gap-4">
-                    {(task.status === "ASSIGNED" || task.status === "REWORK") && (
-                      <ActionButton
-                        icon={<Play />}
-                        color="emerald"
-                        onClick={() => handleAction("start")}
-                        disabled={processing}
-                      >
-                        Start Task
-                      </ActionButton>
-                    )}
-                    {task.status === "IN_PROGRESS" && (
-                      <>
-                        <ActionButton
-                          icon={<Pause />}
-                          color="amber"
-                          onClick={() => handleAction("pause")}
-                          disabled={processing}
-                        >
-                          Pause
-                        </ActionButton>
-                        <ActionButton
-                          icon={<Square />}
-                          color="red"
-                          onClick={() => {
-                            setEndComment("");
-                            setIsEndModalOpen(true);
-                          }}
-                          disabled={processing}
-                        >
-                          End Task
-                        </ActionButton>
-                      </>
-                    )}
-                    {task.status === "BREAK" && (
-                      <ActionButton
-                        icon={<Play />}
-                        color="green"
-                        onClick={() => handleAction("resume")}
-                        disabled={processing}
-                      >
-                        Resume Task
-                      </ActionButton>
-                    )}
-                    {processing && (
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        <span>Processing...</span>
-                      </div>
-                    )}
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Status</p>
+                    <span
+                      className={`inline-block mt-1 px-4 py-2 rounded-full font-semibold text-sm border-2 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
+                    >
+                      {statusConfig.label.replace(/_/g, ' ') || '—'}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Work Summary */}
-              {task.workingHourTask && task.workingHourTask.length > 0 &&
-                ["admin", "deputy_manager", "human_resource", "operation_executive", "staff", "project_manager", "department_manager"].includes(userRole) && (
-                  <div className="bg-green-50 rounded-2xl p-6 border border-green-200">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-xl  text-indigo-900 flex items-center gap-3">
-                        <Timer className="w-6 h-6" />
-                        Work Summary
-                      </h3>
-                      <button
-                        onClick={() => setShowWorkSummary(!showWorkSummary)}
-                        className="text-indigo-600 hover:text-indigo-800"
+              {/* Description */}
+              {task.description && (
+                <div className="mt-8 p-6 bg-white/70 backdrop-blur rounded-xl border border-green-100">
+                  <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-green-600" />
+                    Description
+                  </h4>
+                  <div
+                    className="text-gray-700 leading-relaxed prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: task.description }}
+                  />
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="mt-8 pt-6 border-t border-green-200">
+                <div className="flex flex-wrap items-center gap-4">
+                  {(task.status === 'ASSIGNED' || task.status === 'REWORK') && (
+                    <ActionButton
+                      icon={<Play />}
+                      color="emerald"
+                      onClick={() => handleAction('start')}
+                      disabled={processing}
+                    >
+                      Start Task
+                    </ActionButton>
+                  )}
+                  {task.status === 'IN_PROGRESS' && (
+                    <>
+                      <ActionButton
+                        icon={<Pause />}
+                        color="amber"
+                        onClick={() => handleAction('pause')}
+                        disabled={processing}
                       >
-                        {showWorkSummary ? (
-                          <ChevronUp size={24} />
-                        ) : (
-                          <ChevronDown size={24} />
-                        )}
-                      </button>
+                        Pause
+                      </ActionButton>
+                      <ActionButton
+                        icon={<Square />}
+                        color="red"
+                        onClick={() => {
+                          setEndComment('')
+                          setIsEndModalOpen(true)
+                        }}
+                        disabled={processing}
+                      >
+                        End Task
+                      </ActionButton>
+                    </>
+                  )}
+                  {task.status === 'BREAK' && (
+                    <ActionButton
+                      icon={<Play />}
+                      color="green"
+                      onClick={() => handleAction('resume')}
+                      disabled={processing}
+                    >
+                      Resume Task
+                    </ActionButton>
+                  )}
+                  {processing && (
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Processing...</span>
                     </div>
-                    {showWorkSummary && (
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <SummaryCard
-                          icon={<Clock4 />}
-                          label="Total Time"
-                          value={formatSecondsToHHMM(totalDurationSeconds)}
-                        />
-                        <SummaryCardSession
-                          icon={<Users />}
-                          label="Sessions"
-                          value={task.workingHourTask.length}
-                        />
-                        <SummaryCardStatus
-                          icon={<Timer />}
-                          label="Current Status"
-                          value={statusConfig.label}
-                          color={statusConfig.text}
-                        />
-                      </div>
-                    )}
-                    {showWorkSummary && ["admin", "human_resource", "operation_executive"].includes(userRole) && (
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Work Summary */}
+            {task.workingHourTask &&
+              task.workingHourTask.length > 0 &&
+              [
+                'admin',
+                'deputy_manager',
+                'human_resource',
+                'operation_executive',
+                'staff',
+                'project_manager',
+                'department_manager'
+              ].includes(userRole) && (
+                <div className="bg-green-50 rounded-2xl p-6 border border-green-200">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl  text-indigo-900 flex items-center gap-3">
+                      <Timer className="w-6 h-6" />
+                      Work Summary
+                    </h3>
+                    <button
+                      onClick={() => setShowWorkSummary(!showWorkSummary)}
+                      className="text-indigo-600 hover:text-indigo-800"
+                    >
+                      {showWorkSummary ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                    </button>
+                  </div>
+                  {showWorkSummary && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <SummaryCard
+                        icon={<Clock4 />}
+                        label="Total Time"
+                        value={formatSecondsToHHMM(totalDurationSeconds)}
+                      />
+                      <SummaryCardSession
+                        icon={<Users />}
+                        label="Sessions"
+                        value={task.workingHourTask.length}
+                      />
+                      <SummaryCardStatus
+                        icon={<Timer />}
+                        label="Current Status"
+                        value={statusConfig.label}
+                        color={statusConfig.text}
+                      />
+                    </div>
+                  )}
+                  {showWorkSummary &&
+                    ['admin', 'human_resource', 'operation_executive'].includes(userRole) && (
                       <div className="mt-6 bg-white/50 rounded-xl border border-indigo-100 overflow-hidden">
                         <table className="w-full text-left text-sm">
                           <thead>
@@ -634,13 +607,20 @@ const FetchTaskByID = ({
                           </thead>
                           <tbody className="divide-y divide-indigo-100">
                             {[...task.workingHourTask].reverse().map((session, idx) => (
-                              <tr key={session.id || idx} className="hover:bg-indigo-50/30 transition-colors">
+                              <tr
+                                key={session.id || idx}
+                                className="hover:bg-indigo-50/30 transition-colors"
+                              >
                                 <td className="px-4 py-3 font-semibold text-indigo-900 capitalize">
                                   {session.type?.toLowerCase() || 'Work'}
                                 </td>
-                                <td className="px-4 py-3 text-gray-700">{toIST(session.started_at)}</td>
                                 <td className="px-4 py-3 text-gray-700">
-                                  {session.ended_at ? toIST(session.ended_at) : (
+                                  {toIST(session.started_at)}
+                                </td>
+                                <td className="px-4 py-3 text-gray-700">
+                                  {session.ended_at ? (
+                                    toIST(session.ended_at)
+                                  ) : (
                                     <span className="text-emerald-600  animate-pulse flex items-center gap-1">
                                       <Play className="w-3 h-3 fill-current" /> Running...
                                     </span>
@@ -657,19 +637,19 @@ const FetchTaskByID = ({
                         </table>
                       </div>
                     )}
-                  </div>
-                )}
+                </div>
+              )}
 
-              {/* Comments Section */}
-              <div ref={commentsRef} className="bg-white rounded-2xl p-6 border border-gray-200 mt-6">
-                <Comment
-                  comments={task.taskcomment}
-                  onAddComment={handleAddComment}
-                  staffData={staffData}
-                  onAcknowledge={handleAcknowledgeComment}
-                />
-              </div>
-            </>
+            {/* Comments Section */}
+            <div ref={commentsRef} className="bg-white rounded-2xl p-6 border border-gray-200 mt-6">
+              <Comment
+                comments={task.taskcomment}
+                onAddComment={handleAddComment}
+                staffData={staffData}
+                onAcknowledge={handleAcknowledgeComment}
+              />
+            </div>
+          </>
         </div>
       </div>
       {isEditing && (
@@ -677,8 +657,8 @@ const FetchTaskByID = ({
           id={task.id}
           onClose={() => setIsEditing(false)}
           refresh={() => {
-            fetchTask();
-            if (refresh) refresh();
+            fetchTask()
+            if (refresh) refresh()
           }}
         />
       )}
@@ -692,19 +672,37 @@ const FetchTaskByID = ({
               <h3 className="text-xl ">End Task session</h3>
             </div>
             <p className="text-gray-600">
-              Please provide a brief summary or feedback about the work done before ending the session.
+              Please provide a brief summary or feedback about the work done before ending the
+              session.
             </p>
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">WBS Item Completion (%) *</label>
+                <label className="text-sm font-medium text-gray-700">
+                  WBS Item Completion (%) *
+                </label>
                 <select
                   value={completionPercentage}
                   onChange={(e) => setCompletionPercentage(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all outline-none text-gray-700 bg-white"
                 >
-                  <option value="" disabled>Select completion range</option>
-                  {["0-10", "11-20", "21-30", "31-40", "41-50", "51-60", "61-70", "71-80", "81-90", "91-100"].map(range => (
-                    <option key={range} value={range}>{range}%</option>
+                  <option value="" disabled>
+                    Select completion range
+                  </option>
+                  {[
+                    '0-10',
+                    '11-20',
+                    '21-30',
+                    '31-40',
+                    '41-50',
+                    '51-60',
+                    '61-70',
+                    '71-80',
+                    '81-90',
+                    '91-100'
+                  ].map((range) => (
+                    <option key={range} value={range}>
+                      {range}%
+                    </option>
                   ))}
                 </select>
               </div>
@@ -731,9 +729,9 @@ const FetchTaskByID = ({
             <div className="flex gap-3 pt-2">
               <Button
                 onClick={() => {
-                  setIsEndModalOpen(false);
-                  setEndComment("");
-                  setCompletionPercentage("");
+                  setIsEndModalOpen(false)
+                  setEndComment('')
+                  setCompletionPercentage('')
                 }}
                 variant="outline"
                 className="flex-1 py-3 text-red-600 font-semibold border-red-200"
@@ -742,10 +740,18 @@ const FetchTaskByID = ({
               </Button>
               <Button
                 onClick={handleEndTask}
-                disabled={processing || endComment.replace(/[.,]/g, '').trim().length < 10 || !completionPercentage}
+                disabled={
+                  processing ||
+                  endComment.replace(/[.,]/g, '').trim().length < 10 ||
+                  !completionPercentage
+                }
                 className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center justify-center gap-2"
               >
-                {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Square className="w-4 h-4" />}
+                {processing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Square className="w-4 h-4" />
+                )}
                 Submit & End
               </Button>
             </div>
@@ -754,8 +760,8 @@ const FetchTaskByID = ({
       )}
     </div>,
     document.body
-  );
-};
+  )
+}
 
 // Helper Components
 const InfoItem = ({ icon, label, value }) => (
@@ -768,15 +774,15 @@ const InfoItem = ({ icon, label, value }) => (
       <p className="font-semibold text-gray-700 mt-1">{value}</p>
     </div>
   </div>
-);
+)
 
 const ActionButton = ({ children, icon, color, onClick, disabled }) => {
   const colors = {
-    emerald: "bg-emerald-600 hover:bg-emerald-700",
-    amber: "bg-amber-600 hover:bg-amber-700",
-    red: "bg-red-600 hover:bg-red-700",
-    green: "bg-green-600 hover:bg-green-700",
-  };
+    emerald: 'bg-emerald-600 hover:bg-emerald-700',
+    amber: 'bg-amber-600 hover:bg-amber-700',
+    red: 'bg-red-600 hover:bg-red-700',
+    green: 'bg-green-600 hover:bg-green-700'
+  }
   return (
     <button
       onClick={onClick}
@@ -786,47 +792,47 @@ const ActionButton = ({ children, icon, color, onClick, disabled }) => {
       {icon}
       {children}
     </button>
-  );
-};
+  )
+}
 
-const SummaryCard = ({ icon, label, value, color = "text-indigo-700" }) => (
+const SummaryCard = ({ icon, label, value, color = 'text-indigo-700' }) => (
   <div className="bg-white p-4 rounded-xl border border-gray-300 shadow-sm flex items-center justify-between min-h-[80px] w-full">
     <div className="flex items-center gap-3">
       <div className="p-2.5 bg-green-50 rounded-xl border border-green-200 shadow-sm text-green-600 shrink-0">
-        {React.cloneElement(icon, { className: "w-5 h-5", strokeWidth: 2.5 })}
+        {React.cloneElement(icon, { className: 'w-5 h-5', strokeWidth: 2.5 })}
       </div>
-      <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">{label}</span>
+      <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">
+        {label}
+      </span>
     </div>
-    <span className={`text-lg font-black tracking-tight shrink-0 ${color}`}>
-      {value} hrs
-    </span>
+    <span className={`text-lg font-black tracking-tight shrink-0 ${color}`}>{value} hrs</span>
   </div>
-);
-const SummaryCardSession = ({ icon, label, value, color = "text-indigo-700" }) => (
+)
+const SummaryCardSession = ({ icon, label, value, color = 'text-indigo-700' }) => (
   <div className="bg-white p-4 rounded-xl border border-gray-300 shadow-sm flex items-center justify-between min-h-[80px] w-full">
     <div className="flex items-center gap-3">
       <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-200 shadow-sm text-blue-600 shrink-0">
-        {React.cloneElement(icon, { className: "w-5 h-5", strokeWidth: 2.5 })}
+        {React.cloneElement(icon, { className: 'w-5 h-5', strokeWidth: 2.5 })}
       </div>
-      <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">{label}</span>
+      <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">
+        {label}
+      </span>
     </div>
-    <span className={`text-lg font-black tracking-tight shrink-0 ${color}`}>
-      {value}
-    </span>
+    <span className={`text-lg font-black tracking-tight shrink-0 ${color}`}>{value}</span>
   </div>
-);
-const SummaryCardStatus = ({ icon, label, value, color = "text-indigo-700" }) => (
+)
+const SummaryCardStatus = ({ icon, label, value, color = 'text-indigo-700' }) => (
   <div className="bg-white p-4 rounded-xl border border-gray-300 shadow-sm flex items-center justify-between min-h-[80px] w-full">
     <div className="flex items-center gap-3">
       <div className="p-2.5 bg-yellow-50 rounded-xl border border-yellow-200 shadow-sm text-yellow-600 shrink-0">
-        {React.cloneElement(icon, { className: "w-5 h-5", strokeWidth: 2.5 })}
+        {React.cloneElement(icon, { className: 'w-5 h-5', strokeWidth: 2.5 })}
       </div>
-      <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">{label}</span>
+      <span className="text-[15px] font-black text-gray-700 uppercase tracking-widest">
+        {label}
+      </span>
     </div>
-    <span className={`text-lg font-black tracking-tight shrink-0 ${color}`}>
-      {value}
-    </span>
+    <span className={`text-lg font-black tracking-tight shrink-0 ${color}`}>{value}</span>
   </div>
-);
+)
 
-export default FetchTaskByID;
+export default FetchTaskByID

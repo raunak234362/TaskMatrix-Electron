@@ -1,111 +1,101 @@
-"use client";
+'use client'
 
-import React, { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
-import { Search } from "lucide-react";
-
-
+import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
+import { Search } from 'lucide-react'
 
 const Select = ({
   options = [],
-  label,
-  name = "",
-  className = "",
+  name = '',
+  className = '',
+  menuClassName = '',
+  optionClassName = '',
   onChange,
   placeholder,
   value,
-  showSearch = true,
+  showSearch = true
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(
-    null,
-  );
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredOptions, setFilteredOptions] =
-    useState(options);
-  const wrapperRef = useRef(null);
-  const searchRef = useRef(null);
-  const menuRef = useRef(null);
-  const [menuStyles, setMenuStyles] = useState({});
+  const [isOpen, setIsOpen] = useState(false)
+  const [selectedOption, setSelectedOption] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filteredOptions, setFilteredOptions] = useState(options)
+  const wrapperRef = useRef(null)
+  const searchRef = useRef(null)
+  const menuRef = useRef(null)
+  const [menuStyles, setMenuStyles] = useState({})
 
   // Sync filtered options when options prop changes
   useEffect(() => {
-    setFilteredOptions(options);
-  }, [options]);
+    setFilteredOptions(options)
+  }, [options])
 
   // Sync selected option when controlled value changes
   useEffect(() => {
-    if (typeof value !== "undefined") {
-      const match =
-        options.find((o) => String(o.value) === String(value)) || null;
-      setSelectedOption(match);
+    if (typeof value !== 'undefined') {
+      const match = options.find((o) => String(o.value) === String(value)) || null
+      setSelectedOption(match)
     }
-  }, [value, options]);
+  }, [value, options])
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      const isOutsideWrapper =
-        wrapperRef.current &&
-        !wrapperRef.current.contains(event.target);
-      const isOutsideMenu =
-        menuRef.current && !menuRef.current.contains(event.target);
+      const isOutsideWrapper = wrapperRef.current && !wrapperRef.current.contains(event.target)
+      const isOutsideMenu = menuRef.current && !menuRef.current.contains(event.target)
 
       if (isOutsideWrapper && isOutsideMenu) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
-    };
+    }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Dynamic menu placement and portal positioning
   useEffect(() => {
     if (isOpen && wrapperRef.current) {
-      const rect = wrapperRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const menuHeight = 240; // max-h-60 is 15rem = 240px
-      const shouldPlaceTop = spaceBelow < menuHeight && rect.top > menuHeight;
+      const rect = wrapperRef.current.getBoundingClientRect()
+      const spaceBelow = window.innerHeight - rect.bottom
+      const menuHeight = 240 // max-h-60 is 15rem = 240px
+      const shouldPlaceTop = spaceBelow < menuHeight && rect.top > menuHeight
 
       setMenuStyles({
-        position: "fixed",
+        position: 'fixed',
         top: shouldPlaceTop ? rect.top - 4 : rect.bottom + 4,
         left: rect.left,
         width: rect.width,
-        transform: shouldPlaceTop ? "translateY(-100%)" : "none",
-        zIndex: 9999,
-      });
+        transform: shouldPlaceTop ? 'translateY(-100%)' : 'none',
+        zIndex: 9999
+      })
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   // Handle search input
   const handleSearch = (event) => {
-    const term = event.target.value.toLowerCase();
-    setSearchTerm(term);
-    const filtered = options.filter(
-      (option) => option && option.label.toLowerCase().includes(term),
-    );
-    setFilteredOptions(filtered);
-  };
+    const term = event.target.value.toLowerCase()
+    setSearchTerm(term)
+    const filtered = options.filter((option) => option && option.label.toLowerCase().includes(term))
+    setFilteredOptions(filtered)
+  }
 
   // Handle option selection
   const handleSelect = (option) => {
-    setSelectedOption(option);
-    setSearchTerm("");
-    setIsOpen(false);
+    setSelectedOption(option)
+    setSearchTerm('')
+    setIsOpen(false)
     if (onChange) {
-      onChange(name, String(option.value));
+      onChange(name, String(option.value))
     }
-  };
+  }
 
   // Highlight matching text in options
   const highlightMatch = (text, highlight) => {
     if (!highlight.trim()) {
-      return text;
+      return text
     }
-    const regex = new RegExp(`(${highlight})`, "gi");
-    const parts = text.split(regex);
+    const regex = new RegExp(`(${highlight})`, 'gi')
+    const parts = text.split(regex)
 
     return (
       <>
@@ -116,26 +106,27 @@ const Select = ({
             </mark>
           ) : (
             part
-          ),
+          )
         )}
       </>
-    );
-  };
+    )
+  }
 
   return (
     <div ref={wrapperRef} className="relative w-full">
       {/* Dropdown Trigger */}
       <div
         onClick={() => {
-          setIsOpen(!isOpen);
+          setIsOpen(!isOpen)
           if (showSearch) {
             setTimeout(() => {
-              searchRef.current?.focus();
-            }, 100);
+              searchRef.current?.focus()
+            }, 100)
           }
         }}
-        className={`flex items-center justify-between p-2.5 text-xs font-bold border rounded-lg bg-white cursor-pointer transition-all ${isOpen ? "border-sky-400 ring-4 ring-sky-50 shadow-sm" : "border-black"
-          } ${className}`}
+        className={`flex items-center justify-between p-2.5 text-xs font-bold border rounded-lg bg-white cursor-pointer transition-all ${
+          isOpen ? 'border-sky-400 ring-4 ring-sky-50 shadow-sm' : 'border-black'
+        } ${className}`}
       >
         <div className="flex-1">
           {isOpen && showSearch ? (
@@ -152,28 +143,20 @@ const Select = ({
               />
             </div>
           ) : (
-            <span
-              className={`uppercase tracking-wide text-black`}
-            >
-              {selectedOption
-                ? selectedOption.label
-                : placeholder || "ALL"}
+            <span className={`uppercase tracking-wide text-black`}>
+              {selectedOption ? selectedOption.label : placeholder || 'ALL'}
             </span>
           )}
         </div>
         <svg
-          className={`w-3.5 h-3.5 text-black transition-transform duration-300 ${isOpen ? "rotate-180" : ""
-            }`}
+          className={`w-3.5 h-3.5 text-black transition-transform duration-300 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2.5"
-            d="M19 9l-7 7-7-7"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
         </svg>
       </div>
 
@@ -182,28 +165,26 @@ const Select = ({
           <div
             ref={menuRef}
             style={menuStyles}
-            className="text-sm bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto custom-scrollbar"
+            className={`text-sm bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto custom-scrollbar ${menuClassName}`}
           >
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option) => (
                 <div
                   key={option.value}
-                  className="px-4 py-2.5 cursor-pointer hover:bg-sky-50 hover:text-sky-700 transition-colors uppercase font-bold tracking-wider text-[11px]"
+                  className={`px-4 py-2.5 cursor-pointer hover:bg-sky-50 hover:text-sky-700 transition-colors uppercase font-bold tracking-wider ${optionClassName || 'text-[11px]'}`}
                   onClick={() => handleSelect(option)}
                 >
                   {highlightMatch(option.label, searchTerm)}
                 </div>
               ))
             ) : (
-              <div className="px-4 py-2 text-gray-500 italic">
-                No options found
-              </div>
+              <div className="px-4 py-2 text-gray-500 italic">No options found</div>
             )}
           </div>,
-          document.body,
+          document.body
         )}
     </div>
-  );
-};
+  )
+}
 
-export default Select;
+export default Select
