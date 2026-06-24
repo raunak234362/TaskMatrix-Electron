@@ -55,9 +55,10 @@ const SubmittalResponseModal = ({
       let fabricatorName = "";
       let projectName = "";
       const submittalDetails = await Service.GetSubmittalbyId(submittalId);
-      const pid = submittalDetails?.projectId || submittalDetails?.project_id || submittalDetails?.data?.projectId || submittalDetails?.data?.project_id;
+      const pid = submittalDetails?.projectId || submittalDetails?.project_id || submittalDetails?.data?.projectId || submittalDetails?.data?.project_id || submittalDetails?.project?.id || submittalDetails?.data?.project?.id;
       if (pid) {
-        const project = await Service.GetProjectById(pid);
+        const projectRes = await Service.GetProjectById(pid);
+        const project = projectRes?.data || projectRes;
         fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
         projectName = project?.projectName || project?.name || "";
       }

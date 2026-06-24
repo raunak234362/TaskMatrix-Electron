@@ -150,16 +150,6 @@ const BfaManager = ({ submittalId, isAssist }) => {
   }, [submittalId]);
 
   const handleCreateBfa = async () => {
-    if (!subject.trim()) {
-      toast.error("Subject is required");
-      return;
-    }
-    const strippedDescription = description.replace(/<[^>]+>/g, "").trim();
-    if (!strippedDescription) {
-      toast.error("Description is required");
-      return;
-    }
-
     try {
       setSubmitting(true);
       const formData = new FormData();
@@ -170,11 +160,12 @@ const BfaManager = ({ submittalId, isAssist }) => {
       files.forEach((file) => formData.append("files", file));
 
       const submittalDetails = await Service.GetSubmittalbyId(submittalId);
-      const pid = submittalDetails?.projectId || submittalDetails?.project_id || submittalDetails?.data?.projectId || submittalDetails?.data?.project_id;
+      const pid = submittalDetails?.projectId || submittalDetails?.project_id || submittalDetails?.data?.projectId || submittalDetails?.data?.project_id || submittalDetails?.project?.id || submittalDetails?.data?.project?.id;
       let fabricatorName = "";
       let projectName = "";
       if (pid) {
-        const project = await Service.GetProjectById(pid);
+        const projectRes = await Service.GetProjectById(pid);
+        const project = projectRes?.data || projectRes;
         fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
         projectName = project?.projectName || project?.name || "";
       }
@@ -198,12 +189,6 @@ const BfaManager = ({ submittalId, isAssist }) => {
   };
 
   const handleUpdateBfa = async () => {
-    const strippedDescription = description.replace(/<[^>]+>/g, "").trim();
-    if (!strippedDescription) {
-      toast.error("Description is required");
-      return;
-    }
-
     try {
       setSubmitting(true);
       const formData = new FormData();
@@ -212,11 +197,12 @@ const BfaManager = ({ submittalId, isAssist }) => {
       files.forEach((file) => formData.append("files", file));
 
       const submittalDetails = await Service.GetSubmittalbyId(submittalId);
-      const pid = submittalDetails?.projectId || submittalDetails?.project_id || submittalDetails?.data?.projectId || submittalDetails?.data?.project_id;
+      const pid = submittalDetails?.projectId || submittalDetails?.project_id || submittalDetails?.data?.projectId || submittalDetails?.data?.project_id || submittalDetails?.project?.id || submittalDetails?.data?.project?.id;
       let fabricatorName = "";
       let projectName = "";
       if (pid) {
-        const project = await Service.GetProjectById(pid);
+        const projectRes = await Service.GetProjectById(pid);
+        const project = projectRes?.data || projectRes;
         fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
         projectName = project?.projectName || project?.name || "";
       }
@@ -395,7 +381,7 @@ const BfaManager = ({ submittalId, isAssist }) => {
             </h2>
 
             <div>
-              <label className="text-sm font-medium">BFA Subject *</label>
+              <label className="text-sm font-medium">BFA Subject (Optional)</label>
               <input
                 type="text"
                 value={subject}
@@ -418,7 +404,7 @@ const BfaManager = ({ submittalId, isAssist }) => {
             </div>
 
             <div>
-              <label className="text-sm font-medium">Description *</label>
+              <label className="text-sm font-medium">Description (Optional)</label>
               <div className="mt-1">
                 <RichTextEditor
                   value={description}
@@ -464,7 +450,7 @@ const BfaManager = ({ submittalId, isAssist }) => {
             </div>
 
             <div>
-              <label className="text-sm font-medium">Description *</label>
+              <label className="text-sm font-medium">Description (Optional)</label>
               <div className="mt-1">
                 <RichTextEditor
                   value={description}
