@@ -37,20 +37,23 @@ const CDNetworkOverview = ({
   const pieCenterX = "50%";
   const pieCenterY = "50%"; // slightly lower looks visually perfect
 
-  const filteredDesigners = designers.filter(
-    (d) =>
-      d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      d.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredDesigners = designers.filter((d) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      (d.name || "").toLowerCase().includes(term) ||
+      (d.email || "").toLowerCase().includes(term) ||
+      (d.contactInfo || "").toLowerCase().includes(term)
+    );
+  });
 
   return (
-    <div className="flex flex-col gap-6 mb-8" style={{ fontSize: 'clamp(10px, 1.1vw, 16px)' }}>
+    <div className="flex flex-col gap-6 mb-8">
       {/* LEFT Designer Directory (Interactive List) */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-white rounded-3xl shadow-sm border border-gray-500 flex flex-col"
+        className="bg-white rounded-3xl shadow-sm flex flex-col border-none"
       >
         <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <input
@@ -85,7 +88,7 @@ const CDNetworkOverview = ({
                 onMouseEnter={() => setHoveredId(designer.id || designer._id)}
                 onMouseLeave={() => setHoveredId(null)}
                 onClick={() => onSelect(designer.id || designer._id)}
-                className="group relative flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-all border border-gray-100 hover:border-green-200 cursor-pointer"
+                className="group relative flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-all border-none cursor-pointer"
               >
                 {/* Main Info */}
                 <div className="flex items-center gap-6 min-w-0">
@@ -93,17 +96,17 @@ const CDNetworkOverview = ({
                     {designer.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-base font-black text-gray-800 group-hover:text-green-600 transition-colors">
+                    <h4 className="text-sm font-semibold text-gray-800 group-hover:text-green-600 transition-colors uppercase tracking-normal">
                       {designer.name}
                     </h4>
                     <div className="flex flex-wrap items-center gap-4 mt-1">
                       {designer.email && (
-                        <span className="flex items-center gap-2 text-[11px] font-bold text-black uppercase tracking-wide">
+                        <span className="flex items-center gap-2 text-sm font-semibold text-black uppercase tracking-normal">
                           <Mail size={12} className="text-gray-500" /> {designer.email}
                         </span>
                       )}
                       {designer.contactInfo && (
-                        <span className="flex items-center gap-2 text-[11px] font-bold text-black uppercase tracking-wide">
+                        <span className="flex items-center gap-2 text-sm font-semibold text-black uppercase tracking-normal">
                           <Phone size={12} className="text-gray-500" /> {designer.contactInfo}
                         </span>
                       )}

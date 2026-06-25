@@ -873,30 +873,30 @@ const GetProjectById = ({ id, onClose }) => {
                   </div>
 
                   {/* Connection Design Scope */}
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <h4 className="text-sm font-bold text-black uppercase tracking-wider mb-3">
+                  <div className="mt-6">
+                    <h4 className="text-base font-semibold text-green-800 uppercase tracking-normal mb-3">
                       Connection Design Scope
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {project.connectionDesign && (
-                        <span className="px-3 py-1.5 bg-white border border-gray-200 text-black text-sm font-semibold rounded-none uppercase tracking-wider">
+                        <span className="px-3 py-1.5 bg-white border border-gray-200 text-black text-sm font-semibold rounded-none uppercase tracking-normal">
                           Main Design
                         </span>
                       )}
                       {project.miscDesign && (
-                        <span className="px-3 py-1.5 bg-white border border-gray-200 text-black text-sm font-semibold rounded-none uppercase tracking-wider">
+                        <span className="px-3 py-1.5 bg-white border border-gray-200 text-black text-sm font-semibold rounded-none uppercase tracking-normal">
                           Misc Design
                         </span>
                       )}
                       {project.customerDesign && (
-                        <span className="px-3 py-1.5 bg-white border border-gray-200 text-black text-sm font-semibold rounded-none uppercase tracking-wider">
+                        <span className="px-3 py-1.5 bg-white border border-gray-200 text-black text-sm font-semibold rounded-none uppercase tracking-normal">
                           Customer Design
                         </span>
                       )}
                       {!project.connectionDesign &&
                         !project.miscDesign &&
                         !project.customerDesign && (
-                          <span className="text-sm italic text-black">
+                          <span className="text-sm text-gray-700 font-semibold uppercase tracking-normal">
                             No Connection Design scope defined.
                           </span>
                         )}
@@ -905,22 +905,22 @@ const GetProjectById = ({ id, onClose }) => {
 
                   {/* Detailing Scope */}
                   <div className="mt-6">
-                    <h4 className="text-sm font-bold text-black uppercase tracking-wider mb-3">
+                    <h4 className="text-base font-semibold text-green-800 uppercase tracking-normal mb-3">
                       Detailing Scope
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {project.detailingMain && (
-                        <span className="px-3 py-1.5 bg-white border border-gray-200 text-black text-sm font-semibold rounded-none uppercase tracking-wider">
+                        <span className="px-3 py-1.5 bg-white border border-gray-200 text-black text-sm font-semibold rounded-none uppercase tracking-normal">
                           Detailing Main
                         </span>
                       )}
                       {project.detailingMisc && (
-                        <span className="px-3 py-1.5 bg-white border border-gray-200 text-black text-sm font-semibold rounded-none uppercase tracking-wider">
+                        <span className="px-3 py-1.5 bg-white border border-gray-200 text-black text-sm font-semibold rounded-none uppercase tracking-normal">
                           Detailing Misc
                         </span>
                       )}
                       {!project.detailingMain && !project.detailingMisc && (
-                        <span className="text-sm italic text-black">
+                        <span className="text-sm text-gray-700 font-semibold uppercase tracking-normal">
                           No Detailing scope defined.
                         </span>
                       )}
@@ -929,12 +929,12 @@ const GetProjectById = ({ id, onClose }) => {
 
                   {/* Project Scope Description */}
                   {project.description && (
-                    <div className="mt-6 pt-6 border-t border-gray-200">
+                    <div className="mt-6">
                       <h4 className="text-sm font-bold text-black uppercase tracking-wider mb-3">
                         Project Scope
                       </h4>
                       <div
-                        className="text-black bg-white p-4 rounded-none border border-gray-200 prose prose-sm max-w-none font-medium"
+                        className="text-black bg-white p-4 rounded-none prose prose-sm max-w-none font-medium"
                         dangerouslySetInnerHTML={{
                           __html: project.description
                         }}
@@ -961,11 +961,11 @@ const GetProjectById = ({ id, onClose }) => {
                 {Object.keys(otherTasksByBundle).length > 0 && (
                   <div className="mt-12">
                     <div className="pb-3 border-b border-gray-200 flex items-center gap-2 mb-4">
-                      <ClipboardList className="w-5 h-5 text-black" />
-                      <h4 className="text-base font-bold uppercase tracking-wider text-black">
+                     
+                      <h4 className="text-sm font-semibold uppercase tracking-normal text-black">
                         Other Tasks &mdash; Logged Time
                       </h4>
-                      <span className="ml-auto text-sm text-black font-semibold uppercase tracking-widest">
+                      <span className="ml-auto text-sm text-black font-semibold uppercase tracking-normal">
                         {Object.values(otherTasksByBundle).reduce((s, t) => s + t.length, 0)} tasks
                       </span>
                     </div>
@@ -1002,13 +1002,13 @@ const GetProjectById = ({ id, onClose }) => {
                               className="w-full flex items-center gap-3 py-3 hover:bg-slate-50 transition-colors text-left px-2"
                             >
                               <span className="w-1.5 h-1.5 rounded-none bg-[#6bbd45] shrink-0" />
-                              <span className="flex-1 text-sm font-bold uppercase tracking-wider text-black">
+                              <span className="flex-1 text-sm font-semibold uppercase tracking-normal text-black">
                                 {bundleKey}
                               </span>
-                              <span className="text-sm font-bold text-black">
+                              <span className="text-sm font-semibold text-black">
                                 {tasks.length} task{tasks.length !== 1 ? 's' : ''}
                               </span>
-                              <span className="text-sm font-bold text-[#3a8a1a] min-w-[52px] text-right">
+                              <span className="text-sm font-semibold text-[#3a8a1a] min-w-[52px] text-right">
                                 {formatSeconds(bundleTotalSeconds)}
                               </span>
                               <span className="shrink-0 text-black ml-1">
@@ -1021,65 +1021,60 @@ const GetProjectById = ({ id, onClose }) => {
                             </button>
 
                             {isExpanded && (
-                              <div className="divide-y divide-gray-50 bg-slate-50/30 px-2 py-1">
-                                {tasks.map((task, idx) => {
-                                  const assignee = task.user
-                                    ? `${task.user.firstName || ''} ${task.user.lastName || ''}`.trim()
-                                    : task.assignedTo
-                                      ? `${task.assignedTo.firstName || ''} ${task.assignedTo.lastName || ''}`.trim()
-                                      : 'Unassigned'
+                              <div className="bg-slate-50/30 px-4 py-3 border-t border-gray-100">
+                                <table className="w-full text-left border-collapse">
+                                  <thead>
+                                    <tr className="border-b border-gray-200">
+                                      <th className="pb-2 text-xs font-semibold text-gray-500 uppercase tracking-normal w-1/4">Assignee</th>
+                                      <th className="pb-2 text-xs font-semibold text-gray-500 uppercase tracking-normal w-2/5">Task Detail</th>
+                                      <th className="pb-2 text-xs font-semibold text-gray-500 uppercase tracking-normal w-1/5">Status</th>
+                                      <th className="pb-2 text-xs font-semibold text-gray-500 uppercase tracking-normal text-right w-[15%]">Duration</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-gray-100">
+                                    {tasks.map((task, idx) => {
+                                      const assignee = task.user
+                                        ? `${task.user.firstName || ''} ${task.user.lastName || ''}`.trim()
+                                        : task.assignedTo
+                                          ? `${task.assignedTo.firstName || ''} ${task.assignedTo.lastName || ''}`.trim()
+                                          : 'Unassigned'
 
-                                  const initials = assignee
-                                    .split(' ')
-                                    .filter(Boolean)
-                                    .map((n) => n[0])
-                                    .slice(0, 2)
-                                    .join('')
-                                    .toUpperCase()
+                                      const taskSeconds = (task.workingHourTask || []).reduce(
+                                        (s, w) => s + (w.duration_seconds || 0),
+                                        0
+                                      )
 
-                                  const taskSeconds = (task.workingHourTask || []).reduce(
-                                    (s, w) => s + (w.duration_seconds || 0),
-                                    0
-                                  )
+                                      const sc =
+                                        statusMap[(task.status || '').toLowerCase()] ||
+                                        'bg-gray-100 text-black border-gray-200'
 
-                                  const sc =
-                                    statusMap[(task.status || '').toLowerCase()] ||
-                                    'bg-gray-100 text-black border-gray-200'
-
-                                  return (
-                                    <button
-                                      key={task.id || idx}
-                                      onClick={() => setSelectedTaskId(task.id)}
-                                      className="w-full flex items-center gap-3 py-2.5 hover:bg-slate-100 transition-colors cursor-pointer text-left focus:outline-none"
-                                    >
-                                      <div className="w-7 h-7 rounded-none bg-linear-to-br from-slate-500 to-slate-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
-                                        {initials || '?'}
-                                      </div>
-
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-bold text-black truncate leading-tight">
-                                          {assignee}
-                                        </p>
-                                        <p className="text-xs text-black truncate leading-tight mt-0.5">
-                                          {task.name || task.title || `Task #${idx + 1}`}
-                                        </p>
-                                      </div>
-
-                                      <span
-                                        className={`text-xs font-bold px-2 py-0.5 rounded-none border uppercase tracking-wide shrink-0 ${sc}`}
-                                      >
-                                        {task.status || '—'}
-                                      </span>
-
-                                      <div className="flex items-center gap-1 shrink-0">
-                                        <Clock className="w-3 h-3 text-black" />
-                                        <span className="text-sm font-bold text-black min-w-[42px] text-right">
-                                          {taskSeconds > 0 ? formatSeconds(taskSeconds) : '—'}
-                                        </span>
-                                      </div>
-                                    </button>
-                                  )
-                                })}
+                                      return (
+                                        <tr
+                                          key={task.id || idx}
+                                          onClick={() => setSelectedTaskId(task.id)}
+                                          className="hover:bg-slate-100/80 transition-colors cursor-pointer group"
+                                        >
+                                          <td className="py-2.5 text-sm font-semibold text-black uppercase tracking-normal pr-4">
+                                            {assignee}
+                                          </td>
+                                          <td className="py-2.5 text-sm font-semibold text-black uppercase tracking-normal pr-4">
+                                            {task.name || task.title || `Task #${idx + 1}`}
+                                          </td>
+                                          <td className="py-2.5">
+                                            <span
+                                              className={`text-sm font-semibold px-2 py-0.5 rounded-none border uppercase tracking-normal inline-block ${sc}`}
+                                            >
+                                              {task.status || '—'}
+                                            </span>
+                                          </td>
+                                          <td className="py-2.5 text-sm font-semibold text-black text-right uppercase tracking-normal">
+                                            {taskSeconds > 0 ? formatSeconds(taskSeconds) : '—'}
+                                          </td>
+                                        </tr>
+                                      )
+                                    })}
+                                  </tbody>
+                                </table>
                               </div>
                             )}
                           </div>
@@ -1091,8 +1086,8 @@ const GetProjectById = ({ id, onClose }) => {
                 {/* Core WBS Categories — Logged & Allocated Time Overview */}
                 <div className="mt-12">
                   <div className="pb-3 border-b border-gray-200 flex items-center gap-2 mb-6">
-                    <ClipboardList className="w-5 h-5 text-black" />
-                    <h4 className="text-base font-bold uppercase tracking-wider text-black">
+                   
+                    <h4 className="text-sm font-semibold uppercase tracking-normal text-black">
                       Primary WBS &mdash; Logged &amp; Allocated Time
                     </h4>
                   </div>
@@ -1139,27 +1134,27 @@ const GetProjectById = ({ id, onClose }) => {
                         key={cat.key}
                         className="p-4 bg-slate-50/40 hover:bg-slate-50 transition-colors flex flex-col items-center justify-center text-center"
                       >
-                        <span className="text-sm font-bold uppercase tracking-wider text-black mb-2.5 truncate w-full">
+                        <span className="text-sm font-semibold uppercase tracking-normal text-black mb-2.5 truncate w-full">
                           {cat.label}
                         </span>
                         <div className="flex flex-col gap-1.5 w-full max-w-[110px]">
                           <div
                             className={`px-2.5 py-1 rounded-none ${cat.bg} border border-[#6bbd45]/20 flex justify-between items-center text-sm shadow-none`}
                           >
-                            <span className="font-bold text-black uppercase tracking-wider">
+                            <span className="font-semibold text-black uppercase tracking-normal">
                               W:
                             </span>
-                            <span className={`font-bold ${cat.color}`}>
+                            <span className={`font-semibold ${cat.color}`}>
                               {wbsCategoryTotals[cat.key]?.logged > 0
                                 ? formatSeconds(wbsCategoryTotals[cat.key].logged)
                                 : '00:00'}
                             </span>
                           </div>
                           <div className="px-2.5 py-1 rounded-none bg-blue-50 border border-blue-100 flex justify-between items-center text-sm shadow-none">
-                            <span className="font-bold text-black uppercase tracking-wider">
+                            <span className="font-semibold text-black uppercase tracking-normal">
                               A:
                             </span>
-                            <span className="font-bold text-blue-600">
+                            <span className="font-semibold text-blue-600">
                               {wbsCategoryTotals[cat.key]?.allocated > 0
                                 ? formatSeconds(wbsCategoryTotals[cat.key].allocated)
                                 : '00:00'}

@@ -10,7 +10,7 @@ import EditRFI from "./EditRFI";
 
 const Info = ({ label, value, noBorder }) => (
   <div className={`flex items-center pb-2 text-sm gap-2 ${noBorder ? "" : "border-b border-gray-200"}`}>
-    <span className="font-semibold text-black uppercase tracking-wider shrink-0">
+    <span className="font-semibold text-black uppercase tracking-normal shrink-0">
       {label}:
     </span>
     <span className="text-black font-normal uppercase text-left truncate flex-1" title={value}>
@@ -22,7 +22,7 @@ const Info = ({ label, value, noBorder }) => (
 const SectionTitle = ({ title }) => (
   <div className="flex items-center gap-3 mb-4">
     <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
-    <h2 className="text-lg font-bold text-black tracking-wider uppercase">{title}</h2>
+    <h2 className="text-sm font-semibold text-black tracking-normal uppercase">{title}</h2>
   </div>
 );
 
@@ -56,7 +56,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
       <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div className="bg-white rounded-none p-8 flex items-center justify-center border border-gray-200 shadow-2xl">
           <Loader2 className="w-5 h-5 animate-spin mr-2 text-black" />
-          <span className="text-sm font-bold uppercase tracking-wider text-black">Loading RFI details...</span>
+          <span className="text-sm font-semibold uppercase tracking-normal text-black">Loading RFI details...</span>
         </div>
       </div>
     );
@@ -67,10 +67,10 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
       <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div className="bg-white rounded-none p-8 flex items-center justify-center border border-red-200 shadow-2xl text-red-600">
           <AlertCircle className="w-5 h-5 mr-2" />
-          <span className="text-sm font-bold uppercase tracking-wider">{error || "RFI not found"}</span>
+          <span className="text-sm font-semibold uppercase tracking-normal">{error || "RFI not found"}</span>
           <button
             onClick={onClose}
-            className="ml-4 px-4 py-1 bg-red-50 text-red-700 border border-red-200 rounded-none text-xs font-bold uppercase tracking-wider"
+            className="ml-4 px-4 py-1 bg-red-50 text-red-700 border border-red-200 rounded-none text-sm font-semibold uppercase tracking-normal"
           >
             Close
           </button>
@@ -150,7 +150,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
 
         return (
           <span
-            className={`px-2 py-0.5 rounded-none text-[10px] font-bold border uppercase tracking-wider ${getStatusStyles(status)}`}
+            className={`px-2 py-0.5 rounded-none text-sm font-semibold border uppercase tracking-normal ${getStatusStyles(status)}`}
           >
             {status}
           </span>
@@ -167,20 +167,20 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
           <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
-              <h1 className="text-xl font-bold text-black uppercase tracking-wider">RFI Details</h1>
+              <h1 className="text-sm font-semibold text-black uppercase tracking-normal">RFI Details</h1>
             </div>
             <div className="flex items-center gap-3">
               {(userRole !== "STAFF" || isAssist) && (
                 <button
                   onClick={() => setShowEditModal(true)}
-                  className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+                  className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-semibold text-sm uppercase tracking-normal shadow-sm cursor-pointer"
                 >
                   Edit RFI
                 </button>
               )}
               <button
                 onClick={onClose}
-                className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+                className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-normal shadow-sm cursor-pointer"
               >
                 Close
               </button>
@@ -193,7 +193,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
               {/* Card 1: Details, Description & Attachments */}
               <div className="bg-zinc-50 p-6 rounded-none border border-gray-200 space-y-6">
                 <div className="space-y-4">
-                  <h1 className="text-xl font-bold text-black uppercase tracking-tight">
+                  <h1 className="text-sm font-semibold text-black uppercase tracking-normal">
                     {rfi.subject || "No Subject"}
                   </h1>
 
@@ -202,7 +202,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
                     <Info label="Project" value={rfi.project?.name || "—"} />
 
                     <div className="flex items-center pb-2 border-b border-gray-200 text-sm gap-2">
-                      <span className="font-semibold text-black uppercase tracking-wider shrink-0">
+                      <span className="font-semibold text-black uppercase tracking-normal shrink-0">
                         Status:
                       </span>
                       {(() => {
@@ -211,7 +211,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
                           ? "bg-green-50 text-green-700 border-green-200"
                           : "bg-yellow-50 text-yellow-700 border-yellow-200";
                         return (
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-xs font-bold uppercase tracking-tight border ${statusStyles}`}>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-sm font-semibold uppercase tracking-normal border ${statusStyles}`}>
                             {status}
                           </span>
                         );
@@ -263,7 +263,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
                 <div className="flex justify-between items-center pb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
-                    <h2 className="text-lg font-bold text-black tracking-wider uppercase">Responses</h2>
+                    <h2 className="text-sm font-semibold text-black tracking-normal uppercase">Responses</h2>
                   </div>
                   {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole?.includes("MANAGER") || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole === "DEPUTY_MANAGER" || isAssist) && (
                     <button
@@ -289,7 +289,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
                       {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole?.includes("MANAGER") || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole === "DEPUTY_MANAGER" || isAssist) && (
                         <button
                           onClick={() => setShowModal(true)}
-                          className="mt-3 px-4 py-1.5 bg-gray-100 text-black border border-gray-300 rounded-none hover:bg-gray-200 transition-all font-bold text-xs uppercase tracking-wider cursor-pointer"
+                          className="mt-3 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer shadow-sm"
                         >
                           Add Response Now
                         </button>

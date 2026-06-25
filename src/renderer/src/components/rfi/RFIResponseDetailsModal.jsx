@@ -15,7 +15,7 @@ const STATUS_OPTIONS = [
 const SectionTitle = ({ title }) => (
   <div className="flex items-center gap-3">
     <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
-    <h2 className="text-lg font-bold text-black tracking-wider uppercase">{title}</h2>
+    <h2 className="text-sm font-semibold text-black tracking-normal uppercase">{title}</h2>
   </div>
 );
 
@@ -86,11 +86,11 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
         <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
-            <h1 className="text-xl font-bold text-black uppercase tracking-wider">Response Details</h1>
+            <h1 className="text-sm font-semibold text-black uppercase tracking-normal">Response Details</h1>
           </div>
           <button
             onClick={onClose}
-            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-normal shadow-sm cursor-pointer"
           >
             Close
           </button>
@@ -103,19 +103,19 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
             <div className="bg-[#ebf5ea]/80 border border-[#6bbd45]/20 p-4 rounded-none">
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-16 text-sm">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-black uppercase tracking-wider shrink-0">
+                  <span className="font-semibold text-black uppercase tracking-normal shrink-0">
                     Sender:
                   </span>
-                  <span className="text-black font-normal uppercase whitespace-nowrap" title={getSenderName()}>
+                  <span className="text-black font-semibold uppercase whitespace-nowrap" title={getSenderName()}>
                     {getSenderName()}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-black uppercase tracking-wider shrink-0">
+                  <span className="font-semibold text-black uppercase tracking-normal shrink-0">
                     Created At:
                   </span>
-                  <span className="text-black font-normal uppercase whitespace-nowrap">
+                  <span className="text-black font-semibold uppercase whitespace-nowrap">
                     {new Date(response.createdAt).toLocaleString()}
                   </span>
                 </div>
@@ -150,7 +150,7 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
               <div className="pt-4 border-t border-gray-200 flex justify-end">
                 <button
                   onClick={() => setReplyMode(true)}
-                  className="px-8 py-2.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+                  className="px-8 py-2.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-semibold text-sm uppercase tracking-normal shadow-sm cursor-pointer"
                 >
                   Reply
                 </button>
@@ -168,11 +168,11 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
                     key={child.id}
                     className="bg-gray-50 p-4 rounded-none border border-gray-200 text-sm space-y-2"
                   >
-                    <div className="flex justify-between text-xs text-gray-500 pb-1 border-b border-gray-200">
-                      <span className="font-semibold text-black uppercase tracking-wider">
+                    <div className="flex justify-between text-sm text-black pb-1 border-b border-gray-200">
+                      <span className="font-semibold text-black uppercase tracking-normal">
                         {child.user ? `${child.user.firstName || ""} ${child.user.lastName || ""}`.trim() : "User"} ({child.user?.role || "N/A"})
                       </span>
-                      <span>{new Date(child.createdAt).toLocaleString()}</span>
+                      <span className="font-semibold text-black uppercase tracking-normal">{new Date(child.createdAt).toLocaleString()}</span>
                     </div>
                     <div
                       className="text-black prose prose-sm max-w-none pt-1"
@@ -208,7 +208,7 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
 
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-black uppercase tracking-wider">
+                  <label className="text-sm font-semibold text-black uppercase tracking-normal">
                     Message
                   </label>
                   <RichTextEditor
@@ -220,7 +220,7 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1">
-                    <label className="block text-xs font-bold text-black uppercase tracking-wider mb-2">
+                    <label className="block text-sm font-semibold text-black uppercase tracking-normal mb-2">
                       Response Status
                     </label>
                     <select
@@ -247,13 +247,13 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
 
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
                 <button
-                  className="px-6 py-2 bg-gray-50 text-black border border-gray-300 rounded-none hover:bg-gray-200 transition-all font-bold text-sm uppercase tracking-wider cursor-pointer"
+                  className="px-6 py-2 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer"
                   onClick={() => setReplyMode(false)}
                 >
                   Cancel
                 </button>
                 <button
-                  className="px-6 py-2 bg-[#6bbd45] text-white border-2 border-green-700 hover:bg-[#5aa83a] transition-all font-bold text-sm uppercase tracking-wider cursor-pointer rounded-none"
+                  className="px-6 py-2 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer rounded-none"
                   onClick={handleReplySubmit}
                 >
                   Send Reply

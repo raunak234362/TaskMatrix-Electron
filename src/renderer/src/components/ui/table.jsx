@@ -306,13 +306,13 @@ export default function DataTable({
               ))}
             <button
               onClick={() => table.resetColumnFilters()}
-              className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm flex items-center"
+              className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-semibold text-sm uppercase tracking-normal shadow-sm flex items-center"
             >
               <X className="w-4 h-4 mr-2 text-black" /> Clear Filters
             </button>
           </div>
         )}
-
+ 
       {/* responsive body */}
       {isMobile ? (
         <MobileCardView
@@ -330,7 +330,7 @@ export default function DataTable({
                     {hg.headers.map((header) => (
                       <th
                         key={header.id}
-                        className="px-4 py-3 text-left text-base font-bold uppercase tracking-wide bg-green-100 text-black border-b border-black/5"
+                        className="px-4 py-3 text-left text-sm font-semibold uppercase tracking-normal bg-green-100 text-black border-b border-black/5"
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         <div className="flex items-center gap-1 cursor-pointer">
@@ -345,7 +345,7 @@ export default function DataTable({
                             <ChevronDown className="w-4 h-4" />
                           )}
                         </div>
-
+ 
                         {showColumnFiltersInHeader &&
                           header.column.getCanFilter() && (
                             <TextFilter column={header.column} />
@@ -355,7 +355,7 @@ export default function DataTable({
                   </tr>
                 ))}
               </thead>
-
+ 
               <tbody className="bg-white text-black divide-y divide-gray-100">
                 {table.getPaginationRowModel().rows.map((row) => (
                   <React.Fragment key={row.id}>
@@ -385,8 +385,8 @@ export default function DataTable({
                         <td colSpan={columns.length} className="px-4 py-4">
                           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-black">
                             <DetailComponent
-                              row={row.original}
-                              close={() => setExpandedRowId(null)}
+                               row={row.original}
+                               close={() => setExpandedRowId(null)}
                             />
                           </div>
                         </td>
@@ -399,12 +399,12 @@ export default function DataTable({
           </div>
         </div>
       )}
-
+ 
       {/* pagination */}
       <div className="flex flex-col sm:flex-row items-center gap-4 text-sm p-4 border-gray-50 dark:border-slate-800">
         <div className="flex items-center gap-4">
-          <span className="text-black font-bold">
-            Page {table.getState().pagination.pageIndex + 1} of{" "}
+          <span className="text-black font-semibold text-sm uppercase">
+            PAGE {table.getState().pagination.pageIndex + 1} OF{" "}
             {table.getPageCount()}
           </span>
         </div>
@@ -412,14 +412,14 @@ export default function DataTable({
           <Button
             disabled={!table.getCanPreviousPage()}
             onClick={() => table.previousPage()}
-            className="px-3 py-1 border border-gray-200 rounded disabled:opacity-50 text-black font-bold"
+            className="px-3 py-1 border border-gray-200 rounded-none disabled:opacity-50 text-black font-semibold text-sm"
           >
             {"<"}
           </Button>
           <Button
             disabled={!table.getCanNextPage()}
             onClick={() => table.nextPage()}
-            className="px-3 py-1 border border-gray-200 rounded disabled:opacity-50 text-black font-bold"
+            className="px-3 py-1 border border-gray-200 rounded-none disabled:opacity-50 text-black font-semibold text-sm"
           >
             {">"}
           </Button>

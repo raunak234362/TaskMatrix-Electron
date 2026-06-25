@@ -11,15 +11,15 @@ const CDSnapshotCards = ({ stats }) => {
             type: "simple"
         },
         {
-            topLabel: `${stats.totalCountries} COUNTRIES`,
-            bottomLabel: `${stats.totalStates} OPERATIONAL STATES`,
+            label: "COUNTRIES",
+            value: stats.totalCountries,
             icon: Globe,
             color: "green",
-            type: "double"
+            type: "simple"
         },
         {
-            label: "TOTAL POC",
-            value: stats.totalEngineers, // Mapping workforce to POC as per image context or placeholder
+            label: "OPERATIONAL STATES",
+            value: stats.totalStates,
             icon: HardHat,
             color: "green",
             type: "simple"
@@ -29,36 +29,22 @@ const CDSnapshotCards = ({ stats }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {cards.map((card, index) => (
-                <div key={index} className="bg-green-50 p-5 rounded-2xl border border-black flex items-center justify-between shadow-sm group hover:shadow-md transition-all">
-                    <div className={`w-14 h-14 rounded-2xl bg-${card.color}-50 text-${card.color}-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-105`}>
-                        <card.icon size={24} strokeWidth={2} />
+                <div key={index} className="bg-green-50 py-3 px-5 rounded-2xl border border-black flex items-center justify-between shadow-sm group hover:shadow-md transition-all">
+                    <div className={`w-11 h-11 rounded-2xl bg-${card.color}-50 text-${card.color}-600 flex items-center justify-center shrink-0 transition-transform group-hover:scale-105`}>
+                        <card.icon size={20} strokeWidth={2} />
                     </div>
                     <div className="flex justify-between items-center w-full">
-
                         {/* LEFT → LABEL */}
                         <div>
-                            {card.type === "simple" ? (
-                                <p className="px-2 text-xl text-black font-semibold uppercase">
-                                    {card.label}
-                                </p>
-                            ) : (
-                                <>
-                                    <p className="px-2 text-xl text-black font-semibold uppercase">
-                                        {card.topLabel}
-                                    </p>
-                                    <p className="px-2 text-lg text-black uppercase">
-                                        {card.bottomLabel}
-                                    </p>
-                                </>
-                            )}
+                            <p className="px-2 text-base font-semibold text-black uppercase tracking-normal">
+                                {card.label}
+                            </p>
                         </div>
 
                         {/* RIGHT → NUMBER */}
-                        {card.type === "simple" && (
-                            <h3 className="text-2xl text-black">
-                                {card.value}
-                            </h3>
-                        )}
+                        <h3 className="text-3xl font-semibold text-black">
+                            {card.value}
+                        </h3>
                     </div>
                 </div>
             ))}

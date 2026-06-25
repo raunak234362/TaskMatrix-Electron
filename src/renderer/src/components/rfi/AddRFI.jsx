@@ -215,9 +215,9 @@ const AddRFI = ({
   }, [rfiData, setValue, isCDMode]);
 
   return (
-    <div className="w-full mx-auto bg-white p-2 rounded-xl shadow">
+    <div className="w-full mx-auto bg-white p-2 rounded-none">
       {/* Recipient Category Toggle */}
-      <div className="flex bg-gray-100/50 p-1 rounded-lg gap-1 mb-4">
+      <div className="flex bg-gray-100/50 p-1 rounded-none gap-1 mb-4">
         <button
           type="button"
           onClick={() => {
@@ -225,9 +225,9 @@ const AddRFI = ({
             setValue("multipleRecipients", []); // Clear selection when switching modes
             setValue("isConnectionDesign", false);
           }}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+          className={`flex-1 py-1.5 text-sm font-semibold rounded-none transition-all ${
             !isCDMode
-              ? "bg-white text-black shadow-sm"
+              ? "bg-white text-black shadow-none border border-gray-200"
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -240,9 +240,9 @@ const AddRFI = ({
             setValue("multipleRecipients", []); // Clear selection when switching modes
             setValue("isConnectionDesign", true);
           }}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+          className={`flex-1 py-1.5 text-sm font-semibold rounded-none transition-all ${
             isCDMode
-              ? "bg-white text-black shadow-sm"
+              ? "bg-white text-black shadow-none border border-gray-200"
               : "text-gray-500 hover:text-gray-700"
           }`}
         >
@@ -255,7 +255,7 @@ const AddRFI = ({
 
         {/* WBT RECIPIENT */}
         <div className="space-y-1">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-semibold text-black uppercase tracking-normal">
             Select {isCDMode ? "CD Engineer" : "Client"} Recipients *
           </label>
           <Controller
@@ -299,7 +299,7 @@ const AddRFI = ({
         />
 
         <div className="space-y-1">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-semibold text-black uppercase tracking-normal">
             Description
           </label>
           <RichTextEditor
@@ -314,9 +314,13 @@ const AddRFI = ({
         <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
 
         <div className="flex justify-center w-full mt-6">
-          <Button type="submit" className="w-full" disabled={loading}>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer shadow-sm disabled:opacity-50"
+          >
             {loading ? "Submitting RFI..." : "Submit RFI"}
-          </Button>
+          </button>
         </div>
       </form>
     </div>

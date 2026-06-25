@@ -148,24 +148,24 @@ const EditRFI = ({ id, onSuccess }) => {
   }
 
   return (
-    <div className="w-full mx-auto bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+    <div className="w-full mx-auto bg-white p-4 rounded-none">
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Edit RFI</h2>
-        <p className="text-sm text-gray-500">Update Request for Information details and recipients.</p>
+        <h2 className="text-sm font-semibold text-black uppercase tracking-normal">Edit RFI</h2>
+        
       </div>
 
       {/* Recipient Category Toggle */}
-      <div className="flex bg-gray-100/80 p-1.5 rounded-xl gap-2 mb-6 border border-gray-200">
+      <div className="flex bg-gray-100/50 p-1 rounded-none gap-1 mb-4">
         <button
           type="button"
           onClick={() => {
             setIsCDMode(false)
             setValue('multipleRecipients', [])
           }}
-          className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+          className={`flex-1 py-1.5 text-sm font-semibold rounded-none transition-all ${
             !isCDMode
-              ? 'bg-white text-black shadow-md border border-gray-100'
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+              ? 'bg-white text-black shadow-none border border-gray-200'
+              : 'text-gray-500 hover:text-gray-700'
           }`}
         >
           CLIENT POCs
@@ -176,10 +176,10 @@ const EditRFI = ({ id, onSuccess }) => {
             setIsCDMode(true)
             setValue('multipleRecipients', [])
           }}
-          className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+          className={`flex-1 py-1.5 text-sm font-semibold rounded-none transition-all ${
             isCDMode
-              ? 'bg-white text-black shadow-md border border-gray-100'
-              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'
+              ? 'bg-white text-black shadow-none border border-gray-200'
+              : 'text-gray-500 hover:text-gray-700'
           }`}
         >
           CONNECTION DESIGNER
@@ -189,9 +189,9 @@ const EditRFI = ({ id, onSuccess }) => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Recipients */}
         <div className="space-y-2">
-          <label className="text-sm font-bold text-gray-800 flex justify-between items-center">
+          <label className="text-sm font-semibold text-black uppercase tracking-normal flex justify-between items-center">
             <span>Select {isCDMode ? 'CD Engineer' : 'Client'} Recipients *</span>
-            <span className="text-[10px] font-normal text-gray-400 uppercase tracking-wider bg-gray-50 px-2 py-0.5 rounded border border-gray-100">Required</span>
+            <span className="text-xs font-semibold text-red-700 uppercase tracking-normal bg-red-50 px-2 py-0.5 rounded-none border border-red-200">Required</span>
           </label>
           <Controller
             name="multipleRecipients"
@@ -222,7 +222,7 @@ const EditRFI = ({ id, onSuccess }) => {
                   styles={{
                     control: (base) => ({
                       ...base,
-                      borderRadius: '10px',
+                      borderRadius: '0px',
                       padding: '2px',
                       borderColor: fieldState.error ? '#ef4444' : '#e5e7eb',
                       '&:hover': {
@@ -232,7 +232,7 @@ const EditRFI = ({ id, onSuccess }) => {
                     multiValue: (base) => ({
                       ...base,
                       backgroundColor: '#f0fdf4',
-                      borderRadius: '6px',
+                      borderRadius: '0px',
                       border: '1px solid #dcfce7'
                     }),
                     multiValueLabel: (base) => ({
@@ -264,15 +264,15 @@ const EditRFI = ({ id, onSuccess }) => {
           label="Subject"
           placeholder="Enter the subject of this RFI"
           {...register('subject', { required: 'Subject is required' })}
-          className="rounded-xl border-gray-200 focus:border-[#6bbd45] focus:ring-[#6bbd45]/20"
+          className="rounded-none border-gray-200 focus:border-black focus:ring-0"
         />
 
         {/* Description */}
         <div className="space-y-2">
-          <label className="text-sm font-bold text-gray-800">
+          <label className="text-sm font-semibold text-black uppercase tracking-normal">
             Description
           </label>
-          <div className="rounded-xl overflow-hidden border border-gray-200 focus-within:border-[#6bbd45] focus-within:ring-2 focus-within:ring-[#6bbd45]/10 transition-all duration-200">
+          <div className="rounded-none overflow-hidden border border-gray-200 focus-within:border-black transition-all duration-200">
             <RichTextEditor
               value={description}
               onChange={setDescription}
@@ -291,28 +291,21 @@ const EditRFI = ({ id, onSuccess }) => {
         </div>
 
         {/* Submit Buttons */}
-        <div className="flex gap-3 pt-4 border-t border-gray-50">
-          <Button
+        <div className="flex gap-3 pt-4 border-t border-gray-200">
+          <button
             type="button"
             onClick={() => onSuccess?.()}
-            className="flex-1 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 font-semibold"
+            className="flex-1 py-2 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer shadow-sm"
           >
             Close
-          </Button>
-          <Button 
+          </button>
+          <button 
             type="submit" 
-            className="flex-[2] bg-[#6bbd45] text-white hover:bg-[#5aa83a] shadow-lg shadow-[#6bbd45]/20 font-bold" 
+            className="flex-[2] py-2 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer rounded-none shadow-sm" 
             disabled={submitting}
           >
-            {submitting ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin mr-2 inline" />
-                Updating RFI...
-              </>
-            ) : (
-              'Update RFI'
-            )}
-          </Button>
+            {submitting ? 'Updating RFI...' : 'Update RFI'}
+          </button>
         </div>
       </form>
     </div>

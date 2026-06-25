@@ -37,11 +37,11 @@ const ProjectProgress = ({ projectId }) => {
       enableColumnFilter: true,
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-black text-black uppercase tracking-tight text-sm">
+          <span className="font-semibold text-black uppercase tracking-normal text-sm">
             {row.original.title || 'Weekly Progress Report'}
           </span>
           {row.original.stage && (
-            <span className="text-[10px] text-black font-black uppercase tracking-widest mt-1 opacity-60">
+            <span className="text-sm text-black font-semibold uppercase tracking-normal mt-1 opacity-60">
               {row.original.stage}
             </span>
           )}
@@ -52,7 +52,7 @@ const ProjectProgress = ({ projectId }) => {
       header: 'Date Created',
       accessorKey: 'createdAt',
       cell: ({ row }) => (
-        <div className="text-[11px] text-black font-black uppercase tracking-widest">
+        <div className="text-sm text-black font-semibold uppercase tracking-normal">
           {format(new Date(row.original.createdAt), 'dd MMM yyyy')}
         </div>
       ),
@@ -62,10 +62,10 @@ const ProjectProgress = ({ projectId }) => {
       accessorKey: 'createdBy.firstName',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-none bg-slate-100 flex items-center justify-center text-[10px] font-black text-black border border-black shadow-none">
+          <div className="w-8 h-8 rounded-none bg-slate-100 flex items-center justify-center text-sm font-semibold text-black border border-black shadow-none">
             {row.original.createdBy?.firstName?.[0] || 'U'}
           </div>
-          <span className="text-[10px] font-black text-black uppercase tracking-widest">
+          <span className="text-sm font-semibold text-black uppercase tracking-normal">
             {row.original.createdBy?.firstName} {row.original.createdBy?.lastName}
           </span>
         </div>
@@ -75,17 +75,16 @@ const ProjectProgress = ({ projectId }) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+      <div className="flex justify-between items-center pb-3">
         <div className="flex items-center gap-3">
           <Activity className="w-5 h-5 text-black" />
-          <h2 className="text-base font-bold text-black uppercase tracking-wider">Weekly Progress Reports</h2>
+          <h2 className="text-sm font-semibold text-black uppercase tracking-normal">Weekly Progress Reports</h2>
         </div>
         <button
           onClick={() => setIsAdding(true)}
-          className="flex items-center gap-2 px-6 py-1.5 border-2 border-green-700/80 bg-green-300 text-black hover:bg-green-100 rounded-none text-xs font-black uppercase tracking-widest transition-all shadow-none"
+          className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-semibold text-sm uppercase tracking-normal shadow-sm inline-flex items-center justify-center cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
-          Add Report
+          + Add Report
         </button>
       </div>
 
@@ -93,7 +92,7 @@ const ProjectProgress = ({ projectId }) => {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <Loader2 className="w-10 h-10 animate-spin text-[#6bbd45] mb-4" />
-            <p className="text-sm text-gray-500 font-bold uppercase tracking-wider">Loading Reports...</p>
+            <p className="text-sm text-gray-500 font-semibold uppercase tracking-normal">Loading Reports...</p>
           </div>
         ) : (
           <DataTable 

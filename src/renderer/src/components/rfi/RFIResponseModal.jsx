@@ -75,10 +75,14 @@ const RFIResponseModal = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40">
-      <div className="bg-white w-full max-w-lg p-6 rounded-xl shadow-lg relative">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-green-700">Add Response</h2>
-          <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
+      <div className="bg-white w-full max-w-lg p-6 rounded-none shadow-2xl border border-gray-200 relative">
+        <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200">
+          <h2 className="text-sm font-semibold text-black uppercase tracking-normal">Add Response</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-normal shadow-sm"
+          >
             Close
           </button>
         </div>
@@ -116,7 +120,7 @@ const RFIResponseModal = ({
               <div className="flex flex-col gap-1">
                 <select
                   {...field}
-                  className="w-full border border-gray-300 rounded-md p-2 text-sm text-gray-700"
+                  className="w-full border border-gray-300 rounded-none p-2 text-sm text-black bg-white focus:outline-none focus:border-black uppercase font-medium"
                   required
                 >
                   <option value="">Select Status</option>
@@ -127,15 +131,21 @@ const RFIResponseModal = ({
             )}
           />
 
-          <div className="flex justify-end gap-3">
-            <Button onClick={onClose}>Cancel</Button>
-            <Button
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
               type="submit"
               disabled={loading}
-              className="bg-green-600 text-white"
+              className="px-6 py-2 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer rounded-none"
             >
               {loading ? "Submitting..." : "Submit Response"}
-            </Button>
+            </button>
           </div>
         </form>
       </div>
