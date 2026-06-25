@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { X, Search, UserPlus, Trash2 } from "lucide-react";
 import Button from "../fields/Button";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 import Service from "../../api/Service";
 
@@ -41,23 +42,18 @@ const GroupDetail = ({ group, onClose }) => {
     if (selectedUsers.length === 0) return;
     setLoading(true);
     try {
-      // Mock API call since actual endpoint is missing
-      console.log("Adding members to group:", group.id, selectedUsers);
       const response = await Service.AddGroupMembers({
         groupId: group.id,
         memberIds: selectedUsers,
       });
       console.log(response);
-
-      // Simulate delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Reset selection and close or show success
       setSelectedUsers([]);
       setActiveTab("members");
-      // You might want to show a toast here
+      fetchGroupMembers();
+      toast.success("Members added successfully!");
     } catch (error) {
       console.error("Failed to add members", error);
+      toast.error("Failed to add members. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -68,8 +64,10 @@ const GroupDetail = ({ group, onClose }) => {
     try {
       await Service.DeleteGroupMember(group.id, memberId);
       fetchGroupMembers();
+      toast.success("Member removed successfully!");
     } catch (error) {
       console.error("Failed to delete member", error);
+      toast.error("Failed to remove member. Please try again.");
     }
   };
 
@@ -82,11 +80,12 @@ const GroupDetail = ({ group, onClose }) => {
       return;
     try {
       await Service.DeleteGroup(group.id);
+      toast.success("Group deleted successfully!");
       onClose();
-      // Ideally trigger a refresh of the chat list here, but for now just close
-      window.location.reload(); // Simple way to refresh for now as requested by user context implies reload might be needed or acceptable
+      window.location.reload();
     } catch (error) {
       console.error("Failed to delete group", error);
+      toast.error("Failed to delete group. Please try again.");
     }
   };
 
@@ -130,16 +129,16 @@ const GroupDetail = ({ group, onClose }) => {
             Members
           </button>
           {
-            userRole === "admin" || userRole === "operation_executive" || userRole === "deputy_manager" || userRole === "human_resource" && (
+            (userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole === "DEPUTY_MANAGER" || userRole === "HUMAN_RESOURCE") && (
               <button
                 className={`flex-1 py-3 text-sm font-medium transition ${activeTab === "add"
                   ? "text-green-600 border-b-2 border-green-600 bg-green-50"
                   : "text-gray-700 hover:text-gray-700 hover:bg-gray-50"
-              }`}
-            onClick={() => setActiveTab("add")}
-          >
-            Add Members
-          </button>
+                }`}
+                onClick={() => setActiveTab("add")}
+              >
+                Add Members
+              </button>
             )
           }
 

@@ -232,7 +232,7 @@ const ChatMain = ({ activeChat, setActiveChat, onMessageSent }) => {
     <div
       className="chat-main-bg flex flex-col h-full overflow-hidden"
     >
-      <div className="shrink-0 py-2">
+      <div className="shrink-0">
         <ChatHead contact={activeChat} onBack={() => setActiveChat(null)} />
       </div>
 
