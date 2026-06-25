@@ -18,6 +18,7 @@ const LocalSectionTitle = ({ title }) => (
 )
 
 const EditTask = ({ id, onClose, refresh }) => {
+  const userRole = sessionStorage.getItem('userRole')?.toUpperCase() || ''
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
   const [projectId, setProjectId] = useState(null)
@@ -368,6 +369,7 @@ const EditTask = ({ id, onClose, refresh }) => {
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-6">
+                    {userRole !== 'PROJECT_MANAGER' && (
                     <div>
                       <label className="text-sm font-bold text-black uppercase tracking-wider block mb-2">
                         Duration
@@ -387,6 +389,7 @@ const EditTask = ({ id, onClose, refresh }) => {
                         />
                       </div>
                     </div>
+                    )}
                     <div>
                       <label className="text-sm font-bold text-black uppercase tracking-wider block mb-2">
                         Priority
