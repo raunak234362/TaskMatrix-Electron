@@ -42,7 +42,7 @@ const CDSnapshotCards = ({ stats }) => {
                         </div>
 
                         {/* RIGHT → NUMBER */}
-                        <h3 className="text-3xl font-semibold text-black">
+                        <h3 className="text-2xl font-semibold text-black">
                             {card.value}
                         </h3>
                     </div>
