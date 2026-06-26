@@ -176,7 +176,7 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
     }
 
     // Fallback if no responses exist
-    if (item.status === true || item.status === 'OPEN' || item.status === 'PENDING') {
+    if (item.status === false || item.status === 'OPEN' || item.status === 'PENDING') {
       return { label: 'PENDING', className: 'bg-green-100 text-black shadow-sm' }
     } else {
       return { label: 'ANSWERED', className: 'bg-orange-100 text-black shadow-sm' }

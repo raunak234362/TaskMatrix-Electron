@@ -133,13 +133,11 @@ export const navItems = [
             'operation_executive',
             'project_manager_officer',
             'team_lead',
-            'staff',
             'sales_manager',
             'client_admin',
             'connection_designer_engineer',
             'client',
             'project_manager',
-            'user',
             'human_resource'
         ]
     },

@@ -16,12 +16,12 @@ import {
   Loader2,
   Compass
 } from "lucide-react";
-import Service from "../../api/Service";
+import Service from "../../../api/Service";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
-import Logo from '../../assets/logo.png';
+import Logo from '../../../assets/logo.png';
 
 const WorkProgressReport = ({
   projectId,

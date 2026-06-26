@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Loader2, FileText, Timer, ClipboardList, Edit } from 'lucide-react'
+import { Loader2, FileText, Timer, ClipboardList, Edit, History } from 'lucide-react'
 import Service from '../../api/Service'
 import { toast } from 'react-toastify'
 import EditTask from './EditTask'
@@ -368,7 +368,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
             {/* Right Column: Work Summary */}
             <div className="space-y-6">
               {task.workingHourTask && task.workingHourTask.length > 0 && (
-                <div className="bg-[#f4faf0]/30 p-6 border border-green-600 rounded-none sticky top-0">
+                <div className="bg-[#f4faf0]/30 p-6 border border-green-600 rounded-none">
                   <LocalSectionTitle title="Work Session" />
 
                   <div className="grid grid-cols-2 gap-3 mb-6">
@@ -461,6 +461,69 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                   )}
                 </div>
               )}
+
+              {/* Allocation Hours History — admin / operation_executive / deputy_manager / human_resource only */}
+              {['admin', 'operation_executive', 'deputy_manager', 'human_resource'].includes(userRole) &&
+                task?.allocationLog && (
+                  <div className="bg-[#f4faf0]/30 p-6 border border-green-600 rounded-none shadow-sm">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-1.5 h-6 bg-green-600 rounded-none" />
+                      <h2 className="text-lg font-bold text-black tracking-wider uppercase flex items-center gap-2">
+                        <History className="w-4 h-4" />
+                        Allocation Hours History
+                      </h2>
+                    </div>
+
+                    {/* Current Allocation */}
+                    <div className="flex items-center justify-between mb-4 p-3 bg-green-50 border border-green-300 rounded-none">
+                      <span className="text-xs font-bold text-black uppercase tracking-wider">Current Allocated</span>
+                      <span className="text-sm font-bold text-green-700 uppercase">
+                        {task.allocationLog.allocatedHours || '00:00'}
+                      </span>
+                    </div>
+
+                    {/* History List */}
+                    {Array.isArray(task.allocationLog.history) && task.allocationLog.history.length > 0 ? (
+                      <div className="bg-[#fcfdfc] rounded-none border border-black overflow-hidden">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-[#f4faf0] border-b border-black">
+                            <tr>
+                              <th className="px-3 py-2 font-semibold text-black uppercase">#</th>
+                              <th className="px-3 py-2 font-semibold text-black uppercase">Hours</th>
+                              <th className="px-3 py-2 font-semibold text-black uppercase">Updated At</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-black/10">
+                            {[...task.allocationLog.history]
+                              .reverse()
+                              .map((entry, idx) => (
+                                <tr key={idx} className="hover:bg-slate-50 transition-all">
+                                  <td className="px-3 py-2 font-bold text-black">
+                                    {task.allocationLog.history.length - idx}
+                                  </td>
+                                  <td className="px-3 py-2 font-bold text-black uppercase">
+                                    {entry.allocatedHours || '—'}
+                                  </td>
+                                  <td className="px-3 py-2 text-black">
+                                    <div className="font-medium">
+                                      {toIST(entry.updatedAt).split(',')[1]?.trim() || '—'}
+                                    </div>
+                                    <div className="text-black/60 font-medium">
+                                      {toIST(entry.updatedAt).split(',')[0]}
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-xs font-bold text-black/50 uppercase text-center py-4">
+                        No history available
+                      </p>
+                    )}
+                  </div>
+                )}
             </div>
           </div>
         </div>

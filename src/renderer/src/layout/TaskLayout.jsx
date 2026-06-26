@@ -4,7 +4,8 @@ import { useState } from "react";
 import AllTasks from "../components/task/AllTasks";
 import AddTask from "../components/task/AddTask";
 import AllActiveTask from "../components/task/AllActiveTask";
-// import GetRFQByID from "../components/rfq/GetRFQByID";
+import PendingTrainings from "../components/training/PendingTrainings";
+import MyTrainings from "../components/training/MyTrainings";
 
 const TaskLayout = () => {
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
@@ -47,6 +48,26 @@ const TaskLayout = () => {
               Add Task
             </button>
           ) : null}
+          {['admin', 'operation_executive', 'deputy_manager', 'human_resource'].includes(userRole) ? (
+            <button
+              onClick={() => setActiveTab("pendingTraining")}
+              className={`px-6 py-1.5 border-2 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm inline-flex items-center justify-center gap-2 transition-all cursor-pointer ${activeTab === "pendingTraining"
+                ? "bg-purple-200 text-black border-purple-700/80"
+                : "bg-purple-50 text-black border-purple-700/80 hover:bg-purple-100"
+                }`}
+            >
+              🎓 Pending Training
+            </button>
+          ) : null}
+          <button
+            onClick={() => setActiveTab("myTraining")}
+            className={`px-6 py-1.5 border-2 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm inline-flex items-center justify-center gap-2 transition-all cursor-pointer ${activeTab === "myTraining"
+              ? "bg-purple-200 text-black border-purple-700/80"
+              : "bg-purple-50 text-black border-purple-700/80 hover:bg-purple-100"
+              }`}
+          >
+            🎓 My Trainings
+          </button>
         </div>
       </div>
       <div className="flex-1 min-h-0 bg-white p-2 rounded-b-2xl overflow-y-auto">
@@ -63,6 +84,16 @@ const TaskLayout = () => {
         {activeTab === "addTask" && (
           <div>
             <AddTask />
+          </div>
+        )}
+        {activeTab === "pendingTraining" && (
+          <div className="p-4">
+            <PendingTrainings />
+          </div>
+        )}
+        {activeTab === "myTraining" && (
+          <div className="p-4">
+            <MyTrainings />
           </div>
         )}
       </div>

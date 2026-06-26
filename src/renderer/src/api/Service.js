@@ -2202,8 +2202,11 @@ class Service {
       })
       return response.data
     } catch (error) {
-      console.error('Error fetching BFA by Submittal ID:', error)
-      throw error
+      // 404 = no BFA for this submittal — expected, not an error
+      if (error?.response?.status !== 404) {
+        console.error('Error fetching BFA by Submittal ID:', error)
+      }
+      return null
     }
   }
 
@@ -4280,7 +4283,11 @@ class Service {
       const response = await api.get(`bfa/submittal/${submittalId}`)
       return response.data
     } catch (error) {
-      console.error('Cannot find BFA by Submittal ID', error)
+      // 404 = no BFA for this submittal — expected, not an error
+      if (error?.response?.status !== 404) {
+        console.error('Cannot find BFA by Submittal ID', error)
+      }
+      return null
     }
   }
 
@@ -4294,6 +4301,141 @@ class Service {
       return response.data
     } catch (error) {
       console.error('Error removing project assist', error)
+      throw error
+    }
+  }
+
+  // ─── Training Services ────────────────────────────────────────────────────
+
+  // GET /training/batches — all batches
+  static async GetAllTrainingBatches() {
+    try {
+      const response = await api.get('training/batches', {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      if (error?.response?.status !== 404) console.error('Error fetching training batches', error)
+      return null
+    }
+  }
+
+
+  // POST /training/request  — { taskId, topic, reason }
+  static async RequestTraining(payload) {
+    try {
+      const response = await api.post('training/request', payload, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error requesting training', error)
+      throw error
+    }
+  }
+
+  // GET /training/pending
+  static async GetPendingTraining() {
+    try {
+      const response = await api.get('training/pending', {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching pending trainings', error)
+      throw error
+    }
+  }
+
+  // PATCH /training/{requestId}/approve  — { name, description, estimatedHours, dueDate }
+  static async ApproveTraining(requestId, payload) {
+    try {
+      const response = await api.patch(`training/${requestId}/approve`, payload, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error approving training', error)
+      throw error
+    }
+  }
+
+  // PATCH /training/{requestId}/reject  — { reason }
+  static async RejectTraining(requestId, payload) {
+    try {
+      const response = await api.patch(`training/${requestId}/reject`, payload, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error rejecting training', error)
+      throw error
+    }
+  }
+
+  // GET /training/{taskId}/variance
+  static async GetTrainingVariance(taskId) {
+    try {
+      const response = await api.get(`training/${taskId}/variance`, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching training variance', error)
+      throw error
+    }
+  }
+
+  // GET /training/batches/suggest — optionally filter by departmentId
+  static async GetSuggestedBatches(departmentId) {
+    try {
+      const url = departmentId ? `training/batches/suggest?departmentId=${departmentId}` : 'training/batches/suggest'
+      const response = await api.get(url, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching suggested batches', error)
+      throw error
+    }
+  }
+
+  // POST /training/batches
+  // payload: { topic, departmentId, requestIds[], trainerId, estimatedHours, dueDate,
+  //            sessionName, sessionDescription, trainingProjectId, priority }
+  static async CreateTrainingBatch(payload) {
+    try {
+      const response = await api.post('training/batches', payload, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error creating training batch', error)
+      throw error
+    }
+  }
+
+  // PATCH /training/batches/{batchId}/complete
+  static async CompleteTrainingBatch(batchId) {
+    try {
+      const response = await api.patch(`training/batches/${batchId}/complete`, {}, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error completing training batch', error)
+      throw error
+    }
+  }
+  // GET /training/batches/mine
+  static async GetMyTrainingBatches() {
+    try {
+      const response = await api.get('training/batches/mine', {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching my training batches', error)
       throw error
     }
   }

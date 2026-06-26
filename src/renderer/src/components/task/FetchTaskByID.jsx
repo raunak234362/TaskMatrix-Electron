@@ -16,7 +16,8 @@ import {
   Play,
   Square,
   ClipboardList,
-  Clock
+  Clock,
+  GraduationCap
 } from 'lucide-react'
 import Service from '../../api/Service'
 import { toast } from 'react-toastify'
@@ -24,6 +25,7 @@ import { Button } from '../ui/button'
 import EditTask from './EditTask'
 import { Edit } from 'lucide-react'
 import Comment from './comments/Comment'
+import RequestTrainingModal from '../training/RequestTrainingModal'
 
 const FetchTaskByID = ({ id, onClose, refresh }) => {
   const [task, setTask] = useState(null)
@@ -36,6 +38,7 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
   const [endComment, setEndComment] = useState('')
   const [completionPercentage, setCompletionPercentage] = useState('')
   const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
+  const [isRequestingTraining, setIsRequestingTraining] = useState(false)
   const fetchTask = async () => {
     if (!id) return
     try {
@@ -411,6 +414,13 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
               <Edit className="w-4 h-4" /> Edit Task
             </button>
           )}
+          {/* Request Training — visible to all roles */}
+          <button
+            onClick={() => setIsRequestingTraining(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-700 border border-purple-300 rounded-lg text-xs font-bold uppercase hover:bg-purple-100 transition-colors"
+          >
+            <GraduationCap className="w-4 h-4" /> Request Training
+          </button>
         </div>
 
         {/* Scrollable Content */}
@@ -660,6 +670,12 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
             fetchTask()
             if (refresh) refresh()
           }}
+        />
+      )}
+      {isRequestingTraining && (
+        <RequestTrainingModal
+          taskId={task.id}
+          onClose={() => setIsRequestingTraining(false)}
         />
       )}
 
