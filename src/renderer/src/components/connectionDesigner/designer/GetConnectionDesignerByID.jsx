@@ -20,7 +20,8 @@ import {
   FileText,
   Search,
   Settings,
-  Edit2
+  Edit2,
+  ChevronRight
 } from 'lucide-react'
 import EditConnectionDesigner from './EditConnectionDesigner'
 import { AllCDEngineer } from '../..'
@@ -49,6 +50,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
   const [activeTab, setActiveTab] = useState('DASHBOARD')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [selectedProjectId, setSelectedProjectId] = useState(null)
+  const [projectSearchTerm, setProjectSearchTerm] = useState('')
 
   const fetchDesigner = async () => {
     if (!id) return
@@ -94,7 +96,9 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
         <div className="flex items-center gap-5">
 
           <div>
-            <h2 className="text-3xl font-black text-black tracking-tight">{designer.name}</h2>
+            <h2 className="text-lg md:text-2xl font-semibold text-gray-900 tracking-tight uppercase">
+              {designer.name}
+            </h2>
             <div className="flex items-center gap-4 mt-1">
               <span className="flex items-center gap-1.5 text-sm font-bold text-black uppercase tracking-widest">
                 <Calendar size={12} className="text-green-500" />
@@ -111,34 +115,27 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setActiveTab('DASHBOARD')}
-            className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'DASHBOARD'
-              ? 'bg-green-50 border-green-400 text-green-700 shadow-sm'
-              : 'bg-white border-gray-300 text-black hover:bg-gray-50'
-              }`}
+            className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm flex items-center gap-2 transition-all cursor-pointer ${
+              activeTab === 'DASHBOARD'
+                ? 'bg-green-50 border-green-700/80 text-black hover:bg-green-100'
+                : 'bg-white border-gray-300 text-black hover:bg-gray-50'
+            }`}
           >
             <LayoutDashboard size={14} /> Dashboard
           </button>
           <button
             onClick={() => setActiveTab('PROJECTS')}
-            className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'PROJECTS'
-              ? 'bg-green-50 border-green-400 text-green-700 shadow-sm'
-              : 'bg-white border-gray-300 text-black hover:bg-gray-50'
-              }`}
+            className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm flex items-center gap-2 transition-all cursor-pointer ${
+              activeTab === 'PROJECTS'
+                ? 'bg-green-50 border-green-700/80 text-black hover:bg-green-100'
+                : 'bg-white border-gray-300 text-black hover:bg-gray-50'
+            }`}
           >
             <Briefcase size={14} /> Projects
           </button>
           <button
-            onClick={() => setActiveTab('FILES')}
-            className={`px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border transition-all ${activeTab === 'FILES'
-              ? 'bg-green-50 border-green-400 text-green-700 shadow-sm'
-              : 'bg-white border-gray-300 text-black hover:bg-gray-50'
-              }`}
-          >
-            <Files size={14} /> Files
-          </button>
-          <button
             onClick={onClose}
-            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
           >
             Close
           </button>
@@ -155,26 +152,27 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
                 value={designer.CDEngineers?.length || 0}
                 icon={HardHat}
               />
-              <StatBox label="All Projects" value={designer.project?.length || 0} icon={RefreshCcw} onClick={() => setActiveTab('PROJECTS')} />
-              <StatBox label="Status" value="Active" icon={ShieldCheck} isStatus />
               <StatBox
-                label="Availability"
+                label="Stamping Availability"
                 value={getStatesList(designer.state).length}
                 icon={Globe}
               />
+              <StatBox label="Status" value="Active" icon={ShieldCheck} isStatus />
+              <StatBox label="All Projects" value={designer.project?.length || 0} icon={RefreshCcw} onClick={() => setActiveTab('PROJECTS')} />
             </div>
 
             <div className="grid grid-cols-12 gap-10">
               {/* Left Column: Profile Details */}
-              <div className="col-span-12 lg:col-span-8 space-y-12">
-                {/* Profile Details Section */}
-                <div>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-black mb-6 flex items-center gap-2">
-                    <Users size={16} className="text-green-600" />
-                    Profile Details
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12 p-8 rounded-2xl border border-gray-300">
+              <div className="col-span-12 lg:col-span-8 flex flex-col">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-black mb-6 flex items-center gap-2 shrink-0">
+                  <Users size={16} className="text-green-600" />
+                  Profile Details
+                </h3>
+                <div className="flex flex-col gap-6 p-8 rounded-2xl border border-gray-300 bg-white flex-1">
+                  {/* Top Row: Basic Info */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     <DetailItem label="Email Address" value={designer.email} />
+                    <DetailItem label="Contact" value={designer.contactInfo || '-'} />
                     <div className="space-y-1.5">
                       <p className="text-sm font-bold text-black uppercase tracking-wider">Website Link</p>
                       {designer.websiteLink ? (
@@ -187,64 +185,68 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
                           {designer.websiteLink}
                         </a>
                       ) : (
-                        <p className="text-sm text-black">-</p>
-                      )}
-                    </div>
-                    <DetailItem label="Contact" value={designer.contactInfo || '-'} />
-                    <div className="space-y-1.5">
-                      <p className="text-sm font-bold text-black uppercase tracking-wider">Coverage</p>
-                      {getStatesList(designer.state).length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {getStatesList(designer.state).map((state, idx) => (
-                            <span
-                              key={idx}
-                              className="px-3.5 py-1 bg-green-50 text-green-900 border border-green-700 rounded-lg font-medium text-xs uppercase tracking-tight shadow-sm inline-flex items-center"
-                            >
-                              {state}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm font-semibold text-gray-900">-</p>
+                        <p className="text-sm font-semibold text-black">-</p>
                       )}
                     </div>
                   </div>
-                </div>
 
+                  <hr className="border-gray-200" />
+
+                  {/* Bottom Row: Coverage */}
+                  <div className="space-y-3">
+                    <p className="text-sm font-bold text-black uppercase tracking-wider">Coverage / Stamping States</p>
+                    {getStatesList(designer.state).length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {getStatesList(designer.state).map((state, idx) => (
+                          <span
+                            key={idx}
+                            className="px-3.5 py-1 bg-green-50 text-green-700 border border-green-100 rounded-full font-bold text-xs uppercase tracking-tight inline-flex items-center"
+                          >
+                            {state}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm font-semibold text-gray-400">-</p>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Right Column: Administrative Control */}
-              <div className="col-span-12 lg:col-span-4">
-                <div className="p-8 rounded-2xl border-2 border-gray-300 flex flex-col gap-5 bg-white shadow-sm lg:sticky lg:top-8">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-black mb-2">
-                    Administrative Control
-                  </h3>
+              <div className="col-span-12 lg:col-span-4 flex flex-col">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-black mb-6 flex items-center gap-2 shrink-0">
+                  <Settings size={16} className="text-green-600" />
+                  Administrative Control
+                </h3>
+                <div className="p-8 rounded-2xl border border-gray-300 flex flex-col justify-between gap-5 bg-white shadow-sm flex-1">
+                  <div className="flex flex-col gap-5">
+                    <button
+                      onClick={() => setEditModel(designer)}
+                      className="w-full p-4 bg-white border border-gray-300 rounded-xl flex items-center gap-4 hover:bg-gray-50 transition-all group"
+                    >
+                      <div className="p-2.5 bg-gray-100 rounded-lg text-black group-hover:text-gray-900 transition-colors border border-gray-300">
+                        <Edit2 size={16} />
+                      </div>
+                      <span className="text-sm font-black text-black uppercase">
+                        Edit Designer Info
+                      </span>
+                    </button>
 
-                  <button
-                    onClick={() => setEditModel(designer)}
-                    className="w-full p-4 bg-white border border-gray-300 rounded-xl flex items-center gap-4 hover:bg-gray-50 transition-all group"
-                  >
-                    <div className="p-2.5 bg-gray-100 rounded-lg text-black group-hover:text-gray-900 transition-colors border border-gray-300">
-                      <Edit2 size={16} />
-                    </div>
-                    <span className="text-sm font-black uppercase tracking-widest">
-                      Edit Designer Info
-                    </span>
-                  </button>
+                    <button
+                      onClick={() => setEnginnerModel(designer)}
+                      className="w-full p-4 bg-white border border-gray-300 rounded-xl flex items-center gap-4 hover:bg-gray-50 transition-all group"
+                    >
+                      <div className="p-2.5 bg-gray-100 rounded-lg text-black group-hover:text-gray-900 transition-colors border border-gray-300">
+                        <Users size={16} />
+                      </div>
+                      <span className="text-sm font-semibold text-black uppercase">
+                        View Connection designer POC 
+                      </span>
+                    </button>
+                  </div>
 
-                  <button
-                    onClick={() => setEnginnerModel(designer)}
-                    className="w-full p-4 bg-white border border-gray-300 rounded-xl flex items-center gap-4 hover:bg-gray-50 transition-all group"
-                  >
-                    <div className="p-2.5 bg-gray-100 rounded-lg text-black group-hover:text-gray-900 transition-colors border border-gray-300">
-                      <Users size={16} />
-                    </div>
-                    <span className="text-sm font-black uppercase tracking-widest">
-                      View Connection designer POC 
-                    </span>
-                  </button>
-
-                  <button className="w-full p-4 bg-red-50/50 border border-red-400 rounded-xl flex items-center gap-4 hover:bg-red-50 transition-all group mt-2">
+                  <button className="w-full p-4 bg-red-50/50 border border-red-400 rounded-xl flex items-center gap-4 hover:bg-red-50 transition-all group">
                     <div className="p-2.5 bg-white border border-red-300 rounded-lg text-red-500">
                       <X size={16} strokeWidth={3} />
                     </div>
@@ -257,14 +259,20 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
             </div>
           </>
         ) : activeTab === 'PROJECTS' ? (
-          <div className="h-full min-h-[500px] bg-white rounded-2xl border border-gray-300 p-8 flex flex-col">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-sm font-black text-black uppercase tracking-widest flex items-center gap-3">
-                <Briefcase size={18} className="text-green-600" />
-                All Projects
-              </h3>
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 pb-2">
+              <div className="relative w-full max-w-md">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search projects by number or name..."
+                  value={projectSearchTerm}
+                  onChange={(e) => setProjectSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-green-500 w-full bg-white text-black font-semibold uppercase tracking-tight"
+                />
+              </div>
               <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-gray-500 uppercase">Filter by Status:</span>
+                <span className="text-xs font-bold text-gray-500 uppercase shrink-0">Filter by Status:</span>
                 <select
                   className="px-4 py-2 border border-gray-300 rounded-lg text-xs font-bold text-black uppercase outline-none focus:border-green-500 cursor-pointer bg-white"
                   value={statusFilter}
@@ -278,29 +286,55 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="flex flex-col border border-gray-200 rounded-2xl overflow-hidden bg-white">
               {designer.project && designer.project.length > 0 ? (
                 designer.project
-                  .filter(proj => statusFilter === 'ALL' || proj.status === statusFilter)
-                  .map((proj) => (
-                  <div 
-                    key={proj.id} 
-                    onClick={() => setSelectedProjectId(proj.id)}
-                    className="p-5 rounded-2xl border border-gray-300 flex flex-col gap-2 bg-white hover:border-green-400 hover:shadow-md transition-all cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-black text-black uppercase tracking-widest">{proj.projectNumber || '-'}</span>
-                      {proj.status && (
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest ${proj.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-                          {proj.status}
-                        </span>
-                      )}
+                  .filter(proj => {
+                    const matchesStatus = statusFilter === 'ALL' || proj.status === statusFilter;
+                    const matchesSearch = 
+                      !projectSearchTerm || 
+                      (proj.projectNumber || '').toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
+                      (proj.name || '').toLowerCase().includes(projectSearchTerm.toLowerCase());
+                    return matchesStatus && matchesSearch;
+                  })
+                  .map((proj, idx, arr) => (
+                    <div 
+                      key={proj.id} 
+                      onClick={() => setSelectedProjectId(proj.id)}
+                      className={`group flex items-center justify-between p-4 hover:bg-gray-50/60 transition-all cursor-pointer ${
+                        idx !== arr.length - 1 ? 'border-b border-gray-100' : ''
+                      }`}
+                    >
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div className="w-10 h-10 shrink-0 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-green-600 font-bold text-sm">
+                          {proj.projectNumber?.slice(0, 2).toUpperCase() || 'PR'}
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-sm font-semibold text-black group-hover:text-green-600 transition-colors uppercase tracking-normal">
+                            {proj.projectNumber || '-'}
+                          </h4>
+                          <p className="text-sm text-black font-semibold line-clamp-1 mt-0.5">
+                            {proj.name || '—'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 shrink-0">
+                        {proj.status && (
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${
+                            proj.status === 'ACTIVE' 
+                              ? 'bg-green-50 text-green-700 border border-green-100' 
+                              : 'bg-gray-50 text-gray-600 border border-gray-200'
+                          }`}>
+                            {proj.status}
+                          </span>
+                        )}
+                        <ChevronRight size={14} className="text-gray-300 group-hover:text-green-500 transition-colors" />
+                      </div>
                     </div>
-                    {proj.name && <span className="text-sm text-gray-700 font-medium line-clamp-2 mt-1">{proj.name}</span>}
-                  </div>
-                ))
+                  ))
               ) : (
-                <div className="col-span-full py-10 flex flex-col items-center justify-center text-gray-400">
+                <div className="py-12 flex flex-col items-center justify-center text-gray-400">
                   <Briefcase size={32} className="mb-3 opacity-20" />
                   <p className="text-sm font-bold uppercase tracking-widest">No projects found</p>
                 </div>
@@ -326,8 +360,10 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
       )}
       {selectedProjectId && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white w-full max-w-7xl h-full max-h-[95vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-            <GetProjectById id={selectedProjectId} onClose={() => setSelectedProjectId(null)} />
+          <div className="bg-white w-full h-full max-h-[95vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div className="flex-1 overflow-y-auto">
+              <GetProjectById id={selectedProjectId} onClose={() => setSelectedProjectId(null)} />
+            </div>
           </div>
         </div>
       )}
@@ -335,44 +371,44 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
   )
 }
 
-const StatBox = ({ label, value, unit, icon: Icon, isStatus, subtext, onClick }) => (
-  <div 
-    onClick={onClick}
-    className={`bg-white p-6 rounded-2xl border border-gray-300 flex items-center justify-between shadow-sm ${onClick ? 'cursor-pointer hover:border-green-400 hover:shadow-md transition-all' : ''}`}
-  >
-    <div className="flex items-center gap-5 flex-1">
-      <div className="p-3 bg-green-50 rounded-xl text-green-600 border border-green-300 flex items-center justify-center shadow-sm">
-        <Icon size={20} strokeWidth={2.5} />
-      </div>
-      <p className="text-sm font-bold text-black uppercase tracking-wider">
-        {label}
-      </p>
-    </div>
-    <div className="flex items-baseline gap-1">
-      <p className={`text-sm font-bold ${isStatus ? 'text-green-600' : 'text-black'} tracking-wider`}>
-        {value}
-      </p>
-      {unit && (
-        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
-          {unit}
-        </span>
-      )}
-    </div>
-    {subtext && (
-      <div className="text-right flex flex-col items-end opacity-70">
-        <p className="text-[9px] font-semibold text-black uppercatracking-widestem] leading-none mb-1.5">
-          {subtext}
+const StatBox = ({ label, value, unit, icon: Icon, isStatus, subtext, onClick }) => {
+  const isGreenValue = !!isStatus;
+  const valueColorClass = isGreenValue ? "text-green-600" : "text-black";
+  const valueSizeClass = isStatus ? "text-sm sm:text-base" : "text-xl sm:text-2xl";
+
+  return (
+    <div 
+      onClick={onClick}
+      className={`bg-white py-3 px-4 rounded-none border border-black border-l-[6px] border-l-green-600 flex items-center justify-between shadow-sm ${
+        onClick ? 'cursor-pointer hover:bg-gray-50/50 transition-all' : ''
+      }`}
+    >
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-black shrink-0 shadow-sm">
+          <Icon size={18} strokeWidth={2} />
+        </div>
+        <p className="text-sm sm:text-base font-bold text-black uppercase tracking-wider truncate">
+          {label}
         </p>
-        <div className="w-6 h-1 bg-green-500 rounded-full"></div>
       </div>
-    )}
-  </div>
-)
+      <div className="flex items-baseline gap-1 shrink-0 ml-4">
+        <p className={`${valueSizeClass} font-bold ${valueColorClass} tracking-tight`}>
+          {value}
+        </p>
+        {unit && (
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
+            {unit}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
 
 const DetailItem = ({ label, value }) => (
   <div className="space-y-1.5">
     <p className="text-sm font-bold text-black uppercase tracking-wider">{label}</p>
-    <p className="text-sm text-black break-all">{value || '-'}</p>
+    <p className="text-sm font-semibold text-black break-all">{value || '-'}</p>
   </div>
 )
 
