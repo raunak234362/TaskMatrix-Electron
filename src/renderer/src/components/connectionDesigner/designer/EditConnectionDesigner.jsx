@@ -214,7 +214,7 @@ const EditConnectionDesigner = ({
       onClick={onClose}
     >
       <div
-        className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-gray-200 animate-in fade-in zoom-in duration-200"
+        className="bg-white w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-gray-200 animate-in fade-in zoom-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -227,7 +227,7 @@ const EditConnectionDesigner = ({
           </div>
           <button
             onClick={onClose}
-            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
           >
             Close
           </button>
@@ -274,7 +274,7 @@ const EditConnectionDesigner = ({
             />
           </div>
 
-          {/* Website */}
+          {/* Website & Country */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
               label="Website (optional)"
@@ -282,40 +282,95 @@ const EditConnectionDesigner = ({
               {...register("website")}
               placeholder="https://example.com"
             />
+            
+            {/* Country */}
+            <div className="flex flex-col gap-1 w-full">
+              <label className="text-sm font-medium text-gray-700">Country *</label>
+              <Controller
+                name="headquater.country"
+                control={control}
+                rules={{ required: "Country is required" }}
+                render={({ field }) => (
+                  <Select
+                    placeholder="Select Country"
+                    options={Object.keys(COUNTRY_MAP).map((c) => ({
+                      label: c,
+                      value: c,
+                    }))}
+                    value={
+                      field.value
+                        ? { label: field.value, value: field.value }
+                        : null
+                    }
+                    onChange={(option) => field.onChange(option?.value || "")}
+                    menuPortalTarget={document.body}
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                      control: (base) => ({
+                        ...base,
+                        borderColor: "black",
+                        borderRadius: "0.375rem",
+                        paddingTop: "2px",
+                        paddingBottom: "2px",
+                        boxShadow: "none",
+                        "&:hover": {
+                          borderColor: "black"
+                        }
+                      })
+                    }}
+                  />
+                )}
+              />
+              {errors.headquater?.country && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.headquater.country.message}
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Country, Multi-State, City */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Country */}
-            <Controller
-              name="headquater.country"
-              control={control}
-              rules={{ required: "Country is required" }}
-              render={({ field }) => (
-                <Select
-                  placeholder="Select Country"
-                  options={Object.keys(COUNTRY_MAP).map((c) => ({
-                    label: c,
-                    value: c,
-                  }))}
-                  value={
-                    field.value
-                      ? { label: field.value, value: field.value }
-                      : null
-                  }
-                  onChange={(option) => field.onChange(option?.value || "")}
-                  menuPortalTarget={document.body}
-                  styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-                />
-              )}
-            />
-            {errors.headquater?.country && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.headquater.country.message}
-              </p>
-            )}
+          {/* City */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* City (Optional) */}
+            <div className="flex flex-col gap-1 w-full">
+              <label className="text-sm font-medium text-gray-700">City (Optional)</label>
+              <Controller
+                name="headquater.city"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    placeholder="Select City (Optional)"
+                    options={cityOptions}
+                    value={
+                      field.value
+                        ? { label: field.value, value: field.value }
+                        : null
+                    }
+                    onChange={(option) => field.onChange(option?.value || "")}
+                    menuPortalTarget={document.body}
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                      control: (base) => ({
+                        ...base,
+                        borderColor: "black",
+                        borderRadius: "0.375rem",
+                        paddingTop: "2px",
+                        paddingBottom: "2px",
+                        boxShadow: "none",
+                        "&:hover": {
+                          borderColor: "black"
+                        }
+                      })
+                    }}
+                  />
+                )}
+              />
+            </div>
+          </div>
 
-            {/* Multi-State */}
+          {/* Multi-State (Full Width) */}
+          <div className="flex flex-col gap-1 w-full">
+            <label className="text-sm font-medium text-gray-700">State(s) *</label>
             <Controller
               name="headquater.states"
               control={control}
@@ -340,7 +395,20 @@ const EditConnectionDesigner = ({
                     setValue("headquater.city", "");
                   }}
                   menuPortalTarget={document.body}
-                  styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                  styles={{
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                    control: (base) => ({
+                      ...base,
+                      borderColor: "black",
+                      borderRadius: "0.375rem",
+                      paddingTop: "2px",
+                      paddingBottom: "2px",
+                      boxShadow: "none",
+                      "&:hover": {
+                        borderColor: "black"
+                      }
+                    })
+                  }}
                 />
               )}
             />
@@ -349,47 +417,25 @@ const EditConnectionDesigner = ({
                 {errors.headquater.states.message}
               </p>
             )}
-
-            {/* City (Optional) */}
-            <Controller
-              name="headquater.city"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  placeholder="Select City (Optional)"
-                  options={cityOptions}
-                  value={
-                    field.value
-                      ? { label: field.value, value: field.value }
-                      : null
-                  }
-                  onChange={(option) => field.onChange(option?.value || "")}
-                  menuPortalTarget={document.body}
-                  styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-                />
-              )}
-            />
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 shrink-0">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={submitting}
-              className="px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50"
-            >
-              Cancel
-            </button>
+          <div className="flex justify-end pt-4 border-t border-gray-200 shrink-0">
             <button
               type="submit"
               disabled={submitting}
-              className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lgn-200 text-[10px] font-black uppercase tracking-[0.2em] shadow-sm disabled:opacity-50 transition-all flex items-center gap-3 active:scale-95"
+              className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm flex items-center gap-2 cursor-pointer disabled:opacity-50"
             >
               {submitting ? (
-                <><Loader2 className="w-4 h-4 animate-spin" />Saving...</>
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
               ) : (
-                <><Check className="w-4 h-4" />Save Changes</>
+                <>
+                  <Check className="w-4 h-4" />
+                  Save Changes
+                </>
               )}
             </button>
           </div>

@@ -24,15 +24,36 @@ const AllCDEngineer = ({ onClose, designerData, refresh }) => {
       accessorFn: (r) => [r.firstName, r.lastName].filter(Boolean).join(" "),
       header: "Engineer Name",
       id: "fullName",
+      cell: ({ getValue }) => (
+        <span className="text-sm font-semibold text-black uppercase">{getValue()}</span>
+      )
     },
-    { accessorKey: "email", header: "Email" },
-    { accessorKey: "phone", header: "Phone" },
-    { accessorKey: "designation", header: "Designation" },
+    {
+      accessorKey: "email",
+      header: "Email",
+      cell: ({ getValue }) => (
+        <span className="text-sm font-medium text-black lowercase">{getValue()}</span>
+      )
+    },
+    {
+      accessorKey: "phone",
+      header: "Phone",
+      cell: ({ getValue }) => (
+        <span className="text-sm font-medium text-black">{getValue()}</span>
+      )
+    },
+    {
+      accessorKey: "designation",
+      header: "Designation",
+      cell: ({ getValue }) => (
+        <span className="text-sm font-medium text-black uppercase">{getValue()}</span>
+      )
+    },
   ], []);
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-4xl bg-white rounded-[2rem] shadow-2xl flex flex-col overflow-hidden relative border border-white/20">
+      <div className="w-full max-w-[95vw] h-full max-h-[95vh] bg-white rounded-none shadow-2xl flex flex-col overflow-hidden relative border border-white/20">
 
         {/* Header Section */}
         <div className="p-8 border-b border-gray-100">
@@ -43,7 +64,7 @@ const AllCDEngineer = ({ onClose, designerData, refresh }) => {
             </div>
             <button
               onClick={onClose}
-              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
             >
               close
             </button>
@@ -56,7 +77,7 @@ const AllCDEngineer = ({ onClose, designerData, refresh }) => {
 
             <button
               onClick={() => setAddEngineerModal(true)}
-              className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
+              className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
             >
               <Plus size={16} strokeWidth={3} className="text-green-700" /> Add New Engineer
             </button>
@@ -69,7 +90,7 @@ const AllCDEngineer = ({ onClose, designerData, refresh }) => {
               <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Loading...</p>
             </div>
           ) : engineers.length > 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-none border border-gray-100 shadow-sm overflow-hidden">
               <DataTable
                 columns={columns}
                 data={engineers}
@@ -77,14 +98,14 @@ const AllCDEngineer = ({ onClose, designerData, refresh }) => {
               />
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-20 px-8 bg-gray-50/50 rounded-[2.5rem] border-2 border-dashed border-gray-100">
-              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
+            <div className="flex flex-col items-center justify-center py-20 px-8 bg-gray-50/50 rounded-none border-2 border-dashed border-gray-100">
+              <div className="w-16 h-16 bg-white rounded-none flex items-center justify-center shadow-sm mb-6">
                 <Users size={32} className="text-gray-200" />
               </div>
               <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] mb-4">No Engineers found in this network</h3>
               <button
                 onClick={() => setAddEngineerModal(true)}
-                className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
+                className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
               >
                 <Plus size={16} strokeWidth={3} className="text-green-700" /> Add New Engineer
               </button>

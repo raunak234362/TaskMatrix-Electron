@@ -202,17 +202,17 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-5xl flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded-none shadow-2xl border border-black overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[95vw] flex flex-col max-h-[90vh]">
         {/* Header */}
         <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
           <div>
-            <h2 className="text-xl text-black tracking-tight uppercase">
+            <h2 className="text-xl font-bold text-black tracking-tight uppercase">
               Edit Employee
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
             Close
           </button>
@@ -221,32 +221,20 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
         <div className="p-8 overflow-y-auto custom-scrollbar flex-1">
           {/* Error */}
           {error && (
-            <div className="mb-8 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold flex items-center gap-3">
+            <div className="mb-8 p-4 bg-red-50 border border-red-200 text-red-600 rounded-none text-xs font-bold flex items-center gap-3">
               <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
               {error}
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border border-gray-200 rounded-2xl p-4 bg-zinc-100">
-              {/* ── Basic Info ── */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {/* ── Row 1: Basic credentials & role ── */}
               <Input label="Username" {...register("username")} className="w-full" />
               <Input label="Email" type="email" {...register("email")} className="w-full" />
-              <Input label="First Name" {...register("firstName")} className="w-full" />
-              <Input label="Middle Name" {...register("middleName")} className="w-full" />
-              <Input label="Last Name" {...register("lastName")} className="w-full" />
-
-              <div className="grid grid-cols-2 gap-4">
-                <Input label="Phone" {...register("phone")} className="w-full" />
-                <Input label="Extension" {...register("extension")} className="w-full" />
-              </div>
-
-              <Input label="Alt Phone" {...register("altPhone")} className="w-full" />
               <Input label="Designation" {...register("designation")} className="w-full" />
-
-              {/* Role */}
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
                   Role
                 </label>
@@ -266,7 +254,11 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
                 )}
               </div>
 
-              <div className="md:col-span-2 flex items-center gap-4 bg-white/50 p-4 rounded-xl border border-gray-200 mt-2">
+              {/* ── Row 2: Names & Active Status ── */}
+              <Input label="First Name" {...register("firstName")} className="w-full" />
+              <Input label="Middle Name" {...register("middleName")} className="w-full" />
+              <Input label="Last Name" {...register("lastName")} className="w-full" />
+              <div className="flex items-center bg-white p-2 border border-black h-[40px] mt-[22px]">
                 <Toggle 
                   label="User Active Status" 
                   {...register("isActive")} 
@@ -275,15 +267,22 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
                 />
               </div>
 
-              {/* ── Address ── */}
-              <div className="md:col-span-2">
+              {/* ── Row 3: Phones & Landlines ── */}
+              <Input label="Phone" {...register("phone")} className="w-full" />
+              <Input label="Extension" {...register("extension")} className="w-full" />
+              <Input label="Alt Phone" {...register("altPhone")} className="w-full" />
+              <Input label="Landline" {...register("landline")} className="w-full" />
+
+              {/* ── Row 4: Address Info ── */}
+              <div className="md:col-span-2 lg:col-span-3">
                 <Input label="Address" {...register("address")} className="w-full" />
               </div>
+              <Input label="Zip Code" {...register("zipCode")} className="w-full" />
+
+              {/* ── Row 5: Geography & Alt contact ── */}
               <Input label="City" {...register("city")} className="w-full" />
               <Input label="State" {...register("state")} className="w-full" />
               <Input label="Country" {...register("country")} className="w-full" />
-              <Input label="Zip Code" {...register("zipCode")} className="w-full" />
-              <Input label="Landline" {...register("landline")} className="w-full" />
               <Input label="Alt Landline" {...register("altLandline")} className="w-full" />
             </div>
           </form>
@@ -296,9 +295,9 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
               type="button"
               onClick={handleDelete}
               disabled={deleting || submitting}
-              className={`px-6 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center gap-2 ${deleting
+              className={`px-6 py-1.5 rounded-none font-bold text-sm uppercase tracking-tight transition-all flex items-center gap-2 ${deleting
                 ? "bg-red-50 text-red-300 cursor-not-allowed"
-                : "bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 active:scale-95 shadow-sm"
+                : "bg-red-50 hover:bg-red-100 text-red-600 border-2 border-red-700/80 active:scale-95 shadow-sm"
                 }`}
             >
               {deleting ? (
@@ -315,19 +314,12 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
             </button>
           </div>
           <button
-            type="button"
-            onClick={onClose}
-            className="px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all active:scale-95"
-          >
-            Cancel
-          </button>
-          <button
             type="submit"
             onClick={handleSubmit(onSubmit)}
             disabled={submitting}
-            className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${submitting
+            className={`px-6 py-1.5 rounded-none font-bold text-sm uppercase tracking-tight transition-all shadow-sm flex items-center gap-2 cursor-pointer disabled:opacity-50 ${submitting
               ? "bg-gray-100 text-black/20 cursor-not-allowed"
-              : "bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black active:scale-95"
+              : "bg-green-50 hover:bg-green-100 text-black border-2 border-green-700/80 active:scale-95"
               }`}
           >
             {submitting ? (
@@ -347,7 +339,7 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
         {/* Archive Confirmation Modal */}
         {showArchiveConfirm && (
           <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 w-full max-w-md animate-in zoom-in-95">
+            <div className="bg-white rounded-none shadow-2xl border border-black p-8 w-full max-w-md animate-in zoom-in-95">
               <h3 className="text-xl font-bold text-red-600 mb-4 uppercase tracking-tight">Archive Employee</h3>
               <p className="text-sm text-gray-600 mb-6">
                 Are you sure you want to archive {employeeData?.firstName} {employeeData?.lastName}? Please provide the following details:
@@ -359,7 +351,7 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
                     type="date" 
                     value={archiveLastWorkingDay}
                     onChange={(e) => setArchiveLastWorkingDay(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                    className="w-full px-3 py-2 border border-black rounded-none focus:outline-none focus:ring-1 focus:ring-black"
                   />
                 </div>
                 <div>
@@ -367,7 +359,7 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
                   <textarea 
                     value={archiveReason}
                     onChange={(e) => setArchiveReason(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 min-h-[100px]"
+                    className="w-full px-3 py-2 border border-black rounded-none focus:outline-none focus:ring-1 focus:ring-black min-h-[100px]"
                     placeholder="Enter reason for archiving..."
                   />
                 </div>
@@ -376,7 +368,7 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
                 <button
                   type="button"
                   onClick={() => setShowArchiveConfirm(false)}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs uppercase rounded-lg transition-colors"
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs uppercase rounded-none border border-gray-300 transition-colors"
                 >
                   Cancel
                 </button>
@@ -384,10 +376,10 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
                   type="button"
                   onClick={executeArchive}
                   disabled={deleting || !archiveLastWorkingDay || !archiveReason.trim()}
-                  className={`px-4 py-2 font-bold text-xs uppercase rounded-lg flex items-center gap-2 transition-colors ${
+                  className={`px-4 py-2 font-bold text-xs uppercase rounded-none flex items-center gap-2 border-2 transition-colors ${
                     deleting || !archiveLastWorkingDay || !archiveReason.trim()
-                      ? "bg-red-200 text-red-50 cursor-not-allowed"
-                      : "bg-red-600 hover:bg-red-700 text-white"
+                      ? "bg-red-200 text-red-50 border-red-200 cursor-not-allowed"
+                      : "bg-red-50 hover:bg-red-100 text-red-600 border-red-700/80"
                   }`}
                 >
                   {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}

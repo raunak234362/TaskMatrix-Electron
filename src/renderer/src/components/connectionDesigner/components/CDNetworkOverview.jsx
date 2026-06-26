@@ -96,18 +96,18 @@ const CDNetworkOverview = ({
                     {designer.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="text-sm font-semibold text-gray-800 group-hover:text-green-600 transition-colors uppercase tracking-normal">
+                    <h4 className="text-sm font-semibold text-black group-hover:text-green-600 transition-colors uppercase tracking-normal">
                       {designer.name}
                     </h4>
                     <div className="flex flex-wrap items-center gap-4 mt-1">
                       {designer.email && (
                         <span className="flex items-center gap-2 text-sm font-semibold text-black uppercase tracking-normal">
-                          <Mail size={12} className="text-gray-500" /> {designer.email}
+                          <Mail size={12} className="text-green-600" /> {designer.email}
                         </span>
                       )}
                       {designer.contactInfo && (
                         <span className="flex items-center gap-2 text-sm font-semibold text-black uppercase tracking-normal">
-                          <Phone size={12} className="text-gray-500" /> {designer.contactInfo}
+                          <Phone size={12} className="text-green-600" /> {designer.contactInfo}
                         </span>
                       )}
                     </div>
