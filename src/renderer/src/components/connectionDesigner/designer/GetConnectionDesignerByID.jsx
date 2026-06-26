@@ -200,7 +200,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
                         {getStatesList(designer.state).map((state, idx) => (
                           <span
                             key={idx}
-                            className="px-3.5 py-1 bg-green-50 text-green-700 border border-green-100 rounded-full font-bold text-xs uppercase tracking-tight inline-flex items-center"
+                            className="px-3.5 py-1 bg-green-50 text-green-700 border border-green-100 rounded-none font-bold text-xs uppercase tracking-tight inline-flex items-center"
                           >
                             {state}
                           </span>
@@ -246,14 +246,7 @@ const GetConnectionDesignerByID = ({ id, onClose }) => {
                     </button>
                   </div>
 
-                  <button className="w-full p-4 bg-red-50/50 border border-red-400 rounded-xl flex items-center gap-4 hover:bg-red-50 transition-all group">
-                    <div className="p-2.5 bg-white border border-red-300 rounded-lg text-red-500">
-                      <X size={16} strokeWidth={3} />
-                    </div>
-                    <span className="text-sm text-red-600 uppercase tracking-widest">
-                      Archive Profile
-                    </span>
-                  </button>
+
                 </div>
               </div>
             </div>
