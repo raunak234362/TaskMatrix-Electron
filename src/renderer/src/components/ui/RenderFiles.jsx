@@ -35,8 +35,8 @@ const RenderFiles = ({
             ...f,
             uploadedAt: curr.uploadedAt,
             user: curr.user,
-            documentID: (table === "submittals" || table === "bfa") && parentId ? parentId : curr.id,
-            versionId: (table === "submittals" || table === "bfa") ? curr.id : f.versionId,
+            documentID: table === "submittals" ? curr.id : ((table === "bfa") && parentId ? parentId : curr.id),
+            versionId: table === "submittals" ? (curr.currentVersionId || f.submittalVersionId || f.versionId || curr.id) : ((table === "bfa") ? curr.id : f.versionId),
             stage: curr.stage,
           });
         });
@@ -71,19 +71,22 @@ const RenderFiles = ({
       case "estimation":
         return `${baseURL}/estimation/viewFile/${parentId}/${fileId}`;
       case "rFI":
-        return `${baseURL}/api/RFI/rfi/viewfile/${parentId}/${fileId}`;
+      case "RFI":
+        return `${baseURL}/rfi/viewfile/${parentId}/${fileId}`;
       case "rFIResponse":
-        return `${baseURL}/api/RFI/rfi/response/viewfile/${parentId}/${fileId}`;
+        return `${baseURL}/rfi/response/viewfile/${parentId}/${fileId}`;
       case "submittals":
+        return `${baseURL}/submittal/${parentId}/versions/${file?.versionId || fileId}/${fileId}`;
       case "submittalsResponse":
-        return `${baseURL}/api/Submittals/submittals/${parentId}/${fileId}`;
+        return `${baseURL}/submittal/response/${parentId}/viewfile/${fileId}`;
       case "rFQ":
         return `${baseURL}/rfq/viewFile/${parentId}/${fileId}`;
       case "estimationResponse":
         return `${baseURL}/estimation/response/viewFile/${parentId}/${fileId}`;
       case "changeOrders":
+        return `${baseURL}/changeOrder/viewFile/${parentId}/${fileId}`;
       case "cOResponse":
-        return `${baseURL}/api/co/viewfile/${parentId}/${fileId}`;
+        return `${baseURL}/changeOrder/viewFile/${parentId}/files/${fileId}`;
       case "teamMeetingNotes":
         return `${baseURL}/teamMeetingNotes/viewFile/${parentId}/${fileId}`;
       case "teamMeetingResponse":
@@ -91,8 +94,9 @@ const RenderFiles = ({
       case "connectionDesignerQuota":
         return `${baseURL}/connectionDesignerQuota/viewFile/${parentId}/${fileId}`;
       case "designDrawings":
+        return `${baseURL}/${table}/viewfile/${parentId}/${fileId}`;
       default:
-        return `${baseURL}/api/${table}/designdrawing/viewfile/${parentId}/${fileId}`;
+        return `${baseURL}/${table}/viewFile/${parentId}/${fileId}`;
     }
   };
 
