@@ -28,6 +28,49 @@ const AllProjectNotes = ({ projectId, project }) => {
     const [showResponseModal, setShowResponseModal] = useState(null);
     const [selectedResponse, setSelectedResponse] = useState(null);
     const [activeNoteId, setActiveNoteId] = useState(null);
+    const [allUsers, setAllUsers] = useState([]);
+    const [filterTab, setFilterTab] = useState("all");
+
+    useEffect(() => {
+        const fetchAll = async () => {
+            let combined = [];
+            try {
+                const res = await Service.FetchAllUsers();
+                const d = res?.data?.data || res?.data || res?.users || res || [];
+                combined = [...combined, ...(Array.isArray(d) ? d : [])];
+            } catch(e) { console.error("Error fetching internal users:", e); }
+
+            const cdId = project?.connectionDesignerID || project?.connectionDesigner?.id || project?.connectionDesigner;
+            if (cdId) {
+                try {
+                    const res = await Service.FetchConnectionDesignerByID(cdId.id || cdId);
+                    const cde = res?.data?.CDEngineers || res?.CDEngineers || [];
+                    combined = [...combined, ...(Array.isArray(cde) ? cde : [])];
+                } catch(e) { console.error("Error fetching CD engineers:", e); }
+            }
+
+            const fabId = project?.fabricatorID || project?.fabricator?.id || project?.fabricator;
+            if (fabId) {
+                try {
+                    const res = await Service.FetchAllClientsByFabricatorID(fabId.id || fabId);
+                    const c = res?.data?.data || res?.data || res || [];
+                    combined = [...combined, ...(Array.isArray(c) ? c : [])];
+                } catch(e) { console.error("Error fetching clients:", e); }
+            }
+            // Remove duplicates by ID just in case
+            const uniqueUsers = [];
+            const seen = new Set();
+            for (const u of combined) {
+                const uid = u.id || u._id;
+                if (!uid || !seen.has(uid)) {
+                    if (uid) seen.add(uid);
+                    uniqueUsers.push(u);
+                }
+            }
+            setAllUsers(uniqueUsers);
+        };
+        fetchAll();
+    }, [project]);
 
     const fetchNotes = async () => {
         try {
@@ -149,6 +192,38 @@ const AllProjectNotes = ({ projectId, project }) => {
         return true;
     });
 
+    const getUserRole = (u) => {
+        if (!u) return "";
+        if (typeof u === 'string') {
+            const found = allUsers.find(user => (user.id || user._id) === u);
+            return found ? String(found.role || "") : "";
+        }
+        if (u.role) return String(u.role);
+        const id = u.id || u._id;
+        if (id) {
+            const found = allUsers.find(user => (user.id || user._id) === id);
+            return found ? String(found.role || "") : "";
+        }
+        return "";
+    };
+
+    const isCDRole = (roleStr) => {
+        const r = (roleStr || "").toLowerCase();
+        return r === "connection_designer" || r === "connection_designer_admin" || r === "connection_designer_engineer" || r.includes("connection_designer");
+    };
+
+    const cdFilteredNotes = filteredNotes.filter((note) => {
+        const creatorRole = getUserRole(note.createdBy);
+        const creatorIsCD = isCDRole(creatorRole);
+
+        const rawTaggedList = [...(note.taggedUsers || []), ...(note.taggedUserIds || [])];
+        const hasCDTagged = rawTaggedList.some(u => isCDRole(getUserRole(u)));
+
+        const isCDNote = creatorIsCD || hasCDTagged;
+
+        return filterTab === "cd" ? isCDNote : !isCDNote;
+    });
+
     const getPriorityBadge = (priority) => {
         const p = Number(priority);
         switch (p) {
@@ -163,7 +238,29 @@ const AllProjectNotes = ({ projectId, project }) => {
 
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-2">
+                <div className="flex gap-6">
+                    <button
+                        onClick={() => setFilterTab("all")}
+                        className={`py-2 px-1 text-sm font-bold tracking-normal border-b-2 transition-colors cursor-pointer ${
+                            filterTab === "all"
+                                ? "border-green-600 text-green-700"
+                                : "border-transparent text-gray-500 hover:text-gray-700"
+                        }`}
+                    >
+                        Notes
+                    </button>
+                    <button
+                        onClick={() => setFilterTab("cd")}
+                        className={`py-2 px-1 text-sm font-bold tracking-normal border-b-2 transition-colors cursor-pointer ${
+                            filterTab === "cd"
+                                ? "border-green-600 text-green-700"
+                                : "border-transparent text-gray-500 hover:text-gray-700"
+                        }`}
+                    >
+                        CD Notes
+                    </button>
+                </div>
 
                 <button
                     onClick={() => setShowAddModal(true)}
@@ -173,7 +270,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                 </button>
             </div>
 
-            {filteredNotes.length === 0 ? (
+            {cdFilteredNotes.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
                     <Inbox className="w-12 h-12 mb-4 text-gray-200" />
                     <p className="text-gray-500 font-bold uppercase tracking-widest text-sm">
@@ -182,7 +279,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-4">
-                    {filteredNotes.map((note) => {
+                    {cdFilteredNotes.map((note) => {
                         const isExpanded = expandedId === note.id;
                         return (
                             <div
