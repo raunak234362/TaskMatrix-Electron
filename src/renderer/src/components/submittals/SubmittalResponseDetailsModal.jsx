@@ -7,7 +7,6 @@ import RenderFiles from "../common/RenderFiles";
 import MultipleFileUpload from "../fields/MultipleFileUpload";
 
 
-
 const Info = ({ label, value }) => (
   <div className="space-y-1">
     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{label}</p>
