@@ -223,8 +223,8 @@ const GetRFQByID = ({ id, onClose }) => {
                 const displayName = user
                     ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.username
                     : row.original.createdByRole === "CLIENT"
-                    ? "Client"
-                    : "WBT Team";
+                        ? "Client"
+                        : "WBT Team";
                 return (
                     <span className="font-bold text-black text-sm">
                         {displayName}
@@ -407,137 +407,137 @@ const GetRFQByID = ({ id, onClose }) => {
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
                     <div className="grid grid-cols-1 gap-4 sm:gap-6">
-                      {/* ---------------- RIGHT COLUMN — RESPONSES & CD QUOTAS ---------------- */}
-                      <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8 flex flex-col min-h-0">
-                          {/* Header + Add Response Button */}
-                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-300 pb-4">
-                              <div className="flex flex-wrap gap-3 items-center">
-                                  {userRole !== "ESTIMATOR" && userRole !== "ESTIMATION_HEAD" && (
-                                      <button
-                                          onClick={() => setActiveTab("responses")}
-                                          className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "responses"
-                                              ? "bg-green-50 text-black border-green-700/80"
-                                              : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
-                                              }`}
-                                      >
-                                          Responses
-                                      </button>
-                                  )}
-                                  {(userRole === "ESTIMATOR" || userRole === "ESTIMATION_HEAD" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole === "DEPUTY_MANAGER") && (
-                                      <button
-                                          onClick={() => setActiveTab("cdSent")}
-                                          className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "cdSent"
-                                              ? "bg-green-50 text-black border-green-700/80"
-                                              : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
-                                              }`}
-                                      >
-                                          Sent to CD
-                                      </button>
-                                  )}
-                              </div>
+                        {/* ---------------- RIGHT COLUMN — RESPONSES & CD QUOTAS ---------------- */}
+                        <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8 flex flex-col min-h-0">
+                            {/* Header + Add Response Button */}
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-300 pb-4">
+                                <div className="flex flex-wrap gap-3 items-center">
+                                    {userRole !== "ESTIMATOR" && userRole !== "ESTIMATION_HEAD" && (
+                                        <button
+                                            onClick={() => setActiveTab("responses")}
+                                            className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "responses"
+                                                ? "bg-green-50 text-black border-green-700/80"
+                                                : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
+                                                }`}
+                                        >
+                                            Responses
+                                        </button>
+                                    )}
+                                    {(userRole === "ESTIMATOR" || userRole === "ESTIMATION_HEAD" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole === "DEPUTY_MANAGER") && (
+                                        <button
+                                            onClick={() => setActiveTab("cdSent")}
+                                            className={`px-6 py-1.5 border-2 rounded-lg font-bold text-sm uppercase tracking-tight shadow-sm transition-all ${activeTab === "cdSent"
+                                                ? "bg-green-50 text-black border-green-700/80"
+                                                : "bg-white text-gray-500 border-gray-300 hover:bg-green-50/40 hover:border-green-700/30 hover:text-black"
+                                                }`}
+                                        >
+                                            Sent to CD
+                                        </button>
+                                    )}
+                                </div>
 
-                              {activeTab === "responses" && (userRole === "ADMIN" ||
-                                  userRole === "DEPUTY_MANAGER" ||
-                                  userRole === "OPERATION_EXECUTIVE" ||
-                                  userRole === "ESTIMATION_HEAD") && (
-                                      <button
-                                          onClick={() => setShowResponseModal(true)}
-                                          className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm whitespace-nowrap"
-                                      >
-                                          + Add Response
-                                      </button>
-                                  )}
-                          </div>
+                                {activeTab === "responses" && (userRole === "ADMIN" ||
+                                    userRole === "DEPUTY_MANAGER" ||
+                                    userRole === "OPERATION_EXECUTIVE" ||
+                                    userRole === "ESTIMATION_HEAD") && (
+                                        <button
+                                            onClick={() => setShowResponseModal(true)}
+                                            className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm whitespace-nowrap"
+                                        >
+                                            + Add Response
+                                        </button>
+                                    )}
+                            </div>
 
-                          <div className="flex-1 overflow-auto">
-                              {activeTab === "responses" && (
-                                  <>
-                                      {showResponseModal && (
-                                          <ResponseModal
-                                              rfqId={id}
-                                              onClose={() => setShowResponseModal(false)}
-                                              onSuccess={fetchRfq}
-                                          />
-                                      )}
+                            <div className="flex-1 overflow-auto">
+                                {activeTab === "responses" && (
+                                    <>
+                                        {showResponseModal && (
+                                            <ResponseModal
+                                                rfqId={id}
+                                                onClose={() => setShowResponseModal(false)}
+                                                onSuccess={fetchRfq}
+                                            />
+                                        )}
 
-                                      {/* ---- RESPONSE TABLE ---- */}
-                                      {rfq?.responses?.length ? (
-                                          <DataTable
-                                              columns={responseColumns}
-                                              data={rfq.responses}
-                                              onRowClick={(row) => setSelectedResponse(row)}
-                                          />
-                                      ) : (
-                                          <p className="text-black italic font-bold p-4 text-center">No responses yet.</p>
-                                      )}
-                                  </>
-                              )}
+                                        {/* ---- RESPONSE TABLE ---- */}
+                                        {rfq?.responses?.length ? (
+                                            <DataTable
+                                                columns={responseColumns}
+                                                data={rfq.responses}
+                                                onRowClick={(row) => setSelectedResponse(row)}
+                                            />
+                                        ) : (
+                                            <p className="text-black italic font-bold p-4 text-center">No responses yet.</p>
+                                        )}
+                                    </>
+                                )}
 
-                              {activeTab === "cdSent" && (
-                                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 font-roboto">
-                                      <div className="space-y-4">
-                                          <div className="flex items-center gap-2">
-                                              <User size={16} className="text-black" />
-                                              <h4 className="text-sm font-bold text-black uppercase tracking-wider">Recipients</h4>
-                                          </div>
-                                          <div className="flex flex-wrap gap-2">
-                                              {rfq?.connectionDesignerRFQ?.length ? (
-                                                  rfq.connectionDesignerRFQ.map((cd) => (
-                                                      <div key={cd.id} className="px-3 py-1.5 bg-white border border-black rounded-xl text-sm font-bold text-black shadow-sm">
-                                                          {cd.name}
-                                                      </div>
-                                                  ))
-                                              ) : (
-                                                  <p className="text-sm text-black italic">No recipients assigned</p>
-                                              )}
-                                          </div>
-                                      </div>
+                                {activeTab === "cdSent" && (
+                                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 font-roboto">
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-2">
+                                                <User size={16} className="text-black" />
+                                                <h4 className="text-sm font-bold text-black uppercase tracking-wider">Recipients</h4>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {rfq?.connectionDesignerRFQ?.length ? (
+                                                    rfq.connectionDesignerRFQ.map((cd) => (
+                                                        <div key={cd.id} className="px-3 py-1.5 bg-white border border-black rounded-xl text-sm font-bold text-black shadow-sm">
+                                                            {cd.name}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-sm text-black italic">No recipients assigned</p>
+                                                )}
+                                            </div>
+                                        </div>
 
-                                      <div className="space-y-4 pt-4 border-t border-gray-200">
-                                          <div className="flex items-center gap-2">
-                                              <Layout size={16} className="text-black" />
-                                              <h4 className="text-sm font-bold text-black uppercase tracking-wider">Sent Package Description</h4>
-                                          </div>
-                                          <div 
-                                              className="bg-white p-5 rounded-2xl border border-black prose prose-sm max-w-none text-sm font-medium text-black"
-                                              dangerouslySetInnerHTML={{ __html: rfq?.CDDescription || "No description provided" }}
-                                          />
-                                      </div>
+                                        <div className="space-y-4 pt-4 border-t border-gray-200">
+                                            <div className="flex items-center gap-2">
+                                                <Layout size={16} className="text-black" />
+                                                <h4 className="text-sm font-bold text-black uppercase tracking-wider">Sent Package Description</h4>
+                                            </div>
+                                            <div
+                                                className="bg-white p-5 rounded-2xl border border-black prose prose-sm max-w-none text-sm font-medium text-black"
+                                                dangerouslySetInnerHTML={{ __html: rfq?.CDDescription || "No description provided" }}
+                                            />
+                                        </div>
 
-                                      <div className="space-y-4 pt-4 border-t border-gray-200">
-                                          <div className="flex items-center gap-2">
-                                              <Paperclip size={16} className="text-black" />
-                                              <h4 className="text-sm font-bold text-black uppercase tracking-wider">Sent Attachments</h4>
-                                          </div>
-                                          <RenderFiles
-                                              files={rfq?.CDAttachments || []}
-                                              table="rFQ"
-                                              parentId={rfq?.id}
-                                              formatDate={(date) => new Date(date).toLocaleDateString()}
-                                          />
-                                      </div>
+                                        <div className="space-y-4 pt-4 border-t border-gray-200">
+                                            <div className="flex items-center gap-2">
+                                                <Paperclip size={16} className="text-black" />
+                                                <h4 className="text-sm font-bold text-black uppercase tracking-wider">Sent Attachments</h4>
+                                            </div>
+                                            <RenderFiles
+                                                files={rfq?.CDAttachments || []}
+                                                table="rFQ"
+                                                parentId={rfq?.id}
+                                                formatDate={(date) => new Date(date).toLocaleDateString()}
+                                            />
+                                        </div>
 
-                                      {userRole !== "ESTIMATOR" && userRole !== "ESTIMATION_HEAD" && (
-                                          <div className="space-y-4 pt-4 border-t border-gray-200">
-                                              <div className="flex items-center gap-2">
-                                                  <Layout size={16} className="text-black" />
-                                                  <h4 className="text-sm font-bold text-black uppercase tracking-wider">CD Quotes</h4>
-                                              </div>
-                                              {rfq?.CDQuotas?.length ? (
-                                                  <DataTable
-                                                      columns={cdQuotasColumns}
-                                                      data={rfq.CDQuotas}
-                                                      onRowClick={(row) => setSelectedCDQuota(row)}
-                                                  />
-                                              ) : (
-                                                  <p className="text-black italic font-bold p-4 text-center">No CD Quotas available.</p>
-                                              )}
-                                          </div>
-                                      )}
-                                  </div>
-                              )}
-                          </div>
-                      </div>
+                                        {userRole !== "ESTIMATOR" && userRole !== "ESTIMATION_HEAD" && (
+                                            <div className="space-y-4 pt-4 border-t border-gray-200">
+                                                <div className="flex items-center gap-2">
+                                                    <Layout size={16} className="text-black" />
+                                                    <h4 className="text-sm font-bold text-black uppercase tracking-wider">CD Quotes</h4>
+                                                </div>
+                                                {rfq?.CDQuotas?.length ? (
+                                                    <DataTable
+                                                        columns={cdQuotasColumns}
+                                                        data={rfq.CDQuotas}
+                                                        onRowClick={(row) => setSelectedCDQuota(row)}
+                                                    />
+                                                ) : (
+                                                    <p className="text-black italic font-bold p-4 text-center">No CD Quotas available.</p>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                         {/* ---------------- LEFT COLUMN — RFQ DETAILS ---------------- */}
                         <div className="bg-gray-100 p-4 sm:p-8 rounded-3xl border border-black shadow-sm space-y-6 sm:space-y-8">
 
@@ -653,8 +653,8 @@ const GetRFQByID = ({ id, onClose }) => {
                                                             {fu.createdByRole === "CLIENT"
                                                                 ? rfq?.sender?.fabricator?.fabName || "Client"
                                                                 : fu.user
-                                                                ? `${fu.user.firstName || ""} ${fu.user.lastName || ""}`.trim() || fu.user.username
-                                                                : "WBT Team"}
+                                                                    ? `${fu.user.firstName || ""} ${fu.user.lastName || ""}`.trim() || fu.user.username
+                                                                    : "WBT Team"}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center gap-1 text-xs font-bold text-black uppercase tracking-wider">
@@ -719,43 +719,43 @@ const GetRFQByID = ({ id, onClose }) => {
 
                             {/* Scopes */}
                             <div className="space-y-4">
-                                <ScopeList 
-                                    title="Connection Design Scope" 
+                                <ScopeList
+                                    title="Connection Design Scope"
                                     icon={<Settings className="w-4 h-4" />}
                                     items={[
                                         { label: "Connection Design", value: rfq?.connectionDesign },
                                         { label: "Misc Design", value: rfq?.miscDesign },
                                         { label: "Customer Design", value: rfq?.customerDesign },
-                                        { 
+                                        {
                                             label: !isTrue(rfq?.customerDesign) && rfq?.sender?.fabricator?.fabName
                                                 ? `Connection design by ${rfq.sender.fabricator.fabName}`
                                                 : "Connection Design by WBT",
                                             value: !isTrue(rfq?.customerDesign) && (isTrue(rfq?.connectionDesign) || isTrue(rfq?.miscDesign))
                                         }
-                                    ]} 
+                                    ]}
                                 />
 
-                                <ScopeList 
-                                    title="Detailing Scope" 
+                                <ScopeList
+                                    title="Detailing Scope"
                                     icon={<Layout className="w-4 h-4" />}
                                     items={[
                                         { label: "Detailing Main", value: rfq?.detailingMain },
                                         { label: "Detailing Misc", value: rfq?.detailingMisc }
-                                    ]} 
+                                    ]}
                                 />
 
-                                <ScopeList 
-                                    title="Material Take-off" 
+                                <ScopeList
+                                    title="Material Take-off"
                                     icon={<Layout className="w-4 h-4" />}
                                     items={[
                                         { label: "MTO - Manual", value: rfq?.MTOManual },
                                         { label: "MTO - Stick Model", value: isTrue(rfq?.MTOStickModel) || isTrue(rfq?.mtoStickModelEnabled) }
-                                    ]} 
+                                    ]}
                                 />
 
                                 {(rfq?.MTOValue || rfq?.MTOStickModel || rfq?.MTOManualModel) && (
                                     <div className="p-4 bg-[#6bbd45]/5 rounded-xl border border-[#6bbd45]/20 overflow-hidden">
-                                        <div 
+                                        <div
                                             className="prose prose-sm max-w-none text-xs text-black font-bold leading-relaxed break-words"
                                             dangerouslySetInnerHTML={{ __html: rfq?.MTOValue || rfq?.MTOStickModel || rfq?.MTOManualModel }}
                                         />
@@ -798,7 +798,7 @@ const GetRFQByID = ({ id, onClose }) => {
                             )}
                         </div>
 
-                      
+
                     </div>
                 </div>
                 {showCDQuotationModal && (
@@ -995,7 +995,7 @@ const Info = ({ label, value }) => (
 
 const ScopeList = ({ title, icon, items, className = "" }) => {
     const activeItems = items.filter(item => isTrue(item.value));
-    
+
     if (activeItems.length === 0) return null;
 
     return (

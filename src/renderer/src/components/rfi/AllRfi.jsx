@@ -18,12 +18,15 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
   const fabricators = useSelector((state) => state.fabricatorInfo?.fabricatorData || [])
   const users = useSelector((state) => state.userInfo?.staffData || [])
 
-  const userRole = sessionStorage.getItem('userRole')
+  const userRole = sessionStorage.getItem('userRole') || ''
+  const userRoleUpper = userRole.toUpperCase()
+
+  const isClient = ['CLIENT', 'CLIENT_ADMIN', 'CLIENT_ESTIMATOR'].includes(userRoleUpper)
+  const isConnectionDesigner = userRoleUpper.includes('CONNECTION_DESIGNER') || userRoleUpper.includes('CD_')
+  const isWBTStaff = !isClient && !isConnectionDesigner
 
   const [activeTab, setActiveTab] = useState(
-    userRole && userRole.toUpperCase().includes('CONNECTION_DESIGNER')
-      ? 'CONNECTION_DESIGNER'
-      : 'GENERAL'
+    isConnectionDesigner ? 'CONNECTION_DESIGNER' : 'GENERAL'
   )
   const [cdFilter, setCdFilter] = useState('sent')
   const [searchQuery, setSearchQuery] = useState('')
@@ -247,6 +250,12 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
     )
   }
 
+  const isCDRole = (roleStr) => {
+    if (!roleStr) return false
+    const r = String(roleStr).toUpperCase()
+    return r.includes('CONNECTION_DESIGNER') || r.includes('CD_') || r === 'CD'
+  }
+
   const isCDUser = (user) => {
     if (!user) return false
 
@@ -265,39 +274,70 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
     if (typeof user === 'object') {
       role = String(user.role || '').toUpperCase()
     }
+    if (role) return isCDRole(role)
 
     if (!role && userId) {
       const matchedUser = users.find((u) => String(u.id || u._id) === String(userId))
       role = String(matchedUser?.role || '').toUpperCase()
     }
 
-    return role.includes('CONNECTION_DESIGNER') || role.includes('CD_')
+    return isCDRole(role)
+  }
+
+  const isClientUser = (user) => {
+    if (!user) return false
+
+    const currentUserId = sessionStorage.getItem('userId')
+    const userId = typeof user === 'object' ? user.id || user._id || user.sender_id : user
+
+    if (userId && String(userId) === String(currentUserId)) {
+      const currentUserRole = sessionStorage.getItem('userRole') || ''
+      if (currentUserRole) {
+        const role = currentUserRole.toUpperCase()
+        if (role.includes('CLIENT')) return true
+      }
+    }
+
+    let role = ''
+    if (typeof user === 'object') {
+      role = String(user.role || '').toUpperCase()
+    }
+
+    if (!role && userId) {
+      const matchedUser = users.find((u) => String(u.id || u._id) === String(userId))
+      role = String(matchedUser?.role || '').toUpperCase()
+    }
+
+    return role.includes('CLIENT')
   }
 
   const getRFIFlowType = (item) => {
     if (item._flowType) return item._flowType
 
     const currentUserId = sessionStorage.getItem('userId')
-    const currentUserRole = sessionStorage.getItem('userRole') || ''
-    const isLoggedUserCD = currentUserRole.toUpperCase().includes('CONNECTION_DESIGNER')
+    const senderId = String(item.sender?.id || item.sender_id || item.sender || '')
+    const isSenderCurrentUser = senderId === String(currentUserId)
 
-    const isSenderCurrentUser =
-      String(item.sender?.id || item.sender_id || item.sender) === String(currentUserId)
-    const isSenderCD = item.sender && isCDUser(item.sender)
+    if (isConnectionDesigner) {
+      return isSenderCurrentUser ? 'sent' : 'received'
+    }
 
-    if (isLoggedUserCD) {
-      if (isSenderCurrentUser || isSenderCD) {
-        return 'sent'
+    if (isClient) {
+      return isSenderCurrentUser ? 'sent' : 'received'
+    }
+
+    if (isWBTStaff) {
+      const isCD_RFI = isConnectionDesignerRFI(item)
+      if (isCD_RFI) {
+        const isSenderCD = item.sender && isCDUser(item.sender)
+        return isSenderCD ? 'received' : 'sent'
       } else {
-        return 'received'
-      }
-    } else {
-      if (isSenderCurrentUser || !isSenderCD) {
-        return 'sent'
-      } else {
-        return 'received'
+        const isSenderClient = item.sender && isClientUser(item.sender)
+        return isSenderClient ? 'received' : 'sent'
       }
     }
+
+    return 'received'
   }
 
   const isConnectionDesignerRFI = (item) => {
@@ -306,12 +346,9 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
       item.isConnectionDesign === true || String(item.isConnectionDesign).toLowerCase() === 'true'
     if (isCDFlag) return true
 
-    if (item.subject) {
-      const match = item.subject.match(/RFI#\d*[A-Za-z]+/i)
-      if (match) return true
-    }
-
     if (item.sender && isCDUser(item.sender)) return true
+
+    if (item.recepients && isCDUser(item.recepients)) return true
 
     if (Array.isArray(item.multipleRecipients) && item.multipleRecipients.some(isCDUser))
       return true
@@ -321,15 +358,8 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
 
   const generalRfis = rfis.filter((item) => {
     if (isConnectionDesignerRFI(item)) return false
-
-    if (!rfiData || rfiData.length === 0) {
-      if (userRole === 'CLIENT') {
-        return getRFIFlowType(item) === 'sent'
-      } else {
-        return getRFIFlowType(item) === 'received'
-      }
-    }
-    return true
+    if (isClient) return true
+    return getRFIFlowType(item) === cdFilter
   })
 
   const connectionDesignerRfis = rfis.filter((item) => {
@@ -349,22 +379,24 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
   return (
     <div className="bg-white p-2 rounded-2xl shadow-md">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 mb-4 gap-4 pb-2 sm:pb-0">
-        <div className="flex space-x-6 border-b border-gray-200 w-full sm:w-auto">
-          <button
-            className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === 'GENERAL' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-            onClick={() => setActiveTab('GENERAL')}
-          >
-            General RFIs
-          </button>
-          <button
-            className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === 'CONNECTION_DESIGNER' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-            onClick={() => setActiveTab('CONNECTION_DESIGNER')}
-          >
-            Connection Designer&apos;s RFI
-          </button>
-        </div>
-        <div className="flex items-center gap-4 pb-2 sm:pb-0 sm:mt-2">
-          {activeTab === 'CONNECTION_DESIGNER' && (
+        {isWBTStaff && (
+          <div className="flex space-x-6 border-b border-gray-200 w-full sm:w-auto">
+            <button
+              className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === 'GENERAL' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('GENERAL')}
+            >
+              General RFIs
+            </button>
+            <button
+              className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === 'CONNECTION_DESIGNER' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('CONNECTION_DESIGNER')}
+            >
+              Connection Designer&apos;s RFI
+            </button>
+          </div>
+        )}
+        <div className="flex items-center gap-4 pb-2 sm:pb-0 sm:mt-2 ml-auto">
+          {!isClient && (
             <div className="flex bg-gray-100 p-1 rounded-lg gap-1 h-9 items-center">
               <button
                 type="button"
@@ -408,8 +440,10 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
           <Inbox className="w-10 h-10 mb-3 text-gray-400" />
           <p className="text-sm font-medium tracking-normal">No RFIs Available</p>
           <p className="text-sm tracking-normal text-gray-400">
-            {userRole === 'CLIENT'
-              ? 'You haven’t sent any RFIs yet.'
+            {isClient
+              ? 'No RFIs have been received for this project yet.'
+              : cdFilter === 'sent'
+              ? 'No RFIs have been sent yet.'
               : 'No RFIs have been received yet.'}
           </p>
         </div>
