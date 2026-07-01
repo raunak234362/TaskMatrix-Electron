@@ -2804,9 +2804,13 @@ class Service {
   // Create Share Link
   static async createShareLink(table, parentId, fileId, versionId) {
     try {
+      let mappedTable = table
+      if (table === 'rfqResponse' || table === 'rFQResponse' || table === 'rFQResponse') {
+        mappedTable = 'rFQResponse'
+      }
       const url = versionId
-        ? `share/${table}/${parentId}/versions/${versionId}/${fileId}`
-        : `share/${table}/${parentId}/${fileId}`
+        ? `share/${mappedTable}/${parentId}/versions/${versionId}/${fileId}`
+        : `share/${mappedTable}/${parentId}/${fileId}`
       const response = await api.post(url)
       return response.data
     } catch (error) {

@@ -54,6 +54,7 @@ const GetRFQByID = ({ id, onClose }) => {
     const [followUpFiles, setFollowUpFiles] = useState([]);
     const [isSubmittingFollowUp, setIsSubmittingFollowUp] = useState(false);
     const [showFollowUpForm, setShowFollowUpForm] = useState(false);
+    const [responseTypeFilter, setResponseTypeFilter] = useState("ALL");
 
     const dispatch = useDispatch();
     const fetchRfq = async () => {
@@ -237,12 +238,24 @@ const GetRFQByID = ({ id, onClose }) => {
             header: "Message",
             cell: ({ row }) => {
                 const plainText = truncateWords(row.original.description, 20);
+                const type = row.original.type || row.original.Type;
                 return (
                     <div className="flex flex-col max-w-[200px]">
                         <p className="truncate text-sm font-bold text-black">{plainText}</p>
-                        <span className="text-xs text-black font-bold uppercase tracking-wider">
-                            {row.original.files?.length || 0} Attachments
-                        </span>
+                        <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-black font-bold uppercase tracking-wider">
+                                {row.original.files?.length || 0} Attachments
+                            </span>
+                            {type && (
+                                <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider leading-none ${
+                                    type.toUpperCase() === "DETAILING"
+                                        ? "bg-blue-50 text-blue-700 border border-blue-200"
+                                        : "bg-purple-50 text-purple-700 border border-purple-200"
+                                }`}>
+                                    {type}
+                                </span>
+                            )}
+                        </div>
                     </div>
                 );
             },
@@ -341,8 +354,12 @@ const GetRFQByID = ({ id, onClose }) => {
         },
     ];
 
-    /* ---------------- TABLE STATE ---------------- */
-    // Removed redundant useDataTable hook
+    const hasMultipleTypes = (() => {
+        const types = (rfq?.responses || [])
+            .map((res) => (res.type || res.Type || "").toUpperCase())
+            .filter((t) => t === "DETAILING" || t === "MTO");
+        return new Set(types).size > 1;
+    })();
 
     return (
         <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 font-roboto text-sm">
@@ -434,6 +451,25 @@ const GetRFQByID = ({ id, onClose }) => {
                                             Sent to CD
                                         </button>
                                     )}
+
+                                    {activeTab === "responses" && hasMultipleTypes && (
+                                        <div className="flex items-center bg-white border border-gray-300 rounded-lg p-0.5 ml-2 shadow-sm">
+                                            {["ALL", "DETAILING", "MTO"].map((type) => (
+                                                <button
+                                                    key={type}
+                                                    type="button"
+                                                    onClick={() => setResponseTypeFilter(type)}
+                                                    className={`px-4 py-1 text-xs font-bold rounded-md transition-all uppercase ${
+                                                        responseTypeFilter === type
+                                                            ? "bg-[#6bbd45] text-white"
+                                                            : "text-gray-500 hover:text-black bg-transparent"
+                                                    }`}
+                                                >
+                                                    {type}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {activeTab === "responses" && (userRole === "ADMIN" ||
@@ -461,15 +497,24 @@ const GetRFQByID = ({ id, onClose }) => {
                                         )}
 
                                         {/* ---- RESPONSE TABLE ---- */}
-                                        {rfq?.responses?.length ? (
-                                            <DataTable
-                                                columns={responseColumns}
-                                                data={rfq.responses}
-                                                onRowClick={(row) => setSelectedResponse(row)}
-                                            />
-                                        ) : (
-                                            <p className="text-black italic font-bold p-4 text-center">No responses yet.</p>
-                                        )}
+                                        {(() => {
+                                            const filteredResponses = (rfq?.responses || []).filter((res) => {
+                                                if (responseTypeFilter === "ALL") return true;
+                                                const type = (res.type || res.Type || "").toUpperCase();
+                                                return type === responseTypeFilter;
+                                            });
+                                            return filteredResponses.length ? (
+                                                <DataTable
+                                                    columns={responseColumns}
+                                                    data={filteredResponses}
+                                                    onRowClick={(row) => setSelectedResponse(row)}
+                                                />
+                                            ) : (
+                                                <p className="text-black italic font-bold p-4 text-center">
+                                                    {rfq?.responses?.length ? "No responses match the selected type." : "No responses yet."}
+                                                </p>
+                                            );
+                                        })()}
                                     </>
                                 )}
 
