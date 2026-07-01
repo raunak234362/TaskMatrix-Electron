@@ -23,7 +23,7 @@ const ResponseModal = ({
     useForm({
       defaultValues: {
         status: "OPEN",
-        type: ""
+        type: "DETAILING"
       }
     });
 
