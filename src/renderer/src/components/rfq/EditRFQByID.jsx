@@ -50,8 +50,11 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
         handleSubmit,
         control,
         reset,
+        watch,
         formState: { errors, isSubmitting }
     } = useForm()
+
+    const mtoStickModelEnabled = watch('mtoStickModelEnabled')
 
     useEffect(() => {
         const fetchRFQ = async () => {
@@ -75,6 +78,7 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                         detailingMain: d.detailingMain ?? false,
                         detailingMisc: d.detailingMisc ?? false,
                         MTOManual: d.MTOManual ?? false,
+                        mtoStickModelEnabled: d.mtoStickModelEnabled ?? !!d.MTOStickModel,
                         MTOStickModel: d.MTOStickModel || ""
                     })
                     setFabricatorName(d.fabricator?.fabName || d.sender?.fabricator?.fabName || d.fabricatorName || '')
@@ -94,6 +98,7 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
         try {
             const payload = {
                 ...data,
+                MTOStickModel: data.mtoStickModelEnabled ? (data.MTOStickModel || "") : "",
                 bidPrice: data.bidPrice !== '' && data.bidPrice !== null && data.bidPrice !== undefined
                     ? String(data.bidPrice)
                     : '',
@@ -281,7 +286,7 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                             </div>
 
                             <SectionTitle title="Detailing Scope" />
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <label className="flex items-center gap-3 cursor-pointer select-none group">
                                     <input
                                         type="checkbox"
@@ -302,6 +307,10 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                                         Detailing Misc
                                     </span>
                                 </label>
+                            </div>
+
+                            <SectionTitle title="Material Takeoff" />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <label className="flex items-center gap-3 cursor-pointer select-none group">
                                     <input
                                         type="checkbox"
@@ -309,17 +318,30 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                                         className="w-4 h-4 rounded border-gray-300 accent-green-500"
                                     />
                                     <span className="text-sm font-semibold text-gray-700 group-hover:text-black transition-colors">
-                                        MTO Manual
+                                        MTO - Manual
+                                    </span>
+                                </label>
+                                <label className="flex items-center gap-3 cursor-pointer select-none group">
+                                    <input
+                                        type="checkbox"
+                                        {...register('mtoStickModelEnabled')}
+                                        className="w-4 h-4 rounded border-gray-300 accent-green-500"
+                                    />
+                                    <span className="text-sm font-semibold text-gray-700 group-hover:text-black transition-colors">
+                                        MTO - Stick Model
                                     </span>
                                 </label>
                             </div>
-                            <div className="pt-4 border-t border-gray-50">
-                                <Input
-                                    label="MTO Stick Model Details"
-                                    {...register('MTOStickModel')}
-                                    placeholder="Enter details..."
-                                />
-                            </div>
+
+                            {mtoStickModelEnabled && (
+                                <div className="pt-4 border-t border-gray-50">
+                                    <Input
+                                        label="MTO Stick Model Details"
+                                        {...register('MTOStickModel')}
+                                        placeholder="Enter details..."
+                                    />
+                                </div>
+                            )}
                         </div>
 
                     </form>
