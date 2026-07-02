@@ -27,6 +27,7 @@ import EditEstimation from "./EditEstimation";
 import EstimationResponseModal from "./EstimationResponseModal";
 
 import RenderFiles from "../ui/RenderFiles";
+import DataTable from "../ui/table";
 
 const tabs = [
   "overview",
@@ -47,6 +48,8 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingInclusion, setIsEditingInclusion] = useState(false);
   const [showResponseModal, setShowResponseModal] = useState(false);
+  const [responseTypeFilter, setResponseTypeFilter] = useState("ALL");
+  const [selectedResponse, setSelectedResponse] = useState(null);
 
   const userRole =
     sessionStorage.getItem("userRole")?.toLowerCase() || "";
@@ -123,6 +126,62 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
         return "bg-blue-100 text-blue-700 border-blue-200";
     }
   }, [estimation]);
+
+  const filteredResponses = useMemo(() => {
+    const resps = estimation?.responses || [];
+    if (responseTypeFilter === "ALL") return resps;
+    return resps.filter(
+      (resp) => (resp.type || "DETAILING").toUpperCase() === responseTypeFilter
+    );
+  }, [estimation?.responses, responseTypeFilter]);
+
+  const responseColumns = useMemo(
+    () => [
+      {
+        accessorKey: "type",
+        header: "Type",
+        cell: ({ row }) => {
+          const type = row.original.type || "DETAILING";
+          return (
+            <span
+              className={`px-2 py-0.5 text-xs font-semibold border rounded-none uppercase ${
+                type.toUpperCase() === "DETAILING"
+                  ? "bg-blue-50 text-blue-700 border-blue-200"
+                  : "bg-purple-50 text-purple-700 border-purple-200"
+              }`}
+            >
+              {type}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "message",
+        header: "Message",
+        cell: ({ row }) => {
+          const htmlContent = row.original.message || "";
+          const plainText = htmlContent
+            .replace(/<[^>]+>/g, "")
+            .replace(/&nbsp;/g, " ");
+          return (
+            <p className="truncate max-w-[250px] text-black text-sm" title={plainText}>
+              {plainText}
+            </p>
+          );
+        },
+      },
+      {
+        accessorKey: "createdAt",
+        header: "Created",
+        cell: ({ row }) => (
+          <span className="text-black text-sm">
+            {new Date(row.original.createdAt).toLocaleString("en-IN")}
+          </span>
+        ),
+      },
+    ],
+    []
+  );
 
   if (loading) {
     return (
@@ -476,61 +535,32 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
               {/* RESPONSES */}
               {activeTab === "responses" && (
                 <>
-                  {estimationResponses.length === 0 ? (
-                    <EmptyState text="No responses added yet." />
+                  {/* Filter Toggle Buttons */}
+                  <div className="flex gap-2 mb-4">
+                    {["ALL", "DETAILING", "MTO"].map((filterType) => (
+                      <button
+                        key={filterType}
+                        onClick={() => setResponseTypeFilter(filterType)}
+                        className={`px-6 py-1.5 text-xs font-bold border-2 rounded-none uppercase tracking-tight transition-all shadow-sm ${
+                          responseTypeFilter === filterType
+                            ? "bg-green-50 text-black border-green-700/80"
+                            : "bg-white text-black border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        {filterType}
+                      </button>
+                    ))}
+                  </div>
+
+                  {filteredResponses.length === 0 ? (
+                    <EmptyState text="No responses match this filter." />
                   ) : (
-                    <div className="space-y-5">
-                      {estimationResponses.map(
-                        (resp, index) => (
-                          <div
-                            key={resp.id}
-                            className="bg-slate-50 border border-slate-200 rounded-none p-5"
-                          >
-                            <div className="flex items-start justify-between gap-4 mb-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-none bg-slate-100 flex items-center justify-center">
-                                  <MessageSquare
-                                    size={18}
-                                    className="text-black"
-                                  />
-                                </div>
-
-                                <div>
-                                  <h4 className="text-sm font-semibold text-black">
-                                    Response #{index + 1}
-                                  </h4>
-
-                                  <p className="text-sm text-black">
-                                    {formatDateTime(
-                                      resp.createdAt
-                                    )}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-
-                            {resp.message && (
-                              <div
-                                className="prose prose-sm max-w-none text-black"
-                                dangerouslySetInnerHTML={{
-                                  __html: resp.message,
-                                }}
-                              />
-                            )}
-
-                            {resp.files?.length > 0 && (
-                              <div className="mt-5">
-                                <RenderFiles
-                                  files={resp.files}
-                                  table="estimationResponse"
-                                  parentId={resp.id}
-                                  formatDate={formatDate}
-                                />
-                              </div>
-                            )}
-                          </div>
-                        )
-                      )}
+                    <div className="bg-white border border-slate-200 rounded-none">
+                      <DataTable
+                        columns={responseColumns}
+                        data={filteredResponses}
+                        onRowClick={(row) => setSelectedResponse(row)}
+                      />
                     </div>
                   )}
                 </>
@@ -588,6 +618,83 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
           }
           onSuccess={fetchEstimation}
         />
+      )}
+
+      {selectedResponse && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-none shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-4xl flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+                <h1 className="text-sm font-semibold text-black uppercase tracking-normal">Response Details</h1>
+              </div>
+              <button
+                onClick={() => setSelectedResponse(null)}
+                className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-normal shadow-sm cursor-pointer"
+              >
+                Close
+              </button>
+            </header>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/50">
+              <div className="bg-white p-6 rounded-none border border-gray-200 space-y-6 shadow-sm">
+                {/* Metadata Box at the Top */}
+                <div className="bg-[#ebf5ea]/80 border border-[#6bbd45]/20 p-4 rounded-none">
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-16 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-black uppercase tracking-normal shrink-0">
+                        Type:
+                      </span>
+                      <span className="text-black font-semibold uppercase whitespace-nowrap">
+                        {selectedResponse.type || "DETAILING"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-black uppercase tracking-normal shrink-0">
+                        Created At:
+                      </span>
+                      <span className="text-black font-semibold uppercase whitespace-nowrap">
+                        {new Date(selectedResponse.createdAt).toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Response Message */}
+                <div className="pt-2">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+                    <h2 className="text-sm font-semibold text-black tracking-normal uppercase">Response Message</h2>
+                  </div>
+                  <div
+                    className="text-sm text-black font-normal prose prose-sm max-w-none bg-white p-4 border border-gray-200 rounded-none mt-4"
+                    dangerouslySetInnerHTML={{ __html: selectedResponse.message || "No description provided" }}
+                  />
+                </div>
+
+                {/* Attachments Section */}
+                {selectedResponse.files?.length > 0 && (
+                  <div className="pt-6 border-t border-gray-200 space-y-4">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+                      <h2 className="text-sm font-semibold text-black tracking-normal uppercase">Attachments</h2>
+                    </div>
+                    <RenderFiles
+                      files={selectedResponse.files}
+                      table="estimationResponse"
+                      parentId={selectedResponse.id}
+                      hideHeader={true}
+                      hideSectionTitle={true}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
