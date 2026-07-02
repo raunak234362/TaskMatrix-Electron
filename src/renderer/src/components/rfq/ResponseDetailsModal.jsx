@@ -16,6 +16,7 @@ const ResponseDetailsModal = ({
   const [replyMode, setReplyMode] = useState(false);
   const [replyMessage, setReplyMessage] = useState("");
   const [replyStatus, setReplyStatus] = useState("PENDING");
+  const [replyType, setReplyType] = useState("");
   const [replyFiles, setReplyFiles] = useState([]);
   const [rfqDetails, setRfqDetails] = useState(null);
 
@@ -69,6 +70,7 @@ const ResponseDetailsModal = ({
     formData.append("userId", sessionStorage.getItem("userId") || "");
     // formData.append("status", replyStatus);
     formData.append("wbtStatus", replyStatus);
+    formData.append("type", replyType);
 
     // Attach files
     replyFiles.forEach((file) => formData.append("files", file));
@@ -94,6 +96,7 @@ const ResponseDetailsModal = ({
       setReplyMessage("");
       setReplyFiles([]);
       setReplyStatus("PENDING");
+      setReplyType("");
       if (onSuccess) onSuccess();
     } catch (err) {
       console.error("Reply failed:", err);
@@ -115,6 +118,11 @@ const ResponseDetailsModal = ({
                   }`}>
                   {child.status}
                 </span>
+                {(child.type || child.Type) && (
+                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-black bg-yellow-100 text-black">
+                    {child.type || child.Type}
+                  </span>
+                )}
               </div>
               <span className="text-[10px] font-bold text-black uppercase">
                 {new Date(child.createdAt).toLocaleString()}
@@ -195,6 +203,11 @@ const ResponseDetailsModal = ({
                   }`}>
                   {response.status}
                 </span>
+                {(response.type || response.Type) && (
+                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-black bg-yellow-100 text-black">
+                    {response.type || response.Type}
+                  </span>
+                )}
               </div>
               <span className="text-xs font-bold text-black uppercase border border-black px-2 py-0.5 rounded bg-white">
                 {response.user ? `${response.user.firstName || ""} ${response.user.lastName || ""}`.trim() : "Sender"}
@@ -282,6 +295,22 @@ const ResponseDetailsModal = ({
                   <option value="CLARIFICATION_REQUIRED">
                     Needs Clarification
                   </option>
+                </select>
+              </div>
+
+              {/* Type Dropdown */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-black">
+                  Type
+                </label>
+                <select
+                  value={replyType}
+                  onChange={(e) => setReplyType(e.target.value)}
+                  className="w-full border-2 border-black rounded-lg p-3 text-sm font-bold uppercase outline-none bg-white"
+                >
+                  <option value="">SELECT TYPE</option>
+                  <option value="MTO">MTO</option>
+                  <option value="DETAILING">DETAILING</option>
                 </select>
               </div>
 

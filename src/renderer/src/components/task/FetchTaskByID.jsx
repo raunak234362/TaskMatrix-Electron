@@ -417,7 +417,7 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
           {/* Request Training — visible to all roles */}
           <button
             onClick={() => setIsRequestingTraining(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-700 border border-purple-300 rounded-lg text-xs font-bold uppercase hover:bg-purple-100 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 border border-green-300 rounded-lg text-xs font-bold uppercase hover:bg-green-100 transition-colors"
           >
             <GraduationCap className="w-4 h-4" /> Request Training
           </button>
@@ -673,10 +673,7 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
         />
       )}
       {isRequestingTraining && (
-        <RequestTrainingModal
-          taskId={task.id}
-          onClose={() => setIsRequestingTraining(false)}
-        />
+        <RequestTrainingModal taskId={task.id} onClose={() => setIsRequestingTraining(false)} />
       )}
 
       {/* End Task Comment Modal */}

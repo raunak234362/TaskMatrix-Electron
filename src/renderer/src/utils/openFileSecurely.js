@@ -21,6 +21,8 @@ const getDownloadUrl = (table, parentId, fileId, versionId) => {
     case 'rFQ':
       return `${baseURL}/rfq/viewFile/${parentId}/${fileId}`
     case 'rfqResponse':
+    case 'rFQResponse':
+    case 'rFQresponse':
     case 'rfq/response':
       return `${baseURL}/rfq/response/viewFile/${parentId}/${fileId}`
     case 'changeOrders':
@@ -115,6 +117,8 @@ export const shareFileSecurely = async (type, id, fileId, versionId) => {
       response = await Service.createShareLink('designDrawings', id, fileId)
     } else if (type === 'bfa') {
       response = await Service.createShareLink('bfa', id, fileId)
+    } else if (type === 'rfqResponse' || type === 'rFQResponse' || type === 'rFQresponse') {
+      response = await Service.createShareLink('rFQResponse', id, fileId, versionId)
     } else {
       response = await Service.createShareLink(type, id, fileId, versionId)
     }
