@@ -114,7 +114,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
 
   return (
     <div className="fixed inset-0 z-[10002] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
-      <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-gray-200 max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-white w-full max-w-4xl rounded-none shadow-2xl border border-gray-200 max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* HEADER */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
           <div>
@@ -125,7 +125,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
           </div>
           <button
             onClick={onCancel}
-            className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
           >
             Close
           </button>
@@ -135,7 +135,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
         <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-white font-sans custom-scrollbar">
           <form id="edit-estimation-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Card 1 */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
+            <div className="bg-white p-6 rounded-none shadow-sm border border-gray-100 space-y-6">
               <SectionTitle title="Estimation Details" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input
@@ -176,7 +176,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
             </div>
 
             {/* Card 2 */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-4">
+            <div className="bg-white p-6 rounded-none shadow-sm border border-gray-100 space-y-4">
               <SectionTitle title="Description" />
               <Controller
                 name="description"
@@ -192,7 +192,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
             </div>
 
             {/* Card 3 & Tools */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
+            <div className="bg-white p-6 rounded-none shadow-sm border border-gray-100 space-y-6">
               <SectionTitle title="Timeline & Tools" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input
@@ -209,7 +209,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
             </div>
 
             {/* Card 4 - Final Values */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-6">
+            <div className="bg-white p-6 rounded-none shadow-sm border border-gray-100 space-y-6">
               <SectionTitle title="Final Values" />
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Input
@@ -243,7 +243,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
             </div>
 
             {/* Card 5 */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-4">
+            <div className="bg-white p-6 rounded-none shadow-sm border border-gray-100 space-y-4">
               <SectionTitle title="Status" />
 
               <div className="flex flex-col gap-1">
@@ -277,7 +277,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm disabled:opacity-50"
           >
             Cancel
           </button>
@@ -285,7 +285,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
             form="edit-estimation-form"
             type="submit"
             disabled={isSubmitting}
-            className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50"
+            className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm flex items-center gap-2 disabled:opacity-50 active:scale-95"
           >
             {isSubmitting ? (
               <>

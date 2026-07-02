@@ -96,7 +96,7 @@ const AllEstimationTask = ({ estimations, onClose, estimationId, onRefresh }) =>
                         <button
                             type="button"
                             onClick={() => setIsAddingTask(true)}
-                            className="px-3 py-1 text-sm rounded-md bg-green-600 hover:bg-green-700 text-white font-medium transition-colors shadow-sm"
+                            className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                         >
                             Add Task
                         </button>
@@ -105,7 +105,7 @@ const AllEstimationTask = ({ estimations, onClose, estimationId, onRefresh }) =>
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+                            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                         >
                             Close
                         </button>
@@ -116,12 +116,12 @@ const AllEstimationTask = ({ estimations, onClose, estimationId, onRefresh }) =>
             {/* Modal Overlay for Adding Task */}
             {isAddingTask && estimationId && (
                 <div className="fixed inset-0 z-70 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-white w-full max-w-3xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in duration-200">
+                    <div className="bg-white w-full max-w-3xl max-h-[90vh] rounded-none shadow-2xl overflow-hidden flex flex-col animate-in zoom-in duration-200">
                         <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                             <h3 className="text-xl  text-gray-700">Add Estimation Task</h3>
                             <button
                                 onClick={() => setIsAddingTask(false)}
-                                className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-700"
+                                className="p-2 hover:bg-gray-200 rounded-none transition-colors text-gray-400 hover:text-gray-700"
                             >
                                 <X size={24} />
                             </button>
@@ -141,8 +141,8 @@ const AllEstimationTask = ({ estimations, onClose, estimationId, onRefresh }) =>
             )}
 
             {/* Table */}
-            <div className="w-full rounded-xl p-4 ">
-                <div className=" rounded-lg">
+            <div className="w-full rounded-none p-4 ">
+                <div className=" rounded-none">
                     {estimations?.length > 0 ? (
                         <DataTable
                             columns={columns}

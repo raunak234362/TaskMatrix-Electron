@@ -209,12 +209,12 @@ const RenderFiles = ({
                       </p>
                     )}
                     {firstFile?.uploadedAt && (
-                      <p className="text-xs text-black/60 font-medium">
+                      <p className="text-sm text-black font-medium">
                         {formatDate(firstFile.uploadedAt)}
                       </p>
                     )}
                     {(firstFile?.user?.f_name || firstFile?.user?.l_name) && (
-                      <p className="text-xs text-black/60 font-medium">
+                      <p className="text-sm text-black font-medium">
                         by <span className="font-bold text-black">{uploaderName}</span>
                       </p>
                     )}
@@ -250,7 +250,7 @@ const RenderFiles = ({
                             {file.originalName || `File ${index + 1}`}
                           </p>
                           {file.stage && (
-                            <p className="text-xs text-black/60 uppercase font-bold tracking-wider mt-0.5">
+                            <p className="text-sm text-black uppercase font-bold tracking-wider mt-0.5">
                               Stage: {file.stage}
                             </p>
                           )}
@@ -276,7 +276,7 @@ const RenderFiles = ({
 
                       <ChevronRight
                         size={16}
-                        className="text-gray-400 shrink-0 group-hover:text-black"
+                        className="text-black shrink-0 group-hover:text-black"
                       />
                     </div>
                   );
@@ -288,7 +288,7 @@ const RenderFiles = ({
       ) : (
         // Empty State
         <div className="text-center py-8 border border-dashed border-black/30 rounded-none">
-          <p className="text-sm font-bold uppercase tracking-widest text-black/60">No files available for this project</p>
+          <p className="text-sm font-bold uppercase tracking-widest text-black">No files available for this project</p>
           {onAddFilesClick && (
             <button
               onClick={onAddFilesClick}

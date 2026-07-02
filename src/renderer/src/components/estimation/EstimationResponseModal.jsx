@@ -65,12 +65,12 @@ const EstimationResponseModal = ({ estimationId, onClose, onSuccess, parentRespo
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-200 flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-white w-full max-w-2xl rounded-none shadow-2xl border border-gray-200 flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
 
                 {/* HEADER */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0 bg-white">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-50 rounded-lg border border-green-100">
+                        <div className="p-2 bg-green-50 rounded-none border border-green-100">
                             <MessageSquare className="w-4 h-4 text-green-600" />
                         </div>
                         <div>
@@ -83,7 +83,7 @@ const EstimationResponseModal = ({ estimationId, onClose, onSuccess, parentRespo
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+                        className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                     >
                         CLOSE
                     </button>
@@ -130,13 +130,12 @@ const EstimationResponseModal = ({ estimationId, onClose, onSuccess, parentRespo
                     </div>
                 </form>
 
-                {/* FOOTER */}
                 <div className="px-6 py-4 border-t border-gray-200 bg-white flex justify-end gap-3 shrink-0">
                     <button
                         type="button"
                         onClick={onClose}
                         disabled={isSubmitting}
-                        className="px-6 py-2.5 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all disabled:opacity-50"
+                        className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm disabled:opacity-50"
                     >
                         Cancel
                     </button>
@@ -144,7 +143,7 @@ const EstimationResponseModal = ({ estimationId, onClose, onSuccess, parentRespo
                         form="estimation-response-form"
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-6 py-2.5 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-sm transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50"
+                        className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm flex items-center gap-2 disabled:opacity-50 active:scale-95"
                     >
                         {isSubmitting ? (
                             <>

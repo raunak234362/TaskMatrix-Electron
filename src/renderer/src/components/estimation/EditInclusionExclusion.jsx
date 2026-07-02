@@ -101,17 +101,17 @@ const EditInclusionExclusion = ({ estimationId, onCancel, onSuccess }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center p-8 bg-white rounded-xl shadow-xs border border-gray-200">
+      <div className="flex justify-center p-8 bg-white rounded-none shadow-xs border border-gray-200">
         <Loader2 className="animate-spin text-gray-500 mr-2" /> Loading...
       </div>
     )
   }
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-xs border border-gray-200">
+    <div className="bg-white p-6 rounded-none shadow-xs border border-gray-200">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl  text-gray-800">Edit Scope of Work</h2>
-        <button onClick={onCancel} className="text-black border border-black hover:text-black bg-red-100 hover:bg-red-200  px-3 py-1 rounded-md text-sm transition-colors">
+        <button onClick={onCancel} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
          close
         </button>
       </div>
@@ -119,7 +119,7 @@ const EditInclusionExclusion = ({ estimationId, onCancel, onSuccess }) => {
       <div className="grid md:grid-cols-2 gap-8">
         {/* Inclusions Input */}
         <div>
-          <h3 className="text-md  text-green-700 bg-green-50 px-3 py-2 rounded-lg mb-4 border-l-4 border-green-500">
+          <h3 className="text-md  text-green-700 bg-green-50 px-3 py-2 rounded-none mb-4 border-l-4 border-green-500">
             Inclusions
           </h3>
           <RichTextEditor
@@ -131,7 +131,7 @@ const EditInclusionExclusion = ({ estimationId, onCancel, onSuccess }) => {
 
         {/* Exclusions Input */}
         <div>
-          <h3 className="text-md  text-red-700 bg-red-50 px-3 py-2 rounded-lg mb-4 border-l-4 border-red-500">
+          <h3 className="text-md  text-red-700 bg-red-50 px-3 py-2 rounded-none mb-4 border-l-4 border-red-500">
             Exclusions
           </h3>
           <RichTextEditor
