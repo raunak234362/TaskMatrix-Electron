@@ -118,10 +118,8 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
         {/* HEADER */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
           <div>
-            <h2 className="text-xl font-black text-black tracking-tight">Edit Estimation</h2>
-            <p className="text-[10px] font-black text-black uppercase tracking-[0.2em] mt-1">
-              UPDATE ESTIMATION DETAILS AND STATUS
-            </p>
+            <h2 className="text-2xl font-semibold text-black tracking-tight">Edit Estimation</h2>
+            
           </div>
           <button
             onClick={onCancel}
@@ -273,14 +271,7 @@ const EditEstimation = ({ id, onSuccess, onCancel }) => {
 
         {/* FOOTER */}
         <div className="px-8 py-5 border-t border-gray-200 bg-white flex justify-end gap-3 z-10 shrink-0">
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={isSubmitting}
-            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm disabled:opacity-50"
-          >
-            Cancel
-          </button>
+         
           <button
             form="edit-estimation-form"
             type="submit"

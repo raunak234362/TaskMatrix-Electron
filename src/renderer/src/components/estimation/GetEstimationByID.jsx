@@ -536,20 +536,22 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
               {activeTab === "responses" && (
                 <>
                   {/* Filter Toggle Buttons */}
-                  <div className="flex gap-2 mb-4">
-                    {["ALL", "DETAILING", "MTO"].map((filterType) => (
-                      <button
-                        key={filterType}
-                        onClick={() => setResponseTypeFilter(filterType)}
-                        className={`px-6 py-1.5 text-xs font-bold border-2 rounded-none uppercase tracking-tight transition-all shadow-sm ${
-                          responseTypeFilter === filterType
-                            ? "bg-green-50 text-black border-green-700/80"
-                            : "bg-white text-black border-gray-300 hover:bg-gray-50"
-                        }`}
-                      >
-                        {filterType}
-                      </button>
-                    ))}
+                  <div className="flex justify-end mb-4">
+                    <div className="inline-flex border border-black rounded-none p-0.5 bg-white">
+                      {["ALL", "DETAILING", "MTO"].map((filterType) => (
+                        <button
+                          key={filterType}
+                          onClick={() => setResponseTypeFilter(filterType)}
+                          className={`px-5 py-1.5 text-xs font-bold uppercase tracking-tight transition-all rounded-none border ${
+                            responseTypeFilter === filterType
+                              ? "bg-green-50 text-black border-green-700/80"
+                              : "bg-white text-black border-transparent hover:bg-slate-50"
+                          }`}
+                        >
+                          {filterType}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {filteredResponses.length === 0 ? (
@@ -706,7 +708,7 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
 
 const MetricCard = ({ icon, label, value }) => {
   return (
-    <div className="bg-white py-4 px-5 rounded-none border border-slate-200 border-l-[6px] border-l-green-600 flex items-center justify-between shadow-sm">
+    <div className="bg-white py-8 px-6 rounded-none border border-slate-200 border-l-[6px] border-l-green-600 flex items-center justify-between shadow-sm">
       <div className="flex items-center gap-3">
         
         <span className="text-lg font-bold text-black uppercase tracking-tight">
