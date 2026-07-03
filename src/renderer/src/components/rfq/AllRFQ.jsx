@@ -4,7 +4,7 @@ import { Search, X, Filter } from "lucide-react";
 
 import GetRFQByID from "./GetRFQByID";
 
-const AllRFQ = ({ rfq }) => {
+const AllRFQ = ({ rfq, newRfqId, onRfqOpened }) => {
   const userType = localStorage.getItem("userType");
 
   // Dynamic filter options extraction
@@ -313,8 +313,14 @@ const AllRFQ = ({ rfq }) => {
       <DataTable
         columns={columns}
         data={filteredRfq}
-        detailComponent={({ row, close }) => <GetRFQByID id={row.id || row._id} onClose={close} />}
+        detailComponent={({ row, close }) => {
+          if (newRfqId && row.id === newRfqId) {
+            onRfqOpened?.();
+          }
+          return <GetRFQByID id={row.id || row._id} onClose={close} />;
+        }}
         disablePagination={true}
+        forceExpandRowId={newRfqId}
       />
     </div>
   );

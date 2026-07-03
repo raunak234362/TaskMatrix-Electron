@@ -356,7 +356,7 @@ const AddRFQ = ({ onSuccess }) => {
         toast.success("RFQ Created Successfully");
         setDescription("");
         reset();
-        onSuccess?.();
+        onSuccess?.(enrichedRFQ.id || enrichedRFQ._id);
       } else {
         toast.error(createdRFQ?.error || "Failed to create RFQ");
       }

@@ -183,6 +183,7 @@ export default function DataTable({
   onRowSelectionChange = () => { },
   getRowId,
   getRowClassName = () => "",
+  forceExpandRowId = null,
 }) {
   const { isMobile } = useScreen();
 
@@ -190,6 +191,12 @@ export default function DataTable({
   const [sorting, setSorting] = useState(initialSorting);
   const [columnFilters, setColumnFilters] = useState([]);
   const [expandedRowId, setExpandedRowId] = useState(null);
+
+  useEffect(() => {
+    if (forceExpandRowId) {
+      setExpandedRowId(forceExpandRowId);
+    }
+  }, [forceExpandRowId]);
 
   const columns = useMemo(() => {
     const sNoCol = {
