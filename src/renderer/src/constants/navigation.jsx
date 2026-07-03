@@ -121,26 +121,26 @@ export const navItems = [
             'human_resource'
         ]
     },
-    {
-        label: 'Team Reports',
-        to: 'team-reports',
-        icon: <FileSpreadsheet />,
-        roles: [
-            'admin',
-            'dept_manager',
-            'deputy_manager',
-            'estimation_head',
-            'operation_executive',
-            'project_manager_officer',
-            'team_lead',
-            'sales_manager',
-            'client_admin',
-            'connection_designer_engineer',
-            'client',
-            'project_manager',
-            'human_resource'
-        ]
-    },
+    // {
+    //     label: 'Team Reports',
+    //     to: 'team-reports',
+    //     icon: <FileSpreadsheet />,
+    //     roles: [
+    //         'admin',
+    //         'dept_manager',
+    //         'deputy_manager',
+    //         'estimation_head',
+    //         'operation_executive',
+    //         'project_manager_officer',
+    //         'team_lead',
+    //         'sales_manager',
+    //         'client_admin',
+    //         'connection_designer_engineer',
+    //         'client',
+    //         'project_manager',
+    //         'human_resource'
+    //     ]
+    // },
     {
         label: 'Invoices',
         to: 'invoices',

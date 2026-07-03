@@ -184,7 +184,8 @@ const GetProjectById = ({ id, onClose }) => {
     // Stage-wise aggregation
     const stageStats = projectTasks.reduce(
       (acc, task) => {
-        if (normaliseWbsType(task.wbsType) === 'others') {
+        const taskStatus = (task.status || '').toLowerCase().trim()
+        if (normaliseWbsType(task.wbsType) === 'others' || taskStatus === 'wrong_allocation' || taskStatus === 'absent') {
           return acc
         }
         const stage = (task.Stage || '').toUpperCase().trim()
@@ -260,10 +261,16 @@ const GetProjectById = ({ id, onClose }) => {
     }
 
     projectTasks.forEach((task) => {
-      if (normaliseWbsType(task.wbsType) !== 'others') return
+      const taskStatus = (task.status || '').toLowerCase().trim()
+      const isExcludedStatus = taskStatus === 'wrong_allocation' || taskStatus === 'absent'
+
+      if (normaliseWbsType(task.wbsType) !== 'others' && !isExcludedStatus) return
+      
       const name = String(task.name || task.title || task.wbsTemplate?.name || '').toLowerCase()
 
-      if (name.includes('training') || name.includes('practice')) {
+      if (isExcludedStatus) {
+        grouped['Other Tasks'].push(task)
+      } else if (name.includes('training') || name.includes('practice')) {
         grouped['Training and Practice'].push(task)
       } else if (name.includes('job study') || name.includes('jobstudy')) {
         grouped['Job Study'].push(task)
@@ -288,6 +295,9 @@ const GetProjectById = ({ id, onClose }) => {
   const wbsTasksByBundle = useMemo(() => {
     const grouped = {}
     projectTasks.forEach((task) => {
+      const taskStatus = (task.status || '').toLowerCase().trim()
+      if (taskStatus === 'wrong_allocation' || taskStatus === 'absent') return
+
       const bundleKey =
         task.projectBundle?.bundleKey ||
         task.projectBundle?.bundle?.bundleKey ||
@@ -321,6 +331,9 @@ const GetProjectById = ({ id, onClose }) => {
     }
 
     projectTasks.forEach((task) => {
+      const taskStatus = (task.status || '').toLowerCase().trim()
+      if (taskStatus === 'wrong_allocation' || taskStatus === 'absent') return
+
       const typeKey = normaliseWbsType(task.wbsType)
       if (totals[typeKey] !== undefined) {
         const taskSeconds = (task.workingHourTask || []).reduce(
