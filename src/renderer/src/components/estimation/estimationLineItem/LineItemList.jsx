@@ -2,7 +2,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react'
 import Service from '../../../api/Service'
 import DataTable from '../../ui/table'
-import { X, Edit2, Save, Layers, AlignLeft, Calculator, Clock, CheckCircle2, Search } from 'lucide-react'
+import { X, Layers, AlignLeft, Clock, CheckCircle2, Search } from 'lucide-react'
 import RichTextEditor from '../../fields/RichTextEditor'
 
 const LineItemList = ({ id, onClose }) => {
@@ -58,13 +58,69 @@ const LineItemList = ({ id, onClose }) => {
   const [pendingChanges, setPendingChanges] = useState({})
   const [isBulkSaving, setIsBulkSaving] = useState(false)
 
+  const getGroupMetrics = () => {
+    if (!groupData) {
+      return {
+        divisor: 0,
+        displayHours: 0,
+        displayWeeks: 0,
+        displayDays: 0
+      }
+    }
+
+    const divisor = groupData?.group?.divisor !== null && groupData?.group?.divisor !== undefined
+      ? Number(groupData.group.divisor)
+      : (groupData?.divisor !== null && groupData?.divisor !== undefined
+          ? Number(groupData.divisor)
+          : 0)
+
+    const tableHours = Number(groupData?.totalHours || 0)
+
+    const savedHours = groupData?.group?.totalHours !== null && groupData?.group?.totalHours !== undefined
+      ? Number(groupData.group.totalHours)
+      : null
+
+    const savedWeeks = groupData?.group?.totalWeeks !== null && groupData?.group?.totalWeeks !== undefined
+      ? Number(groupData.group.totalWeeks)
+      : (groupData?.totalWeeks !== null && groupData?.totalWeeks !== undefined
+          ? Number(groupData.totalWeeks)
+          : null)
+
+    const savedDays = groupData?.group?.totalDays !== null && groupData?.group?.totalDays !== undefined
+      ? Number(groupData.group.totalDays)
+      : (groupData?.totalDays !== null && groupData?.totalDays !== undefined
+          ? Number(groupData.totalDays)
+          : null)
+
+    const displayHours = savedHours !== null ? savedHours : tableHours
+
+    const displayWeeks = savedWeeks !== null
+      ? savedWeeks
+      : (divisor > 0 ? (tableHours / divisor) : 0)
+
+    const displayDays = savedDays !== null
+      ? savedDays
+      : (savedWeeks !== null ? (savedWeeks * 5) : (displayWeeks * 5))
+
+    return {
+      divisor,
+      displayHours,
+      displayWeeks,
+      displayDays
+    }
+  }
+
   const handleGroupEditClick = () => {
+    const metrics = getGroupMetrics()
+
     setIsEditingGroup(true)
     setGroupFormData({
       name: groupData?.group?.name || '',
       description: groupData?.group?.description || '',
-      totalHours: groupData?.totalHours || 0,
-      divisor: groupData?.group?.divisor || 0
+      totalHours: metrics.displayHours.toFixed(2),
+      divisor: metrics.divisor.toFixed(2),
+      weeks: metrics.displayWeeks.toFixed(2),
+      days: metrics.displayDays.toFixed(2)
     })
   }
 
@@ -79,7 +135,11 @@ const LineItemList = ({ id, onClose }) => {
         name: groupFormData.name,
         description: groupFormData.description,
         totalHours: Number(groupFormData.totalHours),
-        divisor: Number(groupFormData.divisor)
+        divisor: Number(groupFormData.divisor),
+        totalWeeks: Number(groupFormData.weeks),
+        weeks: Number(groupFormData.weeks),
+        totalDays: Number(groupFormData.days),
+        days: Number(groupFormData.days)
       }
       await Service.UpdateGroupById(id, payload)
 
@@ -92,15 +152,16 @@ const LineItemList = ({ id, onClose }) => {
               ...prev.group,
               name: payload.name,
               description: payload.description,
-              divisor: payload.divisor
-            },
-            totalHours: payload.totalHours
+              divisor: payload.divisor,
+              totalHours: payload.totalHours,
+              totalWeeks: payload.totalWeeks,
+              totalDays: payload.totalDays
+            }
           }
           : null
       )
 
       setIsEditingGroup(false)
-      // fetchGroupById(); // Optional: still fetch to ensure sync, but local update handles immediate UI
     } catch (error) {
       console.error('Error updating group:', error)
     }
@@ -112,6 +173,13 @@ const LineItemList = ({ id, onClose }) => {
 
   const handleGroupInputRawChange = (e, field) => {
     setGroupFormData({ ...groupFormData, [field]: e.target.value })
+  }
+
+  const handleMetricChange = (val, field) => {
+    setGroupFormData((prev) => ({
+      ...prev,
+      [field]: val
+    }))
   }
 
   // Stabilize handlers with useCallback
@@ -201,13 +269,6 @@ const LineItemList = ({ id, onClose }) => {
     }
   }
 
-  const formatDecimalHours = (decimalHours) => {
-    const num = Number(decimalHours)
-    if (isNaN(num)) return '0h 0m'
-    const hours = Math.floor(num)
-    const minutes = Math.round((num - hours) * 60)
-    return `${hours}h ${minutes}m`
-  }
 
   // Sort initially based on original lineItem data to prevent jumping while editing
   const sortedLineItems = useMemo(() => {
@@ -261,12 +322,13 @@ const LineItemList = ({ id, onClose }) => {
           <input
             type="text"
             value={editFormData.scopeOfWork || ''}
-            onChange={(val) => handleInputChange(val, 'scopeOfWork')}
+            onChange={(e) => handleInputChange(e.target.value, 'scopeOfWork')}
             placeholder="Enter scope of work"
+            className="w-full border border-gray-300 rounded-none px-2 py-1 focus:outline-none focus:border-green-700 bg-white text-black font-medium text-sm"
           />
         ) : (
           <div
-            className="prose prose-sm max-w-none"
+            className="prose prose-sm max-w-none text-black"
             dangerouslySetInnerHTML={{ __html: row.original.scopeOfWork }}
           />
         )
@@ -287,7 +349,7 @@ const LineItemList = ({ id, onClose }) => {
               type="number"
               value={val}
               onChange={(e) => handleInputRawChange(e, 'quantity')}
-              className="w-full border rounded p-1"
+              className="w-full border border-gray-300 rounded-none p-1 focus:outline-none focus:border-green-700 bg-white text-black font-medium text-sm"
             />
           );
         }
@@ -298,7 +360,7 @@ const LineItemList = ({ id, onClose }) => {
               type="number"
               value={val}
               onChange={(e) => handleQuantityChange(row.original.id, e.target.value, row.original.hoursPerQty)}
-              className={`w-full border rounded p-1 transition-colors ${isPending ? 'border-orange-400 bg-orange-50' : 'border-gray-200'}`}
+              className={`w-full border p-1 transition-colors rounded-none focus:outline-none focus:border-green-700 bg-white text-black font-medium text-sm ${isPending ? 'border-green-700 bg-green-50/20' : 'border-gray-300'}`}
             />
           </div>
         )
@@ -314,10 +376,10 @@ const LineItemList = ({ id, onClose }) => {
             type="number"
             value={editFormData.hoursPerQty || 0}
             onChange={(e) => handleInputRawChange(e, 'hoursPerQty')}
-            className="w-full border rounded p-1"
+            className="w-full border border-gray-300 rounded-none p-1 focus:outline-none focus:border-green-700 bg-white text-black font-medium text-sm"
           />
         ) : (
-          row.original.hoursPerQty
+          <span className="text-black text-sm font-medium">{row.original.hoursPerQty}</span>
         )
       }
     },
@@ -336,13 +398,13 @@ const LineItemList = ({ id, onClose }) => {
               type="number"
               value={val || 0}
               onChange={(e) => handleInputRawChange(e, 'totalHours')}
-              className="w-full border rounded p-1"
+              className="w-full border border-gray-300 rounded-none p-1 focus:outline-none focus:border-green-700 bg-white text-black font-medium text-sm"
             />
           )
         }
 
         return (
-          <span className={isPending ? "font-bold text-orange-600" : ""}>
+          <span className={isPending ? "font-bold text-green-700 text-sm" : "text-black text-sm"}>
             {Number(val).toFixed(2)}
           </span>
         );
@@ -357,13 +419,13 @@ const LineItemList = ({ id, onClose }) => {
           <div className="flex gap-2">
             <button
               onClick={() => handleSaveClickCorrect(row.original.id)}
-              className="text-green-600 hover:text-green-800 font-medium"
+              className="text-green-700 hover:text-green-900 font-bold uppercase tracking-wider text-xs"
             >
               Save
             </button>
             <button
               onClick={handleCancelClick}
-              className="text-red-600 hover:text-red-800 font-medium"
+              className="text-black hover:text-gray-600 font-bold uppercase tracking-wider text-xs"
             >
               Cancel
             </button>
@@ -371,7 +433,7 @@ const LineItemList = ({ id, onClose }) => {
         ) : (
           <button
             onClick={() => handleEditClick(row.original)}
-            className="text-blue-600 hover:text-blue-800 font-medium"
+            className="text-green-700 hover:text-green-900 font-bold uppercase tracking-wider text-xs"
           >
             Edit
           </button>
@@ -383,26 +445,26 @@ const LineItemList = ({ id, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       {' '}
-      <div className="bg-white w-full max-w-5xl rounded-xl shadow-2xl overflow-hidden p-5 h-[90vh] flex flex-col">
-        <div className="flex flex-col gap-3 mb-6 border-b pb-4 sticky top-0 bg-white z-10">
+      <div className="bg-white w-full max-w-5xl rounded-none border border-gray-300 shadow-2xl overflow-hidden p-6 h-[90vh] flex flex-col">
+        <div className="flex flex-col gap-3 mb-6 sticky top-0 bg-white z-10">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl text-gray-700">Line Items</h2>
+            <h2 className="text-2xl font-black text-black uppercase tracking-tight">Line Items</h2>
             <div className="flex items-center gap-4">
               {Object.keys(pendingChanges).length > 0 && (
                 <button
                   onClick={handleBulkSave}
                   disabled={isBulkSaving}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-medium animate-in fade-in"
+                  className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                 >
                   {isBulkSaving ? (
-                    <Clock className="w-4 h-4 animate-spin" />
+                    <Clock className="w-4 h-4 animate-spin text-green-700" />
                   ) : (
-                    <CheckCircle2 className="w-4 h-4" />
+                    <CheckCircle2 className="w-4 h-4 text-green-700" />
                   )}
                   Save Changes ({Object.keys(pendingChanges).length})
                 </button>
               )}
-              <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
+              <button onClick={onClose} className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm">
                 Close
               </button>
             </div>
@@ -410,176 +472,203 @@ const LineItemList = ({ id, onClose }) => {
 
           {/* Scope of Work Search */}
           <div className="relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black pointer-events-none" />
             <input
               type="text"
               value={scopeSearch}
               onChange={(e) => setScopeSearch(e.target.value)}
               placeholder="Search scope of work..."
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all placeholder:text-gray-400"
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-none bg-white focus:outline-none focus:border-green-700 transition-all placeholder:text-gray-400 text-black font-medium"
             />
             {scopeSearch && (
               <button
                 onClick={() => setScopeSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:text-gray-600 transition-colors"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
           {scopeSearch && (
-            <p className="text-xs text-gray-500">
-              Showing <span className="font-semibold text-gray-700">{filteredLineItems.length}</span> of{' '}
-              <span className="font-semibold text-gray-700">{mergedLineItems.length}</span> items
+            <p className="text-xs text-black font-medium">
+              Showing <span className="font-bold text-green-700">{filteredLineItems.length}</span> of{' '}
+              <span className="font-bold text-black">{mergedLineItems.length}</span> items
             </p>
           )}
         </div>
-        <div className="mb-6 bg-gray-50 rounded-xl p-5 border border-gray-200 shadow-sm relative group">
-          {!isEditingGroup && (
-            <button
-              onClick={handleGroupEditClick}
-              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-green-600 hover:bg-white rounded-full transition-all opacity-0 group-hover:opacity-100"
-              title="Edit Group Details"
-            >
-              <Edit2 className="w-4 h-4" />
-            </button>
-          )}
 
-          <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-            <div className="flex-1 w-full">
-              {isEditingGroup ? (
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1 block">
-                      Group Name
-                    </label>
-                    <input
-                      type="text"
-                      value={groupFormData.name}
-                      onChange={(e) => handleGroupInputRawChange(e, 'name')}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                      placeholder="Group Name"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1 block">
-                      Description
-                    </label>
-                    <RichTextEditor
-                      value={groupFormData.description}
-                      onChange={(val) => handleGroupInputChange(val, 'description')}
-                      placeholder="Description"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <h3 className="text-lg  text-gray-700 flex items-center gap-2 mb-2">
-                    <Layers className="w-5 h-5 text-green-600" />
-                    {groupData?.group?.name || 'Unnamed Group'}
-                  </h3>
-                  <div className="flex items-start gap-2 text-gray-700">
-                    <AlignLeft className="w-4 h-4 mt-1 shrink-0 text-gray-400" />
-                    <div
-                      className="text-sm leading-relaxed prose prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{
-                        __html: groupData?.group?.description || 'No description available.'
-                      }}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="flex flex-col items-end gap-3">
-              <div className="flex gap-3">
-                <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
-                  <div className="p-2 bg-purple-100 rounded-full">
-                    <Calculator className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-700 font-medium uppercase tracking-wide">
-                      Weeks
-                    </p>
-                    {isEditingGroup ? (
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          value={groupFormData.divisor}
-                          onChange={(e) => handleGroupInputRawChange(e, 'divisor')}
-                          className="w-16 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 outline-none text-right  text-gray-700"
-                          placeholder="Div"
-                        />
-                        <span className="text-gray-400 text-sm">=</span>
-                        <span className="text-sm  text-gray-700">
-                          {groupFormData.divisor > 0
-                            ? (groupFormData.totalHours / groupFormData.divisor).toFixed(2)
-                            : '0.00'}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-end">
-                        <span className="text-lg  text-gray-700">
-                          {groupData?.group?.divisor
-                            ? (groupData?.totalHours / groupData?.group?.divisor).toFixed(2)
-                            : '0.00'}
-                        </span>
-                        <span className="text-[10px] text-gray-400">
-                          (Div: {groupData?.group?.divisor || 0})
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
-                  <div className="p-2 bg-orange-100 rounded-full">
-                    <Clock className="w-5 h-5 text-orange-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-700 font-medium uppercase tracking-wide">
-                      Total Hours
-                    </p>
-                    {isEditingGroup ? (
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={groupFormData.totalHours || ''}
-                        onChange={(e) => handleGroupInputRawChange(e, 'totalHours')}
-                        className="w-24 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 outline-none text-right  text-gray-700"
-                      />
-                    ) : (
-                      <span className="text-lg  text-gray-700">
-                        {Number(groupData?.totalHours || 0).toFixed(2)} hrs
-                      </span>
-                    )}
-                  </div>
-                </div>
+        <div className="mb-6 bg-white p-6 border border-gray-300 flex flex-col gap-4 relative">
+          {isEditingGroup ? (
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-bold text-black uppercase tracking-wider mb-1 block">
+                  Group Name
+                </label>
+                <input
+                  type="text"
+                  value={groupFormData.name}
+                  onChange={(e) => handleGroupInputRawChange(e, 'name')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-none focus:outline-none focus:border-green-700 bg-white text-black text-sm font-medium"
+                  placeholder="Group Name"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-bold text-black uppercase tracking-wider mb-1 block">
+                  Description
+                </label>
+                <RichTextEditor
+                  value={groupFormData.description}
+                  onChange={(val) => handleGroupInputChange(val, 'description')}
+                  placeholder="Description"
+                />
               </div>
 
-              {isEditingGroup && (
-                <div className="flex gap-2 mt-2">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 pt-4 border-t border-gray-200">
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm text-black font-bold uppercase tracking-wider">
+                      Weeks
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={groupFormData.weeks || ''}
+                      onChange={(e) => handleMetricChange(e.target.value, 'weeks')}
+                      className="w-24 px-3 py-1.5 border border-gray-300 rounded-none focus:outline-none focus:border-green-700 bg-white text-black text-sm font-medium"
+                      placeholder="Weeks"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm text-black font-bold uppercase tracking-wider">
+                      Days
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={groupFormData.days || ''}
+                      onChange={(e) => handleMetricChange(e.target.value, 'days')}
+                      className="w-24 px-3 py-1.5 border border-gray-300 rounded-none focus:outline-none focus:border-green-700 bg-white text-black text-sm font-medium"
+                      placeholder="Days"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm text-black font-bold uppercase tracking-wider">
+                      Total Hours
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={groupFormData.totalHours || ''}
+                      onChange={(e) => handleMetricChange(e.target.value, 'totalHours')}
+                      className="w-28 px-3 py-1.5 border border-gray-300 rounded-none focus:outline-none focus:border-green-700 bg-white text-black text-sm font-medium"
+                      placeholder="Total Hours"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm text-black font-bold uppercase tracking-wider">
+                      Hours / Week (Div)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={groupFormData.divisor || ''}
+                      onChange={(e) => handleMetricChange(e.target.value, 'divisor')}
+                      className="w-28 px-3 py-1.5 border border-gray-300 rounded-none focus:outline-none focus:border-green-700 bg-white text-black text-sm font-medium"
+                      placeholder="Divisor"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
                   <button
                     onClick={handleGroupSaveClick}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                    className="px-4 py-2 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 transition-all font-bold text-xs uppercase tracking-wider rounded-none shadow-sm cursor-pointer"
                   >
-                    <Save className="w-3 h-3" />
                     Save
                   </button>
                   <button
                     onClick={handleGroupCancelClick}
-                    className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                    className="px-4 py-2 bg-red-50 text-black border-2 border-red-700/80 hover:bg-red-100 transition-all font-bold text-xs uppercase tracking-wider rounded-none shadow-sm cursor-pointer"
                   >
                     Cancel
                   </button>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+          ) : (
+            <>
+              <h3 className="text-lg font-bold text-black uppercase tracking-wider flex items-center gap-2 mb-2">
+                <Layers className="w-5 h-5 text-green-700" />
+                {groupData?.group?.name || 'Unnamed Group'}
+              </h3>
+              <div className="flex items-start gap-2 text-black mb-4">
+                <AlignLeft className="w-4.5 h-4.5 mt-1 shrink-0 text-black" />
+                <div
+                  className="text-sm leading-relaxed prose prose-sm max-w-none text-black"
+                  dangerouslySetInnerHTML={{
+                    __html: groupData?.group?.description || 'No description available.'
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t border-gray-200">
+                <div className="flex flex-wrap gap-4">
+                  {/* WEEKS Card */}
+                  <div className="flex items-center gap-3 bg-white px-4 py-2 border border-gray-300">
+                    <Clock className="w-5 h-5 text-green-700" />
+                    <div>
+                      <p className="text-sm text-black font-medium uppercase tracking-wider">
+                        Weeks
+                      </p>
+                      <span className="text-sm font-bold text-black">
+                        {Number(getGroupMetrics().displayWeeks).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* DAYS Card */}
+                  <div className="flex items-center gap-3 bg-white px-4 py-2 border border-gray-300">
+                    <Clock className="w-5 h-5 text-green-700" />
+                    <div>
+                      <p className="text-sm text-black font-medium uppercase tracking-wider">
+                        Days
+                      </p>
+                      <span className="text-sm font-bold text-black">
+                        {Number(getGroupMetrics().displayDays).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* TOTAL HOURS Card */}
+                  <div className="flex items-center gap-3 bg-white px-4 py-2 border border-gray-300">
+                    <Clock className="w-5 h-5 text-green-700" />
+                    <div>
+                      <p className="text-sm text-black font-medium uppercase tracking-wider">
+                        Total Hours
+                      </p>
+                      <span className="text-sm font-bold text-black">
+                        {Number(getGroupMetrics().displayHours).toFixed(2)} hrs
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <button
+                    onClick={handleGroupEditClick}
+                    className="px-4 py-2 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 transition-all font-bold text-xs uppercase tracking-wider rounded-none shadow-sm cursor-pointer"
+                  >
+                    Edit Details
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
         <div className="flex-1 overflow-y-auto">
-
           <DataTable
             columns={columns}
             data={filteredLineItems}
