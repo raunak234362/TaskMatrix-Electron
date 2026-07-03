@@ -6,33 +6,41 @@ import { X, Layers, AlignLeft, Clock, CheckCircle2, Search } from 'lucide-react'
 import RichTextEditor from '../../fields/RichTextEditor'
 
 const LineItemList = ({ id, onClose }) => {
+  // --- States ---
   const [lineItem, setLineItem] = useState([])
   const [groupData, setGroupData] = useState(null)
-  // eslint-disable-next-line no-unused-vars
-  const [, setLoading] = useState(false)
+  const [editingRowId, setEditingRowId] = useState(null)
+  const [editFormData, setEditFormData] = useState({})
+  const [isEditingGroup, setIsEditingGroup] = useState(false)
+  const [groupFormData, setGroupFormData] = useState({})
+  const [scopeSearch, setScopeSearch] = useState('')
+  const [pendingChanges, setPendingChanges] = useState({})
+  const [isBulkSaving, setIsBulkSaving] = useState(false)
 
   const groupId = groupData?.group?.id
 
-  const fetchGroupById = useCallback(async () => {
-    const response = await Service.FetchGroupById(id)
-    console.log(response.data)
+  // --- API Integrations ---
 
-    setGroupData(response.data)
+  // Fetches the line item group metadata by group/estimation ID
+  const fetchGroupById = useCallback(async () => {
+    try {
+      const response = await Service.FetchGroupById(id)
+      setGroupData(response.data)
+    } catch (error) {
+      console.error('Error fetching group details:', error)
+    }
   }, [id])
 
+  // Fetches individual line items belonging to the current group
   const fetchLineItem = useCallback(async () => {
     if (!groupId) return
-    setLoading(true)
     try {
       const response = await Service.FetchLineItemGroupList(groupId)
-      console.log(response.data)
       setLineItem(response.data)
     } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false)
+      console.error('Error fetching line items:', error)
     }
-  }, [groupId]) // setLoading is a stable setter, Service is stable, setLineItem is stable
+  }, [groupId])
 
   useEffect(() => {
     fetchGroupById()
@@ -44,28 +52,16 @@ const LineItemList = ({ id, onClose }) => {
     }
   }, [groupId, fetchLineItem])
 
-  const [editingRowId, setEditingRowId] = useState(null)
-  const [editFormData, setEditFormData] = useState({})
+  // --- Metrics Resolving Helper ---
 
-  // Group Editing State
-  const [isEditingGroup, setIsEditingGroup] = useState(false)
-  const [groupFormData, setGroupFormData] = useState({})
-
-  // Scope of Work Search
-  const [scopeSearch, setScopeSearch] = useState('')
-
-  // Bulk Quantity Edit State
-  const [pendingChanges, setPendingChanges] = useState({})
-  const [isBulkSaving, setIsBulkSaving] = useState(false)
-
+  /**
+   * Safe metric extractor to handle schema shapes of different endpoints:
+   * - GET endpoint returns values at the root response level.
+   * - PUT endpoint returns values nested under data.group.
+   */
   const getGroupMetrics = () => {
     if (!groupData) {
-      return {
-        divisor: 0,
-        displayHours: 0,
-        displayWeeks: 0,
-        displayDays: 0
-      }
+      return { divisor: 0, displayHours: 0, displayWeeks: 0, displayDays: 0 }
     }
 
     const divisor = groupData?.group?.divisor !== null && groupData?.group?.divisor !== undefined
@@ -110,9 +106,10 @@ const LineItemList = ({ id, onClose }) => {
     }
   }
 
+  // --- Group Detail Handlers ---
+
   const handleGroupEditClick = () => {
     const metrics = getGroupMetrics()
-
     setIsEditingGroup(true)
     setGroupFormData({
       name: groupData?.group?.name || '',
@@ -138,32 +135,30 @@ const LineItemList = ({ id, onClose }) => {
         divisor: Number(groupFormData.divisor),
         totalWeeks: Number(groupFormData.weeks),
         weeks: Number(groupFormData.weeks),
-        totalDays: Number(groupFormData.days),
-        days: Number(groupFormData.days)
+        totalDays: Number(groupFormData.days)
       }
       await Service.UpdateGroupById(id, payload)
 
-      // Real-time update of local state
+      // Sync updated group state locally
       setGroupData((prev) =>
         prev
           ? {
-            ...prev,
-            group: {
-              ...prev.group,
-              name: payload.name,
-              description: payload.description,
-              divisor: payload.divisor,
-              totalHours: payload.totalHours,
-              totalWeeks: payload.totalWeeks,
-              totalDays: payload.totalDays
+              ...prev,
+              group: {
+                ...prev.group,
+                name: payload.name,
+                description: payload.description,
+                divisor: payload.divisor,
+                totalHours: payload.totalHours,
+                totalWeeks: payload.totalWeeks,
+                totalDays: payload.totalDays
+              }
             }
-          }
           : null
       )
-
       setIsEditingGroup(false)
     } catch (error) {
-      console.error('Error updating group:', error)
+      console.error('Error updating group details:', error)
     }
   }
 
@@ -182,7 +177,8 @@ const LineItemList = ({ id, onClose }) => {
     }))
   }
 
-  // Stabilize handlers with useCallback
+  // --- Inline Single Row Edit Handlers ---
+
   const handleEditClick = useCallback((row) => {
     setEditingRowId(row.id)
     setEditFormData({
@@ -191,12 +187,12 @@ const LineItemList = ({ id, onClose }) => {
       hoursPerQty: row.hoursPerQty,
       totalHours: row.totalHours
     })
-  }, []) // setEditingRowId and setEditFormData are stable setters
+  }, [])
 
   const handleCancelClick = useCallback(() => {
     setEditingRowId(null)
     setEditFormData({})
-  }, []) // setEditingRowId and setEditFormData are stable setters
+  }, [])
 
   const handleSaveClickCorrect = useCallback(async (rowId) => {
     try {
@@ -213,11 +209,11 @@ const LineItemList = ({ id, onClose }) => {
     } catch (error) {
       console.error('Error updating line item:', error)
     }
-  }, [editFormData, fetchLineItem, fetchGroupById]) // editFormData, fetchLineItem, fetchGroupById can change
+  }, [editFormData, fetchLineItem, fetchGroupById])
 
   const handleInputChange = useCallback((value, field) => {
     setEditFormData(prev => ({ ...prev, [field]: value }))
-  }, []) // setEditFormData is a stable setter
+  }, [])
 
   const handleInputRawChange = useCallback((e, field) => {
     const value = e.target.value
@@ -227,17 +223,18 @@ const LineItemList = ({ id, onClose }) => {
       if (field === 'quantity' || field === 'hoursPerQty') {
         const qty = parseFloat(field === 'quantity' ? value : (prev.quantity || 0)) || 0
         const hours = parseFloat(field === 'hoursPerQty' ? value : (prev.hoursPerQty || 0)) || 0
-        newData.totalHours = qty * hours  // always a Number
+        newData.totalHours = qty * hours
       }
       return newData
     })
-  }, []) // setEditFormData is a stable setter
+  }, [])
 
-  // --- Bulk Quantity Logic ---
+  // --- Bulk Quantity Handlers ---
+
   const handleQuantityChange = useCallback((id, newQuantity, hoursPerQty) => {
-    const qty = newQuantity === '' ? 0 : parseFloat(newQuantity) || 0;
-    const hours = parseFloat(hoursPerQty) || 0;
-    const totalHours = qty * hours;
+    const qty = newQuantity === '' ? 0 : parseFloat(newQuantity) || 0
+    const hours = parseFloat(hoursPerQty) || 0
+    const totalHours = qty * hours
 
     setPendingChanges(prev => ({
       ...prev,
@@ -245,63 +242,64 @@ const LineItemList = ({ id, onClose }) => {
         quantity: newQuantity,
         totalHours: totalHours
       }
-    }));
-  }, []) // setPendingChanges is a stable setter
+    }))
+  }, [])
 
   const handleBulkSave = async () => {
-    setIsBulkSaving(true);
+    setIsBulkSaving(true)
     try {
       const promises = Object.entries(pendingChanges).map(([id, data]) => {
         return Service.UpdateLineItemById(id, {
           quantity: Number(data.quantity),
           totalHours: data.totalHours
-        });
-      });
+        })
+      })
 
-      await Promise.all(promises);
-      setPendingChanges({});
-      fetchLineItem();
-      fetchGroupById();
+      await Promise.all(promises)
+      setPendingChanges({})
+      fetchLineItem()
+      fetchGroupById()
     } catch (error) {
-      console.error("Bulk save failed", error);
+      console.error("Bulk save failed:", error)
     } finally {
-      setIsBulkSaving(false);
+      setIsBulkSaving(false)
     }
   }
 
+  // --- Data Sorting & Memoization ---
 
-  // Sort initially based on original lineItem data to prevent jumping while editing
+  // Sort line items based on original data to prevent row shifting while editing
   const sortedLineItems = useMemo(() => {
     return [...lineItem].sort((a, b) => {
-      const aQty = Number(a.quantity);
-      const bQty = Number(b.quantity);
-      const aFilled = !isNaN(aQty) && a.quantity !== null && a.quantity !== undefined && String(a.quantity).trim() !== '' && aQty > 0;
-      const bFilled = !isNaN(bQty) && b.quantity !== null && b.quantity !== undefined && String(b.quantity).trim() !== '' && bQty > 0;
+      const aQty = Number(a.quantity)
+      const bQty = Number(b.quantity)
+      const aFilled = !isNaN(aQty) && a.quantity !== null && a.quantity !== undefined && String(a.quantity).trim() !== '' && aQty > 0
+      const bFilled = !isNaN(bQty) && b.quantity !== null && b.quantity !== undefined && String(b.quantity).trim() !== '' && bQty > 0
 
-      if (aFilled && !bFilled) return -1;
-      if (!aFilled && bFilled) return 1;
-      if (aFilled && bFilled) return bQty - aQty; // descending
-      return 0;
-    });
-  }, [lineItem]);
+      if (aFilled && !bFilled) return -1
+      if (!aFilled && bFilled) return 1
+      if (aFilled && bFilled) return bQty - aQty
+      return 0
+    })
+  }, [lineItem])
 
-  // Merge pending changes into data so columns can be pure
+  // Merges bulk unsaved user input changes into display data
   const mergedLineItems = useMemo(() => {
     return sortedLineItems.map(item => {
-      const pending = pendingChanges[item.id];
+      const pending = pendingChanges[item.id]
       if (pending) {
         return {
           ...item,
           quantity: pending.quantity,
           totalHours: pending.totalHours,
           isPending: true
-        };
+        }
       }
-      return item;
-    });
-  }, [sortedLineItems, pendingChanges]);
+      return item
+    })
+  }, [sortedLineItems, pendingChanges])
 
-  // Filter merged items by scope-of-work plain text
+  // Filters items by plain text matching the search query
   const filteredLineItems = useMemo(() => {
     const query = scopeSearch.trim().toLowerCase()
     if (!query) return mergedLineItems
@@ -311,7 +309,8 @@ const LineItemList = ({ id, onClose }) => {
     })
   }, [mergedLineItems, scopeSearch])
 
-  // Memoize columns to prevent regeneration on every render
+  // --- Table Column Definitions ---
+
   const columns = useMemo(() => [
     {
       accessorKey: 'scopeOfWork',
@@ -338,10 +337,9 @@ const LineItemList = ({ id, onClose }) => {
       accessorKey: 'quantity',
       header: 'Quantity',
       cell: ({ row }) => {
-        const isEditing = editingRowId === row.original.id;
-        // Use merged value from row.original
-        const val = isEditing ? (editFormData.quantity ?? '') : (row.original.quantity ?? '');
-        const isPending = row.original.isPending;
+        const isEditing = editingRowId === row.original.id
+        const val = isEditing ? (editFormData.quantity ?? '') : (row.original.quantity ?? '')
+        const isPending = row.original.isPending
 
         if (isEditing) {
           return (
@@ -351,7 +349,7 @@ const LineItemList = ({ id, onClose }) => {
               onChange={(e) => handleInputRawChange(e, 'quantity')}
               className="w-full border border-gray-300 rounded-none p-1 focus:outline-none focus:border-green-700 bg-white text-black font-medium text-sm"
             />
-          );
+          )
         }
 
         return (
@@ -387,10 +385,9 @@ const LineItemList = ({ id, onClose }) => {
       accessorKey: 'totalHours',
       header: 'Total Hours',
       cell: ({ row }) => {
-        const isEditing = editingRowId === row.original.id;
-        // Use merged value from row.original
-        const val = isEditing ? editFormData.totalHours : row.original.totalHours;
-        const isPending = row.original.isPending;
+        const isEditing = editingRowId === row.original.id
+        const val = isEditing ? editFormData.totalHours : row.original.totalHours
+        const isPending = row.original.isPending
 
         if (isEditing) {
           return (
@@ -407,7 +404,7 @@ const LineItemList = ({ id, onClose }) => {
           <span className={isPending ? "font-bold text-green-700 text-sm" : "text-black text-sm"}>
             {Number(val).toFixed(2)}
           </span>
-        );
+        )
       }
     },
     {
@@ -440,12 +437,12 @@ const LineItemList = ({ id, onClose }) => {
         )
       }
     }
-  ], [editingRowId, editFormData, handleQuantityChange, handleInputRawChange, handleInputChange, handleEditClick, handleCancelClick, handleSaveClickCorrect]);
+  ], [editingRowId, editFormData, handleQuantityChange, handleInputRawChange, handleInputChange, handleEditClick, handleCancelClick, handleSaveClickCorrect])
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      {' '}
       <div className="bg-white w-full max-w-5xl rounded-none border border-gray-300 shadow-2xl overflow-hidden p-6 h-[90vh] flex flex-col">
+        {/* Header and Controls */}
         <div className="flex flex-col gap-3 mb-6 sticky top-0 bg-white z-10">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-black text-black uppercase tracking-tight">Line Items</h2>
@@ -497,6 +494,7 @@ const LineItemList = ({ id, onClose }) => {
           )}
         </div>
 
+        {/* Group Details (Read/Edit mode) */}
         <div className="mb-6 bg-white p-6 border border-gray-300 flex flex-col gap-4 relative">
           {isEditingGroup ? (
             <div className="space-y-4">
@@ -668,6 +666,8 @@ const LineItemList = ({ id, onClose }) => {
             </>
           )}
         </div>
+
+        {/* Line Items Table */}
         <div className="flex-1 overflow-y-auto">
           <DataTable
             columns={columns}
