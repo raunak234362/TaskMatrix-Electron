@@ -127,6 +127,11 @@ const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
         return taskProjectId === project.id;
       });
       const workedHours = projectTasks.reduce((total, task) => {
+        const taskStatus = (task.status || '').toLowerCase().trim();
+        if (taskStatus === 'wrong_allocation' || taskStatus === 'absent') {
+          return total;
+        }
+
         const taskWorked = (task.workingHourTask || []).reduce(
           (acc, wh) => acc + (Number(wh.duration_seconds) || 0),
           0
