@@ -1102,15 +1102,19 @@ class Service {
   }
 
   // Add Project
-  static async AddProject(formData) {
+  static async AddProject(formData, fabricatorName, projectName) {
     const token = sessionStorage.getItem('token')
     try {
-      const response = await api.post(`project/projects`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`
+      const response = await api.post(
+        `project/projects?fabricatorName=${encodeURIComponent(fabricatorName)}&projectName=${encodeURIComponent(projectName)}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`
+          }
         }
-      })
+      )
       console.log(response)
       return response.data
     } catch (error) {

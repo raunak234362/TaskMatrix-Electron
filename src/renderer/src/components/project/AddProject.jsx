@@ -60,7 +60,7 @@ const AddProject = () => {
       })),
   );
 
-  const { register, handleSubmit, control, watch, setValue } =
+  const { register, handleSubmit, control, watch, setValue, reset } =
     useForm({
       defaultValues: {
         tools: "TEKLA",
@@ -193,10 +193,14 @@ const AddProject = () => {
       formData.append("status", "ACTIVE");
       formData.append("stage", "IFA");
 
-      const res = await Service.AddProject(formData);
+      const fabricatorName = fabricators.find((f) => String(f.id) === String(data.fabricatorID))?.fabName || "Unknown Fabricator";
+      const projectName = data.name || "Unknown Project";
+
+      const res = await Service.AddProject(formData, fabricatorName, projectName);
       if (res?.data || res?.project) {
         dispatch(addProject(res?.data || res?.project));
         toast.success("Project launched successfully!");
+        reset();
       } else {
         toast.error(res?.message || "Failed to create project");
       }
