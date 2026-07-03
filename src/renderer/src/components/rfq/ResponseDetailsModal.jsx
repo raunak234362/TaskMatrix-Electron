@@ -37,7 +37,11 @@ const ResponseDetailsModal = ({
   }, [response?.rfqId]);
 
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
-  // const handleReplySubmit = async () => {
+  const showWbtStatusRoles = ["staff", "admin", "project_manager", "deputy_manager", "dept_manager", "operation_executive"];
+  const getStatusToShow = (item) => {
+    const s = showWbtStatusRoles.includes(userRole) ? (item.wbtStatus || item.status) : item.status;
+    return s || "UNKNOWN";
+  };
   //   if (!replyMessage.trim()) return;
 
   //   const formData = new FormData();
@@ -69,7 +73,7 @@ const ResponseDetailsModal = ({
     formData.append("rfqId", response.rfqId);
     formData.append("userId", sessionStorage.getItem("userId") || "");
     // formData.append("status", replyStatus);
-    formData.append("wbtStatus", replyStatus);
+    // formData.append("wbtStatus", replyStatus);
     formData.append("type", replyType);
 
     // Attach files
@@ -113,10 +117,10 @@ const ResponseDetailsModal = ({
                 <span className="text-[10px] font-bold text-black uppercase border border-black px-2 py-0.5 rounded bg-white">
                   {child.user ? `${child.user.firstName} ${child.user.lastName}` : "User"}
                 </span>
-                <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-black ${child.status === "APPROVED" ? "bg-green-100 text-black" :
-                  child.status === "REJECTED" ? "bg-red-100 text-black" : "bg-blue-100 text-black"
+                <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-black ${getStatusToShow(child) === "APPROVED" ? "bg-green-100 text-black" :
+                  getStatusToShow(child) === "REJECTED" ? "bg-red-100 text-black" : "bg-blue-100 text-black"
                   }`}>
-                  {child.status}
+                  {getStatusToShow(child)}
                 </span>
                 {(child.type || child.Type) && (
                   <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-black bg-yellow-100 text-black">
@@ -198,10 +202,10 @@ const ResponseDetailsModal = ({
             <div className="flex justify-between items-center border-b border-black pb-1">
               <div className="flex items-center gap-2">
                 <p className="text-xs text-black font-bold uppercase">Main Message</p>
-                <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-black ${response.status === "APPROVED" ? "bg-green-100 text-black" :
-                  response.status === "REJECTED" ? "bg-red-100 text-black" : "bg-blue-100 text-black"
+                <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-black ${getStatusToShow(response) === "APPROVED" ? "bg-green-100 text-black" :
+                  getStatusToShow(response) === "REJECTED" ? "bg-red-100 text-black" : "bg-blue-100 text-black"
                   }`}>
-                  {response.status}
+                  {getStatusToShow(response)}
                 </span>
                 {(response.type || response.Type) && (
                   <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-black bg-yellow-100 text-black">
@@ -280,7 +284,7 @@ const ResponseDetailsModal = ({
               </div>
 
               {/* Status Dropdown */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-black">
                   Response Status
                 </label>
@@ -289,6 +293,7 @@ const ResponseDetailsModal = ({
                   onChange={(e) => setReplyStatus(e.target.value)}
                   className="w-full border-2 border-black rounded-lg p-3 text-sm font-bold uppercase outline-none bg-white"
                 >
+                  <option value="WBT_SUBMITTED">WBT Submitted</option>
                   <option value="PENDING">Pending</option>
                   <option value="APPROVED">Approved/Awarded</option>
                   <option value="REJECTED">Rejected</option>
@@ -296,7 +301,7 @@ const ResponseDetailsModal = ({
                     Needs Clarification
                   </option>
                 </select>
-              </div>
+              </div> */}
 
               {/* Type Dropdown */}
               <div className="space-y-2">

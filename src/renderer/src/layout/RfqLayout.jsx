@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 
 const RfqLayout = () => {
   const [activeTab, setActiveTab] = useState("allRFQ");
+  const [newRfqId, setNewRfqId] = useState(null);
   const rfq = useSelector((state) => state.RFQInfos?.RFQData);
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   return (
@@ -41,12 +42,15 @@ const RfqLayout = () => {
       <div className="flex-1 min-h-0 bg-white p-2 rounded-b-2xl overflow-y-auto">
         {activeTab === "allRFQ" && (
           <div>
-            <AllRFQ rfq={rfq} />
+            <AllRFQ rfq={rfq} newRfqId={newRfqId} onRfqOpened={() => setNewRfqId(null)} />
           </div>
         )}
         {activeTab === "addRFQ" && (
           <div>
-            <AddRFQ onSuccess={() => setActiveTab("allRFQ")} />
+            <AddRFQ onSuccess={(id) => {
+              setNewRfqId(id);
+              setActiveTab("allRFQ");
+            }} />
           </div>
         )}
       </div>

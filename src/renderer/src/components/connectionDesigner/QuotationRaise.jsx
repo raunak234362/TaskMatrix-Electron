@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import Service from "../../api/Service";
 import { useForm, Controller } from "react-hook-form";
 import Select from "react-select";
@@ -17,7 +17,7 @@ const QuotationRaise = ({
   onClose,
   onSuccess,
 }) => {
-  const { register, handleSubmit, control, watch } = useForm();
+  const { register, handleSubmit, control, watch, formState: { isSubmitting } } = useForm();
 
 
 
@@ -371,9 +371,17 @@ const QuotationRaise = ({
           <div className="flex justify-end pt-4 border-t border-gray-200">
             <button
               type="submit"
-              className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[0.7em] font-black uppercase tracking-[0.2em] shadow-sm transition-all flex items-center gap-2 active:scale-95"
+              disabled={isSubmitting}
+              className="px-8 py-3 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-lg text-[0.7em] font-black uppercase tracking-[0.2em] shadow-sm transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Raise for Quotation
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Raising Quotation...
+                </>
+              ) : (
+                "Raise for Quotation"
+              )}
             </button>
           </div>
         </form>
