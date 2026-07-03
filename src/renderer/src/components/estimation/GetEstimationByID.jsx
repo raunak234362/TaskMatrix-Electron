@@ -27,6 +27,7 @@ import EditEstimation from "./EditEstimation";
 import EstimationResponseModal from "./EstimationResponseModal";
 
 import RenderFiles from "../ui/RenderFiles";
+import DataTable from "../ui/table";
 
 const tabs = [
   "overview",
@@ -47,6 +48,8 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingInclusion, setIsEditingInclusion] = useState(false);
   const [showResponseModal, setShowResponseModal] = useState(false);
+  const [responseTypeFilter, setResponseTypeFilter] = useState("ALL");
+  const [selectedResponse, setSelectedResponse] = useState(null);
 
   const userRole =
     sessionStorage.getItem("userRole")?.toLowerCase() || "";
@@ -124,16 +127,72 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
     }
   }, [estimation]);
 
+  const filteredResponses = useMemo(() => {
+    const resps = estimation?.responses || [];
+    if (responseTypeFilter === "ALL") return resps;
+    return resps.filter(
+      (resp) => (resp.type || "DETAILING").toUpperCase() === responseTypeFilter
+    );
+  }, [estimation?.responses, responseTypeFilter]);
+
+  const responseColumns = useMemo(
+    () => [
+      {
+        accessorKey: "type",
+        header: "Type",
+        cell: ({ row }) => {
+          const type = row.original.type || "DETAILING";
+          return (
+            <span
+              className={`px-2 py-0.5 text-xs font-semibold border rounded-none uppercase ${
+                type.toUpperCase() === "DETAILING"
+                  ? "bg-blue-50 text-blue-700 border-blue-200"
+                  : "bg-purple-50 text-purple-700 border-purple-200"
+              }`}
+            >
+              {type}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "message",
+        header: "Message",
+        cell: ({ row }) => {
+          const htmlContent = row.original.message || "";
+          const plainText = htmlContent
+            .replace(/<[^>]+>/g, "")
+            .replace(/&nbsp;/g, " ");
+          return (
+            <p className="truncate max-w-[250px] text-black text-sm" title={plainText}>
+              {plainText}
+            </p>
+          );
+        },
+      },
+      {
+        accessorKey: "createdAt",
+        header: "Created",
+        cell: ({ row }) => (
+          <span className="text-black text-sm">
+            {new Date(row.original.createdAt).toLocaleString("en-IN")}
+          </span>
+        ),
+      },
+    ],
+    []
+  );
+
   if (loading) {
     return (
       <div className="fixed inset-0 z-[10001] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl px-8 py-6 shadow-2xl border border-slate-200 flex items-center gap-4">
-          <Loader2 className="animate-spin text-slate-700" />
+        <div className="bg-white rounded-none px-8 py-6 shadow-2xl border border-slate-200 flex items-center gap-4">
+          <Loader2 className="animate-spin text-black" />
           <div>
-            <h3 className="font-semibold text-slate-900">
+            <h3 className="text-sm font-semibold text-black">
               Loading Estimation
             </h3>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-black">
               Please wait while we fetch the details.
             </p>
           </div>
@@ -145,25 +204,25 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
   if (error || !estimation) {
     return (
       <div className="fixed inset-0 z-[10001] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl p-8 shadow-2xl border border-slate-200 w-full max-w-md">
+        <div className="bg-white rounded-none p-8 shadow-2xl border border-slate-200 w-full max-w-md">
           <div className="flex items-start gap-4">
-            <div className="bg-red-100 p-3 rounded-2xl">
+            <div className="bg-red-100 p-3 rounded-none">
               <AlertCircle className="text-red-600" />
             </div>
 
             <div className="flex-1">
-              <h2 className="font-semibold text-slate-900">
+              <h2 className="text-sm font-semibold text-black">
                 Unable to Load
               </h2>
 
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="text-sm text-black mt-1">
                 {error || "Estimation not found"}
               </p>
 
               {onClose && (
                 <button
                   onClick={onClose}
-                  className="mt-5 px-5 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition"
+                  className="mt-5 px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                 >
                   Close
                 </button>
@@ -199,32 +258,32 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[10001] bg-black/40 backdrop-blur-sm flex items-center justify-center p-3">
-      <div className="w-full max-w-7xl h-[95vh] bg-slate-50 rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+      <div className="w-full max-w-[95vw] h-[95vh] bg-slate-50 rounded-none shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
         {/* HEADER */}
         <div className="bg-white border-b border-slate-200 px-8 py-6 shrink-0">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-            <div>
-              <p className="text-sm text-slate-500 font-medium">
-                Estimations / {estimationNumber}
-              </p>
-
-              <div className="flex items-center gap-3 mt-1 flex-wrap">
-                <h1 className="text-3xl font-bold text-slate-900">
+          <div className="flex items-center justify-between gap-5">
+            <div className="min-w-0">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-3xl font-bold text-black truncate">
                   {projectName}
                 </h1>
 
                 <span
-                  className={`px-3 py-1 rounded-full border text-xs font-semibold ${statusStyles}`}
+                  className={`px-3 py-1 border text-xs font-semibold rounded-none shrink-0 ${statusStyles}`}
                 >
                   {status}
                 </span>
               </div>
+
+              <p className="text-sm text-black font-medium mt-1 truncate">
+                {estimationNumber}
+              </p>
             </div>
 
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-3 shrink-0">
               <button
                 onClick={() => setShowResponseModal(true)}
-                className="px-5 py-2 bg-white text-black border-2 border-gray-800 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-gray-50 shadow-sm flex items-center gap-2"
+                className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm flex items-center gap-2"
               >
                 <Plus size={14} />
                 Add Response
@@ -233,7 +292,7 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
               {canManage && (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-5 py-2 bg-white text-black border-2 border-gray-800 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-gray-50 shadow-sm flex items-center gap-2"
+                  className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm flex items-center gap-2"
                 >
                   <Pencil size={14} />
                   Edit
@@ -243,7 +302,7 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
               {onClose && (
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 bg-red-100 text-black border-2 border-red-600 rounded-xl hover:bg-red-50 transition-all font-bold text-[12px] uppercase tracking-widest shadow-sm"
+                  className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
                 >
                   Close
                 </button>
@@ -255,7 +314,7 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
         {/* BODY */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* METRICS */}
-          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <MetricCard
               icon={<Clock3 size={18} />}
               label="Final Hours"
@@ -280,7 +339,7 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
 
             <MetricCard
               icon={<Clock3 size={18} />}
-              label="Agreated Hours"
+              label="Aggregated Hours"
               value={formatHours(totalAgreatedHours)}
             />
           </div>
@@ -354,7 +413,7 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
           {description && (
             <SectionCard title="Description">
               <div
-                className={`prose prose-sm max-w-none text-slate-700 transition-all ${
+                className={`prose prose-sm max-w-none text-black transition-all ${
                   showDescription
                     ? ""
                     : "line-clamp-3"
@@ -368,7 +427,7 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
                 onClick={() =>
                   setShowDescription(!showDescription)
                 }
-                className="mt-4 text-sm font-medium text-slate-700 hover:text-slate-900 flex items-center gap-2"
+                className="mt-4 text-sm font-semibold text-black hover:text-black flex items-center gap-2"
               >
                 {showDescription ? (
                   <>
@@ -396,17 +455,17 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
           </SectionCard>
 
           {/* TABS */}
-          <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden">
+          <div className="bg-white border border-slate-200 rounded-none overflow-hidden">
             <div className="border-b border-slate-200 px-4 pt-4">
               <div className="flex gap-2 overflow-x-auto pb-4">
                 {tabs.map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`flex items-center gap-2.5 border-2 px-6 py-2.5 text-[12px] rounded-xl font-black uppercase tracking-widest transition-all whitespace-nowrap shadow-sm active:scale-95 ${
+                    className={`flex items-center gap-2.5 border-2 px-6 py-2.5 text-sm rounded-none font-bold uppercase tracking-tight transition-all whitespace-nowrap shadow-sm active:scale-95 ${
                       activeTab === tab
-                        ? "bg-green-50 text-black border-[#6bbd45]"
-                        : "text-black bg-white border-gray-800 hover:bg-gray-50"
+                        ? "bg-green-50 text-black border-green-700/80"
+                        : "text-black bg-white border-gray-300 hover:bg-gray-50"
                     }`}
                   >
                     {tab}
@@ -476,61 +535,34 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
               {/* RESPONSES */}
               {activeTab === "responses" && (
                 <>
-                  {estimationResponses.length === 0 ? (
-                    <EmptyState text="No responses added yet." />
+                  {/* Filter Toggle Buttons */}
+                  <div className="flex justify-end mb-4">
+                    <div className="inline-flex border border-black rounded-none p-0.5 bg-white">
+                      {["ALL", "DETAILING", "MTO"].map((filterType) => (
+                        <button
+                          key={filterType}
+                          onClick={() => setResponseTypeFilter(filterType)}
+                          className={`px-5 py-1.5 text-xs font-bold uppercase tracking-tight transition-all rounded-none border ${
+                            responseTypeFilter === filterType
+                              ? "bg-green-50 text-black border-green-700/80"
+                              : "bg-white text-black border-transparent hover:bg-slate-50"
+                          }`}
+                        >
+                          {filterType}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {filteredResponses.length === 0 ? (
+                    <EmptyState text="No responses match this filter." />
                   ) : (
-                    <div className="space-y-5">
-                      {estimationResponses.map(
-                        (resp, index) => (
-                          <div
-                            key={resp.id}
-                            className="bg-slate-50 border border-slate-200 rounded-3xl p-5"
-                          >
-                            <div className="flex items-start justify-between gap-4 mb-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center">
-                                  <MessageSquare
-                                    size={18}
-                                    className="text-blue-700"
-                                  />
-                                </div>
-
-                                <div>
-                                  <h4 className="font-semibold text-slate-900">
-                                    Response #{index + 1}
-                                  </h4>
-
-                                  <p className="text-xs text-slate-500">
-                                    {formatDateTime(
-                                      resp.createdAt
-                                    )}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-
-                            {resp.message && (
-                              <div
-                                className="prose prose-sm max-w-none text-slate-700"
-                                dangerouslySetInnerHTML={{
-                                  __html: resp.message,
-                                }}
-                              />
-                            )}
-
-                            {resp.files?.length > 0 && (
-                              <div className="mt-5">
-                                <RenderFiles
-                                  files={resp.files}
-                                  table="estimationResponse"
-                                  parentId={resp.id}
-                                  formatDate={formatDate}
-                                />
-                              </div>
-                            )}
-                          </div>
-                        )
-                      )}
+                    <div className="bg-white border border-slate-200 rounded-none">
+                      <DataTable
+                        columns={responseColumns}
+                        data={filteredResponses}
+                        onRowClick={(row) => setSelectedResponse(row)}
+                      />
                     </div>
                   )}
                 </>
@@ -538,7 +570,7 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
 
               {/* OVERVIEW */}
               {activeTab === "overview" && (
-                <div className="text-sm text-slate-500">
+                <div className="text-sm text-black">
                   Overview information is displayed above.
                 </div>
               )}
@@ -589,6 +621,83 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
           onSuccess={fetchEstimation}
         />
       )}
+
+      {selectedResponse && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-none shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-4xl flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+                <h1 className="text-sm font-semibold text-black uppercase tracking-normal">Response Details</h1>
+              </div>
+              <button
+                onClick={() => setSelectedResponse(null)}
+                className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-normal shadow-sm cursor-pointer"
+              >
+                Close
+              </button>
+            </header>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/50">
+              <div className="bg-white p-6 rounded-none border border-gray-200 space-y-6 shadow-sm">
+                {/* Metadata Box at the Top */}
+                <div className="bg-[#ebf5ea]/80 border border-[#6bbd45]/20 p-4 rounded-none">
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-16 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-black uppercase tracking-normal shrink-0">
+                        Type:
+                      </span>
+                      <span className="text-black font-semibold uppercase whitespace-nowrap">
+                        {selectedResponse.type || "DETAILING"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-black uppercase tracking-normal shrink-0">
+                        Created At:
+                      </span>
+                      <span className="text-black font-semibold uppercase whitespace-nowrap">
+                        {new Date(selectedResponse.createdAt).toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Response Message */}
+                <div className="pt-2">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+                    <h2 className="text-sm font-semibold text-black tracking-normal uppercase">Response Message</h2>
+                  </div>
+                  <div
+                    className="text-sm text-black font-normal prose prose-sm max-w-none bg-white p-4 border border-gray-200 rounded-none mt-4"
+                    dangerouslySetInnerHTML={{ __html: selectedResponse.message || "No description provided" }}
+                  />
+                </div>
+
+                {/* Attachments Section */}
+                {selectedResponse.files?.length > 0 && (
+                  <div className="pt-6 border-t border-gray-200 space-y-4">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
+                      <h2 className="text-sm font-semibold text-black tracking-normal uppercase">Attachments</h2>
+                    </div>
+                    <RenderFiles
+                      files={selectedResponse.files}
+                      table="estimationResponse"
+                      parentId={selectedResponse.id}
+                      hideHeader={true}
+                      hideSectionTitle={true}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -599,31 +708,25 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
 
 const MetricCard = ({ icon, label, value }) => {
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700">
-          {icon}
-        </div>
-      </div>
-
-      <div className="mt-5">
-        <p className="text-sm text-slate-500">
+    <div className="bg-white py-8 px-6 rounded-none border border-slate-200 border-l-[6px] border-l-green-600 flex items-center justify-between shadow-sm">
+      <div className="flex items-center gap-3">
+        
+        <span className="text-lg font-bold text-black uppercase tracking-tight">
           {label}
-        </p>
-
-        <h3 className="mt-1 text-2xl font-bold text-slate-900">
-          {value}
-        </h3>
+        </span>
       </div>
+      <span className="text-xl font-bold text-black">
+        {value}
+      </span>
     </div>
   );
 };
 
 const SectionCard = ({ title, children }) => {
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-      <div className="mb-5">
-        <h2 className="text-lg font-semibold text-slate-900">
+    <div className="bg-white border border-slate-200 rounded-none p-6 shadow-sm">
+      <div className="mb-5 border-l-[4px] border-l-green-600 pl-3">
+        <h2 className="text-lg font-bold text-black uppercase tracking-wider">
           {title}
         </h2>
       </div>
@@ -642,17 +745,17 @@ const InfoRow = ({
     <div className="flex items-start justify-between gap-4 py-4 border-b border-slate-100 last:border-none">
       <div className="flex items-center gap-2 min-w-[140px]">
         {icon && (
-          <span className="text-slate-400">
+          <span className="text-black">
             {icon}
           </span>
         )}
 
-        <span className="text-sm font-medium text-slate-500">
+        <span className="text-sm font-medium text-black">
           {label}
         </span>
       </div>
 
-      <div className="text-sm font-semibold text-slate-900 text-right break-words">
+      <div className="text-sm font-semibold text-black text-right break-words">
         {value}
       </div>
     </div>
@@ -662,11 +765,11 @@ const InfoRow = ({
 const EmptyState = ({ text }) => {
   return (
     <div className="py-16 flex flex-col items-center justify-center text-center">
-      <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-        <MessageSquare className="text-slate-500" />
+      <div className="w-16 h-16 rounded-none bg-slate-100 flex items-center justify-center mb-4">
+        <MessageSquare className="text-black" />
       </div>
 
-      <p className="text-slate-500 text-sm">
+      <p className="text-black text-sm">
         {text}
       </p>
     </div>

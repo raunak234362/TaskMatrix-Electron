@@ -83,13 +83,13 @@ const InclusionExclusion = ({ estimationId, onEdit }) => {
   }
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-xs border border-gray-200 relative">
+    <div className="bg-white p-6 rounded-none shadow-xs border border-gray-200 relative">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-800">Scope of Work</h2>
         {onEdit && (
           <button
             onClick={onEdit}
-            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-none transition-colors border border-gray-200"
             title="Edit Scope"
           >
             <Pencil className="w-5 h-5" />
@@ -100,7 +100,7 @@ const InclusionExclusion = ({ estimationId, onEdit }) => {
       <div className="grid md:grid-cols-2 gap-8">
         {/* Inclusions Column */}
         <div>
-          <h3 className="text-md  text-green-700 bg-green-50 px-3 py-2 rounded-lg mb-3 border-l-4 border-green-500">
+          <h3 className="text-md  text-green-700 bg-green-50 px-3 py-2 rounded-none mb-3 border-l-4 border-green-500">
             Inclusions
           </h3>
           {inclusions ? (
@@ -115,7 +115,7 @@ const InclusionExclusion = ({ estimationId, onEdit }) => {
 
         {/* Exclusions Column */}
         <div>
-          <h3 className="text-md  text-red-700 bg-red-50 px-3 py-2 rounded-lg mb-3 border-l-4 border-red-500">
+          <h3 className="text-md  text-red-700 bg-red-50 px-3 py-2 rounded-none mb-3 border-l-4 border-red-500">
             Exclusions
           </h3>
           {exclusions ? (
