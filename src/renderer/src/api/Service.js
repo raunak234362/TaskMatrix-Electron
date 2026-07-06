@@ -1938,10 +1938,12 @@ class Service {
   }
 
   static async GetRFIResponsebyId(rfiId) {
+    const token = sessionStorage.getItem('token')
     try {
       const response = await api.get(`rfi/responses/${rfiId}`, {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         }
       })
       console.log(' All rfq fetched by rfq ID:', response.data)

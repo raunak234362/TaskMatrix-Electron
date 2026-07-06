@@ -189,7 +189,7 @@ const AddProject = () => {
           formData.append(key, String(value));
         }
       });
-
+1
       formData.append("status", "ACTIVE");
       formData.append("stage", "IFA");
 
