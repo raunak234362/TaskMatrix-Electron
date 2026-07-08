@@ -58,7 +58,7 @@ const HistoryNode = ({
           {initials}
         </div>
       </div>
-      
+
       {/* Message Content */}
       <div className="flex-1 min-w-0">
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
@@ -162,7 +162,7 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
         if (res) {
           const mainData = res.data || res;
           const childResponses = res.childResponses || mainData.childResponses || [];
-          
+
           setFullResponse({
             ...mainData,
             childResponses: childResponses
@@ -291,111 +291,111 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
             Close
           </button>
         </div>
-<div className="h-[80vh] overflow-y-auto">
-        {/* Main message */}
-        {isLoading ? (
-          <div className="flex flex-col justify-center items-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-green-600 mb-4" />
-            <span className="text-gray-500 font-medium">Loading response details...</span>
-          </div>
-        ) : (
-          <div className="flex gap-4 w-full pt-2">
-            {/* Main Avatar */}
-            <div className="flex-shrink-0 mt-1">
-              <div className="w-11 h-11 bg-black text-white rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
-                {getInitials(fullResponse.user?.firstName, fullResponse.user?.lastName)}
-              </div>
+        <div className="h-[80vh] overflow-y-auto">
+          {/* Main message */}
+          {isLoading ? (
+            <div className="flex flex-col justify-center items-center py-20">
+              <Loader2 className="w-8 h-8 animate-spin text-green-600 mb-4" />
+              <span className="text-gray-500 font-medium">Loading response details...</span>
             </div>
-            
-            <div className="flex-1 min-w-0">
-              <div className="bg-white border-2 border-gray-200 rounded-xl shadow-sm overflow-hidden mb-8">
-                <div className="flex justify-between items-center px-5 py-4 bg-gray-50 border-b border-gray-200">
-                  <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-gray-900">
-                      {fullResponse.user ? `${fullResponse.user.firstName || ""} ${fullResponse.user.lastName || ""}`.trim() : "User"}
-                    </span>
-                    {fullResponse.user?.role && (
-                      <span className="text-[10px] uppercase font-bold text-gray-600 bg-gray-200 px-2 py-0.5 rounded-full tracking-wider">
-                        {fullResponse.user.role}
+          ) : (
+            <div className="flex gap-4 w-full pt-2">
+              {/* Main Avatar */}
+              <div className="flex-shrink-0 mt-1">
+                <div className="w-11 h-11 bg-black text-white rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
+                  {getInitials(fullResponse.user?.firstName, fullResponse.user?.lastName)}
+                </div>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="bg-white border-2 border-gray-200 rounded-xl shadow-sm overflow-hidden mb-8">
+                  <div className="flex justify-between items-center px-5 py-4 bg-gray-50 border-b border-gray-200">
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold text-gray-900">
+                        {fullResponse.user ? `${fullResponse.user.firstName || ""} ${fullResponse.user.lastName || ""}`.trim() : "User"}
                       </span>
+                      {fullResponse.user?.role && (
+                        <span className="text-[10px] uppercase font-bold text-gray-600 bg-gray-200 px-2 py-0.5 rounded-full tracking-wider">
+                          {fullResponse.user.role}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs font-semibold text-gray-500 flex items-center gap-1">
+                      <CalendarDays className="w-3.5 h-3.5" />
+                      {formatDateTime(fullResponse.createdAt)}
+                    </span>
+                  </div>
+
+                  <div className="p-5">
+                    <div
+                      className="text-gray-800 text-sm prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: fullResponse.reason }}
+                    />
+                    {fullResponse.files?.length > 0 && (
+                      <div className="mt-5 border-t border-gray-100 pt-4">
+                        <RenderFiles
+                          files={fullResponse.files}
+                          table="rFIResponse"
+                          parentId={fullResponse.id}
+                        />
+                      </div>
                     )}
                   </div>
-                  <span className="text-xs font-semibold text-gray-500 flex items-center gap-1">
-                    <CalendarDays className="w-3.5 h-3.5" />
-                    {formatDateTime(fullResponse.createdAt)}
-                  </span>
-                </div>
-                
-                <div className="p-5">
-                  <div
-                    className="text-gray-800 text-sm prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ __html: fullResponse.reason }}
-                  />
-                  {fullResponse.files?.length > 0 && (
-                    <div className="mt-5 border-t border-gray-100 pt-4">
-                      <RenderFiles
-                        files={fullResponse.files}
-                        table="rFIResponse"
-                        parentId={fullResponse.id}
-                      />
+
+                  {canReply && (!replyMode || replyParentId !== fullResponse.id) && (
+                    <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 flex justify-end">
+                      <Button
+                        className="px-6 py-2 bg-green-200 text-black rounded-lg font-bold uppercase tracking-tight hover:bg-green-300/90 transition-all shadow-md text-xs"
+                        onClick={() => {
+                          setReplyParentId(fullResponse.id);
+                          setReplyMode(true);
+                        }}
+                      >
+                        Reply to Thread
+                      </Button>
+                    </div>
+                  )}
+
+                  {replyMode && replyParentId === fullResponse.id && (
+                    <div className="p-5 border-t border-gray-200 bg-gray-50">
+                      {renderReplyForm()}
                     </div>
                   )}
                 </div>
 
-                {canReply && (!replyMode || replyParentId !== fullResponse.id) && (
-                  <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 flex justify-end">
-                    <Button
-                      className="px-6 py-2 bg-green-200 text-black rounded-lg font-bold uppercase tracking-tight hover:bg-green-300/90 transition-all shadow-md text-xs"
-                      onClick={() => {
-                        setReplyParentId(fullResponse.id);
-                        setReplyMode(true);
-                      }}
-                    >
-                      Reply to Thread
-                    </Button>
-                  </div>
-                )}
+                {/* Child Responses (Thread) */}
+                {fullResponse.childResponses?.length > 0 && (
+                  <div className="space-y-6">
+                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 ml-1 flex items-center gap-2">
+                      <div className="h-px bg-gray-200 flex-1" />
+                      Thread ({fullResponse.childResponses.length} Replies)
+                      <div className="h-px bg-gray-200 flex-1" />
+                    </h3>
 
-                {replyMode && replyParentId === fullResponse.id && (
-                  <div className="p-5 border-t border-gray-200 bg-gray-50">
-                    {renderReplyForm()}
+                    <div className="space-y-6">
+                      {[...fullResponse.childResponses]
+                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                        .map((child) => (
+                          <HistoryNode
+                            key={child.id}
+                            initialChild={child}
+                            depth={0}
+                            canReply={canReply}
+                            replyMode={replyMode}
+                            replyParentId={replyParentId}
+                            setReplyParentId={setReplyParentId}
+                            setReplyMode={setReplyMode}
+                            renderReplyForm={renderReplyForm}
+                          />
+                        ))}
+                    </div>
                   </div>
                 )}
               </div>
-
-              {/* Child Responses (Thread) */}
-              {fullResponse.childResponses?.length > 0 && (
-                <div className="space-y-6">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 ml-1 flex items-center gap-2">
-                    <div className="h-px bg-gray-200 flex-1" />
-                    Thread ({fullResponse.childResponses.length} Replies)
-                    <div className="h-px bg-gray-200 flex-1" />
-                  </h3>
-                  
-                  <div className="space-y-6">
-                    {[...fullResponse.childResponses]
-                      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                      .map((child) => (
-                        <HistoryNode
-                          key={child.id}
-                          initialChild={child}
-                          depth={0}
-                          canReply={canReply}
-                          replyMode={replyMode}
-                          replyParentId={replyParentId}
-                          setReplyParentId={setReplyParentId}
-                          setReplyMode={setReplyMode}
-                          renderReplyForm={renderReplyForm}
-                        />
-                      ))}
-                  </div>
-                </div>
-              )}
             </div>
-          </div>
-        )}
+          )}
 
-</div>
+        </div>
       </div>
     </div>
   );

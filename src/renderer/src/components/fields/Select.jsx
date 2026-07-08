@@ -66,7 +66,7 @@ const Select = ({
         left: rect.left,
         width: rect.width,
         transform: shouldPlaceTop ? 'translateY(-100%)' : 'none',
-        zIndex: 9999
+        zIndex: 99999
       })
     }
   }, [isOpen])

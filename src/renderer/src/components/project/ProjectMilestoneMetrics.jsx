@@ -244,7 +244,7 @@ const ProjectMilestoneMetrics = ({
                           </span>
                         </div>
  
-                        {userRole !== "client" && userRole !== "client_admin" && (
+                        {userRole !== "client" && userRole !== "client_admin" && ms.isConnectionDesign && (
                           <div className="flex justify-between items-center text-sm">
                             <span className="text-black uppercase text-sm font-semibold tracking-normal">
                               CD Approval Date

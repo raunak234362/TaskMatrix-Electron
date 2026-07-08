@@ -358,7 +358,8 @@ const WorkProgressReport = ({
           return {
             id: s.id || s._id,
             subject: s.subject || s.serialNo || "—",
-            ifaDate: stage === "IFA" ? fmt(dateStr) : "—",
+            stage: s.stage || "IFA",
+            ifaDate: !["IFC", "CO", "COR"].includes(stage) ? fmt(dateStr) : "—",
             bfaDate: bfaDate,
             ifcDate: stage === "IFC" ? fmt(dateStr) : "—",
             corDate: ["CO", "COR"].includes(stage) ? fmt(dateStr) : "—",
@@ -426,7 +427,8 @@ const WorkProgressReport = ({
           const unifiedEntries = [{
             id: sub.id || sub._id,
             subject: sub.subject || sub.serialNo || "—",
-            ifaDate: stage === "IFA" ? fmt(dateStr) : "—",
+            stage: sub.stage || "IFA",
+            ifaDate: !["IFC", "CO", "COR"].includes(stage) ? fmt(dateStr) : "—",
             bfaDate: finalBfaRecdDate,
             ifcDate: stage === "IFC" ? fmt(dateStr) : "—",
             corDate: ["CO", "COR"].includes(stage) ? fmt(dateStr) : "—",
@@ -1037,7 +1039,7 @@ const WorkProgressReport = ({
             <Download className="w-3.5 h-3.5" />
             PDF Export
           </button>
-        
+
         </div>
       </div>
 
@@ -1374,7 +1376,7 @@ const WorkProgressReport = ({
               {filteredScheduleRows.map((row) => (
                 <tr
                   key={row.id}
-                  className={`border-b border-black/10 transition-all ${row._type === "milestone"
+                  className={`border-b border-black transition-all ${row._type === "milestone"
                     ? "bg-[#f0f7ed] hover:bg-[#e6f3e2]"
                     : "bg-white hover:bg-slate-50"
                     }`}
@@ -1432,19 +1434,19 @@ const WorkProgressReport = ({
                           onChange={(e) => setEditValue(e.target.value)}
                           onBlur={handleCellSave}
                           onKeyDown={handleKeyDown}
-                          className="w-full bg-white border border-black px-2 py-1 rounded-none text-xs text-black"
+                          className="w-full bg-white px-2 rounded-none text-xs text-black"
                         />
                       </div>
                     ) : row.unifiedEntries && row.unifiedEntries.length > 0 ? (
                       <div className="flex flex-col h-full">
                         {row.unifiedEntries.map((entry, i) => (
-                          <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                          <div key={i} className="flex flex-col flex-1 justify-center p-2">
                             {entry.ifaDate !== "—" ? (
                               <>
                                 <span className="text-[11px] font-bold text-blue-800 leading-tight">
                                   {entry.subject}
                                 </span>
-                                <span className="text-[11px] text-blue-600 font-semibold leading-tight mt-0.5">
+                                <span className="text-[11px] text-blue-600 font-semibold leading-tight">
                                   {entry.ifaDate}
                                 </span>
                               </>
@@ -1455,7 +1457,7 @@ const WorkProgressReport = ({
                         ))}
                       </div>
                     ) : (
-                      <span className="block p-3 text-gray-400">—</span>
+                      <span className="block p-2 text-gray-400">—</span>
                     )}
                   </td>
 
@@ -1465,7 +1467,7 @@ const WorkProgressReport = ({
                     className="p-0 border-r border-black/10 align-top cursor-pointer hover:bg-slate-100/50"
                   >
                     {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "bfaRecdDate" ? (
-                      <div className="p-3">
+                      <div className="p-2">
                         <input
                           ref={inputRef}
                           type="text"
@@ -1479,13 +1481,13 @@ const WorkProgressReport = ({
                     ) : row.unifiedEntries && row.unifiedEntries.length > 0 ? (
                       <div className="flex flex-col h-full">
                         {row.unifiedEntries.map((entry, i) => (
-                          <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                          <div key={i} className="flex flex-col flex-1 justify-center p-2">
                             {entry.bfaDate !== "—" ? (
                               <>
                                 <span className="text-[11px] font-bold text-blue-800 leading-tight">
                                   {entry.subject}
                                 </span>
-                                <span className="text-[11px] text-blue-600 font-semibold leading-tight mt-0.5">
+                                <span className="text-[11px] text-blue-600 font-semibold leading-tight">
                                   {entry.bfaDate}
                                 </span>
                               </>
@@ -1496,14 +1498,14 @@ const WorkProgressReport = ({
                         ))}
                       </div>
                     ) : (
-                      <span className="block p-3 text-gray-400">—</span>
+                      <span className="block p-2 text-gray-400">—</span>
                     )}
                   </td>
 
                   {/* IFC sub date – stacked entries */}
                   <td className="p-0 border-r border-black/10 align-top">
                     {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "ifcSubDate" ? (
-                      <div className="p-3">
+                      <div className="p-2">
                         <input
                           ref={inputRef}
                           type="text"
@@ -1517,13 +1519,13 @@ const WorkProgressReport = ({
                     ) : row.unifiedEntries && row.unifiedEntries.length > 0 ? (
                       <div className="flex flex-col h-full">
                         {row.unifiedEntries.map((entry, i) => (
-                          <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                          <div key={i} className="flex flex-col flex-1 justify-center p-2">
                             {entry.ifcDate !== "—" ? (
                               <>
                                 <span className="text-[11px] font-bold text-blue-800 leading-tight">
                                   {entry.subject}
                                 </span>
-                                <span className="text-[11px] text-blue-600 font-semibold leading-tight mt-0.5">
+                                <span className="text-[11px] text-blue-600 font-semibold leading-tight">
                                   {entry.ifcDate}
                                 </span>
                               </>
@@ -1534,14 +1536,14 @@ const WorkProgressReport = ({
                         ))}
                       </div>
                     ) : (
-                      <span className="block p-3 text-gray-400">—</span>
+                      <span className="block p-2 text-gray-400">—</span>
                     )}
                   </td>
 
                   {/* COR Drawing Sub date – stacked entries */}
                   <td className="p-0 border-r border-black/10 align-top">
                     {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "corSubDate" ? (
-                      <div className="p-3">
+                      <div className="p-2">
                         <input
                           ref={inputRef}
                           type="text"
@@ -1555,13 +1557,13 @@ const WorkProgressReport = ({
                     ) : row.unifiedEntries && row.unifiedEntries.length > 0 ? (
                       <div className="flex flex-col h-full">
                         {row.unifiedEntries.map((entry, i) => (
-                          <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                          <div key={i} className="flex flex-col flex-1 justify-center p-2">
                             {entry.corDate !== "—" ? (
                               <>
                                 <span className="text-[11px] font-bold text-blue-800 leading-tight">
                                   {entry.subject}
                                 </span>
-                                <span className="text-[11px] text-blue-600 font-semibold leading-tight mt-0.5">
+                                <span className="text-[11px] text-blue-600 font-semibold leading-tight">
                                   {entry.corDate}
                                 </span>
                               </>
@@ -1572,7 +1574,7 @@ const WorkProgressReport = ({
                         ))}
                       </div>
                     ) : (
-                      <span className="block p-3 text-gray-400">—</span>
+                      <span className="block p-2 text-gray-400">—</span>
                     )}
                   </td>
 
@@ -1611,6 +1613,21 @@ const WorkProgressReport = ({
                       };
 
                       if (row.unifiedEntries && row.unifiedEntries.length > 0) {
+                        const allDone = row.unifiedEntries.every(entry => {
+                          const st = String(entry.status || "—").toUpperCase();
+                          return entry.bfaDate !== "—" || ["COMPLETE", "COMPLETED", "SUCCESS", "BFA_RECEIVED", "RELEASE_FOR_FABRICATION"].includes(st);
+                        });
+
+                        if (allDone) {
+                          return (
+                            <div className="flex h-full items-center p-3">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-black uppercase tracking-widest border bg-emerald-100 text-emerald-700 border-emerald-200 shrink-0">
+                                100% COMPLETE
+                              </span>
+                            </div>
+                          );
+                        }
+
                         return (
                           <div className="flex flex-col h-full">
                             {row.unifiedEntries.map((entry, i) => {
@@ -1618,7 +1635,7 @@ const WorkProgressReport = ({
                               const label = STATUS_LABELS[key] || String(entry.status || "—").replace(/_/g, " ");
                               const color = STATUS_COLORS[key] || "bg-gray-100 text-gray-600 border-gray-200";
                               return (
-                                <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                                <div key={i} className="flex flex-col flex-1 justify-center p-3">
                                   <div className="flex items-center gap-2">
                                     <span className="text-[11px] font-semibold text-blue-800">
                                       {entry.subject}

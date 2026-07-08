@@ -436,21 +436,24 @@ export const useDashboardData = () => {
               projects.filter((p) => p.status?.toUpperCase() === 'ON_HOLD').length
           },
           dashboardStats: {
-            pendingRFI: (rfis.length + clientRfis.length) || pmDashboard?.pendingRFI || 0,
-            pendingRfiWbt: rfis.length,
-            pendingRfiClient: clientRfis.length,
+            pendingRFI: (pmDashboard?.pendingRFI ?? rfis.length) + (pmDashboard?.clientSidePendingActions?.rfi ?? clientRfis.length),
+            pendingRfiWbt: pmDashboard?.pendingRFI ?? rfis.length,
+            pendingRfiClient: pmDashboard?.clientSidePendingActions?.rfi ?? clientRfis.length,
             newRFI: pmDashboard?.newRFI ?? 0,
-            pendingSubmittals: basePendingSubmittalsArray.length + clientSubmittals.length,
-            pendingSubmittalsWbt: basePendingSubmittalsArray.length,
-            pendingSubmittalsClient: clientSubmittals.length,
-            pendingChangeOrders: coList.length + clientCos.length,
-            pendingChangeOrdersWbt: coList.length,
-            pendingChangeOrdersClient: clientCos.length,
+            
+            pendingSubmittals: (pmDashboard?.pendingSubmittals ?? basePendingSubmittalsArray.length) + (pmDashboard?.clientSidePendingActions?.submittals ?? clientSubmittals.length),
+            pendingSubmittalsWbt: pmDashboard?.pendingSubmittals ?? basePendingSubmittalsArray.length,
+            pendingSubmittalsClient: pmDashboard?.clientSidePendingActions?.submittals ?? clientSubmittals.length,
+            
+            pendingChangeOrders: (pmDashboard?.pendingChangeOrders ?? coList.length) + (pmDashboard?.clientSidePendingActions?.changeOrders ?? clientCos.length),
+            pendingChangeOrdersWbt: pmDashboard?.pendingChangeOrders ?? coList.length,
+            pendingChangeOrdersClient: pmDashboard?.clientSidePendingActions?.changeOrders ?? clientCos.length,
             newChangeOrders: pmDashboard?.newChangeOrders ?? 0,
             unapprovedChangeOrders: unapprovedCOList.length,
-            pendingRFQ: rfqList.length + clientRfqs.length,
-            pendingRfqWbt: rfqList.length,
-            pendingRfqClient: clientRfqs.length,
+            
+            pendingRFQ: (pmDashboard?.pendingRFQ ?? rfqList.length) + (pmDashboard?.clientSidePendingActions?.rfq ?? clientRfqs.length),
+            pendingRfqWbt: pmDashboard?.pendingRFQ ?? rfqList.length,
+            pendingRfqClient: pmDashboard?.clientSidePendingActions?.rfq ?? clientRfqs.length,
             newRFQ: pmDashboard?.newRFQ ?? 0
           },
           invoices: invoices

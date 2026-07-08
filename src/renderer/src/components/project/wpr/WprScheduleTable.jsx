@@ -45,11 +45,11 @@ const WprScheduleTable = ({
               <th className="p-3 font-bold uppercase tracking-wider text-black min-w-[16rem]">Comment</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-black/10">
+          <tbody className="">
             {scheduleRows.map((row) => (
               <tr
                 key={row.id}
-                className={`border-b border-black/10 transition-colors ${row._type === "milestone"
+                className={`transition-colors ${row._type === "milestone"
                   ? "bg-[#f0f7ed] hover:bg-[#e6f3e2]"
                   : "bg-white hover:bg-slate-50"
                   }`}
@@ -95,7 +95,7 @@ const WprScheduleTable = ({
                 </td>
 
                 {/* IFA submission date */}
-                <td className="p-0 border-r border-black/10 align-top">
+                <td className="p-0 border-r border-black/10 align-top h-[1px]">
                   {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "ifaSubDate" ? (
                     <div className="p-3">
                       <input
@@ -109,16 +109,16 @@ const WprScheduleTable = ({
                       />
                     </div>
                   ) : row.unifiedEntries && row.unifiedEntries.length > 0 ? (
-                    <div className="flex flex-col h-full">
+                    <div className="grid h-full" style={{ gridTemplateRows: `repeat(${row.unifiedEntries.length}, minmax(0, 1fr))` }}>
                       {row.unifiedEntries.map((entry, i) => (
-                        <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                        <div key={i} className="flex flex-col justify-center p-3">
                           {entry.ifaDate !== "—" ? (
                             <>
                               <span className="text-[11px] font-bold text-blue-800 leading-tight">
                                 {entry.subject}
                               </span>
                               <span className="text-[11px] text-blue-600 font-semibold leading-tight mt-0.5">
-                                {entry.ifaDate}
+                                {entry.stage && entry.stage.toUpperCase() !== "IFA" ? `${entry.stage.toUpperCase()} - ` : ""}{entry.ifaDate}
                               </span>
                             </>
                           ) : (
@@ -135,7 +135,7 @@ const WprScheduleTable = ({
                 {/* BFA date */}
                 <td
                   onClick={() => onCellClick("schedule", row.id, "bfaRecdDate", row.bfaRecdDate)}
-                  className="p-0 border-r border-black/10 align-top cursor-pointer hover:bg-slate-100/50"
+                  className="p-0 border-r border-black/10 align-top cursor-pointer hover:bg-slate-100/50 h-[1px]"
                 >
                   {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "bfaRecdDate" ? (
                     <div className="p-3">
@@ -150,9 +150,9 @@ const WprScheduleTable = ({
                       />
                     </div>
                   ) : row.unifiedEntries && row.unifiedEntries.length > 0 ? (
-                    <div className="flex flex-col h-full">
+                    <div className="grid h-full" style={{ gridTemplateRows: `repeat(${row.unifiedEntries.length}, minmax(0, 1fr))` }}>
                       {row.unifiedEntries.map((entry, i) => (
-                        <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                        <div key={i} className="flex flex-col justify-center p-3">
                           {entry.bfaDate !== "—" ? (
                             <>
                               <span className="text-[11px] font-bold text-blue-800 leading-tight">
@@ -174,7 +174,7 @@ const WprScheduleTable = ({
                 </td>
 
                 {/* IFC sub date */}
-                <td className="p-0 border-r border-black/10 align-top">
+                <td className="p-0 border-r border-black/10 align-top h-[1px]">
                   {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "ifcSubDate" ? (
                     <div className="p-3">
                       <input
@@ -188,9 +188,9 @@ const WprScheduleTable = ({
                       />
                     </div>
                   ) : row.unifiedEntries && row.unifiedEntries.length > 0 ? (
-                    <div className="flex flex-col h-full">
+                    <div className="grid h-full" style={{ gridTemplateRows: `repeat(${row.unifiedEntries.length}, minmax(0, 1fr))` }}>
                       {row.unifiedEntries.map((entry, i) => (
-                        <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                        <div key={i} className="flex flex-col justify-center p-3">
                           {entry.ifcDate !== "—" ? (
                             <>
                               <span className="text-[11px] font-bold text-blue-800 leading-tight">
@@ -212,7 +212,7 @@ const WprScheduleTable = ({
                 </td>
 
                 {/* COR Drawing Sub date */}
-                <td className="p-0 border-r border-black/10 align-top">
+                <td className="p-0 border-r border-black/10 align-top h-[1px]">
                   {activeCell?.table === "schedule" && activeCell.rowId === row.id && activeCell.field === "corSubDate" ? (
                     <div className="p-3">
                       <input
@@ -226,9 +226,9 @@ const WprScheduleTable = ({
                       />
                     </div>
                   ) : row.unifiedEntries && row.unifiedEntries.length > 0 ? (
-                    <div className="flex flex-col h-full">
+                    <div className="grid h-full" style={{ gridTemplateRows: `repeat(${row.unifiedEntries.length}, minmax(0, 1fr))` }}>
                       {row.unifiedEntries.map((entry, i) => (
-                        <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                        <div key={i} className="flex flex-col justify-center p-3">
                           {entry.corDate !== "—" ? (
                             <>
                               <span className="text-[11px] font-bold text-blue-800 leading-tight">
@@ -250,7 +250,7 @@ const WprScheduleTable = ({
                 </td>
 
                 {/* Submittal Status (Comment) */}
-                <td className="p-0 align-top">
+                <td className="p-0 align-top h-[1px]">
                   {(() => {
                     const STATUS_LABELS = {
                       WAITING_FOR_BFA: "Waiting for BFA",
@@ -284,14 +284,29 @@ const WprScheduleTable = ({
                     };
 
                     if (row.unifiedEntries && row.unifiedEntries.length > 0) {
+                      const allDone = row.unifiedEntries.every(entry => {
+                        const st = String(entry.status || "—").toUpperCase();
+                        return entry.bfaDate !== "—" || ["COMPLETE", "COMPLETED", "SUCCESS", "BFA_RECEIVED", "RELEASE_FOR_FABRICATION"].includes(st);
+                      });
+
+                      if (allDone) {
+                        return (
+                          <div className="flex h-full items-center p-3">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-black uppercase tracking-widest border bg-emerald-100 text-emerald-700 border-emerald-200 shrink-0">
+                              100% COMPLETE
+                            </span>
+                          </div>
+                        );
+                      }
+
                       return (
-                        <div className="flex flex-col h-full">
+                        <div className="grid h-full" style={{ gridTemplateRows: `repeat(${row.unifiedEntries.length}, minmax(0, 1fr))` }}>
                           {row.unifiedEntries.map((entry, i) => {
                             const key = String(entry.status || "—").replace(/\s+/g, "_").toUpperCase();
                             const label = STATUS_LABELS[key] || String(entry.status || "—").replace(/_/g, " ");
                             const color = STATUS_COLORS[key] || "bg-gray-100 text-gray-600 border-gray-200";
                             return (
-                              <div key={i} className={`flex flex-col flex-1 justify-center p-3 ${i !== row.unifiedEntries.length - 1 ? "border-b border-black/10" : ""}`}>
+                              <div key={i} className="flex flex-col justify-center p-3">
                                 <div className="flex items-center gap-2">
                                   <span className="text-[11px] font-semibold text-blue-800">
                                     {entry.subject}

@@ -132,11 +132,11 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
                                     ? "text-red-600"
                                     : "text-gray-800"
                                     }`}
-                                  title={submittal.subject || submittal.name}
+                                  title={submittal.subject ? `${submittal.subject}${submittal.subSubject ? ` - ${submittal.subSubject}` : ""}` : submittal.name}
                                 >
-                                  {submittal.subject ||
-                                    submittal.name ||
-                                    "No Subject"}
+                                  {submittal.subject
+                                    ? `${submittal.subject}${submittal.subSubject ? ` - ${submittal.subSubject}` : ""}`
+                                    : submittal.name || "No Subject"}
                                 </span>
 
                                 <span className="text-[10px] text-gray-400 font-medium lg:hidden">

@@ -34,7 +34,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             header: 'Project',
             cell: ({ row }) => (
                 <span className="text-gray-800 font-bold truncate max-w-[280px] inline-block">
-                    {row.original.Project?.name || row.original.project?.name || row.original.project || '—'}
+                    {row.original.Project?.name || row.original.project?.name || row.original.projectName || (typeof row.original.project === 'string' ? row.original.project : null) || '—'}
                 </span>
             )
         },
@@ -141,7 +141,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             header: 'Project',
             cell: ({ row }) => (
                 <span className="text-gray-600 font-medium truncate max-w-[280px] inline-block">
-                    {row.original.Project?.name || row.original.project?.name || row.original.project || '—'}
+                    {row.original.Project?.name || row.original.project?.name || row.original.projectName || (typeof row.original.project === 'string' ? row.original.project : null) || '—'}
                 </span>
             )
         },
@@ -150,7 +150,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             header: 'Fabricator',
             cell: ({ row }) => (
                 <span className="text-gray-600 font-medium truncate max-w-[200px] inline-block">
-                    {row.original.Project?.fabricator?.fabName || row.original.project?.fabricator?.fabName || '—'}
+                    {row.original.Project?.fabricator?.fabName || row.original.project?.fabricator?.fabName || row.original.fabricator?.fabName || row.original.fabName || '—'}
                 </span>
             )
         },
@@ -334,13 +334,15 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             accessorKey: 'status',
             header: 'Status',
             cell: ({ row }) => {
-                const rawStatus = row.original.status
+                const rawStatus = row.original.wbtStatus || row.original.status
 
                 if (type === 'PENDING_SUBMITTALS') {
-                    const isSubmitted = rawStatus === false
+                    const isPending = rawStatus === false || String(rawStatus).toUpperCase() === 'PENDING'
+                    const statusText = typeof rawStatus === 'string' ? rawStatus : (isPending ? 'Pending' : 'Submitted to EOR')
+                    
                     return (
-                        <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider whitespace-nowrap ${isSubmitted ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
-                            {isSubmitted ? 'Pending' : 'Submitted to EOR'}
+                        <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider whitespace-nowrap ${isPending ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
+                            {statusText.replace(/_/g, ' ')}
                         </span>
                     )
                 }
