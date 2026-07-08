@@ -17,12 +17,19 @@ const SubmittalResponseModal = ({
 
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
+  const [isClientSide, setIsClientSide] = useState(false);
 
   const [files, setFiles] = useState([]);
 
+  const userRoleSession = sessionStorage.getItem("userRole")?.toUpperCase() || "";
+  const isEligibleForClientSide = ["ADMIN", "OPERATION_EXECUTIVE", "PROJECT_MANAGER", "DEPT_MANAGER", "DEPUTY_MANAGER"].includes(userRoleSession);
+
   const handleSubmit = async () => {
     const userId = sessionStorage.getItem("userId") || "";
-    const userRole = sessionStorage.getItem("userRole") || "";
+    let finalUserRole = sessionStorage.getItem("userRole") || "";
+    if (isClientSide) {
+      finalUserRole = "CLIENT";
+    }
 
     if (!reason.trim()) {
       toast.error("Reason is required");
@@ -43,7 +50,7 @@ const SubmittalResponseModal = ({
     formData.append("submittalsId", submittalId);
     formData.append("submittalVersionId", submittalVersionId || "");
     formData.append("userId", userId);
-    formData.append("userRole", userRole);
+    formData.append("userRole", finalUserRole);
 
     if (parentResponseId) {
       formData.append("parentResponseId", parentResponseId);
@@ -128,6 +135,22 @@ const SubmittalResponseModal = ({
           <label className="text-sm font-medium">Attachments</label>
           <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
         </div>
+
+        {/* WRITE FROM CLIENT SIDE */}
+        {parentResponseId && isEligibleForClientSide && (
+          <div className="flex items-center gap-2 mt-4">
+            <input
+              type="checkbox"
+              id="clientSide"
+              checked={isClientSide}
+              onChange={(e) => setIsClientSide(e.target.checked)}
+              className="w-4 h-4 cursor-pointer text-green-600 rounded border-gray-300 focus:ring-green-500"
+            />
+            <label htmlFor="clientSide" className="text-sm font-medium text-gray-700 cursor-pointer">
+              Write from Client Side
+            </label>
+          </div>
+        )}
 
         {/* ACTIONS */}
         <div className="flex justify-end gap-2 pt-2">

@@ -21,7 +21,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
   const [isCDMode, setIsCDMode] = useState(false)
 
   const userRole = sessionStorage.getItem('userRole')?.toUpperCase()
-  const canUpdateMilestone = ['ADMIN', 'OPERATION_EXECUTIVE', 'DEPT_MANAGER'].includes(userRole)
+  const canUpdateMilestone = ['ADMIN', 'OPERATION_EXECUTIVE', 'DEPUTY_MANAGER'].includes(userRole)
 
   const [milestones, setMilestones] = useState([])
   const [fetchingMilestones, setFetchingMilestones] = useState(false)
