@@ -438,7 +438,7 @@ const WBTDashboard = () => {
                 <Suspense fallback={<div className="p-8 text-center text-xs font-bold uppercase tracking-widest text-gray-400">Loading details...</div>}>
                   {detailModal.type === 'RFI' && <GetRFIByID id={detailModal.id} onClose={() => setDetailModal({ isOpen: false, type: null, id: null })} />}
                   {detailModal.type === 'SUBMITTAL' && <GetSubmittalByID id={detailModal.id} onClose={() => setDetailModal({ isOpen: false, type: null, id: null })} />}
-                  {detailModal.type === 'CO' && <GetCOByID id={detailModal.id} projectId={detailModal.projectId} />}
+                  {detailModal.type === 'CO' && <GetCOByID id={detailModal.id} projectId={detailModal.projectId} onClose={() => setDetailModal({ isOpen: false, type: null, id: null })} />}
                   {detailModal.type === 'INVOICE' && <GetInvoiceById id={detailModal.id} onClose={() => setDetailModal({ isOpen: false, type: null, id: null })} />}
                 </Suspense>
               </div>

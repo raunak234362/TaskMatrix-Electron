@@ -42,7 +42,8 @@ const AddMileStone = ({
   }, [selectedSubject, setValue]);
 
   const statusOptions = [
-    { label: "Pending", value: "PENDING" },
+
+    { label: "Select Status", value: "" },
     { label: "In Progress", value: "ACTIVE" },
     { label: "Completed", value: "COMPLETE" },
     { label: "Approved", value: "APPROVED" },

@@ -14,6 +14,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
   )
   const [files, setFiles] = useState([])
   const [submitting, setSubmitting] = useState(false)
+  const [savingMilestone, setSavingMilestone] = useState(false)
   const [error, setError] = useState(null)
   const [cdEngineers, setCdEngineers] = useState([])
   const [fetchingEngineers, setFetchingEngineers] = useState(false)
@@ -159,6 +160,64 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
   const [multipleRecipients, setMultipleRecipients] = useState(
     submittal?.multipleRecipients?.map((r) => r.id) || []
   )
+
+  const handleSaveMilestoneOnly = async () => {
+    if (!canUpdateMilestone) return
+    if (selectedMileStoneIds.length === 0) {
+      toast.error('Please select at least one milestone.')
+      return
+    }
+    try {
+      setSavingMilestone(true)
+      setError(null)
+
+      // Collect all previously linked milestone objects from the submittal
+      const previouslyLinked = []
+      if (submittal?.mileStones) {
+        submittal.mileStones.forEach((m) => {
+          const id = String(m.id || m._id)
+          if (!previouslyLinked.find((x) => x.id === id)) {
+            previouslyLinked.push({ id, status: m.status })
+          }
+        })
+      }
+      if (submittal?.mileStoneBelongsTo) {
+        const m = submittal.mileStoneBelongsTo
+        const id = String(m.id || m._id)
+        if (!previouslyLinked.find((x) => x.id === id)) {
+          previouslyLinked.push({ id, status: m.status })
+        }
+      }
+
+      // Find milestones that were removed (not in the new selection) and were COMPLETE
+      const removedCompletedMilestones = previouslyLinked.filter(
+        (m) =>
+          !selectedMileStoneIds.includes(m.id) &&
+          m.status?.toUpperCase() === 'COMPLETE'
+      )
+
+      // Revert removed COMPLETE milestones back to ACTIVE
+      if (removedCompletedMilestones.length > 0) {
+        await Promise.all(
+          removedCompletedMilestones.map((m) =>
+            Service.EditExistingMilestoneByID(m.id, { status: 'ACTIVE' })
+          )
+        )
+      }
+
+      // Update the submittal with the new milestone IDs
+      await Service.updateSubmittalById(submittal.id, { mileStoneIds: selectedMileStoneIds })
+
+      toast.success('Milestone updated successfully!')
+      onSuccess?.()
+      onClose()
+    } catch (err) {
+      console.error('Save milestone failed:', err)
+      setError(err?.response?.data?.message || 'Failed to update milestone. Please try again.')
+    } finally {
+      setSavingMilestone(false)
+    }
+  }
 
   const handleSubmit = async () => {
     if (!subject.trim()) {
@@ -376,12 +435,36 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
           >
             Cancel
           </button>
+          {canUpdateMilestone && (
+            <button
+              type="button"
+              onClick={handleSaveMilestoneOnly}
+              disabled={savingMilestone || submitting}
+              className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${
+                savingMilestone || submitting
+                  ? 'bg-gray-100 text-black/20 cursor-not-allowed'
+                  : 'bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-400 active:scale-95'
+              }`}
+            >
+              {savingMilestone ? (
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  Save Milestone
+                </>
+              )}
+            </button>
+          )}
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={submitting}
+            disabled={submitting || savingMilestone}
             className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${
-              submitting
+              submitting || savingMilestone
                 ? 'bg-gray-100 text-black/20 cursor-not-allowed'
                 : 'bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black active:scale-95'
             }`}

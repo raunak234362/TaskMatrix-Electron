@@ -8,7 +8,7 @@ import Modal from '../ui/Modal'
 import AddCommunication from '../communication/AddCommunication'
 import Service from '../../api/Service'
 
-const AllRFI = ({ rfiData = [], onUpdate }) => {
+const AllRFI = ({ rfiData, onUpdate }) => {
   const [rfis, setRFIs] = useState([])
   const [loading, setLoading] = useState(true)
   const [isFollowUpOpen, setIsFollowUpOpen] = useState(false)
@@ -41,9 +41,9 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
         if (sentRes) {
           if (Array.isArray(sentRes)) {
             sentArray = sentRes
-          } else if (sentRes['show rfi']) {
+          } else if (Array.isArray(sentRes['show rfi'])) {
             sentArray = sentRes['show rfi']
-          } else if (sentRes.data) {
+          } else if (Array.isArray(sentRes.data)) {
             sentArray = sentRes.data
           } else if (typeof sentRes === 'object') {
             const firstArray = Object.values(sentRes).find(Array.isArray)
@@ -55,9 +55,9 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
         if (receivedRes) {
           if (Array.isArray(receivedRes)) {
             receivedArray = receivedRes
-          } else if (receivedRes['show rfi']) {
+          } else if (Array.isArray(receivedRes['show rfi'])) {
             receivedArray = receivedRes['show rfi']
-          } else if (receivedRes.data) {
+          } else if (Array.isArray(receivedRes.data)) {
             receivedArray = receivedRes.data
           } else if (typeof receivedRes === 'object') {
             const firstArray = Object.values(receivedRes).find(Array.isArray)
@@ -92,7 +92,7 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
       }
     }
 
-    if (!rfiData || rfiData.length === 0) {
+    if (rfiData === undefined) {
       fetchRFIs()
     } else {
       let rfiArray = []
@@ -156,6 +156,27 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
   ]
 
   const getStatusInfo = (item) => {
+    // If the RFI itself has a wbtStatus, use it directly (this is the most accurate)
+    if (item.wbtStatus) {
+      const statusStr = String(item.wbtStatus).toUpperCase()
+      switch (statusStr) {
+        case 'OPEN':
+        case 'PENDING':
+          return { label: statusStr, className: 'bg-blue-100 text-black shadow-sm' }
+        case 'SENT':
+          return { label: 'SENT', className: 'bg-purple-100 text-black shadow-sm' }
+        case 'RECEIVED':
+          return { label: 'RECEIVED', className: 'bg-teal-100 text-black shadow-sm' }
+        case 'COMPLETE':
+        case 'ANSWERED':
+          return { label: statusStr, className: 'bg-green-100 text-black shadow-sm' }
+        case 'PARTIAL':
+          return { label: 'PARTIAL', className: 'bg-orange-100 text-black shadow-sm' }
+        default:
+          return { label: statusStr, className: 'bg-gray-100 text-black shadow-sm' }
+      }
+    }
+
     const responses = item.rfiresponse || []
     if (responses.length > 0) {
       const sorted = [...responses].sort(
@@ -178,7 +199,7 @@ const AllRFI = ({ rfiData = [], onUpdate }) => {
       }
     }
 
-    // Fallback if no responses exist
+    // Fallback if no responses exist and no wbtStatus
     if (item.status === false || item.status === 'OPEN' || item.status === 'PENDING') {
       return { label: 'PENDING', className: 'bg-green-100 text-black shadow-sm' }
     } else {
