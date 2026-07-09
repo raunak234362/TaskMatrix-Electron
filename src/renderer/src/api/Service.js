@@ -4476,6 +4476,23 @@ class Service {
     }
   }
 
+  // GET /training/report/monthly
+  static async GetMonthlyTrainingReport(year, month) {
+    try {
+      const response = await api.get(`training/report/monthly`, {
+        params: { year, month },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching monthly training report', error)
+      throw error
+    }
+  }
+
 }
 
 export default Service

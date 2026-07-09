@@ -28,6 +28,12 @@ const STATUS_CONFIG = {
     text: 'text-yellow-800',
     border: 'border-yellow-300'
   },
+  AWAITING_DECISION: {
+    label: 'Awaiting Decision',
+    bg: 'bg-orange-100',
+    text: 'text-orange-800',
+    border: 'border-orange-300'
+  },
   APPROVED: {
     label: 'Approved',
     bg: 'bg-green-100',
@@ -864,7 +870,10 @@ const PendingTrainings = () => {
     (r) => (r.status?.toUpperCase() || 'PENDING') === 'APPROVED'
   )
   const pendingCount = trainings.filter(
-    (r) => (r.status?.toUpperCase() || 'PENDING') === 'PENDING'
+    (r) => {
+      const s = r.status?.toUpperCase() || 'PENDING'
+      return s === 'PENDING' || s === 'AWAITING_DECISION'
+    }
   ).length
   const activeBatchCount = batches.filter(
     (b) => (b.status?.toUpperCase() || 'PENDING') !== 'COMPLETED'
@@ -1034,7 +1043,7 @@ const PendingTrainings = () => {
                             </span>
                           </td>
                           <td className="px-5 py-4">
-                            {status === 'PENDING' ? (
+                            {status === 'PENDING' || status === 'AWAITING_DECISION' ? (
                               <div className="flex flex-col gap-2">
                                 {rejectEntry?.open ? (
                                   <div className="space-y-2 min-w-[200px]">

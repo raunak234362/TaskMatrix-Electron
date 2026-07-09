@@ -381,9 +381,9 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] overflow-hidden flex flex-col relative">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50">
+        <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50/50">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-[#6bbd45]/15 rounded-xl text-[#6bbd45]">
+            <div className="p-2 bg-[#6bbd45]/15 rounded-xl text-[#6bbd45]">
               <ClipboardList className="w-6 h-6" />
             </div>
             <div>
@@ -391,43 +391,45 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* Action Bar */}
+            <div className="px-6 py-3 border-b border-gray-100 flex flex-wrap gap-3 items-center justify-end bg-white">
+              {(userRole === 'admin' ||
+                userRole === 'operation_executive' ||
+                userRole === 'project_manager' ||
+                userRole === 'department_manager' ||
+                userRole === 'deputy_manager') && (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#6bbd45]/20 text-black border border-black rounded-lg text-xs font-bold uppercase hover:bg-[#6bbd45]/30 transition-colors"
+                  >
+                    <Edit className="w-4 h-4" /> Edit Task
+                  </button>
+                )}
+              {/* Request Training — visible to all roles */}
+              <button
+                onClick={() => setIsRequestingTraining(true)}
+                className="flex items-center gap-2 px-4 py-1.5 bg-green-50 text-green-700 border border-black rounded-lg text-sm font-bold uppercase hover:bg-green-100 transition-colors"
+              >
+                <GraduationCap className="w-4 h-4" /> Request Training
+              </button>
+            </div>
             <button
               onClick={onClose}
               className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
             >
               Close
             </button>
+
           </div>
         </div>
 
-        {/* Action Bar */}
-        <div className="px-6 py-3 border-b border-gray-100 flex flex-wrap gap-3 items-center justify-end bg-white">
-          {(userRole === 'admin' ||
-            userRole === 'operation_executive' ||
-            userRole === 'project_manager' ||
-            userRole === 'department_manager' ||
-            userRole === 'deputy_manager') && (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#6bbd45]/20 text-black border border-black rounded-lg text-xs font-bold uppercase hover:bg-[#6bbd45]/30 transition-colors"
-            >
-              <Edit className="w-4 h-4" /> Edit Task
-            </button>
-          )}
-          {/* Request Training — visible to all roles */}
-          <button
-            onClick={() => setIsRequestingTraining(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 border border-green-300 rounded-lg text-xs font-bold uppercase hover:bg-green-100 transition-colors"
-          >
-            <GraduationCap className="w-4 h-4" /> Request Training
-          </button>
-        </div>
+
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-8 py-8 space-y-8">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <>
             {/* Task Info Card */}
-            <div className="bg-green-50 rounded-2xl p-8 border border-green-200">
+            <div className="bg-green-50 rounded-2xl p-4 border border-green-200">
               <h3 className="text-2xl  text-green-900 mb-6 flex items-center gap-3">
                 Task Information
               </h3>
@@ -437,7 +439,7 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
                 <InfoItem
                   icon={<Building2 />}
                   label="WBS Item"
-                  value={task.projectBundle?.bundleKey.replace(/_/g, ' ') || '—'}
+                  value={task.projectBundle?.bundleKey?.replace(/_/g, ' ') || '—'}
                 />
                 <InfoItem icon={<Hash />} label="Stage" value={task.Stage || '—'} />
                 <InfoItem
@@ -499,6 +501,48 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
                     className="text-gray-700 leading-relaxed prose prose-sm max-w-none"
                     dangerouslySetInnerHTML={{ __html: task.description }}
                   />
+                </div>
+              )}
+
+              {/* Training Batch Context */}
+              {task.trainingBatchContext?.trainees?.length > 0 && (
+                <div className="mt-8 p-6 bg-white/70 backdrop-blur rounded-xl border border-green-100">
+                  <h4 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                    <GraduationCap className="w-5 h-5 text-green-600" />
+                    Training Details: <span className="font-bold text-gray-800">{task.trainingBatchContext.topic}</span>
+                  </h4>
+                  <div className="space-y-4">
+                    {Object.values(
+                      task.trainingBatchContext.trainees.reduce((acc, trainee) => {
+                        if (!acc[trainee.traineeId]) {
+                          acc[trainee.traineeId] = {
+                            name: trainee.traineeName,
+                            requests: []
+                          }
+                        }
+                        acc[trainee.traineeId].requests.push(trainee)
+                        return acc
+                      }, {})
+                    ).map((student, index) => (
+                      <div key={index} className="p-4 bg-white rounded-lg border border-green-200 shadow-sm">
+                        <div className="font-bold text-gray-800 flex items-center gap-2 mb-3">
+                          <User className="w-4 h-4 text-green-600" /> {student.name}
+                        </div>
+                        <div className="space-y-3">
+                          {student.requests.map((req, idx) => (
+                            <div key={idx} className="ml-6 pl-4 border-l-2 border-green-300">
+                              <p className="text-sm font-medium text-gray-700">
+                                Original Task: <span className="font-semibold">{req.originalTaskName || 'N/A'}</span> 
+                              </p>
+                              <p className="text-sm text-gray-600 mt-1">
+                                <span className="font-medium text-gray-700">Reason:</span> <span className="italic">{req.reasonForRequest ? `"${req.reasonForRequest}"` : 'No reason provided'}</span>
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
