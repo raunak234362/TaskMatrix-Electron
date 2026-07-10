@@ -167,7 +167,9 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
           <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
-              <h1 className="text-sm font-semibold text-black uppercase tracking-normal">RFI Details</h1>
+              <h1 className="text-sm font-semibold text-black uppercase tracking-normal">
+                RFI Details {rfi.project?.name ? `- ${rfi.project.name}` : ''}
+              </h1>
             </div>
             <div className="flex items-center gap-3">
               {(userRole !== "STAFF" || isAssist) && (
@@ -193,23 +195,43 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
               {/* Card 1: Details, Description & Attachments */}
               <div className="bg-zinc-50 p-6 rounded-none border border-gray-200 space-y-6">
                 <div className="space-y-4">
-                  <h1 className="text-sm font-semibold text-black uppercase tracking-normal">
+                  <h1 className="text-md font-semibold text-black uppercase tracking-normal">
                     {rfi.subject || "No Subject"}
                   </h1>
 
                   {/* 2-Column Info Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 pt-2">
-                    <Info label="Project" value={rfi.project?.name || "—"} />
-
                     <div className="flex items-center pb-2 border-b border-gray-200 text-sm gap-2">
                       <span className="font-semibold text-black uppercase tracking-normal shrink-0">
                         Status:
                       </span>
                       {(() => {
-                        const status = rfi.isAproovedByAdmin ? "APPROVED" : "PENDING";
-                        const statusStyles = rfi.isAproovedByAdmin
+                        let status = rfi.isAproovedByAdmin ? "APPROVED BY SENIOR" : "PENDING";
+                        let statusStyles = rfi.isAproovedByAdmin
                           ? "bg-green-50 text-green-700 border-green-200"
                           : "bg-yellow-50 text-yellow-700 border-yellow-200";
+
+                        if (rfi.wbtStatus) {
+                          const wbtStr = String(rfi.wbtStatus).toUpperCase();
+                          status = wbtStr;
+                          switch (wbtStr) {
+                            case 'OPEN':
+                            case 'PENDING':
+                              statusStyles = 'bg-blue-50 text-blue-700 border-blue-200'; break;
+                            case 'SENT':
+                              statusStyles = 'bg-purple-50 text-purple-700 border-purple-200'; break;
+                            case 'RECEIVED':
+                              statusStyles = 'bg-teal-50 text-teal-700 border-teal-200'; break;
+                            case 'COMPLETE':
+                            case 'ANSWERED':
+                              statusStyles = 'bg-green-50 text-green-700 border-green-200'; break;
+                            case 'PARTIAL':
+                              statusStyles = 'bg-orange-50 text-orange-700 border-orange-200'; break;
+                            default:
+                              statusStyles = 'bg-gray-50 text-black border-gray-200';
+                          }
+                        }
+
                         return (
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-sm font-semibold uppercase tracking-normal border ${statusStyles}`}>
                             {status}

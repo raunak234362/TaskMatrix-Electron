@@ -2029,6 +2029,8 @@ class Service {
       console.error("cannot find submittal's", error)
     }
   }
+
+
   static async GetSubmittalbyId(Id) {
     try {
       const response = await api.get(`submittal/${Id}`, {
@@ -2112,6 +2114,18 @@ class Service {
       throw error
     }
   }
+  //Update submittal patch method by id (partial update, e.g. milestone ID only)
+  static async updateSubmittalById(id, data) {
+    try {
+      const response = await api.patch(`submittal/${id}`, data)
+      console.log('Submittal updated:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot update submittal', error)
+      throw error
+    }
+  }
+
   //submittal by project id :
   static async GetSubmittalByProjectId(projectId) {
     try {
@@ -3790,6 +3804,18 @@ class Service {
       throw error
     }
   }
+
+  // dashboard route for client estimator
+  static async GetClientEstimatorDashboardData() {
+    try {
+      const response = await api.get(`dashBoardData/clientEstimator`)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching client estimator dashboard:', error)
+      throw error
+    }
+  }
+
   //pending submittal operation executive
   static async GetPendingSubmittalOperationExecutive() {
     try {
@@ -4446,6 +4472,23 @@ class Service {
       return response.data
     } catch (error) {
       console.error('Error fetching my training batches', error)
+      throw error
+    }
+  }
+
+  // GET /training/report/monthly
+  static async GetMonthlyTrainingReport(year, month) {
+    try {
+      const response = await api.get(`training/report/monthly`, {
+        params: { year, month },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching monthly training report', error)
       throw error
     }
   }

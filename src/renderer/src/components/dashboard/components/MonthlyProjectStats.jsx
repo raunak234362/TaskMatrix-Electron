@@ -138,55 +138,49 @@ const MonthlyProjectStats = ({
           className="bg-white rounded-xl shadow-sm border border-black/5 overflow-hidden hover:border-black/20 transition-all group"
         >
           {/* Team Header */}
-          <div className="bg-green-100/50 p-2 sm:p-3 text-center border-b border-black/5">
-            <div className="flex items-center justify-center gap-2">
+          <div className="bg-green-100/50 p-2 sm:p-3 border-b border-black/5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 shrink-0">
               <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black/60" />
               <h3 className="text-sm sm:text-base font-bold text-black uppercase tracking-widest truncate">
                 {team.teamName}
               </h3>
             </div>
-          </div>
-
-          <div className="p-3 sm:p-4 space-y-3">
-            {/* Main Stats */}
-            <div className="grid grid-cols-2 gap-3">
+            
+            <div className="flex items-center gap-4 shrink-0">
               <button
                 onClick={() => {
                   const teamProjects = projectsByTeam[team.id]?.projects || [];
                   handleStatClick(teamProjects, "ALL", "TOTAL");
                 }}
-                className="p-2 bg-gray-50/50 rounded-lg flex flex-col items-center justify-center border border-black/5 hover:bg-white hover:border-black/10 transition-all cursor-pointer group/projects"
+                className="flex items-center gap-1.5 hover:opacity-70 transition-opacity cursor-pointer group/headerprojects"
               >
-                <span className="text-[10px] text-gray-400 uppercase tracking-widest mb-0.5 group-hover/projects:text-gray-600">
-                  Projects
+                <span className="text-[10px] sm:text-[11px] text-gray-500 uppercase tracking-widest">
+                  Awarded Projects:
                 </span>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm sm:text-base font-bold text-gray-800">
-                    {team.projectCount}
-                  </span>
-                  <Briefcase className="w-3.5 h-3.5 text-gray-400 group-hover/projects:text-gray-600" />
-                </div>
+                <span className="text-sm sm:text-base font-bold text-gray-800">
+                  {team.projectCount}
+                </span>
               </button>
-              <div className="p-2 bg-green-50/50 rounded-lg flex flex-col items-center justify-center border border-black/5">
-                <span className="text-[10px] text-black/40 uppercase tracking-widest mb-0.5">
-                  Work Done
+              
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] sm:text-[11px] text-black/50 uppercase tracking-widest">
+                  Work Done:
                 </span>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm sm:text-base font-bold text-black">
-                    {formatSeconds(team.totalSeconds)}
-                  </span>
-                  <Clock className="w-3.5 h-3.5 text-green-500/50" />
-                </div>
+                <span className="text-sm sm:text-base font-bold text-black">
+                  {formatSeconds(team.totalSeconds)}
+                </span>
               </div>
             </div>
+          </div>
 
+          <div className="p-3 sm:p-4 space-y-3">
             {/* IFA/IFC/COR Grid */}
             <div className="border border-black/5 rounded-lg overflow-hidden bg-white">
               <div className="grid grid-cols-3 divide-x divide-black/5">
                 {["IFA", "IFC", "COR"].map((stage) => (
                   <div key={stage} className="flex flex-col">
                     {/* Header */}
-                    <div className="bg-gray-50/80 border-b border-black/5 py-1 text-center text-[10px] font-bold tracking-widest text-black/60 uppercase">
+                    <div className="bg-gray-50/80 border-b border-black/5 py-1 text-center text-xs font-bold tracking-widest text-black/60 uppercase">
                       {stage}
                     </div>
                     {/* Content */}
@@ -222,11 +216,11 @@ const MonthlyProjectStats = ({
                           }
                           className={`w-full flex items-center justify-between px-1.5 py-0.5 rounded-md hover:bg-gray-50 transition-all cursor-pointer group/btn`}
                         >
-                          <span className="text-[9px] font-medium text-gray-500 uppercase truncate">
+                          <span className="text-xs font-semibold text-gray-600 uppercase truncate">
                             {item.label}
                           </span>
                           <span
-                            className={`text-[10px] font-bold ${item.key === "active"
+                            className={`text-sm font-bold ${item.key === "active"
                               ? "text-green-600"
                               : item.key === "onHold"
                                 ? "text-orange-500"

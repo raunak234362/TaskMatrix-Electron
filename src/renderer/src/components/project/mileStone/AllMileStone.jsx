@@ -38,10 +38,9 @@ const AllMileStone = ({ project, onUpdate }) => {
   };
 
   useEffect(() => {
-    if (!milestonesByProject[project.id]) {
-      fetchMileStone();
-    }
-  }, [project.id, milestonesByProject, dispatch]);
+    // Always fetch fresh data on mount to avoid stale Redux cache
+    fetchMileStone();
+  }, [project.id]);
 
   const handleOpenAddMileStone = () => setAddMileStoneModal(true);
   const handleCloseAddMileStone = () => setAddMileStoneModal(false);
@@ -49,6 +48,16 @@ const AllMileStone = ({ project, onUpdate }) => {
   const handleSuccess = () => {
     fetchMileStone();
     if (onUpdate) onUpdate();
+  };
+
+  const STATUS_MAP = {
+    ACTIVE:    { label: "Active",       color: "text-blue-700" },
+    COMPLETE:  { label: "Complete",     color: "text-green-700" },
+    COMPLETED: { label: "Complete",     color: "text-green-700" },
+    PENDING:   { label: "Pending",      color: "text-yellow-700" },
+    APPROVED:  { label: "Approved",     color: "text-emerald-700" },
+    ONHOLD:    { label: "On Hold",      color: "text-orange-600" },
+    DELAY:     { label: "Delay",        color: "text-red-600" },
   };
 
   const columns = [
@@ -65,7 +74,15 @@ const AllMileStone = ({ project, onUpdate }) => {
       header: "CD Approval Date",
       cell: ({ row }) => formatDate(row.original.CDApprovalDate),
     },
-    { accessorKey: "status", header: "Status" },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const raw = (row.original.status || "").toUpperCase();
+        const cfg = STATUS_MAP[raw] || { label: row.original.status || "—", color: "text-gray-600" };
+        return <span className={`font-semibold uppercase text-xs ${cfg.color}`}>{cfg.label}</span>;
+      },
+    },
   ];
   const handleRowClick = (row) => {
     const milestonesId = row.id ?? row.fabId ?? "";
@@ -92,7 +109,7 @@ const AllMileStone = ({ project, onUpdate }) => {
           detailComponent={(props) => (
             <GetMilestoneByID {...props} onUpdate={fetchMileStone} />
           )}
-          pageSizeOptions={[5, 10, 25]}
+          pageSizeOptions={[10, 25, 35]}
         />
       ) : (
         <div className="flex flex-col items-center justify-center py-8 text-gray-700">

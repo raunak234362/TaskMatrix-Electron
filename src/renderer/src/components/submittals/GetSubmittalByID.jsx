@@ -467,7 +467,9 @@ const GetSubmittalByID = ({ id, onClose }) => {
                     userRole === 'ADMIN' ||
                     userRole === 'PROJECT_MANAGER' ||
                     userRole === 'DEPT_MANAGER' ||
-                    userRole == 'DEPUTY_MANAGER' ||
+                    userRole === 'DEPUTY_MANAGER' ||
+                    userRole === 'OPERATION_EXECUTIVE' ||
+                    userRole === 'STAFF' ||
                     isAssist) && (
                     <button
                       className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
@@ -495,7 +497,9 @@ const GetSubmittalByID = ({ id, onClose }) => {
                       userRole === 'ADMIN' ||
                       userRole === 'PROJECT_MANAGER' ||
                       userRole === 'DEPT_MANAGER' ||
-                      userRole == 'DEPUTY_MANAGER' ||
+                      userRole === 'DEPUTY_MANAGER' ||
+                      userRole === 'OPERATION_EXECUTIVE' ||
+                      userRole === 'STAFF' ||
                       isAssist) && (
                       <button
                         onClick={() => setShowResponseModal(true)}

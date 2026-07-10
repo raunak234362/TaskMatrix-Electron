@@ -113,7 +113,8 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
 
   const parseDurationToHours = (duration) => {
     if (!duration) return 0
-    const parts = duration.split(/[:\s]+/)
+    const durationStr = String(duration)
+    const parts = durationStr.split(/[:\s]+/)
     let hours = 0
     let minutes = 0
     if (parts.length >= 1) hours = parseFloat(parts[0].replace(/[^\d.]/g, '')) || 0
@@ -133,14 +134,18 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
 
   const toIST = (dateString) => {
     if (!dateString) return '—'
-    return new Intl.DateTimeFormat('en-IN', {
-      timeZone: 'Asia/Kolkata',
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(new Date(dateString))
+    try {
+      return new Intl.DateTimeFormat('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(new Date(dateString))
+    } catch (e) {
+      return String(dateString)
+    }
   }
 
   const formatSecondsToHHMM = (totalSeconds) => {
@@ -184,7 +189,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
       }
     }
     return (
-      configs[status?.toUpperCase() || ''] || {
+      configs[String(status || '').toUpperCase()] || {
         label: status || 'Unknown',
         bg: 'bg-gray-100',
         text: 'text-gray-700',
@@ -257,7 +262,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
             </div>
             <div>
               <h2 className="text-xl font-bold text-black tracking-tight uppercase">
-                {task.wbsType ? `${task.wbsType.replace(/_/g, ' ').toUpperCase()} ` : ''} -{' '}
+                {task.wbsType ? `${String(task.wbsType).replace(/_/g, ' ').toUpperCase()} ` : ''} -{' '}
                 {task.name}
               </h2>
               <div className="flex items-center gap-2 mt-2">
