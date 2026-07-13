@@ -27,7 +27,7 @@ const RFIResponseModal = ({
       setLoading(true);
 
       const userId = sessionStorage.getItem("userId") || "";
-      const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+      const userRole = sessionStorage.getItem("userRole") || "";
       const payload = {
         ...data,
         rfiId,
@@ -50,13 +50,8 @@ const RFIResponseModal = ({
       if (rfiId) {
         const rfiRes = await Service.GetRFIbyId(rfiId);
         const rfi = rfiRes?.data || rfiRes;
-        const pid = rfi?.projectId || rfi?.project_id || rfi?.project?.id;
-        if (pid) {
-          const projectRes = await Service.GetProjectById(pid);
-          const project = projectRes?.data || projectRes;
-          fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
-          projectName = project?.projectName || project?.name || "";
-        }
+        fabricatorName = rfi?.fabricator?.fabName || rfi?.fabricatorName || rfi?.project?.fabricator?.fabName || "";
+        projectName = rfi?.project?.projectName || rfi?.project?.name || "";
       }
 
       await Service.addRFIResponse(formData, rfiId, fabricatorName, projectName);
@@ -74,7 +69,7 @@ const RFIResponseModal = ({
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40">
+    <div className="fixed inset-0 flex items-center justify-center z-[120] bg-black/40">
       <div className="bg-white w-full max-w-lg p-6 rounded-none shadow-2xl border border-gray-200 relative">
         <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200">
           <h2 className="text-sm font-semibold text-black uppercase tracking-normal">Add Response</h2>

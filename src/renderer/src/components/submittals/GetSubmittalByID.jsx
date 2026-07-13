@@ -422,7 +422,9 @@ const GetSubmittalByID = ({ id, onClose }) => {
               </div>
 
               {/* RIGHT PANEL - BFA Manager */}
-              <BfaManager submittalId={submittal.id} isAssist={isAssist} />
+              {String(submittal?.stage || "").toUpperCase() !== "IFC" && (
+                <BfaManager submittalId={submittal.id} isAssist={isAssist} />
+              )}
 
               {/* ── VERSION HISTORY (only when > 1 versions) ── */}
               {hasMultipleVersions && (

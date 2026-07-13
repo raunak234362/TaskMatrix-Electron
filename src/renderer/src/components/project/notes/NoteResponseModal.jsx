@@ -39,12 +39,13 @@ const NoteResponseModal = ({
             let fabricatorName = "";
             let projectName = "";
             if (noteId) {
-                const note = await Service.GetTeamMeetingNotesById(noteId);
-                const pid = note?.projectId || note?.project_id || note?.data?.projectId || note?.data?.project_id;
+                const noteRes = await Service.GetTeamMeetingNotesById(noteId);
+                const note = noteRes?.data || noteRes;
+                const pid = note?.projectId || note?.project_id || note?.project || note?.projectId?._id || note?.projectId?.id;
                 if (pid) {
-                    const projectRes = await Service.GetProjectById(pid);
+                    const projectRes = await Service.GetProjectById(typeof pid === 'object' ? (pid._id || pid.id) : pid);
                     const project = projectRes?.data || projectRes;
-                    fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
+                    fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || project?.fabricator?.name || "";
                     projectName = project?.projectName || project?.name || "";
                 }
             }
