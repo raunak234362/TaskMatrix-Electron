@@ -284,36 +284,13 @@ const WprScheduleTable = ({
                     };
 
                     if (row.unifiedEntries && row.unifiedEntries.length > 0) {
-                      const allDone = row.unifiedEntries.every(entry => {
-                        const st = String(entry.status || "—").toUpperCase();
-                        return entry.bfaDate !== "—" || ["COMPLETE", "COMPLETED", "SUCCESS", "BFA_RECEIVED", "RELEASE_FOR_FABRICATION"].includes(st);
-                      });
-
-                      if (allDone) {
-                        return (
-                          <div className="flex h-full items-center p-3">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-black uppercase tracking-widest border bg-emerald-100 text-emerald-700 border-emerald-200 shrink-0">
-                              100% COMPLETE
-                            </span>
-                          </div>
-                        );
-                      }
-
                       return (
                         <div className="grid h-full" style={{ gridTemplateRows: `repeat(${row.unifiedEntries.length}, minmax(0, 1fr))` }}>
                           {row.unifiedEntries.map((entry, i) => {
-                            const key = String(entry.status || "—").replace(/\s+/g, "_").toUpperCase();
-                            const label = STATUS_LABELS[key] || String(entry.status || "—").replace(/_/g, " ");
-                            const color = STATUS_COLORS[key] || "bg-gray-100 text-gray-600 border-gray-200";
                             return (
-                              <div key={i} className="flex flex-col justify-center p-3">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-[11px] font-semibold text-blue-800">
-                                    {entry.subject}
-                                  </span>
-                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border ${color} shrink-0`}>
-                                    {label}
-                                  </span>
+                              <div key={i} className="flex flex-col justify-center p-3 border-b border-black/5 last:border-b-0">
+                                <div className="text-[11px] text-gray-700 font-normal break-words">
+                                  {entry.notes && typeof entry.notes === "string" && entry.notes.trim() !== "" ? entry.notes : "—"}
                                 </div>
                               </div>
                             );
@@ -322,15 +299,10 @@ const WprScheduleTable = ({
                       );
                     }
 
-                    const key = String(row.submittalStatus || "—").replace(/\s+/g, "_").toUpperCase();
-                    const label = STATUS_LABELS[key] || String(row.submittalStatus || "—").replace(/_/g, " ");
-                    const color = STATUS_COLORS[key] || "bg-gray-100 text-gray-600 border-gray-200";
-                    if (row.submittalStatus && row.submittalStatus !== "—") {
+                    if (row.comments && row.comments !== "—" && typeof row.comments === "string") {
                       return (
-                        <div className="p-3">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border ${color}`}>
-                            {label}
-                          </span>
+                        <div className="p-3 text-[11px] text-gray-700 break-words font-normal">
+                          {row.comments}
                         </div>
                       );
                     }

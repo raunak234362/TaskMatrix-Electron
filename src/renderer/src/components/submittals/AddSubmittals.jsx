@@ -76,6 +76,7 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
       stage: initialData?.stage || "",
       mileStoneIds: [],   // array of milestone IDs
       isConnectionDesign: false,
+      notes: initialData?.notes || "",
     },
   });
   const [description, setDescription] = useState(
@@ -417,6 +418,14 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
           />
         </div>
 
+        <div className="space-y-1">
+          <Input
+            label="Notes"
+            type="textarea"
+            placeholder="Enter submittal notes..."
+            {...register("notes")}
+          />
+        </div>
 
         <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
 

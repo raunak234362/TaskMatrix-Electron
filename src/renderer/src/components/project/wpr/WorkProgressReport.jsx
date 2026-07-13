@@ -303,7 +303,7 @@ const WorkProgressReport = ({
       const linkedSubmittalIds = new Set();
       const fmt = (d) => d ? new Date(d).toLocaleDateString("en-US") : "—";
       const toEntry = (sub) => ({ subject: sub.subject || sub.serialNo || "—", date: fmt(sub.date || sub.createdAt) });
-      const cleanHtml = (str) => (str || "").replace(/<[^>]+>/g, "").replace(/&nbsp;/gi, " ").trim();
+      const cleanHtml = (str) => (typeof str === 'string' ? str : "").replace(/<[^>]+>/g, "").replace(/&nbsp;/gi, " ").trim();
 
       // ── Milestone rows ────────────────────────────────────────────────────────
       const milestoneRows = milestones.map((m) => {
@@ -364,13 +364,21 @@ const WorkProgressReport = ({
             ifcDate: stage === "IFC" ? fmt(dateStr) : "—",
             corDate: ["CO", "COR"].includes(stage) ? fmt(dateStr) : "—",
             status: currentStatus,
-            date: dateStr
+            date: dateStr,
+            notes: s.notes || ""
           };
         });
 
         const finalBfaRecdDate = unifiedEntries.find(e => e.bfaDate !== "—")?.bfaDate || "—";
         const primarySub = subs.length > 0 ? [...subs].sort((a, b) => new Date(b.createdAt || b.date || 0) - new Date(a.createdAt || a.date || 0))[0] : null;
         const submittalStatus = primarySub ? (primarySub.wbtStatus || primarySub.status || "PENDING") : "—";
+
+        const subNotesList = subs
+          .map(s => s.notes)
+          .filter(n => typeof n === "string" && n.trim() !== "");
+        const subNotesStr = subNotesList.length > 0 ? subNotesList.join(" | ") : "";
+
+        const milestoneComments = subNotesStr || "—";
 
         return {
           id: m.id || m._id,
@@ -384,7 +392,7 @@ const WorkProgressReport = ({
           ifaSubDate: unifiedEntries.find(e => e.ifaDate !== "—")?.ifaDate || "—",
           ifcSubDate: unifiedEntries.find(e => e.ifcDate !== "—")?.ifcDate || "—",
           corSubDate: unifiedEntries.find(e => e.corDate !== "—")?.corDate || "—",
-          comments: m.description ? cleanHtml(m.description) : (m.percentage ? `${m.percentage}% Completed` : "—"),
+          comments: milestoneComments,
           types: m.types || "ANCHOR_BOLT",
           subSubject: "",
         };
@@ -433,8 +441,12 @@ const WorkProgressReport = ({
             ifcDate: stage === "IFC" ? fmt(dateStr) : "—",
             corDate: ["CO", "COR"].includes(stage) ? fmt(dateStr) : "—",
             status: currentStatus,
-            date: dateStr
+            date: dateStr,
+            notes: sub.notes || ""
           }];
+
+          const subNotes = typeof sub.notes === "string" ? sub.notes.trim() : "";
+          const finalComments = subNotes || "—";
 
           return {
             id: sub.id || sub._id,
@@ -447,9 +459,7 @@ const WorkProgressReport = ({
             ifcSubDate: stage === "IFC" ? entry.date : "—",
             corSubDate: ["CO", "COR"].includes(stage) ? entry.date : "—",
             submittalStatus: sub.wbtStatus || sub.status || "PENDING",
-            comments: latestResponse
-              ? cleanHtml(latestResponse.description || latestResponse.reason) || "—"
-              : "—",
+            comments: finalComments,
             types: "ANCHOR_BOLT",
             subSubject: sub.subject || sub.serialNo || "",
           };
@@ -1613,36 +1623,13 @@ const WorkProgressReport = ({
                       };
 
                       if (row.unifiedEntries && row.unifiedEntries.length > 0) {
-                        const allDone = row.unifiedEntries.every(entry => {
-                          const st = String(entry.status || "—").toUpperCase();
-                          return entry.bfaDate !== "—" || ["COMPLETE", "COMPLETED", "SUCCESS", "BFA_RECEIVED", "RELEASE_FOR_FABRICATION"].includes(st);
-                        });
-
-                        if (allDone) {
-                          return (
-                            <div className="flex h-full items-center p-3">
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-black uppercase tracking-widest border bg-emerald-100 text-emerald-700 border-emerald-200 shrink-0">
-                                100% COMPLETE
-                              </span>
-                            </div>
-                          );
-                        }
-
                         return (
                           <div className="flex flex-col h-full">
                             {row.unifiedEntries.map((entry, i) => {
-                              const key = String(entry.status || "—").replace(/\s+/g, "_").toUpperCase();
-                              const label = STATUS_LABELS[key] || String(entry.status || "—").replace(/_/g, " ");
-                              const color = STATUS_COLORS[key] || "bg-gray-100 text-gray-600 border-gray-200";
                               return (
-                                <div key={i} className="flex flex-col flex-1 justify-center p-3">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-[11px] font-semibold text-blue-800">
-                                      {entry.subject}
-                                    </span>
-                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border ${color} shrink-0`}>
-                                      {label}
-                                    </span>
+                                <div key={i} className="flex flex-col flex-1 justify-center p-3 border-b border-black/5 last:border-b-0">
+                                  <div className="text-[11px] text-gray-700 font-normal break-words">
+                                    {entry.notes && typeof entry.notes === "string" && entry.notes.trim() !== "" ? entry.notes : "—"}
                                   </div>
                                 </div>
                               );
@@ -1651,15 +1638,10 @@ const WorkProgressReport = ({
                         );
                       }
 
-                      const key = String(row.submittalStatus || "—").replace(/\s+/g, "_").toUpperCase();
-                      const label = STATUS_LABELS[key] || String(row.submittalStatus || "—").replace(/_/g, " ");
-                      const color = STATUS_COLORS[key] || "bg-gray-100 text-gray-600 border-gray-200";
-                      if (row.submittalStatus && row.submittalStatus !== "—") {
+                      if (row.comments && row.comments !== "—" && typeof row.comments === "string") {
                         return (
-                          <div className="p-3">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-[9px] font-black uppercase tracking-widest border ${color}`}>
-                              {label}
-                            </span>
+                          <div className="p-3 text-[11px] text-gray-700 break-words font-normal">
+                            {row.comments}
                           </div>
                         );
                       }
