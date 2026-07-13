@@ -284,6 +284,21 @@ const WprScheduleTable = ({
                     };
 
                     if (row.unifiedEntries && row.unifiedEntries.length > 0) {
+                      const allDone = row.unifiedEntries.every(entry => {
+                        const st = String(entry.status || "—").toUpperCase();
+                        return entry.bfaDate !== "—" || ["COMPLETE", "COMPLETED", "SUCCESS", "BFA_RECEIVED", "RELEASE_FOR_FABRICATION"].includes(st);
+                      });
+
+                      if (allDone) {
+                        return (
+                          <div className="flex h-full items-center p-3">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-black uppercase tracking-widest border bg-emerald-100 text-emerald-700 border-emerald-200 shrink-0">
+                              100% COMPLETE
+                            </span>
+                          </div>
+                        );
+                      }
+
                       return (
                         <div className="grid h-full" style={{ gridTemplateRows: `repeat(${row.unifiedEntries.length}, minmax(0, 1fr))` }}>
                           {row.unifiedEntries.map((entry, i) => {
