@@ -650,25 +650,9 @@ const AddTask = () => {
 
   const employeeOptions = employees
     .filter((e) => {
-      // 1. Hide inactive employees
-      const isActive = e.isActive === true || e.isActive === "true" || e.isActive === 1;
-      if (!isActive) return false;
-
-      // 2. Show only members belonging to the team selected in Project
-      if (selectedProject?.team) {
-        const projectTeamId = selectedProject.team.id || selectedProject.team._id || selectedProject.teamId;
-        const employeeTeamId = e.team?.id || e.team?._id || e.teamId;
-        
-        if (projectTeamId && employeeTeamId) {
-          return String(projectTeamId) === String(employeeTeamId);
-        }
-        
-        const projectTeamName = selectedProject.team.name;
-        const employeeTeamName = e.team?.name;
-        if (projectTeamName && employeeTeamName) {
-          return String(projectTeamName).toLowerCase() === String(employeeTeamName).toLowerCase();
-        }
-      }
+      // Hide inactive employees
+      const isActive = e.isActive === true || e.isActive === "true" || e.isActive === 1 || String(e.isActive).toUpperCase() === 'ACTIVE' || String(e.status).toUpperCase() === 'ACTIVE';
+      if (e.isActive !== undefined && !isActive) return false;
       
       return true;
     })

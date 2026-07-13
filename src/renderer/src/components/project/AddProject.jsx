@@ -133,9 +133,8 @@ const AddProject = () => {
       { label: "Both (Tekla + SDS/2)", value: "BOTH" },
     ],
     clientProjectManagers: clients
-      .filter((c) => c && ["CLIENT", "CLIENT_ADMIN"].includes(c.role))
       .map((c) => ({
-        label: `${c.firstName} ${c.lastName} (${c.role === "CLIENT_ADMIN" ? "Admin" : "Client"})`,
+        label: `${c.firstName} ${c.lastName}${c.designation ? ` (${c.designation})` : ""}`,
         value: c.id,
       })),
   };
