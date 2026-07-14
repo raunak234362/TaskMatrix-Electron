@@ -38,7 +38,8 @@ const EditRFI = ({ id, onSuccess }) => {
       // Initialize form values
       reset({
         subject: data.subject,
-        multipleRecipients: data.multipleRecipients?.map(r => r.id) || []
+        multipleRecipients: data.multipleRecipients?.map(r => r.id) || [],
+        isAproovedByAdmin: data.isAproovedByAdmin || false
       })
 
       // Determine if it was CD Mode based on recipients if possible, 
@@ -280,6 +281,21 @@ const EditRFI = ({ id, onSuccess }) => {
             />
           </div>
         </div>
+
+        {/* Approval Checkbox */}
+        {['project_manager', 'operation_executive', 'dept_manager', 'deputy_manager', 'admin'].includes(sessionStorage.getItem('userRole')?.toLowerCase() || '') && (
+          <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200">
+            <input
+              type="checkbox"
+              id="isAproovedByAdmin"
+              {...register('isAproovedByAdmin')}
+              className="w-4 h-4 text-green-600 border-gray-300 rounded-none focus:ring-green-500 cursor-pointer"
+            />
+            <label htmlFor="isAproovedByAdmin" className="text-sm font-bold text-black uppercase tracking-normal cursor-pointer select-none">
+              Approve RFI
+            </label>
+          </div>
+        )}
 
         {/* Files */}
         <div className="space-y-2">

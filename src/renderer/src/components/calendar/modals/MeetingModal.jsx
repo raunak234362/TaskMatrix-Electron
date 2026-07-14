@@ -37,7 +37,8 @@ const MeetingModal = ({ isOpen, onClose, meeting, refresh }) => {
             try {
                 const response = await Service.FetchAllUsers();
                 // Handle different response structures gracefully
-                const users = response?.users || response?.data?.users || [];
+                const d = response?.data?.users || response?.data?.data || response?.users || response?.data || response || [];
+                const users = Array.isArray(d) ? d : (d?.users ? d.users : []);
 
                 if (Array.isArray(users)) {
                     const options = users.map(user => {

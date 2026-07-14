@@ -34,18 +34,15 @@ const AllProjectNotes = ({ projectId, project }) => {
     useEffect(() => {
         const fetchAll = async () => {
             let combined = [];
-            try {
-                const res = await Service.FetchAllUsers();
-                const d = res?.data?.data || res?.data || res?.users || res || [];
-                combined = [...combined, ...(Array.isArray(d) ? d : [])];
-            } catch(e) { console.error("Error fetching internal users:", e); }
 
             const cdId = project?.connectionDesignerID || project?.connectionDesigner?.id || project?.connectionDesigner;
             if (cdId) {
                 try {
                     const res = await Service.FetchConnectionDesignerByID(cdId.id || cdId);
-                    const cde = res?.data?.CDEngineers || res?.CDEngineers || [];
-                    combined = [...combined, ...(Array.isArray(cde) ? cde : [])];
+                    const cde = res?.data?.CDEngineers || res?.CDEngineers || res?.data?.data?.CDEngineers || [];
+                    const arr = Array.isArray(cde) ? cde : [];
+                    const mappedCde = arr.map(c => ({ ...c, role: c.role || 'connection_designer_engineer' }));
+                    combined = [...combined, ...mappedCde];
                 } catch(e) { console.error("Error fetching CD engineers:", e); }
             }
 
@@ -53,8 +50,10 @@ const AllProjectNotes = ({ projectId, project }) => {
             if (fabId) {
                 try {
                     const res = await Service.FetchAllClientsByFabricatorID(fabId.id || fabId);
-                    const c = res?.data?.data || res?.data || res || [];
-                    combined = [...combined, ...(Array.isArray(c) ? c : [])];
+                    const c = res?.data?.users || res?.data?.data || res?.users || res?.data || res || [];
+                    const arr = Array.isArray(c) ? c : (c?.users ? c.users : []);
+                    const mappedClients = arr.map(client => ({ ...client, role: client.role || 'client' }));
+                    combined = [...combined, ...mappedClients];
                 } catch(e) { console.error("Error fetching clients:", e); }
             }
             // Remove duplicates by ID just in case

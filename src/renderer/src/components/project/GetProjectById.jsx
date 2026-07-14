@@ -135,7 +135,7 @@ const GetProjectById = ({ id, onClose }) => {
   const canCreate = useMemo(() => {
     if (isAssist) return true
     const role = (userRole || sessionStorage.getItem('userRole') || '').toLowerCase().trim()
-    return !['client', 'staff', 'estimator'].includes(role)
+    return !['client', 'estimator'].includes(role)
   }, [isAssist, userRole])
 
   const fetchProjectTasks = async () => {

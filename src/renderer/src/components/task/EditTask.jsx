@@ -369,7 +369,7 @@ const EditTask = ({ id, onClose, refresh }) => {
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-6">
-                    {userRole !== 'PROJECT_MANAGER' && (
+                    
                     <div>
                       <label className="text-sm font-bold text-black uppercase tracking-wider block mb-2">
                         Duration
@@ -389,7 +389,6 @@ const EditTask = ({ id, onClose, refresh }) => {
                         />
                       </div>
                     </div>
-                    )}
                     <div>
                       <label className="text-sm font-bold text-black uppercase tracking-wider block mb-2">
                         Priority
