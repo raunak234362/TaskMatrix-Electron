@@ -182,7 +182,17 @@ const EditProject = ({
         setIsFetchingClients(true);
         try {
           const res = await Service.FetchAllClientsByFabricatorID(watchedFabricatorId);
-          setClients(Array.isArray(res?.data) ? res.data : []);
+          let data = [];
+          if (Array.isArray(res)) {
+            data = res;
+          } else if (Array.isArray(res?.data)) {
+            data = res.data;
+          } else if (Array.isArray(res?.clients)) {
+            data = res.clients;
+          } else if (Array.isArray(res?.data?.clients)) {
+            data = res.data.clients;
+          }
+          setClients(data);
         } catch (error) {
           console.error("Failed to fetch clients", error);
           setClients([]);
@@ -285,9 +295,9 @@ const EditProject = ({
       { label: "Assigned", value: "ASSIGNED" },
     ],
     clientProjectManagers: clients
-      .filter((c) => c && ["CLIENT", "CLIENT_ADMIN"].includes(c.role))
+      .filter((c) => c)
       .map((c) => ({
-        label: `${c.firstName} ${c.lastName} (${c.role === 'CLIENT_ADMIN' ? 'Admin' : 'Client'})`,
+        label: `${c.firstName || ""} ${c.lastName || ""}`.trim() + (c.role ? ` (${c.role === 'CLIENT_ADMIN' ? 'Admin' : 'Client'})` : ''),
         value: c.id,
       })),
     pocOfConnectionDesigner: cdEngineers.map((e) => ({

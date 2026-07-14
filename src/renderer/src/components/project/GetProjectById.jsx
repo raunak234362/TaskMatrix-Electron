@@ -789,19 +789,31 @@ const GetProjectById = ({ id, onClose }) => {
                       </div>
                       <div className="flex justify-between items-center pb-2 border-b border-gray-200">
                         <span className="font-bold text-black uppercase tracking-wider">
-                          Team / Tools:
+                          Team :
                         </span>
                         <span className="font-bold text-black uppercase">
-                          {project.team?.name || '—'} / {project.tools || '—'}
+                          {project.team?.name || '—'} 
                         </span>
                       </div>
                       <div className="flex justify-between items-center pb-2 border-b border-gray-200">
                         <span className="font-bold text-black uppercase tracking-wider">
                           WBT Manager:
                         </span>
-                        <span className="font-bold text-black uppercase">
+                        <span className="font-bold text-black uppercase text-right">
                           {project.manager
                             ? `${project.manager.firstName} ${project.manager.lastName}`
+                            : '—'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center pb-2 border-b border-gray-200">
+                        <span className="font-bold text-black uppercase tracking-wider">
+                          Client PM:
+                        </span>
+                        <span className="font-bold text-black uppercase text-right">
+                          {project.clientProjectManagers && project.clientProjectManagers.length > 0
+                            ? project.clientProjectManagers
+                                .map((pm) => `${pm.firstName || ''} ${pm.lastName || ''}`.trim())
+                                .join(', ')
                             : '—'}
                         </span>
                       </div>

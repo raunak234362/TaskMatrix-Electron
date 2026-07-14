@@ -1,17 +1,45 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "react-toastify";
 import { Search, Filter } from "lucide-react";
 import DataTable from "../../ui/table";
 import GetEmployeeByID from "./GetEmployeeByID";
 import { useSelector } from "react-redux";
+import Service from "../../../api/Service";
 
 const AllEmployee = () => {
-  const isTrue = (val) => val === true || val === "true" || val === 1;
-  const staffData = useSelector((state) => state.userInfo.staffData);
-  const [employees, setEmployees] = useState(staffData);
+  const isTrue = (val) => val === undefined || val === null || val === true || val === "true" || val === 1;
+  const [employees, setEmployees] = useState([]);
   const [employeeID, setEmployeeID] = useState(null);
-  const [loading] = useState(false);
-  const [error] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        setLoading(true);
+        const response = await Service.FetchAllEmployee();
+        let data = [];
+        if (Array.isArray(response)) {
+          data = response;
+        } else if (Array.isArray(response?.data?.employees)) {
+          data = response.data.employees;
+        } else if (Array.isArray(response?.employees)) {
+          data = response.employees;
+        } else if (Array.isArray(response?.data)) {
+          data = response.data;
+        }
+        setEmployees(data);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load employees");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEmployees();
+  }, []);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("All");
   const [selectedDesignation, setSelectedDesignation] = useState("All");
@@ -109,11 +137,10 @@ const AllEmployee = () => {
       cell: ({ row }) => {
         const active = isTrue(row.original.isActive);
         return (
-          <span className={`px-3 py-1 rounded-none text-[10px] font-black uppercase tracking-[0.1em] border ${
-            active 
-              ? "bg-green-50 text-green-700 border-green-200" 
-              : "bg-red-50 text-red-700 border-red-200"
-          }`}>
+          <span className={`px-3 py-1 rounded-none text-[10px] font-black uppercase tracking-[0.1em] border ${active
+            ? "bg-green-50 text-green-700 border-green-200"
+            : "bg-red-50 text-red-700 border-red-200"
+            }`}>
             {active ? "Active" : "Inactive"}
           </span>
         );
