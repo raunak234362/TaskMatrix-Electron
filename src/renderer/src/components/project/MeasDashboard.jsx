@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { Loader2, X, Clock, User, FileText, CheckCircle2, AlertCircle, Timer, ChevronDown, ChevronRight } from "lucide-react";
+import { useSelector } from "react-redux";
+import { Loader2, X, Clock, User, FileText, CheckCircle2, AlertCircle, Timer, ChevronDown, ChevronRight, Search, BarChart2, Activity, Info } from "lucide-react";
 import Service from "../../api/Service";
 
 /* ─── Pure helper functions ─── */
@@ -385,13 +386,16 @@ function TaskDetailPanel({ taskId, onClose }) {
                             </div>
 
                             {/* Description / Comments */}
-                            {task.description ? (
+                            {(task.description || (task.taskcomment && task.taskcomment.length > 0)) ? (
                                 <div
                                     style={{
                                         background: "#f9fafb",
                                         border: "1px solid #000000",
                                         borderRadius: "0px",
                                         padding: "14px 16px",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "12px",
                                     }}
                                 >
                                     <div
@@ -401,7 +405,6 @@ function TaskDetailPanel({ taskId, onClose }) {
                                             color: GREEN,
                                             letterSpacing: "1.5px",
                                             textTransform: "uppercase",
-                                            marginBottom: "8px",
                                             display: "flex",
                                             alignItems: "center",
                                             gap: "6px",
@@ -409,10 +412,19 @@ function TaskDetailPanel({ taskId, onClose }) {
                                     >
                                         <FileText size={12} /> Description / Comments
                                     </div>
-                                    <div
-                                        style={{ fontSize: "14px", color: "#000000", lineHeight: 1.7 }}
-                                        dangerouslySetInnerHTML={{ __html: task.description }}
-                                    />
+                                    {task.description && (
+                                        <div
+                                            style={{ fontSize: "14px", color: "#000000", lineHeight: 1.7 }}
+                                            dangerouslySetInnerHTML={{ __html: task.description }}
+                                        />
+                                    )}
+                                    {task.taskcomment && task.taskcomment.length > 0 && (
+                                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: task.description ? "8px" : "0", borderTop: task.description ? "1px dashed #000" : "none", paddingTop: task.description ? "8px" : "0" }}>
+                                            {task.taskcomment.map(comment => (
+                                                <div key={comment.id} style={{ fontSize: "14px", color: "#000000", lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: comment.data }} />
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div
@@ -559,75 +571,31 @@ function TaskDetailPanel({ taskId, onClose }) {
                                 </div>
                             )}
 
-                            {/* Due date / Created */}
+                            {/* Due date / Created / Created By */}
                             <div
                                 style={{
                                     display: "grid",
-                                    gridTemplateColumns: "1fr 1fr",
+                                    gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
                                     gap: "10px",
                                 }}
                             >
                                 {task.due_date && (
-                                    <div
-                                        style={{
-                                            background: "#f9fafb",
-                                            border: "1px solid #000000",
-                                            borderRadius: "0px",
-                                            padding: "10px 12px",
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                fontSize: "14px",
-                                                fontWeight: 700,
-                                                color: "#000000",
-                                                textTransform: "uppercase",
-                                                letterSpacing: "0.5px",
-                                                marginBottom: "3px",
-                                            }}
-                                        >
-                                            Due Date
-                                        </div>
-                                        <div
-                                            style={{
-                                                fontSize: "14px",
-                                                fontWeight: 700,
-                                                color: "#111827",
-                                            }}
-                                        >
-                                            {formatDate(task.due_date)}
-                                        </div>
+                                    <div style={{ background: "#f9fafb", border: "1px solid #000000", borderRadius: "0px", padding: "10px 12px" }}>
+                                        <div style={{ fontSize: "12px", fontWeight: 700, color: "#000000", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "3px" }}>Due Date</div>
+                                        <div style={{ fontSize: "14px", fontWeight: 700, color: "#111827" }}>{formatDate(task.due_date)}</div>
                                     </div>
                                 )}
-                                {task.createdAt && (
-                                    <div
-                                        style={{
-                                            background: "#f9fafb",
-                                            border: "1px solid #000000",
-                                            borderRadius: "0px",
-                                            padding: "10px 12px",
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                fontSize: "14px",
-                                                fontWeight: 700,
-                                                color: "#000000",
-                                                textTransform: "uppercase",
-                                                letterSpacing: "0.5px",
-                                                marginBottom: "3px",
-                                            }}
-                                        >
-                                            Created At
-                                        </div>
-                                        <div
-                                            style={{
-                                                fontSize: "14px",
-                                                fontWeight: 700,
-                                                color: "#111827",
-                                            }}
-                                        >
-                                            {formatDate(task.createdAt)}
+                                {(task.created_on || task.createdAt) && (
+                                    <div style={{ background: "#f9fafb", border: "1px solid #000000", borderRadius: "0px", padding: "10px 12px" }}>
+                                        <div style={{ fontSize: "12px", fontWeight: 700, color: "#000000", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "3px" }}>Created At</div>
+                                        <div style={{ fontSize: "14px", fontWeight: 700, color: "#111827" }}>{formatDate(task.created_on || task.createdAt)}</div>
+                                    </div>
+                                )}
+                                {task.credatedByUser && (
+                                    <div style={{ background: "#f9fafb", border: "1px solid #000000", borderRadius: "0px", padding: "10px 12px" }}>
+                                        <div style={{ fontSize: "12px", fontWeight: 700, color: "#000000", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "3px" }}>Created By</div>
+                                        <div style={{ fontSize: "14px", fontWeight: 700, color: "#111827", textTransform: "uppercase" }}>
+                                            {task.credatedByUser.firstName} {task.credatedByUser.lastName}
                                         </div>
                                     </div>
                                 )}
@@ -641,8 +609,275 @@ function TaskDetailPanel({ taskId, onClose }) {
     );
 }
 
+
+function calculateEPS(taskList) {
+    if (!taskList || taskList.length === 0) return { eps: 0, details: null };
+
+    let completedTasks = 0;
+    let overrunCount = 0;
+    let underutilizedCount = 0;
+    let reworkTasks = 0;
+    let flagsCount = 0;
+    let totalIdlePercent = 0;
+    let validSessionTasks = 0;
+
+    const completedStatuses = ["COMPLETED", "VALIDATE_COMPLETE", "COMPLETE_OTHER"];
+
+    taskList.forEach(t => {
+        const isCompleted = completedStatuses.includes(String(t.status).toUpperCase());
+        if (isCompleted) completedTasks++;
+
+        const allocated = t.allocationLog?.allocatedHours
+            ? parseTimeToDecimal(t.allocationLog.allocatedHours)
+            : parseFloat(t.hours) || 0;
+        const worked = calculateWorkedSeconds(t) / 3600;
+
+        if (isCompleted && worked > allocated && allocated > 0) overrunCount++;
+        if (isCompleted && worked < (allocated * 0.6) && allocated > 0) underutilizedCount++;
+
+        // Rework frequency 
+        const hasRework = String(t.status).toUpperCase() === "REWORK" || (t.workingHourTask || []).some(w => String(w.type).toUpperCase() === "REWORK");
+        if (hasRework) reworkTasks++;
+
+        // Time discipline flags
+        if (t.autoCloseActionTaken) flagsCount += 5;
+        if (t.workingHourTask && t.workingHourTask.length > 5) flagsCount += 1;
+
+        // Session quality
+        if (t.workingHourTask && t.workingHourTask.length > 0) {
+            const sessions = [...t.workingHourTask].sort((a, b) => new Date(a.started_at) - new Date(b.started_at));
+            const firstStart = new Date(sessions[0].started_at).getTime();
+            const lastEnd = sessions[sessions.length - 1].ended_at ? new Date(sessions[sessions.length - 1].ended_at).getTime() : new Date().getTime();
+            const wallTime = (lastEnd - firstStart) / 1000;
+            const activeTime = sessions.reduce((s, wh) => s + (Number(wh.duration_seconds) || 0), 0);
+            if (wallTime > 0 && activeTime > 0) {
+                const idle = Math.max(0, wallTime - activeTime);
+                const idlePct = idle / wallTime;
+                totalIdlePercent += idlePct;
+                validSessionTasks++;
+            }
+        }
+    });
+
+    const completionScore = taskList.length > 0 ? (completedTasks / taskList.length) * 100 : 0;
+    const overrunScore = completedTasks > 0 ? Math.max(0, 100 - ((overrunCount / completedTasks) * 100)) : 100;
+    const underutilizedScore = completedTasks > 0 ? Math.max(0, 100 - ((underutilizedCount / completedTasks) * 100)) : 100;
+    const reworkScore = taskList.length > 0 ? Math.max(0, 100 - ((reworkTasks / taskList.length) * 100)) : 100;
+    const disciplineScore = Math.max(0, 100 - flagsCount); 
+    const avgIdlePercentage = validSessionTasks > 0 ? totalIdlePercent / validSessionTasks : 0;
+    const sessionScore = Math.max(0, 100 - (avgIdlePercentage * 100));
+
+    const eps = (
+        completionScore * 0.25 +
+        overrunScore * 0.20 +
+        underutilizedScore * 0.10 +
+        reworkScore * 0.20 +
+        disciplineScore * 0.15 +
+        sessionScore * 0.10
+    );
+
+    return {
+        eps,
+        details: {
+            completionScore,
+            overrunScore,
+            underutilizedScore,
+            reworkScore,
+            disciplineScore,
+            sessionScore
+        }
+    };
+}
+
+function EPSDetailPanel({ empName, epsData, onClose }) {
+    if (!epsData) return null;
+    const { eps, details } = epsData;
+    
+    return createPortal(
+        <div style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", justifyContent: "flex-end" }} onClick={onClose}>
+            <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(2px)" }} />
+            <div
+                style={{
+                    position: "relative",
+                    width: "500px",
+                    maxWidth: "95vw",
+                    height: "100%",
+                    background: "#fff",
+                    boxShadow: "-8px 0 40px rgba(0,0,0,0.15)",
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
+                }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div style={{ background: "#f0fdf4", borderBottom: "1px solid #bbf7d0", padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{ background: "#16a34a", padding: "8px", display: "flex" }}>
+                            <Activity size={16} color="#fff" />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: "14px", color: "#16a34a", fontWeight: 800, letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: "2px" }}>
+                                Performance Overview
+                            </div>
+                            <div style={{ fontSize: "16px", fontWeight: 800, color: "#111827", textTransform: "uppercase" }}>
+                                {empName}
+                            </div>
+                        </div>
+                    </div>
+                    <button onClick={onClose} style={{ background: "#fee2e2", border: "1px solid #dc2626", padding: "6px", cursor: "pointer", display: "flex", borderRadius: "0px" }}>
+                        <X size={16} color="#dc2626" />
+                    </button>
+                </div>
+
+                <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px", display: "flex", flexDirection: "column", gap: "20px" }}>
+                    <div style={{ background: "#f9fafb", border: "1px solid #000", padding: "20px", textAlign: "center" }}>
+                        <div style={{ fontSize: "12px", fontWeight: 800, color: "#6b7280", textTransform: "uppercase", letterSpacing: "2px", marginBottom: "8px" }}>
+                            Overall EPS Score
+                        </div>
+                        <div style={{ fontSize: "48px", fontWeight: 900, color: "#111827", lineHeight: 1 }}>
+                            {eps.toFixed(1)}<span style={{ fontSize: "24px", color: "#9ca3af" }}>/100</span>
+                        </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
+                        <div style={{ fontSize: "14px", fontWeight: 800, color: "#111827", textTransform: "uppercase", borderBottom: "2px solid #000", paddingBottom: "8px", marginBottom: "4px" }}>
+                            Score Breakdown (6 Pillars)
+                        </div>
+                        
+                        {[
+                            { label: "Task Completion Rate", weight: "25%", score: details.completionScore, color: "#3b82f6" },
+                            { label: "Overrun Behavior", weight: "20%", score: details.overrunScore, color: "#ef4444" },
+                            { label: "Underutilization Behavior", weight: "10%", score: details.underutilizedScore, color: "#f59e0b" },
+                            { label: "Rework Frequency", weight: "20%", score: details.reworkScore, color: "#8b5cf6" },
+                            { label: "Time Discipline", weight: "15%", score: details.disciplineScore, color: "#14b8a6" },
+                            { label: "Session Quality", weight: "10%", score: details.sessionScore, color: "#ec4899" }
+                        ].map((pillar, idx) => (
+                            <div key={idx} style={{ background: "#fff", border: "1px solid #e5e7eb", padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <div style={{ fontSize: "13px", fontWeight: 700, color: "#374151", textTransform: "uppercase" }}>
+                                        {pillar.label} <span style={{ color: "#9ca3af", fontSize: "11px" }}>({pillar.weight})</span>
+                                    </div>
+                                    <div style={{ fontSize: "14px", fontWeight: 800, color: "#111827" }}>
+                                        {pillar.score.toFixed(1)}
+                                    </div>
+                                </div>
+                                <div style={{ width: "100%", height: "6px", background: "#f3f4f6", overflow: "hidden", borderRadius: "0px" }}>
+                                    <div style={{ width: `${Math.min(100, Math.max(0, pillar.score))}%`, height: "100%", background: pillar.color }} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+}
+
+/* ─── EPS Info Modal ─── */
+function EPSInfoModal({ onClose }) {
+    return createPortal(
+        <div style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", justifyContent: "flex-end", background: "rgba(0,0,0,0.5)" }} onClick={onClose}>
+            <div style={{ width: "800px", maxWidth: "90vw", background: "#fff", height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                <div style={{ background: "#eff6ff", borderBottom: "1px solid #bfdbfe", padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{ background: "#3b82f6", padding: "8px", display: "flex" }}>
+                            <Info size={16} color="#fff" />
+                        </div>
+                        <div style={{ fontSize: "16px", fontWeight: 800, color: "#111827", textTransform: "uppercase" }}>
+                            How we calculate EPS & TES
+                        </div>
+                    </div>
+                    <button onClick={onClose} style={{ background: "#fee2e2", border: "1px solid #dc2626", padding: "6px", cursor: "pointer", display: "flex" }}>
+                        <X size={16} color="#dc2626" />
+                    </button>
+                </div>
+                <div style={{ flex: 1, overflowY: "auto", padding: "30px", fontSize: "14px", lineHeight: "1.6", color: "#374151" }}>
+                    <h3 className="text-xl font-bold mb-4 text-black uppercase">EMPLOYEE PERFORMANCE SCORE (EPS) — Complete Overview</h3>
+                    <p className="mb-4">EPS ensures employees are evaluated only based on transparent, system-tracked data, NOT: <br/> ✘ Fake efficiency ✘ Manual edits ✘ Incorrect allocations ✘ Manager favoritism ✘ Subjective reviews</p>
+                    <p className="mb-4 font-bold text-black">EPS = Weighted score derived from 6 pillars.</p>
+                    
+                    <table className="w-full text-left border-collapse border border-gray-300 mb-8">
+                        <thead>
+                            <tr className="bg-gray-100 text-black">
+                                <th className="border border-gray-300 p-2 uppercase text-xs font-bold">Pillar</th>
+                                <th className="border border-gray-300 p-2 uppercase text-xs font-bold">Meaning</th>
+                                <th className="border border-gray-300 p-2 uppercase text-xs font-bold">Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td className="border border-gray-300 p-2">1. Task Completion Rate</td><td className="border border-gray-300 p-2">Completed vs assigned tasks</td><td className="border border-gray-300 p-2 font-bold">25%</td></tr>
+                            <tr><td className="border border-gray-300 p-2">2. Overrun Behavior</td><td className="border border-gray-300 p-2">Exceeding allocated hours</td><td className="border border-gray-300 p-2 font-bold">20%</td></tr>
+                            <tr><td className="border border-gray-300 p-2">3. Underutilization Behavior</td><td className="border border-gray-300 p-2">Finishing too fast (&lt;60% of time)</td><td className="border border-gray-300 p-2 font-bold">10%</td></tr>
+                            <tr><td className="border border-gray-300 p-2">4. Rework Frequency</td><td className="border border-gray-300 p-2">Number of tasks needing rework</td><td className="border border-gray-300 p-2 font-bold">20%</td></tr>
+                            <tr><td className="border border-gray-300 p-2">5. Time Discipline</td><td className="border border-gray-300 p-2">Forgot stop, auto-closings, breaks</td><td className="border border-gray-300 p-2 font-bold">15%</td></tr>
+                            <tr><td className="border border-gray-300 p-2">6. Session Quality</td><td className="border border-gray-300 p-2">Idle vs active time</td><td className="border border-gray-300 p-2 font-bold">10%</td></tr>
+                        </tbody>
+                    </table>
+                    
+                    <h4 className="text-lg font-bold mb-3 text-black uppercase">⭐ Final EPS Score Formula</h4>
+                    <pre className="bg-slate-100 border border-slate-300 p-4 rounded-none text-sm text-slate-800 font-mono mb-8 whitespace-pre-wrap">
+EPS =
+  completionScore * 0.25 +
+  overrunScore * 0.20 +
+  underutilizedScore * 0.10 +
+  reworkScore * 0.20 +
+  disciplineScore * 0.15 +
+  sessionScore * 0.10
+                    </pre>
+
+                    <h4 className="text-lg font-bold mb-3 text-black uppercase">⭐ EPS Interpretation</h4>
+                    <table className="w-full text-left border-collapse border border-gray-300 mb-8">
+                        <thead>
+                            <tr className="bg-gray-100 text-black"><th className="border border-gray-300 p-2 uppercase text-xs font-bold">Score</th><th className="border border-gray-300 p-2 uppercase text-xs font-bold">Meaning</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td className="border border-gray-300 p-2 font-bold">90–100</td><td className="border border-gray-300 p-2 text-green-600 font-bold uppercase">Outstanding performer</td></tr>
+                            <tr><td className="border border-gray-300 p-2 font-bold">75–89</td><td className="border border-gray-300 p-2 text-blue-600 font-bold uppercase">Strong and reliable</td></tr>
+                            <tr><td className="border border-gray-300 p-2 font-bold">60–74</td><td className="border border-gray-300 p-2 text-yellow-600 font-bold uppercase">Average — needs guidance</td></tr>
+                            <tr><td className="border border-gray-300 p-2 font-bold">40–59</td><td className="border border-gray-300 p-2 text-orange-600 font-bold uppercase">Needs improvement</td></tr>
+                            <tr><td className="border border-gray-300 p-2 font-bold">&lt; 40</td><td className="border border-gray-300 p-2 text-red-600 font-bold uppercase">Serious performance issue</td></tr>
+                        </tbody>
+                    </table>
+
+                    <hr className="my-8 border-gray-300" />
+                    
+                    <h3 className="text-xl font-bold mb-4 text-black uppercase">Team Efficiency Score (TES)</h3>
+                    <p className="mb-4">TES is a monthly team-level score (0..100) that combines employee execution quality and delivery outcomes.</p>
+                    <p className="mb-4 text-black"><strong>TES components:</strong><br/>
+                    • <b>avgEps</b>: average employee EPS of team members for the month.<br/>
+                    • <b>measScore</b>: average MEAS for the team manager across projects mapped to that team.<br/>
+                    • <b>onTimeCompletion</b>: percentage of completed tasks finished on/before due date.<br/>
+                    • <b>throughput</b>: completed-in-month tasks / assigned-in-month tasks.<br/>
+                    • <b>reworkRate</b>: percentage of completed tasks with rework segments.</p>
+
+                    <h4 className="text-lg font-bold mb-3 text-black uppercase">TES Formulas</h4>
+                    <pre className="bg-slate-100 border border-slate-300 p-4 rounded-none text-sm text-slate-800 font-mono whitespace-pre-wrap">
+When MEAS exists for the team context:
+TES = avgEps * 0.35 + measScore * 0.20 + onTimeCompletion * 0.20 + throughput * 0.15 + reworkScore * 0.10
+
+When MEAS is unavailable:
+TES = avgEps * 0.40 + onTimeCompletion * 0.25 + throughput * 0.20 + reworkScore * 0.15
+                    </pre>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+}
+
 /* ─── Main Component ─── */
 export default function MeasDashboard({ projectId, tasks = [], view, setView }) {
+    const userRole = useSelector((state) => state.auth?.user?.role || "");
+    const canViewEPS = ["admin", "deputy_manager", "human_resource", "operation_executive"].includes(String(userRole).toLowerCase());
+    
+    const [searchQuery, setSearchQuery] = useState("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [taskSortOrder, setTaskSortOrder] = useState("newest");
+    const [selectedEPSEmp, setSelectedEPSEmp] = useState(null);
+    const [showEPSInfo, setShowEPSInfo] = useState(false);
+
     const [selectedTaskId, setSelectedTaskId] = useState(null);
     const [expandedEmployees, setExpandedEmployees] = useState({});
 
@@ -654,8 +889,15 @@ export default function MeasDashboard({ projectId, tasks = [], view, setView }) 
     };
 
     const projectTasks = useMemo(() => {
-        return tasks.filter((t) => t.project_id === projectId);
-    }, [tasks, projectId]);
+        let pt = tasks.filter((t) => t.project_id === projectId);
+        if (startDate) {
+            pt = pt.filter(t => new Date(t.created_on) >= new Date(startDate));
+        }
+        if (endDate) {
+            pt = pt.filter(t => new Date(t.created_on) <= new Date(endDate + 'T23:59:59.999Z'));
+        }
+        return pt;
+    }, [tasks, projectId, startDate, endDate]);
 
     const overallMEAS = useMemo(() => getMEAS(projectTasks), [projectTasks]);
 
@@ -674,6 +916,7 @@ export default function MeasDashboard({ projectId, tasks = [], view, setView }) 
                     (t) => `${t.user?.firstName} ${t.user?.lastName}` === emp,
                 );
                 const meas = getMEAS(empTasks);
+                const epsData = calculateEPS(empTasks);
                 const totalAllocated = empTasks.reduce((s, t) => {
                     const hours = t.allocationLog?.allocatedHours
                         ? parseTimeToDecimal(t.allocationLog.allocatedHours)
@@ -685,10 +928,15 @@ export default function MeasDashboard({ projectId, tasks = [], view, setView }) 
                     0,
                 );
                 const overrun = totalWorked > totalAllocated;
-                return { name: emp, tasks: empTasks, meas, totalAllocated, totalWorked, overrun };
+                return { name: emp, tasks: empTasks, meas, epsData, totalAllocated, totalWorked, overrun };
             })
             .sort((a, b) => b.meas - a.meas);
     }, [employees, projectTasks]);
+
+    const filteredEmployeeStats = useMemo(() => {
+        if (!searchQuery) return employeeStats;
+        return employeeStats.filter(emp => emp.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    }, [employeeStats, searchQuery]);
 
     const taskScores = useMemo(() => {
         return projectTasks.map((t) => {
@@ -724,11 +972,64 @@ export default function MeasDashboard({ projectId, tasks = [], view, setView }) 
                 />
 
 
+            {selectedEPSEmp && (
+                <EPSDetailPanel 
+                    empName={selectedEPSEmp.name}
+                    epsData={selectedEPSEmp.epsData}
+                    onClose={() => setSelectedEPSEmp(null)}
+                />
+            )}
+            {showEPSInfo && <EPSInfoModal onClose={() => setShowEPSInfo(false)} />}
             <div style={{ padding: "28px 36px", background: "#f9fafb" }}>
                 {/* BY EMPLOYEE */}
                 {view === "by employee" && (
                     <div className="space-y-4">
-                        {employeeStats.map((emp) => {
+                        <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+                            <div className="relative flex-1 w-full">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Search className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input
+                                    type="text"
+                                    className="block w-full pl-10 pr-3 py-2 border border-black rounded-none leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm transition duration-150 ease-in-out uppercase tracking-wide"
+                                    placeholder="Search employees..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                {canViewEPS && (
+                                    <button 
+                                        onClick={() => setShowEPSInfo(true)}
+                                        className="border border-blue-600 text-blue-700 bg-blue-50 px-3 py-2 flex items-center gap-2 text-sm uppercase font-bold hover:bg-blue-100 transition-colors"
+                                    >
+                                        <Info size={16} /> How is this calculated?
+                                    </button>
+                                )}
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="border border-black px-3 py-2 text-sm uppercase bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                                />
+                                <span className="font-bold text-gray-500">to</span>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    className="border border-black px-3 py-2 text-sm uppercase bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                                />
+                                <select 
+                                    value={taskSortOrder} 
+                                    onChange={(e) => setTaskSortOrder(e.target.value)}
+                                    className="border border-black px-3 py-2 text-sm uppercase bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:ml-2 mt-2 sm:mt-0"
+                                >
+                                    <option value="newest">Newest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                </select>
+                            </div>
+                        </div>
+                        {filteredEmployeeStats.map((emp) => {
                             const isExpanded = !!expandedEmployees[emp.name];
                             const statusColor = getMEASColor(emp.meas);
                             const statusLabel = getMEASLabel(emp.meas);
@@ -764,9 +1065,19 @@ export default function MeasDashboard({ projectId, tasks = [], view, setView }) 
                                             </div>
 
                                             {/* Employee Name */}
-                                            <h4 className="text-base font-semibold text-black uppercase tracking-wider mb-2">
-                                                {emp.name}
-                                            </h4>
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <h4 className="text-base font-semibold text-black uppercase tracking-wider">
+                                                    {emp.name}
+                                                </h4>
+                                                {canViewEPS && (
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setSelectedEPSEmp(emp); }}
+                                                        className="flex items-center gap-1 text-[10px] px-2 py-1 bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 uppercase font-bold tracking-wider rounded-none transition-colors"
+                                                    >
+                                                        <BarChart2 size={12} /> View EPS
+                                                    </button>
+                                                )}
+                                            </div>
 
                                             {/* Info & Progress bar */}
                                             <div className="flex flex-wrap items-center gap-6">
@@ -814,7 +1125,11 @@ export default function MeasDashboard({ projectId, tasks = [], view, setView }) 
 
                                                 {/* Task Rows */}
                                                 <div className="divide-y divide-black/10">
-                                                    {emp.tasks.map((t) => {
+                                                    {[...emp.tasks].sort((a, b) => {
+                                                        const dateA = new Date(a.created_on || 0).getTime();
+                                                        const dateB = new Date(b.created_on || 0).getTime();
+                                                        return taskSortOrder === "newest" ? dateB - dateA : dateA - dateB;
+                                                    }).map((t) => {
                                                         const allocated = t.allocationLog?.allocatedHours
                                                             ? parseTimeToDecimal(t.allocationLog.allocatedHours)
                                                             : parseFloat(t.hours) || 0;
@@ -828,12 +1143,15 @@ export default function MeasDashboard({ projectId, tasks = [], view, setView }) 
                                                         return (
                                                             <div
                                                                 key={t.id}
+                                                                className="flex flex-col border-b border-black/10 hover:bg-gray-50/50 transition-colors cursor-pointer"
                                                                 onClick={() => setSelectedTaskId(t.id)}
-                                                                className="grid grid-cols-7 gap-4 p-4 hover:bg-gray-50/50 transition-colors cursor-pointer items-center text-sm font-normal text-black"
                                                             >
+                                                              <div className="grid grid-cols-7 gap-4 p-4 items-center text-sm font-normal text-black">
                                                                 <div className="col-span-2">
                                                                     <p className="font-normal text-black truncate">{t.name || "—"}</p>
-                                                                    <p className="text-xs text-black/60 uppercase mt-0.5">{t.wbsType || "Task"}</p>
+                                                                    <p className="text-xs text-black/60 uppercase mt-0.5">
+                                                                        {t.wbsType || "Task"} {t.created_on ? ` • ${new Date(t.created_on).toLocaleDateString()}` : ""}
+                                                                    </p>
                                                                 </div>
                                                                 <div className="text-right">{allocated.toFixed(2)}h</div>
                                                                 <div className="text-right font-normal">{worked.toFixed(2)}h</div>
@@ -866,6 +1184,7 @@ export default function MeasDashboard({ projectId, tasks = [], view, setView }) 
                                                                         {t.status}
                                                                     </span>
                                                                 </div>
+                                                              </div>
                                                             </div>
                                                         );
                                                     })}

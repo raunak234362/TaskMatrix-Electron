@@ -17,7 +17,7 @@ import Service from "../../api/Service";
 import Input from "../fields/input";
 import Button from "../fields/Button";
 import Select from "../fields/Select";
-import SectionTitle from "../ui/SectionTitle"; 
+import SectionTitle from "../ui/SectionTitle";
 import RichTextEditor from "../fields/RichTextEditor";
 
 import { setProjectData, updateProject } from "../../store/projectSlice";
@@ -51,6 +51,7 @@ const AddTask = () => {
   const [bundles, setBundles] = useState([]);
   const [projectSubmittals, setProjectSubmittals] = useState([]);
   const [overdueEmployees, setOverdueEmployees] = useState({});
+  const [projectTeamMemberIds, setProjectTeamMemberIds] = useState([]);
 
   const dispatch = useDispatch();
   const projects = useSelector(
@@ -161,6 +162,37 @@ const AddTask = () => {
     dispatch,
     setValue,
   ]);
+
+  // Fetch Project Team Members to limit assignee dropdown
+  useEffect(() => {
+    const teamId = selectedProject?.teamID || selectedProject?.team?.id;
+    if (selectedProjectId && teamId) {
+      Service.GetTeamByID(teamId)
+        .then((res) => {
+          let teamData = res?.data || res;
+          if (teamData?.data) {
+            teamData = teamData.data;
+          }
+          const memberIds = [];
+          if (teamData?.manager?.id) memberIds.push(teamData.manager.id);
+          else if (teamData?.managerID) memberIds.push(teamData.managerID);
+
+          if (teamData?.members && Array.isArray(teamData.members)) {
+            teamData.members.forEach((m) => {
+              if (m.userId) memberIds.push(m.userId);
+              else if (m.member?.id) memberIds.push(m.member.id);
+            });
+          }
+          setProjectTeamMemberIds(memberIds);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch team members", err);
+          setProjectTeamMemberIds([]);
+        });
+    } else {
+      setProjectTeamMemberIds([]);
+    }
+  }, [selectedProjectId, selectedProject?.teamID, selectedProject?.team?.id]);
 
   // Fetch tasks for the selected project to calculate remaining hours
   useEffect(() => {
@@ -376,49 +408,73 @@ const AddTask = () => {
           const res = await Service.GetAllTaskByUserID(empId);
           const tasks = Array.isArray(res) ? res : (res?.data || []);
           const now = new Date();
-          // IN_REVIEW is intentionally excluded from completedStatuses so those tasks
-          // still count toward elapsed time, but they do NOT block on their own.
           const completedStatuses = ["VALIDATE_COMPLETE", "COMPLETE_OTHER", "WRONG_ALLOCATION", "ABSENT", "USER_FAULT"];
-          
-          const hasOverdue = tasks.some(task => {
-            if (completedStatuses.includes(String(task.status).toUpperCase())) return false;
-            // IN_REVIEW tasks are fine — skip them for the overdue block check
-            if (String(task.status).toUpperCase() === "IN_REVIEW") return false;
-            
-            const taskDate = task.created_at || task.createdAt;
-            if (!taskDate) return false;
-            
-            const createdAt = new Date(taskDate);
-            if (isNaN(createdAt.getTime())) return false;
-            
-            let current = new Date(createdAt);
+
+          let overdueType = false;
+          for (const task of tasks) {
+            if (completedStatuses.includes(String(task.status).toUpperCase())) continue;
+
+            const taskStatus = String(task.status).toUpperCase();
+            let referenceDateStr;
+            let isReview = false;
+
+            if (taskStatus === "IN_REVIEW") {
+              isReview = true;
+              if (task.workingHourTask && Array.isArray(task.workingHourTask) && task.workingHourTask.length > 0) {
+                const sortedWork = [...task.workingHourTask]
+                  .filter(w => w.ended_at || w.updated_at)
+                  .sort((a, b) => {
+                    const dateA = new Date(a.ended_at || a.updated_at).getTime();
+                    const dateB = new Date(b.ended_at || b.updated_at).getTime();
+                    return dateA - dateB;
+                  });
+                if (sortedWork.length > 0) {
+                  const lastWork = sortedWork[sortedWork.length - 1];
+                  referenceDateStr = lastWork.ended_at || lastWork.updated_at;
+                }
+              }
+              if (!referenceDateStr) {
+                referenceDateStr = task.updatedAt || task.updated_at || task.created_at || task.createdAt;
+              }
+            } else {
+              referenceDateStr = task.created_at || task.createdAt;
+            }
+
+            if (!referenceDateStr) continue;
+
+            const refDate = new Date(referenceDateStr);
+            if (isNaN(refDate.getTime())) continue;
+
+            let current = new Date(refDate);
             let totalMs = 0;
-            
+
             while (current < now) {
               let nextDay = new Date(current);
               nextDay.setDate(nextDay.getDate() + 1);
               nextDay.setHours(0, 0, 0, 0);
               let stepEnd = nextDay < now ? nextDay : now;
-              
-              // Only count weekdays (Mon–Fri), skip Saturday (6) and Sunday (0)
+
               if (current.getDay() !== 0 && current.getDay() !== 6) {
                 totalMs += (stepEnd - current);
               }
               current = stepEnd;
             }
-            
-            const totalHours = totalMs / (1000 * 60 * 60);
-            return totalHours > 24;
-          });
 
-          setOverdueEmployees((prev) => ({ ...prev, [empId]: hasOverdue ? "OVERDUE" : false }));
+            const totalHours = totalMs / (1000 * 60 * 60);
+            if (totalHours > 24) {
+              overdueType = isReview ? "REVIEW_OVERDUE" : "OVERDUE";
+              break;
+            }
+          }
+
+          setOverdueEmployees((prev) => ({ ...prev, [empId]: overdueType }));
         } catch (err) {
           console.error("Error checking employee tasks:", err);
         }
       }
     });
   }, [assignments, overdueEmployees]);
-  
+
   const hasAnyOverdue = assignments.some(a => a.employeeId && overdueEmployees[a.employeeId]);
 
   const onSubmit = async (data) => {
@@ -438,41 +494,70 @@ const AddTask = () => {
           const tasks = Array.isArray(res) ? res : (res?.data || []);
           const now = new Date();
           const completedStatuses = ["VALIDATE_COMPLETE", "COMPLETE_OTHER", "WRONG_ALLOCATION", "ABSENT", "USER_FAULT"];
-          
-          const hasOverdue = tasks.some(task => {
-            if (completedStatuses.includes(String(task.status).toUpperCase())) return false;
-            // IN_REVIEW tasks are acceptable — they do not block new assignments
-            if (String(task.status).toUpperCase() === "IN_REVIEW") return false;
-            
-            const taskDate = task.created_at || task.createdAt;
-            if (!taskDate) return false;
-            
-            const createdAt = new Date(taskDate);
-            if (isNaN(createdAt.getTime())) return false;
-            
-            let current = new Date(createdAt);
+
+          let overdueType = false;
+          for (const task of tasks) {
+            if (completedStatuses.includes(String(task.status).toUpperCase())) continue;
+
+            const taskStatus = String(task.status).toUpperCase();
+            let referenceDateStr;
+            let isReview = false;
+
+            if (taskStatus === "IN_REVIEW") {
+              isReview = true;
+              if (task.workingHourTask && Array.isArray(task.workingHourTask) && task.workingHourTask.length > 0) {
+                const sortedWork = [...task.workingHourTask]
+                  .filter(w => w.ended_at || w.updated_at)
+                  .sort((a, b) => {
+                    const dateA = new Date(a.ended_at || a.updated_at).getTime();
+                    const dateB = new Date(b.ended_at || b.updated_at).getTime();
+                    return dateA - dateB;
+                  });
+                if (sortedWork.length > 0) {
+                  const lastWork = sortedWork[sortedWork.length - 1];
+                  referenceDateStr = lastWork.ended_at || lastWork.updated_at;
+                }
+              }
+              if (!referenceDateStr) {
+                referenceDateStr = task.updatedAt || task.updated_at || task.created_at || task.createdAt;
+              }
+            } else {
+              referenceDateStr = task.created_at || task.createdAt;
+            }
+
+            if (!referenceDateStr) continue;
+
+            const refDate = new Date(referenceDateStr);
+            if (isNaN(refDate.getTime())) continue;
+
+            let current = new Date(refDate);
             let totalMs = 0;
-            
+
             while (current < now) {
               let nextDay = new Date(current);
               nextDay.setDate(nextDay.getDate() + 1);
               nextDay.setHours(0, 0, 0, 0);
               let stepEnd = nextDay < now ? nextDay : now;
-              
-              // Skip Saturday (6) and Sunday (0)
+
               if (current.getDay() !== 0 && current.getDay() !== 6) {
                 totalMs += (stepEnd - current);
               }
               current = stepEnd;
             }
-            
-            const totalHours = totalMs / (1000 * 60 * 60);
-            return totalHours > 24;
-          });
 
-          if (hasOverdue) {
+            const totalHours = totalMs / (1000 * 60 * 60);
+            if (totalHours > 24) {
+              overdueType = isReview ? "REVIEW_OVERDUE" : "OVERDUE";
+              break;
+            }
+          }
+
+          if (overdueType) {
             const empName = employees.find(e => e.id === assignment.employeeId)?.firstName || "This employee";
-            toast.error(`${empName} has incomplete tasks older than 24 working hours. Cannot assign new tasks.`);
+            const msg = overdueType === "REVIEW_OVERDUE"
+              ? `${empName} has tasks in review for more than 24 working hours. Cannot assign new tasks.`
+              : `${empName} has incomplete tasks older than 24 working hours. Cannot assign new tasks.`;
+            toast.error(msg);
             setIsSubmitting(false);
             return;
           }
@@ -530,10 +615,10 @@ const AddTask = () => {
 
       const results = await Promise.all(promises);
 
-      const hasError = results.some(res => 
-        !res || 
-        res.success === false || 
-        res.status === false || 
+      const hasError = results.some(res =>
+        !res ||
+        res.success === false ||
+        res.status === false ||
         res.status === "error" ||
         res.error
       );
@@ -653,7 +738,12 @@ const AddTask = () => {
       // Hide inactive employees
       const isActive = e.isActive === true || e.isActive === "true" || e.isActive === 1 || String(e.isActive).toUpperCase() === 'ACTIVE' || String(e.status).toUpperCase() === 'ACTIVE';
       if (e.isActive !== undefined && !isActive) return false;
-      
+
+      // Only show employees that belong to the project team (if a team is assigned)
+      if (projectTeamMemberIds.length > 0) {
+        if (!projectTeamMemberIds.includes(e.id)) return false;
+      }
+
       return true;
     })
     .map((e) => ({
@@ -1110,6 +1200,12 @@ const AddTask = () => {
                                           <div className="flex items-center gap-1 text-[10px] text-red-600 uppercase">
                                             <AlertCircle className="w-3 h-3" />
                                             Has overdue tasks ({">"}24h)
+                                          </div>
+                                        )}
+                                        {employeeError === "REVIEW_OVERDUE" && (
+                                          <div className="flex items-center gap-1 text-[10px] text-red-600 uppercase">
+                                            <AlertCircle className="w-3 h-3" />
+                                            Has tasks in review {">"}24h
                                           </div>
                                         )}
                                         {employeeError === "IN_REVIEW" && (
