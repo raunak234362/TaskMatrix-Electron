@@ -19,9 +19,11 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
   const [cdEngineers, setCdEngineers] = useState([])
   const [fetchingEngineers, setFetchingEngineers] = useState(false)
   const [isCDMode, setIsCDMode] = useState(false)
+  const [approving, setApproving] = useState(false)
 
   const userRole = sessionStorage.getItem('userRole')?.toUpperCase()
   const canUpdateMilestone = ['ADMIN', 'OPERATION_EXECUTIVE', 'DEPUTY_MANAGER'].includes(userRole)
+  const canApprove = ['PROJECT_MANAGER', 'OPERATION_EXECUTIVE', 'DEPT_MANAGER', 'DEPUTY_MANAGER', 'ADMIN'].includes((sessionStorage.getItem('userRole') || '').toUpperCase().trim())
 
   const [milestones, setMilestones] = useState([])
   const [fetchingMilestones, setFetchingMilestones] = useState(false)
@@ -219,6 +221,22 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
     }
   }
 
+  const handleApprove = async () => {
+    try {
+      setApproving(true)
+      setError(null)
+      await Service.updateSubmittalById(submittal.id, { isAproovedByAdmin: true })
+      toast.success('Submittal approved successfully!')
+      onSuccess?.()
+      onClose()
+    } catch (err) {
+      console.error('Approve submittal failed:', err)
+      setError(err?.response?.data?.message || 'Failed to approve submittal. Please try again.')
+    } finally {
+      setApproving(false)
+    }
+  }
+
   const handleSubmit = async () => {
     if (!subject.trim()) {
       setError('Subject is required.')
@@ -305,9 +323,8 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                 setMultipleRecipients([]) // Clear selection when switching modes
                 setSelectedMileStoneIds([]) // Clear milestone selection when switching modes
               }}
-              className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${
-                !isCDMode ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'
-              }`}
+              className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${!isCDMode ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'
+                }`}
             >
               Client
             </button>
@@ -318,9 +335,8 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                 setMultipleRecipients([]) // Clear selection when switching modes
                 setSelectedMileStoneIds([]) // Clear milestone selection when switching modes
               }}
-              className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${
-                isCDMode ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'
-              }`}
+              className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${isCDMode ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'
+                }`}
             >
               Connection Designer
             </button>
@@ -439,12 +455,11 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
             <button
               type="button"
               onClick={handleSaveMilestoneOnly}
-              disabled={savingMilestone || submitting}
-              className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${
-                savingMilestone || submitting
+              disabled={savingMilestone || submitting || approving}
+              className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${savingMilestone || submitting || approving
                   ? 'bg-gray-100 text-black/20 cursor-not-allowed'
                   : 'bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-400 active:scale-95'
-              }`}
+                }`}
             >
               {savingMilestone ? (
                 <>
@@ -459,15 +474,37 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
               )}
             </button>
           )}
+          {canApprove && !submittal?.isAproovedByAdmin && (
+            <button
+              type="button"
+              onClick={handleApprove}
+              disabled={approving || submitting || savingMilestone}
+              className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${approving || submitting || savingMilestone
+                  ? 'bg-gray-100 text-black/20 cursor-not-allowed'
+                  : 'bg-green-50 hover:bg-green-100 text-green-800 border border-green-400 active:scale-95'
+                }`}
+            >
+              {approving ? (
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Approving...
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  Approve
+                </>
+              )}
+            </button>
+          )}
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={submitting || savingMilestone}
-            className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${
-              submitting || savingMilestone
+            disabled={submitting || savingMilestone || approving}
+            className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${submitting || savingMilestone
                 ? 'bg-gray-100 text-black/20 cursor-not-allowed'
                 : 'bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black active:scale-95'
-            }`}
+              }`}
           >
             {submitting ? (
               <>

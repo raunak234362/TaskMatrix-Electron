@@ -539,6 +539,7 @@ const GetProjectById = ({ id, onClose }) => {
                     'project_manager',
                     'deputy_manager',
                     'client',
+                    'staff',
                     'client_admin',
                     'operation_executive',
                     'connection_designer_engineer',

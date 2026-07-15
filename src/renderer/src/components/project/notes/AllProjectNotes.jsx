@@ -153,6 +153,7 @@ const AllProjectNotes = ({ projectId, project }) => {
         "deputy_manager",
         "client",
         "client_admin",
+        "staff",
         "project_manager_officer",
         "operation_executive",
         "estimation_head",
@@ -171,6 +172,7 @@ const AllProjectNotes = ({ projectId, project }) => {
         // Admin, internal staff, and Client Admins see everything for the project
         const hasFullAccess = [
             "admin",
+            "staff",
             "project_manager",
             "deputy_manager",
             "project_manager_officer",
@@ -261,12 +263,14 @@ const AllProjectNotes = ({ projectId, project }) => {
                     </button>
                 </div>
 
-                <button
-                    onClick={() => setShowAddModal(true)}
-                    className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
-                >
-                    + Add New Note
-                </button>
+                {userRole !== "staff" && (
+                    <button
+                        onClick={() => setShowAddModal(true)}
+                        className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
+                    >
+                        + Add New Note
+                    </button>
+                )}
             </div>
 
             {cdFilteredNotes.length === 0 ? (
@@ -352,21 +356,23 @@ const AllProjectNotes = ({ projectId, project }) => {
                                     </div>
 
                                     <div className="flex items-center gap-2 shrink-0 ml-3">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDelete(note.id);
-                                            }}
-                                            disabled={deletingId === note.id}
-                                            className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors"
-                                            title="Delete note"
-                                        >
-                                            {deletingId === note.id ? (
-                                                <Loader2 size={14} className="animate-spin" />
-                                            ) : (
-                                                <Trash2 size={14} />
-                                            )}
-                                        </button>
+                                        {userRole !== "staff" && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDelete(note.id);
+                                                }}
+                                                disabled={deletingId === note.id}
+                                                className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors"
+                                                title="Delete note"
+                                            >
+                                                {deletingId === note.id ? (
+                                                    <Loader2 size={14} className="animate-spin" />
+                                                ) : (
+                                                    <Trash2 size={14} />
+                                                )}
+                                            </button>
+                                        )}
                                         {isExpanded ? (
                                             <ChevronUp size={16} className="text-gray-400" />
                                         ) : (
@@ -412,12 +418,14 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                     <span className="w-1.5 h-1.5 bg-[#6bbd45] rounded-full"></span>
                                                     Responses
                                                 </h4>
-                                                <button
-                                                    onClick={() => setShowResponseModal(note.id)}
-                                                    className="px-4 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-normal text-sm uppercase tracking-tight shadow-sm cursor-pointer"
-                                                >
-                                                    + Add Response
-                                                </button>
+                                                {userRole !== "staff" && (
+                                                    <button
+                                                        onClick={() => setShowResponseModal(note.id)}
+                                                        className="px-4 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-normal text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+                                                    >
+                                                        + Add Response
+                                                    </button>
+                                                )}
                                             </div>
 
                                             {note.responses && note.responses.length > 0 ? (
@@ -461,7 +469,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                                     </span>
                                                                 ),
                                                             },
-                                                            {
+                                                            ...(userRole !== "staff" ? [{
                                                                 id: "actions",
                                                                 header: "Actions",
                                                                 cell: ({ row }) => (
@@ -476,7 +484,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                                         <Trash2 size={14} />
                                                                     </button>
                                                                 ),
-                                                            },
+                                                            }] : []),
                                                         ]}
                                                         data={note.responses?.filter(r => !r.parentResponseId) || []}
                                                         detailComponent={({ row }) => {
@@ -497,16 +505,18 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                                                     </span>
                                                                                     <div className="flex items-center gap-2">
                                                                                         <span className="text-sm font-normal text-black">{formatDateTime(reply.createdAt)}</span>
-                                                                                        <button
-                                                                                            onClick={(e) => {
-                                                                                                e.stopPropagation();
-                                                                                                handleDeleteResponse(reply.id, note.id);
-                                                                                            }}
-                                                                                            className="p-1 rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors"
-                                                                                            title="Delete reply"
-                                                                                        >
-                                                                                            <Trash2 size={10} />
-                                                                                        </button>
+                                                                                        {userRole !== "staff" && (
+                                                                                            <button
+                                                                                                onClick={(e) => {
+                                                                                                    e.stopPropagation();
+                                                                                                    handleDeleteResponse(reply.id, note.id);
+                                                                                                }}
+                                                                                                className="p-1 rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors"
+                                                                                                title="Delete reply"
+                                                                                            >
+                                                                                                <Trash2 size={10} />
+                                                                                            </button>
+                                                                                        )}
                                                                                     </div>
                                                                                 </div>
                                                                                 <div
@@ -519,10 +529,10 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                                 </div>
                                                             );
                                                         }}
-                                                        onRowClick={(row) => {
+                                                        onRowClick={userRole !== "staff" ? ((row) => {
                                                             setSelectedResponse(row);
                                                             setActiveNoteId(note.id);
-                                                        }}
+                                                        }) : undefined}
                                                         pageSizeOptions={[5, 10]}
                                                     />
                                                 </div>

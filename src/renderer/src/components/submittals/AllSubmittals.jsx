@@ -114,7 +114,11 @@ const AllSubmittals = ({ submittalData, projectId }) => {
       accessorKey: 'status',
       header: 'Status',
       cell: ({ row }) => {
-        const status = row.original.wbtStatus || row.original.status || 'PENDING'
+        let status = row.original.wbtStatus || row.original.status || 'PENDING'
+        
+        if (row.original.isAproovedByAdmin === false) {
+          status = 'NOT_APPROVED'
+        }
 
         const STATUS_LABELS = {
           WAITING_FOR_BFA: 'Waiting for BFA',

@@ -332,12 +332,22 @@ const GetSubmittalByID = ({ id, onClose }) => {
                       }
                     />
 
+                    {submittal.approvedBy && (
+                      <Info
+                        label={submittal.isAproovedByAdmin === false ? "Rejected By" : "Approved By"}
+                        value={`${submittal.approvedBy.firstName ?? ''} ${submittal.approvedBy.lastName ?? ''}`.trim()}
+                      />
+                    )}
+
                     <div className="flex items-center pb-2 border-b border-gray-200 text-sm gap-2">
                       <span className="font-semibold text-black uppercase tracking-wider shrink-0">
                         Status:
                       </span>
                       {(() => {
-                        const status = submittal.wbtStatus || submittal.status || 'PENDING'
+                        let status = submittal.wbtStatus || submittal.status || 'PENDING'
+                        if (submittal.isAproovedByAdmin === false) {
+                          status = 'NOT_APPROVED'
+                        }
                         const STATUS_LABELS = {
                           WAITING_FOR_BFA: 'Waiting for BFA',
                           BFA_RECEIVED: 'BFA RECEIVED',
