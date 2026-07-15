@@ -216,6 +216,15 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
   const onSubmit = async (data) => {
     try {
       setLoading(true);
+      const userRoleStr = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+      const autoApproveRoles = [
+        "admin",
+        "deputy_manager",
+        "dept_manager",
+        "operation_executive",
+        "project_manager"
+      ];
+
       const payload = {
         ...data,
         fabricator_id: fabricatorId,
@@ -223,6 +232,7 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
         isConnectionDesign: isCDMode,
         description,
         files,
+        isAproovedByAdmin: autoApproveRoles.includes(userRoleStr),
       };
 
       const formData = new FormData();

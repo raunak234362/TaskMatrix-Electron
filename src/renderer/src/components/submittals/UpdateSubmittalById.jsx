@@ -256,6 +256,18 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
       formData.append('subject', subject)
       formData.append('description', description)
       formData.append('isConnectionDesign', String(isCDMode))
+
+      const userRoleStr = sessionStorage.getItem('userRole')?.toLowerCase() || ''
+      const autoApproveRoles = [
+        'admin',
+        'deputy_manager',
+        'dept_manager',
+        'operation_executive',
+        'project_manager'
+      ]
+      if (autoApproveRoles.includes(userRoleStr)) {
+        formData.append('isAproovedByAdmin', 'true')
+      }
       if (files && files.length > 0) {
         files.forEach((f) => formData.append('files', f))
       }
