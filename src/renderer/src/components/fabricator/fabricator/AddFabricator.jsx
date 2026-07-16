@@ -42,6 +42,11 @@ const AddFabricator = () => {
           "paymenTDueDate",
           String(parseFloat(String(data.paymenTDueDate))),
         );
+      if (data.COPerHourPrice !== undefined)
+        formData.append(
+          "COPerHourPrice",
+          String(parseFloat(String(data.COPerHourPrice))),
+        );
       if (data.fabricatPercentage !== undefined)
         formData.append(
           "fabricatPercentage",
@@ -186,6 +191,19 @@ const AddFabricator = () => {
                 label=""
                 type="number"
                 {...register("paymenTDueDate", { valueAsNumber: true })}
+                placeholder="0"
+                className="w-full border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-semibold mb-1">
+                CO Per Hour Price
+              </label>
+              <Input
+                label=""
+                type="number"
+                step="0.01"
+                {...register("COPerHourPrice", { valueAsNumber: true })}
                 placeholder="0"
                 className="w-full border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
               />

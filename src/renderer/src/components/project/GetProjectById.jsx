@@ -523,7 +523,6 @@ const GetProjectById = ({ id, onClose }) => {
                   userRole === 'staff' &&
                   [
                     'wbs',
-                    'changeOrder',
                     'milestones',
                     'analytics',
                     'teamAnalytics',
@@ -1462,7 +1461,7 @@ const GetProjectById = ({ id, onClose }) => {
                 )}
               </div>
             )}
-            {activeTab === 'changeOrder' && (userRole !== 'staff' || isAssist) && (
+            {activeTab === 'changeOrder' && (
               <div className="space-y-4">
                 {/* Sub-tabs for RFI */}
                 <div className="flex justify-start mb-4">

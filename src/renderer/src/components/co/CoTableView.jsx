@@ -1,7 +1,10 @@
 
-const EDITABLE_COLS = ["description", "referenceDoc", "elements", "QtyNo", "hours", "cost", "remarks"];
+const getCols = (canSeeCost) => canSeeCost
+  ? ["description", "referenceDoc", "elements", "QtyNo", "hours", "cost", "remarks"]
+  : ["description", "referenceDoc", "elements", "QtyNo", "hours", "remarks"];
 
-const CoTableView = ({ rows }) => {
+const CoTableView = ({ rows, canSeeCost = true }) => {
+  const activeCols = getCols(canSeeCost);
   const normalizedRows = rows.map((r) => ({
     ...r,
     QtyNo: r.QtyNo === -999999 ? "_MERGED_LEFT_" : r.QtyNo === -999998 ? "_MERGED_UP_" : r.QtyNo,
@@ -13,20 +16,20 @@ const CoTableView = ({ rows }) => {
   const cellSpans = [];
   for (let r = 0; r < normalizedRows.length; r++) {
     const rowSpans = [];
-    for (let c = 0; c < EDITABLE_COLS.length; c++) {
+    for (let c = 0; c < activeCols.length; c++) {
       rowSpans.push({ rowSpan: 1, colSpan: 1, isSpanned: false });
     }
     cellSpans.push(rowSpans);
   }
 
   for (let r = 0; r < normalizedRows.length; r++) {
-    for (let c = 0; c < EDITABLE_COLS.length; c++) {
+    for (let c = 0; c < activeCols.length; c++) {
       if (cellSpans[r]?.[c]?.isSpanned) continue;
 
       let colSpan = 1;
       let nextCol = c + 1;
-      while (nextCol < EDITABLE_COLS.length) {
-        const fieldName = EDITABLE_COLS[nextCol];
+      while (nextCol < activeCols.length) {
+        const fieldName = activeCols[nextCol];
         if (normalizedRows[r]?.[fieldName] === "_MERGED_LEFT_") {
           colSpan++;
           nextCol++;
@@ -40,7 +43,7 @@ const CoTableView = ({ rows }) => {
       while (nextRow < normalizedRows.length) {
         let allMergedUp = true;
         for (let offset = 0; offset < colSpan; offset++) {
-          const fieldName = EDITABLE_COLS[c + offset];
+          const fieldName = activeCols[c + offset];
           if (normalizedRows[nextRow]?.[fieldName] !== "_MERGED_UP_") {
             allMergedUp = false;
             break;
@@ -82,7 +85,7 @@ const CoTableView = ({ rows }) => {
               <th className="px-4 py-3 border border-gray-200">Elements</th>
               <th className="px-4 py-3 text-center border border-gray-200">Qty</th>
               <th className="px-4 py-3 text-center border border-gray-200">Hours</th>
-              <th className="px-4 py-3 text-right border border-gray-200">Cost ($)</th>
+              {canSeeCost && <th className="px-4 py-3 text-right border border-gray-200">Cost ($)</th>}
               <th className="px-4 py-3 border border-gray-200">Remarks</th>
             </tr>
           </thead>
@@ -92,7 +95,7 @@ const CoTableView = ({ rows }) => {
               <tr key={r.id || i} className="hover:bg-gray-50">
                 <td className="px-4 py-3 text-gray-700 border border-gray-200">{i + 1}</td>
 
-                {EDITABLE_COLS.map((colName, colIndex) => {
+                {activeCols.map((colName, colIndex) => {
                   const spanInfo = cellSpans[i]?.[colIndex] || { rowSpan: 1, colSpan: 1, isSpanned: false };
                   if (spanInfo.isSpanned) return null;
 

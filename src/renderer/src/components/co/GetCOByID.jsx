@@ -52,6 +52,11 @@ const GetCOByID = ({ id, projectId, onClose }) => {
   const userRoleLower = userRole?.toLowerCase() || "";
   const canSeeAllVersions = ['admin', 'deputy_manager', 'operation_executive', 'project_manager_officer'].includes(userRoleLower);
 
+  const hideCost = ["staff", "project_manager", "dept_manager"].includes(userRoleLower);
+  const canSeeCost = !hideCost;
+  const hideResponses = userRoleLower === "staff";
+  const canEdit = ["project_manager", "dept_manager", "operation_executive", "deputy_manager", "admin"].includes(userRoleLower);
+
   /* -------------------- SAFE DERIVED VALUES -------------------- */
   const sortedVersions = useMemo(() => {
     if (!co?.versions) return [];
@@ -256,7 +261,7 @@ const GetCOByID = ({ id, projectId, onClose }) => {
               <h1 className="text-xl font-bold text-black uppercase tracking-wider">Change Order Details</h1>
             </div>
             <div className="flex items-center gap-3">
-              {userRole !== "CLIENT" && userRoleLower !== "project_manager" && userRoleLower !== "staff" && (
+              {canEdit && (
                 <button
                   onClick={() => setShowUpdateModal(true)}
                   className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
@@ -297,8 +302,9 @@ const GetCOByID = ({ id, projectId, onClose }) => {
                         Status:
                       </span>
                       {(() => {
-                        const status = co.isAproovedByAdmin ? "APPROVED" : "PENDING";
-                        const statusStyles = co.isAproovedByAdmin
+                        const isApproved = co.isAproovedByAdmin === true || co.isAproovedByAdmin === "true";
+                        const status = isApproved ? "APPROVED" : "PENDING";
+                        const statusStyles = isApproved
                           ? "bg-green-50 text-green-700 border-green-200"
                           : "bg-yellow-50 text-yellow-700 border-yellow-200";
                         return (
@@ -307,6 +313,21 @@ const GetCOByID = ({ id, projectId, onClose }) => {
                           </span>
                         );
                       })()}
+                    </div>
+
+                    <div className="flex items-center pb-2 border-b border-gray-200 text-sm gap-2">
+                      <span className="font-semibold text-black uppercase tracking-wider shrink-0">
+                        Approved By Manager:
+                      </span>
+                      {(co.isApprovedByManager === true || co.isApprovedByManager === "true") ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-none text-xs font-bold uppercase tracking-tight border bg-green-50 text-green-700 border-green-200">
+                          TRUE
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-none text-xs font-bold uppercase tracking-tight border bg-yellow-50 text-yellow-700 border-yellow-200">
+                          FALSE
+                        </span>
+                      )}
                     </div>
 
                     <Info
@@ -410,33 +431,35 @@ const GetCOByID = ({ id, projectId, onClose }) => {
               </div>
 
               {/* ================= RIGHT RESPONSES ================= */}
-              <div className="bg-white p-6 rounded-none border border-gray-200 space-y-6">
-                <div className="flex justify-between items-center pb-4 border-b border-gray-200">
-                  <SectionTitle title="Responses" />
-                  {userRole === "CLIENT" && (
-                    <button
-                      onClick={() => setShowResponseModal(true)}
-                      className="px-6 py-2 bg-[#6bbd45] text-white border-2 border-green-700 hover:bg-[#5aa83a] transition-all font-bold text-xs uppercase tracking-widest cursor-pointer rounded-none"
-                    >
-                      + Add Response
-                    </button>
+              {!hideResponses && (
+                <div className="bg-white p-6 rounded-none border border-gray-200 space-y-6">
+                  <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <SectionTitle title="Responses" />
+                    {userRole === "CLIENT" && (
+                      <button
+                        onClick={() => setShowResponseModal(true)}
+                        className="px-6 py-2 bg-[#6bbd45] text-white border-2 border-green-700 hover:bg-[#5aa83a] transition-all font-bold text-xs uppercase tracking-widest cursor-pointer rounded-none"
+                      >
+                        + Add Response
+                      </button>
+                    )}
+                  </div>
+
+                  {responses.length > 0 ? (
+                    <DataTable
+                      columns={responseColumns}
+                      data={responses}
+                      onRowClick={(row) => setSelectedResponse(row)}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center py-12">
+                      <span className="text-black/60 text-sm font-semibold uppercase tracking-wider">
+                        No responses yet
+                      </span>
+                    </div>
                   )}
                 </div>
-
-                {responses.length > 0 ? (
-                  <DataTable
-                    columns={responseColumns}
-                    data={responses}
-                    onRowClick={(row) => setSelectedResponse(row)}
-                  />
-                ) : (
-                  <div className="flex items-center justify-center py-12">
-                    <span className="text-black/60 text-sm font-semibold uppercase tracking-wider">
-                      No responses yet
-                    </span>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -516,8 +539,12 @@ const GetCOByID = ({ id, projectId, onClose }) => {
                 ) : (
                   <>
                     {/* Summary Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      {[{ label: "Total Quantity", value: totalQty }, { label: "Total Hours", value: `${totalHours} hrs` }, { label: "Total Cost", value: `$${totalCost}` }].map((card) => (
+                    <div className={`grid grid-cols-1 gap-4 ${canSeeCost ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+                      {[
+                        { label: "Total Quantity", value: totalQty },
+                        { label: "Total Hours", value: `${totalHours} hrs` },
+                        ...(canSeeCost ? [{ label: "Total Cost", value: `$${totalCost}` }] : [])
+                      ].map((card) => (
                         <div key={card.label} className="bg-white rounded-none shadow-sm border p-4">
                           <p className="text-xs uppercase text-black font-bold tracking-wider">{card.label}</p>
                           <p className="text-2xl text-black mt-1 font-semibold">{card.value}</p>
@@ -526,7 +553,7 @@ const GetCOByID = ({ id, projectId, onClose }) => {
                     </div>
 
                     {/* Table */}
-                    <CoTableView rows={tableRows} />
+                    <CoTableView rows={tableRows} canSeeCost={canSeeCost} />
 
                     {/* Footer */}
                     <div className="text-xs text-gray-400 text-center pt-2">

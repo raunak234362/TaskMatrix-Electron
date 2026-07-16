@@ -2,6 +2,10 @@ import { useLocation } from "react-router-dom";
 import CoTableView from "./CoTableView";
 
 const CoTablePage = () => {
+  const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+  const hideCost = ["staff", "project_manager", "dept_manager"].includes(userRole);
+  const canSeeCost = !hideCost;
+
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const encodedData = params.get("coData");
@@ -62,14 +66,14 @@ const CoTablePage = () => {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className={`grid grid-cols-1 gap-4 ${canSeeCost ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
           <SummaryCard label="Total Quantity" value={totalQty} />
           <SummaryCard label="Total Hours" value={`${totalHours} hrs`} />
-          <SummaryCard label="Total Cost" value={`$${totalCost}`} />
+          {canSeeCost && <SummaryCard label="Total Cost" value={`$${totalCost}`} />}
         </div>
 
         {/* Table */}
-        <CoTableView rows={rows} />
+        <CoTableView rows={rows} canSeeCost={canSeeCost} />
 
         {/* Footer */}
         <div className="text-xs text-gray-400 text-center pt-4">

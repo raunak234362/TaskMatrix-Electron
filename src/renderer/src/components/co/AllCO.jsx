@@ -105,6 +105,36 @@ const AllCO = ({ changeOrderData = [] }) => {
       },
     },
     {
+      accessorKey: "isAproovedByAdmin",
+      header: "Admin Approved",
+      cell: ({ row }) => {
+        const val = row.original.isAproovedByAdmin;
+        const isApproved = val === true || val === "true";
+        const statusClass = isApproved ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700";
+        const text = isApproved ? "APPROVED" : "PENDING";
+        return (
+          <span className={`px-2 py-1 text-[10px] uppercase font-bold rounded-full tracking-wider border ${statusClass}`}>
+            {text}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "isApprovedByManager",
+      header: "Manager Approved",
+      cell: ({ row }) => {
+        const val = row.original.isApprovedByManager;
+        const isApproved = val === true || val === "true";
+        const statusClass = isApproved ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700";
+        const text = isApproved ? "APPROVED" : "PENDING";
+        return (
+          <span className={`px-2 py-1 text-[10px] uppercase font-bold rounded-full tracking-wider border ${statusClass}`}>
+            {text}
+          </span>
+        );
+      },
+    },
+    {
       accessorKey: "createdAt",
       header: "Created At",
       cell: ({ row }) =>

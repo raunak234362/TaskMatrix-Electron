@@ -48,6 +48,7 @@ const EditFabricator = ({
       approvalPercentage: 0,
       paymenTDueDate: 0,
       currencyType: "",
+      COPerHourPrice: 0,
       wbtFabricatorPointOfContact: "",
       files: null, // Initialize new files to null
     },
@@ -117,6 +118,7 @@ const EditFabricator = ({
       approvalPercentage: fabricatorData.approvalPercentage || 0,
       paymenTDueDate: fabricatorData.paymenTDueDate || 0,
       currencyType: fabricatorData.currencyType || "",
+      COPerHourPrice: fabricatorData.COPerHourPrice || 0,
       wbtFabricatorPointOfContact: Array.isArray(fabricatorData.wbtFabricatorPointOfContact)
         ? fabricatorData.wbtFabricatorPointOfContact[0]?._id || fabricatorData.wbtFabricatorPointOfContact[0]?.id || fabricatorData.wbtFabricatorPointOfContact[0] || ""
         : fabricatorData.wbtFabricatorPointOfContact?._id || fabricatorData.wbtFabricatorPointOfContact?.id || fabricatorData.wbtFabricatorPointOfContact || "",
@@ -173,6 +175,11 @@ const EditFabricator = ({
         formData.append(
           "paymenTDueDate",
           String(parseFloat(String(data.paymenTDueDate)))
+        );
+      if (data.COPerHourPrice !== undefined)
+        formData.append(
+          "COPerHourPrice",
+          String(parseFloat(String(data.COPerHourPrice)))
         );
       if (data.currencyType) formData.append("currencyType", data.currencyType);
 
@@ -426,6 +433,18 @@ const EditFabricator = ({
                       DAYS
                     </span>
                   </div>
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                    CO Per Hour Price
+                  </label>
+                  <Input
+                    label=""
+                    type="number"
+                    step="0.01"
+                    {...register("COPerHourPrice", { valueAsNumber: true })}
+                    className="w-full bg-slate-50 border-slate-200 rounded-2xl font-bold"
+                  />
                 </div>
               </div>
             </section>

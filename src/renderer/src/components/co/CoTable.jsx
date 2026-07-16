@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { Merge } from "lucide-react";
 
 
-const EDITABLE_COLS = ["description", "referenceDoc", "elements", "QtyNo", "hours", "cost", "remarks"];
+const EDITABLE_COLS = ["description", "referenceDoc", "elements", "QtyNo", "hours", "remarks"];
 
 const sumCellValue = (val) => {
   if (val === undefined || val === null) return 0;
@@ -15,6 +15,14 @@ const sumCellValue = (val) => {
 };
 
 const CoTable = ({ coId, onSuccess }) => {
+  const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+  const hideCost = ["staff", "project_manager", "dept_manager"].includes(userRole);
+  const canSeeCost = !hideCost;
+
+  const activeCols = canSeeCost
+    ? ["description", "referenceDoc", "elements", "QtyNo", "hours", "cost", "remarks"]
+    : ["description", "referenceDoc", "elements", "QtyNo", "hours", "remarks"];
+
   const [loading, setLoading] = useState(true);
   const [selectedRowIds, setSelectedRowIds] = useState(new Set());
   const [cellMergeMode, setCellMergeMode] = useState(false);
@@ -142,7 +150,7 @@ const CoTable = ({ coId, onSuccess }) => {
     const coords = Array.from(selectedCells).map((key) => {
       const [rStr, colName] = key.split("-");
       const r = parseInt(rStr, 10);
-      const c = EDITABLE_COLS.indexOf(colName);
+      const c = activeCols.indexOf(colName);
       return { r, c, colName };
     });
 
@@ -165,7 +173,7 @@ const CoTable = ({ coId, onSuccess }) => {
     const valuesToMerge = [];
     for (let r = minR; r <= maxR; r++) {
       for (let c = minC; c <= maxC; c++) {
-        const fieldName = EDITABLE_COLS[c];
+        const fieldName = activeCols[c];
         const val = currentRows[r]?.[fieldName];
         if (val !== undefined && val !== null && val !== "" && val !== "_MERGED_LEFT_" && val !== "_MERGED_UP_") {
           valuesToMerge.push(val);
@@ -184,7 +192,7 @@ const CoTable = ({ coId, onSuccess }) => {
     const updatedRows = JSON.parse(JSON.stringify(currentRows));
     for (let r = minR; r <= maxR; r++) {
       for (let c = minC; c <= maxC; c++) {
-        const fieldName = EDITABLE_COLS[c];
+        const fieldName = activeCols[c];
         if (r === minR && c === minC) {
           updatedRows[r][fieldName] = combinedText;
         } else if (r === minR) {
@@ -213,7 +221,7 @@ const CoTable = ({ coId, onSuccess }) => {
     selectedCells.forEach((key) => {
       const [rStr, colName] = key.split("-");
       const r = parseInt(rStr, 10);
-      const c = EDITABLE_COLS.indexOf(colName);
+      const c = activeCols.indexOf(colName);
 
       const val = updatedRows[r]?.[colName];
       if (val === "_MERGED_LEFT_" || val === "_MERGED_UP_") {
@@ -221,8 +229,8 @@ const CoTable = ({ coId, onSuccess }) => {
       }
 
       let nextC = c + 1;
-      while (nextC < EDITABLE_COLS.length) {
-        const nextFieldName = EDITABLE_COLS[nextC];
+      while (nextC < activeCols.length) {
+        const nextFieldName = activeCols[nextC];
         if (updatedRows[r]?.[nextFieldName] === "_MERGED_LEFT_") {
           updatedRows[r][nextFieldName] = "";
           nextC++;
@@ -236,7 +244,7 @@ const CoTable = ({ coId, onSuccess }) => {
         let allMergedUp = true;
         const width = nextC - c;
         for (let offset = 0; offset < width; offset++) {
-          const fieldName = EDITABLE_COLS[c + offset];
+          const fieldName = activeCols[c + offset];
           if (updatedRows[nextR]?.[fieldName] !== "_MERGED_UP_") {
             allMergedUp = false;
             break;
@@ -244,7 +252,7 @@ const CoTable = ({ coId, onSuccess }) => {
         }
         if (allMergedUp) {
           for (let offset = 0; offset < width; offset++) {
-            const fieldName = EDITABLE_COLS[c + offset];
+            const fieldName = activeCols[c + offset];
             updatedRows[nextR][fieldName] = "";
           }
           nextR++;
@@ -304,20 +312,20 @@ const CoTable = ({ coId, onSuccess }) => {
   const cellSpans = [];
   for (let r = 0; r < rows.length; r++) {
     const rowSpans = [];
-    for (let c = 0; c < EDITABLE_COLS.length; c++) {
+    for (let c = 0; c < activeCols.length; c++) {
       rowSpans.push({ rowSpan: 1, colSpan: 1, isSpanned: false });
     }
     cellSpans.push(rowSpans);
   }
 
   for (let r = 0; r < rows.length; r++) {
-    for (let c = 0; c < EDITABLE_COLS.length; c++) {
+    for (let c = 0; c < activeCols.length; c++) {
       if (cellSpans[r]?.[c]?.isSpanned) continue;
 
       let colSpan = 1;
       let nextCol = c + 1;
-      while (nextCol < EDITABLE_COLS.length) {
-        const fieldName = EDITABLE_COLS[nextCol];
+      while (nextCol < activeCols.length) {
+        const fieldName = activeCols[nextCol];
         if (rows[r]?.[fieldName] === "_MERGED_LEFT_") {
           colSpan++;
           nextCol++;
@@ -331,7 +339,7 @@ const CoTable = ({ coId, onSuccess }) => {
       while (nextRow < rows.length) {
         let allMergedUp = true;
         for (let offset = 0; offset < colSpan; offset++) {
-          const fieldName = EDITABLE_COLS[c + offset];
+          const fieldName = activeCols[c + offset];
           if (rows[nextRow]?.[fieldName] !== "_MERGED_UP_") {
             allMergedUp = false;
             break;
@@ -433,7 +441,7 @@ const CoTable = ({ coId, onSuccess }) => {
                 <th className="p-3">Elements</th>
                 <th className="p-3 w-20">Qty</th>
                 <th className="p-3 w-24">Hours</th>
-                <th className="p-3 w-28">Cost ($)</th>
+                {canSeeCost && <th className="p-3 w-28">Cost ($)</th>}
                 <th className="p-3">Remarks</th>
               </tr>
             </thead>
@@ -459,7 +467,7 @@ const CoTable = ({ coId, onSuccess }) => {
                   </td>
                   <td className="p-3 text-gray-700">{index + 1}</td>
                   
-                  {EDITABLE_COLS.map((colName, colIndex) => {
+                  {activeCols.map((colName, colIndex) => {
                     const spanInfo = cellSpans[index]?.[colIndex] || { rowSpan: 1, colSpan: 1, isSpanned: false };
                     if (spanInfo.isSpanned) return null;
 
@@ -547,9 +555,11 @@ const CoTable = ({ coId, onSuccess }) => {
                   Total
                 </td>
                 <td className="p-3 text-green-900 font-bold">{totalHours}</td>
-                <td className="p-3 text-green-900 font-bold">
-                  ${totalCost.toLocaleString()}
-                </td>
+                {canSeeCost && (
+                  <td className="p-3 text-green-900 font-bold">
+                    ${totalCost.toLocaleString()}
+                  </td>
+                )}
                 <td />
               </tr>
             </tbody>

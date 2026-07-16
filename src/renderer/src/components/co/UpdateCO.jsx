@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Input from "../fields/input";
 import Button from "../fields/Button";
@@ -19,6 +20,10 @@ const sumCellValue = (val) => {
 };
 
 const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
+  const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+  const hideStatus = ["staff", "project_manager", "dept_manager"].includes(userRole);
+  const showManagerApproval = ["project_manager", "dept_manager"].includes(userRole);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingRows, setLoadingRows] = useState(true);
   const [selectedRowIds, setSelectedRowIds] = useState(new Set());
@@ -27,13 +32,20 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
   const [description, setDescription] = useState(coData?.description || "");
   const [files, setFiles] = useState([]);
 
-  const { register, handleSubmit, control, reset, watch } = useForm({
+  const fabricators = useSelector((state) => state.fabricatorInfo?.fabricatorData || []);
+  const projObj = coData?.Project || coData?.project;
+  const fabId = projectId || (typeof projObj === "object" ? (projObj?.fabricatorID || projObj?.fabricator?.id) : null);
+  const selectedFabricator = fabricators?.find((f) => String(f.id || f._id) === String(fabId));
+  const coPerHourPrice = selectedFabricator?.COPerHourPrice || 0;
+
+  const { register, handleSubmit, control, reset, watch, setValue } = useForm({
     defaultValues: {
       changeOrderNumber: coData?.changeOrderNumber || "",
       remarks: coData?.remarks || "",
       reason: coData?.reason || "",
       link: coData?.link || "",
-      isAproovedByAdmin: coData?.isAproovedByAdmin ?? "PENDING",
+      isAproovedByAdmin: coData?.isAproovedByAdmin || false,
+      isApprovedByManager: coData?.isApprovedByManager || false,
       rows: [
         {
           description: "",
@@ -93,7 +105,8 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
         remarks: coData.remarks,
         reason: coData.reason,
         link: coData.link,
-        isAproovedByAdmin: coData.isAproovedByAdmin === true ? "APPROVED" : coData.isAproovedByAdmin === false ? "REJECTED" : "PENDING",
+        isAproovedByAdmin: coData.isAproovedByAdmin || false,
+        isApprovedByManager: coData.isApprovedByManager || false,
         rows: [],
       });
       setDescription(coData.description || "");
@@ -307,8 +320,8 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
       formData.append("link", data.link || "");
       formData.append("description", description);
 
-      const status = data.isAproovedByAdmin === "APPROVED" ? true : data.isAproovedByAdmin === "REJECTED" ? false : "PENDING";
-      formData.append("isAproovedByAdmin", status);
+      formData.append("isAproovedByAdmin", data.isAproovedByAdmin ? true : false);
+      formData.append("isApprovedByManager", data.isApprovedByManager ? true : false);
 
       files.forEach((file) => formData.append("files", file));
 
@@ -385,17 +398,32 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                 label="Subject *"
                 {...register("remarks", { required: true })}
               />
-              <div className="space-y-1">
-                <label className="block text-sm font-medium text-gray-700">Status</label>
-                <select
-                  {...register("isAproovedByAdmin")}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-                >
-                  <option value="PENDING">Pending</option>
-                  <option value="APPROVED">Approved</option>
-                  <option value="REJECTED">Rejected</option>
-                </select>
-              </div>
+              {!hideStatus && (
+                <div className="space-y-1 flex items-center pt-6">
+                  <input
+                    type="checkbox"
+                    id="isAproovedByAdmin"
+                    {...register("isAproovedByAdmin")}
+                    className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                  />
+                  <label htmlFor="isAproovedByAdmin" className="ml-2 block text-sm font-medium text-gray-700">
+                    Approve Change Order (Admin)
+                  </label>
+                </div>
+              )}
+              {showManagerApproval && (
+                <div className="space-y-1 flex items-center pt-6">
+                  <input
+                    type="checkbox"
+                    id="isApprovedByManager"
+                    {...register("isApprovedByManager")}
+                    className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                  />
+                  <label htmlFor="isApprovedByManager" className="ml-2 block text-sm font-medium text-gray-700">
+                    Approve Change Order (Manager)
+                  </label>
+                </div>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -716,8 +744,18 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                                 </div>
                               ) : ["QtyNo", "hours", "cost"].includes(colName) ? (
                                 <input
-                                  {...register(`rows.${index}.${colName}`)}
+                                  {...register(`rows.${index}.${colName}`, {
+                                    onChange: (e) => {
+                                      if (colName === "hours") {
+                                        const hrs = parseFloat(e.target.value) || 0;
+                                        if (coPerHourPrice > 0) {
+                                          setValue(`rows.${index}.cost`, parseFloat((hrs * coPerHourPrice).toFixed(2)), { shouldDirty: true });
+                                        }
+                                      }
+                                    }
+                                  })}
                                   type="number"
+                                  step="0.01"
                                   className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
                                 />
                               ) : (
