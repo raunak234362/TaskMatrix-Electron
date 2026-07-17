@@ -88,14 +88,36 @@ const GetCOByID = ({ id, projectId, onClose }) => {
   const responses = useMemo(() => {
     try {
       if (!co?.coResponses) return [];
-      return Array.isArray(co.coResponses)
+      const parsed = Array.isArray(co.coResponses)
         ? co.coResponses
         : JSON.parse(co.coResponses);
+      
+      const map = {};
+      const roots = [];
+
+      parsed.forEach((item) => {
+        const id = item.id || item._id;
+        map[id] = { ...item, childResponses: [] };
+      });
+
+      parsed.forEach((item) => {
+        const id = item.id || item._id;
+        const mappedItem = map[id];
+        const parentId = item.parentResponseId || item.ParentResponseId;
+        if (parentId && map[parentId]) {
+          map[parentId].childResponses.push(mappedItem);
+        } else {
+          roots.push(mappedItem);
+        }
+      });
+
+      return roots;
     } catch (err) {
       console.error("Failed to parse CO responses", err);
       return [];
     }
   }, [co?.coResponses]);
+
 
   /* -------------------- FETCH CO -------------------- */
   const fetchCO = async () => {
@@ -232,22 +254,8 @@ const GetCOByID = ({ id, projectId, onClose }) => {
         </span>
       ),
     },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.original.status || "—";
-        const statusStyles = status === "OPEN"
-          ? "bg-blue-50 text-blue-700 border-blue-200"
-          : "bg-yellow-50 text-yellow-700 border-yellow-200";
-        return (
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-bold border uppercase tracking-wider ${statusStyles}`}>
-            {status}
-          </span>
-        );
-      },
-    },
   ];
+
 
   /* ======================= RENDER ======================= */
   return (
