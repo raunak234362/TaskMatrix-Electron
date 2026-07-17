@@ -42,7 +42,7 @@ const WprScheduleTable = ({
               <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 min-w-[8rem]">BFA - Recd Date</th>
               <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 min-w-[10rem]">IFC - Sub Date</th>
               <th className="p-3 font-bold uppercase tracking-wider text-black border-r border-black/10 min-w-[16rem]">COR Drawing Submission Date</th>
-              <th className="p-3 font-bold uppercase tracking-wider text-black min-w-[16rem]">Comment</th>
+              <th className="p-3 font-bold uppercase tracking-wider text-black min-w-[20rem]">Status & Comment</th>
             </tr>
           </thead>
           <tbody className="">
@@ -249,7 +249,7 @@ const WprScheduleTable = ({
                   )}
                 </td>
 
-                {/* Submittal Status (Comment) */}
+                {/* Status & Comment */}
                 <td className="p-0 align-top h-[1px]">
                   {(() => {
                     const STATUS_LABELS = {
@@ -283,18 +283,30 @@ const WprScheduleTable = ({
                       SUCCESS: "bg-emerald-100 text-emerald-700 border-emerald-200",
                     };
 
+                    const renderBadge = (rawStatus) => {
+                      if (!rawStatus || rawStatus === "—") return null;
+                      const st = String(rawStatus).toUpperCase();
+                      const label = STATUS_LABELS[st] || rawStatus;
+                      const colors = STATUS_COLORS[st] || "bg-gray-100 text-gray-700 border-gray-200";
+                      return (
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-black uppercase tracking-widest border shrink-0 ${colors}`}>
+                          {label}
+                        </span>
+                      );
+                    };
+
                     if (row.unifiedEntries && row.unifiedEntries.length > 0) {
                       const allDone = row.unifiedEntries.every(entry => {
                         const st = String(entry.status || "—").toUpperCase();
                         return entry.bfaDate !== "—" || ["COMPLETE", "COMPLETED", "SUCCESS", "BFA_RECEIVED", "RELEASE_FOR_FABRICATION"].includes(st);
                       });
 
-                      if (allDone) {
+                      const hasAnyNotes = row.unifiedEntries.some(entry => entry.notes && typeof entry.notes === "string" && entry.notes.trim() !== "");
+
+                      if (allDone && !hasAnyNotes) {
                         return (
-                          <div className="flex h-full items-center p-3">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-black uppercase tracking-widest border bg-emerald-100 text-emerald-700 border-emerald-200 shrink-0">
-                              100% COMPLETE
-                            </span>
+                          <div className="flex h-full items-center gap-2 p-3">
+                            {renderBadge("COMPLETE")}
                           </div>
                         );
                       }
@@ -302,11 +314,15 @@ const WprScheduleTable = ({
                       return (
                         <div className="grid h-full" style={{ gridTemplateRows: `repeat(${row.unifiedEntries.length}, minmax(0, 1fr))` }}>
                           {row.unifiedEntries.map((entry, i) => {
+                            const hasNote = entry.notes && typeof entry.notes === "string" && entry.notes.trim() !== "";
                             return (
-                              <div key={i} className="flex flex-col justify-center p-3 border-b border-black/5 last:border-b-0">
-                                <div className="text-[11px] text-gray-700 font-normal break-words">
-                                  {entry.notes && typeof entry.notes === "string" && entry.notes.trim() !== "" ? entry.notes : "—"}
-                                </div>
+                              <div key={i} className="flex flex-col justify-center gap-1.5 p-3 border-b border-black/5 last:border-b-0">
+                                <div>{renderBadge(allDone ? "COMPLETE" : entry.status)}</div>
+                                {hasNote && (
+                                  <div className="text-[11px] text-gray-700 font-normal break-words">
+                                    {entry.notes}
+                                  </div>
+                                )}
                               </div>
                             );
                           })}
@@ -314,14 +330,17 @@ const WprScheduleTable = ({
                       );
                     }
 
-                    if (row.comments && row.comments !== "—" && typeof row.comments === "string") {
-                      return (
-                        <div className="p-3 text-[11px] text-gray-700 break-words font-normal">
-                          {row.comments}
-                        </div>
-                      );
-                    }
-                    return <span className="block p-3 text-gray-400">—</span>;
+                    const hasComments = row.comments && row.comments !== "—" && typeof row.comments === "string" && row.comments.trim() !== "";
+                    return (
+                      <div className="flex flex-col justify-center gap-1.5 p-3 h-full">
+                        <div>{renderBadge(row.submittalStatus)}</div>
+                        {hasComments && (
+                          <div className="text-[11px] text-gray-700 break-words font-normal">
+                            {row.comments}
+                          </div>
+                        )}
+                      </div>
+                    );
                   })()}
                 </td>
               </tr>
