@@ -227,6 +227,7 @@ const AdminDashboardView = ({
     currentTask,
     handlers,
     unreadComments,
+    unapprovedListsCount,
     memberStats = []
 }) => {
     const {
@@ -272,7 +273,7 @@ const AdminDashboardView = ({
 
             {/* Row 2: Priority Header Row */}
             <div className="relative">
-                <div className={`grid grid-cols-1 sm:grid-cols-2 ${userRole === 'project_manager_officer' || userRole === 'operation_executive' ? 'lg:grid-cols-2' : 'lg:grid-cols-2 2xl:grid-cols-4'} gap-4 lg:gap-6 relative z-10`}>
+                <div className={`grid grid-cols-1 sm:grid-cols-2 ${userRole === 'project_manager_officer' || userRole === 'operation_executive' ? 'lg:grid-cols-3' : 'lg:grid-cols-2 2xl:grid-cols-5'} gap-4 lg:gap-6 relative z-10`}>
                         {/* 1. Priority Focus - Hidden for PMO, OE, and Admin */}
                         {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && userRole !== 'admin' && (
                             <div
@@ -401,6 +402,24 @@ const AdminDashboardView = ({
                                     </div>
                                 </div>
                             )}
+
+                            {/* 6. Pending Approvals */}
+                            <div
+                                className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                                onClick={() => handlers.handleActionClick && handlers.handleActionClick('PENDING_APPROVALS')}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2.5 bg-purple-100/60 rounded-xl border border-purple-200 shadow-sm group-hover:scale-110 transition-transform">
+                                            <Bell className="w-5 h-5 text-purple-600" strokeWidth={2.5} />
+                                        </div>
+                                        <span className="text-[14px] font-semibold text-black uppercase tracking-widest">Pending Approvals</span>
+                                    </div>
+                                    <span className="text-3xl font-black text-purple-600 tracking-tighter">
+                                        {unapprovedListsCount || 0}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
             {(userRole === 'admin' || userRole === 'project_manager_officer' || userRole === 'deputy_manager') && (

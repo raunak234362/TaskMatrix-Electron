@@ -23,12 +23,14 @@ export default defineConfig(({ mode }) => {
         }
       },
       server: {
+        host: '0.0.0.0',
         proxy: {
           '/v1': {
             target: targetUrl,
             changeOrigin: true,
             secure: false
-          }
+          },
+
         }
       },
       plugins: [react(), tailwindcss()]

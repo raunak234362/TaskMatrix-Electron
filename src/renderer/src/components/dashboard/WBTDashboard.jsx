@@ -62,9 +62,9 @@ const WBTDashboard = () => {
     isAdminRole,
     userStats,
     adminData,
-    fetchData,
     memberStats,
-    unreadComments
+    unreadComments,
+    unapprovedListsCount
   } = useDashboardData()
 
   // Modal States
@@ -166,6 +166,15 @@ const WBTDashboard = () => {
           clientSide: []
         }
         break
+      case 'PENDING_APPROVALS': {
+        const d = adminData.unapprovedListsData || {};
+        data = {
+          RFI: Array.isArray(d.unapprovedRFIsList) ? d.unapprovedRFIsList.map(r => ({ ...r, __approvalType: 'RFI' })) : [],
+          Submittals: Array.isArray(d.unapprovedSubmittalsList) ? d.unapprovedSubmittalsList.map(s => ({ ...s, __approvalType: 'SUBMITTAL' })) : [],
+          ChangeOrder: Array.isArray(d.unapprovedChangeOrdersList) ? d.unapprovedChangeOrdersList.map(c => ({ ...c, __approvalType: 'CO' })) : []
+        };
+        break;
+      }
       default:
         data = { wbt: [], clientSide: [] }
     }
@@ -182,6 +191,7 @@ const WBTDashboard = () => {
         case 'PENDING_SUBMITTALS': type = 'SUBMITTAL'; break;
         case 'CHANGE_ORDERS': type = 'CO'; break;
         case 'UNAPPROVED_CHANGE_ORDERS': type = 'CO'; break;
+        case 'PENDING_APPROVALS': type = item.__approvalType || 'RFI'; break;
       }
 
       if (type && (item.id || item._id)) {
@@ -246,6 +256,7 @@ const WBTDashboard = () => {
             currentTask={currentTask}
             memberStats={memberStats}
             unreadComments={unreadComments}
+            unapprovedListsCount={unapprovedListsCount}
             handlers={{
               handleProjectStatClick,
               handleActionClick,

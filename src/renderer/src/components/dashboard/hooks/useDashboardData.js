@@ -8,6 +8,7 @@ export const useDashboardData = () => {
   const [tasks, setTasks] = useState([])
   const [projectNotes, setProjectNotes] = useState([])
   const [unreadComments, setUnreadComments] = useState([])
+  const [unapprovedListsCount, setUnapprovedListsCount] = useState(0)
 
   // Role Based Logic
   const userRoleRaw = sessionStorage.getItem('userRole')
@@ -121,10 +122,36 @@ export const useDashboardData = () => {
         const comments = res?.data || res || [];
         setUnreadComments(comments);
       })
-      .catch(err => console.error('Failed to fetch unread comments', err));
-
     try {
       if (isAdminRole) {
+        // Fetch Dashboard Number for Pending Approvals
+        Service.GetDashboardNumber()
+          .then(res => {
+            const data = res?.data ?? res ?? {};
+            let finalCount = 0;
+            if (typeof data === 'number') {
+              finalCount = data;
+            } else if (typeof data === 'object' && data !== null) {
+              if (data.total !== undefined) {
+                finalCount = data.total;
+              } else {
+                finalCount = Object.values(data).reduce((acc, val) => {
+                  if (Array.isArray(val)) return acc + val.length;
+                  if (typeof val === 'number') return acc + val;
+                  return acc;
+                }, 0);
+              }
+            }
+            setUnapprovedListsCount(finalCount);
+            
+            // Store raw unapproved lists in adminData asynchronously
+            setAdminData(prev => ({
+              ...prev,
+              unapprovedListsData: typeof data === 'object' ? data : {}
+            }));
+          })
+          .catch(err => console.error('Failed to fetch unapproved lists count', err));
+
         // Fetch Admin Data
         let pmDashboardFromAPI = {}
         let computedPMStats = {}
@@ -405,7 +432,8 @@ export const useDashboardData = () => {
 
         const basePendingSubmittalsArray = (userRole === 'admin' || userRole === 'deputy_manager' || userRole === 'project_manager_officer') ? submittals : submittals;
 
-        setAdminData({
+        setAdminData(prev => ({
+          ...prev,
           projects,
           rfis,
           submittals,
@@ -457,7 +485,7 @@ export const useDashboardData = () => {
             newRFQ: pmDashboard?.newRFQ ?? 0
           },
           invoices: invoices
-        })
+        }))
 
         if (['dept_manager', 'operation_executive', 'admin', 'deputy_manager', 'project_manager_officer'].includes(userRole)) {
           console.log(`📊 ${userRole.toUpperCase()} Dashboard Data:`, {
@@ -593,6 +621,7 @@ export const useDashboardData = () => {
     fetchData,
     memberStats,
     memberLoading,
-    unreadComments
+    unreadComments,
+    unapprovedListsCount
   }
 }

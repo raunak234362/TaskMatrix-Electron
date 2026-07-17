@@ -2797,6 +2797,18 @@ class Service {
     }
   }
 
+  //Dashboard Number for Pending Approval(Submittals, RFI, CO)
+  static async GetDashboardNumber() {
+    try {
+      const response = await api.get(`dashBoardData/unapproved-lists`) 
+      console.log('Dashboard data fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+      throw error
+    }
+  }
+
   // upcomping submittal
   static async GetPendingSubmittal() {
     try {

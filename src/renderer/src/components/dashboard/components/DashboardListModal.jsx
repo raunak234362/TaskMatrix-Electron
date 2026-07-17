@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import DataTable from '../../ui/table'
 
 const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSide: [] }, onItemSelect }) => {
-    const [activeTab, setActiveTab] = useState('wbt')
+    const [activeTab, setActiveTab] = useState('')
     const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
     const showTabs = ['admin', 'deputy_manager', 'operation_executive', 'dept_manager', 'project_manager'].includes(userRole)
 
@@ -17,6 +17,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             case 'CHANGE_ORDERS': return { title: 'Pending Action on Change Orders', icon: RefreshCw, color: 'text-rose-600', iconBg: 'bg-rose-100' }
             case 'PENDING_RFQ': return { title: 'Pending Action on RFQ ', icon: Search, color: 'text-cyan-600', iconBg: 'bg-cyan-100' }
             case 'UNAPPROVED_CHANGE_ORDERS': return { title: 'Unapproved Change Orders', icon: RefreshCw, color: 'text-red-600', iconBg: 'bg-red-100' }
+            case 'PENDING_APPROVALS': return { title: 'Pending Approvals', icon: FileText, color: 'text-purple-600', iconBg: 'bg-purple-100' }
             default: return { title: 'Items', icon: FileText, color: 'text-gray-600', iconBg: 'bg-gray-100' }
         }
     }
@@ -24,9 +25,15 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
     const headerInfo = getTitle()
 
     // Handle both old array format and new object format
-    const isSegmented = showTabs && !Array.isArray(data) && (data.wbt || data.clientSide)
-    const effectiveData = isSegmented ? (data[activeTab] || []) : (data || [])
-    const totalCount = isSegmented ? (data.wbt.length + data.clientSide.length) : data.length
+    const isWbtSegmented = showTabs && !Array.isArray(data) && (data.wbt || data.clientSide)
+    const isApprovalSegmented = !Array.isArray(data) && type === 'PENDING_APPROVALS'
+
+    const currentTab = activeTab || (isWbtSegmented ? 'wbt' : isApprovalSegmented ? 'RFI' : '')
+    const effectiveData = isWbtSegmented || isApprovalSegmented ? (data[currentTab] || []) : (data || [])
+    
+    const totalCount = isWbtSegmented ? ((data.wbt?.length || 0) + (data.clientSide?.length || 0)) 
+                     : isApprovalSegmented ? ((data.RFI?.length || 0) + (data.Submittals?.length || 0) + (data.ChangeOrder?.length || 0))
+                     : data.length
 
     const changeOrderColumns = [
         {
@@ -415,25 +422,56 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
                 </div>
 
                 {/* Tabs */}
-                {isSegmented && (
+                {isWbtSegmented && (
                     <div className="flex px-8 pt-2 bg-white border-b border-gray-50 shrink-0">
                         <button
                             onClick={() => setActiveTab('wbt')}
-                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${activeTab === 'wbt'
+                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${currentTab === 'wbt'
                                 ? 'border-green-600 text-green-700'
                                 : 'border-transparent text-gray-400 hover:text-gray-600'
                                 }`}
                         >
-                            WBT Side ({data.wbt.length})
+                            WBT Side ({data.wbt?.length || 0})
                         </button>
                         <button
                             onClick={() => setActiveTab('clientSide')}
-                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${activeTab === 'clientSide'
+                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${currentTab === 'clientSide'
                                 ? 'border-green-600 text-green-700'
                                 : 'border-transparent text-gray-400 hover:text-gray-600'
                                 }`}
                         >
-                            Client Side ({data.clientSide.length})
+                            Client Side ({data.clientSide?.length || 0})
+                        </button>
+                    </div>
+                )}
+                {isApprovalSegmented && (
+                    <div className="flex px-8 pt-2 bg-white border-b border-gray-50 shrink-0">
+                        <button
+                            onClick={() => setActiveTab('RFI')}
+                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${currentTab === 'RFI'
+                                ? 'border-purple-600 text-purple-700'
+                                : 'border-transparent text-gray-400 hover:text-gray-600'
+                                }`}
+                        >
+                            RFI ({data.RFI?.length || 0})
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('Submittals')}
+                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${currentTab === 'Submittals'
+                                ? 'border-purple-600 text-purple-700'
+                                : 'border-transparent text-gray-400 hover:text-gray-600'
+                                }`}
+                        >
+                            Submittals ({data.Submittals?.length || 0})
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('ChangeOrder')}
+                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${currentTab === 'ChangeOrder'
+                                ? 'border-purple-600 text-purple-700'
+                                : 'border-transparent text-gray-400 hover:text-gray-600'
+                                }`}
+                        >
+                            Change Orders ({data.ChangeOrder?.length || 0})
                         </button>
                     </div>
                 )}
