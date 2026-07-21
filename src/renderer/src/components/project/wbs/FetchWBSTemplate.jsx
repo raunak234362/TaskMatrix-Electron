@@ -130,8 +130,8 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
   }
 
   return (
-    <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden w-full mx-auto animate-in fade-in zoom-in duration-300">
-      <div className="p-2 space-y-6">
+    <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden mx-auto animate-in fade-in zoom-in duration-300">
+      <div className="p-5 h-[90vh] overflow-y-auto custom-scrollbar">
         {/* Search and Select All */}
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="relative w-full sm:max-w-xs">
@@ -145,25 +145,39 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
             />
           </div>
           <div className="flex items-center gap-2">
+            
             <Button
               variant="ghost"
               onClick={handleSelectAll}
-              className="text-sm font-semibold text-green-600 hover:text-green-700 transition-colors px-4 py-2 hover:bg-green-50"
+              className="text-sm font-semibold bg-green-200 border border-green-600 cursor-pointer text-black hover:text-green-700 transition-colors px-4 py-2 hover:bg-green-50"
             >
               {selectedIds.size === filteredTemplates.length
                 ? "Deselect All"
                 : "Select All"}
             </Button>
+            {onClose && (
+              <Button
+                variant="ghost"
+                onClick={onClose}
+                className="text-sm bg-red-200 border border-red-600 cursor-pointer font-semibold text-black hover:text-gray-800 transition-colors px-4 py-2 hover:bg-gray-100"
+              >
+                Cancel
+              </Button>
+            )}
           </div>
         </div>
 
         {/* Template List */}
-        <div className="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+        <div className="grid grid-cols-1 gap-3 pr-2 custom-scrollbar">
           {filteredTemplates.length > 0 ? (
             filteredTemplates.map((template) => (
-              <div key={template.id} className={`flex flex-col border-2 rounded-2xl transition-all duration-200 bg-white overflow-hidden ${selectedIds.has(template.id) ? "border-green-500 shadow-sm" : "border-gray-100 hover:border-green-200"}`}>
+              <div key={template.id} className={`h-auto flex flex-col border-2 rounded-2xl transition-all duration-200 bg-white overflow-hidden ${selectedIds.has(template.id) ? "border-green-500 shadow-sm" : "border-gray-100 hover:border-green-200"}`}>
                 <div
-                  onClick={() => toggleSelection(template.id)}
+                  onClick={() => {
+                    toggleSelection(template.id);
+                    setExpandedId(expandedId === template.id ? null : template.id);
+                    setNewItemName("");
+                  }}
                   className={`group relative flex items-center p-4 cursor-pointer transition-all duration-200 ${selectedIds.has(template.id)
                     ? "bg-green-50/50"
                     : "hover:bg-gray-50"
@@ -209,6 +223,7 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      toggleSelection(template.id);
                       setExpandedId(expandedId === template.id ? null : template.id);
                       setNewItemName(""); // reset input when toggling
                     }}
@@ -311,14 +326,6 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
             templates selected
           </p>
           <div className="flex space-x-3">
-            {onClose && (
-              <Button
-                onClick={onClose}
-                className="bg-gray-100 text-gray-700 hover:bg-gray-200 border-none shadow-none"
-              >
-                Cancel
-              </Button>
-            )}
             <Button
               onClick={handleSubmit}
               disabled={selectedIds.size === 0}
