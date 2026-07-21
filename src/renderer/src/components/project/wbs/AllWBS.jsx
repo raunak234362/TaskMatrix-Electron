@@ -187,7 +187,7 @@ const AllWBS = ({ id, stage }) => {
       {/* ✅ Fetch Template Modal */}
       {showFetchTemplate && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="w-full">
             <FetchWBSTemplate
               id={projectId}
               onClose={() => setShowFetchTemplate(false)}
