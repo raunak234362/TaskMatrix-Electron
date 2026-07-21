@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState, useMemo, useCallback } from 'react'
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import Service from '../../../api/Service'
 import DataTable from '../../ui/table'
 import { X, Layers, AlignLeft, Clock, CheckCircle2, Search } from 'lucide-react'
@@ -16,6 +16,11 @@ const LineItemList = ({ id, onClose }) => {
   const [scopeSearch, setScopeSearch] = useState('')
   const [pendingChanges, setPendingChanges] = useState({})
   const [isBulkSaving, setIsBulkSaving] = useState(false)
+
+  const editFormDataRef = useRef(editFormData)
+  useEffect(() => {
+    editFormDataRef.current = editFormData
+  }, [editFormData])
 
   const groupId = groupData?.group?.id
 
@@ -196,11 +201,12 @@ const LineItemList = ({ id, onClose }) => {
 
   const handleSaveClickCorrect = useCallback(async (rowId) => {
     try {
+      const currentFormData = editFormDataRef.current
       const payload = {
-        ...editFormData,
-        quantity: Number(editFormData.quantity),
-        hoursPerQty: Number(editFormData.hoursPerQty),
-        totalHours: Number(editFormData.totalHours)
+        ...currentFormData,
+        quantity: Number(currentFormData.quantity),
+        hoursPerQty: Number(currentFormData.hoursPerQty),
+        totalHours: Number(currentFormData.totalHours)
       }
       await Service.UpdateLineItemById(rowId, payload)
       setEditingRowId(null)
@@ -209,7 +215,7 @@ const LineItemList = ({ id, onClose }) => {
     } catch (error) {
       console.error('Error updating line item:', error)
     }
-  }, [editFormData, fetchLineItem, fetchGroupById])
+  }, [fetchLineItem, fetchGroupById])
 
   const handleInputChange = useCallback((value, field) => {
     setEditFormData(prev => ({ ...prev, [field]: value }))
@@ -315,12 +321,13 @@ const LineItemList = ({ id, onClose }) => {
     {
       accessorKey: 'scopeOfWork',
       header: 'Scope of Work',
-      cell: ({ row }) => {
+      cell: ({ row, table }) => {
+        const { editingRowId, editFormData, handleInputChange } = table.options.meta || {}
         const isEditing = editingRowId === row.original.id
         return isEditing ? (
           <input
             type="text"
-            value={editFormData.scopeOfWork || ''}
+            value={editFormData?.scopeOfWork || ''}
             onChange={(e) => handleInputChange(e.target.value, 'scopeOfWork')}
             placeholder="Enter scope of work"
             className="w-full border border-gray-300 rounded-none px-2 py-1 focus:outline-none focus:border-green-700 bg-white text-black font-medium text-sm"
@@ -336,9 +343,10 @@ const LineItemList = ({ id, onClose }) => {
     {
       accessorKey: 'quantity',
       header: 'Quantity',
-      cell: ({ row }) => {
+      cell: ({ row, table }) => {
+        const { editingRowId, editFormData, handleInputRawChange, handleQuantityChange } = table.options.meta || {}
         const isEditing = editingRowId === row.original.id
-        const val = isEditing ? (editFormData.quantity ?? '') : (row.original.quantity ?? '')
+        const val = isEditing ? (editFormData?.quantity ?? '') : (row.original.quantity ?? '')
         const isPending = row.original.isPending
 
         if (isEditing) {
@@ -367,12 +375,13 @@ const LineItemList = ({ id, onClose }) => {
     {
       accessorKey: 'hoursPerQty',
       header: 'Hours/Qty',
-      cell: ({ row }) => {
+      cell: ({ row, table }) => {
+        const { editingRowId, editFormData, handleInputRawChange } = table.options.meta || {}
         const isEditing = editingRowId === row.original.id
         return isEditing ? (
           <input
             type="number"
-            value={editFormData.hoursPerQty || 0}
+            value={editFormData?.hoursPerQty ?? 0}
             onChange={(e) => handleInputRawChange(e, 'hoursPerQty')}
             className="w-full border border-gray-300 rounded-none p-1 focus:outline-none focus:border-green-700 bg-white text-black font-medium text-sm"
           />
@@ -384,16 +393,17 @@ const LineItemList = ({ id, onClose }) => {
     {
       accessorKey: 'totalHours',
       header: 'Total Hours',
-      cell: ({ row }) => {
+      cell: ({ row, table }) => {
+        const { editingRowId, editFormData, handleInputRawChange } = table.options.meta || {}
         const isEditing = editingRowId === row.original.id
-        const val = isEditing ? editFormData.totalHours : row.original.totalHours
+        const val = isEditing ? editFormData?.totalHours : row.original.totalHours
         const isPending = row.original.isPending
 
         if (isEditing) {
           return (
             <input
               type="number"
-              value={val || 0}
+              value={val ?? 0}
               onChange={(e) => handleInputRawChange(e, 'totalHours')}
               className="w-full border border-gray-300 rounded-none p-1 focus:outline-none focus:border-green-700 bg-white text-black font-medium text-sm"
             />
@@ -402,7 +412,7 @@ const LineItemList = ({ id, onClose }) => {
 
         return (
           <span className={isPending ? "font-bold text-green-700 text-sm" : "text-black text-sm"}>
-            {Number(val).toFixed(2)}
+            {Number(val || 0).toFixed(2)}
           </span>
         )
       }
@@ -410,7 +420,8 @@ const LineItemList = ({ id, onClose }) => {
     {
       id: 'actions',
       header: 'Actions',
-      cell: ({ row }) => {
+      cell: ({ row, table }) => {
+        const { editingRowId, handleSaveClickCorrect, handleCancelClick, handleEditClick } = table.options.meta || {}
         const isEditing = editingRowId === row.original.id
         return isEditing ? (
           <div className="flex gap-2">
@@ -437,7 +448,27 @@ const LineItemList = ({ id, onClose }) => {
         )
       }
     }
-  ], [editingRowId, editFormData, handleQuantityChange, handleInputRawChange, handleInputChange, handleEditClick, handleCancelClick, handleSaveClickCorrect])
+  ], [])
+
+  const tableMeta = useMemo(() => ({
+    editingRowId,
+    editFormData,
+    handleInputChange,
+    handleInputRawChange,
+    handleQuantityChange,
+    handleEditClick,
+    handleCancelClick,
+    handleSaveClickCorrect
+  }), [
+    editingRowId,
+    editFormData,
+    handleInputChange,
+    handleInputRawChange,
+    handleQuantityChange,
+    handleEditClick,
+    handleCancelClick,
+    handleSaveClickCorrect
+  ])
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -672,6 +703,8 @@ const LineItemList = ({ id, onClose }) => {
           <DataTable
             columns={columns}
             data={filteredLineItems}
+            meta={tableMeta}
+            getRowId={(row) => row.id}
             searchPlaceholder="Search line items..."
           />
         </div>

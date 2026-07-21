@@ -184,6 +184,7 @@ export default function DataTable({
   getRowId,
   getRowClassName = () => "",
   forceExpandRowId = null,
+  meta,
 }) {
   const { isMobile } = useScreen();
 
@@ -254,6 +255,7 @@ export default function DataTable({
   const table = useReactTable({
     data,
     columns,
+    meta,
     state: {
       globalFilter,
       sorting,
