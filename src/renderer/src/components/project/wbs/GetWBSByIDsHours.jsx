@@ -1,8 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState } from "react";
 import { Loader2, ListChecks, Layers } from "lucide-react";
 import { Button } from "../../ui/button";
 import DataTable from "../../ui/table";
 import GetWBSLineItem from "./GetWBSLineItem";
+import AddNewWBSItem from "./AddNewWBSItem";
 
 // Helper function to convert decimal hours to hh:mm format
 const formatDecimalHoursToTime = (decimalHours) => {
@@ -13,6 +14,7 @@ const formatDecimalHoursToTime = (decimalHours) => {
 };
 
 const GetWBSByIDsHours = ({
+  projectId,
   wbsData,
   lineItems,
   loading,
@@ -21,6 +23,9 @@ const GetWBSByIDsHours = ({
   setSelectedWbsId,
   formatDate,
 }) => {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const bundleKey = wbsData?.bundle?.bundleKey || wbsData?.bundleKey || "";
+
   return (
     <>
       <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
@@ -131,11 +136,19 @@ const GetWBSByIDsHours = ({
           Download Report
         </Button>
         <Button
+          onClick={() => setIsAddModalOpen(true)}
           className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
         >
           Add Quantity
         </Button>
       </div>
+
+      <AddNewWBSItem
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        bundleKey={bundleKey}
+        projectId={projectId}
+      />
     </>
   );
 };

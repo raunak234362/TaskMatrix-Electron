@@ -218,6 +218,7 @@ const GetWBSByID = ({
         </div>
 
         <GetWBSByIDsHours
+          projectId={projectId}
           wbsData={wbsData}
           lineItems={lineItems}
           loading={loading}

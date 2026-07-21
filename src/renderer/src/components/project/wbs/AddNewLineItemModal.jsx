@@ -2,79 +2,78 @@ import React, { useState, useEffect } from "react";
 import { Loader2, Save } from "lucide-react";
 import Service from "../../../api/Service";
 
-const AddNewWBSItem = ({ isOpen, onClose, bundleKey, projectId }) => {
+const AddNewLineItemModal = ({ isOpen, onClose, wbsTemplate }) => {
   const [formData, setFormData] = useState({
-    name: "",
+    wbsTemplateId: "",
+    description: "",
+    unitTime: 0,
+    checkUnitTime: 0,
     templateKey: "",
-    bundleKey: bundleKey || "",
-    discipline: "EXECUTION",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (bundleKey && !formData.bundleKey) {
-      setFormData((prev) => ({ ...prev, bundleKey }));
-    }
-  }, [bundleKey]);
-
-  useEffect(() => {
-    if (isOpen) {
+    if (isOpen && wbsTemplate) {
       setFormData({
-        name: "",
+        wbsTemplateId: wbsTemplate.id || "",
+        description: "",
+        unitTime: 0,
+        checkUnitTime: 0,
         templateKey: "",
-        bundleKey: bundleKey || "",
-        discipline: "EXECUTION",
       });
       setError(null);
     }
-  }, [isOpen, bundleKey]);
+  }, [isOpen, wbsTemplate]);
 
   if (!isOpen) return null;
 
-  const handleNameChange = (e) => {
+  const handleDescriptionChange = (e) => {
     const val = e.target.value;
     setFormData({
       ...formData,
-      name: val,
+      description: val,
       templateKey: val.trim().replace(/\s+/g, "_").toUpperCase(),
     });
   };
 
   const handleSave = async () => {
     try {
-      if (!formData.name || !formData.templateKey || !formData.bundleKey) {
+      if (!formData.description || !formData.templateKey) {
          setError("Please fill all required fields");
          return;
       }
       setLoading(true);
       setError(null);
-
+      
       const payload = {
-        ...formData,
-        wbsTemplateKey: formData.templateKey
+        wbsTemplateId: formData.wbsTemplateId,
+        description: formData.description,
+        unitTime: Number(formData.unitTime),
+        checkUnitTime: Number(formData.checkUnitTime),
+        templateKey: formData.templateKey
       };
-
-      await Service.AddCustomWBSItem(projectId, payload);
+      
+      await Service.AddNewWBSLineItems(payload);
       onClose();
     } catch (err) {
-      console.error("Error adding template item:", err);
-      setError("Failed to add item. Please try again.");
+      console.error("Error adding line item:", err);
+      setError("Failed to add line item. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-md rounded-none shadow-2xl overflow-hidden border border-black animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white w-full max-w-md rounded-none shadow-2xl overflow-hidden border border-black animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
         <div className="px-6 py-4 border-black flex justify-between items-center bg-green-100">
           <div>
             <h3 className="text-xl font-semibold text-black uppercase tracking-tight">
-              Add New Item
+              Add Line Item
             </h3>
             <p className="text-sm text-black font-normal uppercase tracking-wider">
-              New WBS Template Item
+              {wbsTemplate?.name || wbsTemplate?.title || "Template"}
             </p>
           </div>
           <button
@@ -89,26 +88,14 @@ const AddNewWBSItem = ({ isOpen, onClose, bundleKey, projectId }) => {
           {error && <p className="text-sm text-red-600 font-semibold">{error}</p>}
           <div className="space-y-1.5">
             <label className="text-sm font-normal text-black uppercase tracking-wider ml-1">
-              Bundle Key *
+              Description *
             </label>
             <input
               type="text"
-              value={formData.bundleKey}
-              onChange={(e) => setFormData({ ...formData, bundleKey: e.target.value })}
+              value={formData.description}
+              onChange={handleDescriptionChange}
               className="w-full px-4 py-3 bg-white border border-black rounded-none text-base focus:ring-2 focus:ring-green-500 outline-none transition-all font-normal text-black"
-              placeholder="e.g. MAIN_STEEL_CONNECTION"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-normal text-black uppercase tracking-wider ml-1">
-              Name *
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={handleNameChange}
-              className="w-full px-4 py-3 bg-white border border-black rounded-none text-base focus:ring-2 focus:ring-green-500 outline-none transition-all font-normal text-black"
-              placeholder="Enter name"
+              placeholder="Enter description"
             />
           </div>
           <div className="space-y-1.5">
@@ -123,18 +110,33 @@ const AddNewWBSItem = ({ isOpen, onClose, bundleKey, projectId }) => {
               placeholder="Generated key"
             />
           </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-normal text-black uppercase tracking-wider ml-1">
-              Discipline
-            </label>
-            <select
-              value={formData.discipline}
-              onChange={(e) => setFormData({ ...formData, discipline: e.target.value })}
-              className="w-full px-4 py-3 bg-white border border-black rounded-none text-base focus:ring-2 focus:ring-green-500 outline-none transition-all font-normal text-black"
-            >
-              <option value="EXECUTION">EXECUTION</option>
-              <option value="CHECKING">CHECKING</option>
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-normal text-black uppercase tracking-wider ml-1">
+                Unit Time
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                value={formData.unitTime}
+                onChange={(e) => setFormData({ ...formData, unitTime: e.target.value })}
+                className="w-full px-4 py-3 bg-white border border-black rounded-none text-base focus:ring-2 focus:ring-green-500 outline-none transition-all font-normal text-black"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-normal text-black uppercase tracking-wider ml-1">
+                Check Unit Time
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                value={formData.checkUnitTime}
+                onChange={(e) => setFormData({ ...formData, checkUnitTime: e.target.value })}
+                className="w-full px-4 py-3 bg-white border border-black rounded-none text-base focus:ring-2 focus:ring-green-500 outline-none transition-all font-normal text-black"
+              />
+            </div>
           </div>
         </div>
 
@@ -149,7 +151,7 @@ const AddNewWBSItem = ({ isOpen, onClose, bundleKey, projectId }) => {
             ) : (
               <>
                 <Save className="w-5 h-5 mr-2" />
-                Add Item
+                Add Line Item
               </>
             )}
           </button>
@@ -159,4 +161,4 @@ const AddNewWBSItem = ({ isOpen, onClose, bundleKey, projectId }) => {
   );
 };
 
-export default AddNewWBSItem;
+export default AddNewLineItemModal;

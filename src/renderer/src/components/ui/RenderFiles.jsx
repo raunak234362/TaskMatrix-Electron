@@ -80,6 +80,8 @@ const RenderFiles = ({
       case "submittalsResponse":
         return `${baseURL}/submittal/response/${parentId}/viewfile/${fileId}`;
       case "rFQ":
+      case "rfqCDAttachments":
+      case "CDAttachments":
         return `${baseURL}/rfq/viewFile/${parentId}/${fileId}`;
       case "estimationResponse":
         return `${baseURL}/estimation/response/viewFile/${parentId}/${fileId}`;
@@ -104,8 +106,9 @@ const RenderFiles = ({
     e.preventDefault();
     e.stopPropagation();
     try {
+      const shareTable = (table === "rfqCDAttachments" || table === "CDAttachments") ? "rFQ" : table;
       const response = await Service.createShareLink(
-        table,
+        shareTable,
         file.documentID,
         file.id
       );

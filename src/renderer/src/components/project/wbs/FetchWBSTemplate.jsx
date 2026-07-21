@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import Service from "../../../api/Service";
 import { Check, Loader2, Search, ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { Button } from "../../ui/button";
-
+import AddNewWBSItem from "./AddNewWBSItem";
+import AddNewLineItemModal from "./AddNewLineItemModal";
 
 
 const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
@@ -13,6 +14,9 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
   const [expandedId, setExpandedId] = useState(null);
   const [newItemName, setNewItemName] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [activeBundleKey, setActiveBundleKey] = useState("");
+  const [lineItemModalData, setLineItemModalData] = useState(null);
 
   const fetchWbsTemplate = async () => {
       try {
@@ -140,15 +144,17 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button
-            variant="ghost"
-            onClick={handleSelectAll}
-            className="text-sm font-semibold text-green-600 hover:text-green-700 transition-colors px-4 py-2 hover:bg-green-50"
-          >
-            {selectedIds.size === filteredTemplates.length
-              ? "Deselect All"
-              : "Select All"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              onClick={handleSelectAll}
+              className="text-sm font-semibold text-green-600 hover:text-green-700 transition-colors px-4 py-2 hover:bg-green-50"
+            >
+              {selectedIds.size === filteredTemplates.length
+                ? "Deselect All"
+                : "Select All"}
+            </Button>
+          </div>
         </div>
 
         {/* Template List */}
@@ -225,10 +231,22 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
                       {template.wbsTemplates?.map((item, index) => (
                         <li
                           key={index}
-                          className="text-sm text-gray-700 flex items-center border-l-2 border-green-300 pl-3 py-1"
+                          className="text-sm text-gray-700 flex items-center justify-between border-l-2 border-green-300 pl-3 py-1 group hover:bg-green-50 transition-colors"
                         >
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-400 mr-2 shrink-0"></span>
-                          {item.name || item.title || "Unnamed Item"}
+                          <div className="flex items-center">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-400 mr-2 shrink-0"></span>
+                            {item.name || item.title || "Unnamed Item"}
+                          </div>
+                          <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setLineItemModalData(item);
+                            }}
+                            className="hidden group-hover:flex items-center justify-center p-1 bg-green-200 text-green-700 rounded-md hover:bg-green-300 transition-colors"
+                            title="Add Line Item"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
                         </li>
                       ))}
                       {(!template.wbsTemplates || template.wbsTemplates.length === 0) && (
@@ -239,7 +257,7 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center mt-2 space-y-2 sm:space-y-0 sm:space-x-2 bg-white rounded-lg border border-gray-200 p-1 pl-3 shadow-sm">
                       <input
                         type="text"
-                        placeholder="Add new WBS template item..."
+                        placeholder="Quick add new template item..."
                         className="flex-grow bg-transparent outline-none text-sm py-1.5"
                         value={newItemName}
                         onChange={(e) => setNewItemName(e.target.value)}
@@ -256,6 +274,21 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
                       >
                         {isAdding ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
                         {isAdding ? "Adding..." : "Add Item"}
+                      </Button>
+                    </div>
+
+                    <div className="mt-3 flex justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveBundleKey(template.bundleKey);
+                          setIsAddModalOpen(true);
+                        }}
+                        className="text-xs font-semibold text-green-700 border-green-600 hover:bg-green-50 transition-colors px-4 py-1.5 shadow-sm rounded-md uppercase tracking-wider"
+                      >
+                        + Add Custom Template Item
                       </Button>
                     </div>
                   </div>
@@ -316,6 +349,26 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
           background: #94a3b8;
         }
       `}</style>
+
+      <AddNewWBSItem
+        isOpen={isAddModalOpen}
+        bundleKey={activeBundleKey}
+        projectId={id}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setActiveBundleKey("");
+          fetchWbsTemplate();
+        }}
+      />
+
+      <AddNewLineItemModal
+        isOpen={!!lineItemModalData}
+        wbsTemplate={lineItemModalData}
+        onClose={() => {
+          setLineItemModalData(null);
+          fetchWbsTemplate();
+        }}
+      />
     </div>
   );
 };

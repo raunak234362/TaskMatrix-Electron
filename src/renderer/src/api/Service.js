@@ -1489,6 +1489,38 @@ class Service {
     }
   }
 
+  // Sync WBS
+  static async SyncWBS(projectId) {
+    try {
+      const response = await api.post(`project/projects/${projectId}/wbs/sync`, {}, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  // Add Custom WBS Item
+  static async AddCustomWBSItem(projectId, data) {
+    try {
+      const response = await api.post(`project/projects/${projectId}/wbs/custom`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
   // fetch bundle by ProjectID
   static async GetBundleByProjectId(projectId) {
     try {
@@ -1532,6 +1564,21 @@ class Service {
     } catch (error) {
       console.log(error)
     }
+  }
+
+  // Add New WBS Line Item
+  static async AddNewWBSLineItems(data) {
+      try {
+        const response = await api.post(`wbsTemplates/admin/templates/line-items`, data, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        console.log(response)
+        return response.data
+      } catch (error) {
+        console.log(error)
+      }
   }
 
   //Add WBS Template
