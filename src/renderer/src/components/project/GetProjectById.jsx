@@ -185,7 +185,11 @@ const GetProjectById = ({ id, onClose }) => {
     const stageStats = projectTasks.reduce(
       (acc, task) => {
         const taskStatus = (task.status || '').toLowerCase().trim()
-        if (normaliseWbsType(task.wbsType) === 'others' || taskStatus === 'wrong_allocation' || taskStatus === 'absent') {
+        if (
+          normaliseWbsType(task.wbsType) === 'others' ||
+          taskStatus === 'wrong_allocation' ||
+          taskStatus === 'absent'
+        ) {
           return acc
         }
         const stage = (task.Stage || '').toUpperCase().trim()
@@ -265,7 +269,7 @@ const GetProjectById = ({ id, onClose }) => {
       const isExcludedStatus = taskStatus === 'wrong_allocation' || taskStatus === 'absent'
 
       if (normaliseWbsType(task.wbsType) !== 'others' && !isExcludedStatus) return
-      
+
       const name = String(task.name || task.title || task.wbsTemplate?.name || '').toLowerCase()
 
       if (isExcludedStatus) {
@@ -792,7 +796,7 @@ const GetProjectById = ({ id, onClose }) => {
                           Team :
                         </span>
                         <span className="font-bold text-black uppercase">
-                          {project.team?.name || '—'} 
+                          {project.team?.name || '—'}
                         </span>
                       </div>
                       <div className="flex justify-between items-center pb-2 border-b border-gray-200">
@@ -986,7 +990,6 @@ const GetProjectById = ({ id, onClose }) => {
                 {Object.keys(otherTasksByBundle).length > 0 && (
                   <div className="mt-12">
                     <div className="pb-3 border-b border-gray-200 flex items-center gap-2 mb-4">
-                     
                       <h4 className="text-sm font-semibold uppercase tracking-normal text-black">
                         Other Tasks &mdash; Logged Time
                       </h4>
@@ -1050,10 +1053,18 @@ const GetProjectById = ({ id, onClose }) => {
                                 <table className="w-full text-left border-collapse">
                                   <thead>
                                     <tr className="border-b border-gray-200">
-                                      <th className="pb-2 text-xs font-semibold text-gray-500 uppercase tracking-normal w-1/4">Assignee</th>
-                                      <th className="pb-2 text-xs font-semibold text-gray-500 uppercase tracking-normal w-2/5">Task Detail</th>
-                                      <th className="pb-2 text-xs font-semibold text-gray-500 uppercase tracking-normal w-1/5">Status</th>
-                                      <th className="pb-2 text-xs font-semibold text-gray-500 uppercase tracking-normal text-right w-[15%]">Duration</th>
+                                      <th className="pb-2 text-xs font-semibold text-gray-500 uppercase tracking-normal w-1/4">
+                                        Assignee
+                                      </th>
+                                      <th className="pb-2 text-xs font-semibold text-gray-500 uppercase tracking-normal w-2/5">
+                                        Task Detail
+                                      </th>
+                                      <th className="pb-2 text-xs font-semibold text-gray-500 uppercase tracking-normal w-1/5">
+                                        Status
+                                      </th>
+                                      <th className="pb-2 text-xs font-semibold text-gray-500 uppercase tracking-normal text-right w-[15%]">
+                                        Duration
+                                      </th>
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-gray-100">
@@ -1111,7 +1122,6 @@ const GetProjectById = ({ id, onClose }) => {
                 {/* Core WBS Categories — Logged & Allocated Time Overview */}
                 <div className="mt-12">
                   <div className="pb-3 border-b border-gray-200 flex items-center gap-2 mb-6">
-                   
                     <h4 className="text-sm font-semibold uppercase tracking-normal text-black">
                       Primary WBS &mdash; Logged &amp; Allocated Time
                     </h4>
@@ -1479,7 +1489,7 @@ const GetProjectById = ({ id, onClose }) => {
                     >
                       All Change Order
                     </button>
-                    {canCreate && (
+                    {canCreate && userRole !== 'staff' && (
                       <button
                         onClick={() => setChangeOrderView('add')}
                         className={`
