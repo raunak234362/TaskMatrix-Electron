@@ -1346,7 +1346,7 @@ const GetProjectById = ({ id, onClose }) => {
 
                 {/* Submittal Content */}
                 {submittalView === 'list' ? (
-                  <AllSubmittals submittalData={submittalData} projectId={id} />
+                  <AllSubmittals submittalData={submittalData} projectId={id} onUpdate={fetchProject} />
                 ) : (
                   <AddSubmittal
                     project={project}
@@ -1448,7 +1448,7 @@ const GetProjectById = ({ id, onClose }) => {
 
                 {/* Submittal Content */}
                 {submittalView === 'list' ? (
-                  <AllSubmittals submittalData={submittalData} projectId={id} />
+                  <AllSubmittals submittalData={submittalData} projectId={id} onUpdate={fetchProject} />
                 ) : (
                   <AddSubmittal
                     project={project}
@@ -1499,7 +1499,7 @@ const GetProjectById = ({ id, onClose }) => {
 
                 {/* Change Order Content */}
                 {changeOrderView === 'list' ? (
-                  <AllCO changeOrderData={changeOrderData} />
+                  <AllCO changeOrderData={changeOrderData} onUpdate={fetchProject} />
                 ) : changeOrderView === 'add' ? (
                   <AddCO
                     project={project}

@@ -8,7 +8,7 @@ import GetSubmittalByID from './GetSubmittalByID'
 import Modal from '../ui/Modal'
 import AddCommunication from '../communication/AddCommunication'
 
-const AllSubmittals = ({ submittalData, projectId }) => {
+const AllSubmittals = ({ submittalData, projectId, onUpdate }) => {
   const [submittals, setSubmittals] = useState([])
   const [loading, setLoading] = useState(true)
   const [isFollowUpOpen, setIsFollowUpOpen] = useState(false)
@@ -323,7 +323,18 @@ const AllSubmittals = ({ submittalData, projectId }) => {
         <DataTable
           columns={columns}
           data={finalSubmittals}
-          detailComponent={({ row, close }) => <GetSubmittalByID id={row.id} onClose={close} />}
+          detailComponent={({ row, close }) => (
+            <GetSubmittalByID
+              id={row.id}
+              onClose={(wasDeleted) => {
+                close()
+                if (wasDeleted === true) {
+                  if (onUpdate) onUpdate()
+                  else fetchSubmittals()
+                }
+              }}
+            />
+          )}
         />
       )}
 

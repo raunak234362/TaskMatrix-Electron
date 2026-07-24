@@ -1458,6 +1458,48 @@ class Service {
     }
   }
 
+  static async DeleteSubmittalById(id) {
+    try {
+      const response = await api.delete(`submittal/delete/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error deleting submittal:', error)
+      throw error
+    }
+  }
+  static async DeleteRFIById(id) {
+    try {
+      const response = await api.delete(`rfi/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error deleting RFI:', error)
+      throw error
+    }
+  }
+
+  static async DeleteChangeOrderById(id) {
+    try {
+      const response = await api.delete(`changeOrder/delete/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error deleting change order:', error)
+      throw error
+    }
+  }
+
+
   //Fetch WBS-Template
   static async GetWBSTemplate() {
     try {

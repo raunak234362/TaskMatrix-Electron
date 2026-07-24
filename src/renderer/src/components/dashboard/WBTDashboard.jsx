@@ -64,7 +64,8 @@ const WBTDashboard = () => {
     adminData,
     memberStats,
     unreadComments,
-    unapprovedListsCount
+    unapprovedListsCount,
+    fetchData
   } = useDashboardData()
 
   // Modal States
@@ -82,6 +83,26 @@ const WBTDashboard = () => {
 
   const [detailTaskId, setDetailTaskId] = useState(null)
   const [selectedMilestone, setSelectedMilestone] = useState(null) // New state for wrapper
+
+  const getTaskPriorityValue = (task) => {
+    const priorityValue = Number(task?.priority)
+    if (Number.isFinite(priorityValue)) return priorityValue
+
+    const normalizedPriority = `${task?.priority ?? ''}`.toUpperCase()
+    if (normalizedPriority.includes('CRITICAL')) return 4
+    if (normalizedPriority.includes('HIGH')) return 3
+    if (normalizedPriority.includes('MEDIUM')) return 2
+    if (normalizedPriority.includes('LOW')) return 1
+
+    return 0
+  }
+
+  const isHighPriorityTask = (task) => getTaskPriorityValue(task) >= 3
+
+  const isFallbackTask = (task) => {
+    const normalizedStatus = task?.status?.toUpperCase()
+    return ['IN_PROGRESS', 'BREAK', 'ASSIGNED', 'REWORK'].includes(normalizedStatus)
+  }
 
   // Popup States for Widgets
   const [showSubmittalsPopup, setShowSubmittalsPopup] = useState(false)
@@ -115,7 +136,29 @@ const WBTDashboard = () => {
     dispatch
   ])
 
-  const currentTask = useMemo(() => tasks.find((t) => t.status === 'IN_PROGRESS' || t.status === 'BREAK'), [tasks])
+  const currentTask = useMemo(() => {
+    const normalizedTasks = Array.isArray(tasks) ? tasks : []
+
+    const highPriorityTask = normalizedTasks.find((task) => {
+      const normalizedStatus = task?.status?.toUpperCase()
+      return isHighPriorityTask(task) && normalizedStatus !== 'COMPLETED' && normalizedStatus !== 'IN_REVIEW'
+    })
+
+    if (highPriorityTask) {
+      return highPriorityTask
+    }
+
+    const activeTask = normalizedTasks.find((task) => {
+      const normalizedStatus = task?.status?.toUpperCase()
+      return normalizedStatus === 'IN_PROGRESS' || normalizedStatus === 'BREAK'
+    })
+
+    if (activeTask) {
+      return activeTask
+    }
+
+    return normalizedTasks.find((task) => isFallbackTask(task)) || null
+  }, [tasks])
 
   const getGreeting = () => {
     const hour = new Date().getHours()
@@ -447,9 +490,40 @@ const WBTDashboard = () => {
               </div>
               <div className="flex-1 overflow-y-auto p-4 bg-gray-50/30">
                 <Suspense fallback={<div className="p-8 text-center text-xs font-bold uppercase tracking-widest text-gray-400">Loading details...</div>}>
-                  {detailModal.type === 'RFI' && <GetRFIByID id={detailModal.id} onClose={() => setDetailModal({ isOpen: false, type: null, id: null })} />}
-                  {detailModal.type === 'SUBMITTAL' && <GetSubmittalByID id={detailModal.id} onClose={() => setDetailModal({ isOpen: false, type: null, id: null })} />}
-                  {detailModal.type === 'CO' && <GetCOByID id={detailModal.id} projectId={detailModal.projectId} onClose={() => setDetailModal({ isOpen: false, type: null, id: null })} />}
+                  {detailModal.type === 'RFI' && (
+                    <GetRFIByID
+                      id={detailModal.id}
+                      onClose={(wasDeleted) => {
+                        setDetailModal({ isOpen: false, type: null, id: null })
+                        if (wasDeleted === true) {
+                          fetchData()
+                        }
+                      }}
+                    />
+                  )}
+                  {detailModal.type === 'SUBMITTAL' && (
+                    <GetSubmittalByID
+                      id={detailModal.id}
+                      onClose={(wasDeleted) => {
+                        setDetailModal({ isOpen: false, type: null, id: null })
+                        if (wasDeleted === true) {
+                          fetchData()
+                        }
+                      }}
+                    />
+                  )}
+                  {detailModal.type === 'CO' && (
+                    <GetCOByID
+                      id={detailModal.id}
+                      projectId={detailModal.projectId}
+                      onClose={(wasDeleted) => {
+                        setDetailModal({ isOpen: false, type: null, id: null })
+                        if (wasDeleted === true) {
+                          fetchData()
+                        }
+                      }}
+                    />
+                  )}
                   {detailModal.type === 'INVOICE' && <GetInvoiceById id={detailModal.id} onClose={() => setDetailModal({ isOpen: false, type: null, id: null })} />}
                 </Suspense>
               </div>

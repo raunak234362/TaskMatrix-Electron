@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { X, Check, Loader2, Upload } from 'lucide-react'
+import { X, Check, Loader2, Upload, Trash2 } from 'lucide-react'
 import Service from '../../api/Service'
 import RichTextEditor from '../fields/RichTextEditor'
 import Select from 'react-select'
@@ -24,6 +24,58 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
   const userRole = sessionStorage.getItem('userRole')?.toUpperCase()
   const canUpdateMilestone = ['ADMIN', 'OPERATION_EXECUTIVE', 'DEPUTY_MANAGER'].includes(userRole)
   const canApprove = ['PROJECT_MANAGER', 'OPERATION_EXECUTIVE', 'DEPT_MANAGER', 'DEPUTY_MANAGER', 'ADMIN'].includes((sessionStorage.getItem('userRole') || '').toUpperCase().trim())
+  const canDelete = ['ADMIN', 'OPERATION_EXECUTIVE', 'DEPUTY_MANAGER'].includes(userRole)
+
+  const handleDelete = () => {
+    toast.info(
+      ({ closeToast }) => (
+        <div className="flex flex-col gap-3 p-1">
+          <p className="font-bold text-gray-800 text-sm">Are you sure you want to delete?</p>
+          <p className="text-xs text-gray-600 font-medium">This action cannot be undone.</p>
+          <div className="flex gap-4 items-center mt-2">
+            <button
+              onClick={async () => {
+                closeToast()
+                try {
+                  setSubmitting(true)
+                  await Service.DeleteSubmittalById(submittal.id)
+                  toast.success('Submittal deleted successfully!', {
+                    position: 'bottom-right'
+                  })
+                  if (onSuccess) await onSuccess(true)
+                  onClose()
+                } catch (error) {
+                  console.error(error)
+                  toast.error('Failed to delete submittal')
+                } finally {
+                  setSubmitting(false)
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md active:scale-95"
+            >
+              Confirm Delete
+            </button>
+            <button
+              onClick={closeToast}
+              className="text-gray-500 hover:text-gray-800 text-xs font-bold transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        closeButton: false,
+        position: 'top-center',
+        className: 'shadow-2xl rounded-2xl border border-gray-100',
+        style: { width: '320px' }
+      }
+    )
+  }
+
 
   const [milestones, setMilestones] = useState([])
   const [fetchingMilestones, setFetchingMilestones] = useState(false)
@@ -454,15 +506,21 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
         </div>
 
         {/* ── Footer ── */}
-        <footer className="p-6 border-t border-gray-200 bg-white flex justify-end gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={submitting}
-            className="px-8 py-3 bg-gray-50 border border-gray-300 hover:bg-gray-100 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all active:scale-95 disabled:opacity-50"
-          >
-            Cancel
-          </button>
+        <footer className="p-6 border-t border-gray-200 bg-white flex justify-between items-center gap-3 shrink-0">
+          <div>
+            {canDelete && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="px-8 py-3 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:text-red-700 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all active:scale-95 flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
+            )}
+          </div>
+          <div className="flex gap-3">
+           
           {canUpdateMilestone && (
             <button
               type="button"
@@ -530,6 +588,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
               </>
             )}
           </button>
+          </div>
         </footer>
       </div>
     </div>

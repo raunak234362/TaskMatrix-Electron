@@ -176,12 +176,11 @@ const AddMileStone = ({
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Description *
+                Description
               </label>
               <Controller
                 name="description"
                 control={control}
-                rules={{ required: "Required" }}
                 render={({ field }) => (
                   <RichTextEditor
                     value={field.value || ""}
@@ -190,11 +189,6 @@ const AddMileStone = ({
                   />
                 )}
               />
-              {errors.description && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.description.message}
-                </p>
-              )}
             </div>
 
             {isConnectionDesigner ? (

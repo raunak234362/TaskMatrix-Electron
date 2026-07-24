@@ -487,7 +487,14 @@ const GetCOByID = ({ id, projectId, onClose }) => {
           coData={co}
           projectId={projectId}
           onClose={() => setShowUpdateModal(false)}
-          onSuccess={fetchCO}
+          onSuccess={(isDeleted) => {
+            setShowUpdateModal(false);
+            if (isDeleted) {
+              if (onClose) onClose(true);
+            } else {
+              fetchCO();
+            }
+          }}
         />
       )}
 

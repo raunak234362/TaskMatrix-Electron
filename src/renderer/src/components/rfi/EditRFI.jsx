@@ -27,6 +27,59 @@ const EditRFI = ({ id, onSuccess }) => {
 
   const { register, setValue, handleSubmit, control, reset } = useForm()
 
+  const canDelete = ['admin', 'operation_executive', 'deputy_manager'].includes(
+    sessionStorage.getItem('userRole')?.toLowerCase() || ''
+  )
+
+  const handleDelete = () => {
+    toast.info(
+      ({ closeToast }) => (
+        <div className="flex flex-col gap-3 p-1">
+          <p className="font-bold text-gray-800 text-sm">Are you sure you want to delete?</p>
+          <p className="text-xs text-gray-600 font-medium">This action cannot be undone.</p>
+          <div className="flex gap-4 items-center mt-2">
+            <button
+              onClick={async () => {
+                closeToast()
+                try {
+                  setSubmitting(true)
+                  await Service.DeleteRFIById(id)
+                  toast.success('RFI deleted successfully!', {
+                    position: 'bottom-right'
+                  })
+                  if (onSuccess) await onSuccess(true)
+                } catch (error) {
+                  console.error(error)
+                  toast.error('Failed to delete RFI')
+                } finally {
+                  setSubmitting(false)
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-none text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+            >
+              Confirm Delete
+            </button>
+            <button
+              onClick={closeToast}
+              className="text-gray-500 hover:text-gray-800 text-xs font-bold transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        closeButton: false,
+        position: 'top-center',
+        className: 'shadow-2xl rounded-none border border-gray-100',
+        style: { width: '320px' }
+      }
+    )
+  }
+
   const fetchRfi = async () => {
     try {
       setLoading(true)
@@ -149,172 +202,189 @@ const EditRFI = ({ id, onSuccess }) => {
   }
 
   return (
-    <div className="w-full mx-auto bg-white p-4 rounded-none">
-      <div className="mb-6">
-        <h2 className="text-sm font-semibold text-black uppercase tracking-normal">Edit RFI</h2>
-        
-      </div>
-
-      {/* Recipient Category Toggle */}
-      <div className="flex bg-gray-100/50 p-1 rounded-none gap-1 mb-4">
-        <button
-          type="button"
-          onClick={() => {
-            setIsCDMode(false)
-            setValue('multipleRecipients', [])
-          }}
-          className={`flex-1 py-1.5 text-sm font-semibold rounded-none transition-all ${
-            !isCDMode
-              ? 'bg-white text-black shadow-none border border-gray-200'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          CLIENT POCs
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setIsCDMode(true)
-            setValue('multipleRecipients', [])
-          }}
-          className={`flex-1 py-1.5 text-sm font-semibold rounded-none transition-all ${
-            isCDMode
-              ? 'bg-white text-black shadow-none border border-gray-200'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          CONNECTION DESIGNER
-        </button>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Recipients */}
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-black uppercase tracking-normal flex justify-between items-center">
-            <span>Select {isCDMode ? 'CD Engineer' : 'Client'} Recipients *</span>
-            <span className="text-xs font-semibold text-red-700 uppercase tracking-normal bg-red-50 px-2 py-0.5 rounded-none border border-red-200">Required</span>
-          </label>
-          <Controller
-            name="multipleRecipients"
-            control={control}
-            rules={{ required: 'At least one recipient is required' }}
-            render={({ field, fieldState }) => (
-              <div className="space-y-1">
-                <Select
-                  isMulti
-                  placeholder={
-                    fetchingEngineers
-                      ? 'Fetching engineers...'
-                      : `Select ${isCDMode ? 'engineers' : 'Point of Contacts'}...`
-                  }
-                  options={activeRecipientOptions}
-                  isLoading={fetchingEngineers}
-                  value={activeRecipientOptions.filter((o) => (field.value || []).includes(o.value))}
-                  onChange={(options) => {
-                    field.onChange(options ? options.map((o) => o.value) : [])
-                    if (options && options.length > 0) {
-                      const names = options.map((o) => o.label.split(' (')[0]).join(', ')
-                      setDescription(`<p>Dear ${names},</p><br/>`)
-                    } else {
-                      setDescription('')
-                    }
-                  }}
-                  className="text-sm"
-                  styles={{
-                    control: (base) => ({
-                      ...base,
-                      borderRadius: '0px',
-                      padding: '2px',
-                      borderColor: fieldState.error ? '#ef4444' : '#e5e7eb',
-                      '&:hover': {
-                        borderColor: fieldState.error ? '#ef4444' : '#6bbd45'
-                      }
-                    }),
-                    multiValue: (base) => ({
-                      ...base,
-                      backgroundColor: '#f0fdf4',
-                      borderRadius: '0px',
-                      border: '1px solid #dcfce7'
-                    }),
-                    multiValueLabel: (base) => ({
-                      ...base,
-                      color: '#166534',
-                      fontSize: '12px',
-                      fontWeight: '500'
-                    }),
-                    multiValueRemove: (base) => ({
-                      ...base,
-                      color: '#166534',
-                      '&:hover': {
-                        backgroundColor: '#dcfce7',
-                        color: '#14532d'
-                      }
-                    })
-                  }}
-                />
-                {fieldState.error && (
-                  <p className="text-xs text-red-500 font-medium">{fieldState.error.message}</p>
-                )}
-              </div>
-            )}
-          />
+    <div className="w-full h-full flex flex-col bg-white rounded-none overflow-hidden max-h-[90vh]">
+      {/* Fixed Header */}
+      <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-white shrink-0">
+        <div>
+          <h2 className="text-lg font-semibold text-black uppercase tracking-normal">Edit RFI</h2>
         </div>
-
-        {/* Subject */}
-        <Input
-          label="Subject"
-          placeholder="Enter the subject of this RFI"
-          {...register('subject', { required: 'Subject is required' })}
-          className="rounded-none border-gray-200 focus:border-black focus:ring-0"
-        />
-
-        {/* Description */}
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-black uppercase tracking-normal">
-            Description
-          </label>
-          <div className="rounded-none overflow-hidden border border-gray-200 focus-within:border-black transition-all duration-200">
-            <RichTextEditor
-              value={description}
-              onChange={setDescription}
-              placeholder="Provide detailed information about the RFI..."
-            />
-          </div>
-        </div>
-
-        {/* Approval Checkbox */}
-        {['project_manager', 'operation_executive', 'dept_manager', 'deputy_manager', 'admin'].includes(sessionStorage.getItem('userRole')?.toLowerCase() || '') && (
-          <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200">
-            <input
-              type="checkbox"
-              id="isAproovedByAdmin"
-              {...register('isAproovedByAdmin')}
-              className="w-4 h-4 text-green-600 border-gray-300 rounded-none focus:ring-green-500 cursor-pointer"
-            />
-            <label htmlFor="isAproovedByAdmin" className="text-sm font-bold text-black uppercase tracking-normal cursor-pointer select-none">
-              Approve RFI
-            </label>
-          </div>
-        )}
-
-        {/* Files */}
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-gray-800">
-            Attachments
-          </label>
-          <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
-          <p className="text-[10px] text-gray-400">Supported formats: PDF, DWG, Images. Max size 20MB per file.</p>
-        </div>
-
-        {/* Submit Buttons */}
-        <div className="flex gap-3 pt-4 border-t border-gray-200">
+        <div className="w-36">
           <button
             type="button"
             onClick={() => onSuccess?.()}
-            className="flex-1 py-2 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer shadow-sm"
+            className="w-full py-2 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer shadow-sm"
           >
             Close
           </button>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col overflow-hidden">
+        {/* Scrollable Form Body */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+          {/* Recipient Category Toggle */}
+          <div className="flex bg-gray-100/50 p-1 rounded-none gap-1 mb-4">
+            <button
+              type="button"
+              onClick={() => {
+                setIsCDMode(false)
+                setValue('multipleRecipients', [])
+              }}
+              className={`flex-1 py-1.5 text-sm font-semibold rounded-none transition-all ${
+                !isCDMode
+                  ? 'bg-white text-black shadow-none border border-gray-200'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              CLIENT POCs
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsCDMode(true)
+                setValue('multipleRecipients', [])
+              }}
+              className={`flex-1 py-1.5 text-sm font-semibold rounded-none transition-all ${
+                isCDMode
+                  ? 'bg-white text-black shadow-none border border-gray-200'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              CONNECTION DESIGNER
+            </button>
+          </div>
+
+          {/* Recipients */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-black uppercase tracking-normal flex justify-between items-center">
+              <span>Select {isCDMode ? 'CD Engineer' : 'Client'} Recipients *</span>
+              <span className="text-xs font-semibold text-red-700 uppercase tracking-normal bg-red-50 px-2 py-0.5 rounded-none border border-red-200">Required</span>
+            </label>
+            <Controller
+              name="multipleRecipients"
+              control={control}
+              rules={{ required: 'At least one recipient is required' }}
+              render={({ field, fieldState }) => (
+                <div className="space-y-1">
+                  <Select
+                    isMulti
+                    placeholder={
+                      fetchingEngineers
+                        ? 'Fetching engineers...'
+                        : `Select ${isCDMode ? 'engineers' : 'Point of Contacts'}...`
+                    }
+                    options={activeRecipientOptions}
+                    isLoading={fetchingEngineers}
+                    value={activeRecipientOptions.filter((o) => (field.value || []).includes(o.value))}
+                    onChange={(options) => {
+                      field.onChange(options ? options.map((o) => o.value) : [])
+                      if (options && options.length > 0) {
+                        const names = options.map((o) => o.label.split(' (')[0]).join(', ')
+                        setDescription(`<p>Dear ${names},</p><br/>`)
+                      } else {
+                        setDescription('')
+                      }
+                    }}
+                    className="text-sm"
+                    styles={{
+                      control: (base) => ({
+                        ...base,
+                        borderRadius: '0px',
+                        padding: '2px',
+                        borderColor: fieldState.error ? '#ef4444' : '#e5e7eb',
+                        '&:hover': {
+                          borderColor: fieldState.error ? '#ef4444' : '#6bbd45'
+                        }
+                      }),
+                      multiValue: (base) => ({
+                        ...base,
+                        backgroundColor: '#f0fdf4',
+                        borderRadius: '0px',
+                        border: '1px solid #dcfce7'
+                      }),
+                      multiValueLabel: (base) => ({
+                        ...base,
+                        color: '#166534',
+                        fontSize: '12px',
+                        fontWeight: '500'
+                      }),
+                      multiValueRemove: (base) => ({
+                        ...base,
+                        color: '#166534',
+                        '&:hover': {
+                          backgroundColor: '#dcfce7',
+                          color: '#14532d'
+                        }
+                      })
+                    }}
+                  />
+                  {fieldState.error && (
+                    <p className="text-xs text-red-500 font-medium">{fieldState.error.message}</p>
+                  )}
+                </div>
+              )}
+            />
+          </div>
+
+          {/* Subject */}
+          <Input
+            label="Subject"
+            placeholder="Enter the subject of this RFI"
+            {...register('subject', { required: 'Subject is required' })}
+            className="rounded-none border-gray-200 focus:border-black focus:ring-0"
+          />
+
+          {/* Description */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-black uppercase tracking-normal">
+              Description
+            </label>
+            <div className="rounded-none overflow-hidden border border-gray-200 focus-within:border-black transition-all duration-200">
+              <RichTextEditor
+                value={description}
+                onChange={setDescription}
+                placeholder="Provide detailed information about the RFI..."
+              />
+            </div>
+          </div>
+
+          {/* Approval Checkbox */}
+          {['project_manager', 'operation_executive', 'dept_manager', 'deputy_manager', 'admin'].includes(sessionStorage.getItem('userRole')?.toLowerCase() || '') && (
+            <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200">
+              <input
+                type="checkbox"
+                id="isAproovedByAdmin"
+                {...register('isAproovedByAdmin')}
+                className="w-4 h-4 text-green-600 border-gray-300 rounded-none focus:ring-green-500 cursor-pointer"
+              />
+              <label htmlFor="isAproovedByAdmin" className="text-sm font-bold text-black uppercase tracking-normal cursor-pointer select-none">
+                Approve RFI
+              </label>
+            </div>
+          )}
+
+          {/* Files */}
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-gray-800">
+              Attachments
+            </label>
+            <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
+            <p className="text-[10px] text-gray-400">Supported formats: PDF, DWG, Images. Max size 20MB per file.</p>
+          </div>
+        </div>
+
+        {/* Fixed Footer */}
+        <div className="p-6 border-t border-gray-200 flex gap-3 bg-white shrink-0">
+          {canDelete && (
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={submitting}
+              className="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white border-2 border-red-800 hover:border-red-900 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer rounded-none shadow-sm"
+            >
+              Delete RFI
+            </button>
+          )}
           <button 
             type="submit" 
             className="flex-[2] py-2 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer rounded-none shadow-sm" 

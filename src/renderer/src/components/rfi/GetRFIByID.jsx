@@ -342,16 +342,18 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
       {showEditModal && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-none shadow-2xl border border-gray-200 overflow-hidden w-full max-w-2xl max-h-[90vh] flex flex-col relative">
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-              <EditRFI
-                id={id}
-                onSuccess={() => {
-                  setShowEditModal(false);
+            <EditRFI
+              id={id}
+              onSuccess={(isDeleted) => {
+                setShowEditModal(false);
+                if (isDeleted) {
+                  if (onClose) onClose(true);
+                } else {
                   fetchRfi();
                   onUpdate?.();
-                }}
-              />
-            </div>
+                }
+              }}
+            />
           </div>
         </div>
       )}

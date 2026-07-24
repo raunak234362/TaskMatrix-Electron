@@ -310,16 +310,144 @@ const AllTasks = () => {
       .trim()
   }
 
+  const formatSecondsToHHMM = (totalSeconds) => {
+    if (!totalSeconds || isNaN(totalSeconds)) return '00:00'
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+  }
+
+  const groupAndCombineTasks = (tasksList) => {
+    const groups = {}
+    tasksList.forEach((task) => {
+      const dateStr = formatDate(task.due_date)
+      const username = task.user ? `${task.user.firstName} ${task.user.lastName}`.trim() : 'Unassigned'
+      const key = `${dateStr}_${username}`
+      if (!groups[key]) {
+        groups[key] = []
+      }
+      groups[key].push(task)
+    })
+
+    const combinedTasks = []
+    Object.keys(groups).forEach((key) => {
+      const groupTasks = groups[key]
+      if (groupTasks.length > 1) {
+        // Combine them!
+        const combinedNames = groupTasks.map((t, idx) => `${idx + 1}. ${t.name || 'N/A'}`).join('\n')
+        const projectNames = [...new Set(groupTasks.map((t) => t.project?.name || 'N/A'))].join(', ')
+        const managers = [...new Set(groupTasks.map((t) => {
+          const mObj = t.project?.manager
+          return mObj ? `${mObj.firstName || ''} ${mObj.lastName || ''}`.trim() || 'Unnamed Manager' : 'No Manager'
+        }))].join(', ')
+        const statuses = [...new Set(groupTasks.map((t) => t.status || 'Unknown'))].join(', ')
+
+        let hasAllocated = false
+        const totalAllocatedSeconds = groupTasks.reduce((acc, t) => {
+          const allocatedStr = t.allocationLog?.allocatedHours || '—'
+          if (allocatedStr === '—') return acc
+          hasAllocated = true
+          if (allocatedStr.includes(':')) {
+            const [h, m] = allocatedStr.split(':').map(Number)
+            return acc + (h || 0) * 3600 + (m || 0) * 60
+          }
+          const num = Number(allocatedStr)
+          if (!isNaN(num)) {
+            return acc + num * 3600
+          }
+          return acc
+        }, 0)
+
+        const totalWorkingSeconds = groupTasks.reduce((acc, t) => {
+          return acc + (t.workingHourTask?.reduce((sum, wh) => sum + (Number(wh.duration_seconds) || 0), 0) || 0)
+        }, 0)
+
+        const formattedTotalAllocated = hasAllocated ? formatSecondsToHHMM(totalAllocatedSeconds) : '—'
+        const formattedTotalWorking = formatSecondsToHHMM(totalWorkingSeconds)
+
+        // Separate hours for each task
+        const allocatedList = groupTasks.map((t, idx) => `${idx + 1}. ${t.allocationLog?.allocatedHours || '—'}`).join('\n')
+        const allocatedText = `${allocatedList}\nTotal: ${formattedTotalAllocated}`
+
+        const workingList = groupTasks.map((t, idx) => {
+          const totalSecs = t.workingHourTask?.reduce((sum, wh) => sum + (Number(wh.duration_seconds) || 0), 0) || 0
+          return `${idx + 1}. ${formatSecondsToHHMM(totalSecs)}`
+        }).join('\n')
+        const workingText = `${workingList}\nTotal: ${formattedTotalWorking}`
+
+        const dueDates = [...new Set(groupTasks.map((t) => formatDate(t.due_date)))].join(', ')
+
+        const unacknowledgedComments = groupTasks.flatMap((t) => t.taskcomment?.filter((c) => c.acknowledged === false) || [])
+        const hasUnacknowledgedComments = unacknowledgedComments.length > 0
+        const commentsText = unacknowledgedComments.map((c) => stripHtml(c.data)).join('\n---\n')
+
+        const firstTask = groupTasks[0]
+        const username = firstTask.user ? `${firstTask.user.firstName} ${firstTask.user.lastName}` : 'Unassigned'
+
+        combinedTasks.push({
+          isCombined: true,
+          name: combinedNames,
+          projectName: projectNames,
+          managerName: managers,
+          username,
+          status: statuses,
+          allocatedHours: allocatedText,
+          workingHours: workingText,
+          dueDate: dueDates,
+          ackStatus: hasUnacknowledgedComments ? 'No' : 'Yes',
+          commentsText,
+          combinedSummary: `Total Assigned: ${formattedTotalAllocated}, Total Taken: ${formattedTotalWorking}`,
+          due_date: firstTask.due_date
+        })
+      } else {
+        // Just 1 task, keep as is
+        const task = groupTasks[0]
+        const totalSeconds = task.workingHourTask?.reduce((acc, wh) => acc + (Number(wh.duration_seconds) || 0), 0) || 0
+        const formattedWorkingHours = formatSecondsToHHMM(totalSeconds)
+        const unacknowledgedComments = task.taskcomment?.filter((c) => c.acknowledged === false) || []
+        const hasUnacknowledgedComments = unacknowledgedComments.length > 0
+        const commentsText = unacknowledgedComments.map((c) => stripHtml(c.data)).join('\n---\n')
+
+        const mObj = task.project?.manager
+        const managerName = mObj
+          ? `${mObj.firstName || ''} ${mObj.lastName || ''}`.trim() || 'Unnamed Manager'
+          : 'No Manager'
+
+        const username = task.user ? `${task.user.firstName} ${task.user.lastName}` : 'Unassigned'
+
+        combinedTasks.push({
+          isCombined: false,
+          name: task.name || 'N/A',
+          projectName: task.project?.name || 'N/A',
+          managerName,
+          username,
+          status: task.status || 'Unknown',
+          allocatedHours: task.allocationLog?.allocatedHours || '—',
+          workingHours: formattedWorkingHours,
+          dueDate: formatDate(task.due_date),
+          ackStatus: hasUnacknowledgedComments ? 'No' : 'Yes',
+          commentsText,
+          combinedSummary: '—',
+          due_date: task.due_date
+        })
+      }
+    })
+
+    return combinedTasks
+  }
+
   const handleDownloadPDF = () => {
-    // Sort tasks by created date (oldest first, or newest first; using oldest first here)
+    // Sort tasks by due date
     const sortedTasks = [...filteredTasks].sort(
-      (a, b) => new Date(a.created_on) - new Date(b.created_on)
+      (a, b) => new Date(a.due_date) - new Date(b.due_date)
     )
+
+    const combinedTasks = groupAndCombineTasks(sortedTasks)
+    combinedTasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
 
     const tableColumn = [
       'Task Detail',
       'Project Name',
-      'Manager',
       'Assigned User',
       'Status',
       'Allocated Hrs',
@@ -330,34 +458,17 @@ const AllTasks = () => {
     ]
     const tableRows = []
 
-    sortedTasks.forEach((task) => {
-      // Calculate working hours
-      const totalSeconds =
-        task.workingHourTask?.reduce((acc, wh) => acc + (Number(wh.duration_seconds) || 0), 0) || 0
-      const hours = Math.floor(totalSeconds / 3600)
-      const minutes = Math.floor((totalSeconds % 3600) / 60)
-      const formattedWorkingHours = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
-
-      const unacknowledgedComments = task.taskcomment?.filter((c) => c.acknowledged === false) || []
-      const hasUnacknowledgedComments = unacknowledgedComments.length > 0
-      const commentsText = unacknowledgedComments.map((c) => stripHtml(c.data)).join('\n---\n')
-
-      const mObj = task.project?.manager
-      const managerName = mObj
-        ? `${mObj.firstName || ''} ${mObj.lastName || ''}`.trim() || 'Unnamed Manager'
-        : 'No Manager'
-
+    combinedTasks.forEach((task) => {
       tableRows.push([
-        task.name || 'N/A',
-        task.project?.name || 'N/A',
-        managerName,
-        task.user ? `${task.user.firstName} ${task.user.lastName}` : 'Unassigned',
-        task.status || 'Unknown',
-        task.allocationLog?.allocatedHours || '—',
-        formattedWorkingHours,
-        formatDate(task.due_date),
-        hasUnacknowledgedComments ? 'No' : 'Yes',
-        commentsText
+        task.name,
+        task.projectName,
+        task.username,
+        task.status,
+        task.allocatedHours,
+        task.workingHours,
+        task.dueDate,
+        task.ackStatus,
+        task.commentsText
       ])
     })
 
@@ -368,6 +479,17 @@ const AllTasks = () => {
       body: tableRows,
       startY: 20,
       styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+      columnStyles: {
+        0: { cellWidth: 40 }, // Task Detail
+        1: { cellWidth: 35 }, // Project Name
+        2: { cellWidth: 25 }, // Assigned User
+        3: { cellWidth: 20 }, // Status
+        4: { cellWidth: 20 }, // Allocated Hrs
+        5: { cellWidth: 20 }, // Working Hrs
+        6: { cellWidth: 25 }, // Due Date
+        7: { cellWidth: 12 }, // Ack?
+        8: { cellWidth: 45 }  // Comments
+      },
       rowPageBreak: 'avoid', // Prevents rows from cutting across pages
       headStyles: { fillColor: [22, 163, 74] } // Green-600 header
     })
@@ -375,37 +497,25 @@ const AllTasks = () => {
   }
 
   const handleDownloadExcel = () => {
+    // Sort tasks by due date
     const sortedTasks = [...filteredTasks].sort(
-      (a, b) => new Date(a.created_on) - new Date(b.created_on)
+      (a, b) => new Date(a.due_date) - new Date(b.due_date)
     )
-    const reportData = sortedTasks.map((task) => {
-      // Calculate working hours
-      const totalSeconds =
-        task.workingHourTask?.reduce((acc, wh) => acc + (Number(wh.duration_seconds) || 0), 0) || 0
-      const hours = Math.floor(totalSeconds / 3600)
-      const minutes = Math.floor((totalSeconds % 3600) / 60)
-      const formattedWorkingHours = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
 
-      const unacknowledgedComments = task.taskcomment?.filter((c) => c.acknowledged === false) || []
-      const hasUnacknowledgedComments = unacknowledgedComments.length > 0
-      const commentsText = unacknowledgedComments.map((c) => stripHtml(c.data)).join('\n---\n')
+    const combinedTasks = groupAndCombineTasks(sortedTasks)
+    combinedTasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
 
-      const mObj = task.project?.manager
-      const managerName = mObj
-        ? `${mObj.firstName || ''} ${mObj.lastName || ''}`.trim() || 'Unnamed Manager'
-        : 'No Manager'
-
+    const reportData = combinedTasks.map((task) => {
       return {
-        'Task Detail': task.name || 'N/A',
-        'Project Name': task.project?.name || 'N/A',
-        Manager: managerName,
-        'Assigned User': task.user ? `${task.user.firstName} ${task.user.lastName}` : 'Unassigned',
-        Status: task.status || 'Unknown',
-        'Allocated Hours': task.allocationLog?.allocatedHours || '—',
-        'Working Hours': formattedWorkingHours,
-        'Due Date': formatDate(task.due_date),
-        'Comment Acknowledged': hasUnacknowledgedComments ? 'No' : 'Yes',
-        Comments: commentsText
+        'Task Detail': task.name,
+        'Project Name': task.projectName,
+        'Assigned User': task.username,
+        Status: task.status,
+        'Allocated Hours': task.allocatedHours,
+        'Working Hours': task.workingHours,
+        'Due Date': task.dueDate,
+        'Comment Acknowledged': task.ackStatus,
+        Comments: task.commentsText
       }
     })
 

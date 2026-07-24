@@ -16,6 +16,8 @@ const EditMileStone = ({
   mileStoneVersionId,
 }) => {
   const [loading, setLoading] = useState(false);
+  const userRole = (sessionStorage.getItem("userRole") || "").toUpperCase().trim();
+  const canDelete = ["DEPUTY_MANAGER", "OPERATION_EXECUTIVE", "ADMIN"].includes(userRole);
   const {
     register,
     handleSubmit,
@@ -122,7 +124,7 @@ const EditMileStone = ({
     toast.info(
       ({ closeToast }) => (
         <div className="flex flex-col gap-3 p-1">
-          <p className="font-bold text-gray-800 text-sm">Delete Milestone?</p>
+          <p className="font-bold text-gray-800 text-sm">Are you sure you want to delete?</p>
           <p className="text-xs text-gray-600 font-medium">This action cannot be undone.</p>
           <div className="flex gap-4 items-center mt-2">
             <button
@@ -382,7 +384,7 @@ const EditMileStone = ({
         {/* Action Buttons */}
         <div className="flex justify-between items-center p-6 border-t border-gray-100 bg-gray-50/50 shrink-0">
           <div>
-            {milestoneId && (
+            {milestoneId && canDelete && (
               <Button
                 type="button"
                 onClick={handleDelete}

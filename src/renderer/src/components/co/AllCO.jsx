@@ -11,7 +11,7 @@ import AddCommunication from "../communication/AddCommunication";
 
 
 
-const AllCO = ({ changeOrderData = [] }) => {
+const AllCO = ({ changeOrderData = [], onUpdate }) => {
   const [changeOrders, setChangeOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFollowUpOpen, setIsFollowUpOpen] = useState(false);
@@ -207,7 +207,16 @@ const AllCO = ({ changeOrderData = [] }) => {
         columns={columns}
         data={changeOrders}
         detailComponent={({ row, close }) => (
-          <GetCOByID id={row.id} projectId={row.project || row.Project} onClose={close} />
+          <GetCOByID
+            id={row.id}
+            projectId={row.project || row.Project}
+            onClose={(wasDeleted) => {
+              close()
+              if (wasDeleted === true && onUpdate) {
+                onUpdate()
+              }
+            }}
+          />
         )}
       />
 

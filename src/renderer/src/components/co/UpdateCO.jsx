@@ -23,6 +23,59 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const hideStatus = ["staff", "project_manager", "dept_manager"].includes(userRole);
   const showManagerApproval = ["project_manager", "dept_manager"].includes(userRole);
+  const canDelete = ["deputy_manager", "operation_executive", "admin"].includes(userRole);
+
+  const handleDelete = () => {
+    toast.info(
+      ({ closeToast }) => (
+        <div className="flex flex-col gap-3 p-1">
+          <p className="font-bold text-gray-800 text-sm">Are you sure you want to delete?</p>
+          <p className="text-xs text-gray-600 font-medium">This action cannot be undone.</p>
+          <div className="flex gap-4 items-center mt-2">
+            <button
+              onClick={async () => {
+                closeToast();
+                try {
+                  setIsSubmitting(true);
+                  const coId = coData.id || coData._id;
+                  await Service.DeleteChangeOrderById(coId);
+                  toast.success("Change Order deleted successfully!", {
+                    position: "bottom-right",
+                  });
+                  if (onSuccess) await onSuccess(true);
+                  onClose();
+                } catch (error) {
+                  console.error(error);
+                  toast.error("Failed to delete change order");
+                } finally {
+                  setIsSubmitting(false);
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md active:scale-95"
+            >
+              Confirm Delete
+            </button>
+            <button
+              onClick={closeToast}
+              className="text-gray-500 hover:text-gray-800 text-xs font-bold transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        closeButton: false,
+        position: "top-center",
+        className: "shadow-2xl rounded-2xl border border-gray-100",
+        style: { width: "320px" },
+      },
+    );
+  };
+
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingRows, setLoadingRows] = useState(true);
@@ -824,33 +877,47 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
           </section>
 
           {/* Footer Actions */}
-          <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 bg-white sticky bottom-0 z-10 -m-6 p-6 mt-0">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="px-6 border-gray-200 text-gray-600 hover:bg-gray-50 uppercase tracking-widest text-sm font-semibold"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 px-8 uppercase tracking-widest text-sm font-semibold shadow-lg shadow-green-200 disabled:opacity-50"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Save size={14} />
-                  Update change order & table
-                </>
+          <div className="flex justify-between items-center gap-3 pt-6 border-t border-gray-100 bg-white sticky bottom-0 z-10 -m-6 p-6 mt-0">
+            <div>
+              {canDelete && (
+                <Button
+                  type="button"
+                  onClick={handleDelete}
+                  className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:text-red-700 px-6 uppercase tracking-widest text-sm font-semibold flex items-center gap-2"
+                >
+                  <Trash2 size={14} />
+                  Delete
+                </Button>
               )}
-            </Button>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                className="px-6 border-gray-200 text-gray-600 hover:bg-gray-50 uppercase tracking-widest text-sm font-semibold"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 px-8 uppercase tracking-widest text-sm font-semibold shadow-lg shadow-green-200 disabled:opacity-50"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Save size={14} />
+                    Update change order & table
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </form>
       </div>

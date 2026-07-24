@@ -31,67 +31,67 @@ const AllRFI = ({ rfiData, onUpdate }) => {
   const [cdFilter, setCdFilter] = useState('sent')
   const [searchQuery, setSearchQuery] = useState('')
 
-  useEffect(() => {
-    const fetchRFIs = async () => {
-      try {
-        setLoading(true)
-        const [sentRes, receivedRes] = await Promise.all([Service.RfiSent(), Service.RfiRecieved()])
+  const fetchRFIs = async () => {
+    try {
+      setLoading(true)
+      const [sentRes, receivedRes] = await Promise.all([Service.RfiSent(), Service.RfiRecieved()])
 
-        let sentArray = []
-        if (sentRes) {
-          if (Array.isArray(sentRes)) {
-            sentArray = sentRes
-          } else if (Array.isArray(sentRes['show rfi'])) {
-            sentArray = sentRes['show rfi']
-          } else if (Array.isArray(sentRes.data)) {
-            sentArray = sentRes.data
-          } else if (typeof sentRes === 'object') {
-            const firstArray = Object.values(sentRes).find(Array.isArray)
-            if (firstArray) sentArray = firstArray
-          }
+      let sentArray = []
+      if (sentRes) {
+        if (Array.isArray(sentRes)) {
+          sentArray = sentRes
+        } else if (Array.isArray(sentRes['show rfi'])) {
+          sentArray = sentRes['show rfi']
+        } else if (Array.isArray(sentRes.data)) {
+          sentArray = sentRes.data
+        } else if (typeof sentRes === 'object') {
+          const firstArray = Object.values(sentRes).find(Array.isArray)
+          if (firstArray) sentArray = firstArray
         }
-
-        let receivedArray = []
-        if (receivedRes) {
-          if (Array.isArray(receivedRes)) {
-            receivedArray = receivedRes
-          } else if (Array.isArray(receivedRes['show rfi'])) {
-            receivedArray = receivedRes['show rfi']
-          } else if (Array.isArray(receivedRes.data)) {
-            receivedArray = receivedRes.data
-          } else if (typeof receivedRes === 'object') {
-            const firstArray = Object.values(receivedRes).find(Array.isArray)
-            if (firstArray) receivedArray = firstArray
-          }
-        }
-
-        const normalizedSent = sentArray.map((item) => ({
-          ...item,
-          createdAt: item.createdAt || item.date || null,
-          _flowType: 'sent'
-        }))
-
-        const normalizedReceived = receivedArray.map((item) => ({
-          ...item,
-          createdAt: item.createdAt || item.date || null,
-          _flowType: 'received'
-        }))
-
-        const combined = [...normalizedSent]
-        normalizedReceived.forEach((item) => {
-          if (!combined.some((c) => c.id === item.id)) {
-            combined.push(item)
-          }
-        })
-
-        setRFIs(combined)
-      } catch (error) {
-        console.error('Error fetching RFIs:', error)
-      } finally {
-        setLoading(false)
       }
-    }
 
+      let receivedArray = []
+      if (receivedRes) {
+        if (Array.isArray(receivedRes)) {
+          receivedArray = receivedRes
+        } else if (Array.isArray(receivedRes['show rfi'])) {
+          receivedArray = receivedRes['show rfi']
+        } else if (Array.isArray(receivedRes.data)) {
+          receivedArray = receivedRes.data
+        } else if (typeof receivedRes === 'object') {
+          const firstArray = Object.values(receivedRes).find(Array.isArray)
+          if (firstArray) receivedArray = firstArray
+        }
+      }
+
+      const normalizedSent = sentArray.map((item) => ({
+        ...item,
+        createdAt: item.createdAt || item.date || null,
+        _flowType: 'sent'
+      }))
+
+      const normalizedReceived = receivedArray.map((item) => ({
+        ...item,
+        createdAt: item.createdAt || item.date || null,
+        _flowType: 'received'
+      }))
+
+      const combined = [...normalizedSent]
+      normalizedReceived.forEach((item) => {
+        if (!combined.some((c) => c.id === item.id)) {
+          combined.push(item)
+        }
+      })
+
+      setRFIs(combined)
+    } catch (error) {
+      console.error('Error fetching RFIs:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
     if (rfiData === undefined) {
       fetchRFIs()
     } else {
@@ -472,7 +472,19 @@ const AllRFI = ({ rfiData, onUpdate }) => {
         <DataTable
           columns={columns}
           data={finalRfis}
-          detailComponent={({ row, close }) => <GetRFIByID id={row.id} onClose={close} onUpdate={onUpdate} />}
+          detailComponent={({ row, close }) => (
+            <GetRFIByID
+              id={row.id}
+              onClose={(wasDeleted) => {
+                close()
+                if (wasDeleted === true) {
+                  if (onUpdate) onUpdate()
+                  else fetchRFIs()
+                }
+              }}
+              onUpdate={onUpdate}
+            />
+          )}
         />
       )}
 

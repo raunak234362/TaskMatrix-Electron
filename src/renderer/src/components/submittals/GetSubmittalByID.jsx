@@ -557,9 +557,13 @@ const GetSubmittalByID = ({ id, onClose }) => {
         <UpdateSubmittalById
           submittal={submittal}
           onClose={() => setShowUpdateModal(false)}
-          onSuccess={() => {
+          onSuccess={(isDeleted) => {
             setShowUpdateModal(false)
-            fetchData()
+            if (isDeleted) {
+              if (onClose) onClose(true)
+            } else {
+              fetchData()
+            }
           }}
         />
       )}
