@@ -158,8 +158,9 @@ const CoordinationDrawingDetails = ({ drawingId, onBack }) => {
         parentId,
         fileId
       );
-      if (response.shareUrl) {
-        await navigator.clipboard.writeText(response.shareUrl);
+      const shareUrl = response?.shareUrl || response?.data?.shareUrl;
+      if (shareUrl) {
+        await navigator.clipboard.writeText(shareUrl);
         toast.success("Link copied to clipboard!");
       } else {
         toast.error("Failed to generate link");
