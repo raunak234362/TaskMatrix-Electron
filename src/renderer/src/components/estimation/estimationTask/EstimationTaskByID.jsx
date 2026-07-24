@@ -28,6 +28,8 @@ import CreateLineItemGroup from '../estimationLineItem/CreateLineItemGroup'
 import LineItemGroup from '../estimationLineItem/LineItemGroup'
 import EditEstimationTaskByID from './EditEstimationTaskByID'
 import ReviewEstimationTaskModal from './ReviewEstimationTaskModal'
+import Comment from '../../task/comments/Comment'
+
 
 // Helper Components
 const InfoItem = ({ icon, label, value }) => (
@@ -85,6 +87,7 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
   const [isEditing, setIsEditing] = useState(false)
   const [showStatusModal, setShowStatusModal] = useState(false)
   const [showReviewModal, setShowReviewModal] = useState(false)
+  const [staffData, setStaffData] = useState([])
 
   const userRole = sessionStorage.getItem('userRole')
   const canEdit = ['ESTIMATION_HEAD', 'OPERATION_EXECUTIVE', 'DEPUTY_MANAGER'].includes(userRole)
@@ -109,6 +112,15 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
 
   useEffect(() => {
     fetchTask()
+    const fetchStaff = async () => {
+      try {
+        const data = await Service.FetchAllEmployee()
+        setStaffData(data || [])
+      } catch (err) {
+        console.error('Failed to fetch staff', err)
+      }
+    }
+    fetchStaff()
 
     const handleTaskUpdated = () => {
       fetchTask();
@@ -260,9 +272,7 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
         </div>
       </div>
     )
-  }
-
-  return (
+  }  return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full h-[95vh] overflow-hidden flex flex-col">
         {/* Header */}
@@ -494,6 +504,37 @@ export default function EstimationTaskByID({ id, onClose, refresh }) {
               )}
             </div>
           )}
+
+          {/* Comments Section */}
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-6">
+            <Comment
+              comments={task?.comment || task?.estimationtaskcomment || task?.taskcomment || task?.comments || []}
+              onAddComment={(commentData) =>
+                Service.AddEstimationTaskComment(task.id, sessionStorage.getItem('userId'), commentData.comment)
+                  .then(() => {
+                    toast.success('Comment added successfully')
+                    fetchTask()
+                  })
+                  .catch((err) => {
+                    console.error(err)
+                    toast.error('Failed to add comment')
+                  })
+              }
+              staffData={staffData}
+              onAcknowledge={(commentId) =>
+                Service.AcknowledgeEstimationTaskComment(commentId)
+                  .then(() => {
+                    toast.success('Comment acknowledged')
+                    fetchTask()
+                  })
+                  .catch((err) => {
+                    console.error(err)
+                    toast.error('Failed to acknowledge comment')
+                  })
+              }
+              cardRounded="rounded-2xl"
+            />
+          </div>
 
           {/* Line Item Groups Section */}
           <div className="border-t pt-8">

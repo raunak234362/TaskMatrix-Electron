@@ -1,8 +1,8 @@
-import { MessagesSquare, Check } from 'lucide-react'
+import { MessagesSquare, Check, Calendar } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import RichTextEditor from '../../fields/RichTextEditor'
 
-const Comment = ({ comments, onAddComment, staffData, onAcknowledge }) => {
+const Comment = ({ comments, onAddComment, staffData, onAcknowledge, cardRounded = 'rounded-none' }) => {
   const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
   const {
     control,
@@ -57,72 +57,88 @@ const Comment = ({ comments, onAddComment, staffData, onAcknowledge }) => {
             {comments?.map((comment, index) => (
               <div
                 key={index}
-                className="p-4 bg-[#fcfdfc] border border-black rounded-none shadow-sm"
+                className={`bg-white ${cardRounded} border border-gray-200 shadow-sm transition-all duration-300 overflow-hidden flex flex-col p-5`}
+                style={{
+                  borderLeftWidth: '6px',
+                  borderLeftColor: '#2563eb'
+                }}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center justify-center w-8 h-8 text-black border border-black rounded-none bg-green-50 text-sm font-bold uppercase">
-                      {(Array.isArray(staffData) ? staffData : [])
-                        ?.find((staff) => staff?.id === comment?.user_id)
-                        ?.f_name?.charAt(0) || 'U'}
+                <div className="flex-1 min-w-0">
+                  {/* Main Comment Text */}
+                  <div
+                    className="text-lg font-bold text-black uppercase tracking-tight mb-3 font-mono"
+                    dangerouslySetInnerHTML={{ __html: comment?.data }}
+                  />
+
+                  {/* Footer with User, Timestamp, and Acknowledge */}
+                  <div className="flex flex-wrap items-center justify-between gap-4 mt-2 border-t border-gray-100 pt-3">
+                    <div className="flex items-center gap-4 text-xs font-normal text-black uppercase tracking-widest">
+                      {(comment?.user || comment?.user_id) && (
+                        <span className="flex items-center gap-1.5 bg-gray-100 px-2.5 py-0.5 rounded-full text-black font-semibold">
+                          {comment?.user
+                            ? `${comment.user.firstName || ''} ${comment.user.middleName || ''} ${comment.user.lastName || ''}`.replace(/\s+/g, ' ').trim()
+                            : (() => {
+                                const staff = (Array.isArray(staffData) ? staffData : []).find(
+                                  (s) => s?.id === comment?.user_id
+                                )
+                                return staff ? `${staff.f_name || ''} ${staff.m_name || ''} ${staff.l_name || ''}`.replace(/\s+/g, ' ').trim() : 'User'
+                              })()}
+                        </span>
+                      )}
+                      {comment?.created_on && (
+                        <span className="flex items-center gap-1 text-black">
+                          <Calendar size={12} className="text-black" />
+                          {new Intl.DateTimeFormat('en-IN', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }).format(new Date(comment.created_on))}
+                        </span>
+                      )}
                     </div>
-                    <span className="text-sm font-bold text-black uppercase">
-                      {comment?.user?.firstName} {comment?.user?.middleName}{' '}
-                      {comment?.user?.lastName}
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-sm font-bold text-black uppercase">
-                      {new Date(comment?.created_on).toLocaleString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </span>
+
                     {/* Acknowledge Logic */}
-                    {comment.acknowledged ? (
-                      <div className="flex items-center gap-1 text-sm text-green-600 font-bold uppercase">
-                        <Check className="w-3 h-3 text-green-600" />
-                        <span>Read</span>
-                        {comment.acknowledgedTime && (
-                          <span className="text-black font-bold ml-1 uppercase">
-                            at{' '}
-                            {new Date(comment.acknowledgedTime).toLocaleString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      <>
-                        {userRole !== 'staff' && (
-                          <button
-                            onClick={() =>
-                              onAcknowledge(comment.id, {
-                                acknowledged: true,
-                                acknowledgedTime: new Date()
-                              })
-                            }
-                            className="flex items-center gap-1 px-3 py-1 bg-cyan-50 text-black border-2 border-cyan-700/80 rounded-none hover:bg-cyan-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
-                          >
-                            <Check className="w-3 h-3 text-black" />
-                            Acknowledge
-                          </button>
-                        )}
-                      </>
-                    )}
+                    <div>
+                      {comment.acknowledged ? (
+                        <div className="flex items-center gap-1 text-xs text-green-600 font-bold uppercase tracking-wider">
+                          <Check className="w-3.5 h-3.5 text-green-600" />
+                          <span>Read</span>
+                          {comment.acknowledgedTime && (
+                            <span className="text-black font-bold ml-1">
+                              at{' '}
+                              {new Intl.DateTimeFormat('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              }).format(new Date(comment.acknowledgedTime))}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <>
+                          {userRole !== 'staff' && (
+                            <button
+                              onClick={() =>
+                                onAcknowledge(comment.id, {
+                                  acknowledged: true,
+                                  acknowledgedTime: new Date()
+                                })
+                              }
+                              className="flex items-center gap-1 px-3 py-1 bg-cyan-50 text-black border border-cyan-700/80 rounded-none hover:bg-cyan-100 transition-all font-bold text-xs uppercase tracking-wider shadow-sm cursor-pointer"
+                            >
+                              <Check className="w-3 h-3 text-black" />
+                              Acknowledge
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div
-                  className="pl-10 text-black text-sm font-bold uppercase whitespace-pre-line"
-                  dangerouslySetInnerHTML={{ __html: comment?.data }}
-                />
               </div>
             ))}
           </div>

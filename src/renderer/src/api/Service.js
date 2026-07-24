@@ -2725,6 +2725,36 @@ class Service {
     }
   }
 
+  // Add Estimation Task Comment
+  static async AddEstimationTaskComment(estimationTaskId, userId, commentText) {
+    try {
+      const payload = {
+        estimationTaskId,
+        task_id: '',
+        user_id: userId ? Number(userId) : null,
+        data: commentText
+      }
+      return await this.AddTaskComment(payload)
+    } catch (error) {
+      console.error('Error adding estimation task comment:', error)
+      throw error
+    }
+  }
+
+  // Acknowledge Estimation Task Comment
+  static async AcknowledgeEstimationTaskComment(commentId) {
+    try {
+      const payload = {
+        acknowledged: true,
+        acknowledgedTime: new Date()
+      }
+      return await this.AddTaskCommentAcknowledged(commentId, payload)
+    } catch (error) {
+      console.error('Error acknowledging estimation task comment:', error)
+      throw error
+    }
+  }
+
   // Get User Stats
   static async getUsersStats(userId) {
     try {
