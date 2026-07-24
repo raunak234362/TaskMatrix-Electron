@@ -66,7 +66,7 @@ const LineItemList = ({ id, onClose }) => {
    */
   const getGroupMetrics = () => {
     if (!groupData) {
-      return { divisor: 0, displayHours: 0, displayWeeks: 0, displayDays: 0 }
+      return { divisor: 0, displayHours: 0, displayWeeks: 0, displayDays: null, fabStandards: 0, grandTotalHours: 0 }
     }
 
     const divisor = groupData?.group?.divisor !== null && groupData?.group?.divisor !== undefined
@@ -93,21 +93,31 @@ const LineItemList = ({ id, onClose }) => {
           ? Number(groupData.totalDays)
           : null)
 
+    const fabStandards = groupData?.group?.fabStandards !== null && groupData?.group?.fabStandards !== undefined
+      ? Number(groupData.group.fabStandards)
+      : (groupData?.fabStandards !== null && groupData?.fabStandards !== undefined
+          ? Number(groupData.fabStandards)
+          : 0)
+
     const displayHours = savedHours !== null ? savedHours : tableHours
 
     const displayWeeks = savedWeeks !== null
       ? savedWeeks
       : (divisor > 0 ? (tableHours / divisor) : 0)
 
-    const displayDays = savedDays !== null
-      ? savedDays
-      : (savedWeeks !== null ? (savedWeeks * 5) : (displayWeeks * 5))
+    // Manual input only: displayDays is null if not explicitly set
+    const displayDays = savedDays !== null ? savedDays : null
+
+    // Grand total hours: totalHours + totalHours * (fabStandards / 100)
+    const grandTotalHours = displayHours + (displayHours * (fabStandards / 100))
 
     return {
       divisor,
       displayHours,
       displayWeeks,
-      displayDays
+      displayDays,
+      fabStandards,
+      grandTotalHours
     }
   }
 
@@ -119,10 +129,11 @@ const LineItemList = ({ id, onClose }) => {
     setGroupFormData({
       name: groupData?.group?.name || '',
       description: groupData?.group?.description || '',
-      totalHours: metrics.displayHours.toFixed(2),
-      divisor: metrics.divisor.toFixed(2),
-      weeks: metrics.displayWeeks.toFixed(2),
-      days: metrics.displayDays.toFixed(2)
+      totalHours: typeof metrics.displayHours === 'number' ? metrics.displayHours.toFixed(2) : '',
+      divisor: typeof metrics.divisor === 'number' ? metrics.divisor.toFixed(2) : '',
+      weeks: typeof metrics.displayWeeks === 'number' ? metrics.displayWeeks.toFixed(2) : '',
+      days: typeof metrics.displayDays === 'number' && metrics.displayDays !== null ? metrics.displayDays.toFixed(2) : '',
+      fabStandards: typeof metrics.fabStandards === 'number' ? metrics.fabStandards.toFixed(2) : ''
     })
   }
 
@@ -140,7 +151,8 @@ const LineItemList = ({ id, onClose }) => {
         divisor: Number(groupFormData.divisor),
         totalWeeks: Number(groupFormData.weeks),
         weeks: Number(groupFormData.weeks),
-        totalDays: Number(groupFormData.days)
+        totalDays: groupFormData.days !== '' && groupFormData.days !== null && groupFormData.days !== undefined ? Number(groupFormData.days) : null,
+        fabStandards: groupFormData.fabStandards !== '' && groupFormData.fabStandards !== null && groupFormData.fabStandards !== undefined ? Number(groupFormData.fabStandards) : null
       }
       await Service.UpdateGroupById(id, payload)
 
@@ -156,7 +168,8 @@ const LineItemList = ({ id, onClose }) => {
                 divisor: payload.divisor,
                 totalHours: payload.totalHours,
                 totalWeeks: payload.totalWeeks,
-                totalDays: payload.totalDays
+                totalDays: payload.totalDays,
+                fabStandards: payload.fabStandards
               }
             }
           : null
@@ -471,8 +484,8 @@ const LineItemList = ({ id, onClose }) => {
   ])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white w-full max-w-5xl rounded-none border border-gray-300 shadow-2xl overflow-hidden p-6 h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-xs">
+      <div className="bg-white w-full max-w-[95vw] xl:max-w-[90vw] 2xl:max-w-[85vw] rounded-none border border-gray-300 shadow-2xl overflow-hidden p-6 h-[95vh] flex flex-col">
         {/* Header and Controls */}
         <div className="flex flex-col gap-3 mb-6 sticky top-0 bg-white z-10">
           <div className="flex justify-between items-center">
@@ -553,37 +566,9 @@ const LineItemList = ({ id, onClose }) => {
               </div>
 
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 pt-4 border-t border-gray-200">
-                <div className="flex flex-wrap gap-4">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm text-black font-bold uppercase tracking-wider">
-                      Weeks
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={groupFormData.weeks || ''}
-                      onChange={(e) => handleMetricChange(e.target.value, 'weeks')}
-                      className="w-24 px-3 py-1.5 border border-gray-300 rounded-none focus:outline-none focus:border-green-700 bg-white text-black text-sm font-medium"
-                      placeholder="Weeks"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm text-black font-bold uppercase tracking-wider">
-                      Days
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={groupFormData.days || ''}
-                      onChange={(e) => handleMetricChange(e.target.value, 'days')}
-                      className="w-24 px-3 py-1.5 border border-gray-300 rounded-none focus:outline-none focus:border-green-700 bg-white text-black text-sm font-medium"
-                      placeholder="Days"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm text-black font-bold uppercase tracking-wider">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 flex-1 w-full">
+                  <div className="flex flex-col gap-1 w-full">
+                    <label className="text-xs text-black font-bold uppercase tracking-wider truncate">
                       Total Hours
                     </label>
                     <input
@@ -591,13 +576,27 @@ const LineItemList = ({ id, onClose }) => {
                       step="0.01"
                       value={groupFormData.totalHours || ''}
                       onChange={(e) => handleMetricChange(e.target.value, 'totalHours')}
-                      className="w-28 px-3 py-1.5 border border-gray-300 rounded-none focus:outline-none focus:border-green-700 bg-white text-black text-sm font-medium"
+                      className="w-full px-3 py-1.5 border border-gray-300 rounded-none focus:outline-none focus:border-green-700 bg-white text-black text-sm font-medium"
                       placeholder="Total Hours"
                     />
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm text-black font-bold uppercase tracking-wider">
+                  <div className="flex flex-col gap-1 w-full">
+                    <label className="text-xs text-black font-bold uppercase tracking-wider truncate">
+                      FAB Standards (%)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={groupFormData.fabStandards || ''}
+                      onChange={(e) => handleMetricChange(e.target.value, 'fabStandards')}
+                      className="w-full px-3 py-1.5 border border-gray-300 rounded-none focus:outline-none focus:border-green-700 bg-white text-black text-sm font-medium"
+                      placeholder="FAB Standards"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1 w-full">
+                    <label className="text-xs text-black font-bold uppercase tracking-wider truncate">
                       Hours / Week (Div)
                     </label>
                     <input
@@ -605,13 +604,41 @@ const LineItemList = ({ id, onClose }) => {
                       step="0.01"
                       value={groupFormData.divisor || ''}
                       onChange={(e) => handleMetricChange(e.target.value, 'divisor')}
-                      className="w-28 px-3 py-1.5 border border-gray-300 rounded-none focus:outline-none focus:border-green-700 bg-white text-black text-sm font-medium"
+                      className="w-full px-3 py-1.5 border border-gray-300 rounded-none focus:outline-none focus:border-green-700 bg-white text-black text-sm font-medium"
                       placeholder="Divisor"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1 w-full">
+                    <label className="text-xs text-black font-bold uppercase tracking-wider truncate">
+                      Weeks
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={groupFormData.weeks || ''}
+                      onChange={(e) => handleMetricChange(e.target.value, 'weeks')}
+                      className="w-full px-3 py-1.5 border border-gray-300 rounded-none focus:outline-none focus:border-green-700 bg-white text-black text-sm font-medium"
+                      placeholder="Weeks"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1 w-full">
+                    <label className="text-xs text-black font-bold uppercase tracking-wider truncate">
+                      Days
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={groupFormData.days || ''}
+                      onChange={(e) => handleMetricChange(e.target.value, 'days')}
+                      className="w-full px-3 py-1.5 border border-gray-300 rounded-none focus:outline-none focus:border-green-700 bg-white text-black text-sm font-medium"
+                      placeholder="Days"
                     />
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 shrink-0 sm:ml-4">
                   <button
                     onClick={handleGroupSaveClick}
                     className="px-4 py-2 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 transition-all font-bold text-xs uppercase tracking-wider rounded-none shadow-sm cursor-pointer"
@@ -644,51 +671,79 @@ const LineItemList = ({ id, onClose }) => {
               </div>
 
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t border-gray-200">
-                <div className="flex flex-wrap gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 flex-1">
+                  {/* TOTAL HOURS Card */}
+                  <div className="flex items-center gap-3 bg-white p-4 border border-gray-300 w-full min-w-0">
+                    <Clock className="w-5 h-5 text-green-700 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-black font-medium uppercase tracking-wider truncate">
+                        Total Hours
+                      </p>
+                      <span className="text-sm font-bold text-black truncate block">
+                        {Number(getGroupMetrics().displayHours).toFixed(2)} hrs
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* FAB STANDARDS Card */}
+                  <div className="flex items-center gap-3 bg-white p-4 border border-gray-300 w-full min-w-0">
+                    <Clock className="w-5 h-5 text-green-700 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-black font-medium uppercase tracking-wider truncate">
+                        Fab Standards
+                      </p>
+                      <span className="text-sm font-bold text-black truncate block">
+                        {Number(getGroupMetrics().fabStandards).toFixed(2)}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* GRAND TOTAL HOURS Card */}
+                  <div className="flex items-center gap-3 bg-white p-4 border border-gray-300 w-full min-w-0">
+                    <Clock className="w-5 h-5 text-green-700 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-black font-medium uppercase tracking-wider truncate">
+                        Grand Total Hours
+                      </p>
+                      <span className="text-sm font-bold text-black truncate block">
+                        {Number(getGroupMetrics().grandTotalHours).toFixed(2)} hrs
+                      </span>
+                    </div>
+                  </div>
+
                   {/* WEEKS Card */}
-                  <div className="flex items-center gap-3 bg-white px-4 py-2 border border-gray-300">
-                    <Clock className="w-5 h-5 text-green-700" />
-                    <div>
-                      <p className="text-sm text-black font-medium uppercase tracking-wider">
+                  <div className="flex items-center gap-3 bg-white p-4 border border-gray-300 w-full min-w-0">
+                    <Clock className="w-5 h-5 text-green-700 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-black font-medium uppercase tracking-wider truncate">
                         Weeks
                       </p>
-                      <span className="text-sm font-bold text-black">
+                      <span className="text-sm font-bold text-black truncate block">
                         {Number(getGroupMetrics().displayWeeks).toFixed(2)}
                       </span>
                     </div>
                   </div>
 
                   {/* DAYS Card */}
-                  <div className="flex items-center gap-3 bg-white px-4 py-2 border border-gray-300">
-                    <Clock className="w-5 h-5 text-green-700" />
-                    <div>
-                      <p className="text-sm text-black font-medium uppercase tracking-wider">
+                  <div className="flex items-center gap-3 bg-white p-4 border border-gray-300 w-full min-w-0">
+                    <Clock className="w-5 h-5 text-green-700 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-black font-medium uppercase tracking-wider truncate">
                         Days
                       </p>
-                      <span className="text-sm font-bold text-black">
-                        {Number(getGroupMetrics().displayDays).toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* TOTAL HOURS Card */}
-                  <div className="flex items-center gap-3 bg-white px-4 py-2 border border-gray-300">
-                    <Clock className="w-5 h-5 text-green-700" />
-                    <div>
-                      <p className="text-sm text-black font-medium uppercase tracking-wider">
-                        Total Hours
-                      </p>
-                      <span className="text-sm font-bold text-black">
-                        {Number(getGroupMetrics().displayHours).toFixed(2)} hrs
+                      <span className="text-sm font-bold text-black truncate block">
+                        {getGroupMetrics().displayDays !== null
+                          ? Number(getGroupMetrics().displayDays).toFixed(2)
+                          : '-'}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div>
+                <div className="shrink-0 sm:ml-4">
                   <button
                     onClick={handleGroupEditClick}
-                    className="px-4 py-2 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 transition-all font-bold text-xs uppercase tracking-wider rounded-none shadow-sm cursor-pointer"
+                    className="px-4 py-2 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 transition-all font-bold text-xs uppercase tracking-wider rounded-none shadow-sm cursor-pointer whitespace-nowrap"
                   >
                     Edit Details
                   </button>
