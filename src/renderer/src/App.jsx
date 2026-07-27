@@ -77,7 +77,18 @@ const AppContent = () => {
             const fullTaskRes = await Service.GetTaskById(activeTask.id.toString())
             const fullTask = fullTaskRes?.data || fullTaskRes || activeTask
             
-            const activeWorkID = fullTask.workingHourTask?.find((wh) => wh.ended_at === null)?.id
+            let active = fullTask.workingHourTask?.find((wh) => {
+              return wh.ended_at === null || wh.ended_at === undefined || String(wh.ended_at).toLowerCase() === 'null' || !wh.ended_at
+            })
+            if (!active && fullTask.workingHourTask && fullTask.workingHourTask.length > 0) {
+              const sorted = [...fullTask.workingHourTask].sort((a, b) => {
+                const dateA = a.started_at ? new Date(a.started_at).getTime() : 0
+                const dateB = b.started_at ? new Date(b.started_at).getTime() : 0
+                return dateB - dateA
+              })
+              active = sorted[0]
+            }
+            const activeWorkID = active ? (active.id || active._id || null) : null
             if (activeWorkID) {
               toast.info(`Sending pause request for task ${activeTask.id}...`, { autoClose: 10000 })
               await Service.TaskPause(activeTask.id.toString(), { whId: activeWorkID })

@@ -147,7 +147,14 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
   }
 
   const getActiveWorkID = () => {
-    return task?.workingHourTask?.find((wh) => wh.ended_at === null)?.id || null
+    console.log('FetchTaskByID getActiveWorkID: task?.workingHourTask is:', task?.workingHourTask)
+    const active = task?.workingHourTask?.find((wh) => {
+      return wh.ended_at === null || wh.ended_at === undefined || String(wh.ended_at).toLowerCase() === 'null' || !wh.ended_at
+    })
+    console.log('FetchTaskByID getActiveWorkID: Found active session:', active)
+    const id = active ? (active.id || active._id || null) : null
+    console.log('FetchTaskByID getActiveWorkID: Resolved ID:', id)
+    return id
   }
 
   const activeWorkID = getActiveWorkID()
@@ -185,33 +192,69 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
   }
 
   const handleAction = async (action) => {
+    console.log('FetchTaskByID handleAction action:', action, 'task?.id:', task?.id, 'activeWorkID:', activeWorkID)
     if (!task?.id) return
     try {
       setProcessing(true)
       const taskId = task.id.toString()
       switch (action) {
         case 'start':
+          console.log('FetchTaskByID handleAction start taskId:', taskId)
           await Service.TaskStart(taskId)
           toast.success('Task started')
           break
-        case 'pause':
-          if (!activeWorkID) return toast.warning('No active session to pause')
-          await Service.TaskPause(taskId, { whId: activeWorkID })
+        case 'pause': {
+          console.log('FetchTaskByID handleAction pause taskId:', taskId, 'activeWorkID:', activeWorkID)
+          let whIdToUse = activeWorkID
+          if (!whIdToUse) {
+            console.warn('FetchTaskByID handleAction pause: no active session found. Attempting self-healing resume...')
+            await Service.TaskResume(taskId)
+            const freshTaskRes = await Service.GetTaskById(taskId)
+            const freshTask = freshTaskRes?.data || freshTaskRes
+            const freshActive = freshTask?.workingHourTask?.find((wh) => {
+              return wh.ended_at === null || wh.ended_at === undefined || String(wh.ended_at).toLowerCase() === 'null' || !wh.ended_at
+            })
+            whIdToUse = freshActive?.id || freshActive?._id
+            console.log('FetchTaskByID handleAction pause: Self-healing resolved new session ID:', whIdToUse)
+            if (!whIdToUse) {
+              return toast.error('Failed to auto-resume task session to pause it. Please try again.')
+            }
+          }
+          await Service.TaskPause(taskId, { whId: whIdToUse })
           toast.info('Task paused')
           break
+        }
         case 'resume':
+          console.log('FetchTaskByID handleAction resume taskId:', taskId)
           await Service.TaskResume(taskId)
           toast.success('Task resumed')
           break
-        case 'end':
-          if (!activeWorkID) return toast.warning('No active session to end')
-          await Service.TaskEnd(taskId, { whId: activeWorkID })
+        case 'end': {
+          console.log('FetchTaskByID handleAction end taskId:', taskId, 'activeWorkID:', activeWorkID)
+          let whIdToUse = activeWorkID
+          if (!whIdToUse) {
+            console.warn('FetchTaskByID handleAction end: no active session found. Attempting self-healing resume...')
+            await Service.TaskResume(taskId)
+            const freshTaskRes = await Service.GetTaskById(taskId)
+            const freshTask = freshTaskRes?.data || freshTaskRes
+            const freshActive = freshTask?.workingHourTask?.find((wh) => {
+              return wh.ended_at === null || wh.ended_at === undefined || String(wh.ended_at).toLowerCase() === 'null' || !wh.ended_at
+            })
+            whIdToUse = freshActive?.id || freshActive?._id
+            console.log('FetchTaskByID handleAction end: Self-healing resolved new session ID:', whIdToUse)
+            if (!whIdToUse) {
+              return toast.error('Failed to auto-resume task session to end it. Please try again.')
+            }
+          }
+          await Service.TaskEnd(taskId, { whId: whIdToUse })
           toast.success('Task completed')
           break
+        }
       }
       await fetchTask()
       if (refresh) refresh()
     } catch (error) {
+      console.error('FetchTaskByID handleAction error:', error)
       toast.error('Action failed. Please try again.')
     } finally {
       setProcessing(false)
@@ -234,13 +277,37 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
       toast.warning('Please select the completion percentage')
       return
     }
-    if (!task?.id || !activeWorkID) return
+    console.log('FetchTaskByID handleEndTask task?.id:', task?.id, 'activeWorkID:', activeWorkID)
+    
+    let whIdToUse = activeWorkID
+    const taskId = task?.id?.toString()
+    if (!taskId) return
+
+    if (!whIdToUse) {
+      console.warn('FetchTaskByID handleEndTask: no active session found. Attempting self-healing resume...')
+      try {
+        await Service.TaskResume(taskId)
+        const freshTaskRes = await Service.GetTaskById(taskId)
+        const freshTask = freshTaskRes?.data || freshTaskRes
+        const freshActive = freshTask?.workingHourTask?.find((wh) => {
+          return wh.ended_at === null || wh.ended_at === undefined || String(wh.ended_at).toLowerCase() === 'null' || !wh.ended_at
+        })
+        whIdToUse = freshActive?.id || freshActive?._id
+        console.log('FetchTaskByID handleEndTask: Self-healing resolved new session ID:', whIdToUse)
+      } catch (resumeErr) {
+        console.error('FetchTaskByID handleEndTask: Self-healing resume failed:', resumeErr)
+      }
+      if (!whIdToUse) {
+        toast.error('Cannot end task: No active session could be started.')
+        return
+      }
+    }
 
     try {
       setProcessing(true)
-      const taskId = task.id.toString()
 
       // Step 1: Update Task Completion Percentage
+      console.log('FetchTaskByID handleEndTask: Updating task completion percentage to:', completionPercentage)
       await Service.UpdateTaskById(taskId, {
         lineItemCompletion: completionPercentage
       })
@@ -264,10 +331,12 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
           </div>
         `
       }
+      console.log('FetchTaskByID handleEndTask: Adding comment:', commentPayload)
       await Service.AddTaskComment(commentPayload)
 
       // Step 3: End the task session
-      await Service.TaskEnd(taskId, { whId: activeWorkID })
+      console.log('FetchTaskByID handleEndTask: Ending task session with activeWorkID:', whIdToUse)
+      await Service.TaskEnd(taskId, { whId: whIdToUse })
 
       toast.success('Task completed successfully')
       setIsEndModalOpen(false)
@@ -276,7 +345,7 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
       await fetchTask()
       if (refresh) refresh()
     } catch (error) {
-      console.error(error)
+      console.error('FetchTaskByID handleEndTask error:', error)
       toast.error('Failed to end task. Please try again.')
     } finally {
       setProcessing(false)

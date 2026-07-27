@@ -2631,6 +2631,7 @@ class Service {
       return response.data
     } catch (error) {
       console.error('cannot find Task', error)
+      throw error
     }
   }
 
@@ -2650,6 +2651,7 @@ class Service {
       return response.data
     } catch (error) {
       console.error('cannot find Task', error)
+      throw error
     }
   }
 
@@ -2665,6 +2667,7 @@ class Service {
       return response.data
     } catch (error) {
       console.error('cannot find Task', error)
+      throw error
     }
   }
 
@@ -2680,6 +2683,7 @@ class Service {
       return response.data
     } catch (error) {
       console.error('cannot find Task', error)
+      throw error
     }
   }
 
