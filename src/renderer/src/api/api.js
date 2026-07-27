@@ -5,7 +5,8 @@ const instance = axios.create()
 
 // Request interceptor to set the dynamic baseURL for every request
 instance.interceptors.request.use((config) => {
-  const currentBaseURL = getApiUrl()
+  // In development, we use the relative path '/v1/' to route requests through the Vite dev server proxy and avoid CORS errors.
+  const currentBaseURL = import.meta.env.DEV ? '/v1/' : getApiUrl()
   config.baseURL = currentBaseURL
 
   // Update defaults as well so any direct access to instance.defaults.baseURL is accurate

@@ -143,17 +143,27 @@ app.whenReady().then(() => {
     })
   })
 
-  // Safer CSP handling
+  // Safer CSP handling and CORS injection
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const csp = is.dev
       ? "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
-      : "default-src 'self'; script-src 'self'; connect-src 'self' https://project-station.whiteboardtec.com:5160 wss://project-station.whiteboardtec.com:5160 http://192.168.1.157:5160 ws://192.168.1.157:5160 https://api.github.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; object-src 'none';"
+      : "default-src 'self'; script-src 'self'; connect-src 'self' https://project-station.whiteboardtec.com:* wss://project-station.whiteboardtec.com:* http://192.168.1.157:* ws://192.168.1.157:* https://api.github.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; object-src 'none';"
+
+    const responseHeaders = {
+      ...details.responseHeaders,
+      'Content-Security-Policy': [csp]
+    }
+
+    // Bypass CORS for local backend and deployed backend
+    const url = details.url.toLowerCase()
+    if (url.includes('192.168.1.157') || url.includes('project-station.whiteboardtec.com')) {
+      responseHeaders['Access-Control-Allow-Origin'] = ['*']
+      responseHeaders['Access-Control-Allow-Headers'] = ['*']
+      responseHeaders['Access-Control-Allow-Methods'] = ['*']
+    }
 
     callback({
-      responseHeaders: {
-        ...details.responseHeaders,
-        'Content-Security-Policy': [csp]
-      }
+      responseHeaders
     })
   })
 
