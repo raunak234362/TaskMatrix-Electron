@@ -27,11 +27,17 @@ jobs:
         run: npm install
 
       - name: Create .env file
+        shell: bash
         run: |
-          echo VITE_BASE_URL=${{ secrets.VITE_BASE_URL }} > .env
-          echo VITE_SOCKET_URL=${{ secrets.VITE_SOCKET_URL }} >> .env
-          echo VITE_GITHUB_TOKEN_WBTIT=${{ secrets.VITE_GITHUB_TOKEN_WBTIT }} >> .env
-          echo VITE_GITHUB_TOKEN_RAUNAK=${{ secrets.VITE_GITHUB_TOKEN_RAUNAK }} >> .env
+          echo "VITE_BASE_URL=$VITE_BASE_URL" > .env
+          echo "VITE_SOCKET_URL=$VITE_SOCKET_URL" >> .env
+          echo "VITE_GITHUB_TOKEN_WBTIT=$VITE_GITHUB_TOKEN_WBTIT" >> .env
+          echo "VITE_GITHUB_TOKEN_RAUNAK=$VITE_GITHUB_TOKEN_RAUNAK" >> .env
+        env:
+          VITE_BASE_URL: ${{ secrets.VITE_BASE_URL }}
+          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
+          VITE_GITHUB_TOKEN_WBTIT: ${{ secrets.VITE_GITHUB_TOKEN_WBTIT }}
+          VITE_GITHUB_TOKEN_RAUNAK: ${{ secrets.VITE_GITHUB_TOKEN_RAUNAK }}
 
       - name: Build Windows Installer
         run: npm run build:win
@@ -63,11 +69,17 @@ jobs:
         run: npm install
 
       - name: Create .env file
+        shell: bash
         run: |
-          echo VITE_BASE_URL=${{ secrets.VITE_BASE_URL }} > .env
-          echo VITE_SOCKET_URL=${{ secrets.VITE_SOCKET_URL }} >> .env
-          echo VITE_GITHUB_TOKEN_WBTIT=${{ secrets.VITE_GITHUB_TOKEN_WBTIT }} >> .env
-          echo VITE_GITHUB_TOKEN_RAUNAK=${{ secrets.VITE_GITHUB_TOKEN_RAUNAK }} >> .env
+          echo "VITE_BASE_URL=$VITE_BASE_URL" > .env
+          echo "VITE_SOCKET_URL=$VITE_SOCKET_URL" >> .env
+          echo "VITE_GITHUB_TOKEN_WBTIT=$VITE_GITHUB_TOKEN_WBTIT" >> .env
+          echo "VITE_GITHUB_TOKEN_RAUNAK=$VITE_GITHUB_TOKEN_RAUNAK" >> .env
+        env:
+          VITE_BASE_URL: ${{ secrets.VITE_BASE_URL }}
+          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
+          VITE_GITHUB_TOKEN_WBTIT: ${{ secrets.VITE_GITHUB_TOKEN_WBTIT }}
+          VITE_GITHUB_TOKEN_RAUNAK: ${{ secrets.VITE_GITHUB_TOKEN_RAUNAK }}
 
       - name: Build macOS App
         run: npm run build:mac
@@ -99,11 +111,17 @@ jobs:
         run: npm install
 
       - name: Create .env file
+        shell: bash
         run: |
-          echo VITE_BASE_URL=${{ secrets.VITE_BASE_URL }} > .env
-          echo VITE_SOCKET_URL=${{ secrets.VITE_SOCKET_URL }} >> .env
-          echo VITE_GITHUB_TOKEN_WBTIT=${{ secrets.VITE_GITHUB_TOKEN_WBTIT }} >> .env
-          echo VITE_GITHUB_TOKEN_RAUNAK=${{ secrets.VITE_GITHUB_TOKEN_RAUNAK }} >> .env
+          echo "VITE_BASE_URL=$VITE_BASE_URL" > .env
+          echo "VITE_SOCKET_URL=$VITE_SOCKET_URL" >> .env
+          echo "VITE_GITHUB_TOKEN_WBTIT=$VITE_GITHUB_TOKEN_WBTIT" >> .env
+          echo "VITE_GITHUB_TOKEN_RAUNAK=$VITE_GITHUB_TOKEN_RAUNAK" >> .env
+        env:
+          VITE_BASE_URL: ${{ secrets.VITE_BASE_URL }}
+          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
+          VITE_GITHUB_TOKEN_WBTIT: ${{ secrets.VITE_GITHUB_TOKEN_WBTIT }}
+          VITE_GITHUB_TOKEN_RAUNAK: ${{ secrets.VITE_GITHUB_TOKEN_RAUNAK }}
 
       - name: Build Linux App
         run: npm run build:linux
