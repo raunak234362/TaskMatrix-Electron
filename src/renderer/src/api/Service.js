@@ -3981,7 +3981,7 @@ class Service {
 
   static async viewRfqFile(Id, fileId) {
     try {
-      const response = await api.get(`rfq/followups/${Id}/${fileId}`, {
+      const response = await api.get(`rfq/followups/viewFile/${Id}/${fileId}`, {
         responseType: 'blob'
       })
       console.log('RFQ file fetched:', response.data)

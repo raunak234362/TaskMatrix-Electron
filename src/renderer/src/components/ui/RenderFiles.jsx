@@ -113,8 +113,8 @@ const RenderFiles = ({
       let shareParentId = file.documentID;
 
       if (table === "followups") {
-        shareTable = "rFQ";
-        shareParentId = rfqId;
+        shareTable = "rFQFollowUp";
+        shareParentId = file.documentID;
       }
 
       const response = await Service.createShareLink(
@@ -142,7 +142,6 @@ const RenderFiles = ({
   ) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("DEBUG: handleDownload - table:", table, "file.documentID:", file.documentID, "file.id:", file.id, "parentId (prop):", parentId);
     const downloadUrl = getDownloadUrl(table, file.documentID, file.id, file);
 
     try {
@@ -189,9 +188,6 @@ const RenderFiles = ({
   // Step 3 grouped sections
   return (
     <div className="space-y-6">
-      <div className="text-[10px] text-red-500 bg-red-50 p-1 font-mono">
-        DEBUG - Table: {table} | ParentId: {String(parentId)} | RfqId: {String(rfqId)}
-      </div>
       {/* Header */}
       <div className="flex justify-between items-center">
         {/* <h4 className="text-sm font-medium text-black">Project Files</h4> */}
