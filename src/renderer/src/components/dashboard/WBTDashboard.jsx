@@ -167,10 +167,11 @@ const WBTDashboard = () => {
     return 'Good Evening'
   }
 
-  // Handlers
   const handleProjectStatClick = (status) => {
     const filteredProjects = adminData.projects.filter(p => {
       if (status === 'ACTIVE') return !p.status || p.status.toUpperCase() === 'ACTIVE'
+      if (status === 'COMPLETED') return p.status?.toUpperCase() === 'COMPLETED' || p.status?.toUpperCase() === 'COMPLETE'
+      if (status === 'ON_HOLD') return p.status?.toUpperCase() === 'ON_HOLD' || p.status?.toUpperCase() === 'ON-HOLD'
       return p.status?.toUpperCase() === status
     })
     setProjectModal({ isOpen: true, status, data: filteredProjects })

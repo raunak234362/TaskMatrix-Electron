@@ -30,7 +30,7 @@ const ProjectListModal = ({ isOpen, onClose, status, projects, onProjectSelect }
         <span
           className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-black ${row.original.status === 'ACTIVE'
             ? 'bg-green-100 text-black'
-            : row.original.status === 'COMPLETED'
+            : row.original.status === 'COMPLETED' || row.original.status === 'COMPLETE'
               ? 'bg-blue-100 text-black shadow-sm'
               : 'bg-orange-100 text-black shadow-sm'
             }`}

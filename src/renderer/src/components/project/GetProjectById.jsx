@@ -117,6 +117,7 @@ const GetProjectById = ({ id, onClose }) => {
   const [selectedTaskId, setSelectedTaskId] = useState(null)
   const [projectTasks, setProjectTasks] = useState([])
   const [showAssistsModal, setShowAssistsModal] = useState(false)
+  const [archiving, setArchiving] = useState(false)
   const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
   const currentUserId = sessionStorage.getItem('userId')
 
@@ -162,6 +163,26 @@ const GetProjectById = ({ id, onClose }) => {
       import('react-toastify').then(({ toast }) => {
         toast.error(error?.response?.data?.message || 'Failed to remove assist')
       })
+    }
+  }
+
+  const handleArchiveProject = async () => {
+    if (!window.confirm('Are you sure you want to archive this project? This action manually triggers the file archival process.')) {
+      return
+    }
+
+    try {
+      setArchiving(true)
+      const res = await Service.ArchiveProject(id)
+      toast.success(res?.message || 'Project files archived successfully')
+      if (onClose) {
+        onClose()
+      }
+    } catch (error) {
+      console.error('Error archiving project:', error)
+      toast.error(error?.response?.data?.message || 'Failed to archive project files')
+    } finally {
+      setArchiving(false)
     }
   }
 
@@ -445,9 +466,20 @@ const GetProjectById = ({ id, onClose }) => {
         {/* Header */}
         <div className="sticky top-0 z-30 bg-[#fcfdfc] flex flex-col md:flex-row md:items-start justify-between gap-4 pb-4 border-b border-gray-100">
           <div>
-            <h2 className="text-lg md:text-2xl font-semibold text-gray-900 tracking-tight uppercase">
-              {project.name}
-            </h2>
+            <div className="flex flex-wrap items-center gap-4">
+              <h2 className="text-lg md:text-2xl font-semibold text-gray-900 tracking-tight uppercase">
+                {project.name}
+              </h2>
+              {['admin', 'deputy_manager', 'project_manager_officer', 'operation_executive'].includes(userRole) && (
+                <button
+                  className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
+                  onClick={handleArchiveProject}
+                  disabled={archiving}
+                >
+                  {archiving ? 'Archiving...' : 'Archive'}
+                </button>
+              )}
+            </div>
             <div className="flex flex-wrap items-center gap-2 mt-3">
               <span className="px-6 py-1.5 bg-gray-200 text-black border border-gray-500 rounded-none font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center">
                 PROJECT NO: {project.projectNumber || project.serialNo}
@@ -489,6 +521,7 @@ const GetProjectById = ({ id, onClose }) => {
                 </button>
               </>
             )}
+
             {onClose && (
               <button
                 onClick={onClose}

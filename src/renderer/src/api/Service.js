@@ -396,6 +396,38 @@ class Service {
     }
   }
 
+  // Delete Fabricator by ID
+  static async DeleteFabricatorByID(id) {
+    try {
+      const response = await api.delete(`fabricator/id/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Fabricator deleted:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error deleting Fabricator:', error)
+      throw error
+    }
+  }
+
+  // Delete branch by branch ID
+  static async DeleteBranchByBranchID(id) {
+    try {
+      const response = await api.delete(`fabricator/branch/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Fabricator branch deleted:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error deleting Fabricator branch:', error)
+      throw error
+    }
+  }
+
   // Add Client by Fabricator ID
   static async AddClientByFabricator(fabricatorId, data) {
     try {
@@ -1192,6 +1224,22 @@ class Service {
       return response.data
     } catch (error) {
       console.log(error)
+    }
+  }
+
+  // Archive Project Files By ID
+  static async ArchiveProject(id) {
+    try {
+      const response = await api.post(`project/projects/${id}/archive`, {}, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Project archived:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error archiving project:', error)
+      throw error
     }
   }
 

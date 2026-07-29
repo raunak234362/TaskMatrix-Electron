@@ -1,13 +1,33 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { X, MapPin, Plus, Building2, CheckCircle2 } from "lucide-react";
+import { X, MapPin, Plus, Building2, CheckCircle2, Trash2 } from "lucide-react";
 import AddBranch from "./AddBranch";
 import { useState } from "react";
+import Service from "../../../api/Service";
+import { useDispatch } from "react-redux";
+import { deleteBranchFromFabricator } from "../../../store/fabricatorSlice";
+import { toast } from "react-toastify";
 
-const AllBranches = ({ fabricator, onClose }) => {
+const AllBranches = ({ fabricator, onClose, onBranchChange }) => {
+  const dispatch = useDispatch();
   const [addBranchModal, setAddBranchModal] = useState(false);
 
   const handleOpenAddBranch = () => setAddBranchModal(true);
   const handleCloseAddBranch = () => setAddBranchModal(false);
+
+  const handleDeleteBranch = async (branchId) => {
+    if (!window.confirm("Are you sure you want to delete this branch?")) return;
+
+    try {
+      await Service.DeleteBranchByBranchID(branchId);
+      const fabId = fabricator.id || fabricator._id;
+      dispatch(deleteBranchFromFabricator({ fabricatorId: fabId, branchId }));
+      toast.success("Branch deleted successfully");
+      onBranchChange?.();
+    } catch (err) {
+      console.error("Failed to delete branch:", err);
+      toast.error(err?.response?.data?.message || "Failed to delete branch");
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -64,11 +84,12 @@ const AllBranches = ({ fabricator, onClose }) => {
                       <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">CONTACT PHONE</th>
                       <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">GEOGRAPHIC ADDRESS</th>
                       <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">TYPE</th>
+                      <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">ACTIONS</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {fabricator.branches.map((branch) => (
-                      <tr key={branch.id} className="hover:bg-gray-50/50 transition-colors group">
+                      <tr key={branch.id || branch._id} className="hover:bg-gray-50/50 transition-colors group">
                         <td className="px-6 py-4">
                           <span className="text-sm font-bold text-gray-900 group-hover:text-black">{branch.name}</span>
                         </td>
@@ -103,6 +124,17 @@ const AllBranches = ({ fabricator, onClose }) => {
                             )}
                           </div>
                         </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center">
+                            <button
+                              onClick={() => handleDeleteBranch(branch.id || branch._id)}
+                              className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all"
+                              title="Delete Branch"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -118,13 +150,14 @@ const AllBranches = ({ fabricator, onClose }) => {
             </div>
           </div>
         </div>
-
+ 
         {/* Add Branch Modal Overlay */}
         {addBranchModal && (
           <AddBranch
-            fabricatorId={fabricator.id}
+            fabricatorId={fabricator.id || fabricator._id}
             onClose={handleCloseAddBranch}
             fabricatorName={fabricator.fabName}
+            onSuccess={onBranchChange}
           />
         )}
       </div>

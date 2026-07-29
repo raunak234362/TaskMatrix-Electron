@@ -8,7 +8,7 @@ import { Country, State, City } from "country-state-city";
 import axios from "axios";
 import { X, PlusCircle, MapPin, Loader2 } from "lucide-react";
 
-const AddBranch = ({ fabricatorId, onClose, fabricatorName }) => {
+const AddBranch = ({ fabricatorId, onClose, fabricatorName, onSuccess }) => {
   const [stateOptions, setStateOptions] = useState([]);
   const [cityOptions, setCityOptions] = useState([]);
 
@@ -89,6 +89,7 @@ const AddBranch = ({ fabricatorId, onClose, fabricatorName }) => {
       await Service.AddBranchByFabricator(data);
       toast.success("Branch added successfully");
       reset();
+      onSuccess?.();
       if (onClose) onClose();
     } catch (err) {
       console.error("Failed to add branch:", err);

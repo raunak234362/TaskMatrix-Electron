@@ -119,7 +119,7 @@ const AllFabricator = () => {
   };
 
   // Define columns for DataTable
-  const columns = [
+  const columns = useMemo(() => [
     { accessorKey: "fabName", header: "Fabricator Name" },
     {
       accessorKey: "createdAt",
@@ -151,7 +151,7 @@ const AllFabricator = () => {
         );
       },
     },
-  ];
+  ], []);
 
   // Loading and error states
   // if (loading) return <div className="p-8 text-center">Loading…</div>;

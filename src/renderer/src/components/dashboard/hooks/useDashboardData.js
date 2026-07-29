@@ -458,10 +458,10 @@ export const useDashboardData = () => {
               projects.filter((p) => p.status?.toUpperCase() === 'ACTIVE' || p.status?.toUpperCase() === 'IN_PROGRESS').length,
             completedProjects:
               pmDashboard?.totalCompleteProject ??
-              projects.filter((p) => p.status?.toUpperCase() === 'COMPLETED').length,
+              projects.filter((p) => p.status?.toUpperCase() === 'COMPLETED' || p.status?.toUpperCase() === 'COMPLETE').length,
             onHoldProjects:
               pmDashboard?.totalOnHoldProject ??
-              projects.filter((p) => p.status?.toUpperCase() === 'ON_HOLD').length
+              projects.filter((p) => p.status?.toUpperCase() === 'ON_HOLD' || p.status?.toUpperCase() === 'ON-HOLD').length
           },
           dashboardStats: {
             pendingRFI: (pmDashboard?.pendingRFI ?? rfis.length) + (pmDashboard?.clientSidePendingActions?.rfi ?? clientRfis.length),

@@ -61,7 +61,24 @@ const fabricatorSlice = createSlice({
     },
 
     deleteFabricator: (state, action) => {
-      state.fabricatorData = state.fabricatorData.filter((fab) => fab.id !== action.payload)
+      state.fabricatorData = state.fabricatorData.filter(
+        (fab) => (fab.id || fab._id) !== action.payload
+      )
+    },
+
+    deleteBranchFromFabricator: (state, action) => {
+      const { fabricatorId, branchId } = action.payload
+      state.fabricatorData = state.fabricatorData.map((fab) => {
+        const fId = fab.id || fab._id
+        return fId === fabricatorId
+          ? {
+              ...fab,
+              branches: fab.branches?.filter(
+                (branch) => (branch.id || branch._id) !== branchId
+              )
+            }
+          : fab
+      })
     }
   }
 })
@@ -73,6 +90,7 @@ export const {
   addBranchToFabricator,
   updateFabricatorBranch,
   deleteFabricator,
+  deleteBranchFromFabricator,
   addClient,
   showClient
 } = fabricatorSlice.actions

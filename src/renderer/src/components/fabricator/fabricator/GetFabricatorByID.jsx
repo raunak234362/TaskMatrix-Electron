@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Service from "../../../api/Service";
 import { Loader2, AlertCircle, Link2, FileText, Link, Building2, Hash, CreditCard, Landmark, X } from "lucide-react";
 import Button from "../../fields/Button";
 import { motion } from "framer-motion";
+import { useDispatch } from "react-redux";
+import { deleteFabricator, updateFabricator } from "../../../store/fabricatorSlice";
+import { toast } from "react-toastify";
 
 import { openFileSecurely } from "../../../utils/openFileSecurely";
 import EditFabricator from "./EditFabricator";
@@ -15,8 +19,10 @@ const truncateText = (text, max = 40) =>
   text.length > max ? text.substring(0, max) + "..." : text;
 
 const GetFabricatorByID = ({ id, onClose }) => {
+  const dispatch = useDispatch();
   const [fabricator, setFabricator] = useState(null);
   const [loading, setLoading] = useState(true);
+  console.log("GetFabricatorByID render pass, id:", id, "loading:", loading);
   const [error, setError] = useState(null);
   const [editModel, setEditModel] = useState(null);
   const [branch, setBranch] = useState(null);
@@ -25,30 +31,55 @@ const GetFabricatorByID = ({ id, onClose }) => {
   const [account, setAccount] = useState(null);
   const [accountLoading, setAccountLoading] = useState(false);
   const [accountError, setAccountError] = useState(null);
+  const [archiving, setArchiving] = useState(false);
+
+  const fetchFab = async (updateRedux = false) => {
+    console.log("GetFabricatorByID fetchFab called, id:", id, "updateRedux:", updateRedux);
+    if (!id) {
+      setError("Invalid Fabricator ID");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await Service.GetFabricatorByID(id);
+      const updatedFab = response?.data || null;
+      setFabricator(updatedFab);
+      if (updateRedux && updatedFab) {
+        console.log("GetFabricatorByID dispatching updateFabricator:", updatedFab);
+        dispatch(updateFabricator(updatedFab));
+      }
+    } catch (err) {
+      setError("Failed to load fabricator");
+      console.error("Error fetching fabricator:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchFab = async () => {
-      if (!id) {
-        setError("Invalid Fabricator ID");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await Service.GetFabricatorByID(id);
-        setFabricator(response?.data || null);
-      } catch (err) {
-        setError("Failed to load fabricator");
-        console.error("Error fetching fabricator:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFab();
+    console.log("GetFabricatorByID useEffect running for id:", id);
+    fetchFab(false);
   }, [id]);
+
+  const handleArchive = async () => {
+    if (!window.confirm("Are you sure you want to archive this fabricator?")) return;
+
+    try {
+      setArchiving(true);
+      await Service.DeleteFabricatorByID(id);
+      dispatch(deleteFabricator(id));
+      toast.success("Fabricator archived successfully");
+      onClose();
+    } catch (err) {
+      console.error("Failed to archive fabricator:", err);
+      toast.error(err?.response?.data?.message || "Failed to archive fabricator");
+    } finally {
+      setArchiving(false);
+    }
+  };
 
   useEffect(() => {
     const fetchAccount = async () => {
@@ -77,27 +108,31 @@ const GetFabricatorByID = ({ id, onClose }) => {
     });
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8 text-sm tracking-normal text-gray-700">
-        <Loader2 className="w-5 h-5 animate-spin mr-2" />
-        Loading fabricator details...
-      </div>
+    return createPortal(
+      <div className="fixed inset-0 z-10001 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="bg-white p-8 rounded-2xl shadow-xl flex items-center text-sm tracking-normal text-gray-700 border border-gray-100">
+          <Loader2 className="w-5 h-5 animate-spin mr-2 text-green-600" />
+          Loading fabricator details...
+        </div>
+      </div>,
+      document.body
     );
   }
 
   if (error || !fabricator) {
-    return (
+    return createPortal(
       <div className="fixed inset-0 z-10001 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}>
         <div className="bg-white p-8 rounded-2xl shadow-xl flex items-center text-sm tracking-normal text-red-600" onClick={(e) => e.stopPropagation()}>
           <AlertCircle className="w-5 h-5 mr-2" />
           {error || "Fabricator not found"}
           <button onClick={onClose} className="ml-4 text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-10001 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
       onClick={onClose}
@@ -346,9 +381,11 @@ const GetFabricatorByID = ({ id, onClose }) => {
               Edit Fabricator
             </button>
             <button
+              onClick={handleArchive}
+              disabled={archiving}
               className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-normal shadow-sm active:scale-95"
             >
-              Archive
+              {archiving ? "Archiving..." : "Archive"}
             </button>
           </div>
 
@@ -356,6 +393,7 @@ const GetFabricatorByID = ({ id, onClose }) => {
             <EditFabricator
               fabricatorData={fabricator}
               onClose={() => setEditModel(null)}
+              onSuccess={() => fetchFab(true)}
             />
           )}
 
@@ -363,6 +401,7 @@ const GetFabricatorByID = ({ id, onClose }) => {
             <AllBranches
               fabricator={fabricator}
               onClose={() => setBranch(null)}
+              onBranchChange={() => fetchFab(true)}
             />
           )}
 
@@ -374,7 +413,8 @@ const GetFabricatorByID = ({ id, onClose }) => {
           )}
         </div>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
