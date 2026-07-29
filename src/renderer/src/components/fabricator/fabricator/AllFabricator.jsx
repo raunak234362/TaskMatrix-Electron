@@ -1,118 +1,116 @@
-import { useState, useMemo } from "react";
-import { Search, X, Filter } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Search, X } from "lucide-react";
 import DataTable from "../../ui/table";
-
 import GetFabricatorByID from "./GetFabricatorByID";
-
-import { useSelector } from "react-redux";
+import Service from "../../../api/Service";
 
 const AllFabricator = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     fabStage: "All Stages",
     wbtContact: "All WBT Contacts",
-    poc: "All POCs",
   });
 
-  // const [fabricators, setFabricators] = useState([]);
-  const fabricators = useSelector(
-    (state) => state.fabricatorInfo?.fabricatorData
-  );
+  const [fabricators, setFabricators] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [allFabricators, setAllFabricators] = useState([]);
+  const [wbtContacts, setWbtContacts] = useState([
+    { id: "All WBT Contacts", name: "All WBT Contacts" }
+  ]);
 
-  // Fetch all fabricators on component mount
-  // useEffect(() => {
-  //   const fetchFabricators = async () => {
-  //     try {
-  //       setLoading(true);
-  //       setError(null);
-  //       const response = await Service.GetAllFabricators();
-  //       console.log(response);
-  //       const data = response.data || [];
-  //       setFabricators(data);
-  //     } catch (err) {
-  //       console.error("Failed to fetch fabricators:", err);
-  //       setError("Failed to load fabricators");
-  //       toast.error("Failed to load fabricators");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+  // Fetch all fabricators once on mount for filter dropdowns
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const response = await Service.GetAllFabricators(1, 10);
+        const data = response.data || [];
+        setAllFabricators(data);
+      } catch (err) {
+        console.error("Failed to fetch fabricators for filters:", err);
+      }
+    };
+    fetchAll();
+  }, []);
 
-  //   fetchFabricators();
-  // }, []);
-  console.log(fabricators);
+  // Fetch employees for WBT Contact filter using FetchManagementUser
+  useEffect(() => {
+    const fetchWbtContacts = async () => {
+      try {
+        const res = await Service.FetchManagementUser();
+        let users = [];
+        if (res) {
+          if (Array.isArray(res)) {
+            users = res;
+          } else if (res.data) {
+            if (Array.isArray(res.data)) {
+              users = res.data;
+            } else if (res.data.users && Array.isArray(res.data.users)) {
+              users = res.data.users;
+            } else if (res.data.employees && Array.isArray(res.data.employees)) {
+              users = res.data.employees;
+            } else if (Array.isArray(res.data.data)) {
+              users = res.data.data;
+            }
+          }
+        }
+        
+        const map = new Map();
+        users.forEach((emp) => {
+          const id = emp.id || emp._id;
+          const name = `${emp.firstName || ""} ${emp.lastName || ""}`.trim();
+          if (id && name) {
+            map.set(id, name);
+          }
+        });
+        
+        setWbtContacts([
+          { id: "All WBT Contacts", name: "All WBT Contacts" },
+          ...Array.from(map.entries()).map(([id, name]) => ({ id, name }))
+        ]);
+      } catch (err) {
+        console.error("Failed to fetch WBT contacts:", err);
+      }
+    };
+    fetchWbtContacts();
+  }, []);
 
-  // Derive Unique Filter Options
-  const stages = useMemo(() => {
-    const list = (fabricators || [])
-      .map((f) => f.fabStage)
-      .filter(Boolean);
-    return ["All Stages", ...new Set(list)];
-  }, [fabricators]);
+  // Fetch paginated fabricators for the table
+  useEffect(() => {
+    const fetchPaginated = async () => {
+      try {
+        setLoading(true);
+        const response = await Service.GetAllFabricators(
+          currentPage,
+          10,
+          searchQuery,
+          filters.fabStage,
+          filters.wbtContact
+        );
+        if (response && response.success) {
+          setFabricators(response.data || []);
+          setTotalPages(response.meta?.totalPages || 1);
+          setTotalItems(response.meta?.total || 0);
+        } else {
+          setFabricators([]);
+          setTotalPages(1);
+          setTotalItems(0);
+        }
+      } catch (err) {
+        console.error("Failed to fetch paginated fabricators:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPaginated();
+  }, [currentPage, searchQuery, filters]);
 
-  const wbtContacts = useMemo(() => {
-    const list = (fabricators || [])
-      .flatMap((f) => 
-        Array.isArray(f.wbtFabricatorPointOfContact) 
-          ? f.wbtFabricatorPointOfContact.map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : c)
-          : []
-      )
-      .filter(Boolean);
-    return ["All WBT Contacts", ...new Set(list)];
-  }, [fabricators]);
+  // Stage options: All Stages, PRODUCTION, RFQ
+  const stages = ["All Stages", "PRODUCTION", "RFQ"];
 
-  const pocs = useMemo(() => {
-    const list = (fabricators || [])
-      .flatMap((f) => 
-        Array.isArray(f.pointOfContact) 
-          ? f.pointOfContact.map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : c)
-          : []
-      )
-      .filter(Boolean);
-    return ["All POCs", ...new Set(list)];
-  }, [fabricators]);
-
-  // Filter fabricators based on search query and dropdowns
-  const filteredFabricators = useMemo(() => {
-    let result = fabricators || [];
-
-    // Search Query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter((f) =>
-        f.fabName?.toLowerCase().includes(query)
-      );
-    }
-
-    // Stage Filter
-    if (filters.fabStage !== "All Stages") {
-      result = result.filter((f) => f.fabStage === filters.fabStage);
-    }
-
-    // WBT Contact Filter
-    if (filters.wbtContact !== "All WBT Contacts") {
-      result = result.filter((f) => {
-        const contacts = Array.isArray(f.wbtFabricatorPointOfContact)
-          ? f.wbtFabricatorPointOfContact.map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : c)
-          : [];
-        return contacts.includes(filters.wbtContact);
-      });
-    }
-
-    // POC Filter
-    if (filters.poc !== "All POCs") {
-      result = result.filter((f) => {
-        const contacts = Array.isArray(f.pointOfContact)
-          ? f.pointOfContact.map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : c)
-          : [];
-        return contacts.includes(filters.poc);
-      });
-    }
-
-    return result;
-  }, [fabricators, searchQuery, filters]);
-
-  // Handle row click (optional)
+  // Handle row click
   const handleRowClick = (row) => {
     const fabricatorUniqueId = (row).id ?? (row).fabId ?? "";
     console.debug("Selected fabricator:", fabricatorUniqueId);
@@ -143,7 +141,7 @@ const AllFabricator = () => {
       id: "location",
       header: "Location",
       cell: ({ row }) => {
-        const country = row.original.branches?.[0]?.country || "N/A";
+        const country = row.original.country || row.original.branches?.[0]?.country || "N/A";
         return (
           <div className="text-black uppercase">
             {country}
@@ -153,11 +151,6 @@ const AllFabricator = () => {
     },
   ], []);
 
-  // Loading and error states
-  // if (loading) return <div className="p-8 text-center">Loading…</div>;
-  // if (error) return <div className="p-8 text-red-600">{error}</div>;
-
-  // Render DataTable
   return (
     <div className="bg-[#fcfdfc] min-h-[500px]">
       {/* Search Bar & Filters - Premium Style */}
@@ -170,13 +163,19 @@ const AllFabricator = () => {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
                 placeholder="Search fabricators by name..."
                 className="flex-1 px-3 py-1 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none font-medium text-sm"
               />
               {searchQuery && (
                 <button
-                  onClick={() => setSearchQuery("")}
+                  onClick={() => {
+                    setSearchQuery("");
+                    setCurrentPage(1);
+                  }}
                   className="p-1 text-gray-300 hover:text-gray-500 transition-colors shrink-0"
                 >
                   <X size={16} />
@@ -190,7 +189,10 @@ const AllFabricator = () => {
             <select
               className="w-full h-11 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl px-4 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/5 transition-all shadow-sm"
               value={filters.fabStage}
-              onChange={(e) => setFilters(prev => ({ ...prev, fabStage: e.target.value }))}
+              onChange={(e) => {
+                setFilters(prev => ({ ...prev, fabStage: e.target.value }));
+                setCurrentPage(1);
+              }}
             >
               {stages.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
@@ -201,29 +203,22 @@ const AllFabricator = () => {
             <select
               className="w-full h-11 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl px-4 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/5 transition-all shadow-sm"
               value={filters.wbtContact}
-              onChange={(e) => setFilters(prev => ({ ...prev, wbtContact: e.target.value }))}
+              onChange={(e) => {
+                setFilters(prev => ({ ...prev, wbtContact: e.target.value }));
+                setCurrentPage(1);
+              }}
             >
-              {wbtContacts.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-
-          {/* POC Filter */}
-          <div className="w-full sm:w-auto min-w-[220px]">
-            <select
-              className="w-full h-11 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl px-4 cursor-pointer focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/5 transition-all shadow-sm"
-              value={filters.poc}
-              onChange={(e) => setFilters(prev => ({ ...prev, poc: e.target.value }))}
-            >
-              {pocs.map(p => <option key={p} value={p}>{p}</option>)}
+              {wbtContacts.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
 
           {/* Clear All */}
-          {(filters.fabStage !== "All Stages" || filters.wbtContact !== "All WBT Contacts" || filters.poc !== "All POCs" || searchQuery) && (
+          {(filters.fabStage !== "All Stages" || filters.wbtContact !== "All WBT Contacts" || searchQuery) && (
             <button
               onClick={() => {
-                setFilters({ fabStage: "All Stages", wbtContact: "All WBT Contacts", poc: "All POCs" });
+                setFilters({ fabStage: "All Stages", wbtContact: "All WBT Contacts" });
                 setSearchQuery("");
+                setCurrentPage(1);
               }}
               className="h-11 px-4 text-xs font-bold text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all flex items-center gap-2 shrink-0"
             >
@@ -236,14 +231,18 @@ const AllFabricator = () => {
 
       <DataTable
         columns={columns}
-        data={filteredFabricators}
+        data={fabricators}
         onRowClick={handleRowClick}
         detailComponent={({ row, close }) => {
           const fabricatorUniqueId =
             (row).id ?? (row).fabId ?? "";
           return <GetFabricatorByID id={fabricatorUniqueId} onClose={close} />;
         }}
-        disablePagination={true}
+        manualPagination={true}
+        pageCount={totalPages}
+        pageIndex={currentPage - 1}
+        onPageChange={(index) => setCurrentPage(index + 1)}
+        pageSizeOptions={[10,15,20,25]}
       />
     </div>
   );

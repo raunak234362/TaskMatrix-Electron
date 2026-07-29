@@ -1,5 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense, lazy } from "react";
 import { createPortal } from "react-dom";
+import Modal from "../../ui/Modal";
+
+const GetProjectById = lazy(() => import("../../project/GetProjectById"));
 import Service from "../../../api/Service";
 import { Loader2, AlertCircle, Link2, FileText, Link, Building2, Hash, CreditCard, Landmark, X } from "lucide-react";
 import Button from "../../fields/Button";
@@ -195,6 +198,15 @@ const GetFabricatorByID = ({ id, onClose }) => {
               Account Details
             </button>
             <button
+              onClick={() => setActiveTab("projects")}
+              className={`px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-normal transition-all border-2 shadow-sm active:scale-95 ${activeTab === "projects"
+                ? "bg-green-50 text-black border-green-700/80 hover:bg-green-100"
+                : "bg-white text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-black hover:border-gray-400"
+                }`}
+            >
+              Projects
+            </button>
+            <button
               onClick={onClose}
               className="px-6 py-1.5 bg-red-50 text-black  border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-normal shadow-sm active:scale-95 ml-2"
             >
@@ -283,6 +295,8 @@ const GetFabricatorByID = ({ id, onClose }) => {
                   </div>
                 )}
               </div>
+            ) : activeTab === "projects" ? (
+              <FabricatorProjects fabricatorId={id} />
             ) : (
               <div className="flex flex-col gap-8">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12 p-8 rounded-2xl border border-gray-300 bg-white shadow-sm py-6">
@@ -292,7 +306,7 @@ const GetFabricatorByID = ({ id, onClose }) => {
                     value={
                       Array.isArray(fabricator.wbtFabricatorPointOfContact) && fabricator.wbtFabricatorPointOfContact.length > 0
                         ? fabricator.wbtFabricatorPointOfContact
-                            .map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : String(c).replace(/^Contact:/i, ""))
+                            .map(c => typeof c === 'object' ? (c.name || `${c.firstName || ""} ${c.lastName || ""}`.trim()) : String(c).replace(/^Contact:/i, ""))
                             .filter(Boolean)
                             .join(", ")
                         : "—"
@@ -303,7 +317,7 @@ const GetFabricatorByID = ({ id, onClose }) => {
                     value={
                       Array.isArray(fabricator.pointOfContact) && fabricator.pointOfContact.length > 0
                         ? fabricator.pointOfContact
-                            .map(c => typeof c === 'object' ? `${c.firstName} ${c.lastName}` : String(c).replace(/^Contact:/i, ""))
+                            .map(c => typeof c === 'object' ? (c.name || `${c.firstName || ""} ${c.lastName || ""}`.trim()) : String(c).replace(/^Contact:/i, ""))
                             .filter(Boolean)
                             .join(", ")
                         : "—"
@@ -434,5 +448,167 @@ const AccountInfoCard = ({ icon, label, value }) => (
     <p className="text-sm font-bold text-gray-900 break-all tracking-normal">{value}</p>
   </div>
 );
+
+const FabricatorProjects = ({ fabricatorId }) => {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await Service.GetProjectsByFabricatorID(fabricatorId);
+        let list = [];
+        if (response) {
+          if (Array.isArray(response)) {
+            list = response;
+          } else if (response.data) {
+            if (Array.isArray(response.data)) {
+              list = response.data;
+            } else if (response.data.projects && Array.isArray(response.data.projects)) {
+              list = response.data.projects;
+            } else if (Array.isArray(response.data.data)) {
+              list = response.data.data;
+            }
+          }
+        }
+        setProjects(list);
+      } catch (err) {
+        console.error("Error fetching projects for fabricator:", err);
+        setError("Failed to load projects");
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (fabricatorId) {
+      fetchProjects();
+    }
+  }, [fabricatorId]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12 text-sm tracking-normal text-gray-700">
+        <Loader2 className="w-6 h-6 animate-spin mr-2 text-green-600" />
+        Loading projects...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12 text-sm tracking-normal text-red-600 bg-red-50 rounded-xl border border-red-100">
+        <AlertCircle className="w-6 h-6 mr-2" />
+        {error}
+      </div>
+    );
+  }
+
+  if (projects.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-gray-500 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 animate-in fade-in duration-300">
+        <AlertCircle className="w-10 h-10 mb-3 opacity-20 text-gray-400" />
+        <p className="font-semibold text-gray-400 uppercase tracking-wider text-xs">No projects assigned to this fabricator</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="py-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <div className="bg-white rounded-2xl border border-gray-300 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-gray-200 bg-gray-50/50">
+                <th className="px-6 py-4 text-xs font-black text-gray-500 uppercase tracking-wider">Project Name</th>
+                <th className="px-6 py-4 text-xs font-black text-gray-500 uppercase tracking-wider">Project Manager</th>
+                <th className="px-6 py-4 text-xs font-black text-gray-500 uppercase tracking-wider">Department</th>
+                <th className="px-6 py-4 text-xs font-black text-gray-500 uppercase tracking-wider">Stage</th>
+                <th className="px-6 py-4 text-xs font-black text-gray-500 uppercase tracking-wider">Est. Hours</th>
+                <th className="px-6 py-4 text-xs font-black text-gray-500 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-150">
+              {projects.map((proj) => {
+                const managerName = proj.manager
+                  ? `${proj.manager.firstName || ""} ${proj.manager.lastName || ""}`.trim()
+                  : "—";
+                const deptName = proj.department?.name || "—";
+
+                return (
+                  <tr
+                    key={proj.id || proj._id}
+                    className="hover:bg-gray-50/50 cursor-pointer transition-colors group"
+                    onClick={() => setSelectedProject(proj)}
+                  >
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-bold text-gray-900 group-hover:text-green-800 transition-colors">
+                        {proj.name}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-gray-600 font-semibold">{managerName}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-gray-600 font-medium">{deptName}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-gray-600 font-medium">{proj.stage || "—"}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm text-gray-800 font-semibold">
+                        {proj.estimatedHours ? `${proj.estimatedHours}h` : "—"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border shadow-sm ${
+                          proj.status === "ACTIVE"
+                            ? "bg-blue-50 text-blue-700 border-blue-200"
+                            : proj.status === "COMPLETE" || proj.status === "COMPLETED"
+                            ? "bg-green-50 text-green-700 border-green-200"
+                            : proj.status === "ONHOLD"
+                            ? "bg-red-50 text-red-700 border-red-200"
+                            : "bg-gray-50 text-gray-700 border-gray-200"
+                        }`}
+                      >
+                        {proj.status || "UNKNOWN"}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {selectedProject && (
+        <Modal
+          isOpen={!!selectedProject}
+          onClose={() => setSelectedProject(null)}
+          hideHeader={true}
+          zIndex="z-[20000]"
+        >
+          <Suspense fallback={
+            <div className="fixed inset-0 z-[20005] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+              <div className="bg-white p-8 rounded-2xl shadow-xl flex items-center text-sm tracking-normal text-gray-700 border border-gray-100">
+                <Loader2 className="w-5 h-5 animate-spin mr-2 text-green-600" />
+                Loading project details...
+              </div>
+            </div>
+          }>
+            <GetProjectById
+              id={selectedProject.id ?? selectedProject.fabId ?? ""}
+              onClose={() => setSelectedProject(null)}
+            />
+          </Suspense>
+        </Modal>
+      )}
+    </div>
+  );
+};
 
 export default GetFabricatorByID;

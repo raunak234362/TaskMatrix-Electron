@@ -13,7 +13,7 @@ import Button from "../fields/Button";
 import AddEstimation from "../estimation/AddEstimation";
 import RenderFiles from "../ui/RenderFiles";
 import QuotationRaise from "../connectionDesigner/QuotationRaise";
-import { Trash2, X } from "lucide-react";
+import { Trash2, X, Download } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { deleteRFQ } from "../../store/rfqSlice";
 import { toast } from "react-toastify";
@@ -21,6 +21,7 @@ import EditRFQByID from "./EditRFQByID";
 import ConnectionDesignerQuotaByID from "../connectionDesigner/ConnectionDesignerQuotaByID";
 import { truncateWords } from "../../utils/stringUtils";
 import GetEstimationByID from "../estimation/GetEstimationByID";
+import { openFileSecurely, downloadFileSecurely } from "../../utils/openFileSecurely";
 
 const isTrue = (val) => val === true || val === "true" || val === 1;
 
@@ -247,11 +248,10 @@ const GetRFQByID = ({ id, onClose }) => {
                                 {row.original.files?.length || 0} Attachments
                             </span>
                             {type && (
-                                <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider leading-none ${
-                                    type.toUpperCase() === "DETAILING"
+                                <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider leading-none ${type.toUpperCase() === "DETAILING"
                                         ? "bg-blue-50 text-blue-700 border border-blue-200"
                                         : "bg-purple-50 text-purple-700 border border-purple-200"
-                                }`}>
+                                    }`}>
                                     {type}
                                 </span>
                             )}
@@ -459,11 +459,10 @@ const GetRFQByID = ({ id, onClose }) => {
                                                     key={type}
                                                     type="button"
                                                     onClick={() => setResponseTypeFilter(type)}
-                                                    className={`px-4 py-1 text-xs font-bold rounded-md transition-all uppercase ${
-                                                        responseTypeFilter === type
+                                                    className={`px-4 py-1 text-xs font-bold rounded-md transition-all uppercase ${responseTypeFilter === type
                                                             ? "bg-[#6bbd45] text-white"
                                                             : "text-gray-500 hover:text-black bg-transparent"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {type}
                                                 </button>
@@ -682,79 +681,77 @@ const GetRFQByID = ({ id, onClose }) => {
                                 )}
 
                                 {/* Follow-ups List */}
-                                <div className="space-y-3">
+                                <div className="space-y-4">
                                     {rfq?.followUps && rfq.followUps.length > 0 ? (
-                                        rfq.followUps.map((fu, idx) => (
-                                            <div
-                                                key={fu.id || idx}
-                                                className="bg-white p-3 sm:p-4 rounded-2xl border border-black shadow-sm space-y-3"
-                                            >
-                                                <div className="flex items-center justify-between border-b border-black/5 pb-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-6 h-6 rounded-full bg-gray-100 border border-black flex items-center justify-center">
-                                                            <User className="w-3 h-3 text-black" />
-                                                        </div>
-                                                        <span className="text-xs font-bold text-black uppercase tracking-wider">
-                                                            {fu.createdByRole === "CLIENT"
-                                                                ? rfq?.sender?.fabricator?.fabName || "Client"
-                                                                : fu.user
-                                                                    ? `${fu.user.firstName || ""} ${fu.user.lastName || ""}`.trim() || fu.user.username
-                                                                    : "WBT Team"}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1 text-xs font-bold text-black uppercase tracking-wider">
-                                                        <Clock className="w-3 h-3" />
-                                                        {new Date(fu.createdAt).toLocaleString("en-IN", {
-                                                            day: '2-digit',
-                                                            month: 'short',
-                                                            year: 'numeric',
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        })}
-                                                    </div>
-                                                </div>
-
+                                        rfq.followUps.map((fu, idx) => {
+                                            const isClient = fu.createdByRole === "CLIENT";
+                                            return (
                                                 <div
-                                                    className="text-xs text-black leading-relaxed prose prose-sm max-w-none"
-                                                    dangerouslySetInnerHTML={{ __html: fu.description }}
-                                                />
+                                                    key={fu.id || idx}
+                                                    className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs hover:shadow-md transition-all duration-300 space-y-3 relative overflow-hidden pl-5"
+                                                >
+                                                    {/* Color strip indicating role */}
+                                                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${isClient ? "bg-green-600" : "bg-blue-600"
+                                                        }`} />
 
-                                                {fu.files && fu.files.length > 0 && (
-                                                    <div className="flex flex-wrap gap-2 pt-2 border-t border-black/5">
-                                                        {fu.files.map((file, fIdx) => (
-                                                            <button
-                                                                key={file.id || fIdx}
-                                                                onClick={async () => {
-                                                                    try {
-                                                                        const res = await Service.viewRfqFile(id, file.id);
-                                                                        if (res) {
-                                                                            const url = URL.createObjectURL(new Blob([res]));
-                                                                            const link = document.createElement('a');
-                                                                            link.href = url;
-                                                                            link.setAttribute('download', file.fileName || 'attachment');
-                                                                            document.body.appendChild(link);
-                                                                            link.click();
-                                                                            link.parentNode.removeChild(link);
-                                                                        }
-                                                                    } catch (err) {
-                                                                        toast.error("Failed to download file");
-                                                                    }
-                                                                }}
-                                                                className="flex items-center gap-2 px-3 py-1 bg-gray-50 border border-black rounded-full hover:bg-gray-100 transition-all group"
-                                                            >
-                                                                <Paperclip className="w-3 h-3 text-black" />
-                                                                <span className="text-xs font-bold text-black uppercase tracking-wider truncate max-w-[150px]">
-                                                                    {file.originalName || file.fileName || "File"}
+                                                    <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                                                        <div className="flex items-center gap-2.5">
+                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs uppercase ${isClient
+                                                                    ? "bg-green-50 text-green-700 border border-green-200/50"
+                                                                    : "bg-blue-50 text-blue-700 border border-blue-200/50"
+                                                                }`}>
+                                                                {isClient ? "CL" : "WT"}
+                                                            </div>
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-semibold text-gray-800 leading-tight">
+                                                                    {isClient
+                                                                        ? rfq?.sender?.fabricator?.fabName || "Client"
+                                                                        : fu.user
+                                                                            ? `${fu.user.firstName || ""} ${fu.user.lastName || ""}`.trim() || fu.user.username
+                                                                            : "WBT Team"}
                                                                 </span>
-                                                            </button>
-                                                        ))}
+                                                                <span className={`text-[10px] w-fit px-1.5 py-0.5 rounded-sm font-semibold uppercase tracking-wider mt-0.5 ${isClient
+                                                                        ? "bg-green-50 text-green-700 border border-green-200/30"
+                                                                        : "bg-blue-50 text-blue-700 border border-blue-200/30"
+                                                                    }`}>
+                                                                    {isClient ? "Client" : "WBT Team"}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500">
+                                                            <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                                            {new Date(fu.createdAt).toLocaleString("en-IN", {
+                                                                day: '2-digit',
+                                                                month: 'short',
+                                                                year: 'numeric',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            })}
+                                                        </div>
                                                     </div>
-                                                )}
-                                            </div>
-                                        ))
+
+                                                    <div
+                                                        className="text-xs text-gray-700 leading-relaxed font-normal prose prose-sm max-w-none px-1"
+                                                        dangerouslySetInnerHTML={{ __html: fu.description }}
+                                                    />
+
+                                                    {fu.files && fu.files.length > 0 && (
+                                                        <div className="pt-2 border-t border-gray-100">
+                                                            <RenderFiles
+                                                                files={fu.files}
+                                                                table="followups"
+                                                                parentId={fu.id || fu._id}
+                                                                rfqId={id}
+                                                                formatDate={(date) => new Date(date).toLocaleDateString()}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })
                                     ) : (
-                                        <div className="p-8 text-center bg-gray-50 rounded-2xl border-2 border-dashed border-black">
-                                            <p className="text-sm font-bold text-black uppercase tracking-[0.2em]">
+                                        <div className="p-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                                            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">
                                                 No follow-ups recorded yet
                                             </p>
                                         </div>

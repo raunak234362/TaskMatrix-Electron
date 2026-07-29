@@ -1,15 +1,151 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { X, MapPin, Plus, Building2, CheckCircle2, Trash2 } from "lucide-react";
+import { X, MapPin, Plus, Building2, CheckCircle2, Trash2, Loader2, AlertCircle, Eye } from "lucide-react";
 import AddBranch from "./AddBranch";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Service from "../../../api/Service";
 import { useDispatch } from "react-redux";
 import { deleteBranchFromFabricator } from "../../../store/fabricatorSlice";
 import { toast } from "react-toastify";
 
+const GetBranchByIDModal = ({ branchId, onClose }) => {
+  const [branchDetail, setBranchDetail] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await Service.GetFabricatorBranchByID(branchId);
+        const detail = response?.data || response;
+        setBranchDetail(detail);
+      } catch (err) {
+        console.error("Error fetching branch details:", err);
+        setError("Failed to load branch details");
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (branchId) {
+      fetchDetail();
+    }
+  }, [branchId]);
+
+  return (
+    <div className="fixed inset-0 z-[10100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-150 animate-in fade-in zoom-in duration-150">
+        <div className="p-6 border-b border-gray-200 flex items-center justify-between bg-white">
+          <h3 className="text-lg font-bold text-gray-900 uppercase">Branch Details</h3>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-700">
+            <X size={20} />
+          </button>
+        </div>
+        <div className="p-6 bg-white space-y-4">
+          {loading ? (
+            <div className="flex items-center justify-center py-8 text-sm text-gray-600">
+              <Loader2 className="w-5 h-5 animate-spin mr-2 text-green-600" />
+              Loading branch details...
+            </div>
+          ) : error || !branchDetail ? (
+            <div className="text-sm text-red-600 bg-red-50 p-4 rounded-xl border border-red-200">
+              {error || "Branch details not found"}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase">Branch Name</p>
+                <p className="text-sm font-semibold text-gray-900 mt-0.5">{branchDetail.name}</p>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase">Secure Email</p>
+                <p className="text-sm font-semibold text-gray-900 mt-0.5">{branchDetail.email || "—"}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-bold text-gray-500 uppercase">Phone</p>
+                  <p className="text-sm font-semibold text-gray-900 mt-0.5">{branchDetail.phone || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 uppercase">Extension</p>
+                  <p className="text-sm font-semibold text-gray-900 mt-0.5">{branchDetail.extension || "—"}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase">Geographic Address</p>
+                <p className="text-sm font-semibold text-gray-900 mt-0.5 leading-relaxed">
+                  {branchDetail.address || ""}, {branchDetail.city || ""}, {branchDetail.state || ""} {branchDetail.zipCode || ""}, {branchDetail.country || ""}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase">Type</p>
+                <span className={`inline-block px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border mt-1.5 ${
+                  branchDetail.isHeadquarters
+                    ? "bg-green-50 text-[#6bbd45] border-green-200"
+                    : "bg-gray-50 text-gray-400 border-gray-200"
+                }`}>
+                  {branchDetail.isHeadquarters ? "Headquarters" : "Branch Hangar"}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg text-sm font-bold uppercase transition-all"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AllBranches = ({ fabricator, onClose, onBranchChange }) => {
   const dispatch = useDispatch();
   const [addBranchModal, setAddBranchModal] = useState(false);
+  const [branches, setBranches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedBranchId, setSelectedBranchId] = useState(null);
+
+  const fabricatorId = fabricator.id || fabricator._id;
+
+  const fetchBranches = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await Service.GetFabricatorBranchesByFabricatorID(fabricatorId);
+      let list = [];
+      if (response) {
+        if (Array.isArray(response)) {
+          list = response;
+        } else if (response.data) {
+          if (Array.isArray(response.data)) {
+            list = response.data;
+          } else if (response.data.branches && Array.isArray(response.data.branches)) {
+            list = response.data.branches;
+          } else if (Array.isArray(response.data.data)) {
+            list = response.data.data;
+          }
+        }
+      }
+      setBranches(list);
+    } catch (err) {
+      console.error("Error fetching branches:", err);
+      setError("Failed to load branches");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (fabricatorId) {
+      fetchBranches();
+    }
+  }, [fabricatorId]);
 
   const handleOpenAddBranch = () => setAddBranchModal(true);
   const handleCloseAddBranch = () => setAddBranchModal(false);
@@ -19,9 +155,10 @@ const AllBranches = ({ fabricator, onClose, onBranchChange }) => {
 
     try {
       await Service.DeleteBranchByBranchID(branchId);
-      const fabId = fabricator.id || fabricator._id;
+      const fabId = fabricatorId;
       dispatch(deleteBranchFromFabricator({ fabricatorId: fabId, branchId }));
       toast.success("Branch deleted successfully");
+      fetchBranches();
       onBranchChange?.();
     } catch (err) {
       console.error("Failed to delete branch:", err);
@@ -48,7 +185,7 @@ const AllBranches = ({ fabricator, onClose, onBranchChange }) => {
                 </span>
                 <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                  {fabricator.branches?.length || 0} OPERATIONAL HUBS
+                  {branches.length} OPERATIONAL HUBS
                 </span>
               </div>
             </div>
@@ -75,7 +212,17 @@ const AllBranches = ({ fabricator, onClose, onBranchChange }) => {
         <div className="flex-1 overflow-hidden flex flex-col p-8 bg-gray-50/30">
           <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col flex-1">
             <div className="flex-1 overflow-auto custom-scrollbar">
-              {fabricator.branches && fabricator.branches.length > 0 ? (
+              {loading ? (
+                <div className="flex items-center justify-center py-20 text-sm text-gray-600">
+                  <Loader2 className="w-6 h-6 animate-spin mr-2 text-green-600" />
+                  Loading branches...
+                </div>
+              ) : error ? (
+                <div className="flex items-center justify-center py-20 text-sm text-red-600">
+                  <AlertCircle className="w-6 h-6 mr-2" />
+                  {error}
+                </div>
+              ) : branches.length > 0 ? (
                 <table className="w-full text-left border-collapse">
                   <thead className="sticky top-0 bg-white z-10">
                     <tr className="border-b border-gray-100">
@@ -88,10 +235,10 @@ const AllBranches = ({ fabricator, onClose, onBranchChange }) => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {fabricator.branches.map((branch) => (
+                    {branches.map((branch) => (
                       <tr key={branch.id || branch._id} className="hover:bg-gray-50/50 transition-colors group">
-                        <td className="px-6 py-4">
-                          <span className="text-sm font-bold text-gray-900 group-hover:text-black">{branch.name}</span>
+                        <td className="px-6 py-4 cursor-pointer" onClick={() => setSelectedBranchId(branch.id || branch._id)}>
+                          <span className="text-sm font-bold text-gray-900 group-hover:text-[#6bbd45] transition-colors">{branch.name}</span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600 font-medium">
                           {branch.email}
@@ -125,7 +272,14 @@ const AllBranches = ({ fabricator, onClose, onBranchChange }) => {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex justify-center">
+                          <div className="flex justify-center gap-2">
+                            <button
+                              onClick={() => setSelectedBranchId(branch.id || branch._id)}
+                              className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition-all"
+                              title="View Branch details"
+                            >
+                              <Eye size={16} />
+                            </button>
                             <button
                               onClick={() => handleDeleteBranch(branch.id || branch._id)}
                               className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all"
@@ -154,10 +308,21 @@ const AllBranches = ({ fabricator, onClose, onBranchChange }) => {
         {/* Add Branch Modal Overlay */}
         {addBranchModal && (
           <AddBranch
-            fabricatorId={fabricator.id || fabricator._id}
+            fabricatorId={fabricatorId}
             onClose={handleCloseAddBranch}
             fabricatorName={fabricator.fabName}
-            onSuccess={onBranchChange}
+            onSuccess={() => {
+              fetchBranches();
+              onBranchChange?.();
+            }}
+          />
+        )}
+
+        {/* View Branch Details Modal Overlay */}
+        {selectedBranchId && (
+          <GetBranchByIDModal
+            branchId={selectedBranchId}
+            onClose={() => setSelectedBranchId(null)}
           />
         )}
       </div>

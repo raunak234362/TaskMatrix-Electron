@@ -191,7 +191,7 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
   // ── Loading UI ──
   if (loading) {
     return (
-      <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-[12000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
         <div className="bg-white rounded-2xl p-12 border border-gray-200 shadow-xl flex items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-[#6bbd45]" />
           <span className="text-sm font-black uppercase tracking-widest text-[#6bbd45]">Loading employee...</span>
@@ -201,7 +201,7 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[12000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-none shadow-2xl border border-black overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[95vw] flex flex-col max-h-[90vh]">
         {/* Header */}
         <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
@@ -338,7 +338,7 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
 
         {/* Archive Confirmation Modal */}
         {showArchiveConfirm && (
-          <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="fixed inset-0 z-[12100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white rounded-none shadow-2xl border border-black p-8 w-full max-w-md animate-in zoom-in-95">
               <h3 className="text-xl font-bold text-red-600 mb-4 uppercase tracking-tight">Archive Employee</h3>
               <p className="text-sm text-gray-600 mb-6">

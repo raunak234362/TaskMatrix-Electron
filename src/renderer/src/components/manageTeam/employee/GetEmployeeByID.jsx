@@ -595,7 +595,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
 
   if (loading) {
     return createPortal(
-      <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-[11000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
         <div className="flex items-center justify-center p-12 text-black bg-white rounded-none border-2 border-black shadow-xl">
           <Loader2 className="w-8 h-8 animate-spin mr-3 text-black" />
           <span className="text-sm font-bold uppercase text-black">Loading employee details...</span>
@@ -606,7 +606,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
   }
   if (error || !employee) {
     return createPortal(
-      <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-[11000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
         <div className="flex flex-col items-center justify-center p-12 text-red-600 bg-white rounded-none border-2 border-black shadow-xl gap-4">
           <div className="flex items-center">
             <AlertCircle className="w-8 h-8 mr-3 text-black" />
@@ -623,7 +623,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return createPortal(
-    <div className="fixed inset-0 z-1000 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[11000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-none shadow-2xl border border-black overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[95vw] mx-auto flex flex-col h-[95vh]">
         {/* Header */}
         <header className="flex items-center justify-between p-6 border-b border-black bg-green-200 sticky top-0 z-10 shrink-0">
@@ -1210,7 +1210,7 @@ const EmployeeTaskDrawer = ({ taskId, onClose }) => {
   if (!task) {
     if (loading) {
        return (
-          <div className="fixed inset-0 z-[1100] flex" onClick={onClose}>
+          <div className="fixed inset-0 z-[11500] flex" onClick={onClose}>
             <div className="ml-auto w-full max-w-lg h-full bg-white shadow-2xl border-l border-black/10 flex flex-col justify-center items-center animate-in slide-in-from-right duration-200" onClick={e => e.stopPropagation()}>
                <Loader2 className="w-8 h-8 animate-spin text-green-600" />
             </div>
@@ -1229,7 +1229,7 @@ const EmployeeTaskDrawer = ({ taskId, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-[1100] flex"
+      className="fixed inset-0 z-[11500] flex"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="ml-auto w-full max-w-lg h-full bg-white shadow-2xl border-l border-black/10 flex flex-col animate-in slide-in-from-right duration-200 overflow-hidden">

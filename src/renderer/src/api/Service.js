@@ -86,6 +86,23 @@ class Service {
     }
   }
 
+  //
+  static async FetchManagementUser(){
+    try{
+      const response=await api.get(`user/management-users`,{
+        headers:{
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log(response)
+      return response.data   
+    }
+    catch(error){
+      console.log('Error fetching management user', error)
+    }
+  }
+
   // Fetch Employee by ID
   static async FetchEmployeeByID(id) {
     try {
@@ -339,9 +356,17 @@ class Service {
     }
   }
 
-  static async GetAllFabricators() {
+  static async GetAllFabricators(page, limit = 10, search, stage, contactId) {
     try {
       const response = await api.get(`fabricator/all`, {
+        params: { 
+          page, 
+          limit,
+          search: search || undefined,
+          stage: stage !== "All Stages" ? stage : undefined,
+          contactId: contactId !== "All WBT Contacts" ? contactId : undefined,
+        
+        },
         headers: {
           'Content-Type': 'application/json'
         }
@@ -365,6 +390,51 @@ class Service {
       return response.data
     } catch (error) {
       console.error('cannot find fabricators', error)
+    }
+  }
+
+  // Fetch Fabricator Branch by Branch ID
+  static async GetFabricatorBranchByID(id) {
+    try {
+      const response = await api.get(`fabricator/branch/${id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching fabricator branch by ID:', error)
+    }
+  }
+
+  // Fetch Fabricator Branches by Fabricator ID
+  static async GetFabricatorBranchesByFabricatorID(fabricatorId) {
+    try {
+      const response = await api.get(`fabricator/branch/fabricator/${fabricatorId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching fabricator branches by fabricator ID:', error)
+    }
+  }
+
+  // Fetch Projects by Fabricator ID
+  static async GetProjectsByFabricatorID(fabricatorId) {
+    try {
+      const response = await api.get(`project/projects/fabricator/${fabricatorId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error fetching projects by fabricator ID:', error)
     }
   }
 
@@ -1795,10 +1865,10 @@ class Service {
           'Content-Type': 'application/json'
         }
       })
-      console.log(' All Fabricators fetched:', response.data)
+      console.log(' All Chats fetched:', response.data)
       return response.data
     } catch (error) {
-      console.error('cannot find fabricators', error)
+      console.error('cannot find Chats', error)
     }
   }
 
@@ -3911,7 +3981,9 @@ class Service {
 
   static async viewRfqFile(Id, fileId) {
     try {
-      const response = await api.get(`rfq/followups/viewFile/${Id}/${fileId}`)
+      const response = await api.get(`rfq/followups/${Id}/${fileId}`, {
+        responseType: 'blob'
+      })
       console.log('RFQ file fetched:', response.data)
       return response.data
     } catch (error) {

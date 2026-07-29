@@ -33,17 +33,24 @@ const FabricatorDashboard = ({ fabricator }) => {
     try {
       setLoading(true);
 
-      // 1. Get Projects for this fabricator (Prioritize fabricator.project prop if available)
+      // 1. Get Projects for this fabricator using the fabricator-specific projects API
       let fabProjects = [];
-      if (fabricator.project) {
-        fabProjects = Array.isArray(fabricator.project)
-          ? fabricator.project
-          : Object.values(fabricator.project);
-      } else {
-        const allProjectsResponse = await Service.GetAllProjects();
-        fabProjects = (allProjectsResponse || []).filter(
-          (p) => p.fabricatorID === fabricator.id
-        );
+      const fabricatorId = fabricator.id || fabricator._id;
+      if (fabricatorId) {
+        const response = await Service.GetProjectsByFabricatorID(fabricatorId);
+        if (response) {
+          if (Array.isArray(response)) {
+            fabProjects = response;
+          } else if (response.data) {
+            if (Array.isArray(response.data)) {
+              fabProjects = response.data;
+            } else if (response.data.projects && Array.isArray(response.data.projects)) {
+              fabProjects = response.data.projects;
+            } else if (Array.isArray(response.data.data)) {
+              fabProjects = response.data.data;
+            }
+          }
+        }
       }
       setProjects(fabProjects);
 
@@ -121,16 +128,6 @@ const FabricatorDashboard = ({ fabricator }) => {
   }, [projects, searchTerm, selectedStatus, selectedStage]);
 
   const columns = [
-    { accessorKey: "serialNo", header: "Serial #" },
-    {
-      accessorKey: "projectCode",
-      header: "Project Code",
-      cell: ({ row }) => (
-        <span className="font-mono text-sm font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 tracking-normal">
-          {row.original.projectCode || "N/A"}
-        </span>
-      )
-    },
     {
       accessorKey: "name",
       header: "Project Name",
@@ -269,6 +266,7 @@ const FabricatorDashboard = ({ fabricator }) => {
           isOpen={!!selectedProject}
           onClose={() => setSelectedProject(null)}
           hideHeader={true}
+          zIndex="z-[20000]"
         >
           <GetProjectById
             id={selectedProject.id}

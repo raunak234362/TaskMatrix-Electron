@@ -41,6 +41,10 @@ const getDownloadUrl = (table, parentId, fileId, versionId) => {
       return `${baseURL}/${table}/viewfile/${parentId}/${fileId}`
     case 'bfa':
       return `${baseURL}/bfa/viewFile/${parentId}/${fileId}`
+    case 'followup':
+    case 'followups':
+    case 'rfqFollowups':
+      return `${baseURL}/rfq/followups/${parentId}/${fileId}`
     default:
       return `${baseURL}/${table}/viewFile/${parentId}/${fileId}`
   }

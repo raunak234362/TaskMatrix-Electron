@@ -11,6 +11,7 @@ const RenderFiles = ({
   formatDate,
   table,
   parentId,
+  rfqId,
 }) => {
   // Step 1 and flatten files
   console.log(files);
@@ -97,6 +98,8 @@ const RenderFiles = ({
         return `${baseURL}/connectionDesignerQuota/viewFile/${parentId}/${fileId}`;
       case "designDrawings":
         return `${baseURL}/${table}/viewfile/${parentId}/${fileId}`;
+      case "followups":
+        return `${baseURL}/rfq/followups/viewFile/${parentId}/${fileId}`;
       default:
         return `${baseURL}/${table}/viewFile/${parentId}/${fileId}`;
     }
@@ -106,10 +109,17 @@ const RenderFiles = ({
     e.preventDefault();
     e.stopPropagation();
     try {
-      const shareTable = (table === "rfqCDAttachments" || table === "CDAttachments") ? "rFQ" : table;
+      let shareTable = (table === "rfqCDAttachments" || table === "CDAttachments") ? "rFQ" : table;
+      let shareParentId = file.documentID;
+
+      if (table === "followups") {
+        shareTable = "rFQ";
+        shareParentId = rfqId;
+      }
+
       const response = await Service.createShareLink(
         shareTable,
-        file.documentID,
+        shareParentId,
         file.id
       );
       console.log(response);
@@ -132,6 +142,7 @@ const RenderFiles = ({
   ) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log("DEBUG: handleDownload - table:", table, "file.documentID:", file.documentID, "file.id:", file.id, "parentId (prop):", parentId);
     const downloadUrl = getDownloadUrl(table, file.documentID, file.id, file);
 
     try {
@@ -178,6 +189,9 @@ const RenderFiles = ({
   // Step 3 grouped sections
   return (
     <div className="space-y-6">
+      <div className="text-[10px] text-red-500 bg-red-50 p-1 font-mono">
+        DEBUG - Table: {table} | ParentId: {String(parentId)} | RfqId: {String(rfqId)}
+      </div>
       {/* Header */}
       <div className="flex justify-between items-center">
         {/* <h4 className="text-sm font-medium text-black">Project Files</h4> */}

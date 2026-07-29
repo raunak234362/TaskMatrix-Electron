@@ -185,6 +185,12 @@ export default function DataTable({
   getRowClassName = () => "",
   forceExpandRowId = null,
   meta,
+
+  // Manual pagination props
+  manualPagination = false,
+  pageCount,
+  pageIndex,
+  onPageChange,
 }) {
   const { isMobile } = useScreen();
 
@@ -192,6 +198,24 @@ export default function DataTable({
   const [sorting, setSorting] = useState(initialSorting);
   const [columnFilters, setColumnFilters] = useState([]);
   const [expandedRowId, setExpandedRowId] = useState(null);
+
+  const [pagination, setPagination] = useState({
+    pageIndex: pageIndex !== undefined ? pageIndex : 0,
+    pageSize: pageSizeOptions[0] || 10,
+  });
+
+  useEffect(() => {
+    if (pageIndex !== undefined) {
+      setPagination((prev) => ({ ...prev, pageIndex }));
+    }
+  }, [pageIndex]);
+
+  const firstPageSizeOption = pageSizeOptions?.[0];
+  useEffect(() => {
+    if (firstPageSizeOption) {
+      setPagination((prev) => ({ ...prev, pageSize: firstPageSizeOption }));
+    }
+  }, [firstPageSizeOption]);
 
   useEffect(() => {
     if (forceExpandRowId) {
@@ -204,11 +228,11 @@ export default function DataTable({
       id: "sNo",
       header: "S.No",
       cell: ({ row, table }) => {
-        const { pageIndex, pageSize } = table.getState().pagination;
+        const { pageIndex: pIdx, pageSize: pSize } = table.getState().pagination;
         const index = table
           .getPaginationRowModel()
           .rows.findIndex((r) => r.id === row.id);
-        return <span>{pageIndex * pageSize + index + 1}</span>;
+        return <span>{pIdx * pSize + index + 1}</span>;
       },
       enableSorting: false,
       enableColumnFilter: false,
@@ -261,15 +285,22 @@ export default function DataTable({
       sorting,
       columnFilters,
       rowSelection,
+      pagination,
     },
     initialState: {
       sorting: initialSorting,
-      pagination: {
-        pageSize: pageSizeOptions[0] || 10,
-      },
       // Ensure rowSelection is valid even if undefined
       rowSelection: rowSelection || {},
     },
+    onPaginationChange: (updater) => {
+      const nextVal = typeof updater === "function" ? updater(pagination) : updater;
+      setPagination(nextVal);
+      if (manualPagination && onPageChange) {
+        onPageChange(nextVal.pageIndex);
+      }
+    },
+    manualPagination,
+    pageCount,
     enableRowSelection,
     onRowSelectionChange,
     getRowId,

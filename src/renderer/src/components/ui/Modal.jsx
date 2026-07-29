@@ -1,11 +1,11 @@
 import { X } from 'lucide-react'
 import { createPortal } from 'react-dom'
 
-const Modal = ({ isOpen, onClose, title, children,  hideHeader = false }) => {
+const Modal = ({ isOpen, onClose, title, children,  hideHeader = false, zIndex = "z-[150]" }) => {
   if (!isOpen) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className={`fixed inset-0 ${zIndex} flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm`}>
       <div
         className={`bg-white w-full max-h-[90vh] rounded-xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in fade-in zoom-in duration-200 p-4`}
       >
