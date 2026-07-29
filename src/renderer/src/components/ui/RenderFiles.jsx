@@ -254,7 +254,7 @@ const RenderFiles = ({
                         <div className={`p-1.5 rounded-none border border-black/10 ${bgColor} relative flex items-center justify-center`}>
                           <Icon size={18} className={color} strokeWidth={2} />
                           {text && (
-                            <span className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[7px] font-bold mt-[2px] ${textColor}`}>
+                            <span className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[7px] font-bold mt-0.5 ${textColor}`}>
                               {text}
                             </span>
                           )}
