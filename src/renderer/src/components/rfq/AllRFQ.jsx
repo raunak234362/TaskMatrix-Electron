@@ -65,12 +65,12 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
 
   const fabricatorOptions = useMemo(() => {
     const fabs = new Set();
-    rfq?.forEach(item => {
+    rfqList?.forEach(item => {
       const name = item.fabricator?.fabName;
       if (name) fabs.add(name);
     });
     return Array.from(fabs).map(f => ({ label: f, value: f }));
-  }, [rfq]);
+  }, [rfqList]);
 
   // Premium styled columns
   let columns = [
@@ -259,7 +259,7 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
   ];
 
   const filteredRfq = useMemo(() => {
-    return (rfq || []).filter(item => {
+    return (rfqList || []).filter(item => {
       // 1. Search Filter
       const matchesSearch = item.projectName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.projectNumber?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -282,7 +282,7 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
 
       return true;
     });
-  }, [rfq, searchQuery, showAwarded, mtoFilter]);
+  }, [rfqList, searchQuery, showAwarded, mtoFilter]);
 
   return (
     <div className="bg-[#fcfdfc] min-h-[600px] animate-in fade-in duration-700">
@@ -365,7 +365,10 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
           }
           return <GetRFQByID id={row.id || row._id} onClose={close} />;
         }}
-        disablePagination={true}
+        manualPagination={true}
+        pageCount={totalPages}
+        pageIndex={currentPage - 1}
+        onPageChange={(index) => setCurrentPage(index + 1)}
         forceExpandRowId={newRfqId}
       />
     </div>
