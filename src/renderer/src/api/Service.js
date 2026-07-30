@@ -557,9 +557,13 @@ class Service {
     return response.data
   }
   //Fetch all the RFQ
-  static async FetchAllRFQ() {
+  static async FetchAllRFQ(page, limit = 5) {
     try {
       const response = await api.get(`rfq/all`, {
+        params: {
+          page,
+          limit,
+        },
         headers: {
           'Content-Type': 'application/json'
         }
@@ -572,9 +576,13 @@ class Service {
   }
 
   // api for sents :
-  static async RfqSent() {
+  static async RfqSent(page, limit = 5) {
     try {
       const response = await api.get(`rfq/sents`, {
+        params: {
+          page,
+          limit
+        },
         headers: {
           'Content-Type': 'application/json'
         }
@@ -587,9 +595,13 @@ class Service {
   }
 
   //api for recieved:
-  static async RFQRecieved() {
+  static async RFQRecieved(page, limit = 5) {
     try {
       const response = await api.get(`rfq/received`, {
+        params: {
+          page,
+          limit,
+        },
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'

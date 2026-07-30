@@ -1,21 +1,67 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import DataTable from "../ui/table";
 import { Search, X, Filter } from "lucide-react";
 
 import GetRFQByID from "./GetRFQByID";
+import Service from "../../api/Service";
 
-const AllRFQ = ({ rfq, newRfqId, onRfqOpened }) => {
+const AllRFQ = ({ newRfqId, onRfqOpened }) => {
   const userType = localStorage.getItem("userType");
+
+  const [rfqList, setRfqList] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch paginated RFQs
+  useEffect(() => {
+    const fetchPaginated = async () => {
+      try {
+        setLoading(true);
+        let response;
+        if (userType === "CLIENT") {
+          response = await Service.RfqSent(currentPage, 5);
+        } else {
+          response = await Service.FetchAllRFQ(currentPage, 5);
+        }
+
+        if (response) {
+          const resData = response.data || response;
+          const pagination = response.meta || response.pagination || resData.pagination || resData.meta;
+
+          if (Array.isArray(resData)) {
+            setRfqList(resData);
+            setTotalPages(1);
+            setTotalItems(resData.length);
+          } else if (resData && Array.isArray(resData.data)) {
+            setRfqList(resData.data);
+            setTotalPages(pagination?.totalPages || 1);
+            setTotalItems(pagination?.total || 0);
+          } else if (response.data && Array.isArray(response.data)) {
+            setRfqList(response.data);
+            setTotalPages(pagination?.totalPages || 1);
+            setTotalItems(pagination?.total || 0);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch paginated RFQs:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPaginated();
+  }, [currentPage, userType]);
 
   // Dynamic filter options extraction
   const statusOptions = useMemo(() => {
     const statuses = new Set();
-    rfq?.forEach(item => {
+    rfqList?.forEach(item => {
       const status = item.wbtStatus || item.status || 'PENDING';
       statuses.add(status);
     });
     return Array.from(statuses).map(s => ({ label: s, value: s }));
-  }, [rfq]);
+  }, [rfqList]);
 
   const fabricatorOptions = useMemo(() => {
     const fabs = new Set();
