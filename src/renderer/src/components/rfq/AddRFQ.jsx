@@ -54,6 +54,9 @@ const AddRFQ = ({ onSuccess }) => {
     (state) => state.fabricatorInfo?.fabricatorData,
   ) || [];
 
+  const userDetail = useSelector((state) => state.userInfo?.userDetail);
+  const userRole = userDetail?.role;
+
   // const staffData = useSelector((state) => state.userInfo.staffData);
 
   // const userType = typeof window !== "undefined" ? sessionStorage.getItem("userType") : null;
@@ -110,6 +113,7 @@ const AddRFQ = ({ onSuccess }) => {
   const [description, setDescription] = useState("");
   const [isDetailing, setIsDetailing] = useState(false);
   const [isMTO, setIsMTO] = useState(false);
+  const [pocs, setPocs] = useState([]);
 
   const dynamicEditorHeight = React.useMemo(() => {
     let h = 300; // Base height when nothing is selected
@@ -150,6 +154,32 @@ const AddRFQ = ({ onSuccess }) => {
     };
     loadStaff();
   }, []);
+
+  // Fetch POCs when Fabricator is selected
+  useEffect(() => {
+    const fetchPOCs = async () => {
+      if (!selectedFabricatorId) {
+        setPocs([]);
+        return;
+      }
+      try {
+        const response = await Service.GetFabricatorPOC(selectedFabricatorId);
+        const pocData = response?.data || response || [];
+        setPocs(Array.isArray(pocData) ? pocData : []);
+      } catch (err) {
+        console.error("Failed to fetch fabricator POCs:", err);
+        setPocs([]);
+      }
+    };
+    fetchPOCs();
+  }, [selectedFabricatorId]);
+
+  // Reset selected contact when fabricator changes (only for staff/admin)
+  useEffect(() => {
+    if (userRole !== "CLIENT" && userRole !== "CLIENT_ADMIN" && userRole !== "CLIENT_ESTIMATOR") {
+      setValue("senderId", "");
+    }
+  }, [selectedFabricatorId, setValue, userRole]);
 
   // --- FABRICATOR OPTIONS ---
   const fabOptions =
@@ -202,16 +232,13 @@ const AddRFQ = ({ onSuccess }) => {
     }
   }, [selectedCountry, selectedState, setValue, stateOptions.length]);
 
-  const clientOptions =
-    selectedFabricator?.pointOfContact?.map((client) => ({
-      label: `${client.firstName} ${client.middleName ?? ""} ${client.lastName}`,
-      value: String(client.id),
-    })) ?? [];
-
-  // selector for the user
-
-  const userDetail = useSelector((state) => state.userInfo.userDetail);
-  const userRole = userDetail?.role;
+  const clientOptions = React.useMemo(() => {
+    const list = pocs.length > 0 ? pocs : (selectedFabricator?.pointOfContact || []);
+    return list.map((client) => ({
+      label: `${client.firstName || ""} ${client.middleName ?? ""} ${client.lastName || ""}`.trim().replace(/\s+/g, " "),
+      value: String(client.id || client._id),
+    }));
+  }, [pocs, selectedFabricator]);
 
   // Auto-populate form fields for client roles
   useEffect(() => {

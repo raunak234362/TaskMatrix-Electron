@@ -21,9 +21,9 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
         setLoading(true);
         let response;
         if (userType === "CLIENT") {
-          response = await Service.RfqSent(currentPage, 5);
+          response = await Service.RfqSent(currentPage, 10);
         } else {
-          response = await Service.FetchAllRFQ(currentPage, 5);
+          response = await Service.FetchAllRFQ(currentPage, 10);
         }
 
         if (response) {

@@ -528,6 +528,21 @@ class Service {
     }
   }
 
+  // Fetch POC by Fabricator ID
+  static async GetFabricatorPOC(fabricatorId) {
+    try {
+      const response = await api.get(`fabricator/${fabricatorId}/poc`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Fabricator POC fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find fabricator pocs', error)
+    }
+  }
+
   // Fetch Client by ID
   static async FetchClientByID(clientID) {
     try {

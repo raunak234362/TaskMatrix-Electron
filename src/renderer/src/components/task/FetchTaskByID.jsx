@@ -456,7 +456,9 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
               <ClipboardList className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl md:text-2xl font-bold text-gray-800">{task.name}</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-gray-800">
+                {task.name}{task.wbsType ? ` - ${String(task.wbsType).replace(/_/g, ' ')}` : ''}
+              </h2>
             </div>
           </div>
           <div className="flex items-center gap-3">

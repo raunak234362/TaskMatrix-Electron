@@ -262,8 +262,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
             </div>
             <div>
               <h2 className="text-xl font-bold text-black tracking-tight uppercase">
-                {task.wbsType ? `${String(task.wbsType).replace(/_/g, ' ').toUpperCase()} ` : ''} -{' '}
-                {task.name}
+                {task.name}{task.wbsType ? ` - ${String(task.wbsType).replace(/_/g, ' ')}` : ''}
               </h2>
               <div className="flex items-center gap-2 mt-2">
                 <span
