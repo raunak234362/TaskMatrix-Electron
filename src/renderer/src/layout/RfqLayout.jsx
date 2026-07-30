@@ -2,13 +2,11 @@ import { useState } from "react";
 import AddRFQ from "../components/rfq/AddRFQ";
 import AllRFQ from "../components/rfq/AllRFQ";
 
-import { useSelector } from "react-redux";
 // import GetRFQByID from "../components/rfq/GetRFQByID";
 
 const RfqLayout = () => {
   const [activeTab, setActiveTab] = useState("allRFQ");
   const [newRfqId, setNewRfqId] = useState(null);
-  const rfq = useSelector((state) => state.RFQInfos?.RFQData);
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   return (
     <div className="w-full overflow-y-hidden overflow-x-hidden">
@@ -42,7 +40,7 @@ const RfqLayout = () => {
       <div className="flex-1 min-h-0 bg-white p-2 rounded-b-2xl overflow-y-auto">
         {activeTab === "allRFQ" && (
           <div>
-            <AllRFQ rfq={rfq} newRfqId={newRfqId} onRfqOpened={() => setNewRfqId(null)} />
+            <AllRFQ newRfqId={newRfqId} onRfqOpened={() => setNewRfqId(null)} />
           </div>
         )}
         {activeTab === "addRFQ" && (

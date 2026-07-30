@@ -557,7 +557,7 @@ class Service {
     return response.data
   }
   //Fetch all the RFQ
-  static async FetchAllRFQ(page, limit = 5) {
+  static async FetchAllRFQ(page, limit = 10) {
     try {
       const response = await api.get(`rfq/all`, {
         params: {
@@ -576,7 +576,7 @@ class Service {
   }
 
   // api for sents :
-  static async RfqSent(page, limit = 5) {
+  static async RfqSent(page, limit = 10) {
     try {
       const response = await api.get(`rfq/sents`, {
         params: {
@@ -595,7 +595,7 @@ class Service {
   }
 
   //api for recieved:
-  static async RFQRecieved(page, limit = 5) {
+  static async RFQRecieved(page, limit = 10) {
     try {
       const response = await api.get(`rfq/received`, {
         params: {

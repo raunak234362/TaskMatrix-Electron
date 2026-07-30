@@ -27,22 +27,33 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
         }
 
         if (response) {
-          const resData = response.data || response;
-          const pagination = response.meta || response.pagination || resData.pagination || resData.meta;
+          let list = [];
+          let totalP = 1;
+          let totalI = 0;
 
-          if (Array.isArray(resData)) {
-            setRfqList(resData);
-            setTotalPages(1);
-            setTotalItems(resData.length);
-          } else if (resData && Array.isArray(resData.data)) {
-            setRfqList(resData.data);
-            setTotalPages(pagination?.totalPages || 1);
-            setTotalItems(pagination?.total || 0);
+          if (Array.isArray(response)) {
+            list = response;
+            totalI = response.length;
+            totalP = list.length === 5 ? currentPage + 1 : currentPage;
+          } else if (response.data && Array.isArray(response.data.data)) {
+            list = response.data.data;
+            const meta = response.data.pagination || response.data.meta || response.meta || response.pagination || {};
+            totalP = meta.totalPages || (list.length === 5 ? currentPage + 1 : currentPage);
+            totalI = meta.total || list.length;
           } else if (response.data && Array.isArray(response.data)) {
-            setRfqList(response.data);
-            setTotalPages(pagination?.totalPages || 1);
-            setTotalItems(pagination?.total || 0);
+            list = response.data;
+            const meta = response.meta || response.pagination || {};
+            totalP = meta.totalPages || (list.length === 5 ? currentPage + 1 : currentPage);
+            totalI = meta.total || list.length;
+          } else if (response.data) {
+            list = [response.data];
+            totalI = 1;
+            totalP = 1;
           }
+
+          setRfqList(list);
+          setTotalPages(totalP);
+          setTotalItems(totalI);
         }
       } catch (err) {
         console.error("Failed to fetch paginated RFQs:", err);
@@ -297,13 +308,19 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
                 placeholder="Search RFQs by project name or number..."
                 className="flex-1 px-4 py-2 bg-transparent text-gray-800 placeholder-gray-400 focus:outline-none font-medium"
               />
               {searchQuery && (
                 <button
-                  onClick={() => setSearchQuery("")}
+                  onClick={() => {
+                    setSearchQuery("");
+                    setCurrentPage(1);
+                  }}
                   className="p-1 px-3 text-gray-300 hover:text-gray-500 transition-colors"
                 >
                   <X size={16} />
@@ -317,7 +334,10 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
             <div className="relative">
               <select
                 value={mtoFilter}
-                onChange={(e) => setMtoFilter(e.target.value)}
+                onChange={(e) => {
+                  setMtoFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="appearance-none bg-white border-2 border-gray-200 rounded-lg px-4 py-2 pr-9 text-sm font-bold text-gray-700 uppercase tracking-tight shadow-sm hover:border-purple-400 focus:outline-none focus:border-purple-500 transition-all duration-200 cursor-pointer"
                 style={{ minWidth: 150 }}
               >
@@ -338,7 +358,10 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
                 Awarded
               </span>
               <div
-                onClick={() => setShowAwarded(v => !v)}
+                onClick={() => {
+                  setShowAwarded(v => !v);
+                  setCurrentPage(1);
+                }}
                 className={`relative inline-flex items-center w-12 h-6 rounded-full border-2 transition-all duration-300 ${
                   showAwarded
                     ? 'bg-green-500 border-green-600 shadow-md shadow-green-200'
@@ -369,6 +392,7 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
         pageCount={totalPages}
         pageIndex={currentPage - 1}
         onPageChange={(index) => setCurrentPage(index + 1)}
+        pageSizeOptions={[5]}
         forceExpandRowId={newRfqId}
       />
     </div>
