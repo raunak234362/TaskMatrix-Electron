@@ -111,8 +111,13 @@ const RenderFiles = ({
     try {
       let shareTable = (table === "rfqCDAttachments" || table === "CDAttachments") ? "rFQ" : table;
       let shareParentId = file.documentID;
+      let shareVersionId = file.versionId;
 
-      if (table === "followups") {
+      if (table === "submittals") {
+        shareTable = "submittalVersion";
+        shareParentId = file.versionId || file.documentID;
+        shareVersionId = undefined;
+      } else if (table === "followups" || table === "followup") {
         shareTable = "rFQFollowUp";
         shareParentId = file.documentID;
       }
@@ -120,10 +125,11 @@ const RenderFiles = ({
       const response = await Service.createShareLink(
         shareTable,
         shareParentId,
-        file.id
+        file.id,
+        shareVersionId
       );
-      console.log(response);
-      const shareUrl = response?.shareUrl || response?.data?.shareUrl;
+      console.log("Share link response:", response);
+      const shareUrl = response?.shareUrl || response?.data?.shareUrl || (typeof response === "string" ? response : null);
       if (shareUrl) {
         await navigator.clipboard.writeText(shareUrl);
         toast.success("Link copied to clipboard!");

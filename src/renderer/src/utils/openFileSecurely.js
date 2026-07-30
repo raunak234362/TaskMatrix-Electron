@@ -4,6 +4,8 @@ import { toast } from 'react-toastify'
 const getDownloadUrl = (table, parentId, fileId, versionId) => {
   const baseURL = import.meta.env.VITE_BASE_URL?.replace(/\/$/, '')
   switch (table) {
+    case 'bfa':
+      return `${baseURL}/bfa/viewFile/${parentId}/${fileId}`
     case 'project':
       return `${baseURL}/project/viewFile/${parentId}/${fileId}`
     case 'estimation':
@@ -19,32 +21,34 @@ const getDownloadUrl = (table, parentId, fileId, versionId) => {
     case 'submittal/response':
       return `${baseURL}/submittal/response/${parentId}/viewfile/${fileId}`
     case 'rFQ':
-    case 'rfqCDAttachments':
-    case 'CDAttachments':
       return `${baseURL}/rfq/viewFile/${parentId}/${fileId}`
     case 'rfqResponse':
     case 'rFQResponse':
     case 'rFQresponse':
     case 'rfq/response':
       return `${baseURL}/rfq/response/viewFile/${parentId}/${fileId}`
+    case 'rfqFollowup':
+    case 'rfq/followup':
+      return `${baseURL}/rfq/followUps/viewFile/${parentId}/${fileId}`
     case 'changeOrders':
       return `${baseURL}/changeOrder/viewFile/${parentId}/${fileId}`
     case 'changeOrder/response':
     case 'cOResponse':
       return `${baseURL}/changeOrder/viewFile/${parentId}/files/${fileId}`
-    case 'notes':
-      return `${baseURL}/project/notes/viewFile/${parentId}/${fileId}`
-    case 'connectionDesignerQuota':
-      return `${baseURL}/connectionDesignerQuota/viewFile/${parentId}/${fileId}`
-    case 'designDrawings':
+    case 'projectNotes':
+      return `${baseURL}/projectNotes/note/viewfile/${parentId}/${fileId}`
+    case 'connection-designer':
+      return `${baseURL}/connectionDesign/viewFile/${parentId}/${fileId}`
     case 'designDrawings':
       return `${baseURL}/${table}/viewfile/${parentId}/${fileId}`
-    case 'bfa':
-      return `${baseURL}/bfa/viewFile/${parentId}/${fileId}`
-    case 'followup':
-    case 'followups':
-    case 'rfqFollowups':
-      return `${baseURL}/rfq/followups/viewFile/${parentId}/${fileId}`
+    case 'teamMeetingNotes':
+      return `${baseURL}/teamMeetingNotes/viewFile/${parentId}/${fileId}`
+    case 'teamMeetingResponse':
+      return `${baseURL}/teamMeetingNotes/responses/viewFile/${parentId}/${fileId}`
+    case 'quotation':
+      return `${baseURL}/connectionDesignerQuota/viewFile/${parentId}/${fileId}`
+    case 'quotationResponse':
+      return `${baseURL}/connectionDesignerQuota/replies/viewFile/${parentId}/${fileId}`
     default:
       return `${baseURL}/${table}/viewFile/${parentId}/${fileId}`
   }
@@ -56,7 +60,7 @@ export const openFileSecurely = async (type, id, fileId, versionId) => {
     const token = sessionStorage.getItem('token')
     if (!token) {
       toast.error('Authentication token missing')
-      return
+      return { success: false, error: 'Authentication token missing' }
     }
 
     const response = await fetch(downloadUrl, {
@@ -67,15 +71,22 @@ export const openFileSecurely = async (type, id, fileId, versionId) => {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to fetch file')
+      const errorMsg =
+        response.status === 404
+          ? 'File not found'
+          : response.status === 403
+            ? 'Access denied'
+            : 'Server error'
+      throw new Error(errorMsg)
     }
 
     const blob = await response.blob()
     const fileURL = window.URL.createObjectURL(blob)
     window.open(fileURL, '_blank', 'noopener,noreferrer')
+    return { success: true }
   } catch (err) {
     console.error('File open failed:', err)
-    toast.error('Unable to open file')
+    return { success: false, error: err.message || 'Unable to open file' }
   }
 }
 
@@ -85,7 +96,7 @@ export const downloadFileSecurely = async (type, id, fileId, originalName, versi
     const token = sessionStorage.getItem('token')
     if (!token) {
       toast.error('Authentication token missing')
-      return
+      return { success: false, error: 'Authentication token missing' }
     }
 
     const response = await fetch(downloadUrl, {
@@ -94,7 +105,15 @@ export const downloadFileSecurely = async (type, id, fileId, originalName, versi
       }
     })
 
-    if (!response.ok) throw new Error('Download failed')
+    if (!response.ok) {
+      const errorMsg =
+        response.status === 404
+          ? 'File not found'
+          : response.status === 403
+            ? 'Access denied'
+            : 'Server error'
+      throw new Error(errorMsg)
+    }
 
     const blob = await response.blob()
     const url = window.URL.createObjectURL(blob)
@@ -103,14 +122,13 @@ export const downloadFileSecurely = async (type, id, fileId, originalName, versi
     a.download = originalName || 'download'
     document.body.appendChild(a)
     a.click()
-    setTimeout(() => {
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-    }, 1000)
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(a)
     toast.success('Download started')
+    return { success: true }
   } catch (error) {
     console.error('Error downloading file:', error)
-    toast.error('Error downloading file')
+    return { success: false, error: error.message || 'Error downloading file' }
   }
 }
 
@@ -118,21 +136,29 @@ export const shareFileSecurely = async (type, id, fileId, versionId) => {
   try {
     let response
     if (type === 'submittals') {
-      response = await Service.createShareLink('submittalVersion', versionId, fileId)
-    } else if (type === 'designDrawings' || type === 'designDrawings') {
-      response = await Service.createShareLink('designDrawings', id, fileId)
+      response = await Service.createShareLink(
+        'submittalVersion',
+        String(versionId),
+        String(fileId)
+      )
     } else if (type === 'bfa') {
-      response = await Service.createShareLink('bfa', id, fileId)
+      response = await Service.createShareLink('bfa', String(id), String(fileId))
     } else if (type === 'rfqResponse' || type === 'rFQResponse' || type === 'rFQresponse') {
-      response = await Service.createShareLink('rFQResponse', id, fileId, versionId)
-    } else if (type === 'rfqCDAttachments' || type === 'CDAttachments') {
-      response = await Service.createShareLink('rFQ', id, fileId, versionId)
-    } else if (type === 'followups' || type === 'followup') {
-      response = await Service.createShareLink('rFQFollowUp', id, fileId)
+      response = await Service.createShareLink(
+        'rFQResponse',
+        String(id),
+        String(fileId),
+        versionId ? String(versionId) : undefined
+      )
     } else {
-      response = await Service.createShareLink(type, id, fileId, versionId)
+      response = await Service.createShareLink(
+        type,
+        String(id),
+        String(fileId),
+        versionId ? String(versionId) : undefined
+      )
     }
-    const shareUrl = response?.shareUrl || response?.data?.shareUrl
+    const shareUrl = response?.shareUrl || response?.data?.shareUrl || (typeof response === 'string' ? response : null)
     if (shareUrl) {
       await navigator.clipboard.writeText(shareUrl)
       toast.success('Link copied to clipboard!')

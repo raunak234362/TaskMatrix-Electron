@@ -26,17 +26,18 @@ class MiscellaneousService {
   // Share Link
   static async createShareLink(table, parentId, fileId, versionId) {
     try {
-      const payload = { table, parentId, fileId }
-      if (versionId) {
-        payload.versionId = versionId
+      let mappedTable = table;
+      if (table === "rfqResponse" || table === "rFQResponse" || table === "rFQresponse") {
+        mappedTable = "rFQResponse";
       }
-      const response = await api.post('shareLink', payload, {
-        headers: { 'Content-Type': 'application/json' }
-      })
-      return response.data
+      const url = versionId
+        ? `share/${mappedTable}/${parentId}/versions/${versionId}/${fileId}`
+        : `share/${mappedTable}/${parentId}/${fileId}`;
+      const response = await api.post(url);
+      return response.data;
     } catch (error) {
-      console.error('Error creating share link:', error)
-      throw error
+      console.error("Error creating share link:", error);
+      throw error;
     }
   }
 

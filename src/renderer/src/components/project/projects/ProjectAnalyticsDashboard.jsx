@@ -132,6 +132,39 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
     return grouped;
   }, [filteredTasks]);
 
+  const resolvedBundles = useMemo(() => {
+    let list = Array.isArray(bundles) ? bundles : (bundles?.data || []);
+    if (list.length > 0) return list;
+
+    // Synthesize from tasksByBundle if API returns empty
+    return Object.keys(tasksByBundle).map((key) => {
+      const bTasks = tasksByBundle[key] || [];
+      let totalExecMins = 0;
+      let totalCheckMins = 0;
+
+      bTasks.forEach((t) => {
+        const type = (t.wbsType || "").toLowerCase();
+        const workedSecs = calculateWorkedSeconds(t);
+        const workedMins = Math.round(workedSecs / 60);
+        if (type.includes("checking")) {
+          totalCheckMins += workedMins;
+        } else {
+          totalExecMins += workedMins;
+        }
+      });
+
+      const firstTask = bTasks[0];
+      return {
+        id: key,
+        bundleKey: key,
+        name: key,
+        stage: firstTask?.Stage || firstTask?.stage || "IFA",
+        totalExecHr: totalExecMins,
+        totalCheckHr: totalCheckMins,
+      };
+    });
+  }, [bundles, tasksByBundle]);
+
   // Analytics for Charts
   const chartData = useMemo(() => {
     return milestones.map((ms) => {
@@ -536,8 +569,8 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
         </div>
 
         <div className="divide-y divide-black/10">
-          {bundles.length > 0 ? (
-            bundles.map((bundle) => {
+          {resolvedBundles.length > 0 ? (
+            resolvedBundles.map((bundle) => {
               // Resolve the shared bundleKey — present on both bundle objects and tasks
               const bundleKey =
                 bundle.bundleKey ||

@@ -65,19 +65,26 @@ const GetWBSByID = ({
       setError(null);
       const response = await Service.GetWBSLineItemById(projectId, id, stage);
       console.log("WBS Detail Response:", response);
-      // Handle potential different response structures from the new endpoint
-      if (response && response.data) {
-        setLineItems(response.data || []);
-      } else if (response && Array.isArray(response.data)) {
-        // If it returns { lineItems: [...] } but no wbs metadata, we might need to handle it
-        // For now assume it has the metadata or it's the old structure
-        setWbs(response);
-      } else {
-        setWbs(response || null);
+      
+      if (response) {
+        if (Array.isArray(response)) {
+          setLineItems(response);
+        } else if (Array.isArray(response.data)) {
+          setLineItems(response.data);
+        } else if (Array.isArray(response.data?.data)) {
+          setLineItems(response.data.data);
+        } else if (response.wbsTemplates || response.lineItems) {
+          setLineItems(response.wbsTemplates || response.lineItems || []);
+        }
+        if (response.id || response.bundleKey || response.name) {
+          setWbs((prev) => prev || response);
+        }
       }
     } catch (err) {
-      console.error("Error fetching WBS:", err);
-      setError("Failed to load WBS details");
+      console.error("Error fetching WBS line items:", err);
+      if (!initialData && !wbsData) {
+        setError("Failed to load WBS details");
+      }
     } finally {
       setLoading(false);
     }
@@ -149,7 +156,7 @@ const GetWBSByID = ({
       })
       : "—";
 
-  if (loading && !wbs)
+  if (loading && !wbs && !wbsData)
     return (
       <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50">
         <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 border border-white/20">
@@ -164,7 +171,7 @@ const GetWBSByID = ({
       </div>
     );
 
-  if (error || !wbs)
+  if ((error || (!wbs && !wbsData)) && !initialData)
     return (
       <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50">
         <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 max-w-md text-center border border-red-100">

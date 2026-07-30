@@ -50,8 +50,71 @@ const AllWBS = ({ id, stage }) => {
       setLoading(true);
       setError(null);
 
-      const response = await Service.GetBundleByProjectId(projectId);
-      const data = response?.data || [];
+      const [bundleRes, taskRes] = await Promise.all([
+        Service.GetBundleByProjectId(projectId).catch(() => null),
+        Service.GetAllTask().catch(() => null),
+      ]);
+
+      let data = [];
+      if (Array.isArray(bundleRes)) {
+        data = bundleRes;
+      } else if (Array.isArray(bundleRes?.data)) {
+        data = bundleRes.data;
+      } else if (Array.isArray(bundleRes?.data?.data)) {
+        data = bundleRes.data.data;
+      }
+
+      // If backend returned empty bundles, synthesize bundle entries from project tasks
+      if (data.length === 0 && taskRes) {
+        const allTasks = Array.isArray(taskRes)
+          ? taskRes
+          : Array.isArray(taskRes?.data)
+          ? taskRes.data
+          : [];
+
+        const projectTasks = allTasks.filter(
+          (t) =>
+            t.project_id === projectId ||
+            t.project?.id === projectId ||
+            (typeof t.project === "string" && t.project === projectId)
+        );
+
+        const bundleMap = {};
+        projectTasks.forEach((t) => {
+          const key =
+            t.projectBundle?.bundleKey ||
+            t.projectBundle?.name ||
+            t.projectBundle?.bundle?.bundleKey ||
+            t.bundleKey;
+          if (!key) return;
+
+          if (!bundleMap[key]) {
+            bundleMap[key] = {
+              id: t.projectBundle?.id || key,
+              bundleKey: key,
+              name: key,
+              stage: t.Stage || t.stage || stage || "IFA",
+              totalExecHr: 0,
+              totalCheckHr: 0,
+            };
+          }
+
+          const type = (t.wbsType || "").toLowerCase();
+          const workedSecs = (t.workingHourTask || []).reduce(
+            (s, w) => s + (Number(w.duration_seconds) || 0),
+            0
+          );
+          const workedMins = Math.round(workedSecs / 60);
+
+          if (type.includes("checking")) {
+            bundleMap[key].totalCheckHr += workedMins;
+          } else {
+            bundleMap[key].totalExecHr += workedMins;
+          }
+        });
+
+        data = Object.values(bundleMap);
+      }
 
       setWbsBundles(data);
       dispatch(setWBSForProject({ projectId, wbs: data }));
@@ -73,7 +136,7 @@ const AllWBS = ({ id, stage }) => {
       accessorKey: "bundleKey",
       header: "Bundle Name",
       cell: ({ row }) => (
-        <span className="text-black font-normal">
+        <span className="text-black font-semibold">
           {row.original.name ||
             row.original.bundle?.name ||
             row.original.bundleKey ||
@@ -85,25 +148,16 @@ const AllWBS = ({ id, stage }) => {
       accessorKey: "stage",
       header: "Stage",
       cell: ({ row }) => (
-        <span className="text-sm font-normal text-black tracking-tight uppercase">
+        <span className="text-sm font-semibold text-black tracking-tight uppercase">
           {row.original.stage || "—"}
         </span>
       ),
     },
-    // {
-    //   accessorKey: "totalQtyNo",
-    //   header: "Quantity",
-    //   cell: ({ row }) => (
-    //     <span className="text-sm font-bold text-gray-700">
-    //       {row.original.totalQtyNo || 0}
-    //     </span>
-    //   ),
-    // },
     {
       accessorKey: "totalExecHr",
       header: "Exec Time",
       cell: ({ row }) => (
-        <span className="text-sm font-normal text-black">
+        <span className="text-sm font-semibold text-black">
           {formatMinutesToTime(row.original.totalExecHr)} hrs
         </span>
       ),
@@ -112,7 +166,7 @@ const AllWBS = ({ id, stage }) => {
       accessorKey: "totalCheckHr",
       header: "Check Time",
       cell: ({ row }) => (
-        <span className="text-sm font-normal text-black">
+        <span className="text-sm font-semibold text-[#3a8a1a]">
           {formatMinutesToTime(row.original.totalCheckHr)} hrs
         </span>
       ),
@@ -148,8 +202,6 @@ const AllWBS = ({ id, stage }) => {
   return (
     <div className="bg-[#fcfdfc] min-h-[400px] p-2 animate-in fade-in duration-700">
       <div className="flex justify-between items-center mb-6">
-        
-
         {(userRole === "admin" ||
           userRole === "operation_executive" ||
           userRole === "estimation_head") && (
@@ -168,7 +220,6 @@ const AllWBS = ({ id, stage }) => {
         onRowClick={canViewDetails ? handleRowClick : undefined}
         disablePagination={true}
         initialSorting={[
-          { id: "totalQtyNo", desc: true },
           { id: "bundleKey", desc: false },
         ]}
       />
