@@ -27,8 +27,8 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import Service from "../../api/Service";
-import { formatSeconds } from "../../utils/timeUtils";
+import Service from "../../../api/Service";
+import { formatSeconds } from "../../../utils/timeUtils";
 
 const parseTimeToDecimal = (timeStr) => {
   if (!timeStr || typeof timeStr !== "string") return 0;
@@ -267,9 +267,9 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
       {/* Header with Filters and Actions */}
       <div className="bg-white py-3 px-6 rounded-none border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex flex-wrap items-center gap-6">
-          
+
           {/* Start Date Selector */}
-          <div 
+          <div
             onClick={() => {
               try { startRef.current?.showPicker(); } catch (e) { startRef.current?.focus(); }
             }}
@@ -290,7 +290,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
           </div>
 
           {/* End Date Selector */}
-          <div 
+          <div
             onClick={() => {
               try { endRef.current?.showPicker(); } catch (e) { endRef.current?.focus(); }
             }}

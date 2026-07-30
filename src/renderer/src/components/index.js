@@ -22,7 +22,7 @@ import AllEstimation from './estimation/AllEstimation'
 
 // Projects
 import AddProject from './project/AddProject'
-import AllProjects from './project/AllProjects'
+import AllProjects from './project/projects/AllProjects'
 import AllNotes from './project/notes/AllNotes'
 import ProjectDashboard from './dashboard/ProjectDashboard'
 

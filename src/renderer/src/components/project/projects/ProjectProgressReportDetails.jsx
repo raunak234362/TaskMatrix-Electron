@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, Clock, Download, User, ArrowLeft, Loader2, MessageSquare, Reply } from 'lucide-react';
 import { format } from 'date-fns';
-import Service from '../../api/Service';
-import RenderFiles from '../ui/RenderFiles';
-import AddProjectProgressReportResponse from './AddProjectProgressReportResponse';
+import Service from '../../../api/Service';
+import RenderFiles from '../../ui/RenderFiles';
+import AddProjectProgressReportResponse from '../AddProjectProgressReportResponse';
 
 const ResponseItem = ({ response, isChild = false, onReply }) => {
   const [showChildren, setShowChildren] = useState(false);
   const user = response.user || response.createdBy;
   const hasChildren = response.childResponses && response.childResponses.length > 0;
-  
-  const displayName = user?.firstName 
-    ? `${user.firstName} ${user.lastName || ''}` 
+
+  const displayName = user?.firstName
+    ? `${user.firstName} ${user.lastName || ''}`
     : (user?.username || 'Unknown User');
 
   const initials = user?.firstName?.[0] || user?.username?.[0] || 'U';
@@ -58,16 +58,16 @@ const ResponseItem = ({ response, isChild = false, onReply }) => {
             )}
           </div>
         </div>
-        <div 
+        <div
           className="prose prose-xs max-w-none text-black font-semibold leading-relaxed"
           dangerouslySetInnerHTML={{ __html: response.description }}
         />
         {response.files && response.files.length > 0 && (
           <div className="mt-8 pt-8 border-t border-black/5">
-            <RenderFiles 
-              files={response.files} 
-              table="projectProgressReportResponse" 
-              parentId={response.id} 
+            <RenderFiles
+              files={response.files}
+              table="projectProgressReportResponse"
+              parentId={response.id}
               hideHeader={true}
             />
           </div>
@@ -172,7 +172,7 @@ const ProjectProgressReportDetails = ({ reportId, onBack }) => {
                   <Activity className="w-4 h-4" />
                   Report Details
                 </h3>
-                <div 
+                <div
                   className="prose prose-sm max-w-none text-black font-bold leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: report.message }}
                 />
@@ -184,7 +184,7 @@ const ProjectProgressReportDetails = ({ reportId, onBack }) => {
                   <MessageSquare className="w-4 h-4" />
                   Responses ({responses.length})
                 </h3>
-                
+
                 {responses.length === 0 ? (
                   <div className="bg-white rounded-lg border border-dashed border-black/20 p-12 text-center text-black font-black uppercase tracking-widest text-[10px] opacity-40">
                     No responses yet. Be the first to respond.
@@ -192,13 +192,13 @@ const ProjectProgressReportDetails = ({ reportId, onBack }) => {
                 ) : (
                   <div className="space-y-6">
                     {responses.filter(r => !r.parentResponseId).map((response) => (
-                      <ResponseItem 
-                        key={response.id} 
-                        response={response} 
+                      <ResponseItem
+                        key={response.id}
+                        response={response}
                         onReply={(id) => {
                           setSelectedParentId(id);
                           setShowAddResponse(true);
-                        }} 
+                        }}
                       />
                     ))}
                   </div>
@@ -233,10 +233,10 @@ const ProjectProgressReportDetails = ({ reportId, onBack }) => {
                     <Download className="w-4 h-4" />
                     Attachments
                   </h3>
-                  <RenderFiles 
-                    files={report.files} 
-                    table="projectProgressReport" 
-                    parentId={report.id} 
+                  <RenderFiles
+                    files={report.files}
+                    table="projectProgressReport"
+                    parentId={report.id}
                     hideHeader={true}
                   />
                 </div>

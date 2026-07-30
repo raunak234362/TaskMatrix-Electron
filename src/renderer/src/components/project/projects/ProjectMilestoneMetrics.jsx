@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { CalendarCheck, Pencil } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { setMilestonesForProject } from "../../store/milestoneSlice";
-import { formatDate } from "../../utils/dateUtils";
-import Service from "../../api/Service";
-import UpdateCompletionPer from "./mileStone/UpdateCompletionPer";
-import GetMilestoneByID from "./mileStone/GetMilestoneByID";
+import { setMilestonesForProject } from "../../../store/milestoneSlice";
+import { formatDate } from "../../../utils/dateUtils";
+import Service from "../../../api/Service";
+import UpdateCompletionPer from "../mileStone/UpdateCompletionPer";
+import GetMilestoneByID from "../mileStone/GetMilestoneByID";
 
 const ProjectMilestoneMetrics = ({
   projectId,
@@ -141,7 +141,7 @@ const ProjectMilestoneMetrics = ({
       {/* Milestone Approvals Section */}
       <div>
         <div className="pb-3 border-b border-gray-200 flex items-center gap-2 mb-6">
-          
+
           <h4 className="text-sm font-semibold uppercase tracking-normal text-black">
             Project Progress &mdash; Milestones
           </h4>
@@ -168,95 +168,95 @@ const ProjectMilestoneMetrics = ({
                       return true;
                     })
                     .map((ms, index) => (
-                    <div
-                      key={ms.id || index}
-                      onClick={() => {
-                        setSelectedMilestoneToView(ms);
-                      }}
-                      className={`p-4 bg-slate-50/40 border border-gray-200 rounded-none shadow-none flex flex-col justify-between transition-colors cursor-pointer hover:bg-slate-50`}
-                    >
-                      <div>
-                        <h5 className="font-semibold text-black text-sm mb-1 line-clamp-1">
-                          {ms.subject}
-                        </h5>
-                        <div className="flex justify-between items-center text-sm text-black font-semibold mb-2">
-                          <span className="uppercase tracking-normal">Status:</span>
-                          <span
-                            className={`px-2 py-0.5 rounded-none text-sm uppercase font-semibold tracking-normal ${ms.status === "APPROVED" ||
-                              ms.status === "COMPLETED"
-                              ? " text-green-700"
-                              : " text-yellow-700"
-                              }`}
-                          >
-                            {ms.status || "PENDING"}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm text-black font-semibold mb-2">
-                          <span className="uppercase tracking-normal">Completion Percentage:</span>
-                          <div className="flex items-center">
+                      <div
+                        key={ms.id || index}
+                        onClick={() => {
+                          setSelectedMilestoneToView(ms);
+                        }}
+                        className={`p-4 bg-slate-50/40 border border-gray-200 rounded-none shadow-none flex flex-col justify-between transition-colors cursor-pointer hover:bg-slate-50`}
+                      >
+                        <div>
+                          <h5 className="font-semibold text-black text-sm mb-1 line-clamp-1">
+                            {ms.subject}
+                          </h5>
+                          <div className="flex justify-between items-center text-sm text-black font-semibold mb-2">
+                            <span className="uppercase tracking-normal">Status:</span>
                             <span
                               className={`px-2 py-0.5 rounded-none text-sm uppercase font-semibold tracking-normal ${ms.status === "APPROVED" ||
                                 ms.status === "COMPLETED"
                                 ? " text-green-700"
-                                : " text-green-950"
+                                : " text-yellow-700"
                                 }`}
                             >
-                              {ms.progress}%
+                              {ms.status || "PENDING"}
                             </span>
-                            {userRole !== "client" &&
-                              userRole !== "client_admin" && userRole !== "staff" && userRole !== "connection_designer_admin" && userRole !== "connection_designer_engineer" && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedMilestoneId(ms.id || ms._id);
-                                    setIsUpdateModalOpen(true);
-                                  }}
-                                  className="ml-2 text-black hover:text-blue-600"
-                                >
-                                  <Pencil size={14} />
-                                </button>
-                              )}
+                          </div>
+                          <div className="flex justify-between items-center text-sm text-black font-semibold mb-2">
+                            <span className="uppercase tracking-normal">Completion Percentage:</span>
+                            <div className="flex items-center">
+                              <span
+                                className={`px-2 py-0.5 rounded-none text-sm uppercase font-semibold tracking-normal ${ms.status === "APPROVED" ||
+                                  ms.status === "COMPLETED"
+                                  ? " text-green-700"
+                                  : " text-green-950"
+                                  }`}
+                              >
+                                {ms.progress}%
+                              </span>
+                              {userRole !== "client" &&
+                                userRole !== "client_admin" && userRole !== "staff" && userRole !== "connection_designer_admin" && userRole !== "connection_designer_engineer" && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedMilestoneId(ms.id || ms._id);
+                                      setIsUpdateModalOpen(true);
+                                    }}
+                                    className="ml-2 text-black hover:text-blue-600"
+                                  >
+                                    <Pencil size={14} />
+                                  </button>
+                                )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="w-full bg-red-500 rounded-none h-2 relative overflow-hidden">
-                        {/* Time Progress (background shadow layer) */}
-                        <div
-                          className="absolute top-0 left-0 h-2 bg-gray-400 opacity-40 transition-all duration-500"
-                          style={{ width: `${ms.timePercent}%` }}
-                        ></div>
-                        {/* Task Completion (real progress) */}
-                        <div
-                          className="absolute top-0 left-0 h-2 rounded-none bg-teal-500 transition-all duration-500"
-                          style={{
-                            width: `${ms.progress || 0}%`,
-                          }}
-                        ></div>
-                      </div>
-                      <div className="border-t border-gray-100 pt-2 mt-2 space-y-2">
- 
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-black uppercase text-sm font-semibold tracking-normal">
-                            Approval Date
-                          </span>
-                          <span className="font-semibold text-black text-sm">
-                            {formatDate(ms.approvalDate)}
-                          </span>
+                        <div className="w-full bg-red-500 rounded-none h-2 relative overflow-hidden">
+                          {/* Time Progress (background shadow layer) */}
+                          <div
+                            className="absolute top-0 left-0 h-2 bg-gray-400 opacity-40 transition-all duration-500"
+                            style={{ width: `${ms.timePercent}%` }}
+                          ></div>
+                          {/* Task Completion (real progress) */}
+                          <div
+                            className="absolute top-0 left-0 h-2 rounded-none bg-teal-500 transition-all duration-500"
+                            style={{
+                              width: `${ms.progress || 0}%`,
+                            }}
+                          ></div>
                         </div>
- 
-                        {userRole !== "client" && userRole !== "client_admin" && ms.isConnectionDesign && (
+                        <div className="border-t border-gray-100 pt-2 mt-2 space-y-2">
+
                           <div className="flex justify-between items-center text-sm">
                             <span className="text-black uppercase text-sm font-semibold tracking-normal">
-                              CD Approval Date
+                              Approval Date
                             </span>
                             <span className="font-semibold text-black text-sm">
-                              {formatDate(ms.CDApprovalDate)}
+                              {formatDate(ms.approvalDate)}
                             </span>
                           </div>
-                        )}
+
+                          {userRole !== "client" && userRole !== "client_admin" && ms.isConnectionDesign && (
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-black uppercase text-sm font-semibold tracking-normal">
+                                CD Approval Date
+                              </span>
+                              <span className="font-semibold text-black text-sm">
+                                {formatDate(ms.CDApprovalDate)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
             ))}

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Activity, Loader2, Plus, Compass } from 'lucide-react';
-import Service from '../../api/Service';
-import AddProjectProgressReport from './AddProjectProgressReport';
+import Service from '../../../api/Service';
+import AddProjectProgressReport from '../AddProjectProgressReport';
 import ProjectProgressReportDetails from './ProjectProgressReportDetails';
-import DataTable from '../ui/table';
+import DataTable from '../../ui/table';
 import { format } from 'date-fns';
 
 const ProjectProgress = ({ projectId }) => {
@@ -95,7 +95,7 @@ const ProjectProgress = ({ projectId }) => {
             <p className="text-sm text-gray-500 font-semibold uppercase tracking-normal">Loading Reports...</p>
           </div>
         ) : (
-          <DataTable 
+          <DataTable
             columns={columns}
             data={reports}
             onRowClick={(row) => setSelectedReportId(row.id)}
