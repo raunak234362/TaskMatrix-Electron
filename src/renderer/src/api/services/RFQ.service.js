@@ -91,6 +91,18 @@ class RFQService {
     }
   }
 
+  //Delete RFQ by ID
+  static async DeleteRFQById(rfqId) {
+    try {
+      const response = await api.delete(`rfq/delete/${rfqId}`)
+      console.log('RFQ deleted:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot delete rfq', error)
+      throw error
+    }
+  }
+
   // GET RFQ responses by ID
   static async getRFQResponses(rfqId) {
     try {

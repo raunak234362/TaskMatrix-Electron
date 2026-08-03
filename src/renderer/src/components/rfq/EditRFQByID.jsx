@@ -2,8 +2,10 @@
 import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'react-toastify'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Trash2, AlertTriangle } from 'lucide-react'
 import ReactSelect from 'react-select'
+import { useDispatch } from 'react-redux'
+import { deleteRFQ } from '../../store/rfqSlice'
 
 import Input from '../fields/input'
 import SectionTitle from '../ui/SectionTitle'
@@ -41,9 +43,16 @@ const selectStyles = {
     menuPortal: (base) => ({ ...base, zIndex: 9999 })
 }
 
-const EditRFQByID = ({ id, onSuccess, onCancel }) => {
+const EditRFQByID = ({ id, onSuccess, onDelete, onCancel }) => {
     const [loading, setLoading] = useState(true)
     const [fabricatorName, setFabricatorName] = useState('')
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
+    const dispatch = useDispatch()
+
+    const userRole = sessionStorage.getItem('userRole')
+    const canDelete = userRole === 'ADMIN' || userRole === 'OPERATION_EXECUTIVE' || userRole === 'DEPUTY_MANAGER'
+
 
     const {
         register,
@@ -118,6 +127,26 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
         }
     }
 
+    const handleDelete = async () => {
+        try {
+            setIsDeleting(true)
+            await Service.DeleteRFQById(id)
+            dispatch(deleteRFQ(id))
+            toast.success('RFQ deleted successfully')
+            if (onDelete) {
+                onDelete()
+            } else {
+                onSuccess?.()
+            }
+        } catch (error) {
+            console.error('Delete failed:', error)
+            toast.error('Failed to delete RFQ')
+        } finally {
+            setIsDeleting(false)
+            setShowDeleteModal(false)
+        }
+    }
+
     if (loading) {
         return (
             <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 backdrop-blur-sm">
@@ -138,13 +167,25 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                             UPDATE RFQ DETAILS AND STATUS
                         </p>
                     </div>
-                    <button
-                        type="button"
-                        onClick={onCancel}
-                        className="px-4 py-2 bg-red-50 border border-red-600 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 transition-all"
-                    >
-                        Close
-                    </button>
+                    <div className="flex gap-2">
+                        {canDelete && (
+                            <button
+                                type="button"
+                                onClick={() => setShowDeleteModal(true)}
+                                className="px-4 py-2 bg-red-50 border border-red-600 text-red-600 font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-100 hover:text-red-700 transition-all flex items-center gap-2"
+                            >
+                                <Trash2 className="w-3 h-3" />
+                                Delete
+                            </button>
+                        )}
+                        <button
+                            type="button"
+                            onClick={onCancel}
+                            className="px-4 py-2 bg-gray-50 border border-gray-300 text-black font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-gray-100 transition-all"
+                        >
+                            Close
+                        </button>
+                    </div>
                 </div>
 
                 {/* BODY */}
@@ -374,6 +415,37 @@ const EditRFQByID = ({ id, onSuccess, onCancel }) => {
                     </button>
                 </div>
 
+                {/* DELETE CONFIRMATION MODAL */}
+                {showDeleteModal && (
+                    <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-white rounded-2xl shadow-2xl border border-red-100 p-6 max-w-sm w-full text-center space-y-4 animate-in zoom-in-95 duration-200">
+                            <div className="mx-auto w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-2">
+                                <AlertTriangle className="w-6 h-6 text-red-500" />
+                            </div>
+                            <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">Delete RFQ?</h3>
+                            <p className="text-sm text-gray-500 font-medium">
+                                Are you sure you want to delete this RFQ? This action cannot be undone.
+                            </p>
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    onClick={() => setShowDeleteModal(false)}
+                                    disabled={isDeleting}
+                                    className="flex-1 py-2 bg-gray-50 hover:bg-gray-100 text-black font-bold text-xs uppercase rounded-lg border border-gray-200 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleDelete}
+                                    disabled={isDeleting}
+                                    className="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase rounded-lg border border-red-700 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                                    {isDeleting ? 'Deleting...' : 'Delete'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )

@@ -25,7 +25,7 @@ import { openFileSecurely, downloadFileSecurely } from "../../utils/openFileSecu
 
 const isTrue = (val) => val === true || val === "true" || val === 1;
 
-const GetRFQByID = ({ id, onClose }) => {
+const GetRFQByID = ({ id, onClose, onDelete }) => {
     const [rfq, setRfq] = useState(null);
     const [responses, setResponses] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -152,9 +152,11 @@ const GetRFQByID = ({ id, onClose }) => {
             console.log("Service.DeleteRFQById response:", res);
             dispatch(deleteRFQ(id));
             toast.success("RFQ deleted successfully");
-            // Redirect or close view - assuming we want to close/go back
-            // Since this is a detail view, we might need a way to tell the parent to refresh or close
-            // For now, let's just show success and maybe the parent handles the state sync via Redux
+            if (onDelete) {
+                onDelete();
+            } else {
+                onClose();
+            }
         } catch (err) {
             console.error("Delete failed:", err);
             toast.error("Failed to delete RFQ");
@@ -1056,6 +1058,14 @@ const GetRFQByID = ({ id, onClose }) => {
                         onSuccess={() => {
                             setShowEditModal(false);
                             fetchRfq();
+                        }}
+                        onDelete={() => {
+                            setShowEditModal(false);
+                            if (onDelete) {
+                                onDelete();
+                            } else {
+                                onClose();
+                            }
                         }}
                         onCancel={() => setShowEditModal(false)}
                     />

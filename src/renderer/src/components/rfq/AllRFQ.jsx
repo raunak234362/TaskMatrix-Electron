@@ -386,7 +386,14 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
           if (newRfqId && row.id === newRfqId) {
             onRfqOpened?.();
           }
-          return <GetRFQByID id={row.id || row._id} onClose={close} />;
+          return <GetRFQByID 
+            id={row.id || row._id} 
+            onClose={close} 
+            onDelete={() => {
+              setRfqList(prev => prev.filter(r => r.id !== (row.id || row._id) && r._id !== (row.id || row._id)));
+              close();
+            }}
+          />;
         }}
         manualPagination={true}
         pageCount={totalPages}
