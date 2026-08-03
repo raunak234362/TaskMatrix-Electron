@@ -27,6 +27,7 @@ const isTrue = (val) => val === true || val === "true" || val === 1;
 
 const GetRFQByID = ({ id, onClose }) => {
     const [rfq, setRfq] = useState(null);
+    const [responses, setResponses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showResponseModal, setShowResponseModal] = useState(false);
@@ -58,11 +59,48 @@ const GetRFQByID = ({ id, onClose }) => {
     const [responseTypeFilter, setResponseTypeFilter] = useState("ALL");
 
     const dispatch = useDispatch();
+    const extractResponsesArray = (res) => {
+        if (!res) return [];
+        if (Array.isArray(res)) return res;
+        if (Array.isArray(res.data)) return res.data;
+        if (Array.isArray(res.responses)) return res.responses;
+        if (Array.isArray(res.data?.responses)) return res.data.responses;
+        if (Array.isArray(res.data?.data)) return res.data.data;
+        if (typeof res === "object" && res !== null) {
+            const arrayVal = Object.values(res).find((v) => Array.isArray(v));
+            if (Array.isArray(arrayVal)) return arrayVal;
+        }
+        return [];
+    };
+
+    const fetchResponses = async () => {
+        try {
+            const cleanId = typeof id === "object" && id !== null ? (id.id || id._id) : id;
+            if (!cleanId) return;
+            const respRes = await Service.getRFQResponses(cleanId);
+            const fetchedResponses = extractResponsesArray(respRes);
+            setResponses(fetchedResponses);
+        } catch (err) {
+            console.error("Error fetching RFQ responses independently:", err);
+            setResponses([]);
+        }
+    };
+
     const fetchRfq = async () => {
         try {
+            const cleanId = typeof id === "object" && id !== null ? (id.id || id._id) : id;
+            if (!cleanId) return;
+
             setLoading(true);
-            const response = await Service.GetRFQbyId(id);
-            setRfq(response.data || null);
+            const response = await Service.GetRFQbyId(cleanId);
+            const rfqData = response.data || response;
+            
+            if (rfqData) {
+                delete rfqData.responses;
+                setRfq(rfqData);
+            }
+            
+            fetchResponses();
         } catch {
             setError("Failed to load RFQ");
         } finally {
@@ -80,6 +118,7 @@ const GetRFQByID = ({ id, onClose }) => {
     useEffect(() => {
         if (id) {
             fetchRfq();
+            fetchResponses();
         } else {
             setLoading(false);
             setError("No RFQ ID provided");
@@ -88,11 +127,11 @@ const GetRFQByID = ({ id, onClose }) => {
 
     // Sync selected response for real-time updates in modal
     useEffect(() => {
-        if (selectedResponse && rfq?.responses) {
-            const updated = rfq.responses.find(r => r.id === selectedResponse.id);
+        if (selectedResponse && responses.length > 0) {
+            const updated = responses.find(r => r.id === selectedResponse.id);
             if (updated) setSelectedResponse(updated);
         }
-    }, [rfq?.responses]);
+    }, [responses]);
 
     const handleDelete = async () => {
         console.log(
@@ -355,7 +394,7 @@ const GetRFQByID = ({ id, onClose }) => {
     ];
 
     const hasMultipleTypes = (() => {
-        const types = (rfq?.responses || [])
+        const types = (responses || [])
             .map((res) => (res.type || res.Type || "").toUpperCase())
             .filter((t) => t === "DETAILING" || t === "MTO");
         return new Set(types).size > 1;
@@ -497,7 +536,7 @@ const GetRFQByID = ({ id, onClose }) => {
 
                                         {/* ---- RESPONSE TABLE ---- */}
                                         {(() => {
-                                            const filteredResponses = (rfq?.responses || []).filter((res) => {
+                                            const filteredResponses = (responses || []).filter((res) => {
                                                 if (responseTypeFilter === "ALL") return true;
                                                 const type = (res.type || res.Type || "").toUpperCase();
                                                 return type === responseTypeFilter;
@@ -510,7 +549,7 @@ const GetRFQByID = ({ id, onClose }) => {
                                                 />
                                             ) : (
                                                 <p className="text-black italic font-bold p-4 text-center">
-                                                    {rfq?.responses?.length ? "No responses match the selected type." : "No responses yet."}
+                                                    {responses?.length ? "No responses match the selected type." : "No responses yet."}
                                                 </p>
                                             );
                                         })()}
