@@ -151,13 +151,16 @@ const AddProject = () => {
     if (!selectedRfq) return;
 
     setValue("name", selectedRfq.projectName || "");
-    setValue(
-      "projectNumber",
-      selectedRfq.projectNumber ||
-      `PROJ-${new Date().getFullYear()}-${String(
-        rfqData.indexOf(selectedRfq) + 1,
-      ).padStart(3, "0")}`,
-    );
+    
+    let baseNumber = selectedRfq.projectNumber || `PROJ-${new Date().getFullYear()}-${String(projectData.length + 1).padStart(3, "0")}`;
+    let suggestedNumber = baseNumber;
+    let counter = 1;
+    while (projectData.some(p => p.projectNumber === suggestedNumber)) {
+      suggestedNumber = `${baseNumber}-${counter}`;
+      counter++;
+    }
+    setValue("projectNumber", suggestedNumber);
+
     setValue("description", selectedRfq.description || "");
     setValue("fabricatorID", String(selectedRfq.fabricatorId || ""));
     setValue("tools", selectedRfq.tools || "TEKLA");
@@ -167,6 +170,14 @@ const AddProject = () => {
     setValue("customerDesign", !!selectedRfq.customerDesign);
     setValue("detailingMain", !!selectedRfq.detailingMain);
     setValue("detailingMisc", !!selectedRfq.detailingMisc);
+
+    if (selectedRfq.senderId) {
+      setValue("clientProjectManagers", [String(selectedRfq.senderId)]);
+    } else if (selectedRfq.sender?.id) {
+      setValue("clientProjectManagers", [String(selectedRfq.sender.id)]);
+    } else {
+      setValue("clientProjectManagers", []);
+    }
 
     toast.success("RFQ data auto-filled!", {
       icon: <Sparkles className="w-5 h-5" />,
@@ -369,7 +380,7 @@ const AddProject = () => {
                         render={({ field }) => (
                           <Select
                             options={options.fabricators}
-                            value={options.fabricators.find((o) => o.value === field.value)}
+                            value={options.fabricators.find((o) => String(o.value) === String(field.value))}
                             onChange={(o) => field.onChange(o?.value || "")}
                             placeholder="Select..."
                             className="text-sm"
@@ -387,7 +398,7 @@ const AddProject = () => {
                         render={({ field }) => (
                           <Select
                             options={options.tools}
-                            value={options.tools.find((o) => o.value === field.value)}
+                            value={options.tools.find((o) => String(o.value) === String(field.value))}
                             onChange={(o) => field.onChange(o?.value || "")}
                             placeholder="Select..."
                             className="text-sm"
@@ -423,7 +434,7 @@ const AddProject = () => {
                         render={({ field }) => (
                           <Select
                             options={options.departments}
-                            value={options.departments.find((o) => o.value === field.value)}
+                            value={options.departments.find((o) => String(o.value) === String(field.value))}
                             onChange={(o) => field.onChange(o?.value || "")}
                             placeholder="Select..."
                             className="text-sm"
@@ -441,7 +452,7 @@ const AddProject = () => {
                         render={({ field }) => (
                           <Select
                             options={options.teams}
-                            value={options.teams.find((o) => o.value === field.value)}
+                            value={options.teams.find((o) => String(o.value) === String(field.value))}
                             onChange={(o) => field.onChange(o?.value || "")}
                             placeholder="Select..."
                             className="text-sm"
@@ -460,7 +471,7 @@ const AddProject = () => {
                             isMulti
                             options={options.clientProjectManagers}
                             value={options.clientProjectManagers.filter((o) =>
-                              (Array.isArray(field.value) ? field.value : []).includes(o.value)
+                              (Array.isArray(field.value) ? field.value.map(String) : []).includes(String(o.value))
                             )}
                             onChange={(selectedOptions) =>
                               field.onChange(selectedOptions ? selectedOptions.map((o) => o.value) : [])
