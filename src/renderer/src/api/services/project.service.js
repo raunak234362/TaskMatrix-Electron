@@ -24,9 +24,20 @@ class ProjectService {
   }
 
   // Get All Projects
-  static async GetAllProjects() {
+  static async GetAllProjects(page, limit, search, managerName, fabricatorName, stage, startDate, endDate) {
     try {
+      const params = {}
+      if (page) params.page = page
+      if (limit) params.limit = limit
+      if (search) params.search = search
+      if (managerName && managerName !== "All Managers") params.managerName = managerName
+      if (fabricatorName && fabricatorName !== "All Fabricators") params.fabricatorName = fabricatorName
+      if (stage && stage !== "All Stages") params.stage = stage
+      if (startDate) params.startDate = startDate
+      if (endDate) params.endDate = endDate
+
       const response = await api.get(`project/projects`, {
+        params,
         headers: {
           'Content-Type': 'application/json'
         }

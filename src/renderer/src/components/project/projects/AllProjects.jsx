@@ -33,8 +33,18 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
     month: new Date().getMonth(),
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [projectList, setProjectList] = useState([]);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
+
   const [fabricatorDetails, setFabricatorDetails] = useState(null);
   const [loadingFab, setLoadingFab] = useState(false);
+
+  const [managerOptions, setManagerOptions] = useState(["All Managers"]);
+  const [fabricatorOptions, setFabricatorOptions] = useState(["All Fabricators"]);
+  const stageOptions = ["All Stages", "IFA", "IFC", "RIFA", "RIFC", "COR"];
 
   const fabricatorList = useSelector(
     (state) => state.fabricatorInfo?.fabricatorData || []
@@ -92,35 +102,158 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
     fetchFabricatorDetails();
   }, [filters.fabricator, fabricatorList]);
 
-  // --- Derive Unique Filter Options ---
-  const managers = useMemo(() => {
-    const list = projects
-      .map((p) =>
-        p.manager
-          ? `${p.manager.firstName || ""} ${p.manager.lastName || ""}`.trim()
-          : "Unassigned"
-      )
-      .filter(Boolean);
-    return ["All Managers", ...new Set(list)];
-  }, [projects]);
+  // Fetch Filter Options
+  useEffect(() => {
+    const fetchManagerOptions = async () => {
+      try {
+        const roles = ["ADMIN", "PROJECT_MANAGER", "OPERATION_EXECUTIVE", "DEPUTY_MANAGER", "DEPT_MANAGER"];
+        const responses = await Promise.all(roles.map(r => Service.FetchEmployeeByRole(r)));
+        
+        const managersSet = new Set();
+        responses.forEach(res => {
+          let arr = [];
+          if (Array.isArray(res)) arr = res;
+          else if (res?.employees && Array.isArray(res.employees)) arr = res.employees;
+          else if (res?.data?.employees && Array.isArray(res.data.employees)) arr = res.data.employees;
+          else if (res?.data && Array.isArray(res.data)) arr = res.data;
 
-  const fabricators = useMemo(() => {
-    const list = projects
-      .map((p) => p.fabricator?.fabName || "Unassigned")
-      .filter(Boolean);
-    return ["All Fabricators", ...new Set(list)];
-  }, [projects]);
+          arr.forEach(p => {
+             const name = `${p.firstName || ""} ${p.lastName || ""}`.trim();
+             if (name) managersSet.add(name);
+          });
+        });
+        setManagerOptions(["All Managers", ...Array.from(managersSet)]);
+      } catch (err) {
+        console.error("Failed to fetch managers", err);
+      }
+    };
 
-  const stages = useMemo(() => {
-    const list = projects
-      .map((p) => p.stage || "Unknown")
-      .filter(Boolean);
-    return ["All Stages", ...new Set(list)];
-  }, [projects]);
+    const fetchFabricatorOptions = async () => {
+      try {
+        const res = await Service.GetAllFabricators();
+        let fabs = [];
+        if (Array.isArray(res)) fabs = res;
+        else if (res?.data && Array.isArray(res.data)) fabs = res.data;
+        else if (res?.data?.data && Array.isArray(res.data.data)) fabs = res.data.data;
+        else if (res?.fabricators && Array.isArray(res.fabricators)) fabs = res.fabricators;
+
+        const fabNames = fabs.map(f => f.fabName || f.name).filter(Boolean);
+        setFabricatorOptions(["All Fabricators", ...new Set(fabNames)]);
+      } catch (err) {
+        console.error("Failed to fetch fabricators", err);
+      }
+    };
+
+    fetchManagerOptions();
+    fetchFabricatorOptions();
+  }, []);
+
+  // Fetch paginated projects
+  useEffect(() => {
+    const fetchPaginatedProjects = async () => {
+      try {
+        setIsLoadingProjects(true);
+
+        let startDateStr = "";
+        let endDateStr = "";
+
+        if (dateFilter && dateFilter.type !== "all") {
+          const type = dateFilter.type;
+          
+          const formatLocal = (d) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+          };
+
+          if (type === "month") {
+            const y = dateFilter.year;
+            const m = dateFilter.month;
+            if (y && m !== undefined) {
+              startDateStr = formatLocal(new Date(y, m, 1));
+              endDateStr = formatLocal(new Date(y, m + 1, 0));
+            }
+          } else if (type === "year") {
+            const y = dateFilter.year;
+            if (y) {
+              startDateStr = `${y}-01-01`;
+              endDateStr = `${y}-12-31`;
+            }
+          } else if (type === "week") {
+            if (dateFilter.weekStart && dateFilter.weekEnd) {
+              startDateStr = formatLocal(new Date(dateFilter.weekStart));
+              endDateStr = formatLocal(new Date(dateFilter.weekEnd));
+            }
+          } else if (type === "range") {
+            const y = dateFilter.year;
+            const startM = dateFilter.startMonth;
+            const endM = dateFilter.endMonth;
+            if (y && startM !== undefined && endM !== undefined) {
+              startDateStr = formatLocal(new Date(y, startM, 1));
+              endDateStr = formatLocal(new Date(y, endM + 1, 0));
+            }
+          } else if (type === "dateRange") {
+            if (dateFilter.startDate && dateFilter.endDate) {
+              startDateStr = formatLocal(new Date(dateFilter.startDate));
+              endDateStr = formatLocal(new Date(dateFilter.endDate));
+            }
+          } else if (type === "specificDate") {
+            if (dateFilter.date) {
+              startDateStr = formatLocal(new Date(dateFilter.date));
+              endDateStr = startDateStr;
+            }
+          }
+        }
+
+        const response = await Service.GetAllProjects(
+          currentPage, 
+          limit, 
+          filters.searchTerm, 
+          filters.manager, 
+          filters.fabricator, 
+          filters.stage, 
+          startDateStr,
+          endDateStr
+        );
+        if (response) {
+          let list = [];
+          let totalP = 1;
+
+          if (Array.isArray(response)) {
+            list = response;
+            totalP = list.length === limit ? currentPage + 1 : currentPage;
+          } else if (response.data && Array.isArray(response.data.data)) {
+            list = response.data.data;
+            const meta = response.data.pagination || response.data.meta || response.meta || response.pagination || {};
+            totalP = meta.totalPages || (list.length === limit ? currentPage + 1 : currentPage);
+          } else if (response.data && Array.isArray(response.data)) {
+            list = response.data;
+            const meta = response.meta || response.pagination || {};
+            totalP = meta.totalPages || (list.length === limit ? currentPage + 1 : currentPage);
+          }
+
+          setProjectList(list);
+          setTotalPages(totalP);
+        }
+      } catch (error) {
+        console.error("Error fetching paginated projects:", error);
+      } finally {
+        setIsLoadingProjects(false);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      fetchPaginatedProjects();
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [currentPage, limit, filters.searchTerm, filters.manager, filters.fabricator, filters.stage, dateFilter]);
+
+  // --- Derived filters removed as they are now state/constants ---
 
   // --- Filter Logic ---
   const filteredProjects = useMemo(() => {
-    return projects.map(project => {
+    return projectList.map(project => {
       // Calculate worked hours for this project
       const projectTasks = tasks.filter(t => {
         const taskProjectId = t.project?.id || t.project_id || (typeof t.project === 'string' ? t.project : null);
@@ -154,24 +287,7 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
       const workedHours = Number(project.workedHours) || 0;
       const isOverrun = workedHours > estHours && estHours > 0;
 
-      if (
-        filters.searchTerm &&
-        !project.name?.toLowerCase().includes(filters.searchTerm.toLowerCase())
-      )
-        return false;
-
-      if (
-        filters.manager !== "All Managers" &&
-        managerName !== filters.manager
-      )
-        return false;
-      if (
-        filters.fabricator !== "All Fabricators" &&
-        fabName !== filters.fabricator
-      )
-        return false;
-      if (filters.stage !== "All Stages" && stage !== filters.stage)
-        return false;
+      // Other filters are handled by API
       if (
         statusFilter !== "All Statuses" &&
         project.status !== statusFilter
@@ -179,13 +295,9 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
         return false;
       if (filters.overrunOnly && !isOverrun) return false;
  
-      // Filter by Date
-      const dateToMatch = project.startDate || project.start_date || project.created_on || project.createdAt;
-      if (!matchesDateFilter(dateToMatch, dateFilter)) return false;
-
       return true;
     });
-  }, [projects, filters, tasks, dateFilter, statusFilter]);
+  }, [projectList, filters, tasks, statusFilter]);
 
   // --- Column Definitions ---
   const columns = [
@@ -303,7 +415,10 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
                 placeholder="Search by name..."
                 className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md pl-9 pr-3 py-2 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all placeholder:text-gray-500 placeholder:font-normal shadow-sm"
                 value={filters.searchTerm}
-                onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
+                onChange={(e) => {
+                  setFilters(prev => ({ ...prev, searchTerm: e.target.value }));
+                  setCurrentPage(1);
+                }}
               />
             </div>
           </div>
@@ -315,9 +430,12 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
             <select
               className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm"
               value={filters.manager}
-              onChange={(e) => setFilters(prev => ({ ...prev, manager: e.target.value }))}
+              onChange={(e) => {
+                setFilters(prev => ({ ...prev, manager: e.target.value }));
+                setCurrentPage(1);
+              }}
             >
-              {managers.map(m => <option key={m} value={m}>{m}</option>)}
+              {managerOptions.map(m => <option key={m} value={m}>{m}</option>)}
             </select>
           </div>
           )}
@@ -327,9 +445,12 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
             <select
               className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm"
               value={filters.fabricator}
-              onChange={(e) => setFilters(prev => ({ ...prev, fabricator: e.target.value }))}
+              onChange={(e) => {
+                setFilters(prev => ({ ...prev, fabricator: e.target.value }));
+                setCurrentPage(1);
+              }}
             >
-              {fabricators.map(f => <option key={f} value={f}>{f}</option>)}
+              {fabricatorOptions.map(f => <option key={f} value={f}>{f}</option>)}
             </select>
           </div>
 
@@ -339,9 +460,12 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
             <select
               className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm"
               value={filters.stage}
-              onChange={(e) => setFilters(prev => ({ ...prev, stage: e.target.value }))}
+              onChange={(e) => {
+                setFilters(prev => ({ ...prev, stage: e.target.value }));
+                setCurrentPage(1);
+              }}
             >
-              {stages.map(s => <option key={s} value={s}>{s}</option>)}
+              {stageOptions.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
 
@@ -362,7 +486,13 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
           {/* Date Filter */}
           <div className="flex flex-col gap-1.5 w-full sm:w-auto">
             <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">Start Date</label>
-            <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
+            <DateFilter 
+              dateFilter={dateFilter} 
+              setDateFilter={(val) => {
+                setDateFilter(val);
+                setCurrentPage(1);
+              }} 
+            />
           </div>
         </div>
 
@@ -407,7 +537,11 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
         columns={columns}
         data={filteredProjects}
         onRowClick={handleRowClick}
-        disablePagination={true}
+        manualPagination={true}
+        pageCount={totalPages}
+        pageIndex={currentPage - 1}
+        onPageChange={(index) => setCurrentPage(index + 1)}
+        pageSizeOptions={[limit]}
       />
 
       {selectedProject && (
