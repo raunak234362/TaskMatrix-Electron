@@ -180,7 +180,7 @@ const Login = () => {
             <div className="mb-6">
               <p className="text-center text-2xl sm:text-3xl text-gray-700 font-light leading-tight">
                 Welcome to <br />
-                <span className="text-green-700 font-normal">Task Matrix <span className="text-green-700 text-[10px] font-light">version: 1.1.0</span></span>
+                <span className="text-green-700 font-normal">Task Matrix <span className="text-green-700 text-[10px] font-light">version: 1.2.0</span></span>
               </p>
               <p className="text-center text-sm text-gray-500 mt-2">
                 {showOTP ? "Verify your identity" : "Please login to continue"}
