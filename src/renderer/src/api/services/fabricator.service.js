@@ -17,7 +17,7 @@ class FabricatorService {
     }
   }
 
-  static async GetAllFabricators(page, limit = 10, search, stage, contactId) {
+  static async GetAllFabricators(page, limit, search, stage, contactId) {
     try {
       const response = await api.get(`fabricator/all`, {
         params: {

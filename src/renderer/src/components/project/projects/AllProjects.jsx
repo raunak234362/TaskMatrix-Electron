@@ -3,7 +3,7 @@ import React, { Suspense, useMemo, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import DataTable from "../../ui/table";
 import Modal from "../../ui/Modal";
-import { Search, FileText } from "lucide-react";
+import { Search, FileText, ChevronDown } from "lucide-react";
 import Service from "../../../api/Service";
 import DateFilter from "../../common/DateFilter";
 import { matchesDateFilter } from "../../../utils/dateFilter";
@@ -45,6 +45,20 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
   const [managerOptions, setManagerOptions] = useState(["All Managers"]);
   const [fabricatorOptions, setFabricatorOptions] = useState(["All Fabricators"]);
   const stageOptions = ["All Stages", "IFA", "IFC", "RIFA", "RIFC", "COR"];
+
+  const [fabSearchQuery, setFabSearchQuery] = useState("");
+  const [isFabDropdownOpen, setIsFabDropdownOpen] = useState(false);
+  const fabDropdownRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (fabDropdownRef.current && !fabDropdownRef.current.contains(event.target)) {
+        setIsFabDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const fabricatorList = useSelector(
     (state) => state.fabricatorInfo?.fabricatorData || []
@@ -128,25 +142,32 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
       }
     };
 
-    const fetchFabricatorOptions = async () => {
-      try {
-        const res = await Service.GetAllFabricators();
-        let fabs = [];
-        if (Array.isArray(res)) fabs = res;
-        else if (res?.data && Array.isArray(res.data)) fabs = res.data;
-        else if (res?.data?.data && Array.isArray(res.data.data)) fabs = res.data.data;
-        else if (res?.fabricators && Array.isArray(res.fabricators)) fabs = res.fabricators;
-
-        const fabNames = fabs.map(f => f.fabName || f.name).filter(Boolean);
-        setFabricatorOptions(["All Fabricators", ...new Set(fabNames)]);
-      } catch (err) {
-        console.error("Failed to fetch fabricators", err);
-      }
-    };
-
     fetchManagerOptions();
-    fetchFabricatorOptions();
+    handleFetchFabricatorOptions();
   }, []);
+
+  const handleFetchFabricatorOptions = async (search = "") => {
+    try {
+      const res = await Service.GetAllFabricators(1, 100, search);
+      let fabs = [];
+      if (Array.isArray(res)) fabs = res;
+      else if (res?.data && Array.isArray(res.data)) fabs = res.data;
+      else if (res?.data?.data && Array.isArray(res.data.data)) fabs = res.data.data;
+      else if (res?.fabricators && Array.isArray(res.fabricators)) fabs = res.fabricators;
+
+      const fabNames = fabs.map(f => f.fabName || f.name).filter(Boolean);
+      setFabricatorOptions(["All Fabricators", ...new Set(fabNames)]);
+    } catch (err) {
+      console.error("Failed to fetch fabricators", err);
+    }
+  };
+
+  const filteredFabricatorOptions = useMemo(() => {
+    if (!fabSearchQuery.trim()) return fabricatorOptions;
+    return fabricatorOptions.filter((f) =>
+      f.toLowerCase().includes(fabSearchQuery.toLowerCase())
+    );
+  }, [fabricatorOptions, fabSearchQuery]);
 
   // Fetch paginated projects
   useEffect(() => {
@@ -439,19 +460,60 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
             </select>
           </div>
           )}
-          {/* Fabricator Filter */}
-          <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[200px]">
+          {/* Fabricator Filter with Search */}
+          <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[220px] relative" ref={fabDropdownRef}>
             <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">Fabricator</label>
-            <select
-              className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm"
-              value={filters.fabricator}
-              onChange={(e) => {
-                setFilters(prev => ({ ...prev, fabricator: e.target.value }));
-                setCurrentPage(1);
-              }}
+            <div
+              onClick={() => setIsFabDropdownOpen((prev) => !prev)}
+              className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none hover:border-gray-400 transition-all shadow-sm flex items-center justify-between"
             >
-              {fabricatorOptions.map(f => <option key={f} value={f}>{f}</option>)}
-            </select>
+              <span className="truncate">{filters.fabricator || "All Fabricators"}</span>
+              <ChevronDown size={16} className="text-gray-500 shrink-0 ml-2" />
+            </div>
+
+            {isFabDropdownOpen && (
+              <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50 overflow-hidden flex flex-col max-h-60 min-w-[220px]">
+                <div className="p-2 border-b border-gray-200 bg-gray-50 sticky top-0">
+                  <div className="relative">
+                    <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search fabricator..."
+                      className="w-full text-xs font-medium text-gray-900 bg-white border border-gray-300 rounded pl-8 pr-2 py-1.5 focus:outline-none focus:border-green-600"
+                      value={fabSearchQuery}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFabSearchQuery(val);
+                        handleFetchFabricatorOptions(val);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      autoFocus
+                    />
+                  </div>
+                </div>
+                <div className="overflow-y-auto max-h-48 py-1">
+                  {filteredFabricatorOptions.length > 0 ? (
+                    filteredFabricatorOptions.map((f) => (
+                      <div
+                        key={f}
+                        onClick={() => {
+                          setFilters((prev) => ({ ...prev, fabricator: f }));
+                          setCurrentPage(1);
+                          setIsFabDropdownOpen(false);
+                        }}
+                        className={`px-3 py-1.5 text-sm cursor-pointer hover:bg-green-50 hover:text-green-700 transition-colors ${
+                          filters.fabricator === f ? "bg-green-100 text-green-800 font-semibold" : "text-gray-700"
+                        }`}
+                      >
+                        {f}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="px-3 py-2 text-xs text-gray-400 italic">No fabricators found</div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Stage Filter */}
