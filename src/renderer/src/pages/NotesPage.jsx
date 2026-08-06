@@ -1,10 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AllNotes } from '../components'
 import { useSelector } from 'react-redux'
+import Service from '../api/Service'
 
 const NotesPage = () => {
-  const projects = useSelector((state) => state.projectInfo?.projectData || [])
+  const [projects, setProjects] = useState([])
   const [selectedProjectId, setSelectedProjectId] = useState('')
+
+  useEffect(() => {
+    Service.GetAllProjects(1, 10000).then((res) => {
+      const data = Array.isArray(res) ? res : (res?.data || [])
+      setProjects(Array.isArray(data) ? data : [])
+    })
+  }, [])
 
   return (
     <div className="p-4">
