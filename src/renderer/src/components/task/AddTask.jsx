@@ -123,7 +123,8 @@ const AddTask = () => {
 
       // Fetch WBS bundles
       Service.GetBundleByProjectId(selectedProjectId).then((res) => {
-        setBundles(res?.data || []);
+        const bundleData = Array.isArray(res) ? res : (res?.data || []);
+        setBundles(Array.isArray(bundleData) ? bundleData : []);
       });
 
       // Fetch project submittals

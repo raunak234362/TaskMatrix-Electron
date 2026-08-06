@@ -4,7 +4,7 @@ class WBSTemplateService {
   // Get WBS template list
   static async GetWBSTemplate() {
     try {
-      const response = await api.get(`wbs-template/`, {
+      const response = await api.get(`wbsTemplates/admin/templates/bundles`, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -16,10 +16,56 @@ class WBSTemplateService {
     }
   }
 
-  // add new WBS template
+  //Get Bundle Templates with WBS + LINEITEM
+  static async GetBundleTemplateWithItems() {
+    try {
+      const response = await api.get(`project/wbs/bundles`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' WBS fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find wbs templates', error)
+    }
+  }
+
+  //Post Expands WBS + LINEITEM in project
+  static async PostExpandedBundles(projectId, data) {
+    try {
+      const response = await api.post(`project/projects/${projectId}/wbs/expand`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' Expanded WBS posted:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find expanded wbs', error)
+      throw error
+    }
+  }
+
+  // Get WBS Line Item by ID
+  static async GetWBSLineItem(wbsId) {
+    try {
+      const response = await api.get(`project/project-wbs/${wbsId}/line-items`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(' WBS line item fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find wbs line item', error)
+    }
+  }
+
+  // add new WBS template Item
   static async AddWBSTemplateItem(data) {
     try {
-      const response = await api.post(`wbs-template/`, data, {
+      const response = await api.post(`wbsTemplates/admin/templates/wbs`, data, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -34,7 +80,7 @@ class WBSTemplateService {
   // sync WBS with DB
   static async SyncWBS(projectId) {
     try {
-      const response = await api.post(`wbs/sync/${projectId}`, {
+      const response = await api.post(`project/projects/${projectId}/wbs/sync`, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -46,25 +92,10 @@ class WBSTemplateService {
     }
   }
 
-  // add custom wbs item:
-  static async AddCustomWBSItem(projectId, data) {
-    try {
-      const response = await api.post(`wbs/custom/${projectId}`, data, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      console.log(' WBS custom item added:', response.data)
-      return response.data
-    } catch (error) {
-      console.error('cannot add custom wbs item', error)
-    }
-  }
-
   // getBundleByProjectId
   static async GetBundleByProjectId(projectId) {
     try {
-      const response = await api.get(`wbs-template/bundle/${projectId}`, {
+      const response = await api.get(`project/projects/${projectId}/bundles`, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -76,25 +107,12 @@ class WBSTemplateService {
     }
   }
 
-  // Get WBS Line Item by ID
-  static async GetWBSLineItem(wbsId) {
-    try {
-      const response = await api.get(`wbs-template/lineItems/${wbsId}`, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      console.log(' WBS line item fetched:', response.data)
-      return response.data
-    } catch (error) {
-      console.error('cannot find wbs line item', error)
-    }
-  }
+  
 
   // Update WBS Line Item
   static async UpdateLineItem(id, data) {
     try {
-      const response = await api.put(`wbs-template/lineItems/update/${id}`, data, {
+      const response = await api.patch(`project/line-items/${id}`, data, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -109,7 +127,7 @@ class WBSTemplateService {
   // Add new Line item in WBS template
   static async AddNewWBSLineItems(data) {
     try {
-      const response = await api.post(`wbs-template/lineItems/`, data, {
+      const response = await api.post(`wbsTemplates/admin/templates/line-items`, data, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -136,22 +154,7 @@ class WBSTemplateService {
     }
   }
 
-  // Add WBS in Project from Template
-  static async AddWBSFromTemplate(projectId, wbsData) {
-    try {
-      const response = await api.post(`wbs/import-template/${projectId}`, wbsData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      console.log('WBS imported from template:', response.data)
-      return response.data
-    } catch (error) {
-      console.error('cannot import wbs from template', error)
-      throw error
-    }
-  }
-
+  
   // add wbs in project:
   static async AddWBSInProject(projectId) {
     try {
@@ -200,7 +203,7 @@ class WBSTemplateService {
   // wbsLineItemByProjectID
   static async GetWBSLineItemById(projectId, id, stage) {
     try {
-      const response = await api.get(`wbs/line-items/${projectId}/${id}/${stage}`, {
+      const response = await api.get(`project/project-wbs/${id}/line-items`, {
         headers: {
           'Content-Type': 'application/json'
         }
