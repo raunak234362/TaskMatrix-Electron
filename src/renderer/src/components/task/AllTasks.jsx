@@ -43,7 +43,6 @@ const AllTasks = () => {
     status: 'All Status',
     assignedUser: 'All Users',
     wbsType: 'All Types',
-    taskName: 'All Tasks',
     manager: 'All Managers'
   })
 
@@ -199,7 +198,6 @@ const AllTasks = () => {
     statusOptions,
     userOptions,
     wbsTypeOptions,
-    taskOptions,
     managerOptions
   } = useMemo(() => {
     const projects = new Set()
@@ -207,7 +205,6 @@ const AllTasks = () => {
     const statuses = new Set()
     const users = new Set()
     const wbsTypes = new Set()
-    const tasksList = new Set()
     const managers = new Set()
 
     tasks.forEach((task) => {
@@ -215,7 +212,6 @@ const AllTasks = () => {
       if (task.Stage) stages.add(task.Stage)
       if (task.status) statuses.add(task.status)
       if (task.wbsType) wbsTypes.add(task.wbsType)
-      if (task.name) tasksList.add(task.name)
       const userName = task.user ? `${task.user.firstName} ${task.user.lastName}` : 'Unassigned'
       users.add(userName)
 
@@ -247,10 +243,6 @@ const AllTasks = () => {
         { label: 'All Types', value: 'All Types' },
         ...Array.from(wbsTypes).map((w) => ({ label: w, value: w }))
       ],
-      taskOptions: [
-        { label: 'All Tasks', value: 'All Tasks' },
-        ...Array.from(tasksList).map((t) => ({ label: t, value: t }))
-      ],
       managerOptions: [
         { label: 'All Managers', value: 'All Managers' },
         ...Array.from(managers).map((m) => ({ label: m, value: m }))
@@ -267,7 +259,6 @@ const AllTasks = () => {
 
       if (filters.projectName !== 'All Projects' && projectName !== filters.projectName)
         return false
-      if (filters.taskName !== 'All Tasks' && task.name !== filters.taskName) return false
       if (filters.stage !== 'All Stages' && stage !== filters.stage) return false
       if (filters.status !== 'All Status' && status !== filters.status) return false
 
@@ -791,19 +782,7 @@ const AllTasks = () => {
             />
           </div>
 
-          {/* Task Filter */}
-          <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
-            <label className="text-[10px] font-bold text-black uppercase tracking-wider">
-              Task
-            </label>
-            <Select
-              options={taskOptions}
-              value={filters.taskName}
-              onChange={(_, val) => setFilters((prev) => ({ ...prev, taskName: val }))}
-              placeholder="Select Task"
-              className="font-semibold text-black bg-gray-50"
-            />
-          </div>
+
 
           {/* Stage Filter */}
           <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">

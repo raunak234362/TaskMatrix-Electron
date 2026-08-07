@@ -504,22 +504,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
                     <p className="text-sm font-semibold text-black uppercase tracking-wider">
                       No responses yet.
                     </p>
-                    {(userRole === 'CLIENT_ADMIN' ||
-                      userRole === 'CLIENT' ||
-                      userRole === 'ADMIN' ||
-                      userRole === 'PROJECT_MANAGER' ||
-                      userRole === 'DEPT_MANAGER' ||
-                      userRole === 'DEPUTY_MANAGER' ||
-                      userRole === 'OPERATION_EXECUTIVE' ||
-                      userRole === 'STAFF' ||
-                      isAssist) && (
-                      <button
-                        onClick={() => setShowResponseModal(true)}
-                        className="mt-3 px-4 py-1.5 bg-gray-100 text-black border border-gray-300 rounded-none hover:bg-gray-200 transition-all font-bold text-xs uppercase tracking-wider cursor-pointer"
-                      >
-                        Add Response Now
-                      </button>
-                    )}
+                 
                   </div>
                 )}
               </div>

@@ -158,7 +158,8 @@ const AllRFI = ({ rfiData, onUpdate }) => {
   const getStatusInfo = (item) => {
     // If the RFI itself has a wbtStatus, use it directly (this is the most accurate)
     if (item.wbtStatus) {
-      const statusStr = String(item.wbtStatus).toUpperCase()
+      let statusStr = String(item.wbtStatus).toUpperCase()
+      if (statusStr === 'COMPLETE') statusStr = 'CLOSED'
       switch (statusStr) {
         case 'OPEN':
         case 'PENDING':
@@ -167,7 +168,7 @@ const AllRFI = ({ rfiData, onUpdate }) => {
           return { label: 'SENT', className: 'bg-purple-100 text-black shadow-sm' }
         case 'RECEIVED':
           return { label: 'RECEIVED', className: 'bg-teal-100 text-black shadow-sm' }
-        case 'COMPLETE':
+        case 'CLOSED':
         case 'ANSWERED':
           return { label: statusStr, className: 'bg-green-100 text-black shadow-sm' }
         case 'PARTIAL':
@@ -185,14 +186,15 @@ const AllRFI = ({ rfiData, onUpdate }) => {
       const latest = sorted[0]
       const rfiStatus = latest.wbtStatus || latest.status
       if (rfiStatus) {
-        const statusStr = rfiStatus.toUpperCase()
+        let statusStr = rfiStatus.toUpperCase()
+        if (statusStr === 'COMPLETE') statusStr = 'CLOSED'
         switch (statusStr) {
           case 'OPEN':
             return { label: 'OPEN', className: 'bg-blue-100 text-black shadow-sm' }
           case 'PARTIAL':
             return { label: 'PARTIAL', className: 'bg-orange-100 text-black shadow-sm' }
-          case 'COMPLETE':
-            return { label: 'COMPLETE', className: 'bg-green-100 text-black shadow-sm' }
+          case 'CLOSED':
+            return { label: 'CLOSED', className: 'bg-green-100 text-black shadow-sm' }
           default:
             return { label: statusStr, className: 'bg-gray-100 text-black shadow-sm' }
         }
@@ -202,6 +204,8 @@ const AllRFI = ({ rfiData, onUpdate }) => {
     // Fallback if no responses exist and no wbtStatus
     if (item.status === false || item.status === 'OPEN' || item.status === 'PENDING') {
       return { label: 'PENDING', className: 'bg-green-100 text-black shadow-sm' }
+    } else if (String(item.status).toUpperCase() === 'COMPLETE') {
+      return { label: 'CLOSED', className: 'bg-green-100 text-black shadow-sm' }
     } else {
       return { label: 'ANSWERED', className: 'bg-orange-100 text-black shadow-sm' }
     }
