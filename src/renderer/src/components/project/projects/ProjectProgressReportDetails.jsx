@@ -187,7 +187,7 @@ const ProjectProgressReportDetails = ({ reportId, onBack }) => {
 
                 {responses.length === 0 ? (
                   <div className="bg-white rounded-lg border border-dashed border-black/20 p-12 text-center text-black font-black uppercase tracking-widest text-[10px] opacity-40">
-                    No responses yet. Be the first to respond.
+                    No responses yet. 
                   </div>
                 ) : (
                   <div className="space-y-6">

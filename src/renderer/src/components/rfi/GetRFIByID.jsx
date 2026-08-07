@@ -308,14 +308,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
                     <div className="text-center py-8 border border-dashed border-gray-300 rounded-none bg-white flex flex-col items-center justify-center">
                       <FileText className="w-10 h-10 text-gray-300 mb-2" />
                       <p className="text-sm font-semibold text-black uppercase tracking-wider">No responses yet.</p>
-                      {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole?.includes("MANAGER") || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole === "DEPUTY_MANAGER" || isAssist) && (
-                        <button
-                          onClick={() => setShowModal(true)}
-                          className="mt-3 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer shadow-sm"
-                        >
-                          Add Response Now
-                        </button>
-                      )}
+                     
                     </div>
                   )}
                 </div>
