@@ -12,7 +12,8 @@ import {
   Trash2,
   Filter,
   Download,
-  Search
+  Search,
+  RotateCcw
 } from 'lucide-react'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -289,6 +290,36 @@ const AllTasks = () => {
       return true
     })
   }, [tasks, filters, dateFilter, searchQuery])
+
+  const isFiltered = useMemo(() => {
+    return (
+      filters.projectName !== 'All Projects' ||
+      filters.stage !== 'All Stages' ||
+      filters.status !== 'All Status' ||
+      filters.assignedUser !== 'All Users' ||
+      filters.wbsType !== 'All Types' ||
+      filters.manager !== 'All Managers' ||
+      dateFilter.type !== 'all' ||
+      searchQuery.trim() !== ''
+    )
+  }, [filters, dateFilter, searchQuery])
+
+  const handleResetFilters = () => {
+    setFilters({
+      projectName: 'All Projects',
+      stage: 'All Stages',
+      status: 'All Status',
+      assignedUser: 'All Users',
+      wbsType: 'All Types',
+      manager: 'All Managers'
+    })
+    setDateFilter({
+      type: 'all',
+      year: new Date().getFullYear(),
+      month: new Date().getMonth()
+    })
+    setSearchQuery('')
+  }
 
   const stripHtml = (html) => {
     if (!html) return ''
@@ -717,6 +748,15 @@ const AllTasks = () => {
             </span>
           </div>
           <div className="flex items-center gap-2">
+            {isFiltered && (
+              <button
+                onClick={handleResetFilters}
+                className="flex w-fit items-center gap-1.5 px-3 py-1.5 border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 rounded-md transition-colors shadow-sm text-xs cursor-pointer"
+              >
+                <RotateCcw size={14} />
+                <span className="font-bold">Reset Filters</span>
+              </button>
+            )}
             <button
               onClick={handleDownloadExcel}
               disabled={filteredTasks.length === 0}
@@ -852,6 +892,17 @@ const AllTasks = () => {
           <div className="flex flex-col gap-1 w-full sm:w-auto">
             <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
           </div>
+
+          {/* Reset Filters Button */}
+          {isFiltered && (
+            <button
+              onClick={handleResetFilters}
+              className="flex items-center gap-1.5 px-3 py-[7px] border border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors text-xs font-bold shrink-0 self-end cursor-pointer"
+            >
+              <RotateCcw size={14} />
+              <span>Reset Filters</span>
+            </button>
+          )}
         </div>
       </div>
 

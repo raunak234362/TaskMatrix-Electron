@@ -365,7 +365,7 @@ const GetFabricatorByID = ({ id, onClose }) => {
                   <div className="pt-8 border-t border-gray-200">
                     <div className="flex items-center gap-2 mb-6 text-green-700">
                       <FileText className="w-4 h-4" />
-                      <h4 className="text-sm font-black uppercase tracking-normal text-slate-800">Resource Documents</h4>
+                      <h4 className="text-md font-semibold uppercase tracking-normal text-black">Fabricator / Detailing Standards</h4>
                     </div>
                     <RenderFiles files={fabricator.files} table="fabricator" parentId={id} />
                   </div>

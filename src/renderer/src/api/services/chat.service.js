@@ -1,10 +1,10 @@
 import api from '../api'
 
 class ChatService {
-  // Add Group
+  // Add Group (POST /chat/group)
   static async AddGroup(data) {
     try {
-      const response = await api.post(`chat/create-group`, data, {
+      const response = await api.post(`chat/group`, data, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -16,10 +16,10 @@ class ChatService {
     }
   }
 
-  // All Chats
+  // All Chats (GET /chat/recent)
   static async AllChats() {
     try {
-      const response = await api.get(`chat/`, {
+      const response = await api.get(`chat/recent`, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -31,10 +31,10 @@ class ChatService {
     }
   }
 
-  // Add Group Members
+  // Add Group Members (POST /chat/group/members)
   static async AddGroupMembers(data) {
     try {
-      const response = await api.post(`chat/add-members`, data, {
+      const response = await api.post(`chat/group/members`, data, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -46,10 +46,10 @@ class ChatService {
     }
   }
 
-  // Get Group Members
+  // Get Group Members (GET /chat/group/{groupId}/members)
   static async GetGroupMembers(groupId) {
     try {
-      const response = await api.get(`chat/members/${groupId}`, {
+      const response = await api.get(`chat/group/${groupId}/members`, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -61,10 +61,10 @@ class ChatService {
     }
   }
 
-  // Delete Group Member
+  // Delete Group Member (DELETE /chat/group/{groupId}/member/{memberId})
   static async DeleteGroupMember(groupId, memberId) {
     try {
-      const response = await api.delete(`chat/remove-member/${groupId}/${memberId}`, {
+      const response = await api.delete(`chat/group/${groupId}/member/${memberId}`, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -76,10 +76,10 @@ class ChatService {
     }
   }
 
-  // Delete Group
+  // Delete Group (DELETE /chat/group/{groupId})
   static async DeleteGroup(groupId) {
     try {
-      const response = await api.delete(`chat/delete-group/${groupId}`, {
+      const response = await api.delete(`chat/group/${groupId}`, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -91,12 +91,30 @@ class ChatService {
     }
   }
 
-  // Chat By Group ID
+  // Chat By Group ID (GET /chat/group/{groupId}/history/{lastMessageId})
   static async ChatByGroupID(groupId, lastId) {
     try {
-      const params = lastId ? { lastId } : {}
-      const response = await api.get(`chat/history/${groupId}`, {
-        params,
+      const url = lastId
+        ? `chat/group/${groupId}/history/${lastId}`
+        : `chat/group/${groupId}/history/undefined`
+
+      const response = await api.get(url, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Chats by Group ID fetched:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Cannot find chats by group ID', error)
+      throw error
+    }
+  }
+
+  // Private Chat By User ID (GET /chat/private/{userId})
+  static async GetPrivateChat(userId) {
+    try {
+      const response = await api.get(`chat/private/${userId}`, {
         headers: {
           'Content-Type': 'application/json'
         }

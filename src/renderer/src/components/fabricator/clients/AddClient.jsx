@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import Button from "../../fields/Button";
@@ -11,6 +11,56 @@ import { X, UserPlus, Loader2 } from "lucide-react";
 
 const AddClients = ({ fabricator, onClose }) => {
   const dispatch = useDispatch();
+  const [branches, setBranches] = useState([]);
+  const [loadingBranches, setLoadingBranches] = useState(false);
+
+  useEffect(() => {
+    const fetchBranches = async () => {
+      const fabBranches = fabricator?.branches || [];
+      const fabId = fabricator?.id || fabricator?._id;
+      setLoadingBranches(true);
+      try {
+        if (Array.isArray(fabBranches) && fabBranches.length > 0) {
+          const branchPromises = fabBranches.map(async (b) => {
+            const bId = typeof b === "string" ? b : (b.id || b._id);
+            if (!bId) return typeof b === "object" ? b : null;
+            try {
+              const res = await Service.GetFabricatorBranchByID(bId);
+              return res?.data || res || b;
+            } catch (err) {
+              console.error(`Error fetching branch ID ${bId}:`, err);
+              return typeof b === "object" ? b : null;
+            }
+          });
+          const fetched = await Promise.all(branchPromises);
+          const validBranches = fetched.filter(Boolean);
+          if (validBranches.length > 0) {
+            setBranches(validBranches);
+            return;
+          }
+        }
+
+        if (fabId) {
+          const response = await Service.GetFabricatorBranchesByFabricatorID(fabId);
+          let list = [];
+          if (response) {
+            if (Array.isArray(response)) list = response;
+            else if (Array.isArray(response.data)) list = response.data;
+            else if (Array.isArray(response.data?.branches)) list = response.data.branches;
+            else if (Array.isArray(response.data?.data)) list = response.data.data;
+          }
+          setBranches(list);
+        }
+      } catch (error) {
+        console.error("Error loading branches in AddClient:", error);
+      } finally {
+        setLoadingBranches(false);
+      }
+    };
+
+    fetchBranches();
+  }, [fabricator]);
+
   const {
     register,
     handleSubmit,
@@ -79,13 +129,13 @@ const AddClients = ({ fabricator, onClose }) => {
               <div className="space-y-1">
                 <Select
                   label="Branch Association"
-                  placeholder="Select branch"
-                  options={fabricator.branches
-                    ?.filter((branch) => branch.id !== undefined)
+                  placeholder={loadingBranches ? "Loading branches..." : "Select branch"}
+                  options={branches
+                    .filter((branch) => branch && (branch.id || branch._id))
                     .map((branch) => ({
-                      label: branch.name,
-                      value: branch.id,
-                    })) || []}
+                      label: branch.name || branch.branchName || "Unnamed Branch",
+                      value: branch.id || branch._id,
+                    }))}
                   {...register("branchId")}
                   onChange={(_, value) => setValue("branchId", value)}
                 />
@@ -186,7 +236,7 @@ const AddClients = ({ fabricator, onClose }) => {
 
               <div className="space-y-1">
                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
-                  Network Role
+                 Access Role
                 </label>
                 <Select
                   options={roleOptions}

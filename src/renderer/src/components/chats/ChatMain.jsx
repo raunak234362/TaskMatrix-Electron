@@ -109,7 +109,7 @@ const ChatMain = ({ activeChat, setActiveChat, onMessageSent }) => {
       const prevScrollHeight = container?.scrollHeight;
 
       setIsLoading(true);
-      const response = await Service.ChatByGroupID(targetGroupID, lastMsgId ?? undefined);
+      const response = await Service.ChatByGroupID(targetGroupID, lastMsgId || undefined);
       const list = Array.isArray(response) ? response : response?.data ?? [];
 
       if (list.length > 0) {

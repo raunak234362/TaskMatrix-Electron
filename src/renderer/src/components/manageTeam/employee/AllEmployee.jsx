@@ -194,14 +194,14 @@ const AllEmployee = () => {
           )}
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3">
           {/* Role Filter */}
-          <div className="flex items-center gap-2">
-            <Filter size={14} className="text-black/30" />
+          <div className="flex items-center gap-2 px-3.5 py-2.5 bg-gray-50 border border-black rounded-none text-xs font-black uppercase tracking-widest text-black/70 hover:text-black transition-all">
+            <Filter size={14} className="text-black/50" />
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
-              className="bg-transparent text-xs font-black uppercase tracking-widest text-black/60 focus:outline-none cursor-pointer hover:text-black transition-colors"
+              className="bg-transparent text-xs font-black uppercase tracking-widest text-black focus:outline-none cursor-pointer"
             >
               <option value="All">All Roles</option>
               {roles.filter(r => r !== "All").map((r) => (
@@ -211,11 +211,11 @@ const AllEmployee = () => {
           </div>
 
           {/* Designation Filter */}
-          <div className="flex items-center gap-2 border-l border-black/10 pl-4">
+          <div className="flex items-center gap-2 px-3.5 py-2.5 bg-gray-50 border border-black rounded-none text-xs font-black uppercase tracking-widest text-black/70 hover:text-black transition-all">
             <select
               value={selectedDesignation}
               onChange={(e) => setSelectedDesignation(e.target.value)}
-              className="bg-transparent text-xs font-black uppercase tracking-widest text-black/60 focus:outline-none cursor-pointer hover:text-black transition-colors"
+              className="bg-transparent text-xs font-black uppercase tracking-widest text-black focus:outline-none cursor-pointer"
             >
               <option value="All">All Designations</option>
               {designations.filter(d => d !== "All").map((d) => (
@@ -225,11 +225,11 @@ const AllEmployee = () => {
           </div>
 
           {/* Status Filter */}
-          <div className="flex items-center gap-2 border-l border-black/10 pl-4">
+          <div className="flex items-center gap-2 px-3.5 py-2.5 bg-gray-50 border border-black rounded-none text-xs font-black uppercase tracking-widest text-black/70 hover:text-black transition-all">
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="bg-transparent text-xs font-black uppercase tracking-widest text-black/60 focus:outline-none cursor-pointer hover:text-black transition-colors"
+              className="bg-transparent text-xs font-black uppercase tracking-widest text-black focus:outline-none cursor-pointer"
             >
               <option value="All">All Status</option>
               <option value="Active">Active</option>
