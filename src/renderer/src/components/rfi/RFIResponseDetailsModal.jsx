@@ -10,7 +10,7 @@ import MultipleFileUpload from "../fields/MultipleFileUpload";
 // Status dropdown options
 const STATUS_OPTIONS = [
   { label: "Partial", value: "PARTIAL" },
-  { label: "Complete", value: "COMPLETE" },
+  { label: "Closed", value: "COMPLETE" },
 ];
 
 const getInitials = (firstName, lastName) => {

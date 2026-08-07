@@ -120,7 +120,7 @@ const RFIResponseModal = ({
                 >
                   <option value="">Select Status</option>
                   <option value="PARTIAL">Partial</option>
-                  <option value="COMPLETE">Complete</option>
+                  <option value="COMPLETE">Closed</option>
                 </select>
               </div>
             )}

@@ -134,7 +134,8 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
       accessorKey: "wbtStatus",
       header: "Status",
       cell: ({ row }) => {
-        const status = row.original.wbtStatus || row.original.status || "—";
+        const rawStatus = row.original.wbtStatus || row.original.status || "—";
+        const displayStatus = String(rawStatus).toUpperCase() === "COMPLETE" ? "CLOSED" : rawStatus;
         const getStatusStyles = (s) => {
           switch (s?.toUpperCase()) {
             case "OPEN":
@@ -142,6 +143,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
             case "PARTIAL":
               return "bg-amber-50 text-amber-700 border-amber-200";
             case "COMPLETE":
+            case "CLOSED":
               return "bg-green-50 text-green-700 border-green-200";
             default:
               return "bg-gray-50 text-gray-700 border-gray-200";
@@ -150,9 +152,9 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
 
         return (
           <span
-            className={`px-2 py-0.5 rounded-none text-sm font-semibold border uppercase tracking-normal ${getStatusStyles(status)}`}
+            className={`px-2 py-0.5 rounded-none text-sm font-semibold border uppercase tracking-normal ${getStatusStyles(displayStatus)}`}
           >
-            {status}
+            {displayStatus}
           </span>
         );
       },
@@ -213,7 +215,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
 
                         if (rfi.wbtStatus) {
                           const wbtStr = String(rfi.wbtStatus).toUpperCase();
-                          status = wbtStr;
+                          status = wbtStr === 'COMPLETE' ? 'CLOSED' : wbtStr;
                           switch (wbtStr) {
                             case 'OPEN':
                             case 'PENDING':
@@ -223,6 +225,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
                             case 'RECEIVED':
                               statusStyles = 'bg-teal-50 text-teal-700 border-teal-200'; break;
                             case 'COMPLETE':
+                            case 'CLOSED':
                             case 'ANSWERED':
                               statusStyles = 'bg-green-50 text-green-700 border-green-200'; break;
                             case 'PARTIAL':
