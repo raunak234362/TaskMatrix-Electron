@@ -54,20 +54,18 @@ const AddTask = () => {
   const [projectTeamMemberIds, setProjectTeamMemberIds] = useState([]);
 
   const dispatch = useDispatch();
-  const projects = useSelector(
-    (state) => state.projectInfo?.projectData || [],
-  );
+  const [projects, setProjects] = useState([]);
+  
   const milestonesByProject = useSelector(
     (state) => state.milestoneInfo?.milestonesByProject || {},
   );
 
   useEffect(() => {
-    if (projects.length === 0) {
-      Service.GetAllProjects().then((res) => {
-        dispatch(setProjectData(res.data));
-      });
-    }
-  }, [dispatch, projects.length]);
+    Service.GetAllProjects(1, 10000).then((res) => {
+      const data = Array.isArray(res) ? res : (res?.data || []);
+      setProjects(Array.isArray(data) ? data : []);
+    });
+  }, []);
 
   const employees = useSelector(
     (state) => state.userInfo?.staffData || [],
@@ -125,7 +123,8 @@ const AddTask = () => {
 
       // Fetch WBS bundles
       Service.GetBundleByProjectId(selectedProjectId).then((res) => {
-        setBundles(res?.data || []);
+        const bundleData = Array.isArray(res) ? res : (res?.data || []);
+        setBundles(Array.isArray(bundleData) ? bundleData : []);
       });
 
       // Fetch project submittals

@@ -115,6 +115,18 @@ class RFQService {
     }
   }
 
+  // GET single RFQ response by ID
+  static async getRFQResponseById(id) {
+    try {
+      const response = await api.get(`rfq/responses/${id}`)
+      console.log('RFQ response fetched by ID:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('cannot find rfq response by ID', error)
+      throw error
+    }
+  }
+
   // Update RFQ by ID
   static async UpdateRFQById(rfqId, data, fabricatorName, rfqProjectName) {
     try {

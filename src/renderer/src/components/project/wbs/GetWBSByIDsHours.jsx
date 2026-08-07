@@ -129,19 +129,7 @@ const GetWBSByIDsHours = ({
       </div>
 
       {/* Footer Section */}
-      <div className="px-8 py-6 border-t border-black bg-white flex justify-end gap-4">
-        <Button
-          className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
-        >
-          Download Report
-        </Button>
-        <Button
-          onClick={() => setIsAddModalOpen(true)}
-          className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
-        >
-          Add Quantity
-        </Button>
-      </div>
+   
 
       <AddNewWBSItem
         isOpen={isAddModalOpen}

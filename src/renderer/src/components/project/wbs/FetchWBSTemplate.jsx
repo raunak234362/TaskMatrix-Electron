@@ -19,36 +19,37 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
   const [lineItemModalData, setLineItemModalData] = useState(null);
 
   const fetchWbsTemplate = async () => {
-      try {
-        setLoading(true);
-        const response = await Service.GetWBSTemplate();
+    try {
+      setLoading(true);
+      const response = await Service.GetBundleTemplateWithItems();
+      console.log(response);
 
-        const sortOrder = [
-          "MAIN_STEEL_PLACEMENT",
-          "MAIN_STEEL_CONNECTION",
-          "MISC.STEEL_PLACEMENT_&_CONNECTION",
-          "ERECTION_OF_MAIN_STEEL",
-          "ERECTION_OF_MISC_STEEL",
-          "DETAILING_OF_MAIN_STEEL",
-          "DETAILING_OF_MISC_STEEL",
-          "OTHERS"
-        ];
+      const sortOrder = [
+        "MAIN_STEEL_PLACEMENT",
+        "MAIN_STEEL_CONNECTION",
+        "MISC.STEEL_PLACEMENT_&_CONNECTION",
+        "ERECTION_OF_MAIN_STEEL",
+        "ERECTION_OF_MISC_STEEL",
+        "DETAILING_OF_MAIN_STEEL",
+        "DETAILING_OF_MISC_STEEL",
+        "OTHERS"
+      ];
 
-        const sortedData = (response.data || []).sort((a, b) => {
-          let indexA = sortOrder.indexOf(a.bundleKey);
-          let indexB = sortOrder.indexOf(b.bundleKey);
-          if (indexA === -1) indexA = sortOrder.length;
-          if (indexB === -1) indexB = sortOrder.length;
-          return indexA - indexB;
-        });
+      const sortedData = (response.data || []).sort((a, b) => {
+        let indexA = sortOrder.indexOf(a.bundleKey);
+        let indexB = sortOrder.indexOf(b.bundleKey);
+        if (indexA === -1) indexA = sortOrder.length;
+        if (indexB === -1) indexB = sortOrder.length;
+        return indexA - indexB;
+      });
 
-        setTemplates(sortedData);
-      } catch (error) {
-        console.error("Error fetching WBS templates:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      setTemplates(sortedData);
+    } catch (error) {
+      console.error("Error fetching WBS templates:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchWbsTemplate();
@@ -104,12 +105,18 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
     const selectedTemplates = templates.filter((t) => selectedIds.has(t.id));
     const bundleKeys = selectedTemplates.map((t) => t.bundleKey);
 
-    if (onSelect) {
-      onSelect(bundleKeys.join(","));
+    try {
+      const response = await Service.PostExpandedBundles(id, { bundleKeys });
+      console.log("Selected Bundle Keys:", bundleKeys);
+      console.log("Response from PostExpandedBundles:", response);
+      if (onSelect) {
+        onSelect(bundleKeys.join(","));
+      } else if (onClose) {
+        onClose();
+      }
+    } catch (error) {
+      console.error("Error adding selected templates:", error);
     }
-    const response = await Service.AddWBSFromTemplate(id, { bundleKeys });
-    console.log("Selected Bundle Keys:", bundleKeys);
-    console.log("Response:", response);
   };
 
   const filteredTemplates = templates.filter(
@@ -145,7 +152,7 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
             />
           </div>
           <div className="flex items-center gap-2">
-            
+
             <Button
               variant="ghost"
               onClick={handleSelectAll}
@@ -203,7 +210,7 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
                     >
                       {template.name}
                     </h3>
-                    
+
                     <div className="flex items-center mt-1 space-x-3">
                       <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-200 text-gray-700 uppercase tracking-wider">
                         {template.category}
@@ -254,8 +261,8 @@ const FetchWBSTemplate = ({ id, onSelect, onClose }) => {
                           </div>
                           <button
                             onClick={(e) => {
-                                e.stopPropagation();
-                                setLineItemModalData(item);
+                              e.stopPropagation();
+                              setLineItemModalData(item);
                             }}
                             className="hidden group-hover:flex items-center justify-center p-1 bg-green-200 text-green-700 rounded-md hover:bg-green-300 transition-colors"
                             title="Add Line Item"

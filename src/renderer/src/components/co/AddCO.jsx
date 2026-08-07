@@ -30,11 +30,46 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
     });
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
+  const [pocs, setPocs] = React.useState([]);
+  const [fetchingPocs, setFetchingPocs] = React.useState(false);
 
-  const fabricatorId = project?.fabricatorID;
+  const fabricatorId = project?.fabricatorID || project?.fabricator?.id || project?.fabricator_id;
   const selectedFabricator = fabricators?.find(
     (f) => String(f.id) === String(fabricatorId),
   );
+
+  React.useEffect(() => {
+    const fetchPocs = async () => {
+      if (fabricatorId) {
+        try {
+          setFetchingPocs(true);
+          const res = await Service.GetFabricatorPOC(fabricatorId);
+          let list = [];
+          if (Array.isArray(res)) {
+            list = res;
+          } else if (res?.data?.pointOfContact && Array.isArray(res.data.pointOfContact)) {
+            list = res.data.pointOfContact;
+          } else if (res?.pointOfContact && Array.isArray(res.pointOfContact)) {
+            list = res.pointOfContact;
+          } else if (res?.data && Array.isArray(res.data)) {
+            list = res.data;
+          } else if (res?.pocs && Array.isArray(res.pocs)) {
+            list = res.pocs;
+          }
+
+          setPocs(list);
+        } catch (err) {
+          console.error("Failed to fetch fabricator POCs", err);
+          setPocs([]);
+        } finally {
+          setFetchingPocs(false);
+        }
+      } else {
+        setPocs([]);
+      }
+    };
+    fetchPocs();
+  }, [fabricatorId]);
 
   React.useEffect(() => {
     let maxNum = 0;
@@ -59,11 +94,17 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
     }
   }, [project, changeOrderData, setValue, userDetail, isAdminRole]);
 
-  const pocOptions =
+  const fetchedPocOptions = pocs.map((p) => ({
+    label: `${p.firstName || ""} ${p.middleName ? p.middleName + " " : ""}${p.lastName || ""}`.trim() || p.email || p.name || "Unnamed POC",
+    value: p.id || p._id,
+  }));
+
+  const pocOptions = fetchedPocOptions.length > 0 ? fetchedPocOptions : (
     selectedFabricator?.pointOfContact?.map((p) => ({
-      label: `${p.firstName} ${p.middleName ?? ""} ${p.lastName}`,
+      label: `${p.firstName} ${p.middleName ?? ""} ${p.lastName}`.trim(),
       value: p.id,
-    })) ?? [];
+    })) ?? []
+  );
 
   const recipientOptions =
     staff
@@ -136,7 +177,8 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
           render={({ field }) => (
             <Select
               isMulti
-              placeholder="Fabricator Contact"
+              placeholder={fetchingPocs ? "Fetching POCs..." : "Fabricator Contact"}
+              isLoading={fetchingPocs}
               options={pocOptions}
               value={pocOptions.filter((o) => (field.value || []).includes(o.value))}
               onChange={(options) => {

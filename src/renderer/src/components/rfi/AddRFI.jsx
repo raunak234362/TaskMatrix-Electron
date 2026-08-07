@@ -39,20 +39,63 @@ const AddRFI = ({
   const [loading, setLoading] = useState(false);
   const [cdEngineers, setCdEngineers] = useState([]);
   const [fetchingEngineers, setFetchingEngineers] = useState(false);
+  const [pocs, setPocs] = useState([]);
+  const [fetchingPocs, setFetchingPocs] = useState(false);
 
   const connectionDesignerID = project?.connectionDesignerID;
+  const targetFabricatorID = fabricatorID || project?.fabricator?.id || project?.fabricator_id;
+
+  // Fetch Fabricator POCs via API
+  useEffect(() => {
+    const fetchPocs = async () => {
+      if (targetFabricatorID) {
+        try {
+          setFetchingPocs(true);
+          const res = await Service.GetFabricatorPOC(targetFabricatorID);
+          let list = [];
+          if (Array.isArray(res)) {
+            list = res;
+          } else if (res?.data?.pointOfContact && Array.isArray(res.data.pointOfContact)) {
+            list = res.data.pointOfContact;
+          } else if (res?.pointOfContact && Array.isArray(res.pointOfContact)) {
+            list = res.pointOfContact;
+          } else if (res?.data && Array.isArray(res.data)) {
+            list = res.data;
+          } else if (res?.pocs && Array.isArray(res.pocs)) {
+            list = res.pocs;
+          }
+
+          setPocs(list);
+        } catch (err) {
+          console.error("Failed to fetch fabricator POCs", err);
+          setPocs([]);
+        } finally {
+          setFetchingPocs(false);
+        }
+      } else {
+        setPocs([]);
+      }
+    };
+    fetchPocs();
+  }, [targetFabricatorID]);
 
   // Match selected fabricator
   const selectedFabricator = fabricators?.find(
     (f) => String(f.id) === String(fabricatorID),
   );
-  // Correct POC mapping
-  const pocOptions =
-    selectedFabricator?.pointOfContact?.map((p) => ({
-      label: `${p.firstName} ${p.middleName ?? ""} ${p.lastName}`,
 
+  const fetchedPocOptions = pocs.map((p) => ({
+    label: `${p.firstName || ""} ${p.middleName ? p.middleName + " " : ""}${p.lastName || ""}`.trim() || p.email || p.name || "Unnamed POC",
+    value: p.id || p._id,
+  }));
+
+  // Fallback to redux pointOfContact if needed
+  const pocOptions = fetchedPocOptions.length > 0 ? fetchedPocOptions : (
+    selectedFabricator?.pointOfContact?.map((p) => ({
+      label: `${p.firstName} ${p.middleName ?? ""} ${p.lastName}`.trim(),
       value: p.id,
-    })) ?? [];
+    })) ?? []
+  );
 
   const projectOptions =
     selectedFabricator?.project?.map((p) => ({
@@ -266,12 +309,12 @@ const AddRFI = ({
               <Select
                 isMulti
                 placeholder={
-                  fetchingEngineers 
-                    ? "Fetching engineers..." 
-                    : `Select ${isCDMode ? "engineers" : "POCs"}...`
+                  isCDMode
+                    ? (fetchingEngineers ? "Fetching engineers..." : "Select engineers...")
+                    : (fetchingPocs ? "Fetching POCs..." : "Select POCs...")
                 }
                 options={activeRecipientOptions}
-                isLoading={fetchingEngineers}
+                isLoading={isCDMode ? fetchingEngineers : fetchingPocs}
                 value={
                   activeRecipientOptions.filter((o) => (field.value || []).includes(o.value))
                 }

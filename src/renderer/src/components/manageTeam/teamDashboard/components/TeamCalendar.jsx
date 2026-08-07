@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,7 +9,7 @@ import {
   FileText,
 } from "lucide-react";
 import FetchTaskByID from "../../../task/FetchTaskByID";
-
+import Service from "../../../../api/Service";
 
 const TeamCalendar = ({
   members,
@@ -73,26 +73,14 @@ const TeamCalendar = ({
     return map;
   }, [selectedDateModal]);
 
-  const allProjects = useMemo(() => {
-    const projectsMap = new Map();
-    members.forEach((m) => {
-      (m.tasks || []).forEach((t) => {
-        const pId = t.project?.id || t.project_id;
-        const pName =
-          t.project?.name ||
-          t.project?.title ||
-          t.projectName ||
-          `Project ${pId}`;
-        if (pId) {
-          projectsMap.set(pId, pName);
-        }
-      });
+  const [allProjects, setAllProjects] = useState([]);
+
+  useEffect(() => {
+    Service.GetAllProjects(1, 10000).then((res) => {
+      const data = Array.isArray(res) ? res : (res?.data || []);
+      setAllProjects(Array.isArray(data) ? data : []);
     });
-    return Array.from(projectsMap.entries()).map(([id, name]) => ({
-      id,
-      name,
-    }));
-  }, [members]);
+  }, []);
 
   const getDayTasks = (date) => {
     const dayTasks = [];

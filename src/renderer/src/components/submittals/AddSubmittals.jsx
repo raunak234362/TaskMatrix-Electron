@@ -85,9 +85,46 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
   const [files, setFiles] = useState([]);
   const [cdEngineers, setCdEngineers] = useState([]);
   const [fetchingEngineers, setFetchingEngineers] = useState(false);
+  const [pocs, setPocs] = useState([]);
+  const [fetchingPocs, setFetchingPocs] = useState(false);
   const [isCDMode, setIsCDMode] = useState(false);
 
   const connectionDesignerID = project?.connectionDesignerID;
+  const targetFabricatorID = fabricatorId || project?.fabricator?.id || project?.fabricator_id;
+
+  // Fetch Fabricator POCs via API
+  useEffect(() => {
+    const fetchPocs = async () => {
+      if (targetFabricatorID) {
+        try {
+          setFetchingPocs(true);
+          const res = await Service.GetFabricatorPOC(targetFabricatorID);
+          let list = [];
+          if (Array.isArray(res)) {
+            list = res;
+          } else if (res?.data?.pointOfContact && Array.isArray(res.data.pointOfContact)) {
+            list = res.data.pointOfContact;
+          } else if (res?.pointOfContact && Array.isArray(res.pointOfContact)) {
+            list = res.pointOfContact;
+          } else if (res?.data && Array.isArray(res.data)) {
+            list = res.data;
+          } else if (res?.pocs && Array.isArray(res.pocs)) {
+            list = res.pocs;
+          }
+
+          setPocs(list);
+        } catch (err) {
+          console.error("Failed to fetch fabricator POCs", err);
+          setPocs([]);
+        } finally {
+          setFetchingPocs(false);
+        }
+      } else {
+        setPocs([]);
+      }
+    };
+    fetchPocs();
+  }, [targetFabricatorID]);
 
   useEffect(() => {
     const fetchEngineers = async () => {
@@ -113,11 +150,17 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
     (f) => String(f.id) === String(fabricatorId),
   );
 
-  const pocOptions =
+  const fetchedPocOptions = pocs.map((p) => ({
+    label: `${p.firstName || ""} ${p.middleName ? p.middleName + " " : ""}${p.lastName || ""}`.trim() || p.email || p.name || "Unnamed POC",
+    value: p.id || p._id,
+  }));
+
+  const pocOptions = fetchedPocOptions.length > 0 ? fetchedPocOptions : (
     selectedFabricator?.pointOfContact?.map((p) => ({
-      label: `${p.firstName} ${p.middleName ?? ""} ${p.lastName}`,
+      label: `${p.firstName} ${p.middleName ?? ""} ${p.lastName}`.trim(),
       value: p.id,
-    })) ?? [];
+    })) ?? []
+  );
 
   const cdEngineerOptions =
     cdEngineers?.map((e) => ({
@@ -270,32 +313,6 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
     }
   };
 
-  useEffect(() => {
-    const currentFiltered = milestones?.filter((m) => {
-      if (isCDMode) {
-        return !!m.isConnectionDesign;
-      } else {
-        return !m.isConnectionDesign;
-      }
-    }) ?? [];
-
-    const availableMilestones = currentFiltered.filter(
-      (m) => !submittedMilestoneIds.has(String(m.id || m._id))
-    );
-
-    if (availableMilestones.length > 0) {
-      const firstMilestone = availableMilestones[0];
-      const firstId = firstMilestone.id || firstMilestone._id;
-      if (firstId) {
-        setValue("mileStoneIds", [String(firstId)]);
-        setValue("stage", firstMilestone.stage || "");
-      }
-    } else {
-      setValue("mileStoneIds", []);
-      setValue("stage", "");
-    }
-  }, [milestones, isCDMode, submittedMilestoneIds]);
-
   return (
     <div className="w-full mx-auto bg-white p-4 rounded-xl shadow">
       {/* Recipient Category Toggle */}
@@ -305,6 +322,8 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
           onClick={() => {
             setIsCDMode(false);
             setValue("multipleRecipients", []); // Clear selection when switching modes
+            setValue("mileStoneIds", []);
+            setValue("stage", "");
             setValue("isConnectionDesign", false);
           }}
           className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${!isCDMode
@@ -319,6 +338,8 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
           onClick={() => {
             setIsCDMode(true);
             setValue("multipleRecipients", []); // Clear selection when switching modes
+            setValue("mileStoneIds", []);
+            setValue("stage", "");
             setValue("isConnectionDesign", true);
           }}
           className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${isCDMode
@@ -344,12 +365,12 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
               <Select
                 isMulti
                 placeholder={
-                  fetchingEngineers
-                    ? "Fetching engineers..."
-                    : `Select ${isCDMode ? "engineers" : "POCs"}...`
+                  isCDMode
+                    ? (fetchingEngineers ? "Fetching engineers..." : "Select engineers...")
+                    : (fetchingPocs ? "Fetching POCs..." : "Select POCs...")
                 }
                 options={activeRecipientOptions}
-                isLoading={fetchingEngineers}
+                isLoading={isCDMode ? fetchingEngineers : fetchingPocs}
                 value={
                   activeRecipientOptions.filter((o) => (field.value || []).includes(o.value))
                 }
