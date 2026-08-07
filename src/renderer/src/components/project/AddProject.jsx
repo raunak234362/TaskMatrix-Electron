@@ -25,7 +25,7 @@ import RichTextEditor from "../fields/RichTextEditor";
 
 import { addProject } from "../../store/projectSlice";
 
-const AddProject = () => {
+const AddProject = ({ onSuccess }) => {
   const dispatch = useDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [connectionDesigners, setConnectionDesigners] = useState([]);
@@ -60,20 +60,27 @@ const AddProject = () => {
       })),
   );
 
-  const { register, handleSubmit, control, watch, setValue, reset } =
-    useForm({
-      defaultValues: {
-        tools: "TEKLA",
-        connectionDesign: false,
-        miscDesign: false,
-        customerDesign: false,
-        detailingMain: false,
-        detailingMisc: false,
-        isAwarded: false,
-        files: [],
-        clientProjectManagers: [],
-      },
-    });
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      tools: "TEKLA",
+      connectionDesign: false,
+      miscDesign: false,
+      customerDesign: false,
+      detailingMain: false,
+      detailingMisc: false,
+      isAwarded: false,
+      files: [],
+      clientProjectManagers: [],
+    },
+  });
 
   useEffect(() => {
     Service.FetchAllConnectionDesigner()
@@ -199,7 +206,7 @@ const AddProject = () => {
           formData.append(key, String(value));
         }
       });
-1
+
       formData.append("status", "ACTIVE");
       formData.append("stage", "IFA");
 
@@ -211,6 +218,7 @@ const AddProject = () => {
         dispatch(addProject(res?.data || res?.project));
         toast.success("Project launched successfully!");
         reset();
+        onSuccess?.(res?.data || res?.project);
       } else {
         toast.error(res?.message || "Failed to create project");
       }
@@ -221,6 +229,25 @@ const AddProject = () => {
     }
   };
 
+  const onError = (formErrors) => {
+    console.error("Form Validation Errors:", formErrors);
+    const fieldMap = {
+      projectNumber: "Project Number",
+      name: "Project Name",
+      description: "Project Scope",
+      startDate: "Start Date",
+      fabricatorID: "Fabricator",
+      tools: "Tools",
+      managerID: "Project Manager",
+      departmentID: "Department",
+      teamID: "Team",
+    };
+    const missingFields = Object.keys(formErrors)
+      .map((key) => fieldMap[key] || key)
+      .join(", ");
+    toast.error(`Please fill required fields: ${missingFields}`);
+  };
+
   return (
     <div className="min-h-screen bg-white p-2 lg:p-2">
       <div className="w-full mx-auto">
@@ -228,7 +255,7 @@ const AddProject = () => {
         
 
           <form
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleSubmit(onSubmit, onError)}
             className="px-2 py-2 space-y-12"
           >
             {/* RFQ Integration */}
@@ -372,11 +399,11 @@ const AddProject = () => {
                   <SectionTitle title="Leadership" className="mb-6" />
                   <div className="space-y-6">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase">Fabricator</label>
+                      <label className="text-[10px] font-black text-gray-400 uppercase">Fabricator *</label>
                       <Controller
                         name="fabricatorID"
                         control={control}
-                        rules={{ required: true }}
+                        rules={{ required: "Fabricator is required" }}
                         render={({ field }) => (
                           <Select
                             options={options.fabricators}
@@ -388,13 +415,14 @@ const AddProject = () => {
                           />
                         )}
                       />
+                      {errors.fabricatorID && <span className="text-xs text-red-500 font-semibold">{errors.fabricatorID.message || "Fabricator is required"}</span>}
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase">Tools *</label>
                       <Controller
                         name="tools"
                         control={control}
-                        rules={{ required: true }}
+                        rules={{ required: "Tools is required" }}
                         render={({ field }) => (
                           <Select
                             options={options.tools}
@@ -406,13 +434,14 @@ const AddProject = () => {
                           />
                         )}
                       />
+                      {errors.tools && <span className="text-xs text-red-500 font-semibold">{errors.tools.message || "Tools is required"}</span>}
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase">Project Manager</label>
+                      <label className="text-[10px] font-black text-gray-400 uppercase">Project Manager *</label>
                       <Controller
                         name="managerID"
                         control={control}
-                        rules={{ required: true }}
+                        rules={{ required: "Project Manager is required" }}
                         render={({ field }) => (
                           <Select
                             options={managerOption}
@@ -424,13 +453,14 @@ const AddProject = () => {
                           />
                         )}
                       />
+                      {errors.managerID && <span className="text-xs text-red-500 font-semibold">{errors.managerID.message || "Project Manager is required"}</span>}
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase">Department</label>
+                      <label className="text-[10px] font-black text-gray-400 uppercase">Department *</label>
                       <Controller
                         name="departmentID"
                         control={control}
-                        rules={{ required: true }}
+                        rules={{ required: "Department is required" }}
                         render={({ field }) => (
                           <Select
                             options={options.departments}
@@ -442,13 +472,14 @@ const AddProject = () => {
                           />
                         )}
                       />
+                      {errors.departmentID && <span className="text-xs text-red-500 font-semibold">{errors.departmentID.message || "Department is required"}</span>}
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-gray-400 uppercase">Team</label>
+                      <label className="text-[10px] font-black text-gray-400 uppercase">Team *</label>
                       <Controller
                         name="teamID"
                         control={control}
-                        rules={{ required: true }}
+                        rules={{ required: "Team is required" }}
                         render={({ field }) => (
                           <Select
                             options={options.teams}
@@ -460,6 +491,7 @@ const AddProject = () => {
                           />
                         )}
                       />
+                      {errors.teamID && <span className="text-xs text-red-500 font-semibold">{errors.teamID.message || "Team is required"}</span>}
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase">Client Project Managers</label>
