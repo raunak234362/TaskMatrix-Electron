@@ -114,6 +114,7 @@ const AddRFQ = ({ onSuccess }) => {
   const [isDetailing, setIsDetailing] = useState(false);
   const [isMTO, setIsMTO] = useState(false);
   const [pocs, setPocs] = useState([]);
+  const [allFabricators, setAllFabricators] = useState([]);
 
   const dynamicEditorHeight = React.useMemo(() => {
     let h = 300; // Base height when nothing is selected
@@ -143,16 +144,33 @@ const AddRFQ = ({ onSuccess }) => {
     }
   }, [isDetailing, isMTO, mtoStickModelEnabled, setValue]);
 
-  // --- FETCH STAFF ONCE ---
+  // --- FETCH ALL FABRICATORS WITH LIMIT 100 AND STAFF ONCE ---
   useEffect(() => {
-    const loadStaff = async () => {
+    const loadInitialData = async () => {
       try {
         await Service.FetchEmployeeByRole("CLIENT");
       } catch (err) {
         console.error("Staff Fetch Failed:", err);
       }
+
+      try {
+        const res = await Service.GetAllFabricators(1, 100);
+        let list = [];
+        if (Array.isArray(res)) {
+          list = res;
+        } else if (res?.data?.data && Array.isArray(res.data.data)) {
+          list = res.data.data;
+        } else if (res?.data && Array.isArray(res.data)) {
+          list = res.data;
+        } else if (res?.fabricators && Array.isArray(res.fabricators)) {
+          list = res.fabricators;
+        }
+        setAllFabricators(list);
+      } catch (err) {
+        console.error("Failed to fetch fabricators (limit 100):", err);
+      }
     };
-    loadStaff();
+    loadInitialData();
   }, []);
 
   // Fetch POCs when Fabricator is selected
@@ -164,8 +182,19 @@ const AddRFQ = ({ onSuccess }) => {
       }
       try {
         const response = await Service.GetFabricatorPOC(selectedFabricatorId);
-        const pocData = response?.data || response || [];
-        setPocs(Array.isArray(pocData) ? pocData : []);
+        let list = [];
+        if (Array.isArray(response)) {
+          list = response;
+        } else if (response?.data?.pointOfContact && Array.isArray(response.data.pointOfContact)) {
+          list = response.data.pointOfContact;
+        } else if (response?.pointOfContact && Array.isArray(response.pointOfContact)) {
+          list = response.pointOfContact;
+        } else if (response?.data && Array.isArray(response.data)) {
+          list = response.data;
+        } else if (response?.pocs && Array.isArray(response.pocs)) {
+          list = response.pocs;
+        }
+        setPocs(list);
       } catch (err) {
         console.error("Failed to fetch fabricator POCs:", err);
         setPocs([]);
@@ -182,14 +211,16 @@ const AddRFQ = ({ onSuccess }) => {
   }, [selectedFabricatorId, setValue, userRole]);
 
   // --- FABRICATOR OPTIONS ---
+  const fabricatorList = allFabricators.length > 0 ? allFabricators : fabricators;
+
   const fabOptions =
-    fabricators?.map((fab) => ({
-      label: fab.fabName,
-      value: String(fab.id),
+    fabricatorList?.map((fab) => ({
+      label: fab.fabName || fab.name || "Unnamed Fabricator",
+      value: String(fab.id || fab._id),
     })) ?? [];
 
-  const selectedFabricator = fabricators?.find(
-    (fab) => String(fab.id) === String(selectedFabricatorId),
+  const selectedFabricator = fabricatorList?.find(
+    (fab) => String(fab.id || fab._id) === String(selectedFabricatorId),
   );
 
   const fabricatorCountry = selectedFabricator?.branches?.find(b => b.isHeadquarters)?.country || selectedFabricator?.branches?.[0]?.country;
@@ -346,8 +377,8 @@ const AddRFQ = ({ onSuccess }) => {
         }
       }
 
-      const selectedFab = fabricators?.find(
-        (f) => String(f.id) === String(data.fabricatorId),
+      const selectedFab = fabricatorList?.find(
+        (f) => String(f.id || f._id) === String(data.fabricatorId),
       );
       const fabricatorName = selectedFab?.fabName || "";
       const rfqProjectName = data.projectName || "";
@@ -357,8 +388,8 @@ const AddRFQ = ({ onSuccess }) => {
 
       if (createdRFQ && !createdRFQ.error) {
         // Enrich with form data for immediate display in the table
-        const selectedFab = fabricators?.find(
-          (f) => String(f.id) === String(data.fabricatorId),
+        const selectedFab = fabricatorList?.find(
+          (f) => String(f.id || f._id) === String(data.fabricatorId),
         );
         const selectedSender = clientOptions?.find(
           (c) => String(c.value) === String(data.senderId),

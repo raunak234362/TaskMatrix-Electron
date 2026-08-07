@@ -82,6 +82,7 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
   const [description, setDescription] = useState(
     initialData?.description || "",
   );
+  const [notes, setNotes] = useState(initialData?.notes || "");
   const [files, setFiles] = useState([]);
   const [cdEngineers, setCdEngineers] = useState([]);
   const [fetchingEngineers, setFetchingEngineers] = useState(false);
@@ -274,6 +275,7 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
         project_id: projectId,
         isConnectionDesign: isCDMode,
         description,
+        notes,
         files,
         isAproovedByAdmin: autoApproveRoles.includes(userRoleStr),
       };
@@ -303,6 +305,7 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
       reset();
       await fetchMileStone();
       setDescription("");
+      setNotes("");
       setFiles([]);
       onSuccess?.();
     } catch (err) {
@@ -450,11 +453,13 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
         </div>
 
         <div className="space-y-1">
-          <Input
-            label="Notes"
-            type="textarea"
+          <label className="text-sm font-medium text-gray-700">
+            Submittals Notes
+          </label>
+          <RichTextEditor
+            value={notes}
+            onChange={setNotes}
             placeholder="Enter submittal notes..."
-            {...register("notes")}
           />
         </div>
 

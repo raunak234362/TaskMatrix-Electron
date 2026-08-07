@@ -16,15 +16,21 @@ const RichTextEditor = ({
       placeholder: "",
       showPlaceholder: false,
       toolbarAdaptive: false,
+      defaultColor: "", // Forces explicit color styling (e.g. #000000) instead of clearing style attribute
 
       enter: "P",          // ✅ Important
       enterBlock: "li",    // ✅ Forces new <li> on Enter inside lists
+      askBeforePasteHTML: false,
+      askBeforePasteFromWord: false,
 
       buttons: [
         "bold",
         "italic",
         "underline",
         "strikethrough",
+        "|",
+        "copyformat", // ✅ Match Property / Format Painter
+        "eraser",
         "|",
         "ul",
         "ol",
@@ -43,7 +49,6 @@ const RichTextEditor = ({
         "redo",
         "|",
         "hr",
-        "eraser",
       ],
       height: height || 300,
     }),
