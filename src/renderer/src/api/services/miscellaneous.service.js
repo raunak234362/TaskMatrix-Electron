@@ -390,7 +390,7 @@ class MiscellaneousService {
     const token = sessionStorage.getItem('token')
     try {
       const response = await api.post(
-        `teamMeetingNotesResponse/${notesId}?fabricatorName=${encodeURIComponent(fabricatorName)}&projectName=${encodeURIComponent(projectName)}`,
+        `teamMeetingNotes/${notesId}/responses?fabricatorName=${encodeURIComponent(fabricatorName)}&projectName=${encodeURIComponent(projectName)}`,
         formData,
         {
           headers: {
@@ -409,7 +409,7 @@ class MiscellaneousService {
 
   static async Getallrepliesforanote(noteId) {
     try {
-      const response = await api.get(`teamMeetingNotesResponse/note/${noteId}`, {
+      const response = await api.get(`teamMeetingNotes/${noteId}/responses`, {
         headers: {
           'Content-Type': 'application/json'
         }

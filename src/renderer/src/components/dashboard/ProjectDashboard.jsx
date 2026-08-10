@@ -83,33 +83,6 @@ const ProjectDashboard = () => {
 
       if (projectsRes?.data) {
         dispatch(setProjectData(projectsRes.data));
-
-        // Fetch full details and milestones for each project to get submittals and accurate progress
-        const detailPromises = projectsRes.data.map(async (p) => {
-          try {
-            const [milestonesRes, projectRes] = await Promise.all([
-              Service.GetProjectMilestoneById(p.id),
-              Service.GetProjectById(p.id),
-            ]);
-
-            if (milestonesRes?.data) {
-              dispatch(
-                setMilestonesForProject({
-                  projectId: p.id,
-                  milestones: milestonesRes.data,
-                }),
-              );
-            }
-
-            if (projectRes?.data) {
-              dispatch(updateProject(projectRes.data));
-            }
-          } catch (err) {
-            console.error(`Error fetching details for project ${p.id}:`, err);
-          }
-        });
-
-        await Promise.all(detailPromises);
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
