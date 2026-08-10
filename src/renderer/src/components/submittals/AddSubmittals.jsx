@@ -299,7 +299,11 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
       const fabricatorName = selectedFabricator?.fabName || project?.fabricatorName || project?.fabricator?.fabName || "";
       const projectName = project?.projectName || project?.name || "";
 
-      await Service.AddSubmittal(formData, fabricatorName, projectName);
+      const res = await Service.AddSubmittal(formData, fabricatorName, projectName);
+      if (res && res.success === false) {
+        toast.error(res.message || "Failed to create Submittal");
+        return;
+      }
       toast.success("Submittal Created Successfully!");
 
       reset();
@@ -310,7 +314,14 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
       onSuccess?.();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to create Submittal");
+      const errMsg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.data?.message ||
+        (typeof err?.response?.data === "string" ? err.response.data : null) ||
+        err?.message ||
+        "Failed to create Submittal";
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }
