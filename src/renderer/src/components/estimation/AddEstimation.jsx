@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
@@ -10,6 +10,7 @@ import MultipleFileUpload from '../fields/MultipleFileUpload'
 import SectionTitle from '../ui/SectionTitle'
 import Service from '../../api/Service'
 import { setRFQData } from '../../store/rfqSlice'
+import { loadFabricator } from '../../store/fabricatorSlice'
 import RichTextEditor from '../fields/RichTextEditor'
 
 const EstimationStatusOptions = [
@@ -22,32 +23,44 @@ const EstimationStatusOptions = [
 const AddEstimation = ({ initialRfqId = null, onClose, onSuccess = () => { } }) => {
   const dispatch = useDispatch()
   const [files, setFiles] = useState([])
+  const [estimations, setEstimations] = useState([])
 
   const rfqData = useSelector((state) => state.RFQInfos?.RFQData || [])
   const fabricators = useSelector((state) => state.fabricatorInfo?.fabricatorData || [])
 
-  const userType = sessionStorage.getItem('userRole')
-
   useEffect(() => {
-    const fetchRFQs = async () => {
-      if (rfqData.length === 0) {
-        try {
-          let rfqDetail
-          if (userType === 'CLIENT') {
-            rfqDetail = await Service.RfqSent()
-          } else {
-            rfqDetail = await Service.RFQRecieved()
-          }
-          if (rfqDetail?.data) {
-            dispatch(setRFQData(rfqDetail.data))
-          }
-        } catch (error) {
-          console.error('Error fetching RFQs:', error)
+    const fetchData = async () => {
+      try {
+        const [rfqRes, fabRes, estRes] = await Promise.all([
+          Service.FetchAllRFQ(1, 100),
+          Service.GetAllFabricators(1, 100),
+          Service.AllEstimation()
+        ])
+
+        const rfqList = Array.isArray(rfqRes)
+          ? rfqRes
+          : (rfqRes?.data ? (Array.isArray(rfqRes.data) ? rfqRes.data : (rfqRes.data.data || [])) : [])
+        if (rfqList.length > 0 || rfqData.length === 0) {
+          dispatch(setRFQData(rfqList))
         }
+
+        const fabList = Array.isArray(fabRes)
+          ? fabRes
+          : (fabRes?.data ? (Array.isArray(fabRes.data) ? fabRes.data : (fabRes.data.data || [])) : [])
+        if (fabList.length > 0 || fabricators.length === 0) {
+          dispatch(loadFabricator(fabList))
+        }
+
+        const estList = Array.isArray(estRes)
+          ? estRes
+          : (estRes?.data ? (Array.isArray(estRes.data) ? estRes.data : (estRes.data.data || [])) : [])
+        setEstimations(estList)
+      } catch (error) {
+        console.error('Error fetching RFQs, Fabricators, or Estimations:', error)
       }
     }
-    fetchRFQs()
-  }, [dispatch, rfqData.length, userType])
+    fetchData()
+  }, [dispatch])
 
   const {
     register,
@@ -69,14 +82,14 @@ const AddEstimation = ({ initialRfqId = null, onClose, onSuccess = () => { } }) 
   useEffect(() => {
     if (!selectedRfqId || rfqData.length === 0) return
 
-    const rfq = rfqData.find((r) => String(r.id) === String(selectedRfqId))
+    const rfq = rfqData.find((r) => String(r.id || r._id) === String(selectedRfqId))
     if (!rfq) return
 
     // Auto-fill all fields from selected RFQ
     setValue('projectName', rfq.projectName || '')
     setValue('description', rfq.description || '')
     setValue('estimationNumber', rfq.projectNumber || '')
-    setValue('fabricatorId', String(rfq.fabricatorId || ''))
+    setValue('fabricatorId', String(rfq.fabricatorId || rfq.fabricator?.id || rfq.fabricator?._id || ''))
     setValue('tools', rfq.tools || '')
     if (rfq.estimationDate) {
       setValue('estimateDate', String(rfq.estimationDate).split('T')[0])
@@ -92,16 +105,34 @@ const AddEstimation = ({ initialRfqId = null, onClose, onSuccess = () => { } }) 
     }
   }, [initialRfqId, rfqData, selectedRfqId, setValue])
 
-  const rfqOptions = rfqData
-    .filter((rfq) => rfq.wbtStatus === 'RECEIVED')
-    .map((rfq) => ({
-      label: `${rfq.projectName} - ${rfq.sender?.fabricator?.fabName || 'N/A'}`,
-      value: rfq.id
-    }))
+  const estimatedRfqIds = useMemo(() => {
+    const ids = new Set()
+    estimations.forEach((est) => {
+      const id = est.rfqId || est.rfq_id || est.rfq?.id || est.rfq?._id
+      if (id) ids.add(String(id))
+    })
+    return ids
+  }, [estimations])
+
+  const rfqOptions = useMemo(() => {
+    return rfqData
+      .filter((rfq) => {
+        const id = String(rfq.id || rfq._id || '')
+        if (initialRfqId && String(initialRfqId) === id) return true
+        return !estimatedRfqIds.has(id)
+      })
+      .map((rfq) => {
+        const fabName = rfq.sender?.fabricator?.fabName || rfq.fabricator?.fabName || 'N/A'
+        return {
+          label: `${rfq.projectName || 'Unnamed RFQ'} - ${fabName}`,
+          value: rfq.id || rfq._id
+        }
+      })
+  }, [rfqData, estimatedRfqIds, initialRfqId])
 
   const fabricatorOptions = fabricators.map((fab) => ({
     label: fab.fabName,
-    value: fab.id
+    value: fab.id || fab._id
   }))
 
   const onSubmit = async (data) => {
