@@ -191,8 +191,17 @@ const AppContent = () => {
 
     const fetchAllFabricator = async () => {
       try {
-        const response = await Service.GetAllFabricators()
-        const data = response.data || []
+        const response = await Service.GetAllFabricators(1, 100)
+        let data = []
+        if (Array.isArray(response)) {
+          data = response
+        } else if (response?.data?.data && Array.isArray(response.data.data)) {
+          data = response.data.data
+        } else if (response?.data && Array.isArray(response.data)) {
+          data = response.data
+        } else if (response?.fabricators && Array.isArray(response.fabricators)) {
+          data = response.fabricators
+        }
         dispatch(loadFabricator(data))
       } catch (err) {
         console.error('Failed to fetch fabricators:', err)

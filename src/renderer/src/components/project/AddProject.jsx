@@ -110,16 +110,42 @@ const AddProject = ({ onSuccess }) => {
     fetchClients();
   }, [watchedFabricatorId]);
 
+  const [allFabricators, setAllFabricators] = useState([]);
+
+  useEffect(() => {
+    const fetchFabricators = async () => {
+      try {
+        const res = await Service.GetAllFabricators(1, 100);
+        let list = [];
+        if (Array.isArray(res)) {
+          list = res;
+        } else if (res?.data?.data && Array.isArray(res.data.data)) {
+          list = res.data.data;
+        } else if (res?.data && Array.isArray(res.data)) {
+          list = res.data;
+        } else if (res?.fabricators && Array.isArray(res.fabricators)) {
+          list = res.fabricators;
+        }
+        setAllFabricators(list);
+      } catch (err) {
+        console.error("Failed to fetch fabricators in AddProject", err);
+      }
+    };
+    fetchFabricators();
+  }, []);
+
+  const activeFabricatorList = allFabricators.length > 0 ? allFabricators : (Array.isArray(fabricators) ? fabricators : []);
+
   const options = {
     rfqs: rfqData
       .filter((r) => !usedRfqIds.includes(r.id))
       .map((r) => ({
-        label: `${r.projectName} • ${r.fabricator?.fabName}`,
+        label: `${r.projectName} • ${r.fabricator?.fabName || r.fabricator?.name || ""}`,
         value: r.id,
       })),
-    fabricators: fabricators.map((f) => ({
-      label: f.fabName,
-      value: f.id,
+    fabricators: activeFabricatorList.map((f) => ({
+      label: f.fabName || f.name || f.fabricatorName || "Unnamed Fabricator",
+      value: String(f.id || f._id),
     })),
     departments: departmentDatas.map((d) => ({
       label: d.name,

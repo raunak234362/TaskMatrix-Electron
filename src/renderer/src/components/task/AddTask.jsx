@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   Briefcase,
   Flag,
+  Building2,
 } from "lucide-react";
 import Service from "../../api/Service";
 import Input from "../fields/input";
@@ -52,6 +53,9 @@ const AddTask = () => {
   const [projectSubmittals, setProjectSubmittals] = useState([]);
   const [overdueEmployees, setOverdueEmployees] = useState({});
   const [projectTeamMemberIds, setProjectTeamMemberIds] = useState([]);
+  const [allFabricators, setAllFabricators] = useState([]);
+  const [selectedFabricatorId, setSelectedFabricatorId] = useState("");
+  const [fabricatorProjects, setFabricatorProjects] = useState([]);
 
   const dispatch = useDispatch();
   const [projects, setProjects] = useState([]);
@@ -66,6 +70,59 @@ const AddTask = () => {
       setProjects(Array.isArray(data) ? data : []);
     });
   }, []);
+
+  // Fetch fabricators with limit 100 and search parameter support
+  const loadFabricators = async (search = "") => {
+    try {
+      const res = await Service.GetAllFabricators(1, 100, search);
+      let list = [];
+      if (Array.isArray(res)) {
+        list = res;
+      } else if (res?.data?.data && Array.isArray(res.data.data)) {
+        list = res.data.data;
+      } else if (res?.data && Array.isArray(res.data)) {
+        list = res.data;
+      } else if (res?.fabricators && Array.isArray(res.fabricators)) {
+        list = res.fabricators;
+      }
+      setAllFabricators(list);
+    } catch (err) {
+      console.error("Failed to fetch fabricators (limit 100):", err);
+      setAllFabricators([]);
+    }
+  };
+
+  useEffect(() => {
+    loadFabricators();
+  }, []);
+
+  // Fetch Projects when Fabricator changes using Service.GetProjectsByFabricatorID
+  useEffect(() => {
+    const fetchProjectsByFabricator = async () => {
+      if (selectedFabricatorId) {
+        try {
+          const res = await Service.GetProjectsByFabricatorID(selectedFabricatorId);
+          let list = [];
+          if (Array.isArray(res)) {
+            list = res;
+          } else if (res?.data && Array.isArray(res.data)) {
+            list = res.data;
+          } else if (res?.data?.projects && Array.isArray(res.data.projects)) {
+            list = res.data.projects;
+          } else if (res?.projects && Array.isArray(res.projects)) {
+            list = res.projects;
+          }
+          setFabricatorProjects(list);
+        } catch (err) {
+          console.error("Failed to fetch projects by fabricator ID:", err);
+          setFabricatorProjects([]);
+        }
+      } else {
+        setFabricatorProjects([]);
+      }
+    };
+    fetchProjectsByFabricator();
+  }, [selectedFabricatorId]);
 
   const employees = useSelector(
     (state) => state.userInfo?.staffData || [],
@@ -638,9 +695,44 @@ const AddTask = () => {
     }
   };
 
-  const projectOptions = projects.map((p) => ({
-    label: p.name,
-    value: p.id,
+  // Auto-sync fabricator if project is selected directly
+  useEffect(() => {
+    if (selectedProjectId && !selectedFabricatorId) {
+      const proj = projects.find((p) => String(p.id || p._id) === String(selectedProjectId));
+      const fabId = proj?.fabricatorID || proj?.fabricator_id || proj?.fabricatorId || proj?.fabricator?.id || proj?.fabricator?._id;
+      if (fabId) {
+        setSelectedFabricatorId(String(fabId));
+      }
+    }
+  }, [selectedProjectId, selectedFabricatorId, projects]);
+
+  const displayProjects = React.useMemo(() => {
+    if (!selectedFabricatorId) return projects;
+
+    if (fabricatorProjects.length > 0) return fabricatorProjects;
+
+    return projects.filter((p) => {
+      const fabId =
+        p.fabricatorID ||
+        p.fabricator_id ||
+        p.fabricatorId ||
+        p.fabricator?.id ||
+        p.fabricator?._id;
+      return String(fabId) === String(selectedFabricatorId);
+    });
+  }, [selectedFabricatorId, fabricatorProjects, projects]);
+
+  const fabricatorOptions = React.useMemo(() => [
+    { label: "All Fabricators", value: "" },
+    ...allFabricators.map((f) => ({
+      label: f.fabName || f.name || f.fabricatorName || "Unnamed Fabricator",
+      value: String(f.id || f._id),
+    })),
+  ], [allFabricators]);
+
+  const projectOptions = displayProjects.map((p) => ({
+    label: p.name || p.projectName || "Unnamed Project",
+    value: p.id || p._id,
   }));
 
   const milestoneOptions = milestones
@@ -767,6 +859,26 @@ const AddTask = () => {
             <section className="space-y-6">
               <SectionTitle title="Project Context" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-indigo-500" /> Fabricator
+                  </label>
+                  <Select
+                    name="fabricator_id"
+                    options={fabricatorOptions}
+                    value={selectedFabricatorId}
+                    onChange={(_, val) => {
+                      setSelectedFabricatorId(val);
+                      setValue("project_id", "");
+                      setValue("mileStone_id", "");
+                      setValue("wbsType", "");
+                      setValue("project_bundle_id", "");
+                      setSelectedWbs(null);
+                    }}
+                    placeholder="Select Fabricator"
+                  />
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                     <Briefcase className="w-4 h-4 text-indigo-500" /> Project *
