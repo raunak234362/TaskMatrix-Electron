@@ -19,12 +19,16 @@ class SubmittalsService {
   static async AddSubmittal(formData, fabricatorName, projectName) {
     const token = sessionStorage.getItem('token')
     try {
-      const response = await api.post(`submittal/?fabricatorName=${encodeURIComponent(fabricatorName)}&projectName=${encodeURIComponent(projectName)}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`
+      const response = await api.post(
+        `submittal/?fabricatorName=${encodeURIComponent(fabricatorName)}&projectName=${encodeURIComponent(projectName)}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`
+          }
         }
-      })
+      )
       console.log(response)
       return response.data
     } catch (error) {
@@ -110,11 +114,15 @@ class SubmittalsService {
   static async addSubmittalResponse(formData, fabricatorName, projectName) {
     const token = sessionStorage.getItem('token')
 
-    const response = await api.post(`submittal/responses/?fabricatorName=${encodeURIComponent(fabricatorName)}&projectName=${encodeURIComponent(projectName)}`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`
+    const response = await api.post(
+      `submittal/responses/?fabricatorName=${encodeURIComponent(fabricatorName)}&projectName=${encodeURIComponent(projectName)}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       }
-    })
+    )
 
     return response.data
   }
@@ -166,11 +174,15 @@ class SubmittalsService {
   //update  submittal version by ID
   static async updateSubmittalVersionById(id, data, fabricatorName, projectName) {
     try {
-      const response = await api.post(`submittal/${id}/versions?fabricatorName=${encodeURIComponent(fabricatorName)}&projectName=${encodeURIComponent(projectName)}`, data, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
+      const response = await api.post(
+        `submittal/${id}/versions?fabricatorName=${encodeURIComponent(fabricatorName)}&projectName=${encodeURIComponent(projectName)}`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
         }
-      })
+      )
       console.log('Submittal version updated:', response.data)
       return response.data
     } catch (error) {

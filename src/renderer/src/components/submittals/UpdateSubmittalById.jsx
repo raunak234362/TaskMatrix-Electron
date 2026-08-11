@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { X, Check, Loader2, Upload, Trash2 } from 'lucide-react'
+import { Check, Loader2, Trash2 } from 'lucide-react'
 import Service from '../../api/Service'
 import RichTextEditor from '../fields/RichTextEditor'
 import Select from 'react-select'
@@ -23,7 +23,13 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
 
   const userRole = sessionStorage.getItem('userRole')?.toUpperCase()
   const canUpdateMilestone = ['ADMIN', 'OPERATION_EXECUTIVE', 'DEPUTY_MANAGER'].includes(userRole)
-  const canApprove = ['PROJECT_MANAGER', 'OPERATION_EXECUTIVE', 'DEPT_MANAGER', 'DEPUTY_MANAGER', 'ADMIN'].includes((sessionStorage.getItem('userRole') || '').toUpperCase().trim())
+  const canApprove = [
+    'PROJECT_MANAGER',
+    'OPERATION_EXECUTIVE',
+    'DEPT_MANAGER',
+    'DEPUTY_MANAGER',
+    'ADMIN'
+  ].includes((sessionStorage.getItem('userRole') || '').toUpperCase().trim())
   const canDelete = ['ADMIN', 'OPERATION_EXECUTIVE', 'DEPUTY_MANAGER'].includes(userRole)
 
   const handleDelete = () => {
@@ -76,7 +82,6 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
     )
   }
 
-
   const [milestones, setMilestones] = useState([])
   const [fetchingMilestones, setFetchingMilestones] = useState(false)
 
@@ -102,9 +107,55 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
 
   const [selectedMileStoneIds, setSelectedMileStoneIds] = useState(initialMilestones)
 
-  const fabricators = useSelector((state) => state.fabricatorInfo.fabricatorData)
-  const fabricatorID = submittal?.fabricator_id || submittal?.fabricator?.id
+  const fabricators = useSelector(
+    (state) => state.fabricatorInfo?.fabricatorData || state.fabricatorData?.fabricatorData || []
+  )
+  const targetFabricatorID =
+    submittal?.fabricator_id ||
+    submittal?.fabricator?.id ||
+    submittal?.fabricator?._id ||
+    submittal?.fabricatorId ||
+    submittal?.project?.fabricatorID ||
+    submittal?.project?.fabricator_id ||
+    submittal?.project?.fabricator?.id ||
+    submittal?.project?.fabricator?._id
   const connectionDesignerID = submittal?.project?.connectionDesignerID
+
+  const [pocs, setPocs] = useState([])
+  const [fetchingPocs, setFetchingPocs] = useState(false)
+
+  // Fetch Fabricator POCs via API if targetFabricatorID exists
+  useEffect(() => {
+    const fetchPocs = async () => {
+      if (targetFabricatorID) {
+        try {
+          setFetchingPocs(true)
+          const res = await Service.GetFabricatorPOC(targetFabricatorID)
+          let list = []
+          if (Array.isArray(res)) {
+            list = res
+          } else if (res?.data?.pointOfContact && Array.isArray(res.data.pointOfContact)) {
+            list = res.data.pointOfContact
+          } else if (res?.pointOfContact && Array.isArray(res.pointOfContact)) {
+            list = res.pointOfContact
+          } else if (res?.data && Array.isArray(res.data)) {
+            list = res.data
+          } else if (res?.pocs && Array.isArray(res.pocs)) {
+            list = res.pocs
+          }
+          setPocs(list)
+        } catch (err) {
+          console.error('Failed to fetch fabricator POCs', err)
+          setPocs([])
+        } finally {
+          setFetchingPocs(false)
+        }
+      } else {
+        setPocs([])
+      }
+    }
+    fetchPocs()
+  }, [targetFabricatorID])
 
   useEffect(() => {
     const fetchEngineers = async () => {
@@ -148,12 +199,26 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
     fetchMilestones()
   }, [submittal?.project_id, submittal?.project?.id, canUpdateMilestone])
 
-  const selectedFabricator = fabricators?.find((f) => String(f.id) === String(fabricatorID))
+  const selectedFabricator = fabricators?.find(
+    (f) => String(f.id || f._id) === String(targetFabricatorID)
+  )
+
+  const fetchedPocOptions = pocs.map((p) => ({
+    label:
+      `${p.firstName || ''} ${p.middleName ? p.middleName + ' ' : ''}${p.lastName || ''}`.trim() ||
+      p.email ||
+      p.name ||
+      'Unnamed POC',
+    value: p.id || p._id
+  }))
+
   const pocOptions =
-    selectedFabricator?.pointOfContact?.map((p) => ({
-      label: `${p.firstName} ${p.middleName ?? ''} ${p.lastName}`,
-      value: p.id
-    })) ?? []
+    fetchedPocOptions.length > 0
+      ? fetchedPocOptions
+      : (selectedFabricator?.pointOfContact?.map((p) => ({
+          label: `${p.firstName} ${p.middleName ?? ''} ${p.lastName}`.trim(),
+          value: p.id
+        })) ?? [])
 
   const cdEngineerOptions =
     cdEngineers?.map((e) => ({
@@ -245,9 +310,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
 
       // Find milestones that were removed (not in the new selection) and were COMPLETE
       const removedCompletedMilestones = previouslyLinked.filter(
-        (m) =>
-          !selectedMileStoneIds.includes(m.id) &&
-          m.status?.toUpperCase() === 'COMPLETE'
+        (m) => !selectedMileStoneIds.includes(m.id) && m.status?.toUpperCase() === 'COMPLETE'
       )
 
       // Revert removed COMPLETE milestones back to ACTIVE
@@ -333,8 +396,34 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
         }
       }
 
-      const fabricatorName = selectedFabricator?.fabName || submittal?.fabricatorName || ''
-      const projectName = submittal?.project?.projectName || submittal?.project?.name || ''
+      const fabricatorName =
+        selectedFabricator?.fabName ||
+        selectedFabricator?.fabricatorName ||
+        selectedFabricator?.name ||
+        selectedFabricator?.companyName ||
+        selectedFabricator?.fab_name ||
+        submittal?.fabricatorName ||
+        submittal?.fabricator?.fabName ||
+        submittal?.fabricator?.name ||
+        submittal?.fabricator?.fabricatorName ||
+        submittal?.fabricator?.companyName ||
+        submittal?.project?.fabricatorName ||
+        submittal?.project?.fabricator?.fabName ||
+        submittal?.project?.fabricator?.name ||
+        submittal?.project?.fabricator?.companyName ||
+        (typeof submittal?.fabricator === 'string' ? submittal.fabricator : '') ||
+        ''
+
+      const projectName =
+        submittal?.project?.projectName ||
+        submittal?.project?.name ||
+        submittal?.projectName ||
+        (typeof submittal?.project === 'string' ? submittal.project : '') ||
+        ''
+
+      formData.append('fabricatorName', fabricatorName)
+      formData.append('projectName', projectName)
+
       await Service.updateSubmittalVersionById(submittal.id, formData, fabricatorName, projectName)
 
       onSuccess?.()
@@ -387,8 +476,9 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                 setMultipleRecipients([]) // Clear selection when switching modes
                 setSelectedMileStoneIds([]) // Clear milestone selection when switching modes
               }}
-              className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${!isCDMode ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'
-                }`}
+              className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${
+                !isCDMode ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'
+              }`}
             >
               Client
             </button>
@@ -399,8 +489,9 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                 setMultipleRecipients([]) // Clear selection when switching modes
                 setSelectedMileStoneIds([]) // Clear milestone selection when switching modes
               }}
-              className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${isCDMode ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'
-                }`}
+              className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${
+                isCDMode ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'
+              }`}
             >
               Connection Designer
             </button>
@@ -442,7 +533,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
             <Select
               isMulti
               options={activeRecipientOptions}
-              isLoading={fetchingEngineers}
+              isLoading={isCDMode ? fetchingEngineers : fetchingPocs}
               value={activeRecipientOptions.filter((opt) => multipleRecipients.includes(opt.value))}
               onChange={(options) => {
                 const values = options ? options.map((o) => o.value) : []
@@ -454,7 +545,15 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                   setDescription('')
                 }
               }}
-              placeholder={fetchingEngineers ? 'Fetching engineers...' : 'Assign recipients...'}
+              placeholder={
+                isCDMode
+                  ? fetchingEngineers
+                    ? 'Fetching engineers...'
+                    : 'Assign recipients...'
+                  : fetchingPocs
+                    ? 'Fetching POCs...'
+                    : 'Assign recipients...'
+              }
               styles={{
                 control: (base) => ({
                   ...base,
@@ -520,74 +619,76 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
             )}
           </div>
           <div className="flex gap-3">
-           
-          {canUpdateMilestone && (
-            <button
-              type="button"
-              onClick={handleSaveMilestoneOnly}
-              disabled={savingMilestone || submitting || approving}
-              className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${savingMilestone || submitting || approving
-                  ? 'bg-gray-100 text-black/20 cursor-not-allowed'
-                  : 'bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-400 active:scale-95'
+            {canUpdateMilestone && (
+              <button
+                type="button"
+                onClick={handleSaveMilestoneOnly}
+                disabled={savingMilestone || submitting || approving}
+                className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${
+                  savingMilestone || submitting || approving
+                    ? 'bg-gray-100 text-black/20 cursor-not-allowed'
+                    : 'bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-400 active:scale-95'
                 }`}
-            >
-              {savingMilestone ? (
-                <>
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Check className="w-4 h-4" />
-                  Save Milestone
-                </>
-              )}
-            </button>
-          )}
-          {canApprove && !submittal?.isAproovedByAdmin && (
-            <button
-              type="button"
-              onClick={handleApprove}
-              disabled={approving || submitting || savingMilestone}
-              className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${approving || submitting || savingMilestone
-                  ? 'bg-gray-100 text-black/20 cursor-not-allowed'
-                  : 'bg-green-50 hover:bg-green-100 text-green-800 border border-green-400 active:scale-95'
-                }`}
-            >
-              {approving ? (
-                <>
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  Approving...
-                </>
-              ) : (
-                <>
-                  <Check className="w-4 h-4" />
-                  Approve
-                </>
-              )}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={submitting || savingMilestone || approving}
-            className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${submitting || savingMilestone
-                ? 'bg-gray-100 text-black/20 cursor-not-allowed'
-                : 'bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black active:scale-95'
-              }`}
-          >
-            {submitting ? (
-              <>
-                <Loader2 className="w-3 h-3 animate-spin" />
-                Updating...
-              </>
-            ) : (
-              <>
-                <Check className="w-4 h-4" />
-                Save Update
-              </>
+              >
+                {savingMilestone ? (
+                  <>
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Save Milestone
+                  </>
+                )}
+              </button>
             )}
-          </button>
+            {canApprove && !submittal?.isAproovedByAdmin && (
+              <button
+                type="button"
+                onClick={handleApprove}
+                disabled={approving || submitting || savingMilestone}
+                className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${
+                  approving || submitting || savingMilestone
+                    ? 'bg-gray-100 text-black/20 cursor-not-allowed'
+                    : 'bg-green-50 hover:bg-green-100 text-green-800 border border-green-400 active:scale-95'
+                }`}
+              >
+                {approving ? (
+                  <>
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Approving...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Approve
+                  </>
+                )}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting || savingMilestone || approving}
+              className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${
+                submitting || savingMilestone
+                  ? 'bg-gray-100 text-black/20 cursor-not-allowed'
+                  : 'bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black active:scale-95'
+              }`}
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  Save Update
+                </>
+              )}
+            </button>
           </div>
         </footer>
       </div>
