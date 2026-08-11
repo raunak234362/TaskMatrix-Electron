@@ -241,7 +241,11 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
           let list = [];
           let totalP = 1;
 
-          if (Array.isArray(response)) {
+          if (response.status === "success" && Array.isArray(response.data)) {
+            list = response.data;
+            const meta = response.meta || {};
+            totalP = meta.totalPages || Math.ceil((meta.total || list.length) / limit) || 1;
+          } else if (Array.isArray(response)) {
             list = response;
             totalP = list.length === limit ? currentPage + 1 : currentPage;
           } else if (response.data && Array.isArray(response.data.data)) {

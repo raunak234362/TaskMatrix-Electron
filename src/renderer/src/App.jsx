@@ -162,6 +162,19 @@ const AppContent = () => {
       sessionStorage.setItem('lastName', fetchedUser.lastName)
       sessionStorage.setItem('userRole', fetchedUser.role)
       sessionStorage.setItem('designation', fetchedUser.designation)
+
+      const fabId =
+        response?.data?.FabricatorPointOfContacts?.[0]?.id ||
+        response?.data?.data?.FabricatorPointOfContacts?.[0]?.id ||
+        response?.data?.FabricatorPointOfContacts?.[0]?.fabricatorId ||
+        response?.data?.data?.FabricatorPointOfContacts?.[0]?.fabricatorId ||
+        fetchedUser?.fabricatorID ||
+        fetchedUser?.fabricatorId
+
+      if (fabId) {
+        sessionStorage.setItem('fabricatorID', fabId)
+      }
+
       dispatch(setUserData(fetchedUser))
     } catch (err) {
       console.error('User fetch failed:', err)
