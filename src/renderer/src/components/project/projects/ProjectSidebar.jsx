@@ -7,11 +7,13 @@ import {
   Clock,
   ClipboardList,
   TrendingUp,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Bot
 } from 'lucide-react'
 
 const TABS_CONFIG = [
   { key: 'overview', label: 'Overview', icon: ClipboardList },
+  { key: 'standardsChat', label: 'Standards Chatbot', icon: Bot },
   { key: 'wpr', label: 'WPR', icon: FileSpreadsheet },
   { key: 'analytics', label: 'Analytics', icon: TrendingUp },
   { key: 'teamAnalytics', label: 'Team Analytics', icon: Users },
