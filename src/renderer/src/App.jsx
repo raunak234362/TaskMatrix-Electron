@@ -18,7 +18,6 @@ const AppContent = () => {
   const userDetail = useSelector((state) => state.userData?.userData ?? state.userInfo?.userDetail)
   useNotifications()
   const userType = sessionStorage.getItem('userRole')
-
   // Connect socket when userDetail is available
   useEffect(() => {
     if (userDetail?.id) {
@@ -57,10 +56,8 @@ const AppContent = () => {
           }
         )
       }
-
       window.electron.ipcRenderer.on('update-available', handleUpdateAvailable)
       window.electron.ipcRenderer.on('update-downloaded', handleUpdateDownloaded)
-
       const handleSystemLocked = async () => {
         toast.info("System Lock Detected: Checking for active tasks...", { autoClose: 10000 })
         console.log("System lock detected")
