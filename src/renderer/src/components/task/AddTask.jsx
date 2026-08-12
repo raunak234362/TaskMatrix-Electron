@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
@@ -53,76 +52,50 @@ const AddTask = () => {
   const [projectSubmittals, setProjectSubmittals] = useState([]);
   const [overdueEmployees, setOverdueEmployees] = useState({});
   const [projectTeamMemberIds, setProjectTeamMemberIds] = useState([]);
-  const [allFabricators, setAllFabricators] = useState([]);
-  const [selectedFabricatorId, setSelectedFabricatorId] = useState("");
-  const [fabricatorProjects, setFabricatorProjects] = useState([]);
-
   const dispatch = useDispatch();
   const [projects, setProjects] = useState([]);
-  
+  const [isFetchingProjects, setIsFetchingProjects] = useState(false);
+  const searchTimeoutRef = useRef(null);
+
   const milestonesByProject = useSelector(
     (state) => state.milestoneInfo?.milestonesByProject || {},
   );
 
-  useEffect(() => {
-    Service.GetAllProjects(1, 10000).then((res) => {
-      const data = Array.isArray(res) ? res : (res?.data || []);
-      setProjects(Array.isArray(data) ? data : []);
-    });
-  }, []);
-
-  // Fetch fabricators with limit 100 and search parameter support
-  const loadFabricators = async (search = "") => {
+  const loadProjects = useCallback(async (search = "") => {
     try {
-      const res = await Service.GetAllFabricators(1, 100, search);
+      setIsFetchingProjects(true);
+      const res = await Service.GetAllProjects(1, 1000, search);
       let list = [];
       if (Array.isArray(res)) {
         list = res;
-      } else if (res?.data?.data && Array.isArray(res.data.data)) {
-        list = res.data.data;
       } else if (res?.data && Array.isArray(res.data)) {
         list = res.data;
-      } else if (res?.fabricators && Array.isArray(res.fabricators)) {
-        list = res.fabricators;
+      } else if (res?.data?.data && Array.isArray(res.data.data)) {
+        list = res.data.data;
+      } else if (res?.projects && Array.isArray(res.projects)) {
+        list = res.projects;
       }
-      setAllFabricators(list);
+      setProjects(list);
     } catch (err) {
-      console.error("Failed to fetch fabricators (limit 100):", err);
-      setAllFabricators([]);
+      console.error("Failed to fetch projects with search param:", err);
+      setProjects([]);
+    } finally {
+      setIsFetchingProjects(false);
     }
-  };
-
-  useEffect(() => {
-    loadFabricators();
   }, []);
 
-  // Fetch Projects when Fabricator changes using Service.GetProjectsByFabricatorID
   useEffect(() => {
-    const fetchProjectsByFabricator = async () => {
-      if (selectedFabricatorId) {
-        try {
-          const res = await Service.GetProjectsByFabricatorID(selectedFabricatorId);
-          let list = [];
-          if (Array.isArray(res)) {
-            list = res;
-          } else if (res?.data && Array.isArray(res.data)) {
-            list = res.data;
-          } else if (res?.data?.projects && Array.isArray(res.data.projects)) {
-            list = res.data.projects;
-          } else if (res?.projects && Array.isArray(res.projects)) {
-            list = res.projects;
-          }
-          setFabricatorProjects(list);
-        } catch (err) {
-          console.error("Failed to fetch projects by fabricator ID:", err);
-          setFabricatorProjects([]);
-        }
-      } else {
-        setFabricatorProjects([]);
-      }
-    };
-    fetchProjectsByFabricator();
-  }, [selectedFabricatorId]);
+    loadProjects("");
+  }, [loadProjects]);
+
+  const handleProjectSearch = (term) => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      loadProjects(term);
+    }, 300);
+  };
 
   const employees = useSelector(
     (state) => state.userInfo?.staffData || [],
@@ -158,7 +131,14 @@ const AddTask = () => {
   const milestones = selectedProjectId
     ? milestonesByProject[selectedProjectId] || []
     : [];
-  const selectedProject = projects.find((p) => p.id === selectedProjectId);
+  const selectedProject = React.useMemo(() => {
+    if (!selectedProjectId) return null;
+    return (
+      projects.find(
+        (p) => String(p.id || p._id || p.projectId || p.projectID) === String(selectedProjectId)
+      ) || null
+    );
+  }, [selectedProjectId, projects]);
 
   // Fetch Project Details and Milestones when project changes
   useEffect(() => {
@@ -193,16 +173,26 @@ const AddTask = () => {
         setProjectSubmittals([]);
       });
 
-      if (!milestonesByProject[selectedProjectId]) {
-        Service.GetProjectMilestoneById(selectedProjectId).then((res) => {
-          dispatch(
-            setMilestonesForProject({
-              projectId: selectedProjectId,
-              milestones: res?.data || [],
-            }),
-          );
-        });
-      }
+      Service.GetProjectMilestoneById(selectedProjectId).then((res) => {
+        let list = [];
+        if (Array.isArray(res)) {
+          list = res;
+        } else if (Array.isArray(res?.data)) {
+          list = res.data;
+        } else if (Array.isArray(res?.data?.data)) {
+          list = res.data.data;
+        } else if (Array.isArray(res?.milestones)) {
+          list = res.milestones;
+        }
+        dispatch(
+          setMilestonesForProject({
+            projectId: selectedProjectId,
+            milestones: list,
+          }),
+        );
+      }).catch((err) => {
+        console.error("Error fetching milestones for project:", err);
+      });
     } else {
       setValue("mileStone_id", "");
       setValue("wbsType", "");
@@ -213,8 +203,6 @@ const AddTask = () => {
     }
   }, [
     selectedProjectId,
-    milestonesByProject,
-    selectedProject?.projectWbs,
     dispatch,
     setValue,
   ]);
@@ -295,7 +283,7 @@ const AddTask = () => {
 
       // Auto-set Stage based on milestone stage
       const milestone = milestones.find(
-        (m) => String(m.id) === String(selectedMilestoneId),
+        (m) => String(m.id || m._id || m.milestoneId || m.mileStoneId) === String(selectedMilestoneId),
       );
       if (milestone) {
         const msStage = (milestone.stage || "").toUpperCase();
@@ -695,63 +683,51 @@ const AddTask = () => {
     }
   };
 
-  // Auto-sync fabricator if project is selected directly
-  useEffect(() => {
-    if (selectedProjectId && !selectedFabricatorId) {
-      const proj = projects.find((p) => String(p.id || p._id) === String(selectedProjectId));
-      const fabId = proj?.fabricatorID || proj?.fabricator_id || proj?.fabricatorId || proj?.fabricator?.id || proj?.fabricator?._id;
-      if (fabId) {
-        setSelectedFabricatorId(String(fabId));
-      }
-    }
-  }, [selectedProjectId, selectedFabricatorId, projects]);
+  const projectOptions = React.useMemo(() => {
+    return projects
+      .map((p) => {
+        const pId = p.id || p._id || p.projectId || p.projectID;
+        return {
+          label: p.name || p.projectName || p.title || p.project_name || "Unnamed Project",
+          value: pId ? String(pId) : "",
+        };
+      })
+      .filter((opt) => opt.value !== "");
+  }, [projects]);
 
-  const displayProjects = React.useMemo(() => {
-    if (!selectedFabricatorId) return projects;
-
-    if (fabricatorProjects.length > 0) return fabricatorProjects;
-
-    return projects.filter((p) => {
-      const fabId =
-        p.fabricatorID ||
-        p.fabricator_id ||
-        p.fabricatorId ||
-        p.fabricator?.id ||
-        p.fabricator?._id;
-      return String(fabId) === String(selectedFabricatorId);
-    });
-  }, [selectedFabricatorId, fabricatorProjects, projects]);
-
-  const fabricatorOptions = React.useMemo(() => [
-    { label: "All Fabricators", value: "" },
-    ...allFabricators.map((f) => ({
-      label: f.fabName || f.name || f.fabricatorName || "Unnamed Fabricator",
-      value: String(f.id || f._id),
-    })),
-  ], [allFabricators]);
-
-  const projectOptions = displayProjects.map((p) => ({
-    label: p.name || p.projectName || "Unnamed Project",
-    value: p.id || p._id,
-  }));
-
-  const milestoneOptions = milestones
-    .filter((m) => {
-      const hasSubmittals = projectSubmittals.some(
-        (sub) => String(sub.mileStoneId || sub.milestoneId || sub.milestone?.id) === String(m.id || m._id)
-      );
-      return !hasSubmittals;
-    })
-    .map((m) => {
-      const milestoneName = m.subject || m.name || "Unnamed Milestone";
-      const subSubjectName = m.subSubject || "";
-      const stageName = m.stage || "";
-      const labelParts = [milestoneName, subSubjectName, stageName].filter(Boolean);
-      return {
-        label: labelParts.join(" - "),
-        value: m.id,
-      };
-    });
+  const milestoneOptions = React.useMemo(() => {
+    if (!Array.isArray(milestones)) return [];
+    return milestones
+      .filter((m) => {
+        const mId = String(m.id || m._id || m.milestoneId || m.mileStoneId || "");
+        if (!mId) return false;
+        const hasSubmittals = projectSubmittals.some((sub) => {
+          const subMilestoneId = String(
+            sub.mileStoneId ||
+            sub.milestoneId ||
+            sub.milestone?.id ||
+            sub.milestone?._id ||
+            sub.mileStone?.id ||
+            sub.mileStone?._id ||
+            ""
+          );
+          return subMilestoneId === mId;
+        });
+        return !hasSubmittals;
+      })
+      .map((m) => {
+        const milestoneName = m.subject || m.name || m.title || "Unnamed Milestone";
+        const subSubjectName = m.subSubject || "";
+        const stageName = m.stage || "";
+        const labelParts = [milestoneName, subSubjectName, stageName].filter(Boolean);
+        const mId = m.id || m._id || m.milestoneId || m.mileStoneId;
+        return {
+          label: labelParts.join(" - "),
+          value: mId ? String(mId) : "",
+        };
+      })
+      .filter((opt) => opt.value !== "");
+  }, [milestones, projectSubmittals]);
 
   const wbsTypeOptions = [
     { label: "Modeling", value: "modeling" },
@@ -859,27 +835,9 @@ const AddTask = () => {
             <section className="space-y-6">
               <SectionTitle title="Project Context" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-indigo-500" /> Fabricator
-                  </label>
-                  <Select
-                    name="fabricator_id"
-                    options={fabricatorOptions}
-                    value={selectedFabricatorId}
-                    onChange={(_, val) => {
-                      setSelectedFabricatorId(val);
-                      setValue("project_id", "");
-                      setValue("mileStone_id", "");
-                      setValue("wbsType", "");
-                      setValue("project_bundle_id", "");
-                      setSelectedWbs(null);
-                    }}
-                    placeholder="Select Fabricator"
-                  />
-                </div>
 
-                <div className="space-y-2">
+
+                <div className="space-y-2 md:col-span-2">
                   <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                     <Briefcase className="w-4 h-4 text-indigo-500" /> Project *
                   </label>
@@ -893,7 +851,8 @@ const AddTask = () => {
                         options={projectOptions}
                         value={field.value}
                         onChange={(_, val) => field.onChange(val)}
-                        placeholder="Select Project"
+                        onSearchChange={handleProjectSearch}
+                        placeholder={isFetchingProjects ? "Loading Projects..." : "Select Project"}
                       />
                     )}
                   />

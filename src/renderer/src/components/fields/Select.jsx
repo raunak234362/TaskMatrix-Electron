@@ -11,6 +11,7 @@ const Select = ({
   menuClassName = '',
   optionClassName = '',
   onChange,
+  onSearchChange,
   placeholder,
   value,
   showSearch = true
@@ -73,9 +74,12 @@ const Select = ({
 
   // Handle search input
   const handleSearch = (event) => {
-    const term = event.target.value.toLowerCase()
+    const term = event.target.value
     setSearchTerm(term)
-    const filtered = options.filter((option) => option && option.label.toLowerCase().includes(term))
+    if (onSearchChange) {
+      onSearchChange(term)
+    }
+    const filtered = options.filter((option) => option && option.label.toLowerCase().includes(term.toLowerCase()))
     setFilteredOptions(filtered)
   }
 
