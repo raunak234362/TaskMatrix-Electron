@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { createPortal } from "react-dom";
 import Service from "../../../api/Service";
 import Input from "../../fields/input";
 import { toast } from "react-toastify";
@@ -97,14 +98,14 @@ const AddBranch = ({ fabricatorId, onClose, fabricatorName, onSuccess }) => {
     }
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[11000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden relative border border-gray-100 animate-in fade-in zoom-in duration-200">
 
         {/* Header Section */}
         <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-white">
           <div>
-            <h2 className="text-2xl font-black text-gray-800 tracking-tight flex items-center gap-3">
+            <h2 className="text-2xl font-semibold text-gray-800 tracking-tight flex items-center gap-3">
              
               Add New Branch
             </h2>
@@ -309,20 +310,14 @@ const AddBranch = ({ fabricatorId, onClose, fabricatorName, onSuccess }) => {
 
             {/* Submit Container */}
             <div className="flex justify-end gap-3 pt-6 border-t border-gray-50 bg-white">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-8 py-3.5 bg-gray-50 border hover:bg-gray-100 text-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all"
-              >
-                Cancel
-              </button>
+           
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-10 py-3.5 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-sm disabled:opacity-50 transition-all flex items-center gap-3 active:scale-95"
+                className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-600 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm disabled:opacity-50 flex items-center gap-2 active:scale-95"
               >
                 {isSubmitting ? (
-                  <Loader2 className="animate-spin w-4 h-4" />
+                  <Loader2 className="animate-spin w-4 h-4 text-black" />
                 ) : (
                   "Add Branch"
                 )}
@@ -331,7 +326,8 @@ const AddBranch = ({ fabricatorId, onClose, fabricatorName, onSuccess }) => {
           </form>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

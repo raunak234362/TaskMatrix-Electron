@@ -1,5 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import { createPortal } from "react-dom";
 import { toast } from "react-toastify";
 import Button from "../../fields/Button";
 import Service from "../../../api/Service";
@@ -51,7 +52,7 @@ const AddClients = ({ fabricator, onClose }) => {
   const selectedRole = watch("role");
   const selectedRoleOption = roleOptions.find((opt) => opt.value === selectedRole) || null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[11000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden relative border border-gray-100 animate-in fade-in zoom-in duration-200">
 
@@ -230,7 +231,8 @@ const AddClients = ({ fabricator, onClose }) => {
           </form>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

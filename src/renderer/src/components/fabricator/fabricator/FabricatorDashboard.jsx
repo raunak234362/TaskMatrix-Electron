@@ -221,7 +221,7 @@ const FabricatorDashboard = ({ fabricator }) => {
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
               >
-                <option value="">All Statuses</option>
+                <option value="">All Status</option>
                 {statuses.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>

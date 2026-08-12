@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import Button from "../../fields/Button";
 import { X, Users, UserPlus, Building2 } from "lucide-react";
 import AddClients from "./AddClient";
@@ -96,25 +97,23 @@ const AllClients = ({ fabricator, onClose }) => {
     []
   );
 
-  return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[10100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-6xl bg-white rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-gray-100 animate-in fade-in zoom-in duration-200">
 
         {/* Header Section */}
         <div className="p-8 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white">
           <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 shadow-sm border border-gray-100">
-              <Users size={32} strokeWidth={1.5} />
-            </div>
+            
             <div>
-              <h2 className="text-2xl font-black text-gray-900 tracking-tight uppercase">Fabricator POCs</h2>
+              <h2 className="text-2xl font-black text-black tracking-tight uppercase">Fabricator POCs</h2>
               <div className="flex items-center gap-3 mt-1">
-                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
+                <span className="text-sm font-bold text-black uppercase tracking-wider flex items-center gap-1.5">
                   <Building2 size={12} />
                   {fabricator.fabName}
                 </span>
-                <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                <span className="w-1 h-1 rounded-full bg-black"></span>
+                <span className="text-sm font-bold text-black uppercase tracking-wider">
                   {clients.length} CONNECTED ENTITIES
                 </span>
               </div>
@@ -124,7 +123,7 @@ const AllClients = ({ fabricator, onClose }) => {
           <div className="flex items-center gap-3">
             <button
               onClick={openAddClient}
-              className="px-6 py-2.5 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 active:scale-95 shadow-sm"
+              className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-600 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm flex items-center gap-1.5 active:scale-95"
             >
               <UserPlus size={16} />
               Add POC
@@ -164,7 +163,8 @@ const AllClients = ({ fabricator, onClose }) => {
           <AddClients fabricator={fabricator} onClose={closeAddClient} />
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
