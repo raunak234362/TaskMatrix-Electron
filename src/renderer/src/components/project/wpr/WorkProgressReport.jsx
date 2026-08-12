@@ -212,6 +212,66 @@ const WorkProgressReport = ({
     }
   };
 
+  const extractRfiNumber = (rfi) => {
+    const text = rfi.rfiNo || rfi.subject || "";
+    const numMatch = text.match(/RFI\s*#?\s*-?\s*(\d+)/i) || text.match(/#(\d+)/) || text.match(/(\d+)/);
+    if (numMatch) {
+      return { type: "numeric", val: parseInt(numMatch[1], 10) };
+    }
+    const alphaMatch = text.match(/RFI\s*#?\s*-?\s*([A-Za-z]+)/i);
+    if (alphaMatch) {
+      const str = alphaMatch[1].toUpperCase();
+      let num = 0;
+      for (let i = 0; i < str.length; i++) {
+        num = num * 26 + (str.charCodeAt(i) - 64);
+      }
+      return { type: "alpha", val: num };
+    }
+    return { type: "other", val: text.toLowerCase() };
+  };
+
+  const sortRfis = (list) => {
+    return [...list].sort((a, b) => {
+      const numA = extractRfiNumber(a);
+      const numB = extractRfiNumber(b);
+
+      if (numA.type === numB.type) {
+        if (typeof numA.val === "number" && typeof numB.val === "number") {
+          return numA.val - numB.val;
+        }
+        return String(numA.val).localeCompare(String(numB.val));
+      }
+      const order = { numeric: 1, alpha: 2, other: 3 };
+      return (order[numA.type] || 3) - (order[numB.type] || 3);
+    });
+  };
+
+  const sortScheduleRowsByDate = (rows) => {
+    return [...rows].sort((a, b) => {
+      const getEarliestTime = (row) => {
+        if (row.startDate && row.startDate !== "—") {
+          const t = new Date(row.startDate).getTime();
+          if (!isNaN(t)) return t;
+        }
+        if (row.unifiedEntries && row.unifiedEntries.length > 0) {
+          for (const entry of row.unifiedEntries) {
+            const raw = entry.date || entry.ifaDate || entry.ifcDate || entry.corDate || entry.bfaDate;
+            if (raw && raw !== "—") {
+              const t = new Date(raw).getTime();
+              if (!isNaN(t)) return t;
+            }
+          }
+        }
+        return Infinity;
+      };
+
+      const timeA = getEarliestTime(a);
+      const timeB = getEarliestTime(b);
+      if (timeA !== timeB) return timeA - timeB;
+      return String(a.phase || "").localeCompare(String(b.phase || ""));
+    });
+  };
+
   // Sync RFIs
   useEffect(() => {
     let rfiArray = [];
@@ -223,8 +283,13 @@ const WorkProgressReport = ({
       rfiArray = rfiData["show rfi"];
     }
 
-    // Hide connection design RFIs
-    rfiArray = rfiArray.filter(r => !(r.isConnectionDesign === true || String(r.isConnectionDesign).toLowerCase() === "true"));
+    // Hide connection design RFIs (both flag and RFI#00A pattern)
+    rfiArray = rfiArray.filter(r => {
+      if (r.isConnectionDesign === true || String(r.isConnectionDesign).toLowerCase() === "true") return false;
+      const text = r.subject || r.rfiNo || r.serialNo || "";
+      if (/RFI\s*#?\s*\d*[A-Za-z]+/i.test(text)) return false;
+      return true;
+    });
 
     const formattedRFIs = rfiArray.map((r, index) => {
       const flattenResponses = (list) => {
@@ -303,14 +368,23 @@ const WorkProgressReport = ({
       };
     });
 
-    setRawRfis(formattedRFIs);
+    setRawRfis(sortRfis(formattedRFIs));
   }, [rfiData]);
 
   // Sync Schedule – one row per milestone (with stacked submittal entries), plus standalone submittals
   useEffect(() => {
     const processSchedule = async () => {
+      const isConnectionDesignerSubmittal = (sub) => {
+        if (!sub) return false;
+        if (sub.isConnectionDesign === true || String(sub.isConnectionDesign).toLowerCase() === "true") return true;
+        const text = sub.subject || sub.serialNo || sub.name || "";
+        if (/TR\s*#?\s*\d*[A-Za-z]+/i.test(text)) return true;
+        if (/CONNECTION DESIGN/i.test(text)) return true;
+        return false;
+      };
+
       // Hide connection design submittals
-      const filteredSubmittalData = (submittalData || []).filter(sub => !(sub.isConnectionDesign === true || String(sub.isConnectionDesign).toLowerCase() === "true"));
+      const filteredSubmittalData = (submittalData || []).filter(sub => !isConnectionDesignerSubmittal(sub));
 
       // Fetch BFA details for submittals marked as BFA_SENT
       const bfaCache = {};
@@ -508,9 +582,23 @@ const WorkProgressReport = ({
       // (e.g. two milestones both named "ANCHOR BOLT" collapse into one row)
       const sortByDate = (entries) =>
         [...entries].sort((a, b) => {
-          const da = a.date && a.date !== "—" ? new Date(a.date) : new Date(0);
-          const db = b.date && b.date !== "—" ? new Date(b.date) : new Date(0);
-          return da - db;
+          const parseEntryDate = (e) => {
+            const raw = e.date || e.ifaDate || e.ifcDate || e.corDate || e.bfaDate;
+            if (raw && raw !== "—") {
+              const t = new Date(raw).getTime();
+              if (!isNaN(t)) return t;
+            }
+            return 0;
+          };
+          const da = parseEntryDate(a);
+          const db = parseEntryDate(b);
+          if (da !== db) return da - db;
+
+          const matchA = a.subject?.match(/\d+/);
+          const matchB = b.subject?.match(/\d+/);
+          const numA = matchA ? parseInt(matchA[0], 10) : 0;
+          const numB = matchB ? parseInt(matchB[0], 10) : 0;
+          return numA - numB;
         });
 
       const mergeMap = new Map();
@@ -562,7 +650,8 @@ const WorkProgressReport = ({
         };
       });
 
-      setRawScheduleRows(mergedRows);
+      const sortedRows = sortScheduleRowsByDate(mergedRows);
+      setRawScheduleRows(sortedRows);
     };
 
     processSchedule();
@@ -649,22 +738,26 @@ const WorkProgressReport = ({
   }, [selectedWeek, projectWeeks]);
 
   const filteredRfis = useMemo(() => {
-    if (!activeWeekRange) return rawRfis;
-    return rawRfis.filter(r =>
-      isWithinWeek(r.sentDate, activeWeekRange.start, activeWeekRange.end) ||
-      isWithinWeek(r.responseReceivedDate, activeWeekRange.start, activeWeekRange.end)
-    );
+    const list = activeWeekRange
+      ? rawRfis.filter(r =>
+          isWithinWeek(r.sentDate, activeWeekRange.start, activeWeekRange.end) ||
+          isWithinWeek(r.responseReceivedDate, activeWeekRange.start, activeWeekRange.end)
+        )
+      : rawRfis;
+    return sortRfis(list);
   }, [rawRfis, activeWeekRange]);
 
   const filteredScheduleRows = useMemo(() => {
-    if (!activeWeekRange) return rawScheduleRows;
-    return rawScheduleRows.filter(s =>
-      isWithinWeek(s.startDate, activeWeekRange.start, activeWeekRange.end) ||
-      isWithinWeek(s.ifaSubDate, activeWeekRange.start, activeWeekRange.end) ||
-      isWithinWeek(s.bfaRecdDate, activeWeekRange.start, activeWeekRange.end) ||
-      isWithinWeek(s.ifcSubDate, activeWeekRange.start, activeWeekRange.end) ||
-      isWithinWeek(s.corSubDate, activeWeekRange.start, activeWeekRange.end)
-    );
+    const list = activeWeekRange
+      ? rawScheduleRows.filter(s =>
+          isWithinWeek(s.startDate, activeWeekRange.start, activeWeekRange.end) ||
+          isWithinWeek(s.ifaSubDate, activeWeekRange.start, activeWeekRange.end) ||
+          isWithinWeek(s.bfaRecdDate, activeWeekRange.start, activeWeekRange.end) ||
+          isWithinWeek(s.ifcSubDate, activeWeekRange.start, activeWeekRange.end) ||
+          isWithinWeek(s.corSubDate, activeWeekRange.start, activeWeekRange.end)
+        )
+      : rawScheduleRows;
+    return sortScheduleRowsByDate(list);
   }, [rawScheduleRows, activeWeekRange]);
 
   const filteredCoRows = useMemo(() => {

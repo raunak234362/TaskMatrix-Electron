@@ -1,0 +1,556 @@
+import React, { useState, useEffect, useRef } from 'react'
+import {
+  Bot,
+  Send,
+  UploadCloud,
+  FileText,
+  RefreshCw,
+  Sparkles,
+  User,
+  BookOpen,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  X,
+  Paperclip,
+  Image as ImageIcon,
+  ExternalLink,
+  Maximize2
+} from 'lucide-react'
+import Service from '../../../api/Service'
+import { toast } from 'react-toastify'
+
+
+
+const StandardsChatbot = ({ projectId, project }) => {
+  const [messages, setMessages] = useState([])
+  const [loadingHistory, setLoadingHistory] = useState(true)
+  const [query, setQuery] = useState('')
+  const [sending, setSending] = useState(false)
+
+  // Upload modal state
+  const [showUploadModal, setShowUploadModal] = useState(false)
+  const [uploadFile, setUploadFile] = useState(null)
+  const [sourceType, setSourceType] = useState('FABRICATOR')
+  const [uploading, setUploading] = useState(false)
+
+  // Image viewer modal state
+  const [imageModal, setImageModal] = useState({
+    isOpen: false,
+    url: '',
+    loading: false,
+    title: ''
+  })
+
+  const chatEndRef = useRef(null)
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const fetchHistory = async () => {
+    if (!projectId) return
+    try {
+      setLoadingHistory(true)
+      const res = await Service.GetStandardsChatHistory(projectId)
+
+      // Normalize history data into array format
+      let historyList = []
+      if (Array.isArray(res)) {
+        historyList = res
+      } else if (res && Array.isArray(res.data)) {
+        historyList = res.data
+      } else if (res && Array.isArray(res.history)) {
+        historyList = res.history
+      } else if (res && typeof res === 'object') {
+        const foundArr = Object.values(res).find(Array.isArray)
+        if (foundArr) historyList = foundArr
+      }
+
+      setMessages(historyList)
+    } catch (err) {
+      console.error('Error loading standards chat history:', err)
+      toast.error('Failed to load chat history')
+    } finally {
+      setLoadingHistory(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchHistory()
+  }, [projectId])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, sending])
+
+  const handleSend = async (queryTextToSend) => {
+    const textToSubmit = (queryTextToSend || query).trim()
+    if (!textToSubmit || sending) return
+
+    setSending(true)
+    const tempUserMsg = {
+      id: `temp-${Date.now()}`,
+      queryText: textToSubmit,
+      createdAt: new Date().toISOString(),
+      answers: []
+    }
+
+    setMessages((prev) => [...prev, tempUserMsg])
+    if (!queryTextToSend) setQuery('')
+
+    try {
+      const response = await Service.ChatWithStandards(projectId, textToSubmit)
+      console.log('Standards chat response:', response)
+
+      // Format response to message item format
+      const formattedResponse = {
+        id: response?.id || `msg-${Date.now()}`,
+        projectId: response?.projectId || projectId,
+        queryText: response?.queryText || textToSubmit,
+        createdAt: response?.createdAt || new Date().toISOString(),
+        answers: Array.isArray(response?.answers)
+          ? response.answers
+          : response?.answers
+          ? [response.answers]
+          : []
+      }
+
+      setMessages((prev) => {
+        // Replace temp msg or append
+        const filtered = prev.filter((m) => m.id !== tempUserMsg.id)
+        return [...filtered, formattedResponse]
+      })
+    } catch (err) {
+      console.error('Error sending query to standards chat:', err)
+      toast.error('Failed to get answer from standards assistant')
+      setMessages((prev) => prev.filter((m) => m.id !== tempUserMsg.id))
+    } finally {
+      setSending(false)
+    }
+  }
+
+  const handleOpenReferenceImage = async (imgPath, imgIdx, answer) => {
+    const pageNum = answer?.anchorPageStart || answer?.citationPageStart || ''
+    const title = `Reference Image ${imgIdx + 1}${pageNum ? ` (Page ${pageNum})` : ''}`
+
+    setImageModal({
+      isOpen: true,
+      url: '',
+      loading: true,
+      title
+    })
+
+    try {
+      const blob = await Service.GetStandardImageBlob(imgPath)
+      const objectUrl = window.URL.createObjectURL(blob)
+      setImageModal({
+        isOpen: true,
+        url: objectUrl,
+        loading: false,
+        title
+      })
+    } catch (err) {
+      console.error('Error opening reference image:', err)
+      toast.error('Failed to load reference image from server')
+      setImageModal({ isOpen: false, url: '', loading: false, title: '' })
+    }
+  }
+
+  const handleFileUpload = async (e) => {
+    e.preventDefault()
+    if (!uploadFile) {
+      toast.error('Please select a PDF file')
+      return
+    }
+
+    try {
+      setUploading(true)
+      const formData = new FormData()
+      formData.append('file', uploadFile)
+      formData.append('sourceType', sourceType || 'FABRICATOR')
+      formData.append('projectId', projectId)
+
+      const fabricatorId =
+        project?.fabricatorID ||
+        project?.fabricator?.id ||
+        project?.fabricator_id ||
+        project?.fabricatorId ||
+        ''
+      if (fabricatorId) {
+        formData.append('fabricatorId', fabricatorId)
+      }
+
+      await Service.UploadStandard(formData)
+      toast.success('Standard document uploaded successfully!')
+      setShowUploadModal(false)
+      setUploadFile(null)
+      setSourceType('FABRICATOR')
+      fetchHistory()
+    } catch (err) {
+      console.error('Error uploading standard file:', err)
+      toast.error(err?.response?.data?.message || 'Failed to upload standard document')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col h-[750px] bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      {/* Top Bar Header */}
+      <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-emerald-900 via-green-800 to-emerald-950 text-white shadow-md shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20">
+            <Bot className="w-6 h-6 text-emerald-300" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-lg tracking-wide text-white">
+                Standards AI Assistant
+              </h3>
+              <span className="flex items-center gap-1 text-[11px] bg-emerald-500/30 text-emerald-200 px-2 py-0.5 rounded-full border border-emerald-400/30 font-medium">
+                <Sparkles className="w-3 h-3 text-emerald-300" /> RAG Powered
+              </span>
+            </div>
+            <p className="text-xs text-emerald-100/80">
+              Query vector database standards & specs for {project?.name || 'this project'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowUploadModal(true)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-md transition-all shadow-sm cursor-pointer border border-emerald-400/40"
+          >
+            <UploadCloud className="w-4 h-4" />
+            Upload Standard PDF
+          </button>
+          <button
+            onClick={fetchHistory}
+            disabled={loadingHistory}
+            className="p-2 text-emerald-200 hover:text-white hover:bg-white/10 rounded-md transition-all cursor-pointer"
+            title="Refresh History"
+          >
+            <RefreshCw className={`w-4 h-4 ${loadingHistory ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+      </div>
+
+      {/* Main Chat Message Container */}
+      <div className="flex-1 p-6 overflow-y-auto bg-slate-50/60 space-y-6">
+        {loadingHistory ? (
+          <div className="flex flex-col items-center justify-center h-full text-gray-500 gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+            <p className="text-sm font-medium">Loading project standards chat history...</p>
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center max-w-md mx-auto py-12">
+            <div className="w-16 h-16 bg-emerald-100/80 text-emerald-700 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
+              <BookOpen className="w-8 h-8" />
+            </div>
+            <h4 className="text-lg font-bold text-gray-800 mb-1">No Standards Chat Yet</h4>
+            <p className="text-xs text-gray-600 mb-2 leading-relaxed">
+              Ask any question regarding structural steel standards, AISC specifications, welding codes, or uploaded project standards.
+            </p>
+          </div>
+        ) : (
+          messages.map((item, index) => {
+            const hasAnswers = Array.isArray(item.answers) && item.answers.length > 0
+            return (
+              <div key={item.id || index} className="space-y-4 max-w-4xl mx-auto">
+                {/* User Question */}
+                <div className="flex items-start justify-end gap-3">
+                  <div className="max-w-2xl bg-emerald-700 text-white p-4 rounded-2xl rounded-tr-xs shadow-sm">
+                    <p className="text-sm font-medium whitespace-pre-wrap">{item.queryText}</p>
+                    <span className="text-[10px] text-emerald-200/80 mt-1 block text-right">
+                      {item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                    </span>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-emerald-800 text-white flex items-center justify-center shrink-0 text-xs font-bold shadow-xs">
+                    <User className="w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* Bot Answer(s) */}
+                {hasAnswers ? (
+                  item.answers.map((answer, aIdx) => (
+                    <div key={answer.id || aIdx} className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-600 to-green-800 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
+                        <Bot className="w-4 h-4 text-emerald-200" />
+                      </div>
+                      <div className="flex-1 bg-white border border-gray-200 p-5 rounded-2xl rounded-tl-xs shadow-sm space-y-3">
+                        {/* Answer Text */}
+                        <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap font-sans">
+                          {answer.answerText || 'No answer text provided.'}
+                        </div>
+
+                        {/* Citation Badges & Metadata */}
+                        {(answer.citationPdfName || answer.sourceType || answer.chunkType) && (
+                          <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center gap-2 text-xs">
+                            {answer.citationPdfName && (
+                              <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-3 py-1 rounded-md border border-emerald-200/60 font-medium">
+                                <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Citation: <strong className="font-semibold">{answer.citationPdfName}</strong></span>
+                                {(answer.citationPageStart !== undefined && answer.citationPageStart !== null) && (
+                                  <span className="ml-1 text-emerald-700 bg-emerald-100/80 px-1.5 py-0.5 rounded text-[11px]">
+                                    Pg {answer.citationPageStart}
+                                    {answer.citationPageEnd && answer.citationPageEnd !== answer.citationPageStart ? `-${answer.citationPageEnd}` : ''}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            {answer.sourceType && (
+                              <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-[11px] font-semibold uppercase">
+                                Source: {answer.sourceType}
+                              </span>
+                            )}
+
+                            {answer.chunkType && (
+                              <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-[11px] font-semibold">
+                                Chunk: {answer.chunkType}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Image Attachments if present */}
+                        {Array.isArray(answer.imagePaths) && answer.imagePaths.length > 0 && (
+                          <div className="pt-2 flex flex-wrap gap-2">
+                            {answer.imagePaths.map((imgPath, imgIdx) => (
+                              <button
+                                key={imgIdx}
+                                type="button"
+                                onClick={() => handleOpenReferenceImage(imgPath, imgIdx, answer)}
+                                className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-300 transition-all cursor-pointer shadow-2xs group"
+                              >
+                                <ImageIcon className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
+                                <span>View Reference Image {imgIdx + 1}</span>
+                                <Maximize2 className="w-3 h-3 text-emerald-500 ml-0.5" />
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  // Pending or fallback answer display
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-600 to-green-800 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
+                      <Bot className="w-4 h-4 text-emerald-200" />
+                    </div>
+                    <div className="bg-white border border-gray-200 p-4 rounded-2xl rounded-tl-xs shadow-sm flex items-center gap-2 text-xs text-gray-500">
+                      <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+                      <span>Synthesizing answer from project standards vector DB...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })
+        )}
+
+        {/* Sending state spinner */}
+        {sending && (
+          <div className="flex items-start gap-3 max-w-4xl mx-auto">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-600 to-green-800 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
+              <Bot className="w-4 h-4 text-emerald-200" />
+            </div>
+            <div className="bg-white border border-gray-200 p-4 rounded-2xl rounded-tl-xs shadow-sm flex items-center gap-3">
+              <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+              <span className="text-xs font-medium text-gray-600">
+                Searching project standards & generating response...
+              </span>
+            </div>
+          </div>
+        )}
+        <div ref={chatEndRef} />
+      </div>
+
+
+
+      {/* Input Form Bar */}
+      <div className="p-4 bg-white border-t border-gray-200 shrink-0">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleSend()
+          }}
+          className="flex items-center gap-3 max-w-4xl mx-auto"
+        >
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Ask a question about project standards, codes, or specifications..."
+              disabled={sending}
+              className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white text-gray-900 transition-all font-medium placeholder-gray-400"
+            />
+            <button
+              type="submit"
+              disabled={!query.trim() || sending}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg transition-all disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed shadow-xs"
+            >
+              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Upload Standard PDF Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-xl shadow-xl border border-gray-200 max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 bg-emerald-800 text-white">
+              <div className="flex items-center gap-2">
+                <UploadCloud className="w-5 h-5 text-emerald-300" />
+                <h4 className="font-bold text-base">Upload Standard Document</h4>
+              </div>
+              <button
+                onClick={() => setShowUploadModal(false)}
+                className="text-emerald-200 hover:text-white p-1 rounded-md hover:bg-emerald-700 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleFileUpload} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  Source Type
+                </label>
+                <select
+                  value={sourceType}
+                  onChange={(e) => setSourceType(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none font-medium text-gray-800"
+                  required
+                >
+                  <option value="FABRICATOR">FABRICATOR (Default)</option>
+                  <option value="GENERAL">GENERAL</option>
+                  <option value="PROJECT_STANDARD">PROJECT_STANDARD</option>
+                  <option value="AISC">AISC</option>
+                  <option value="AWS">AWS</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  PDF Standard File
+                </label>
+                <div className="border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-lg p-6 text-center bg-gray-50 hover:bg-emerald-50/30 transition-all cursor-pointer relative">
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={(e) => setUploadFile(e.target.files[0] || null)}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    required
+                  />
+                  <Paperclip className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                  {uploadFile ? (
+                    <div className="text-xs font-semibold text-emerald-700 truncate">
+                      Selected: {uploadFile.name}
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-xs font-medium text-gray-600">
+                        Click to select PDF document
+                      </p>
+                      <p className="text-[10px] text-gray-400 mt-1">Accepts PDF format up to 50MB</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-4 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowUploadModal(false)}
+                  className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-md transition-colors uppercase"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={uploading || !uploadFile}
+                  className="flex items-center gap-2 px-5 py-2 text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white rounded-md transition-all uppercase tracking-wide disabled:opacity-50 cursor-pointer shadow-sm"
+                >
+                  {uploading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud className="w-4 h-4" />
+                      Upload File
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reference Image Viewer Modal */}
+      {imageModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-xl shadow-2xl border border-gray-200 max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 bg-emerald-900 text-white shrink-0">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="w-5 h-5 text-emerald-300" />
+                <h4 className="font-bold text-base">{imageModal.title}</h4>
+              </div>
+              <div className="flex items-center gap-2">
+                {imageModal.url && (
+                  <button
+                    type="button"
+                    onClick={() => window.open(imageModal.url, '_blank', 'noopener,noreferrer')}
+                    className="flex items-center gap-1.5 text-xs font-semibold bg-emerald-700 hover:bg-emerald-600 px-3 py-1.5 rounded-md text-white transition-colors cursor-pointer"
+                    title="Open in New Tab"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" /> Open in New Tab
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setImageModal({ isOpen: false, url: '', loading: false, title: '' })}
+                  className="text-emerald-200 hover:text-white p-1 rounded-md hover:bg-emerald-800 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body / Image preview */}
+            <div className="flex-1 p-6 overflow-auto bg-slate-900 flex items-center justify-center min-h-[400px]">
+              {imageModal.loading ? (
+                <div className="flex flex-col items-center gap-3 text-emerald-400">
+                  <Loader2 className="w-8 h-8 animate-spin" />
+                  <p className="text-xs font-medium">Loading authenticated reference image...</p>
+                </div>
+              ) : imageModal.url ? (
+                <img
+                  src={imageModal.url}
+                  alt={imageModal.title}
+                  className="max-w-full max-h-[70vh] object-contain rounded border border-slate-700 shadow-lg"
+                />
+              ) : (
+                <p className="text-xs text-red-400">Failed to load image preview.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default StandardsChatbot
+

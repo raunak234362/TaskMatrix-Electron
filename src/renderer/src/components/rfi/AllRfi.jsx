@@ -371,6 +371,9 @@ const AllRFI = ({ rfiData, onUpdate }) => {
       item.isConnectionDesign === true || String(item.isConnectionDesign).toLowerCase() === 'true'
     if (isCDFlag) return true
 
+    const text = item.subject || item.rfiNo || item.rfiNumber || item.serialNo || ''
+    if (/RFI\s*#?\s*\d*[A-Za-z]+/i.test(text)) return true
+
     if (item.sender && isCDUser(item.sender)) return true
 
     if (item.recepients && isCDUser(item.recepients)) return true
@@ -379,6 +382,40 @@ const AllRFI = ({ rfiData, onUpdate }) => {
       return true
 
     return false
+  }
+
+  const extractRfiNumber = (item) => {
+    const text = item.subject || item.rfiNo || item.rfiNumber || item.name || ''
+    const numMatch = text.match(/RFI\s*#?\s*-?\s*(\d+)/i) || text.match(/#(\d+)/) || text.match(/(\d+)/)
+    if (numMatch) {
+      return { type: 'numeric', val: parseInt(numMatch[1], 10) }
+    }
+    const alphaMatch = text.match(/RFI\s*#?\s*-?\s*([A-Za-z]+)/i)
+    if (alphaMatch) {
+      const str = alphaMatch[1].toUpperCase()
+      let num = 0
+      for (let i = 0; i < str.length; i++) {
+        num = num * 26 + (str.charCodeAt(i) - 64)
+      }
+      return { type: 'alpha', val: num }
+    }
+    return { type: 'other', val: text.toLowerCase() }
+  }
+
+  const sortRfis = (list) => {
+    return [...list].sort((a, b) => {
+      const numA = extractRfiNumber(a)
+      const numB = extractRfiNumber(b)
+
+      if (numA.type === numB.type) {
+        if (typeof numA.val === 'number' && typeof numB.val === 'number') {
+          return numA.val - numB.val
+        }
+        return String(numA.val).localeCompare(String(numB.val))
+      }
+      const order = { numeric: 1, alpha: 2, other: 3 }
+      return (order[numA.type] || 3) - (order[numB.type] || 3)
+    })
   }
 
   const generalRfis = rfis.filter((item) => {
@@ -394,11 +431,13 @@ const AllRFI = ({ rfiData, onUpdate }) => {
 
   const displayedRfis = activeTab === 'CONNECTION_DESIGNER' ? connectionDesignerRfis : generalRfis
 
-  const finalRfis = displayedRfis.filter(
+  const filteredRfis = displayedRfis.filter(
     (item) =>
       !searchQuery ||
       (item.subject && item.subject.toLowerCase().includes(searchQuery.toLowerCase()))
   )
+
+  const finalRfis = sortRfis(filteredRfis)
 
   // ✅ Empty state and Render DataTable
   return (

@@ -24,19 +24,21 @@ const ChatSidebar = ({
         const response = await Service.AllChats();
         const rawList = Array.isArray(response)
           ? response
-          : response?.data;
+          : response?.data || [];
         const normalized = (Array.isArray(rawList) ? rawList : [])
           .map((chat) => {
-            if (!chat?.group?.id || !chat?.group?.name) {
+            const groupId = chat?.group?.id || chat?.id;
+            const groupName = chat?.group?.name || chat?.name || chat?.groupName;
+            if (!groupId || !groupName) {
               return null;
             }
             const fallbackTimestamp =
-              chat?.updatedAt ||
               chat?.timestamp ||
+              chat?.updatedAt ||
               chat?.createdAt ||
               chat?.group?.updatedAt ||
               chat?.group?.createdAt ||
-              new Date().toISOString();
+              null;
             const unread =
               typeof chat?.unread === "number"
                 ? chat.unread
@@ -44,21 +46,35 @@ const ChatSidebar = ({
                   ? chat.unreadCount
                   : undefined;
 
+            const lastMsg =
+              typeof chat?.lastMessage === "string"
+                ? chat.lastMessage
+                : typeof chat?.lastMessage?.content === "string"
+                  ? chat.lastMessage.content
+                  : typeof chat?.lastMessage?.text === "string"
+                    ? chat.lastMessage.text
+                    : typeof chat?.message === "string"
+                      ? chat.message
+                      : undefined;
+
             return {
-              id: chat?.id ?? chat.group.id,
+              id: chat?.id ?? groupId,
               group: {
-                id: chat.group.id,
-                name: chat.group.name,
+                id: groupId,
+                name: groupName,
               },
-              lastMessage: chat?.lastMessage ?? undefined,
+              lastMessage: lastMsg,
               unread,
               updatedAt: fallbackTimestamp,
             };
           })
           .filter((chat) => Boolean(chat))
           .sort(
-            (a, b) =>
-              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+            (a, b) => {
+              const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+              const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+              return timeB - timeA;
+            }
           );
 
         setRecentChats(normalized);
@@ -101,10 +117,12 @@ const ChatSidebar = ({
               <div className="flex justify-between items-center">
                 <h3 className="font-medium text-sm">{chat.group.name}</h3>
                 <span className="text-xs text-gray-700">
-                  {new Date(chat.updatedAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {chat.updatedAt && !isNaN(new Date(chat.updatedAt).getTime())
+                    ? new Date(chat.updatedAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : ""}
                 </span>
               </div>
               <div className="flex justify-between items-center mt-1">

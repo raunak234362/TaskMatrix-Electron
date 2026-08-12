@@ -90,6 +90,18 @@ const AllProjectNotes = ({ projectId, project }) => {
         fetchNotes();
     }, [projectId]);
 
+    const fetchNoteDetails = async (noteId) => {
+        try {
+            const res = await Service.GetTeamMeetingNotesById(noteId);
+            const noteData = res?.data ?? res;
+            if (noteData && (noteData.id || noteData._id)) {
+                setNotes(prev => prev.map(n => (n.id === noteId || n._id === noteId) ? { ...n, ...noteData } : n));
+            }
+        } catch (err) {
+            console.error("Error fetching note by ID:", err, noteId);
+        }
+    };
+
     const fetchResponsesForNote = async (noteId) => {
         try {
             const res = await Service.Getallrepliesforanote(noteId);
@@ -105,6 +117,7 @@ const AllProjectNotes = ({ projectId, project }) => {
             setExpandedId(null);
         } else {
             setExpandedId(id);
+            fetchNoteDetails(id);
             fetchResponsesForNote(id);
         }
     };

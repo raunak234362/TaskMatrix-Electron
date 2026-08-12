@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,6 +11,7 @@ import {
   CheckCircle2,
   Briefcase,
   Flag,
+  Building2,
 } from "lucide-react";
 import Service from "../../api/Service";
 import Input from "../fields/input";
@@ -52,20 +52,50 @@ const AddTask = () => {
   const [projectSubmittals, setProjectSubmittals] = useState([]);
   const [overdueEmployees, setOverdueEmployees] = useState({});
   const [projectTeamMemberIds, setProjectTeamMemberIds] = useState([]);
-
   const dispatch = useDispatch();
   const [projects, setProjects] = useState([]);
-  
+  const [isFetchingProjects, setIsFetchingProjects] = useState(false);
+  const searchTimeoutRef = useRef(null);
+
   const milestonesByProject = useSelector(
     (state) => state.milestoneInfo?.milestonesByProject || {},
   );
 
-  useEffect(() => {
-    Service.GetAllProjects(1, 10000).then((res) => {
-      const data = Array.isArray(res) ? res : (res?.data || []);
-      setProjects(Array.isArray(data) ? data : []);
-    });
+  const loadProjects = useCallback(async (search = "") => {
+    try {
+      setIsFetchingProjects(true);
+      const res = await Service.GetAllProjects(1, 1000, search);
+      let list = [];
+      if (Array.isArray(res)) {
+        list = res;
+      } else if (res?.data && Array.isArray(res.data)) {
+        list = res.data;
+      } else if (res?.data?.data && Array.isArray(res.data.data)) {
+        list = res.data.data;
+      } else if (res?.projects && Array.isArray(res.projects)) {
+        list = res.projects;
+      }
+      setProjects(list);
+    } catch (err) {
+      console.error("Failed to fetch projects with search param:", err);
+      setProjects([]);
+    } finally {
+      setIsFetchingProjects(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadProjects("");
+  }, [loadProjects]);
+
+  const handleProjectSearch = (term) => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      loadProjects(term);
+    }, 300);
+  };
 
   const employees = useSelector(
     (state) => state.userInfo?.staffData || [],
@@ -101,7 +131,14 @@ const AddTask = () => {
   const milestones = selectedProjectId
     ? milestonesByProject[selectedProjectId] || []
     : [];
-  const selectedProject = projects.find((p) => p.id === selectedProjectId);
+  const selectedProject = React.useMemo(() => {
+    if (!selectedProjectId) return null;
+    return (
+      projects.find(
+        (p) => String(p.id || p._id || p.projectId || p.projectID) === String(selectedProjectId)
+      ) || null
+    );
+  }, [selectedProjectId, projects]);
 
   // Fetch Project Details and Milestones when project changes
   useEffect(() => {
@@ -136,16 +173,26 @@ const AddTask = () => {
         setProjectSubmittals([]);
       });
 
-      if (!milestonesByProject[selectedProjectId]) {
-        Service.GetProjectMilestoneById(selectedProjectId).then((res) => {
-          dispatch(
-            setMilestonesForProject({
-              projectId: selectedProjectId,
-              milestones: res?.data || [],
-            }),
-          );
-        });
-      }
+      Service.GetProjectMilestoneById(selectedProjectId).then((res) => {
+        let list = [];
+        if (Array.isArray(res)) {
+          list = res;
+        } else if (Array.isArray(res?.data)) {
+          list = res.data;
+        } else if (Array.isArray(res?.data?.data)) {
+          list = res.data.data;
+        } else if (Array.isArray(res?.milestones)) {
+          list = res.milestones;
+        }
+        dispatch(
+          setMilestonesForProject({
+            projectId: selectedProjectId,
+            milestones: list,
+          }),
+        );
+      }).catch((err) => {
+        console.error("Error fetching milestones for project:", err);
+      });
     } else {
       setValue("mileStone_id", "");
       setValue("wbsType", "");
@@ -156,8 +203,6 @@ const AddTask = () => {
     }
   }, [
     selectedProjectId,
-    milestonesByProject,
-    selectedProject?.projectWbs,
     dispatch,
     setValue,
   ]);
@@ -238,7 +283,7 @@ const AddTask = () => {
 
       // Auto-set Stage based on milestone stage
       const milestone = milestones.find(
-        (m) => String(m.id) === String(selectedMilestoneId),
+        (m) => String(m.id || m._id || m.milestoneId || m.mileStoneId) === String(selectedMilestoneId),
       );
       if (milestone) {
         const msStage = (milestone.stage || "").toUpperCase();
@@ -638,28 +683,51 @@ const AddTask = () => {
     }
   };
 
-  const projectOptions = projects.map((p) => ({
-    label: p.name,
-    value: p.id,
-  }));
+  const projectOptions = React.useMemo(() => {
+    return projects
+      .map((p) => {
+        const pId = p.id || p._id || p.projectId || p.projectID;
+        return {
+          label: p.name || p.projectName || p.title || p.project_name || "Unnamed Project",
+          value: pId ? String(pId) : "",
+        };
+      })
+      .filter((opt) => opt.value !== "");
+  }, [projects]);
 
-  const milestoneOptions = milestones
-    .filter((m) => {
-      const hasSubmittals = projectSubmittals.some(
-        (sub) => String(sub.mileStoneId || sub.milestoneId || sub.milestone?.id) === String(m.id || m._id)
-      );
-      return !hasSubmittals;
-    })
-    .map((m) => {
-      const milestoneName = m.subject || m.name || "Unnamed Milestone";
-      const subSubjectName = m.subSubject || "";
-      const stageName = m.stage || "";
-      const labelParts = [milestoneName, subSubjectName, stageName].filter(Boolean);
-      return {
-        label: labelParts.join(" - "),
-        value: m.id,
-      };
-    });
+  const milestoneOptions = React.useMemo(() => {
+    if (!Array.isArray(milestones)) return [];
+    return milestones
+      .filter((m) => {
+        const mId = String(m.id || m._id || m.milestoneId || m.mileStoneId || "");
+        if (!mId) return false;
+        const hasSubmittals = projectSubmittals.some((sub) => {
+          const subMilestoneId = String(
+            sub.mileStoneId ||
+            sub.milestoneId ||
+            sub.milestone?.id ||
+            sub.milestone?._id ||
+            sub.mileStone?.id ||
+            sub.mileStone?._id ||
+            ""
+          );
+          return subMilestoneId === mId;
+        });
+        return !hasSubmittals;
+      })
+      .map((m) => {
+        const milestoneName = m.subject || m.name || m.title || "Unnamed Milestone";
+        const subSubjectName = m.subSubject || "";
+        const stageName = m.stage || "";
+        const labelParts = [milestoneName, subSubjectName, stageName].filter(Boolean);
+        const mId = m.id || m._id || m.milestoneId || m.mileStoneId;
+        return {
+          label: labelParts.join(" - "),
+          value: mId ? String(mId) : "",
+        };
+      })
+      .filter((opt) => opt.value !== "");
+  }, [milestones, projectSubmittals]);
 
   const wbsTypeOptions = [
     { label: "Modeling", value: "modeling" },
@@ -767,7 +835,9 @@ const AddTask = () => {
             <section className="space-y-6">
               <SectionTitle title="Project Context" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
+
+
+                <div className="space-y-2 md:col-span-2">
                   <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                     <Briefcase className="w-4 h-4 text-indigo-500" /> Project *
                   </label>
@@ -781,7 +851,8 @@ const AddTask = () => {
                         options={projectOptions}
                         value={field.value}
                         onChange={(_, val) => field.onChange(val)}
-                        placeholder="Select Project"
+                        onSearchChange={handleProjectSearch}
+                        placeholder={isFetchingProjects ? "Loading Projects..." : "Select Project"}
                       />
                     )}
                   />

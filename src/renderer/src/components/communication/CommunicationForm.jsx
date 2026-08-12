@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import Select from 'react-select';
 import { format, parseISO } from 'date-fns';
+import Service from '../../api/Service';
 
 const customStyles = {
     control: (base) => ({
@@ -53,15 +54,58 @@ const customStyles = {
 const CommunicationForm = ({ initialData, projects = [], fabricators = [], onSubmit, onCancel, fetchClientsByFabricator }) => {
     const [clients, setClients] = useState([]);
     const [isFetchingClients, setIsFetchingClients] = useState(false);
+    const [allFabricators, setAllFabricators] = useState([]);
+    const [isFetchingFabricators, setIsFetchingFabricators] = useState(false);
 
     const { register, handleSubmit, control, reset, watch, setValue, formState: { errors } } = useForm();
 
     const watchedFabricatorId = watch('fabricatorId');
 
+    // Fetch fabricators with limit 100 and search query
+    const loadFabricators = async (search = '') => {
+        setIsFetchingFabricators(true);
+        try {
+            const res = await Service.GetAllFabricators(1, 100, search);
+            let list = [];
+            if (Array.isArray(res)) {
+                list = res;
+            } else if (res?.data?.data && Array.isArray(res.data.data)) {
+                list = res.data.data;
+            } else if (res?.data && Array.isArray(res.data)) {
+                list = res.data;
+            } else if (res?.fabricators && Array.isArray(res.fabricators)) {
+                list = res.fabricators;
+            }
+            setAllFabricators(list);
+        } catch (err) {
+            console.error("Failed to fetch fabricators (limit 100):", err);
+        } finally {
+            setIsFetchingFabricators(false);
+        }
+    };
+
+    useEffect(() => {
+        loadFabricators();
+    }, []);
+
+    useEffect(() => {
+        if (Array.isArray(fabricators) && fabricators.length > 0) {
+            setAllFabricators(prev => {
+                const combined = [...prev, ...fabricators];
+                const uniqueMap = new Map();
+                combined.forEach(f => {
+                    const id = f.id || f._id;
+                    if (id && !uniqueMap.has(id)) {
+                        uniqueMap.set(id, f);
+                    }
+                });
+                return Array.from(uniqueMap.values());
+            });
+        }
+    }, [fabricators]);
+
     // Default fetch function if not provided
     const defaultFetchClients = async (fabId) => {
-        // This is a placeholder, will be overridden or implemented via prop
-        // We'll see how AddCommunication implements it
         return [];
     };
 
@@ -99,6 +143,44 @@ const CommunicationForm = ({ initialData, projects = [], fabricators = [], onSub
         }
     }, [initialData, reset, projects]);
 
+    const [fetchedProjects, setFetchedProjects] = useState([]);
+    const [isFetchingProjects, setIsFetchingProjects] = useState(false);
+
+    // Fetch Projects when Fabricator changes using Service.GetProjectsByFabricatorID
+    useEffect(() => {
+        const getProjects = async () => {
+            if (watchedFabricatorId) {
+                setIsFetchingProjects(true);
+                try {
+                    const response = await Service.GetProjectsByFabricatorID(watchedFabricatorId);
+                    let list = [];
+                    if (response) {
+                        if (Array.isArray(response)) {
+                            list = response;
+                        } else if (response.data) {
+                            if (Array.isArray(response.data)) {
+                                list = response.data;
+                            } else if (response.data.projects && Array.isArray(response.data.projects)) {
+                                list = response.data.projects;
+                            } else if (Array.isArray(response.data.data)) {
+                                list = response.data.data;
+                            }
+                        }
+                    }
+                    setFetchedProjects(list);
+                } catch (error) {
+                    console.error("Failed to fetch projects by fabricator ID", error);
+                    setFetchedProjects([]);
+                } finally {
+                    setIsFetchingProjects(false);
+                }
+            } else {
+                setFetchedProjects([]);
+            }
+        };
+        getProjects();
+    }, [watchedFabricatorId]);
+
     // Fetch Clients when Fabricator changes
     useEffect(() => {
         const getClients = async () => {
@@ -122,19 +204,34 @@ const CommunicationForm = ({ initialData, projects = [], fabricators = [], onSub
 
     // Derived collections
     const fabricatorOptions = useMemo(() =>
-        fabricators.map(f => ({ value: f.id || f._id, label: f.fabName || f.name || f.fabricatorName })),
-        [fabricators]);
+        allFabricators.map((f, idx) => ({
+            value: f.id || f._id || f.fabricatorId || f.fabId || `fab-${idx}`,
+            label: f.fabName || f.name || f.fabricatorName || "Unnamed Fabricator"
+        })),
+        [allFabricators]);
 
     const availableProjects = useMemo(() => {
         if (!watchedFabricatorId) return [];
-        return projects.filter(p => {
+        const propProjects = projects.filter(p => {
             const fid = p.fabricatorId || p.fabricatorID || p.fabId || (p.fabricator?.id || p.fabricator?._id || p.fabricator?.fabId);
             return String(fid) === String(watchedFabricatorId);
         });
-    }, [projects, watchedFabricatorId]);
+        const combined = [...fetchedProjects, ...propProjects];
+        const uniqueMap = new Map();
+        combined.forEach((p, idx) => {
+            const id = p.id || p._id || p.projectId || p.fabId || p.name || `proj-${idx}`;
+            if (id && !uniqueMap.has(String(id))) {
+                uniqueMap.set(String(id), { ...p, _derivedId: id });
+            }
+        });
+        return Array.from(uniqueMap.values());
+    }, [projects, fetchedProjects, watchedFabricatorId]);
 
     const projectOptions = useMemo(() =>
-        availableProjects.map(p => ({ value: p.id || p._id, label: p.projectName || p.name || p.project_name })),
+        availableProjects.map((p, idx) => ({
+            value: p.id || p._id || p.projectId || p.fabId || p._derivedId || p.name || `proj-${idx}`,
+            label: p.name || p.projectName || p.title || p.project_name || "Unnamed Project"
+        })),
         [availableProjects]);
 
     const handleFormSubmit = (data) => {
@@ -158,7 +255,13 @@ const CommunicationForm = ({ initialData, projects = [], fabricators = [], onSub
                         render={({ field }) => (
                             <Select
                                 isClearable
+                                isLoading={isFetchingFabricators}
                                 options={fabricatorOptions}
+                                onInputChange={(inputValue, { action }) => {
+                                    if (action === 'input-change') {
+                                        loadFabricators(inputValue);
+                                    }
+                                }}
                                 value={fabricatorOptions.find(op => String(op.value) === String(field.value)) || null}
                                 onChange={(val) => {
                                     field.onChange(val ? val.value : '');
@@ -181,13 +284,14 @@ const CommunicationForm = ({ initialData, projects = [], fabricators = [], onSub
                         rules={{ required: true }}
                         render={({ field }) => (
                             <Select
-                                isDisabled={!watchedFabricatorId}
+                                isDisabled={!watchedFabricatorId || isFetchingProjects}
+                                isLoading={isFetchingProjects}
                                 isClearable
                                 options={projectOptions}
-                                value={projectOptions.find(op => String(op.value) === String(field.value)) || null}
+                                value={projectOptions.find(op => String(op.value) === String(field.value) || String(op.label) === String(field.value)) || (field.value ? { value: field.value, label: field.value } : null)}
                                 onChange={(val) => field.onChange(val ? val.value : '')}
                                 styles={customStyles}
-                                placeholder="Select Project"
+                                placeholder={isFetchingProjects ? "Loading projects..." : "Select Project"}
                                 menuPortalTarget={document.body}
                             />
                         )}

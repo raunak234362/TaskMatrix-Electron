@@ -172,15 +172,25 @@ const AddRFI = ({
       const selectedFabricator = fabricators?.find((f) => String(f.id) === String(fabricatorID));
       const fabricatorName = selectedFabricator?.fabName || project?.fabricatorName || project?.fabricator?.fabName || "";
       const projectName = project?.projectName || project?.name || "";
-
-      await Service.addRFI(formData, fabricatorName, projectName);
+      const res = await Service.addRFI(formData, fabricatorName, projectName);
+      if (res && res.success === false) {
+        toast.error(res.message || "Failed to create RFI");
+        return;
+      }
       toast.success("RFI Submitted Successfully");
       setDescription("");
       setFiles([]);
       onSuccess?.();
     } catch (err) {
       console.error(err);
-      toast.error(err?.response?.data?.message || "Failed to create RFI");
+      const errMsg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.data?.message ||
+        (typeof err?.response?.data === "string" ? err.response.data : null) ||
+        err?.message ||
+        "Failed to create RFI";
+      toast.error(errMsg);
     } finally {
       setLoading(false);
     }

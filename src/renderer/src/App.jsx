@@ -18,7 +18,6 @@ const AppContent = () => {
   const userDetail = useSelector((state) => state.userData?.userData ?? state.userInfo?.userDetail)
   useNotifications()
   const userType = sessionStorage.getItem('userRole')
-
   // Connect socket when userDetail is available
   useEffect(() => {
     if (userDetail?.id) {
@@ -57,10 +56,8 @@ const AppContent = () => {
           }
         )
       }
-
       window.electron.ipcRenderer.on('update-available', handleUpdateAvailable)
       window.electron.ipcRenderer.on('update-downloaded', handleUpdateDownloaded)
-
       const handleSystemLocked = async () => {
         toast.info("System Lock Detected: Checking for active tasks...", { autoClose: 10000 })
         console.log("System lock detected")
@@ -162,6 +159,19 @@ const AppContent = () => {
       sessionStorage.setItem('lastName', fetchedUser.lastName)
       sessionStorage.setItem('userRole', fetchedUser.role)
       sessionStorage.setItem('designation', fetchedUser.designation)
+
+      const fabId =
+        response?.data?.FabricatorPointOfContacts?.[0]?.id ||
+        response?.data?.data?.FabricatorPointOfContacts?.[0]?.id ||
+        response?.data?.FabricatorPointOfContacts?.[0]?.fabricatorId ||
+        response?.data?.data?.FabricatorPointOfContacts?.[0]?.fabricatorId ||
+        fetchedUser?.fabricatorID ||
+        fetchedUser?.fabricatorId
+
+      if (fabId) {
+        sessionStorage.setItem('fabricatorID', fabId)
+      }
+
       dispatch(setUserData(fetchedUser))
     } catch (err) {
       console.error('User fetch failed:', err)
@@ -191,8 +201,17 @@ const AppContent = () => {
 
     const fetchAllFabricator = async () => {
       try {
-        const response = await Service.GetAllFabricators()
-        const data = response.data || []
+        const response = await Service.GetAllFabricators(1, 100)
+        let data = []
+        if (Array.isArray(response)) {
+          data = response
+        } else if (response?.data?.data && Array.isArray(response.data.data)) {
+          data = response.data.data
+        } else if (response?.data && Array.isArray(response.data)) {
+          data = response.data
+        } else if (response?.fabricators && Array.isArray(response.fabricators)) {
+          data = response.fabricators
+        }
         dispatch(loadFabricator(data))
       } catch (err) {
         console.error('Failed to fetch fabricators:', err)

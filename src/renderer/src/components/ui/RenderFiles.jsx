@@ -91,9 +91,10 @@ const RenderFiles = ({
       case "cOResponse":
         return `${baseURL}/changeOrder/viewFile/${parentId}/files/${fileId}`;
       case "teamMeetingNotes":
-        return `${baseURL}/teamMeetingNotes/viewFile/${parentId}/${fileId}`;
+        return `${baseURL}/team-meeting-notes/viewFile/${parentId}/${fileId}`;
       case "teamMeetingResponse":
-        return `${baseURL}/teamMeetingNotes/responses/viewFile/${parentId}/${fileId}`;
+      case "teamMeetingNotesResponse":
+        return `${baseURL}/team-meeting-notes/responses/viewFile/${parentId}/${fileId}`;
       case "connectionDesignerQuota":
         return `${baseURL}/connectionDesignerQuota/viewFile/${parentId}/${fileId}`;
       case "designDrawings":

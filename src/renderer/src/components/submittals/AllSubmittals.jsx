@@ -209,23 +209,43 @@ const AllSubmittals = ({ submittalData, projectId, onUpdate }) => {
     )
   }
 
-  const generalSubmittals = submittals.filter(
-    (item) =>
-      item.isConnectionDesign !== true && String(item.isConnectionDesign).toLowerCase() !== 'true'
-  )
-  const connectionDesignerSubmittals = submittals.filter(
-    (item) =>
-      item.isConnectionDesign === true || String(item.isConnectionDesign).toLowerCase() === 'true'
-  )
+  const sortSubmittalsByDate = (list) => {
+    return [...list].sort((a, b) => {
+      const dateA = new Date(a.date || a.createdAt || 0).getTime()
+      const dateB = new Date(b.date || b.createdAt || 0).getTime()
+      if (dateA !== dateB) {
+        return dateA - dateB
+      }
+      const matchA = a.subject?.match(/\d+/)
+      const matchB = b.subject?.match(/\d+/)
+      const numA = matchA ? parseInt(matchA[0], 10) : 0
+      const numB = matchB ? parseInt(matchB[0], 10) : 0
+      return numA - numB
+    })
+  }
+
+  const isConnectionDesignerSubmittal = (item) => {
+    if (!item) return false
+    if (item.isConnectionDesign === true || String(item.isConnectionDesign).toLowerCase() === 'true') return true
+    const text = item.subject || item.serialNo || item.name || ''
+    if (/TR\s*#?\s*\d*[A-Za-z]+/i.test(text)) return true
+    if (/CONNECTION DESIGN/i.test(text)) return true
+    return false
+  }
+
+  const generalSubmittals = submittals.filter((item) => !isConnectionDesignerSubmittal(item))
+  const connectionDesignerSubmittals = submittals.filter((item) => isConnectionDesignerSubmittal(item))
 
   const displayedSubmittals =
     activeTab === 'CONNECTION_DESIGNER' ? connectionDesignerSubmittals : generalSubmittals
 
-  const finalSubmittals = displayedSubmittals.filter(
+  const filteredSubmittals = displayedSubmittals.filter(
     (item) =>
       !searchQuery ||
       (item.subject && item.subject.toLowerCase().includes(searchQuery.toLowerCase()))
   )
+
+  const finalSubmittals = sortSubmittalsByDate(filteredSubmittals)
 
   return (
     <div className="bg-white p-2 rounded-2xl shadow-md">
