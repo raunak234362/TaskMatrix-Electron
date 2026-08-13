@@ -140,13 +140,18 @@ const AddProject = ({ onSuccess }) => {
     rfqs: rfqData
       .filter((r) => !usedRfqIds.includes(r.id))
       .map((r) => ({
-        label: `${r.projectName} • ${r.fabricator?.fabName || r.fabricator?.name || ""}`,
+        label: `${r.projectName} • ${r.fabricator?.fabName || r.fabricator?.name || r.fabricatorName || ""}`,
         value: r.id,
       })),
-    fabricators: activeFabricatorList.map((f) => ({
-      label: f.fabName || f.name || f.fabricatorName || "Unnamed Fabricator",
-      value: String(f.id || f._id),
-    })),
+    fabricators: activeFabricatorList
+      .filter((f, idx, self) => {
+        const id = String(f.id || f._id || idx);
+        return self.findIndex((x) => String(x.id || x._id || idx) === id) === idx;
+      })
+      .map((f) => ({
+        label: f.fabName || f.name || f.fabricatorName || f.companyName || "Unnamed Fabricator",
+        value: String(f.id || f._id),
+      })),
     departments: departmentDatas.map((d) => ({
       label: d.name,
       value: d.id,
@@ -195,7 +200,47 @@ const AddProject = ({ onSuccess }) => {
     setValue("projectNumber", suggestedNumber);
 
     setValue("description", selectedRfq.description || "");
-    setValue("fabricatorID", String(selectedRfq.fabricatorId || ""));
+
+    // Resolve fabricator ID accurately from RFQ object (support fabricatorId, fabricatorID, fabricator_id, fabricator.id, fabricator._id)
+    let rfqFabId =
+      selectedRfq.fabricatorId ||
+      selectedRfq.fabricatorID ||
+      selectedRfq.fabricator_id ||
+      selectedRfq.fabricator?.id ||
+      selectedRfq.fabricator?._id ||
+      (typeof selectedRfq.fabricator === "string" || typeof selectedRfq.fabricator === "number"
+        ? String(selectedRfq.fabricator)
+        : "");
+
+    rfqFabId = rfqFabId ? String(rfqFabId) : "";
+
+    const rfqFabName =
+      selectedRfq.fabricator?.fabName ||
+      selectedRfq.fabricator?.name ||
+      selectedRfq.fabricatorName ||
+      "";
+
+    let matchedFab = activeFabricatorList.find(
+      (f) =>
+        (rfqFabId && String(f.id || f._id) === rfqFabId) ||
+        (rfqFabName && (f.fabName || f.name || f.fabricatorName)?.toLowerCase() === rfqFabName.toLowerCase())
+    );
+
+    if (!matchedFab && selectedRfq.fabricator && typeof selectedRfq.fabricator === "object") {
+      const extraFab = selectedRfq.fabricator;
+      const extraFabId = String(extraFab.id || extraFab._id || rfqFabId);
+      if (extraFabId) {
+        setAllFabricators((prev) => {
+          const exists = prev.some((f) => String(f.id || f._id) === extraFabId);
+          return exists ? prev : [...prev, { ...extraFab, id: extraFabId, _id: extraFabId }];
+        });
+        rfqFabId = extraFabId;
+      }
+    } else if (matchedFab) {
+      rfqFabId = String(matchedFab.id || matchedFab._id);
+    }
+
+    setValue("fabricatorID", rfqFabId);
     setValue("tools", selectedRfq.tools || "TEKLA");
 
     setValue("connectionDesign", !!selectedRfq.connectionDesign);
@@ -215,7 +260,7 @@ const AddProject = ({ onSuccess }) => {
     toast.success("RFQ data auto-filled!", {
       icon: <Sparkles className="w-5 h-5" />,
     });
-  }, [selectedRfq, setValue, rfqData]);
+  }, [selectedRfq, setValue, rfqData, activeFabricatorList]);
 
   const onSubmit = async (data) => {
     try {
@@ -334,7 +379,9 @@ const AddProject = ({ onSuccess }) => {
                   </div>
                   <div className="space-y-0.5">
                     <span className="text-[10px] uppercase font-bold text-gray-400">Fabricator</span>
-                    <p className="text-xs font-bold text-gray-800">{selectedRfq.fabricator?.fabName || "N/A"}</p>
+                    <p className="text-xs font-bold text-gray-800">
+                      {selectedRfq.fabricator?.fabName || selectedRfq.fabricator?.name || selectedRfq.fabricatorName || "N/A"}
+                    </p>
                   </div>
                   <div className="space-y-0.5">
                     <span className="text-[10px] uppercase font-bold text-gray-400">Tools</span>

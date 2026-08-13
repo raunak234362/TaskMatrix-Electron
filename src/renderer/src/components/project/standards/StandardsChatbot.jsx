@@ -44,8 +44,8 @@ const StandardsChatbot = ({ projectId, project }) => {
 
   const chatEndRef = useRef(null)
 
-  const scrollToBottom = () => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  const scrollToBottom = (behavior = 'smooth') => {
+    chatEndRef.current?.scrollIntoView({ behavior })
   }
 
   const fetchHistory = async () => {
@@ -67,12 +67,22 @@ const StandardsChatbot = ({ projectId, project }) => {
         if (foundArr) historyList = foundArr
       }
 
-      setMessages(historyList)
+      // Sort history chronologically ascending (oldest top, latest/newest at bottom)
+      const sortedHistory = [...historyList].sort((a, b) => {
+        const timeA = new Date(a?.createdAt || a?.timestamp || a?.updatedAt || 0).getTime()
+        const timeB = new Date(b?.createdAt || b?.timestamp || b?.updatedAt || 0).getTime()
+        return timeA - timeB
+      })
+
+      setMessages(sortedHistory)
     } catch (err) {
       console.error('Error loading standards chat history:', err)
       toast.error('Failed to load chat history')
     } finally {
       setLoadingHistory(false)
+      setTimeout(() => {
+        scrollToBottom('auto')
+      }, 100)
     }
   }
 
@@ -81,8 +91,10 @@ const StandardsChatbot = ({ projectId, project }) => {
   }, [projectId])
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages, sending])
+    if (!loadingHistory) {
+      scrollToBottom()
+    }
+  }, [messages, sending, loadingHistory])
 
   const handleSend = async (queryTextToSend) => {
     const textToSubmit = (queryTextToSend || query).trim()
@@ -96,7 +108,14 @@ const StandardsChatbot = ({ projectId, project }) => {
       answers: []
     }
 
-    setMessages((prev) => [...prev, tempUserMsg])
+    setMessages((prev) => {
+      const updated = [...prev, tempUserMsg]
+      return updated.sort((a, b) => {
+        const timeA = new Date(a?.createdAt || a?.timestamp || a?.updatedAt || 0).getTime()
+        const timeB = new Date(b?.createdAt || b?.timestamp || b?.updatedAt || 0).getTime()
+        return timeA - timeB
+      })
+    })
     if (!queryTextToSend) setQuery('')
 
     try {
@@ -119,7 +138,12 @@ const StandardsChatbot = ({ projectId, project }) => {
       setMessages((prev) => {
         // Replace temp msg or append
         const filtered = prev.filter((m) => m.id !== tempUserMsg.id)
-        return [...filtered, formattedResponse]
+        const updated = [...filtered, formattedResponse]
+        return updated.sort((a, b) => {
+          const timeA = new Date(a?.createdAt || a?.timestamp || a?.updatedAt || 0).getTime()
+          const timeB = new Date(b?.createdAt || b?.timestamp || b?.updatedAt || 0).getTime()
+          return timeA - timeB
+        })
       })
     } catch (err) {
       console.error('Error sending query to standards chat:', err)
@@ -274,67 +298,150 @@ const StandardsChatbot = ({ projectId, project }) => {
 
                 {/* Bot Answer(s) */}
                 {hasAnswers ? (
-                  item.answers.map((answer, aIdx) => (
-                    <div key={answer.id || aIdx} className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-600 to-green-800 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
-                        <Bot className="w-4 h-4 text-emerald-200" />
-                      </div>
-                      <div className="flex-1 bg-white border border-gray-200 p-5 rounded-2xl rounded-tl-xs shadow-sm space-y-3">
-                        {/* Answer Text */}
-                        <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap font-sans">
-                          {answer.answerText || 'No answer text provided.'}
+                  item.answers.map((answer, aIdx) => {
+                    const hasCitations = Array.isArray(answer.citations) && answer.citations.length > 0
+
+                    // Collect all citations (nested or top-level)
+                    const citationsList = hasCitations
+                      ? answer.citations
+                      : (answer.citationPdfName || (Array.isArray(answer.imagePaths) && answer.imagePaths.length > 0))
+                      ? [answer]
+                      : []
+
+                    // Collect all unique image paths (from top-level and nested citations)
+                    const allImageItems = []
+                    if (Array.isArray(answer.imagePaths)) {
+                      answer.imagePaths.forEach((imgPath) => {
+                        if (imgPath && !allImageItems.some((item) => item.path === imgPath)) {
+                          allImageItems.push({
+                            path: imgPath,
+                            citation: answer
+                          })
+                        }
+                      })
+                    }
+                    if (hasCitations) {
+                      answer.citations.forEach((c) => {
+                        if (Array.isArray(c.imagePaths)) {
+                          c.imagePaths.forEach((imgPath) => {
+                            if (imgPath && !allImageItems.some((item) => item.path === imgPath)) {
+                              allImageItems.push({
+                                path: imgPath,
+                                citation: c
+                              })
+                            }
+                          })
+                        }
+                      })
+                    }
+
+                    // Determine answer text to display
+                    let displayText = answer.answerText
+                    if (!displayText && hasCitations) {
+                      const foundTxt = answer.citations.find((c) => c.answerText || c.text || c.content || c.snippet)
+                      if (foundTxt) {
+                        displayText = foundTxt.answerText || foundTxt.text || foundTxt.content || foundTxt.snippet
+                      }
+                    }
+                    if (!displayText) {
+                      if (allImageItems.length > 0 || citationsList.length > 0) {
+                        displayText = 'Reference standard visual specification matched from uploaded document:'
+                      } else {
+                        displayText = 'No answer text provided.'
+                      }
+                    }
+
+                    // Metadata
+                    const sourceType = answer.sourceType || citationsList.find((c) => c.sourceType)?.sourceType
+                    const chunkType = answer.chunkType || citationsList.find((c) => c.chunkType)?.chunkType
+
+                    return (
+                      <div key={answer.id || aIdx} className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-600 to-green-800 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
+                          <Bot className="w-4 h-4 text-emerald-200" />
                         </div>
-
-                        {/* Citation Badges & Metadata */}
-                        {(answer.citationPdfName || answer.sourceType || answer.chunkType) && (
-                          <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center gap-2 text-xs">
-                            {answer.citationPdfName && (
-                              <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-3 py-1 rounded-md border border-emerald-200/60 font-medium">
-                                <FileText className="w-3.5 h-3.5 text-emerald-600" />
-                                <span>Citation: <strong className="font-semibold">{answer.citationPdfName}</strong></span>
-                                {(answer.citationPageStart !== undefined && answer.citationPageStart !== null) && (
-                                  <span className="ml-1 text-emerald-700 bg-emerald-100/80 px-1.5 py-0.5 rounded text-[11px]">
-                                    Pg {answer.citationPageStart}
-                                    {answer.citationPageEnd && answer.citationPageEnd !== answer.citationPageStart ? `-${answer.citationPageEnd}` : ''}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-
-                            {answer.sourceType && (
-                              <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-[11px] font-semibold uppercase">
-                                Source: {answer.sourceType}
-                              </span>
-                            )}
-
-                            {answer.chunkType && (
-                              <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-[11px] font-semibold">
-                                Chunk: {answer.chunkType}
-                              </span>
-                            )}
+                        <div className="flex-1 bg-white border border-gray-200 p-5 rounded-2xl rounded-tl-xs shadow-sm space-y-3">
+                          {/* Answer Text */}
+                          <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap font-sans">
+                            {displayText}
                           </div>
-                        )}
 
-                        {/* Image Attachments if present */}
-                        {Array.isArray(answer.imagePaths) && answer.imagePaths.length > 0 && (
-                          <div className="pt-2 flex flex-wrap gap-2">
-                            {answer.imagePaths.map((imgPath, imgIdx) => (
-                              <button
-                                key={imgIdx}
-                                type="button"
-                                onClick={() => handleOpenReferenceImage(imgPath, imgIdx, answer)}
-                                className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-300 transition-all cursor-pointer shadow-2xs group"
-                              >
-                                <ImageIcon className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
-                                <span>View Reference Image {imgIdx + 1}</span>
-                                <Maximize2 className="w-3 h-3 text-emerald-500 ml-0.5" />
-                              </button>
-                            ))}
-                          </div>
-                        )}
+                          {/* Citation Badges & Metadata */}
+                          {(citationsList.length > 0 || sourceType || chunkType) && (
+                            <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center gap-2 text-xs">
+                              {citationsList.map((cit, cIdx) => {
+                                const pdfName = cit.citationPdfName
+                                const pStart =
+                                  cit.citationPageStart !== undefined && cit.citationPageStart !== null
+                                    ? cit.citationPageStart
+                                    : cit.anchorPageStart
+                                const pEnd =
+                                  cit.citationPageEnd !== undefined && cit.citationPageEnd !== null
+                                    ? cit.citationPageEnd
+                                    : cit.anchorPageEnd
+
+                                if (!pdfName) return null
+                                return (
+                                  <div
+                                    key={cit.id || cIdx}
+                                    className="flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-3 py-1 rounded-md border border-emerald-200/60 font-medium"
+                                  >
+                                    <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                                    <span>
+                                      Citation: <strong className="font-semibold">{pdfName}</strong>
+                                    </span>
+                                    {pStart !== undefined && pStart !== null && (
+                                      <span className="ml-1 text-emerald-700 bg-emerald-100/80 px-1.5 py-0.5 rounded text-[11px]">
+                                        Pg {pStart}
+                                        {pEnd && pEnd !== pStart ? `-${pEnd}` : ''}
+                                      </span>
+                                    )}
+                                  </div>
+                                )
+                              })}
+
+                              {sourceType && (
+                                <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-[11px] font-semibold uppercase">
+                                  Source: {sourceType}
+                                </span>
+                              )}
+
+                              {chunkType && (
+                                <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-[11px] font-semibold">
+                                  Chunk: {chunkType}
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Image Attachments if present */}
+                          {allImageItems.length > 0 && (
+                            <div className="pt-2 flex flex-wrap gap-2">
+                              {allImageItems.map((item, imgIdx) => {
+                                const pageNum =
+                                  item.citation?.citationPageStart || item.citation?.anchorPageStart || ''
+                                return (
+                                  <button
+                                    key={imgIdx}
+                                    type="button"
+                                    onClick={() => handleOpenReferenceImage(item.path, imgIdx, item.citation)}
+                                    className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-300 transition-all cursor-pointer shadow-2xs group"
+                                  >
+                                    <ImageIcon className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
+                                    <span>
+                                      View Reference Image {imgIdx + 1}
+                                      {pageNum ? ` (Pg ${pageNum})` : ''}
+                                    </span>
+                                    <Maximize2 className="w-3 h-3 text-emerald-500 ml-0.5" />
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    )
+                  })
                 ) : (
                   // Pending or fallback answer display
                   <div className="flex items-start gap-3">
