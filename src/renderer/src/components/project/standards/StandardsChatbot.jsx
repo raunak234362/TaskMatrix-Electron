@@ -220,7 +220,7 @@ const StandardsChatbot = ({ projectId, project }) => {
   }
 
   return (
-    <div className="flex flex-col h-[750px] bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+    <div className="flex flex-col h-[700px] bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
       {/* Top Bar Header */}
       <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-emerald-900 via-green-800 to-emerald-950 text-white shadow-md shrink-0">
         <div className="flex items-center gap-3">
@@ -298,150 +298,156 @@ const StandardsChatbot = ({ projectId, project }) => {
 
                 {/* Bot Answer(s) */}
                 {hasAnswers ? (
-                  item.answers.map((answer, aIdx) => {
-                    const hasCitations = Array.isArray(answer.citations) && answer.citations.length > 0
+                  <div className={`grid gap-4 ${item.answers.length > 1 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+                    {item.answers.map((answer, aIdx) => {
+                      const hasCitations = Array.isArray(answer.citations) && answer.citations.length > 0
 
-                    // Collect all citations (nested or top-level)
-                    const citationsList = hasCitations
-                      ? answer.citations
-                      : (answer.citationPdfName || (Array.isArray(answer.imagePaths) && answer.imagePaths.length > 0))
-                      ? [answer]
-                      : []
+                      // Collect all citations (nested or top-level)
+                      const citationsList = hasCitations
+                        ? answer.citations
+                        : (answer.citationPdfName || (Array.isArray(answer.imagePaths) && answer.imagePaths.length > 0))
+                        ? [answer]
+                        : []
 
-                    // Collect all unique image paths (from top-level and nested citations)
-                    const allImageItems = []
-                    if (Array.isArray(answer.imagePaths)) {
-                      answer.imagePaths.forEach((imgPath) => {
-                        if (imgPath && !allImageItems.some((item) => item.path === imgPath)) {
-                          allImageItems.push({
-                            path: imgPath,
-                            citation: answer
-                          })
-                        }
-                      })
-                    }
-                    if (hasCitations) {
-                      answer.citations.forEach((c) => {
-                        if (Array.isArray(c.imagePaths)) {
-                          c.imagePaths.forEach((imgPath) => {
-                            if (imgPath && !allImageItems.some((item) => item.path === imgPath)) {
-                              allImageItems.push({
-                                path: imgPath,
-                                citation: c
-                              })
-                            }
-                          })
-                        }
-                      })
-                    }
-
-                    // Determine answer text to display
-                    let displayText = answer.answerText
-                    if (!displayText && hasCitations) {
-                      const foundTxt = answer.citations.find((c) => c.answerText || c.text || c.content || c.snippet)
-                      if (foundTxt) {
-                        displayText = foundTxt.answerText || foundTxt.text || foundTxt.content || foundTxt.snippet
+                      // Collect all unique image paths (from top-level and nested citations)
+                      const allImageItems = []
+                      if (Array.isArray(answer.imagePaths)) {
+                        answer.imagePaths.forEach((imgPath) => {
+                          if (imgPath && !allImageItems.some((item) => item.path === imgPath)) {
+                            allImageItems.push({
+                              path: imgPath,
+                              citation: answer
+                            })
+                          }
+                        })
                       }
-                    }
-                    if (!displayText) {
-                      if (allImageItems.length > 0 || citationsList.length > 0) {
-                        displayText = 'Reference standard visual specification matched from uploaded document:'
-                      } else {
-                        displayText = 'No answer text provided.'
+                      if (hasCitations) {
+                        answer.citations.forEach((c) => {
+                          if (Array.isArray(c.imagePaths)) {
+                            c.imagePaths.forEach((imgPath) => {
+                              if (imgPath && !allImageItems.some((item) => item.path === imgPath)) {
+                                allImageItems.push({
+                                  path: imgPath,
+                                  citation: c
+                                })
+                              }
+                            })
+                          }
+                        })
                       }
-                    }
 
-                    // Metadata
-                    const sourceType = answer.sourceType || citationsList.find((c) => c.sourceType)?.sourceType
-                    const chunkType = answer.chunkType || citationsList.find((c) => c.chunkType)?.chunkType
+                      // Determine answer text to display
+                      let displayText = answer.answerText
+                      if (!displayText && hasCitations) {
+                        const foundTxt = answer.citations.find((c) => c.answerText || c.text || c.content || c.snippet)
+                        if (foundTxt) {
+                          displayText = foundTxt.answerText || foundTxt.text || foundTxt.content || foundTxt.snippet
+                        }
+                      }
+                      if (!displayText) {
+                        if (allImageItems.length > 0 || citationsList.length > 0) {
+                          displayText = 'Reference standard visual specification matched from uploaded document:'
+                        } else {
+                          displayText = 'No answer text provided.'
+                        }
+                      }
 
-                    return (
-                      <div key={answer.id || aIdx} className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-600 to-green-800 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
-                          <Bot className="w-4 h-4 text-emerald-200" />
-                        </div>
-                        <div className="flex-1 bg-white border border-gray-200 p-5 rounded-2xl rounded-tl-xs shadow-sm space-y-3">
-                          {/* Answer Text */}
-                          <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap font-sans">
-                            {displayText}
+                      // Metadata
+                      const sourceType = answer.sourceType || citationsList.find((c) => c.sourceType)?.sourceType
+                      const chunkType = answer.chunkType || citationsList.find((c) => c.chunkType)?.chunkType
+
+                      return (
+                        <div key={answer.id || aIdx} className="flex items-start gap-3 h-full">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-600 to-green-800 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
+                            <Bot className="w-4 h-4 text-emerald-200" />
                           </div>
+                          <div className="flex-1 bg-white border border-gray-200 p-5 rounded-2xl rounded-tl-xs shadow-sm flex flex-col justify-between h-full space-y-3">
+                            <div className="space-y-3">
+                              {/* Answer Text */}
+                              <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap font-sans">
+                                {displayText}
+                              </div>
+                            </div>
 
-                          {/* Citation Badges & Metadata */}
-                          {(citationsList.length > 0 || sourceType || chunkType) && (
-                            <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center gap-2 text-xs">
-                              {citationsList.map((cit, cIdx) => {
-                                const pdfName = cit.citationPdfName
-                                const pStart =
-                                  cit.citationPageStart !== undefined && cit.citationPageStart !== null
-                                    ? cit.citationPageStart
-                                    : cit.anchorPageStart
-                                const pEnd =
-                                  cit.citationPageEnd !== undefined && cit.citationPageEnd !== null
-                                    ? cit.citationPageEnd
-                                    : cit.anchorPageEnd
+                            <div className="space-y-3 pt-2">
+                              {/* Citation Badges & Metadata */}
+                              {(citationsList.length > 0 || sourceType || chunkType) && (
+                                <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center gap-2 text-xs">
+                                  {citationsList.map((cit, cIdx) => {
+                                    const pdfName = cit.citationPdfName
+                                    const pStart =
+                                      cit.citationPageStart !== undefined && cit.citationPageStart !== null
+                                        ? cit.citationPageStart
+                                        : cit.anchorPageStart
+                                    const pEnd =
+                                      cit.citationPageEnd !== undefined && cit.citationPageEnd !== null
+                                        ? cit.citationPageEnd
+                                        : cit.anchorPageEnd
 
-                                if (!pdfName) return null
-                                return (
-                                  <div
-                                    key={cit.id || cIdx}
-                                    className="flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-3 py-1 rounded-md border border-emerald-200/60 font-medium"
-                                  >
-                                    <FileText className="w-3.5 h-3.5 text-emerald-600" />
-                                    <span>
-                                      Citation: <strong className="font-semibold">{pdfName}</strong>
+                                    if (!pdfName) return null
+                                    return (
+                                      <div
+                                        key={cit.id || cIdx}
+                                        className="flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-3 py-1 rounded-md border border-emerald-200/60 font-medium"
+                                      >
+                                        <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                                        <span>
+                                          Citation: <strong className="font-semibold">{pdfName}</strong>
+                                        </span>
+                                        {pStart !== undefined && pStart !== null && (
+                                          <span className="ml-1 text-emerald-700 bg-emerald-100/80 px-1.5 py-0.5 rounded text-[11px]">
+                                            Pg {pStart}
+                                            {pEnd && pEnd !== pStart ? `-${pEnd}` : ''}
+                                          </span>
+                                        )}
+                                      </div>
+                                    )
+                                  })}
+
+                                  {sourceType && (
+                                    <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-[11px] font-semibold uppercase">
+                                      Source: {sourceType}
                                     </span>
-                                    {pStart !== undefined && pStart !== null && (
-                                      <span className="ml-1 text-emerald-700 bg-emerald-100/80 px-1.5 py-0.5 rounded text-[11px]">
-                                        Pg {pStart}
-                                        {pEnd && pEnd !== pStart ? `-${pEnd}` : ''}
-                                      </span>
-                                    )}
-                                  </div>
-                                )
-                              })}
+                                  )}
 
-                              {sourceType && (
-                                <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-[11px] font-semibold uppercase">
-                                  Source: {sourceType}
-                                </span>
+                                  {chunkType && (
+                                    <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-[11px] font-semibold">
+                                      Chunk: {chunkType}
+                                    </span>
+                                  )}
+                                </div>
                               )}
 
-                              {chunkType && (
-                                <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-[11px] font-semibold">
-                                  Chunk: {chunkType}
-                                </span>
+                              {/* Image Attachments if present */}
+                              {allImageItems.length > 0 && (
+                                <div className="pt-2 flex flex-wrap gap-2">
+                                  {allImageItems.map((item, imgIdx) => {
+                                    const pageNum =
+                                      item.citation?.citationPageStart || item.citation?.anchorPageStart || ''
+                                    return (
+                                      <button
+                                        key={imgIdx}
+                                        type="button"
+                                        onClick={() => handleOpenReferenceImage(item.path, imgIdx, item.citation)}
+                                        className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-300 transition-all cursor-pointer shadow-2xs group"
+                                      >
+                                        <ImageIcon className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
+                                        <span>
+                                          View Reference Image {imgIdx + 1}
+                                          {pageNum ? ` (Pg ${pageNum})` : ''}
+                                        </span>
+                                        <Maximize2 className="w-3 h-3 text-emerald-500 ml-0.5" />
+                                      </button>
+                                    )
+                                  })}
+                                </div>
                               )}
                             </div>
-                          )}
-
-                          {/* Image Attachments if present */}
-                          {allImageItems.length > 0 && (
-                            <div className="pt-2 flex flex-wrap gap-2">
-                              {allImageItems.map((item, imgIdx) => {
-                                const pageNum =
-                                  item.citation?.citationPageStart || item.citation?.anchorPageStart || ''
-                                return (
-                                  <button
-                                    key={imgIdx}
-                                    type="button"
-                                    onClick={() => handleOpenReferenceImage(item.path, imgIdx, item.citation)}
-                                    className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-300 transition-all cursor-pointer shadow-2xs group"
-                                  >
-                                    <ImageIcon className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
-                                    <span>
-                                      View Reference Image {imgIdx + 1}
-                                      {pageNum ? ` (Pg ${pageNum})` : ''}
-                                    </span>
-                                    <Maximize2 className="w-3 h-3 text-emerald-500 ml-0.5" />
-                                  </button>
-                                )
-                              })}
-                            </div>
-                          )}
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })
+                      )
+                    })}
+                  </div>
                 ) : (
                   // Pending or fallback answer display
                   <div className="flex items-start gap-3">
