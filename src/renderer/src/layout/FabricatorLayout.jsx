@@ -1,6 +1,7 @@
 import { useState } from "react";
 import AllFabricator from "../components/fabricator/fabricator/AllFabricator";
 import AddFabricator from "../components/fabricator/fabricator/AddFabricator";
+import StandardsChatbot from "../components/project/standards/StandardsChatbot";
 
 const FabricatorLayout = () => {
   const [activeTab, setActiveTab] = useState("allFabricator");
@@ -29,6 +30,16 @@ const FabricatorLayout = () => {
             >
               Add Fabricator
             </button>
+
+            <button
+              onClick={() => setActiveTab("fabricationStandards")}
+              className={`px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-normal transition-all border-2 shadow-sm active:scale-95 ${activeTab === "fabricationStandards"
+                ? "bg-green-50 text-black border-green-700/80 hover:bg-green-100"
+                : "bg-white text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-black hover:border-gray-400"
+                }`}
+            >
+              Fabrication Standards
+            </button>
           </div>
         </div>
       </div>
@@ -41,6 +52,11 @@ const FabricatorLayout = () => {
         {activeTab === "addFabricator" && (
           <div>
             <AddFabricator />
+          </div>
+        )}
+        {activeTab === "fabricationStandards" && (
+          <div className="p-2">
+            <StandardsChatbot defaultSourceType="FABRICATOR" />
           </div>
         )}
       </div>

@@ -22,7 +22,7 @@ import { toast } from 'react-toastify'
 
 
 
-const StandardsChatbot = ({ projectId, project }) => {
+const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR' }) => {
   const [messages, setMessages] = useState([])
   const [loadingHistory, setLoadingHistory] = useState(true)
   const [query, setQuery] = useState('')
@@ -31,8 +31,51 @@ const StandardsChatbot = ({ projectId, project }) => {
   // Upload modal state
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [uploadFile, setUploadFile] = useState(null)
-  const [sourceType, setSourceType] = useState('FABRICATOR')
+  const [sourceType, setSourceType] = useState(defaultSourceType)
+  const [documentFamilyId, setDocumentFamilyId] = useState('ACI-318')
   const [uploading, setUploading] = useState(false)
+
+  // Fabricator options state
+  const [fabricators, setFabricators] = useState([])
+  const [selectedFabricatorId, setSelectedFabricatorId] = useState('')
+  const [loadingFabricators, setLoadingFabricators] = useState(false)
+
+  useEffect(() => {
+    const fetchFabricators = async () => {
+      try {
+        setLoadingFabricators(true)
+        const res = await Service.GetAllFabricators(1, 100)
+        let list = []
+        if (Array.isArray(res)) {
+          list = res
+        } else if (res?.data?.data && Array.isArray(res.data.data)) {
+          list = res.data.data
+        } else if (res?.data && Array.isArray(res.data)) {
+          list = res.data
+        } else if (res?.fabricators && Array.isArray(res.fabricators)) {
+          list = res.fabricators
+        }
+        setFabricators(list)
+      } catch (err) {
+        console.error('Failed to fetch fabricators in StandardsChatbot:', err)
+      } finally {
+        setLoadingFabricators(false)
+      }
+    }
+    fetchFabricators()
+  }, [])
+
+  useEffect(() => {
+    const defaultFabId =
+      project?.fabricatorID ||
+      project?.fabricator?.id ||
+      project?.fabricator_id ||
+      project?.fabricatorId ||
+      ''
+    if (defaultFabId) {
+      setSelectedFabricatorId(String(defaultFabId))
+    }
+  }, [project])
 
   // Image viewer modal state
   const [imageModal, setImageModal] = useState({
@@ -49,7 +92,10 @@ const StandardsChatbot = ({ projectId, project }) => {
   }
 
   const fetchHistory = async () => {
-    if (!projectId) return
+    if (!projectId) {
+      setLoadingHistory(false)
+      return
+    }
     try {
       setLoadingHistory(true)
       const res = await Service.GetStandardsChatHistory(projectId)
@@ -119,7 +165,13 @@ const StandardsChatbot = ({ projectId, project }) => {
     if (!queryTextToSend) setQuery('')
 
     try {
-      const response = await Service.ChatWithStandards(projectId, textToSubmit)
+      const chatPayload = {
+        query: textToSubmit,
+        ...(documentFamilyId ? { documentFamilyId } : {}),
+        ...(selectedFabricatorId ? { fabricatorId: selectedFabricatorId } : {})
+      }
+      const targetId = projectId || 'general'
+      const response = await Service.ChatWithStandards(targetId, chatPayload)
       console.log('Standards chat response:', response)
 
       // Format response to message item format
@@ -192,10 +244,16 @@ const StandardsChatbot = ({ projectId, project }) => {
       setUploading(true)
       const formData = new FormData()
       formData.append('file', uploadFile)
-      formData.append('sourceType', sourceType || 'FABRICATOR')
-      formData.append('projectId', projectId)
+      formData.append('sourceType', sourceType || defaultSourceType || 'FABRICATOR')
+      if (projectId) {
+        formData.append('projectId', projectId)
+      }
+      if (documentFamilyId) {
+        formData.append('documentFamilyId', documentFamilyId)
+      }
 
       const fabricatorId =
+        selectedFabricatorId ||
         project?.fabricatorID ||
         project?.fabricator?.id ||
         project?.fabricator_id ||
@@ -230,19 +288,32 @@ const StandardsChatbot = ({ projectId, project }) => {
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-lg tracking-wide text-white">
-                Standards AI Assistant
+                {projectId ? 'Standards AI Assistant' : 'Fabrication Standards AI Assistant'}
               </h3>
               <span className="flex items-center gap-1 text-[11px] bg-emerald-500/30 text-emerald-200 px-2 py-0.5 rounded-full border border-emerald-400/30 font-medium">
                 <Sparkles className="w-3 h-3 text-emerald-300" /> RAG Powered
               </span>
             </div>
             <p className="text-xs text-emerald-100/80">
-              Query vector database standards & specs for {project?.name || 'this project'}
+              {project?.name
+                ? `Query vector database standards & specs for ${project.name}`
+                : 'Upload & query general fabrication standards, specs & codes'}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 bg-emerald-950/40 px-2.5 py-1.5 rounded-md border border-emerald-500/30 text-xs">
+            <span className="text-emerald-300 font-semibold text-[11px] uppercase tracking-wider">Family:</span>
+            <input
+              type="text"
+              value={documentFamilyId}
+              onChange={(e) => setDocumentFamilyId(e.target.value)}
+              placeholder="ACI-318"
+              className="bg-transparent text-white font-semibold text-xs focus:outline-none w-20 border-b border-emerald-400/40 focus:border-emerald-300 px-1"
+              title="Document Family ID sent with queries and uploads"
+            />
+          </div>
           <button
             onClick={() => setShowUploadModal(true)}
             className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-md transition-all shadow-sm cursor-pointer border border-emerald-400/40"
@@ -535,6 +606,19 @@ const StandardsChatbot = ({ projectId, project }) => {
             <form onSubmit={handleFileUpload} className="p-6 space-y-4">
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  Document Family ID
+                </label>
+                <input
+                  type="text"
+                  value={documentFamilyId}
+                  onChange={(e) => setDocumentFamilyId(e.target.value)}
+                  placeholder="e.g. ACI-318"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none font-medium text-gray-800"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
                   Source Type
                 </label>
                 <select
@@ -550,6 +634,30 @@ const StandardsChatbot = ({ projectId, project }) => {
                   <option value="AWS">AWS</option>
                 </select>
               </div>
+
+              {sourceType === 'FABRICATOR' && (
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Select Fabricator
+                  </label>
+                  <select
+                    value={selectedFabricatorId}
+                    onChange={(e) => setSelectedFabricatorId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none font-medium text-gray-800"
+                  >
+                    <option value="">-- Select Fabricator (Optional / General) --</option>
+                    {fabricators.map((fab) => {
+                      const id = String(fab.id || fab._id || fab.fabricatorID || '')
+                      const name = fab.fabName || fab.name || fab.fabricatorName || fab.companyName || 'Unnamed Fabricator'
+                      return (
+                        <option key={id} value={id}>
+                          {name}
+                        </option>
+                      )
+                    })}
+                  </select>
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
