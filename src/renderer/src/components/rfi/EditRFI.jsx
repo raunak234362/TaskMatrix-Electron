@@ -87,17 +87,22 @@ const EditRFI = ({ id, onSuccess }) => {
       const data = response.data
       setRfi(data)
       setDescription(data.description || '')
+      if (data.files && Array.isArray(data.files)) {
+        setFiles(data.files)
+      }
+
+      if (data.isConnectionDesign === true || String(data.isConnectionDesign).toLowerCase() === 'true') {
+        setIsCDMode(true)
+      }
       
       // Initialize form values
       reset({
         subject: data.subject,
-        multipleRecipients: data.multipleRecipients?.map(r => r.id) || [],
+        multipleRecipients: data.multipleRecipients?.map(r => r.id || r._id || r) || [],
         isAproovedByAdmin: data.isAproovedByAdmin || false
       })
 
-      // Determine if it was CD Mode based on recipients if possible, 
-      // or just default to false. Usually, it depends on which list the recipients belong to.
-      // For now, we'll try to fetch CD engineers if there's a connectionDesignerID
+      // Fetch CD engineers if there's a connectionDesignerID
       if (data.project?.connectionDesignerID) {
         fetchCDEngineers(data.project.connectionDesignerID)
       }
@@ -125,20 +130,76 @@ const EditRFI = ({ id, onSuccess }) => {
     if (id) fetchRfi()
   }, [id])
 
+  const [pocs, setPocs] = useState([])
+  const [fetchingPocs, setFetchingPocs] = useState(false)
+
+  const targetFabricatorID =
+    rfi?.fabricator_id ||
+    rfi?.fabricatorID ||
+    rfi?.fabricator?.id ||
+    rfi?.fabricator?._id ||
+    rfi?.project?.fabricatorID ||
+    rfi?.project?.fabricator_id ||
+    rfi?.project?.fabricator?.id ||
+    rfi?.project?.fabricator?._id
+
+  useEffect(() => {
+    const fetchPocs = async () => {
+      if (targetFabricatorID) {
+        try {
+          setFetchingPocs(true)
+          const res = await Service.GetFabricatorPOC(targetFabricatorID)
+          let list = []
+          if (Array.isArray(res)) {
+            list = res
+          } else if (res?.data?.pointOfContact && Array.isArray(res.data.pointOfContact)) {
+            list = res.data.pointOfContact
+          } else if (res?.pointOfContact && Array.isArray(res.pointOfContact)) {
+            list = res.pointOfContact
+          } else if (res?.data && Array.isArray(res.data)) {
+            list = res.data
+          } else if (res?.pocs && Array.isArray(res.pocs)) {
+            list = res.pocs
+          }
+          setPocs(list)
+        } catch (err) {
+          console.error('Failed to fetch fabricator POCs', err)
+          setPocs([])
+        } finally {
+          setFetchingPocs(false)
+        }
+      } else {
+        setPocs([])
+      }
+    }
+    fetchPocs()
+  }, [targetFabricatorID])
+
   const selectedFabricator = fabricators?.find(
-    (f) => String(f.id) === String(rfi?.fabricator_id || rfi?.fabricatorID)
+    (f) => String(f.id || f._id) === String(targetFabricatorID)
   )
 
+  const fetchedPocOptions = pocs.map((p) => ({
+    label:
+      `${p.firstName || ''} ${p.middleName ? p.middleName + ' ' : ''}${p.lastName || ''}`.trim() ||
+      p.email ||
+      p.name ||
+      'Unnamed POC',
+    value: p.id || p._id
+  }))
+
   const pocOptions =
-    selectedFabricator?.pointOfContact?.map((p) => ({
-      label: `${p.firstName} ${p.middleName ?? ''} ${p.lastName}`,
-      value: p.id
-    })) ?? []
+    fetchedPocOptions.length > 0
+      ? fetchedPocOptions
+      : (selectedFabricator?.pointOfContact?.map((p) => ({
+          label: `${p.firstName} ${p.middleName ?? ''} ${p.lastName}`.trim(),
+          value: p.id || p._id
+        })) ?? [])
 
   const cdEngineerOptions =
     cdEngineers?.map((e) => ({
       label: `${e.firstName} ${e.lastName} (CD Engineer)`,
-      value: e.id
+      value: e.id || e._id
     })) ?? []
 
   const activeRecipientOptions = isCDMode ? cdEngineerOptions : pocOptions
@@ -166,7 +227,11 @@ const EditRFI = ({ id, onSuccess }) => {
       })
 
       if (Array.isArray(files)) {
-        files.forEach((f) => formData.append('files', f))
+        files.forEach((f) => {
+          if (f instanceof File) {
+            formData.append('files', f)
+          }
+        })
       }
 
       const fabricatorName = selectedFabricator?.fabName || rfi?.fabricatorName || rfi?.fabricator?.fabName || "";
@@ -269,12 +334,16 @@ const EditRFI = ({ id, onSuccess }) => {
                   <Select
                     isMulti
                     placeholder={
-                      fetchingEngineers
-                        ? 'Fetching engineers...'
-                        : `Select ${isCDMode ? 'engineers' : 'Point of Contacts'}...`
+                      isCDMode
+                        ? fetchingEngineers
+                          ? 'Fetching engineers...'
+                          : 'Select engineers...'
+                        : fetchingPocs
+                        ? 'Fetching POCs...'
+                        : 'Select Point of Contacts...'
                     }
                     options={activeRecipientOptions}
-                    isLoading={fetchingEngineers}
+                    isLoading={isCDMode ? fetchingEngineers : fetchingPocs}
                     value={activeRecipientOptions.filter((o) => (field.value || []).includes(o.value))}
                     onChange={(options) => {
                       field.onChange(options ? options.map((o) => o.value) : [])

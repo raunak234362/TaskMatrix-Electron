@@ -89,6 +89,7 @@ function MultipleFileUpload({
   };
 
   const formatFileSize = (bytes) => {
+    if (bytes === undefined || bytes === null || isNaN(bytes)) return "Existing Attachment";
     if (bytes === 0) return "0 B";
     const k = 1024;
     const sizes = ["B", "KB", "MB", "GB"];
@@ -146,36 +147,39 @@ function MultipleFileUpload({
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Selected Files ({files.length})</p>
           </div>
           <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-            {files.map((file, index) => (
-              <div
-                key={`${file.name}-${file.lastModified}-${index}`}
-                className="flex items-center justify-between p-3 border border-gray-100 rounded-xl bg-white shadow-sm group hover:border-[#6bbd45]/30 transition-colors"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
-                    <FileText className="w-4 h-4 text-[#6bbd45]" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold text-black truncate" title={file.name}>
-                      {file.name}
-                    </p>
-                    <p className="text-[10px] text-gray-400 font-medium uppercase">
-                      {formatFileSize(file.size)}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeFile(index);
-                  }}
-                  className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-all"
+            {files.map((file, index) => {
+              const displayName = file.originalName || file.filename || file.name || "Attachment";
+              return (
+                <div
+                  key={`${displayName}-${file.lastModified || index}-${index}`}
+                  className="flex items-center justify-between p-3 border border-gray-100 rounded-xl bg-white shadow-sm group hover:border-[#6bbd45]/30 transition-colors"
                 >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
+                      <FileText className="w-4 h-4 text-[#6bbd45]" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-black truncate" title={displayName}>
+                        {displayName}
+                      </p>
+                      <p className="text-[10px] text-gray-400 font-medium uppercase">
+                        {formatFileSize(file.size)}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeFile(index);
+                    }}
+                    className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-all"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
