@@ -10,7 +10,7 @@ import {
   getSortedRowModel,
   flexRender,
 } from "@tanstack/react-table";
-import { Search, ChevronDown, ChevronUp, X } from "lucide-react";
+import { Search, ChevronDown, ChevronUp, X, Loader2 } from "lucide-react";
 import { Button } from "./button";
 import Select from "../fields/Select";
 
@@ -191,6 +191,7 @@ export default function DataTable({
   pageCount,
   pageIndex,
   onPageChange,
+  isLoading = false,
 }) {
   const { isMobile } = useScreen();
 
@@ -355,11 +356,18 @@ export default function DataTable({
  
       {/* responsive body */}
       {isMobile ? (
-        <MobileCardView
-          table={table}
-          DetailComponent={DetailComponent}
-          onRowClick={onRowClick}
-        />
+        isLoading ? (
+          <div className="flex flex-col items-center justify-center py-12 bg-white rounded-lg border border-gray-100 shadow-sm">
+            <Loader2 className="w-8 h-8 animate-spin text-green-600 mb-2" />
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Loading...</span>
+          </div>
+        ) : (
+          <MobileCardView
+            table={table}
+            DetailComponent={DetailComponent}
+            onRowClick={onRowClick}
+          />
+        )
       ) : (
         <div className="w-full">
           <div className="max-h-[800px] overflow-y-auto overflow-x-auto">
@@ -385,7 +393,7 @@ export default function DataTable({
                             <ChevronDown className="w-4 h-4" />
                           )}
                         </div>
- 
+
                         {showColumnFiltersInHeader &&
                           header.column.getCanFilter() && (
                             <TextFilter column={header.column} />
@@ -395,45 +403,64 @@ export default function DataTable({
                   </tr>
                 ))}
               </thead>
- 
+
               <tbody className="bg-white text-black divide-y divide-gray-100">
-                {table.getPaginationRowModel().rows.map((row) => (
-                  <React.Fragment key={row.id}>
-                    <tr
-                      className={`hover:bg-green-50 cursor-pointer transition-colors ${expandedRowId === row.id ? "bg-gray-50" : ""
-                        } ${getRowClassName(row.original)}`}
-                      onClick={() => {
-                        onRowClick?.(row.original);
-                        if (DetailComponent) {
-                          setExpandedRowId(
-                            expandedRowId === row.id ? null : row.id,
-                          );
-                        }
-                      }}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id} className="px-4 py-4 text-sm font-normal text-black">
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                    {expandedRowId === row.id && DetailComponent && (
-                      <tr className="bg-gray-50/50">
-                        <td colSpan={columns.length} className="px-4 py-4">
-                          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-black">
-                            <DetailComponent
-                               row={row.original}
-                               close={() => setExpandedRowId(null)}
-                            />
-                          </div>
-                        </td>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={columns.length} className="px-4 py-16 text-center text-gray-500">
+                      <div className="flex flex-col items-center justify-center gap-3">
+                        <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+                        <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                          Loading data...
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : table.getPaginationRowModel().rows.length === 0 ? (
+                  <tr>
+                    <td colSpan={columns.length} className="px-4 py-12 text-center text-gray-400 font-medium">
+                      No records found
+                    </td>
+                  </tr>
+                ) : (
+                  table.getPaginationRowModel().rows.map((row) => (
+                    <React.Fragment key={row.id}>
+                      <tr
+                        className={`hover:bg-green-50 cursor-pointer transition-colors ${expandedRowId === row.id ? "bg-gray-50" : ""
+                          } ${getRowClassName(row.original)}`}
+                        onClick={() => {
+                          onRowClick?.(row.original);
+                          if (DetailComponent) {
+                            setExpandedRowId(
+                              expandedRowId === row.id ? null : row.id,
+                            );
+                          }
+                        }}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <td key={cell.id} className="px-4 py-4 text-sm font-normal text-black">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </td>
+                        ))}
                       </tr>
-                    )}
-                  </React.Fragment>
-                ))}
+                      {expandedRowId === row.id && DetailComponent && (
+                        <tr className="bg-gray-50/50">
+                          <td colSpan={columns.length} className="px-4 py-4">
+                            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-black">
+                              <DetailComponent
+                                 row={row.original}
+                                 close={() => setExpandedRowId(null)}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
