@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, RotateCw } from "lucide-react";
 import { useDispatch } from "react-redux";
 
 import DataTable from "../../ui/table";
@@ -24,6 +24,20 @@ const AllWBS = ({ id, stage }) => {
   const [error, setError] = useState(null);
   const [selectedWBS, setSelectedWBS] = useState(null);
   const [showFetchTemplate, setShowFetchTemplate] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncWBS = async () => {
+    if (!projectId) return;
+    try {
+      setIsSyncing(true);
+      await Service.SyncWBS(projectId);
+      await fetchAllWBS();
+    } catch (err) {
+      console.error("Error syncing WBS:", err);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // ✅ Convert MINUTES → HH:mm (NO seconds)
   const formatMinutesToTime = (totalMinutes) => {
@@ -202,16 +216,36 @@ const AllWBS = ({ id, stage }) => {
   return (
     <div className="bg-[#fcfdfc] min-h-[400px] p-2 animate-in fade-in duration-700">
       <div className="flex justify-between items-center mb-6">
-        {(userRole === "admin" ||
-          userRole === "operation_executive" ||
-          userRole === "estimation_head") && (
-            <Button
-              onClick={() => setShowFetchTemplate(true)}
-              className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
-            >
-              Add New Bundle
-            </Button> 
-          )}
+        <div className="flex items-center gap-3">
+          {(userRole === "admin" ||
+            userRole === "operation_executive" ||
+            userRole === "estimation_head") && (
+              <Button
+                onClick={() => setShowFetchTemplate(true)}
+                className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
+              >
+                Add New Bundle
+              </Button> 
+            )}
+
+          <Button
+            onClick={handleSyncWBS}
+            disabled={isSyncing}
+            className="px-6 py-1.5 bg-blue-50 text-black border-2 border-blue-700/80 rounded-none hover:bg-blue-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer gap-2 disabled:opacity-50"
+          >
+            {isSyncing ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-blue-700" />
+                Syncing WBS...
+              </>
+            ) : (
+              <>
+                <RotateCw className="w-4 h-4 text-blue-700" />
+                Sync WBS
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       <DataTable

@@ -80,7 +80,7 @@ class WBSTemplateService {
   // sync WBS with DB
   static async SyncWBS(projectId) {
     try {
-      const response = await api.post(`project/projects/${projectId}/wbs/sync`, {
+      const response = await api.post(`project/projects/${projectId}/wbs/sync`, {}, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -89,6 +89,7 @@ class WBSTemplateService {
       return response.data
     } catch (error) {
       console.error('cannot sync wbs', error)
+      throw error
     }
   }
 
@@ -107,8 +108,8 @@ class WBSTemplateService {
     }
   }
 
-  
-//------------------------------
+
+  //------------------------------
   // Update WBS Line Item
   static async UpdateLineItem(id, data) {
     try {
@@ -154,7 +155,7 @@ class WBSTemplateService {
     }
   }
 
-  
+
   // add wbs in project:
   static async AddWBSInProject(projectId) {
     try {

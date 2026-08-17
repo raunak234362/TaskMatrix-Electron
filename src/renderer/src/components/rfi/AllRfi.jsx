@@ -367,12 +367,13 @@ const AllRFI = ({ rfiData, onUpdate }) => {
 
   const isConnectionDesignerRFI = (item) => {
     if (!item) return false
-    const isCDFlag =
-      item.isConnectionDesign === true || String(item.isConnectionDesign).toLowerCase() === 'true'
-    if (isCDFlag) return true
 
-    const text = item.subject || item.rfiNo || item.rfiNumber || item.serialNo || ''
-    if (/RFI\s*#?\s*\d*[A-Za-z]+/i.test(text)) return true
+    if (item.isConnectionDesign !== undefined && item.isConnectionDesign !== null) {
+      return (
+        item.isConnectionDesign === true ||
+        String(item.isConnectionDesign).toLowerCase() === 'true'
+      )
+    }
 
     if (item.sender && isCDUser(item.sender)) return true
 

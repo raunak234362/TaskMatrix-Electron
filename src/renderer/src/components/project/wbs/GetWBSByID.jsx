@@ -5,6 +5,7 @@ import {
   AlertCircle,
   Layers,
   X,
+  RotateCw,
 } from "lucide-react";
 import Service from "../../../api/Service";
 
@@ -39,6 +40,23 @@ const GetWBSByID = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedWbsId, setSelectedWbsId] = useState(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncWBS = async () => {
+    const targetProjectId = projectId || initialData?.projectId || initialData?.project?.id || initialData?.project;
+    if (!targetProjectId) return;
+    try {
+      setIsSyncing(true);
+      await Service.SyncWBS(targetProjectId);
+      if (id) {
+        await fetchWBSById(id);
+      }
+    } catch (err) {
+      console.error("Error syncing WBS:", err);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   useEffect(() => {
     if (initialData) {
@@ -216,12 +234,31 @@ const GetWBSByID = ({
               </div>
             </div>
           </div>
-          <Button
-            onClick={onClose}
-            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
-          >
-            Close
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={handleSyncWBS}
+              disabled={isSyncing}
+              className="px-6 py-1.5 bg-blue-50 text-black border-2 border-blue-700/80 rounded-lg hover:bg-blue-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+            >
+              {isSyncing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-blue-700" />
+                  Syncing...
+                </>
+              ) : (
+                <>
+                  <RotateCw className="w-4 h-4 text-blue-700" />
+                  Sync WBS
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={onClose}
+              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
+            >
+              Close
+            </Button>
+          </div>
         </div>
 
         <GetWBSByIDsHours
