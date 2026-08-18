@@ -18,12 +18,14 @@ class RFQService {
   }
 
   //Fetch all the RFQ
-  static async FetchAllRFQ(page, limit = 10) {
+  static async FetchAllRFQ(page, limit = 10, searchByProjectName, status) {
     try {
       const response = await api.get(`rfq/all`, {
         params: {
           page,
           limit,
+          searchByProjectName: searchByProjectName || undefined,
+          status: status || undefined,
         },
         headers: {
           'Content-Type': 'application/json'
@@ -37,12 +39,14 @@ class RFQService {
   }
 
   // api for sents :
-  static async RfqSent(page, limit = 10) {
+  static async RfqSent(page, limit = 10, searchByProjectName, status) {
     try {
       const response = await api.get(`rfq/sents`, {
         params: {
           page,
-          limit
+          limit,
+          searchByProjectName: searchByProjectName || undefined,
+          status: status || undefined,
         },
         headers: {
           'Content-Type': 'application/json'
@@ -56,12 +60,14 @@ class RFQService {
   }
 
   //api for recieved:
-  static async RFQRecieved(page, limit = 10) {
+  static async RFQRecieved(page, limit = 10, searchByProjectName, status) {
     try {
       const response = await api.get(`rfq/received`, {
         params: {
           page,
           limit,
+          searchByProjectName: searchByProjectName || undefined,
+          status: status || undefined,
         },
         headers: {
           Authorization: `Bearer ${token}`,

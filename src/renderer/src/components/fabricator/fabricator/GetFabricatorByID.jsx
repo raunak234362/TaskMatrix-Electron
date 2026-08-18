@@ -1,25 +1,21 @@
-import React, { useEffect, useState, Suspense, lazy } from "react";
+import { useEffect, useState, Suspense, lazy } from "react";
 import { createPortal } from "react-dom";
 import Modal from "../../ui/Modal";
 
 const GetProjectById = lazy(() => import("../../project/GetProjectById"));
 import Service from "../../../api/Service";
-import { Loader2, AlertCircle, Link2, FileText, Link, Building2, Hash, CreditCard, Landmark, X } from "lucide-react";
-import Button from "../../fields/Button";
+import { Loader2, AlertCircle, Link2, FileText, Building2, Hash, CreditCard, Landmark, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";
 import { deleteFabricator, updateFabricator } from "../../../store/fabricatorSlice";
 import { toast } from "react-toastify";
 
-import { openFileSecurely } from "../../../utils/openFileSecurely";
 import EditFabricator from "./EditFabricator";
 import AllBranches from "../branches/AllBranches";
 import AllClients from "../clients/AllClients";
 import FabricatorDashboard from "./FabricatorDashboard";
 import RenderFiles from "../../common/RenderFiles";
 
-const truncateText = (text, max = 40) =>
-  text.length > max ? text.substring(0, max) + "..." : text;
 
 const GetFabricatorByID = ({ id, onClose }) => {
   const dispatch = useDispatch();
@@ -86,12 +82,48 @@ const GetFabricatorByID = ({ id, onClose }) => {
 
   useEffect(() => {
     const fetchAccount = async () => {
-      if (activeTab === "account" && fabricator?.accountId && !account) {
+      const accountId = fabricator?.accountId;
+      const fabId = fabricator?.id || fabricator?._id;
+
+      if (activeTab === "account" && (accountId || fabId) && !account) {
         try {
           setAccountLoading(true);
           setAccountError(null);
-          const response = await Service.GetBankAccountById(fabricator.accountId);
-          setAccount(response?.data || null);
+          let response;
+
+          // 1. Try accountId with GetAccountById (GET /invoice/account/{id})
+          if (accountId) {
+            try {
+              response = await Service.GetAccountById(accountId);
+            } catch (err1) {
+              console.warn("GetAccountById with accountId failed:", err1);
+            }
+          }
+
+          // 2. Try fabId with GetAccountById
+          if (!response && fabId) {
+            try {
+              response = await Service.GetAccountById(fabId);
+            } catch (err2) {
+              console.warn("GetAccountById with fabId failed:", err2);
+            }
+          }
+
+          // 3. Fallback to GetBankAccountById with accountId
+          if (!response && accountId) {
+            try {
+              response = await Service.GetBankAccountById(accountId);
+            } catch (err3) {
+              console.warn("GetBankAccountById failed:", err3);
+            }
+          }
+
+          const resData = response?.data || response;
+          if (resData && typeof resData === 'object' && Object.keys(resData).length > 0) {
+            setAccount(resData);
+          } else {
+            setAccount(null);
+          }
         } catch (err) {
           setAccountError("Failed to load account details");
           console.error("Error fetching account:", err);
@@ -102,7 +134,9 @@ const GetFabricatorByID = ({ id, onClose }) => {
     };
 
     fetchAccount();
-  }, [activeTab, fabricator?.accountId, account]);
+  }, [activeTab, fabricator, account]);
+
+
 
   const formatDate = (date) =>
     new Date(date).toLocaleString("en-IN", {

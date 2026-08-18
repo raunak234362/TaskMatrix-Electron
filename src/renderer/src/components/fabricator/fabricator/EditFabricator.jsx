@@ -1,9 +1,9 @@
 /* eslint-disable no-useless-escape */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/fabricator/EditFabricator.jsx
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Loader2, X, Check, Trash2, Paperclip } from "lucide-react";
+import { Loader2, Check, Trash2, Paperclip, UploadCloud } from "lucide-react";
+
 import { motion } from "framer-motion";
 import Service from "../../../api/Service";
 import Input from "../../fields/input";
@@ -11,6 +11,8 @@ import Button from "../../fields/Button";
 import MultipleFileUpload from "../../fields/MultipleFileUpload";
 import Select from "../../fields/Select";
 import { toast } from "react-toastify";
+import UploadFabricatorStandard from "./UploadFabricatorStandard";
+
 
 const EditFabricator = ({
   fabricatorData,
@@ -23,7 +25,9 @@ const EditFabricator = ({
   const [accounts, setAccounts] = useState([]);
   const [fetchingAccounts, setFetchingAccounts] = useState(false);
   const [wbtContactOptions, setWbtContactOptions] = useState();
+  const [showUploadStandardModal, setShowUploadStandardModal] = useState(false);
   console.log(wbtContactOptions);
+
 
   // State to manage existing files that the user decides to KEEP
   const [filesToKeep, setFilesToKeep] = useState(
@@ -59,15 +63,44 @@ const EditFabricator = ({
     const fetchAccounts = async () => {
       setFetchingAccounts(true);
       try {
-        const response = await Service.GetBankAccounts();
+        const accountId = fabricatorData?.accountId;
+        const fabId =
+          fabricatorData?.id ||
+          fabricatorData?._id ||
+          fabricatorData?.fabricatorID ||
+          fabricatorData?.fabricator_id ||
+          fabricatorData?.fabricatorId;
+
+        let response;
+        if (accountId) {
+          try {
+            response = await Service.GetAccountById(accountId);
+          } catch (err) {
+            console.warn("GetAccountById with accountId failed:", err);
+          }
+        }
+        if (!response && fabId) {
+          try {
+            response = await Service.GetAccountById(fabId);
+          } catch (err) {
+            console.warn("GetAccountById with fabId failed:", err);
+          }
+        }
+        if (!response) {
+          response = await Service.GetBankAccounts();
+        }
+
         const data = response?.data || response || [];
-        setAccounts(Array.isArray(data) ? data : []);
+        const list = Array.isArray(data) ? data : data ? [data] : [];
+        setAccounts(list);
       } catch (err) {
         console.error("Error fetching accounts:", err);
       } finally {
         setFetchingAccounts(false);
       }
     };
+
+
 
     const fetchWBTContacts = async () => {
       try {
@@ -452,6 +485,32 @@ const EditFabricator = ({
 
           {/* Section 3: Assets */}
           <section className="space-y-6 pt-10 border-t border-slate-100">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <h3 className="text-sm text-black font-bold uppercase tracking-[0.2em]">
+                Partner Attachments & Fabrication Standards
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowUploadStandardModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+              >
+                <UploadCloud className="w-4 h-4" />
+                Upload Fabricator Standard PDF
+              </button>
+            </div>
+
+            {showUploadStandardModal && (
+              <UploadFabricatorStandard
+                fabricatorId={fabricatorData?.id || fabricatorData?._id || fabricatorData?.fabricatorID || fabricatorData?.fabricator_id || fabricatorData?.fabricatorId || ''}
+                fabricatorName={fabricatorData?.fabName || fabricatorData?.name || fabricatorData?.fabricatorName || ''}
+                onClose={() => setShowUploadStandardModal(false)}
+                onSuccess={() => {
+                  setShowUploadStandardModal(false);
+                  onSuccess?.();
+                }}
+              />
+            )}
+
 
 
             {/* Existing Files */}

@@ -16,16 +16,39 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
   const [totalPages, setTotalPages] = useState(1)
   const [loading, setLoading] = useState(true)
 
-  // Fetch paginated RFQs
+  const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('ALL')
+  const [mtoFilter, setMtoFilter] = useState('ALL')
+  const [showAwarded, setShowAwarded] = useState(false)
+
+  // Debounce search input for API calls
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+    }, 300)
+    return () => clearTimeout(handler)
+  }, [searchQuery])
+
+  // Derive status parameter for API request
+  const activeStatusParam = useMemo(() => {
+    if (showAwarded) return 'AWARDED'
+    if (statusFilter && statusFilter !== 'ALL') return statusFilter
+    return undefined
+  }, [showAwarded, statusFilter])
+
+  // Fetch paginated RFQs with searchByProjectName & status query params
   useEffect(() => {
     const fetchPaginated = async () => {
       try {
         setLoading(true)
         let response
+        const searchParam = debouncedSearch.trim() || undefined
+
         if (userType === 'CLIENT') {
-          response = await Service.RfqSent(currentPage, 10)
+          response = await Service.RfqSent(currentPage, 10, searchParam, activeStatusParam)
         } else {
-          response = await Service.FetchAllRFQ(currentPage, 10)
+          response = await Service.FetchAllRFQ(currentPage, 10, searchParam, activeStatusParam)
         }
 
         if (response) {
@@ -63,7 +86,7 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
       }
     }
     fetchPaginated()
-  }, [currentPage, userType])
+  }, [currentPage, userType, debouncedSearch, activeStatusParam])
 
   const [allFabricators, setAllFabricators] = useState([])
 
@@ -327,15 +350,24 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
     }
   )
 
-  const [searchQuery, setSearchQuery] = useState('')
-  const [mtoFilter, setMtoFilter] = useState('ALL')
-  const [showAwarded, setShowAwarded] = useState(false)
-
   const MTO_TYPE_OPTIONS = [
     { label: 'All', value: 'ALL' },
     { label: 'MTO', value: 'MTO' },
     { label: 'Detailing', value: 'DETAILING' },
     { label: 'Both', value: 'BOTH' }
+  ]
+
+  const STATUS_FILTER_OPTIONS = [
+    { label: 'All Statuses', value: 'ALL' },
+    { label: 'Pending', value: 'PENDING' },
+    { label: 'In Review', value: 'IN_REVIEW' },
+    { label: 'Received', value: 'RECEIVED' },
+    { label: 'Sent', value: 'SENT' },
+    { label: 'Awarded', value: 'AWARDED' },
+    { label: 'Submitted', value: 'SUBMITTED' },
+    { label: 'Completed', value: 'COMPLETED' },
+    { label: 'Rejected', value: 'REJECTED' },
+    { label: 'Closed', value: 'CLOSED' }
   ]
 
   const filteredRfq = useMemo(() => {
@@ -414,6 +446,36 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
+            {/* Status Dropdown */}
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value)
+                  setCurrentPage(1)
+                }}
+                className="appearance-none bg-white border-2 border-gray-200 rounded-lg px-4 py-2 pr-9 text-sm font-bold text-gray-700 uppercase tracking-tight shadow-sm hover:border-green-400 focus:outline-none focus:border-green-500 transition-all duration-200 cursor-pointer"
+                style={{ minWidth: 160 }}
+              >
+                {STATUS_FILTER_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
+                <svg width="14" height="14" fill="none" viewBox="0 0 20 20">
+                  <path
+                    d="M5 7l5 5 5-5"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            </div>
+
             {/* Type / MTO Dropdown */}
             <div className="relative">
               <select

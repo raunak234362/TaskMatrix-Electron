@@ -107,6 +107,23 @@ class InvoiceService {
     }
   }
 
+  // Get Account Info by ID / Fabricator ID
+  static async GetAccountById(id) {
+    try {
+      const response = await api.get(`invoice/account/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('GetAccountById response:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching account info by ID:', error)
+      throw error
+    }
+  }
+
+
   // Wire Transfer API methods
   static async GetAllWireTransfers() {
     try {

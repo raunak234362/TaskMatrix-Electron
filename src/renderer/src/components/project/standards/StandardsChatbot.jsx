@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Bot,
   Send,
@@ -8,19 +8,15 @@ import {
   Sparkles,
   User,
   BookOpen,
-  CheckCircle2,
-  AlertCircle,
   Loader2,
   X,
-  Paperclip,
   Image as ImageIcon,
   ExternalLink,
   Maximize2
 } from 'lucide-react'
 import Service from '../../../api/Service'
 import { toast } from 'react-toastify'
-
-
+import UploadFabricatorStandard from '../../fabricator/fabricator/UploadFabricatorStandard'
 
 const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR' }) => {
   const [messages, setMessages] = useState([])
@@ -30,40 +26,11 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR'
 
   // Upload modal state
   const [showUploadModal, setShowUploadModal] = useState(false)
-  const [uploadFile, setUploadFile] = useState(null)
-  const [sourceType, setSourceType] = useState(defaultSourceType)
   const [documentFamilyId, setDocumentFamilyId] = useState('ACI-318')
-  const [uploading, setUploading] = useState(false)
 
-  // Fabricator options state
-  const [fabricators, setFabricators] = useState([])
+  // Fabricator selection state
   const [selectedFabricatorId, setSelectedFabricatorId] = useState('')
-  const [loadingFabricators, setLoadingFabricators] = useState(false)
 
-  useEffect(() => {
-    const fetchFabricators = async () => {
-      try {
-        setLoadingFabricators(true)
-        const res = await Service.GetAllFabricators(1, 100)
-        let list = []
-        if (Array.isArray(res)) {
-          list = res
-        } else if (res?.data?.data && Array.isArray(res.data.data)) {
-          list = res.data.data
-        } else if (res?.data && Array.isArray(res.data)) {
-          list = res.data
-        } else if (res?.fabricators && Array.isArray(res.fabricators)) {
-          list = res.fabricators
-        }
-        setFabricators(list)
-      } catch (err) {
-        console.error('Failed to fetch fabricators in StandardsChatbot:', err)
-      } finally {
-        setLoadingFabricators(false)
-      }
-    }
-    fetchFabricators()
-  }, [])
 
   useEffect(() => {
     const defaultFabId =
@@ -92,13 +59,10 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR'
   }
 
   const fetchHistory = async () => {
-    if (!projectId) {
-      setLoadingHistory(false)
-      return
-    }
+    const targetId = projectId || selectedFabricatorId || 'general'
     try {
       setLoadingHistory(true)
-      const res = await Service.GetStandardsChatHistory(projectId)
+      const res = await Service.GetStandardsChatHistory(targetId)
 
       // Normalize history data into array format
       let historyList = []
@@ -126,6 +90,7 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR'
       toast.error('Failed to load chat history')
     } finally {
       setLoadingHistory(false)
+
       setTimeout(() => {
         scrollToBottom('auto')
       }, 100)
@@ -134,7 +99,8 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR'
 
   useEffect(() => {
     fetchHistory()
-  }, [projectId])
+  }, [projectId, selectedFabricatorId])
+
 
   useEffect(() => {
     if (!loadingHistory) {
@@ -233,49 +199,8 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR'
     }
   }
 
-  const handleFileUpload = async (e) => {
-    e.preventDefault()
-    if (!uploadFile) {
-      toast.error('Please select a PDF file')
-      return
-    }
 
-    try {
-      setUploading(true)
-      const formData = new FormData()
-      formData.append('file', uploadFile)
-      formData.append('sourceType', sourceType || defaultSourceType || 'FABRICATOR')
-      if (projectId) {
-        formData.append('projectId', projectId)
-      }
-      if (documentFamilyId) {
-        formData.append('documentFamilyId', documentFamilyId)
-      }
 
-      const fabricatorId =
-        selectedFabricatorId ||
-        project?.fabricatorID ||
-        project?.fabricator?.id ||
-        project?.fabricator_id ||
-        project?.fabricatorId ||
-        ''
-      if (fabricatorId) {
-        formData.append('fabricatorId', fabricatorId)
-      }
-
-      await Service.UploadStandard(formData)
-      toast.success('Standard document uploaded successfully!')
-      setShowUploadModal(false)
-      setUploadFile(null)
-      setSourceType('FABRICATOR')
-      fetchHistory()
-    } catch (err) {
-      console.error('Error uploading standard file:', err)
-      toast.error(err?.response?.data?.message || 'Failed to upload standard document')
-    } finally {
-      setUploading(false)
-    }
-  }
 
   return (
     <div className="flex flex-col h-[700px] bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
@@ -586,137 +511,20 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR'
 
       {/* Upload Standard PDF Modal */}
       {showUploadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-xl shadow-xl border border-gray-200 max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 bg-emerald-800 text-white">
-              <div className="flex items-center gap-2">
-                <UploadCloud className="w-5 h-5 text-emerald-300" />
-                <h4 className="font-bold text-base">Upload Standard Document</h4>
-              </div>
-              <button
-                onClick={() => setShowUploadModal(false)}
-                className="text-emerald-200 hover:text-white p-1 rounded-md hover:bg-emerald-700 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Form */}
-            <form onSubmit={handleFileUpload} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  Document Family ID
-                </label>
-                <input
-                  type="text"
-                  value={documentFamilyId}
-                  onChange={(e) => setDocumentFamilyId(e.target.value)}
-                  placeholder="e.g. ACI-318"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none font-medium text-gray-800"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  Source Type
-                </label>
-                <select
-                  value={sourceType}
-                  onChange={(e) => setSourceType(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none font-medium text-gray-800"
-                  required
-                >
-                  <option value="FABRICATOR">FABRICATOR (Default)</option>
-                  <option value="GENERAL">GENERAL</option>
-                  <option value="PROJECT_STANDARD">PROJECT_STANDARD</option>
-                  <option value="AISC">AISC</option>
-                  <option value="AWS">AWS</option>
-                </select>
-              </div>
-
-              {sourceType === 'FABRICATOR' && (
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                    Select Fabricator
-                  </label>
-                  <select
-                    value={selectedFabricatorId}
-                    onChange={(e) => setSelectedFabricatorId(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none font-medium text-gray-800"
-                  >
-                    <option value="">-- Select Fabricator (Optional / General) --</option>
-                    {fabricators.map((fab) => {
-                      const id = String(fab.id || fab._id || fab.fabricatorID || '')
-                      const name = fab.fabName || fab.name || fab.fabricatorName || fab.companyName || 'Unnamed Fabricator'
-                      return (
-                        <option key={id} value={id}>
-                          {name}
-                        </option>
-                      )
-                    })}
-                  </select>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  PDF Standard File
-                </label>
-                <div className="border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-lg p-6 text-center bg-gray-50 hover:bg-emerald-50/30 transition-all cursor-pointer relative">
-                  <input
-                    type="file"
-                    accept=".pdf"
-                    onChange={(e) => setUploadFile(e.target.files[0] || null)}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    required
-                  />
-                  <Paperclip className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  {uploadFile ? (
-                    <div className="text-xs font-semibold text-emerald-700 truncate">
-                      Selected: {uploadFile.name}
-                    </div>
-                  ) : (
-                    <div>
-                      <p className="text-xs font-medium text-gray-600">
-                        Click to select PDF document
-                      </p>
-                      <p className="text-[10px] text-gray-400 mt-1">Accepts PDF format up to 50MB</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="pt-4 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowUploadModal(false)}
-                  className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-md transition-colors uppercase"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={uploading || !uploadFile}
-                  className="flex items-center gap-2 px-5 py-2 text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white rounded-md transition-all uppercase tracking-wide disabled:opacity-50 cursor-pointer shadow-sm"
-                >
-                  {uploading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Uploading...
-                    </>
-                  ) : (
-                    <>
-                      <UploadCloud className="w-4 h-4" />
-                      Upload File
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <UploadFabricatorStandard
+          fabricatorId={selectedFabricatorId}
+          projectId={projectId}
+          initialSourceType={defaultSourceType || 'FABRICATOR'}
+          initialDocumentFamilyId={documentFamilyId}
+          onClose={() => setShowUploadModal(false)}
+          onSuccess={() => {
+            setShowUploadModal(false)
+            fetchHistory()
+          }}
+        />
       )}
+
+
 
       {/* Reference Image Viewer Modal */}
       {imageModal.isOpen && (

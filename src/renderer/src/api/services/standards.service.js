@@ -106,6 +106,27 @@ class StandardsService {
     }
     throw new Error('Unable to fetch standard reference image')
   }
+
+  /**
+   * Get document ingestion progress
+   * GET /standards/documents/{id}/progress
+   * @param {string} id - Document UUID
+   */
+  static async GetDocumentProgress(id) {
+    try {
+      const response = await api.get(`standards/documents/${id}/progress`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Document progress response:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching document progress:', error)
+      throw error
+    }
+  }
 }
 
 export default StandardsService
+
