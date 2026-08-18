@@ -65,11 +65,40 @@ class StandardsService {
   }
 
   /**
+   * Get a standard document image page
+   * GET /standards/image/{documentId}/{pageNumber}
+   * @param {string} documentId - UUID of the document
+   * @param {number|string} pageNumber - Page number
+   */
+  static async GetStandardImagePage(documentId, pageNumber) {
+    try {
+      const response = await api.get(`standards/image/${documentId}/${pageNumber}`, {
+        responseType: 'blob',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Get Standard Image Page response blob:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching standard document image page:', error)
+      throw error
+    }
+  }
+
+  /**
    * Fetch standard image securely with Authorization token
    * @param {string} imagePath - Relative or full image path
    * @returns {Promise<Blob>} Image blob
    */
   static async GetStandardImageBlob(imagePath) {
+    // Check if path matches /standards/image/{documentId}/{pageNumber} pattern
+    const imagePageMatch = imagePath.match(/standards\/image\/([^/]+)\/([^/]+)/)
+    if (imagePageMatch) {
+      const [, docId, pageNum] = imagePageMatch
+      return await this.GetStandardImagePage(docId, pageNum)
+    }
+
     const token = sessionStorage.getItem('token')
     const baseURL = getBaseURL()
     const apiUrl = getApiUrl()
@@ -123,6 +152,105 @@ class StandardsService {
       return response.data
     } catch (error) {
       console.error('Error fetching document progress:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Get standard preferences for a project
+   * GET /standards/projects/{projectId}/preferences
+   * @param {string} projectId - UUID of the project
+   * @param {string} [tier] - Standard tier query param (e.g. 'GENERAL' or 'PROJECT')
+   */
+  static async GetProjectStandardPreferences(projectId, tier) {
+    try {
+      const effectiveTier = tier === 'FABRICATOR' ? 'PROJECT' : tier || undefined
+      const response = await api.get(`standards/projects/${projectId}/preferences`, {
+        params: {
+          tier: effectiveTier
+        },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Get Project Standard Preferences response:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching project standard preferences:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Get available standard families
+   * GET /standards/families
+   * @param {string} [tier] - Filter by standard tier (GENERAL or PROJECT)
+   * @param {string} [projectId] - Required when tier is PROJECT
+   */
+  static async GetAvailableStandardFamilies(tier, projectId) {
+    try {
+      const response = await api.get('standards/families', {
+        params: {
+          tier: tier || undefined,
+          projectId: projectId || undefined
+        },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Get Available Standard Families response:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching available standard families:', error)
+      throw error
+    }
+  }
+  /**
+   * Get available standard families for a specific fabricator
+   * GET /standards/fabricators/{fabricatorId}/families
+   * @param {string} fabricatorId - UUID of the fabricator
+   */
+  static async GetFabricatorStandardFamilies(fabricatorId) {
+    try {
+      const response = await api.get(`standards/fabricators/${fabricatorId}/families`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Get Fabricator Standard Families response:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching fabricator standard families:', error)
+      throw error
+    }
+  }
+  /**
+   * Set standard preferences for a project
+   * POST /standards/projects/{projectId}/preferences
+   * @param {string} projectId - UUID of the project
+   * @param {object|Array} preferencesData - { standardFamilyIds: string[] } or array of family ID strings
+   * @param {string} [tier] - Standard tier query param (e.g. 'GENERAL' or 'PROJECT')
+   */
+  static async SetProjectStandardPreferences(projectId, preferencesData, tier) {
+    try {
+      const payload = Array.isArray(preferencesData)
+        ? { standardFamilyIds: preferencesData }
+        : preferencesData
+
+      const effectiveTier = tier === 'FABRICATOR' ? 'PROJECT' : tier || undefined
+
+      const response = await api.post(`standards/projects/${projectId}/preferences`, payload, {
+        params: {
+          tier: effectiveTier
+        },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Set Project Standard Preferences response:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error setting project standard preferences:', error)
       throw error
     }
   }

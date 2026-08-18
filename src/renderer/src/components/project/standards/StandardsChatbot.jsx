@@ -12,7 +12,8 @@ import {
   X,
   Image as ImageIcon,
   ExternalLink,
-  Maximize2
+  Maximize2,
+  ChevronDown
 } from 'lucide-react'
 import Service from '../../../api/Service'
 import { toast } from 'react-toastify'
@@ -27,10 +28,173 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR'
   // Upload modal state
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [documentFamilyId, setDocumentFamilyId] = useState('ACI-318')
+  const [selectedTier, setSelectedTier] = useState(
+    defaultSourceType === 'FABRICATOR' ? 'PROJECT' : defaultSourceType || 'PROJECT'
+  )
+
+  // Project standard preferences state (supports array of selected family IDs)
+  const [standardPreferences, setStandardPreferences] = useState([])
+  const [selectedFamilyIds, setSelectedFamilyIds] = useState([])
+  const [showPrefDropdown, setShowPrefDropdown] = useState(false)
+  const prefDropdownRef = useRef(null)
 
   // Fabricator selection state
   const [selectedFabricatorId, setSelectedFabricatorId] = useState('')
 
+  const targetProjectId = projectId || project?.id || project?._id || project?.projectId
+  const targetFabricatorId =
+    selectedFabricatorId ||
+    project?.fabricatorID ||
+    project?.fabricator?.id ||
+    project?.fabricator_id ||
+    project?.fabricatorId ||
+    ''
+
+  // Click outside to close pref dropdown popover
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (prefDropdownRef.current && !prefDropdownRef.current.contains(event.target)) {
+        setShowPrefDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Persist updated preferred family IDs via API POST /standards/projects/{projectId}/preferences
+  const savePreferences = async (newFamilyIds) => {
+    const projId = targetProjectId || 'general'
+    try {
+      console.log('[StandardsChatbot] Hitting SetProjectStandardPreferences for project:', projId, 'familyIds:', newFamilyIds, 'tier:', selectedTier)
+      const res = await Service.SetProjectStandardPreferences(projId, { standardFamilyIds: newFamilyIds }, selectedTier)
+      console.log('[StandardsChatbot] SetProjectStandardPreferences success:', res)
+      toast.success('Updated standard family preferences')
+    } catch (err) {
+      console.error('[StandardsChatbot] Error hitting SetProjectStandardPreferences:', err)
+      toast.error('Failed to update standard preferences')
+    }
+  }
+
+  const toggleFamilySelection = (familyId) => {
+    const updated = selectedFamilyIds.includes(familyId)
+      ? selectedFamilyIds.filter((id) => id !== familyId)
+      : [...selectedFamilyIds, familyId]
+    setSelectedFamilyIds(updated)
+    if (updated.length > 0) {
+      setDocumentFamilyId(updated[0])
+    }
+    savePreferences(updated)
+  }
+
+  const handleSelectAllFamilies = () => {
+    const allIds = standardPreferences.map((fam) => fam.id)
+    setSelectedFamilyIds(allIds)
+    if (allIds.length > 0) setDocumentFamilyId(allIds[0])
+    savePreferences(allIds)
+  }
+
+  const handleClearAllFamilies = () => {
+    setSelectedFamilyIds([])
+    savePreferences([])
+  }
+
+  // Fetch available standard families and project standard preferences
+  useEffect(() => {
+    const fetchFamiliesAndPreferences = async () => {
+      try {
+        console.log('[StandardsChatbot] Fetching families & preferences for tier:', selectedTier, 'projectId:', targetProjectId, 'fabricatorId:', targetFabricatorId)
+
+        let famRes = null
+        if (selectedTier === 'FABRICATOR' && targetFabricatorId) {
+          // GET /standards/fabricators/{fabricatorId}/families
+          famRes = await Service.GetFabricatorStandardFamilies(targetFabricatorId).catch((err) => {
+            console.warn('[StandardsChatbot] Error fetching fabricator standard families:', err)
+            return null
+          })
+        } else {
+          // GET /standards/families
+          famRes = await Service.GetAvailableStandardFamilies(
+            selectedTier !== 'FABRICATOR' ? selectedTier : undefined,
+            targetProjectId
+          ).catch((err) => {
+            console.warn('[StandardsChatbot] Error fetching available standard families:', err)
+            return null
+          })
+        }
+
+        // GET /standards/projects/{projectId}/preferences
+        let prefRes = null
+        if (targetProjectId) {
+          const prefTier = selectedTier === 'FABRICATOR' ? 'PROJECT' : selectedTier
+          prefRes = await Service.GetProjectStandardPreferences(targetProjectId, prefTier).catch((err) => {
+            console.warn('[StandardsChatbot] Error fetching project standard preferences:', err)
+            return null
+          })
+        }
+
+        let combinedFamilies = []
+        let defaultFamilyId = ''
+        let prefFamilyIds = []
+
+        // Extract families from GET /standards/families or GET /standards/fabricators/{fabricatorId}/families
+        const rawFamilies = famRes?.families || famRes?.data?.families || famRes?.data || (Array.isArray(famRes) ? famRes : [])
+        if (Array.isArray(rawFamilies) && rawFamilies.length > 0) {
+          rawFamilies.forEach((f) => {
+            const familyId = typeof f === 'string' ? f : f.id || f.familyCode || f.name
+            const familyCode = typeof f === 'object' ? f.familyCode || f.id || familyId : familyId
+            const edition = typeof f === 'object' ? f.edition : ''
+            const label = familyCode ? `${familyCode}${edition ? ` (Ed. ${edition})` : ''}` : familyId
+
+            if (familyId && !combinedFamilies.some((item) => item.id === familyId)) {
+              combinedFamilies.push({ id: familyId, familyCode, edition, label, isDefault: !!f?.isDefault })
+            }
+            if (typeof f === 'object' && f.isDefault && familyId) {
+              defaultFamilyId = familyId
+            }
+          })
+        }
+
+        // Extract preferences from GET /standards/projects/{projectId}/preferences
+        const rawPrefs = prefRes?.standardFamilyIds || prefRes?.data?.standardFamilyIds || prefRes?.data || (Array.isArray(prefRes) ? prefRes : [])
+        if (Array.isArray(rawPrefs) && rawPrefs.length > 0) {
+          rawPrefs.forEach((p) => {
+            const familyId = typeof p === 'string' ? p : p.id || p.familyCode
+            const familyCode = typeof p === 'object' ? p.familyCode || p.id || familyId : familyId
+            const edition = typeof p === 'object' ? p.edition : ''
+            const label = familyCode ? `${familyCode}${edition ? ` (Ed. ${edition})` : ''}` : familyId
+
+            if (familyId) {
+              if (!prefFamilyIds.includes(familyId)) {
+                prefFamilyIds.push(familyId)
+              }
+              if (!combinedFamilies.some((item) => item.id === familyId)) {
+                combinedFamilies.push({ id: familyId, familyCode, edition, label, isDefault: !!p?.isDefault })
+              }
+            }
+          })
+        }
+
+        setStandardPreferences(combinedFamilies)
+
+        if (prefFamilyIds.length > 0) {
+          setSelectedFamilyIds(prefFamilyIds)
+          setDocumentFamilyId(prefFamilyIds[0])
+        } else if (defaultFamilyId) {
+          setSelectedFamilyIds([defaultFamilyId])
+          setDocumentFamilyId(defaultFamilyId)
+        } else if (combinedFamilies.length > 0) {
+          setSelectedFamilyIds([combinedFamilies[0].id])
+          setDocumentFamilyId(combinedFamilies[0].id)
+        } else {
+          setSelectedFamilyIds([])
+        }
+      } catch (err) {
+        console.error('[StandardsChatbot] Failed fetching families and preferences:', err)
+      }
+    }
+
+    fetchFamiliesAndPreferences()
+  }, [targetProjectId, targetFabricatorId, selectedTier])
 
   useEffect(() => {
     const defaultFabId =
@@ -133,7 +297,12 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR'
     try {
       const chatPayload = {
         query: textToSubmit,
-        ...(documentFamilyId ? { documentFamilyId } : {}),
+        ...(selectedTier ? { tier: selectedTier, sourceType: selectedTier } : {}),
+        ...(selectedFamilyIds.length > 0
+          ? { standardFamilyIds: selectedFamilyIds, documentFamilyIds: selectedFamilyIds, documentFamilyId: selectedFamilyIds[0] }
+          : documentFamilyId
+          ? { documentFamilyId, standardFamilyIds: [documentFamilyId] }
+          : {}),
         ...(selectedFabricatorId ? { fabricatorId: selectedFabricatorId } : {})
       }
       const targetId = projectId || 'general'
@@ -228,18 +397,98 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR'
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Tier / SourceType Selector */}
           <div className="flex items-center gap-1.5 bg-emerald-950/40 px-2.5 py-1.5 rounded-md border border-emerald-500/30 text-xs">
-            <span className="text-emerald-300 font-semibold text-[11px] uppercase tracking-wider">Family:</span>
-            <input
-              type="text"
-              value={documentFamilyId}
-              onChange={(e) => setDocumentFamilyId(e.target.value)}
-              placeholder="ACI-318"
-              className="bg-transparent text-white font-semibold text-xs focus:outline-none w-20 border-b border-emerald-400/40 focus:border-emerald-300 px-1"
-              title="Document Family ID sent with queries and uploads"
-            />
+            <span className="text-emerald-300 font-semibold text-[11px] uppercase tracking-wider">Tier:</span>
+            <select
+              value={selectedTier}
+              onChange={(e) => setSelectedTier(e.target.value)}
+              className="bg-emerald-900 text-white font-semibold text-xs focus:outline-none rounded px-1.5 py-0.5 border border-emerald-500/40 cursor-pointer"
+              title="Select Standard Tier"
+            >
+              <option value="GENERAL" className="bg-emerald-900 text-white">GENERAL</option>
+              <option value="PROJECT" className="bg-emerald-900 text-white">PROJECT</option>
+            </select>
           </div>
+
+          {standardPreferences.length > 0 ? (
+            <div className="relative" ref={prefDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setShowPrefDropdown(!showPrefDropdown)}
+                className="flex items-center gap-1.5 bg-emerald-950/50 hover:bg-emerald-900/60 px-2.5 py-1.5 rounded-md border border-emerald-500/40 text-xs text-white transition-all cursor-pointer shadow-xs"
+                title="Select multiple preferred standard families"
+              >
+                <span className="text-emerald-300 font-semibold text-[11px] uppercase tracking-wider">Pref Families:</span>
+                <span className="bg-emerald-800 text-emerald-100 font-bold px-1.5 py-0.5 rounded text-[11px]">
+                  {selectedFamilyIds.length > 0
+                    ? `${selectedFamilyIds.length} Selected`
+                    : 'None'}
+                </span>
+                <ChevronDown className={`w-3.5 h-3.5 text-emerald-300 transition-transform ${showPrefDropdown ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showPrefDropdown && (
+                <div className="absolute right-0 mt-2 w-64 bg-emerald-950 border border-emerald-500/40 rounded-xl shadow-2xl z-50 p-3 text-white space-y-2 animate-in fade-in zoom-in duration-100">
+                  <div className="flex items-center justify-between border-b border-emerald-800/80 pb-2">
+                    <span className="text-[11px] font-bold text-emerald-200 uppercase tracking-wider">Preferred Families</span>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleSelectAllFamilies}
+                        className="text-[10px] text-emerald-400 hover:text-emerald-200 underline cursor-pointer"
+                      >
+                        Select All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleClearAllFamilies}
+                        className="text-[10px] text-emerald-400 hover:text-emerald-200 underline cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="max-h-48 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+                    {standardPreferences.map((fam) => {
+                      const isChecked = selectedFamilyIds.includes(fam.id)
+                      return (
+                        <label
+                          key={fam.id}
+                          className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-emerald-900/60 cursor-pointer text-xs transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => toggleFamilySelection(fam.id)}
+                            className="rounded border-emerald-600 text-emerald-600 focus:ring-emerald-500 bg-emerald-900 w-3.5 h-3.5 cursor-pointer"
+                          />
+                          <span className={`font-medium ${isChecked ? 'text-white font-semibold' : 'text-emerald-200/80'}`}>
+                            {fam.label || fam.id}
+                          </span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 bg-emerald-950/40 px-2.5 py-1.5 rounded-md border border-emerald-500/30 text-xs">
+              <span className="text-emerald-300 font-semibold text-[11px] uppercase tracking-wider">Family:</span>
+              <input
+                type="text"
+                value={documentFamilyId}
+                onChange={(e) => setDocumentFamilyId(e.target.value)}
+                placeholder="ACI-318"
+                className="bg-transparent text-white font-semibold text-xs focus:outline-none w-20 border-b border-emerald-400/40 focus:border-emerald-300 px-1"
+                title="Document Family ID sent with queries and uploads"
+              />
+            </div>
+          )}
           <button
+            type="button"
             onClick={() => setShowUploadModal(true)}
             className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-md transition-all shadow-sm cursor-pointer border border-emerald-400/40"
           >
@@ -247,6 +496,7 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR'
             Upload Standard PDF
           </button>
           <button
+            type="button"
             onClick={fetchHistory}
             disabled={loadingHistory}
             className="p-2 text-emerald-200 hover:text-white hover:bg-white/10 rounded-md transition-all cursor-pointer"
@@ -482,6 +732,7 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR'
 
       {/* Input Form Bar */}
       <div className="p-4 bg-white border-t border-gray-200 shrink-0">
+        
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -489,6 +740,7 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR'
           }}
           className="flex items-center gap-3 max-w-4xl mx-auto"
         >
+
           <div className="relative flex-1">
             <input
               type="text"
@@ -514,7 +766,7 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = 'FABRICATOR'
         <UploadFabricatorStandard
           fabricatorId={selectedFabricatorId}
           projectId={projectId}
-          initialSourceType={defaultSourceType || 'FABRICATOR'}
+          initialSourceType={selectedTier || defaultSourceType || 'FABRICATOR'}
           initialDocumentFamilyId={documentFamilyId}
           onClose={() => setShowUploadModal(false)}
           onSuccess={() => {

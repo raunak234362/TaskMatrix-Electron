@@ -204,14 +204,21 @@ const UploadFabricatorStandard = ({
         const progRes = await Service.GetDocumentProgress(docId)
         console.log('Document progress poll:', progRes)
 
-        const status = progRes?.status || progRes?.data?.status || 'PROCESSING'
+        const rawStatus = progRes?.status || progRes?.data?.status || 'PROCESSING'
         const stage = progRes?.processingStage || progRes?.data?.processingStage || 'Processing document...'
         const pagesProcessed = progRes?.pagesProcessed ?? progRes?.data?.pagesProcessed ?? 0
         const totalPages = progRes?.totalPages ?? progRes?.data?.totalPages ?? 0
         const failureReason = progRes?.failureReason || progRes?.data?.failureReason || ''
 
+        // If totalPages is valid (> 0) and pagesProcessed has reached or exceeded totalPages, mark as COMPLETED
+        const isPageComplete = totalPages > 0 && pagesProcessed >= totalPages
+        const status =
+          isPageComplete || rawStatus === 'COMPLETED' || rawStatus === 'SUCCESS'
+            ? 'COMPLETED'
+            : rawStatus
+
         let calcPercent = 10
-        if (status === 'COMPLETED' || status === 'SUCCESS') {
+        if (status === 'COMPLETED' || status === 'SUCCESS' || isPageComplete) {
           calcPercent = 100
         } else if (failureReason || status === 'FAILED') {
           calcPercent = progressData.percent || 0
@@ -224,16 +231,18 @@ const UploadFabricatorStandard = ({
         setProgressData({
           percent: calcPercent,
           status,
-          processingStage: stage,
+          processingStage: isPageComplete ? 'Ingestion Completed' : stage,
           pagesProcessed,
           totalPages,
           failureReason
         })
 
-        if (status === 'COMPLETED' || status === 'SUCCESS' || calcPercent >= 100) {
+        if (status === 'COMPLETED' || status === 'SUCCESS' || calcPercent >= 100 || isPageComplete) {
           clearInterval(interval)
           toast.success('Fabricator standard ingested and indexed successfully!')
-          onSuccess?.()
+          setTimeout(() => {
+            onSuccess?.()
+          }, 800)
         } else if (failureReason || status === 'FAILED') {
           clearInterval(interval)
           toast.error(`Ingestion failed: ${failureReason || 'Unknown error'}`)
