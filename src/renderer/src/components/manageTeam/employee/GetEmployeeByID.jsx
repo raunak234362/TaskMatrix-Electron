@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import { toast } from "react-toastify";
 import Button from "../../fields/Button";
 import EditEmployee from "./EditEmployee";
@@ -67,6 +67,91 @@ const calcWorkedSec = (workingHourTask) => {
 const allocToSec = (allocatedHours) => {
   const h = parseFloat(allocatedHours);
   return isNaN(h) ? 0 : h * 3600;
+};
+
+// Calculate EPS Score breakdown for any list of tasks (used for custom date range reports)
+const calculateEPSForTasks = (taskList) => {
+  if (!taskList || taskList.length === 0) {
+    return {
+      score: 0,
+      completionScore: 0,
+      disciplineScore: 0,
+      sessionQualityScore: 0,
+      underutilizedScore: 0,
+      reworkScore: 0,
+      overrunScore: 0
+    };
+  }
+
+  let completedTasks = 0;
+  let overrunCount = 0;
+  let underutilizedCount = 0;
+  let reworkTasks = 0;
+  let flagsCount = 0;
+  let totalIdlePercent = 0;
+  let validSessionTasks = 0;
+
+  const completedStatuses = ["COMPLETED", "VALIDATE_COMPLETE", "COMPLETE", "COMPLETE_OTHER"];
+
+  taskList.forEach((t) => {
+    const statusUpper = String(t.status || "").toUpperCase();
+    const isCompleted = completedStatuses.includes(statusUpper);
+    if (isCompleted) completedTasks++;
+
+    const allocatedSec = allocToSec(t.allocatedHours || t.allocationLog?.allocatedHours);
+    const workedSec = calcWorkedSec(t.workingHourTask);
+
+    if (isCompleted && allocatedSec > 0 && workedSec > allocatedSec) overrunCount++;
+    if (isCompleted && allocatedSec > 0 && workedSec < allocatedSec * 0.6) underutilizedCount++;
+
+    const hasRework = statusUpper === "REWORK" || (t.workingHourTask || []).some(w => String(w.type || "").toUpperCase() === "REWORK");
+    if (hasRework) reworkTasks++;
+
+    if (t.autoCloseActionTaken) flagsCount += 5;
+    if (t.workingHourTask && t.workingHourTask.length > 5) flagsCount += 1;
+
+    if (t.workingHourTask && t.workingHourTask.length > 0) {
+      const sessions = [...t.workingHourTask].filter(s => s.started_at).sort((a, b) => new Date(a.started_at) - new Date(b.started_at));
+      if (sessions.length > 0) {
+        const firstStart = new Date(sessions[0].started_at).getTime();
+        const lastEnd = sessions[sessions.length - 1].ended_at ? new Date(sessions[sessions.length - 1].ended_at).getTime() : Date.now();
+        const wallTime = (lastEnd - firstStart) / 1000;
+        const activeTime = sessions.reduce((s, wh) => s + (Number(wh.duration_seconds) || 0), 0);
+        if (wallTime > 0 && activeTime > 0) {
+          const idle = Math.max(0, wallTime - activeTime);
+          totalIdlePercent += idle / wallTime;
+          validSessionTasks++;
+        }
+      }
+    }
+  });
+
+  const completionScore = taskList.length > 0 ? (completedTasks / taskList.length) * 100 : 0;
+  const overrunScore = completedTasks > 0 ? Math.max(0, 100 - (overrunCount / completedTasks) * 100) : 100;
+  const underutilizedScore = completedTasks > 0 ? Math.max(0, 100 - (underutilizedCount / completedTasks) * 100) : 100;
+  const reworkScore = taskList.length > 0 ? Math.max(0, 100 - (reworkTasks / taskList.length) * 100) : 100;
+  const disciplineScore = Math.max(0, 100 - flagsCount);
+  const avgIdlePct = validSessionTasks > 0 ? totalIdlePercent / validSessionTasks : 0;
+  const sessionQualityScore = Math.max(0, 100 - avgIdlePct * 100);
+
+  const score = (
+    completionScore * 0.25 +
+    overrunScore * 0.20 +
+    underutilizedScore * 0.10 +
+    reworkScore * 0.20 +
+    disciplineScore * 0.15 +
+    sessionQualityScore * 0.10
+  );
+
+  return {
+    score,
+    completionScore,
+    disciplineScore,
+    sessionQualityScore,
+    underutilizedScore,
+    reworkScore,
+    overrunScore
+  };
 };
 
 const COMPLETION_LABEL = {
@@ -442,111 +527,422 @@ const GetEmployeeByID = ({ id, onClose }) => {
   }, [allTasks]);
 
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showDateRangeModal, setShowDateRangeModal] = useState(false);
+  const [dateRangeExportFormat, setDateRangeExportFormat] = useState("pdf");
 
-  const handleExport = (format, scope) => {
+  const computeStatsForExport = (taskList) => {
+    const totalAssignedSec = taskList.reduce(
+      (s, t) => s + allocToSec(t.allocatedHours || t.allocationLog?.allocatedHours), 0
+    );
+    const totalWorkedSec = taskList.reduce(
+      (s, t) => s + calcWorkedSec(t.workingHourTask), 0
+    );
+    const completedCount = taskList.filter(
+      (t) => t.status === "COMPLETED" || t.status === "COMPLETE" || t.status === "VALIDATE_COMPLETE"
+    ).length;
+    const overrunCount = taskList.filter((t) => {
+      const a = allocToSec(t.allocatedHours || t.allocationLog?.allocatedHours);
+      const w = calcWorkedSec(t.workingHourTask);
+      return a > 0 && w > a;
+    }).length;
+
+    const epsObj = calculateEPSForTasks(taskList);
+
+    return {
+      totalAssignedSec,
+      totalWorkedSec,
+      completedCount,
+      overrunCount,
+      totalTasks: taskList.length,
+      eps: epsObj
+    };
+  };
+
+  const generatePdfReport = (dataToExport, scope, fromDate = "", toDate = "", includeTaskList = true) => {
+    try {
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const employeeName = `${employee.firstName || ""} ${employee.middleName || ""} ${employee.lastName || ""}`.trim();
+      const generatedDateStr = new Date().toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      let periodText = "All Time";
+      if (scope === "range" || scope === "custom") {
+        const fromStr = fromDate || taskDateFrom;
+        const toStr = toDate || taskDateTo;
+        if (fromStr && toStr) {
+          periodText = `${fromStr} to ${toStr}`;
+        } else if (fromStr) {
+          periodText = `From ${fromStr}`;
+        } else if (toStr) {
+          periodText = `Until ${toStr}`;
+        } else {
+          periodText = "Filtered Date Range";
+        }
+      } else if (scope === "month") {
+        periodText = `${new Date(0, selectedMonth - 1).toLocaleString("default", { month: "long" })} ${selectedYear}`;
+      } else if (scope === "year") {
+        periodText = `Year ${selectedYear}`;
+      }
+
+      const exportStats = computeStatsForExport(dataToExport);
+
+      const eps = (epsData && (scope === "month" || scope === "year"))
+        ? {
+          score: Number(epsData.score || 0),
+          completionScore: Number(epsData.components?.completionScore || 0),
+          disciplineScore: Number(epsData.components?.disciplineScore || 0),
+          sessionQualityScore: Number(epsData.components?.sessionQualityScore || 0),
+          underutilizedScore: Number(epsData.components?.underutilizedScore || 0),
+          reworkScore: Number(epsData.components?.reworkScore || 0),
+          overrunScore: Number(epsData.components?.overrunScore || 0)
+        }
+        : exportStats.eps;
+
+      // Header Banner
+      doc.setFillColor(22, 163, 74);
+      doc.rect(0, 0, 210, 24, "F");
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(15);
+      doc.setFont("helvetica", "bold");
+      doc.text("TASKMATRIX", 14, 14);
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(includeTaskList ? "FULL PERFORMANCE REPORT" : "PERFORMANCE SUMMARY REPORT", 58, 14);
+
+      doc.setFontSize(8);
+      doc.text(`Generated: ${generatedDateStr}`, 196, 14, { align: "right" });
+
+      let y = 30;
+
+      // Employee Info Box (Matching Image 1)
+      doc.setDrawColor(22, 163, 74);
+      doc.setFillColor(240, 253, 244);
+      doc.roundedRect(14, y, 182, 32, 2, 2, "FD");
+
+      doc.setTextColor(17, 24, 39);
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text(employeeName.toUpperCase(), 18, y + 8);
+
+      doc.setFontSize(8.5);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(22, 163, 74);
+      doc.text(`${(employee.designation || "EMPLOYEE").toUpperCase()}  •  STATUS: ${employee.isActive ? "ACTIVE" : "INACTIVE"}`, 18, y + 14);
+
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(75, 85, 99);
+      doc.text(`Username: ${employee.username || "—"}   |   Email: ${employee.email || "—"}   |   Phone: ${employee.phone || "—"}`, 18, y + 21);
+      
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(17, 24, 39);
+      doc.text(`REPORT PERIOD: ${periodText.toUpperCase()}`, 18, y + 27);
+
+      y += 38;
+
+      // Section 1: EPS Scores (Image 1)
+      doc.setFontSize(10.5);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(17, 24, 39);
+      doc.text("1. EMPLOYEE PERFORMANCE SCORE (EPS)", 14, y);
+      y += 4;
+
+      const epsColumns = ["Score Pillar", "Score / 100", "Weight / Type"];
+      const epsRows = [
+        ["OVERALL EPS SCORE", eps.score.toFixed(2), "Composite Score (100%)"],
+        ["Completion Score", eps.completionScore.toFixed(2), "25% Weight"],
+        ["Discipline Score", eps.disciplineScore.toFixed(2), "15% Weight"],
+        ["Session Quality Score", eps.sessionQualityScore.toFixed(2), "10% Weight"],
+        ["Underutilized Score", eps.underutilizedScore.toFixed(2), "10% Weight"],
+        ["Rework Score", eps.reworkScore.toFixed(2), "20% Weight"],
+        ["Overrun Score", eps.overrunScore.toFixed(2), "20% Weight"],
+      ];
+
+      autoTable(doc, {
+        head: [epsColumns],
+        body: epsRows,
+        startY: y,
+        theme: "grid",
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [22, 163, 74], textColor: [255, 255, 255], fontStyle: "bold" },
+        didParseCell: (data) => {
+          if (data.section === "body" && data.row.index === 0) {
+            data.cell.styles.fontStyle = "bold";
+            data.cell.styles.fillColor = [240, 253, 244];
+            if (data.column.index === 1) {
+              data.cell.styles.textColor = [22, 163, 74];
+            }
+          }
+        },
+        margin: { left: 14, right: 14 },
+      });
+
+      y = (doc.lastAutoTable?.finalY || y + 50) + 8;
+
+      // Section 2: Task Summary KPIs (Image 1)
+      doc.setFontSize(10.5);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(17, 24, 39);
+      doc.text("2. TASK PERFORMANCE SUMMARY", 14, y);
+      y += 4;
+
+      const kpiHeaders = ["Total Tasks", "Assigned Hours", "Worked Hours", "Completed Tasks", "Overrun Tasks"];
+      const kpiBody = [[
+        `${exportStats.totalTasks}`,
+        `${Math.floor(exportStats.totalAssignedSec / 3600)}H (${secToHms(exportStats.totalAssignedSec)})`,
+        `${Math.floor(exportStats.totalWorkedSec / 3600)}H (${secToHms(exportStats.totalWorkedSec)})`,
+        `${exportStats.completedCount} (${exportStats.totalTasks > 0 ? Math.round((exportStats.completedCount / exportStats.totalTasks) * 100) : 0}%)`,
+        `${exportStats.overrunCount}`
+      ]];
+
+      autoTable(doc, {
+        head: [kpiHeaders],
+        body: kpiBody,
+        startY: y,
+        theme: "grid",
+        styles: { fontSize: 8, cellPadding: 3, halign: "center" },
+        headStyles: { fillColor: [31, 41, 55], textColor: [255, 255, 255], fontStyle: "bold" },
+        margin: { left: 14, right: 14 },
+      });
+
+      y = (doc.lastAutoTable?.finalY || y + 20) + 8;
+
+      // Section 3: Task Details Table (Only if includeTaskList is true)
+      if (includeTaskList) {
+        doc.setFontSize(10.5);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(17, 24, 39);
+        doc.text(`3. TASK DETAILS (${dataToExport.length} TASKS)`, 14, y);
+        y += 4;
+
+        const taskHead = [["S.No", "Task Name", "Project Name", "WBS Type", "Created Date", "Est. Hours", "Worked Hours", "Overrun", "Status"]];
+
+        const taskRowsData = dataToExport.map((t, idx) => {
+          const assignedSec = allocToSec(t.allocatedHours || t.allocationLog?.allocatedHours);
+          const workedSec = calcWorkedSec(t.workingHourTask);
+          const isOverrun = assignedSec > 0 && workedSec > assignedSec;
+          const statusMetaInfo = statusMeta(t.status);
+
+          return [
+            idx + 1,
+            t.name || t.title || "—",
+            t.project?.name || "—",
+            t.wbsType || "—",
+            t.created_on ? new Date(t.created_on).toLocaleDateString("en-GB") : (t.createdAt ? new Date(t.createdAt).toLocaleDateString("en-GB") : "—"),
+            secToHms(assignedSec),
+            secToHms(workedSec),
+            isOverrun ? "Overrun" : "Normal",
+            statusMetaInfo.label,
+          ];
+        });
+
+        autoTable(doc, {
+          head: taskHead,
+          body: taskRowsData,
+          startY: y,
+          theme: "striped",
+          styles: { fontSize: 7.5, cellPadding: 2 },
+          headStyles: { fillColor: [22, 163, 74], textColor: [255, 255, 255], fontStyle: "bold" },
+          columnStyles: {
+            0: { cellWidth: 10, halign: "center" },
+            1: { cellWidth: 42 },
+            2: { cellWidth: 32 },
+            3: { cellWidth: 18 },
+            4: { cellWidth: 20 },
+            5: { cellWidth: 18 },
+            6: { cellWidth: 18 },
+            7: { cellWidth: 16, halign: "center" },
+            8: { cellWidth: 16, halign: "center" },
+          },
+          didParseCell: (data) => {
+            if (data.section === "body") {
+              if (data.column.index === 7) {
+                if (data.cell.raw === "Overrun") {
+                  data.cell.styles.textColor = [220, 38, 38];
+                  data.cell.styles.fontStyle = "bold";
+                } else {
+                  data.cell.styles.textColor = [37, 99, 235];
+                }
+              }
+            }
+          },
+          margin: { left: 14, right: 14 },
+        });
+      }
+
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(156, 163, 175);
+        doc.text(`Page ${i} of ${pageCount}`, 196, 290, { align: "right" });
+        doc.text(`TaskMatrix Performance Report — ${employeeName}`, 14, 290);
+      }
+
+      const reportPrefix = includeTaskList ? "Detailed_Report" : "Performance_Summary";
+      const fileName = `${reportPrefix}_${employeeName.replace(/\s+/g, "_")}_${periodText.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
+      doc.save(fileName);
+      toast.success(`${includeTaskList ? "Full Detailed" : "Performance Summary"} PDF generated successfully!`);
+    } catch (err) {
+      console.error("PDF Generation Error:", err);
+      toast.error("Failed to generate PDF report");
+    }
+  };
+
+  const generateExcelReport = (dataToExport, scope, fromDate = "", toDate = "") => {
+    try {
+      const employeeName = `${employee.firstName || ""} ${employee.middleName || ""} ${employee.lastName || ""}`.trim();
+      const exportStats = computeStatsForExport(dataToExport);
+
+      const eps = (epsData && (scope === "month" || scope === "year"))
+        ? {
+          score: Number(epsData.score || 0),
+          completionScore: Number(epsData.components?.completionScore || 0),
+          disciplineScore: Number(epsData.components?.disciplineScore || 0),
+          sessionQualityScore: Number(epsData.components?.sessionQualityScore || 0),
+          underutilizedScore: Number(epsData.components?.underutilizedScore || 0),
+          reworkScore: Number(epsData.components?.reworkScore || 0),
+          overrunScore: Number(epsData.components?.overrunScore || 0)
+        }
+        : exportStats.eps;
+
+      let periodText = scope;
+      if (fromDate || toDate) periodText = `${fromDate || "Start"} to ${toDate || "End"}`;
+
+      const summaryRows = [
+        { Field: "EMPLOYEE PERFORMANCE & TASK REPORT", Value: "" },
+        { Field: "Employee Name", Value: employeeName },
+        { Field: "Designation", Value: employee.designation || "N/A" },
+        { Field: "Email", Value: employee.email || "N/A" },
+        { Field: "Phone", Value: employee.phone || "N/A" },
+        { Field: "Report Period", Value: periodText },
+        { Field: "", Value: "" },
+        { Field: "EMPLOYEE PERFORMANCE SCORES (EPS)", Value: "" },
+        { Field: "Overall EPS Score", Value: eps.score.toFixed(2) },
+        { Field: "Completion Score", Value: eps.completionScore.toFixed(2) },
+        { Field: "Discipline Score", Value: eps.disciplineScore.toFixed(2) },
+        { Field: "Session Quality Score", Value: eps.sessionQualityScore.toFixed(2) },
+        { Field: "Underutilized Score", Value: eps.underutilizedScore.toFixed(2) },
+        { Field: "Rework Score", Value: eps.reworkScore.toFixed(2) },
+        { Field: "Overrun Score", Value: eps.overrunScore.toFixed(2) },
+        { Field: "", Value: "" },
+        { Field: "TASK PERFORMANCE SUMMARY", Value: "" },
+        { Field: "Total Tasks", Value: exportStats.totalTasks },
+        { Field: "Assigned Hours", Value: secToHms(exportStats.totalAssignedSec) },
+        { Field: "Worked Hours", Value: secToHms(exportStats.totalWorkedSec) },
+        { Field: "Completed Tasks", Value: exportStats.completedCount },
+        { Field: "Overrun Tasks", Value: exportStats.overrunCount },
+      ];
+
+      const taskRows = dataToExport.map((t, idx) => {
+        const assignedSec = allocToSec(t.allocatedHours || t.allocationLog?.allocatedHours);
+        const workedSec = calcWorkedSec(t.workingHourTask);
+        const isOverrun = assignedSec > 0 && workedSec > assignedSec;
+        return {
+          "S.No": idx + 1,
+          "Project Name": t.project?.name || "—",
+          "Task Name": t.name || t.title || "—",
+          "WBS Type": t.wbsType || "—",
+          "Created Date": t.created_on ? new Date(t.created_on).toLocaleDateString("en-GB") : "—",
+          "Est. Hours": secToHms(assignedSec),
+          "Worked Hours": secToHms(workedSec),
+          "Overrun": isOverrun ? "Overrun" : "Normal",
+          "Status": statusMeta(t.status).label,
+        };
+      });
+
+      const wb = XLSX.utils.book_new();
+      const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
+      XLSX.utils.book_append_sheet(wb, wsSummary, "Performance Summary");
+
+      const wsTasks = XLSX.utils.json_to_sheet(taskRows);
+      XLSX.utils.book_append_sheet(wb, wsTasks, "Task Details");
+
+      const fileName = `Performance_Report_${employeeName.replace(/\s+/g, "_")}_${periodText.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+      toast.success("Excel report generated successfully!");
+    } catch (err) {
+      console.error("Excel Generation Error:", err);
+      toast.error("Failed to generate Excel report");
+    }
+  };
+
+  const handleExport = (format, scope, customFrom = "", customTo = "") => {
     let dataToExport = [...allTasks];
-    const now = new Date();
 
-    if (scope === "month") {
+    if (scope === "range" || scope === "custom") {
+      const fromStr = customFrom || taskDateFrom;
+      const toStr = customTo || taskDateTo;
+
+      if (fromStr) {
+        const from = new Date(fromStr);
+        dataToExport = listFilterFrom(dataToExport, from);
+      }
+      if (toStr) {
+        const to = new Date(toStr + "T23:59:59.999");
+        dataToExport = listFilterTo(dataToExport, to);
+      }
+
+      if (taskProjectFilter !== "ALL") {
+        dataToExport = dataToExport.filter((t) => (t.project?.name || "") === taskProjectFilter);
+      }
+      if (taskStatusFilter !== "ALL") {
+        dataToExport = dataToExport.filter((t) => t.status === taskStatusFilter);
+      }
+      if (taskSearch.trim()) {
+        const q = taskSearch.toLowerCase();
+        dataToExport = dataToExport.filter(
+          (t) =>
+            (t.name || "").toLowerCase().includes(q) ||
+            (t.description || "").toLowerCase().includes(q) ||
+            (t.project?.name || "").toLowerCase().includes(q)
+        );
+      }
+    } else if (scope === "month") {
       dataToExport = allTasks.filter(t => {
         const d = new Date(t.created_on || t.createdAt);
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        return d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
       });
     } else if (scope === "year") {
       dataToExport = allTasks.filter(t => {
         const d = new Date(t.created_on || t.createdAt);
-        return d.getFullYear() === now.getFullYear();
+        return d.getFullYear() === selectedYear;
       });
     }
 
     if (dataToExport.length === 0) {
-      toast.error("No data found for the selected period");
+      toast.error("No task data found for the selected period");
+      setShowExportMenu(false);
       return;
     }
 
-    const exportRows = dataToExport.map(t => ({
-      Project: t.project?.name || "—",
-      Task: t.name || t.title || "—",
-      Status: t.status || "—",
-      Estimate: `${Math.floor(allocToSec(t.allocatedHours || t.allocationLog?.allocatedHours) / 3600)}h`,
-      Worked: secToHms(calcWorkedSec(t.workingHourTask)),
-      Date: new Date(t.created_on || t.createdAt).toLocaleDateString()
-    }));
-
     if (format === "excel") {
-      const ws = XLSX.utils.json_to_sheet(exportRows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Task Report");
-      XLSX.writeFile(wb, `${employee.firstName}_Task_Report_${scope}.xlsx`);
-      toast.success("Excel report generated successfully!");
+      generateExcelReport(dataToExport, scope, customFrom || taskDateFrom, customTo || taskDateTo);
+    } else if (format === "pdf_summary" || format === "pdf_overview") {
+      generatePdfReport(dataToExport, scope, customFrom || taskDateFrom, customTo || taskDateTo, false);
     } else {
-      try {
-        const doc = new jsPDF();
-        const employeeName = `${employee.firstName || ""} ${employee.lastName || ""}`.trim();
-        const reportTitle = "Employee Task Performance Report";
-        const generatedDate = new Date().toLocaleDateString();
-
-        // Header Section
-        doc.setFontSize(22);
-        doc.setTextColor(20, 184, 166); // Teal-500
-        doc.text(reportTitle, 14, 22);
-
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Employee: ${employeeName}`, 14, 32);
-        doc.text(`Designation: ${employee.designation || "N/A"}`, 14, 38);
-        doc.text(`Generated on: ${generatedDate}`, 14, 44);
-
-        let filterText = `Period: ${scope.charAt(0).toUpperCase() + scope.slice(1)}`;
-        if (scope === "month") {
-          filterText += ` (${new Date().toLocaleString('default', { month: 'long' })} ${new Date().getFullYear()})`;
-        } else if (scope === "year") {
-          filterText += ` (${new Date().getFullYear()})`;
-        }
-        doc.text(filterText, 14, 50);
-
-        // Table preparation
-        const tableColumn = ["Project Name", "Task Name", "Status", "Estimate", "Worked", "Date"];
-        const tableRows = dataToExport.map(t => [
-          t.project?.name || "N/A",
-          t.name || t.title || "N/A",
-          t.status || "N/A",
-          `${Math.floor(allocToSec(t.allocatedHours || t.allocationLog?.allocatedHours) / 3600)}h`,
-          secToHms(calcWorkedSec(t.workingHourTask)),
-          new Date(t.created_on || t.createdAt).toLocaleDateString()
-        ]);
-
-        doc.autoTable({
-          head: [tableColumn],
-          body: tableRows,
-          startY: 60,
-          theme: "grid",
-          headStyles: {
-            fillColor: [20, 184, 166], // Teal-500
-            textColor: [255, 255, 255],
-            fontSize: 10,
-            fontStyle: "bold",
-          },
-          styles: {
-            fontSize: 9,
-            cellPadding: 3,
-          },
-          alternateRowStyles: {
-            fillColor: [240, 253, 250], // Teal-50
-          },
-        });
-
-        // Save PDF
-        const fileName = `Report_${employeeName.replace(/\s+/g, "_")}_${scope}_${generatedDate.replace(/\//g, "-")}.pdf`;
-        doc.save(fileName);
-        toast.success("PDF report generated successfully!");
-      } catch (error) {
-        console.error("PDF Generation Error:", error);
-        toast.error("Failed to generate PDF report");
-      }
+      generatePdfReport(dataToExport, scope, customFrom || taskDateFrom, customTo || taskDateTo, true);
     }
     setShowExportMenu(false);
   };
+
+  const listFilterFrom = (arr, fromDateObj) =>
+    arr.filter((t) => {
+      const d = new Date(t.created_on || t.createdAt);
+      return !isNaN(d) && d >= fromDateObj;
+    });
+
+  const listFilterTo = (arr, toDateObj) =>
+    arr.filter((t) => {
+      const d = new Date(t.created_on || t.createdAt);
+      return !isNaN(d) && d <= toDateObj;
+    });
 
   // ── Filtered tasks ───────────────────────────────────────────────────────────
 
@@ -873,28 +1269,68 @@ const GetEmployeeByID = ({ id, onClose }) => {
                     </button>
 
                     {showExportMenu && (
-                      <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg border border-black/15 shadow-xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                      <div className="absolute top-full right-0 mt-2 w-72 bg-white rounded-lg border border-black/15 shadow-xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2">
                         <div className="px-3 py-2 text-[10px] font-bold text-black uppercase border-b border-black/10 flex items-center justify-between">
-                          Format & Period
-                          <X size={10} className="cursor-pointer text-black" onClick={() => setShowExportMenu(false)} />
+                          Report Type & Scope
+                          <X size={12} className="cursor-pointer text-black hover:text-red-600" onClick={() => setShowExportMenu(false)} />
                         </div>
-                        {["Excel", "PDF"].map((fmt) => (
-                          <div key={fmt} className="space-y-1 mt-2 mb-2 p-1 border-b border-black/10 last:border-0 pb-2">
-                            <div className="flex items-center gap-2 px-2 py-1">
-                              {fmt === "Excel" ? <FileSpreadsheet size={12} className="text-black" /> : <FilePdf size={12} className="text-black" />}
-                              <span className="text-[11px] font-bold uppercase">{fmt} Report</span>
+
+                        {[
+                          { id: "pdf_summary", label: "PDF Summary (EPS & KPIs)", subtitle: "Overview Only (1st Image)", icon: FilePdf, color: "text-green-700" },
+                          { id: "pdf_detailed", label: "PDF Full Report", subtitle: "Summary + Detailed Task List", icon: FilePdf, color: "text-red-700" },
+                          { id: "excel", label: "Excel Spreadsheet", subtitle: "Full Data Workbook", icon: FileSpreadsheet, color: "text-emerald-700" },
+                        ].map((fmtObj) => (
+                          <div key={fmtObj.id} className="space-y-1 mt-2 mb-2 p-1 border-b border-black/10 last:border-0 pb-1.5">
+                            <div className="flex items-center justify-between px-2 py-1 bg-gray-50 border border-black/5 rounded">
+                              <div className="flex items-center gap-1.5">
+                                <fmtObj.icon size={13} className={fmtObj.color} />
+                                <span className="text-[10.5px] font-bold uppercase">{fmtObj.label}</span>
+                              </div>
+                              <span className="text-[8.5px] font-bold text-gray-500">{fmtObj.subtitle}</span>
                             </div>
-                            {["all", "month", "year"].map((scope) => (
+                            {[
+                              { label: "Date Range (From - To)", scope: "range" },
+                              { label: "Current Month", scope: "month" },
+                              { label: "Current Year", scope: "year" },
+                              { label: "All Time", scope: "all" },
+                            ].map((item) => (
                               <button
-                                key={scope}
-                                onClick={() => handleExport(fmt.toLowerCase(), scope)}
-                                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-[10px] font-bold text-black hover:text-green-700 rounded-md transition-all capitalize cursor-pointer"
+                                key={item.scope}
+                                onClick={() => {
+                                  setShowExportMenu(false);
+                                  if (item.scope === "range" && !taskDateFrom && !taskDateTo) {
+                                    setDateRangeExportFormat(fmtObj.id);
+                                    setShowDateRangeModal(true);
+                                  } else {
+                                    handleExport(fmtObj.id, item.scope);
+                                  }
+                                }}
+                                className="w-full text-left px-3 py-1 hover:bg-green-50 text-[10px] font-bold text-black hover:text-green-700 rounded-md transition-all cursor-pointer flex items-center justify-between"
                               >
-                                Export by {scope}
+                                <span>{item.label}</span>
+                                {item.scope === "range" && (taskDateFrom || taskDateTo) && (
+                                  <span className="text-[8px] bg-green-100 text-green-800 px-1 py-0.5 rounded font-mono">
+                                    {taskDateFrom ? taskDateFrom.slice(5) : "start"} → {taskDateTo ? taskDateTo.slice(5) : "end"}
+                                  </span>
+                                )}
                               </button>
                             ))}
                           </div>
                         ))}
+
+                        <div className="pt-1 border-t border-black/10">
+                          <button
+                            onClick={() => {
+                              setShowExportMenu(false);
+                              setDateRangeExportFormat("pdf_summary");
+                              setShowDateRangeModal(true);
+                            }}
+                            className="w-full text-center py-1.5 bg-green-50 hover:bg-green-100 text-green-800 text-[10px] font-black uppercase rounded border border-green-300 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                          >
+                            <CalendarDays size={12} />
+                            Select Custom Date Range...
+                          </button>
+                        </div>
                       </div>
                     )}
 
@@ -1169,6 +1605,16 @@ const GetEmployeeByID = ({ id, onClose }) => {
           {editModel && (
             <EditEmployee employeeData={employee} onClose={handleModelClose} onSuccess={fetchEmployee} />
           )}
+
+          {showDateRangeModal && (
+            <DateRangeExportModal
+              defaultFrom={taskDateFrom}
+              defaultTo={taskDateTo}
+              defaultFormat={dateRangeExportFormat}
+              onClose={() => setShowDateRangeModal(false)}
+              onExport={handleExport}
+            />
+          )}
         </div>
       </div>
     </div>,
@@ -1190,6 +1636,131 @@ const InfoRow = ({ label, value, href }) => (
     )}
   </div>
 );
+
+// ─── DateRangeExportModal ───────────────────────────────────────────────────
+const DateRangeExportModal = ({ defaultFrom, defaultTo, defaultFormat, onClose, onExport }) => {
+  const [fromDate, setFromDate] = useState(defaultFrom || "");
+  const [toDate, setToDate] = useState(defaultTo || "");
+  const [format, setFormat] = useState(defaultFormat || "pdf");
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[12000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-none border-2 border-black shadow-2xl w-full max-w-md p-6 space-y-5 animate-in zoom-in-95 duration-150"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-black pb-3">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-green-50 border border-black">
+              <CalendarDays className="w-5 h-5 text-green-700" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-black uppercase">Date Range Performance Report</h3>
+              <p className="text-[10px] font-bold text-black/60 uppercase">
+                Download performance report for custom date period
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1 text-black hover:bg-gray-100 border border-black cursor-pointer">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-black uppercase mb-1">From Date</label>
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-black text-xs font-bold focus:ring-1 focus:ring-green-600 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-black uppercase mb-1">To Date</label>
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-black text-xs font-bold focus:ring-1 focus:ring-green-600 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-black uppercase mb-1">Report Format & Content</label>
+            <div className="grid grid-cols-1 gap-2">
+              <button
+                type="button"
+                onClick={() => setFormat("pdf_summary")}
+                className={`flex items-center justify-between px-3 py-2 border font-bold text-xs uppercase tracking-wide transition-all cursor-pointer ${
+                  format === "pdf_summary" || format === "pdf" ? "bg-green-700 text-white border-green-800 shadow" : "bg-white text-black border-black hover:bg-gray-50"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <FilePdf size={14} /> PDF Summary (EPS & KPIs Only)
+                </span>
+                <span className="text-[9px] font-normal opacity-80">(Overview Page)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormat("pdf_detailed")}
+                className={`flex items-center justify-between px-3 py-2 border font-bold text-xs uppercase tracking-wide transition-all cursor-pointer ${
+                  format === "pdf_detailed" ? "bg-green-700 text-white border-green-800 shadow" : "bg-white text-black border-black hover:bg-gray-50"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <FilePdf size={14} /> PDF Full Report
+                </span>
+                <span className="text-[9px] font-normal opacity-80">(With Task List Table)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormat("excel")}
+                className={`flex items-center justify-between px-3 py-2 border font-bold text-xs uppercase tracking-wide transition-all cursor-pointer ${
+                  format === "excel" ? "bg-green-700 text-white border-green-800 shadow" : "bg-white text-black border-black hover:bg-gray-50"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <FileSpreadsheet size={14} /> Excel Workbook
+                </span>
+                <span className="text-[9px] font-normal opacity-80">(.XLSX)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-black">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-100 text-black border border-black font-bold text-xs uppercase hover:bg-gray-200 cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (!fromDate && !toDate) {
+                toast.warn("Please select at least a From or To date");
+                return;
+              }
+              onExport(format, "range", fromDate, toDate);
+              onClose();
+            }}
+            className="flex items-center gap-2 px-5 py-2 bg-green-600 text-white border border-black font-bold text-xs uppercase hover:bg-green-700 shadow cursor-pointer"
+          >
+            <Download size={14} /> Download Report
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+};
 
 export default GetEmployeeByID;
 
