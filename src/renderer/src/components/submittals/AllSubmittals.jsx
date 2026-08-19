@@ -226,10 +226,21 @@ const AllSubmittals = ({ submittalData, projectId, onUpdate }) => {
 
   const isConnectionDesignerSubmittal = (item) => {
     if (!item) return false
-    if (item.isConnectionDesign === true || String(item.isConnectionDesign).toLowerCase() === 'true') return true
+
+    const cdVal =
+      item.isConnectionDesign ??
+      item.isConnectionDesigner ??
+      item.is_connection_design ??
+      item.mileStoneBelongsTo?.isConnectionDesign ??
+      item.milestone?.isConnectionDesign ??
+      item.currentVersion?.isConnectionDesign
+
+    if (cdVal !== undefined && cdVal !== null) {
+      return cdVal === true || String(cdVal).toLowerCase() === 'true'
+    }
+
     const text = item.subject || item.serialNo || item.name || ''
-    if (/TR\s*#?\s*\d*[A-Za-z]+/i.test(text)) return true
-    if (/CONNECTION DESIGN/i.test(text)) return true
+    if (/CONNECTION\s*DESIGN/i.test(text)) return true
     return false
   }
 
@@ -257,14 +268,12 @@ const AllSubmittals = ({ submittalData, projectId, onUpdate }) => {
           >
             General Submittals
           </button>
-          {connectionDesignerSubmittals.length > 0 && (
-            <button
-              className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === 'CONNECTION_DESIGNER' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-              onClick={() => setActiveTab('CONNECTION_DESIGNER')}
-            >
-              Connection Designer&rsquo;s Submittals
-            </button>
-          )}
+          <button
+            className={`py-3 px-1 text-sm font-semibold tracking-normal border-b-2 transition-colors ${activeTab === 'CONNECTION_DESIGNER' ? 'border-green-600 text-green-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            onClick={() => setActiveTab('CONNECTION_DESIGNER')}
+          >
+            Connection Designer&rsquo;s Submittals
+          </button>
         </div>
         <div className="relative pb-2 sm:pb-0 sm:mt-2">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

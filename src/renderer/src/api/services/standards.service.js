@@ -233,22 +233,48 @@ class StandardsService {
    */
   static async SetProjectStandardPreferences(projectId, preferencesData, tier) {
     try {
-      const payload = Array.isArray(preferencesData)
-        ? { standardFamilyIds: preferencesData }
-        : preferencesData
+      const familyIds = Array.isArray(preferencesData)
+        ? preferencesData
+        : preferencesData?.standardFamilyIds || preferencesData?.families || preferencesData?.familyIds || []
 
       const effectiveTier = tier === 'FABRICATOR' ? 'PROJECT' : tier || undefined
 
-      const response = await api.post(`standards/projects/${projectId}/preferences`, payload, {
-        params: {
-          tier: effectiveTier
-        },
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      console.log('Set Project Standard Preferences response:', response.data)
-      return response.data
+      const payload = {
+        standardFamilyIds: familyIds,
+        families: familyIds,
+        familyIds: familyIds,
+        tier: effectiveTier,
+        ...(typeof preferencesData === 'object' && !Array.isArray(preferencesData) ? preferencesData : {})
+      }
+
+      const targetPath = projectId && projectId !== 'general'
+        ? `standards/projects/${projectId}/preferences`
+        : 'standards/projects/general/preferences'
+
+      try {
+        const response = await api.post(targetPath, payload, {
+          params: {
+            tier: effectiveTier
+          },
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        console.log('Set Project Standard Preferences response:', response.data)
+        return response.data
+      } catch (err1) {
+        console.warn(`Primary preference POST endpoint (${targetPath}) failed, trying fallback /standards/preferences:`, err1)
+        const response = await api.post('standards/preferences', { ...payload, projectId }, {
+          params: {
+            tier: effectiveTier
+          },
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        console.log('Set Standard Preferences fallback response:', response.data)
+        return response.data
+      }
     } catch (error) {
       console.error('Error setting project standard preferences:', error)
       throw error

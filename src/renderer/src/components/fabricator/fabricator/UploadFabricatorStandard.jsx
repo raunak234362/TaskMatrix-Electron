@@ -30,6 +30,35 @@ const UploadFabricatorStandard = ({
   const [selectedFabricatorId, setSelectedFabricatorId] = useState(initialFabricatorId)
   const [fabricators, setFabricators] = useState([])
   const [loadingFabricators, setLoadingFabricators] = useState(false)
+  const [existingFamilies, setExistingFamilies] = useState([])
+
+  useEffect(() => {
+    const fetchExistingFamilies = async () => {
+      try {
+        let res = null
+        if (sourceType === 'FABRICATOR' && (selectedFabricatorId || initialFabricatorId)) {
+          res = await Service.GetFabricatorStandardFamilies(selectedFabricatorId || initialFabricatorId).catch(() => null)
+        } else {
+          res = await Service.GetAvailableStandardFamilies(sourceType, sourceType === 'PROJECT' ? projectId : undefined).catch(() => null)
+        }
+        const raw = res?.families || res?.data?.families || res?.standardFamilies || res?.data?.standardFamilies || res?.data || (Array.isArray(res) ? res : [])
+        if (Array.isArray(raw)) {
+          const list = raw.map((f) => {
+            const id = typeof f === 'string' ? f : f.id || f.familyCode || f.name
+            const familyCode = typeof f === 'object' ? f.familyCode || f.id || id : id
+            const edition = typeof f === 'object' ? f.edition || '' : ''
+            const isDefault = typeof f === 'object' ? !!f.isDefault : false
+            return { id, familyCode, edition, isDefault, rawObj: f }
+          })
+          setExistingFamilies(list)
+        }
+      } catch (err) {
+        console.warn('Error fetching existing families in uploader:', err)
+      }
+    }
+
+    fetchExistingFamilies()
+  }, [sourceType, selectedFabricatorId, initialFabricatorId, projectId])
 
   // Ingestion progress state
   const [isProcessing, setIsProcessing] = useState(false)
@@ -322,11 +351,8 @@ const UploadFabricatorStandard = ({
                   className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-green-500 focus:outline-none font-medium text-gray-800 font-semibold"
                   required
                 >
-                  <option value="FABRICATOR">FABRICATOR (Default)</option>
                   <option value="GENERAL">GENERAL</option>
-                  <option value="PROJECT_STANDARD">PROJECT_STANDARD</option>
-                  <option value="AISC">AISC</option>
-                  <option value="AWS">AWS</option>
+                  <option value="PROJECT">PROJECT</option>
                 </select>
               </div>
 
@@ -360,6 +386,36 @@ const UploadFabricatorStandard = ({
               )}
 
               {/* Document Family Metadata Fields */}
+              {existingFamilies.length > 0 && (
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                    Select Existing Standard Family
+                  </label>
+                  <select
+                    onChange={(e) => {
+                      const selectedId = e.target.value
+                      if (!selectedId) return
+                      const fam = existingFamilies.find((f) => f.id === selectedId)
+                      if (fam) {
+                        setDocumentFamilyId(fam.id)
+                        setFamilyCode(fam.familyCode || fam.id)
+                        setEdition(fam.edition || '')
+                        setIsDefault(fam.isDefault || false)
+                      }
+                    }}
+                    defaultValue=""
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-green-500 focus:outline-none font-medium text-gray-800 mb-2 cursor-pointer"
+                  >
+                    <option value="">-- Choose Existing Family (Optional) --</option>
+                    {existingFamilies.map((fam) => (
+                      <option key={fam.id} value={fam.id}>
+                        {fam.familyCode || fam.id} {fam.edition ? `(Ed. ${fam.edition})` : ''} {fam.isDefault ? '[Default]' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
@@ -369,7 +425,7 @@ const UploadFabricatorStandard = ({
                     type="text"
                     value={documentFamilyId}
                     onChange={(e) => setDocumentFamilyId(e.target.value)}
-                    placeholder="e.g. ACI-318"
+                    placeholder="e.g. AISC, ACI-318"
                     className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-green-500 focus:outline-none font-medium text-gray-800"
                   />
                 </div>
@@ -381,7 +437,7 @@ const UploadFabricatorStandard = ({
                     type="text"
                     value={familyCode}
                     onChange={(e) => setFamilyCode(e.target.value)}
-                    placeholder="e.g. 318, 360"
+                    placeholder="e.g. AISC, 318"
                     className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-green-500 focus:outline-none font-medium text-gray-800"
                   />
                 </div>
@@ -393,7 +449,7 @@ const UploadFabricatorStandard = ({
                     type="text"
                     value={edition}
                     onChange={(e) => setEdition(e.target.value)}
-                    placeholder="e.g. 2019, 2024"
+                    placeholder="e.g. 14, 2024"
                     className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-green-500 focus:outline-none font-medium text-gray-800"
                   />
                 </div>
