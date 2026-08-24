@@ -3,7 +3,7 @@ import { useForm, useFieldArray, Controller } from "react-hook-form";
 import Button from "../fields/Button";
 import Service from "../../api/Service";
 import { toast } from "react-toastify";
-import { Merge } from "lucide-react";
+import { Merge, Loader2 } from "lucide-react";
 
 
 const EDITABLE_COLS = ["description", "referenceDoc", "elements", "QtyNo", "hours", "remarks"];
@@ -14,10 +14,10 @@ const sumCellValue = (val) => {
   return Number(val) || 0;
 };
 
-const CoTable = ({ coId, onSuccess }) => {
+const CoTable = ({ coId, onSuccess, isDraft, onDraftSubmit, isSubmitting }) => {
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
-  const hideCost = ["staff", "project_manager", "dept_manager"].includes(userRole);
-  const canSeeCost = !hideCost;
+  const costAllowedRoles = ["admin", "deputy_manager", "operation_executive", "project_manager_officer", "pmo"];
+  const canSeeCost = costAllowedRoles.includes(userRole);
 
   const activeCols = canSeeCost
     ? ["description", "referenceDoc", "elements", "QtyNo", "hours", "cost", "remarks"]
@@ -46,7 +46,10 @@ const CoTable = ({ coId, onSuccess }) => {
   const { fields, append, replace } = useFieldArray({ control, name: "rows" });
 
   const fetchTableRows = async () => {
-    if (!coId) return;
+    if (!coId) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const response = await Service.GetAllCOTableRows(coId);
@@ -290,6 +293,11 @@ const CoTable = ({ coId, onSuccess }) => {
         cost: formatSaveValue(row.cost),
         remarks: row.remarks && row.remarks.trim().length >= 2 ? row.remarks : "— "
       }));
+
+      if (isDraft && onDraftSubmit) {
+        await onDraftSubmit(formattedRows);
+        return;
+      }
 
       await Service.addCOTable(formattedRows, coId);
       toast.success("Table saved successfully!");
@@ -610,10 +618,18 @@ const CoTable = ({ coId, onSuccess }) => {
           </Button>
           <Button
             type="submit"
-            disabled={cellMergeMode}
-            className="bg-green-600 hover:bg-green-700 text-white shadow-md ml-auto"
+            disabled={cellMergeMode || isSubmitting}
+            className="bg-green-600 hover:bg-green-700 text-white shadow-md ml-auto disabled:opacity-50 flex items-center gap-2"
           >
-            Finalize & Save Table
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Submitting Change Order...
+              </>
+            ) : isDraft ? (
+              "Submit Change Order"
+            ) : (
+              "Finalize & Save Table"
+            )}
           </Button>
         </div>
       </form>

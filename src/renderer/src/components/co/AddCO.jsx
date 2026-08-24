@@ -10,6 +10,8 @@ import Service from "../../api/Service";
 import SectionTitle from "../ui/SectionTitle";
 import Select from "react-select";
 import RichTextEditor from "../fields/RichTextEditor";
+import CoTable from "./CoTable";
+import { ArrowLeft } from "lucide-react";
 
 
 const AddCO = ({ project, onSuccess, changeOrderData }) => {
@@ -28,6 +30,9 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
         isAproovedByAdmin: isAdminRole
       }
     });
+  const [step, setStep] = useState(1); // 1 = Draft CO Details, 2 = CO Table
+  const [coFormData, setCoFormData] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
   const [pocs, setPocs] = React.useState([]);
@@ -114,11 +119,27 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
         value: s.id,
       })) ?? [];
 
-  const onSubmit = async (data) => {
+  // Step 1: Save CO details in state draft and proceed to table
+  const onProceedToTable = (data) => {
+    setCoFormData(data);
+    setStep(2);
+    toast.info("CO details saved as draft. Please fill the table and click submit.");
+  };
+
+  // Step 2: Final Submit - hits ChangeOrder first, then addCOTable with created CO ID
+  const handleFinalSubmit = async (formattedRows) => {
+    const data = coFormData;
+    if (!data) {
+      toast.error("Draft CO details missing. Please go back and fill CO details.");
+      setStep(1);
+      return;
+    }
+
     try {
+      setIsSubmitting(true);
       const formData = new FormData();
       formData.append("project", project?.id);
-      formData.append("sender", userDetail.id);
+      formData.append("sender", userDetail?.id);
       
       // Handle multiple recipients
       if (Array.isArray(data.recipients) && data.recipients.length > 0) {
@@ -145,29 +166,79 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
 
       const fabricatorName = selectedFabricator?.fabName || project?.fabricatorName || project?.fabricator?.fabName || "";
       const projectName = project?.projectName || project?.name || "";
+      
+      // 1st: Hit ChangeOrder API
       const response = await Service.ChangeOrder(formData, fabricatorName, projectName);
       const createdCO = response.data?.data ?? response.data;
+      const createdCoId = createdCO?.id || createdCO?._id;
 
-      if (createdCO) {
-        toast.success("Change Order Created!");
-
-        // This is where your error happened because onSuccess was undefined
-        if (typeof onSuccess === "function") {
-          onSuccess(createdCO);
-        } else {
-          console.error("onSuccess prop was not passed to AddCO component");
-        }
+      if (!createdCoId) {
+        throw new Error("Failed to retrieve Created Change Order ID");
       }
+
+      // 2nd: Hit addCOTable API using the newly created changeOrder ID
+      if (formattedRows && formattedRows.length > 0) {
+        await Service.addCOTable(formattedRows, createdCoId);
+      }
+
+      toast.success("Change Order & Table created successfully!");
+
       reset();
+      setDescription("");
+      setFiles([]);
+      setCoFormData(null);
+      setStep(1);
+
+      if (typeof onSuccess === "function") {
+        onSuccess(createdCO);
+      }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to create Change Order");
+      toast.error(err?.response?.data?.message || err?.message || "Failed to create Change Order");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  if (step === 2) {
+    return (
+      <div className="w-full bg-white p-6 rounded-xl shadow-lg border border-gray-100 space-y-4">
+        <div className="flex justify-between items-center border-b pb-3 mb-2">
+          <div>
+            <h3 className="text-lg font-bold text-gray-800">
+              Step 2 of 2: Fill Change Order Table Data
+            </h3>
+            <p className="text-xs text-gray-500">
+              Draft CO Number: <span className="font-semibold text-green-700">{coFormData?.changeOrderNumber}</span> | Subject: <span className="font-semibold text-gray-700">{coFormData?.remarks}</span>
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => setStep(1)}
+            className="flex items-center gap-1 text-sm font-semibold text-gray-600 hover:text-green-700 transition-colors cursor-pointer disabled:opacity-50"
+          >
+            <ArrowLeft size={16} /> Back to CO Details
+          </button>
+        </div>
+
+        <CoTable
+          isDraft={true}
+          onDraftSubmit={handleFinalSubmit}
+          isSubmitting={isSubmitting}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-base font-bold text-gray-700 uppercase tracking-wide">
+          Step 1 of 2: Change Order Details (Draft)
+        </h3>
+      </div>
+      <form onSubmit={handleSubmit(onProceedToTable)} className="space-y-4">
         <SectionTitle title="Fabrication & Routing" />
 
         {/* Fabricator Contact */}
@@ -193,8 +264,6 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
             />
           )}
         />
-
-       
 
         <SectionTitle title="Details" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -238,9 +307,9 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
         <div className="flex justify-center w-full pt-4">
           <Button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white px-8 py-2 rounded-lg transition-all"
+            className="w-full bg-green-600 hover:bg-green-700 text-white px-8 py-2 rounded-lg transition-all font-bold text-sm tracking-wide shadow-md"
           >
-            Save & Continue
+            Save Draft & Fill Table →
           </Button>
         </div>
       </form>

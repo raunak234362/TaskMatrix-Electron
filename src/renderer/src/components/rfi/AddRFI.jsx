@@ -141,6 +141,18 @@ const AddRFI = ({
     fetchEngineers();
   }, [connectionDesignerID]);
 
+  const rawUserRole = sessionStorage.getItem("userRole") || userDetail?.role || "";
+  const userRoleStr = String(rawUserRole).toLowerCase();
+  const autoApproveRoles = [
+    "admin",
+    "dept_manager",
+    "department_manager",
+    "deputy_manager",
+    "operation_executive",
+    "project_manager",
+  ];
+  const isAutoApproved = autoApproveRoles.includes(userRoleStr);
+
   const onSubmit = async (data) => {
     try {
       setLoading(true);
@@ -150,7 +162,7 @@ const AddRFI = ({
         fabricator_id: fabricatorID,
         sender_id: userDetail?.id,
         status: true,
-        isAproovedByAdmin: "PENDING",
+        isAproovedByAdmin: isAutoApproved ? true : "PENDING",
         description,
       };
 

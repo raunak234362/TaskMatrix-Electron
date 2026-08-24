@@ -44,14 +44,22 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
         const [accountsRes, invoiceRes, fabricatorsRes] = await Promise.all([
           Service.GetBankAccounts(),
           Service.GetInvoiceById(invoiceId),
-          Service.GetAllFabricators(),
+          Service.GetAllFabricators(1, 1000),
         ]);
 
-        const accountsData = accountsRes?.data || accountsRes || [];
-        setAccounts(Array.isArray(accountsData) ? accountsData : []);
+        let accountsData = [];
+        if (Array.isArray(accountsRes)) accountsData = accountsRes;
+        else if (accountsRes?.data?.data && Array.isArray(accountsRes.data.data)) accountsData = accountsRes.data.data;
+        else if (accountsRes?.data && Array.isArray(accountsRes.data)) accountsData = accountsRes.data;
+        setAccounts(accountsData);
 
         const invoiceData = invoiceRes?.data || invoiceRes;
-        const fabricatorsData = fabricatorsRes?.data || fabricatorsRes || [];
+
+        let fabricatorsData = [];
+        if (Array.isArray(fabricatorsRes)) fabricatorsData = fabricatorsRes;
+        else if (fabricatorsRes?.data?.data && Array.isArray(fabricatorsRes.data.data)) fabricatorsData = fabricatorsRes.data.data;
+        else if (fabricatorsRes?.data && Array.isArray(fabricatorsRes.data)) fabricatorsData = fabricatorsRes.data;
+        else if (fabricatorsRes?.fabricators && Array.isArray(fabricatorsRes.fabricators)) fabricatorsData = fabricatorsRes.fabricators;
 
         if (invoiceData) {
           // Find contacts for this fabricator if linked

@@ -21,6 +21,12 @@ const sumCellValue = (val) => {
 
 const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+  const costAllowedRoles = ["admin", "deputy_manager", "operation_executive", "project_manager_officer", "pmo"];
+  const canSeeCost = costAllowedRoles.includes(userRole);
+  const activeCols = canSeeCost
+    ? ["description", "referenceDoc", "elements", "QtyNo", "hours", "cost", "remarks"]
+    : ["description", "referenceDoc", "elements", "QtyNo", "hours", "remarks"];
+
   const hideStatus = ["staff", "project_manager", "dept_manager"].includes(userRole);
   const showManagerApproval = ["project_manager", "dept_manager"].includes(userRole);
   const canDelete = ["deputy_manager", "operation_executive", "admin"].includes(userRole);
@@ -241,7 +247,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
     const coords = Array.from(selectedCells).map((key) => {
       const [rStr, colName] = key.split("-");
       const r = parseInt(rStr, 10);
-      const c = EDITABLE_COLS.indexOf(colName);
+      const c = activeCols.indexOf(colName);
       return { r, c, colName };
     });
 
@@ -264,7 +270,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
     const valuesToMerge = [];
     for (let r = minR; r <= maxR; r++) {
       for (let c = minC; c <= maxC; c++) {
-        const fieldName = EDITABLE_COLS[c];
+        const fieldName = activeCols[c];
         const val = currentRows[r]?.[fieldName];
         if (val !== undefined && val !== null && val !== "" && val !== "_MERGED_LEFT_" && val !== "_MERGED_UP_") {
           valuesToMerge.push(val);
@@ -283,7 +289,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
     const updatedRows = JSON.parse(JSON.stringify(currentRows));
     for (let r = minR; r <= maxR; r++) {
       for (let c = minC; c <= maxC; c++) {
-        const fieldName = EDITABLE_COLS[c];
+        const fieldName = activeCols[c];
         if (r === minR && c === minC) {
           updatedRows[r][fieldName] = combinedText;
         } else if (r === minR) {
@@ -312,7 +318,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
     selectedCells.forEach((key) => {
       const [rStr, colName] = key.split("-");
       const r = parseInt(rStr, 10);
-      const c = EDITABLE_COLS.indexOf(colName);
+      const c = activeCols.indexOf(colName);
 
       const val = updatedRows[r]?.[colName];
       if (val === "_MERGED_LEFT_" || val === "_MERGED_UP_") {
@@ -320,8 +326,8 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
       }
 
       let nextC = c + 1;
-      while (nextC < EDITABLE_COLS.length) {
-        const nextFieldName = EDITABLE_COLS[nextC];
+      while (nextC < activeCols.length) {
+        const nextFieldName = activeCols[nextC];
         if (updatedRows[r]?.[nextFieldName] === "_MERGED_LEFT_") {
           updatedRows[r][nextFieldName] = "";
           nextC++;
@@ -335,7 +341,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
         let allMergedUp = true;
         const width = nextC - c;
         for (let offset = 0; offset < width; offset++) {
-          const fieldName = EDITABLE_COLS[c + offset];
+          const fieldName = activeCols[c + offset];
           if (updatedRows[nextR]?.[fieldName] !== "_MERGED_UP_") {
             allMergedUp = false;
             break;
@@ -343,7 +349,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
         }
         if (allMergedUp) {
           for (let offset = 0; offset < width; offset++) {
-            const fieldName = EDITABLE_COLS[c + offset];
+            const fieldName = activeCols[c + offset];
             updatedRows[nextR][fieldName] = "";
           }
           nextR++;
@@ -600,7 +606,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                     <th className="p-3">Elements</th>
                     <th className="p-3 w-20">Qty</th>
                     <th className="p-3 w-24">Hours</th>
-                    <th className="p-3 w-28">Cost ($)</th>
+                    {canSeeCost && <th className="p-3 w-28">Cost ($)</th>}
                     <th className="p-3">Remarks</th>
                     <th className="p-3 w-10 text-center">Action</th>
                   </tr>
@@ -609,18 +615,18 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                   {fields.map((field, index) => {
                     // Compute spans dynamically for this row context
                     const rowSpans = [];
-                    for (let c = 0; c < EDITABLE_COLS.length; c++) {
+                    for (let c = 0; c < activeCols.length; c++) {
                       rowSpans.push({ rowSpan: 1, colSpan: 1, isSpanned: false });
                     }
 
                     // Simple wrapper matching main spans algorithm
-                    for (let c = 0; c < EDITABLE_COLS.length; c++) {
+                    for (let c = 0; c < activeCols.length; c++) {
                       const watchedRows = watch("rows") || [];
                       // Check horizontal spans
                       let colSpan = 1;
                       let nextCol = c + 1;
-                      while (nextCol < EDITABLE_COLS.length) {
-                        const fieldName = EDITABLE_COLS[nextCol];
+                      while (nextCol < activeCols.length) {
+                        const fieldName = activeCols[nextCol];
                         if (watchedRows[index]?.[fieldName] === "_MERGED_LEFT_") {
                           colSpan++;
                           nextCol++;
@@ -635,7 +641,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                       while (nextRow < watchedRows.length) {
                         let allMergedUp = true;
                         for (let offset = 0; offset < colSpan; offset++) {
-                          const fieldName = EDITABLE_COLS[c + offset];
+                          const fieldName = activeCols[c + offset];
                           if (watchedRows[nextRow]?.[fieldName] !== "_MERGED_UP_") {
                             allMergedUp = false;
                             break;
@@ -654,11 +660,11 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                       // Check if merged from left
                       let checkC = c - 1;
                       while (checkC >= 0) {
-                        if (watchedRows[index]?.[EDITABLE_COLS[checkC]] !== "_MERGED_LEFT_" && watchedRows[index]?.[EDITABLE_COLS[checkC]] !== "_MERGED_UP_") {
+                        if (watchedRows[index]?.[activeCols[checkC]] !== "_MERGED_LEFT_" && watchedRows[index]?.[activeCols[checkC]] !== "_MERGED_UP_") {
                           // Found potential origin
                           let spansCols = 0;
                           let scanC = checkC + 1;
-                          while (scanC < EDITABLE_COLS.length && watchedRows[index]?.[EDITABLE_COLS[scanC]] === "_MERGED_LEFT_") {
+                          while (scanC < activeCols.length && watchedRows[index]?.[activeCols[scanC]] === "_MERGED_LEFT_") {
                             spansCols++;
                             scanC++;
                           }
@@ -673,11 +679,11 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                       // Check if merged from up
                       let checkR = index - 1;
                       while (checkR >= 0 && !isSpanned) {
-                        if (watchedRows[checkR]?.[EDITABLE_COLS[c]] !== "_MERGED_UP_" && watchedRows[checkR]?.[EDITABLE_COLS[c]] !== "_MERGED_LEFT_") {
+                        if (watchedRows[checkR]?.[activeCols[c]] !== "_MERGED_UP_" && watchedRows[checkR]?.[activeCols[c]] !== "_MERGED_LEFT_") {
                           // Origin cell check
                           let spansCols = 1;
                           let scanC = c + 1;
-                          while (scanC < EDITABLE_COLS.length && watchedRows[checkR]?.[EDITABLE_COLS[scanC]] === "_MERGED_LEFT_") {
+                          while (scanC < activeCols.length && watchedRows[checkR]?.[activeCols[scanC]] === "_MERGED_LEFT_") {
                             spansCols++;
                             scanC++;
                           }
@@ -688,7 +694,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                           while (scanR < watchedRows.length) {
                             let allMerged = true;
                             for (let offset = 0; offset < spansCols; offset++) {
-                              if (watchedRows[scanR]?.[EDITABLE_COLS[c + offset]] !== "_MERGED_UP_") {
+                              if (watchedRows[scanR]?.[activeCols[c + offset]] !== "_MERGED_UP_") {
                                 allMerged = false;
                                 break;
                               }
@@ -754,7 +760,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                           />
                         </td>
 
-                        {EDITABLE_COLS.map((colName, colIndex) => {
+                        {activeCols.map((colName, colIndex) => {
                           const spanInfo = rowSpans[colIndex] || { rowSpan: 1, colSpan: 1, isSpanned: false };
                           if (spanInfo.isSpanned) return null;
 
@@ -850,7 +856,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                   })}
                   {fields.length === 0 && (
                     <tr>
-                      <td colSpan={11} className="p-8 text-center text-slate-400 italic bg-slate-50/30">
+                      <td colSpan={canSeeCost ? 10 : 9} className="p-8 text-center text-slate-400 italic bg-slate-50/30">
                         No rows added. Click &quot;Add Row&quot; to contribute to the table.
                       </td>
                     </tr>
@@ -861,7 +867,9 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                     <tr className="bg-slate-50 font-bold text-slate-700">
                       <td colSpan={6} className="p-3 text-right">Totals:</td>
                       <td className="p-3 text-blue-600 font-black">{totalHours} hr</td>
-                      <td className="p-3 text-green-600 font-black">${totalCost.toLocaleString()}</td>
+                      {canSeeCost && (
+                        <td className="p-3 text-green-600 font-black">${totalCost.toLocaleString()}</td>
+                      )}
                       <td colSpan={2} />
                     </tr>
                   </tfoot>

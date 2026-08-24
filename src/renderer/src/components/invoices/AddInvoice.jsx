@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import Select from "react-select";
 import Input from "../fields/input";
 import Button from "../fields/Button";
 import Service from "../../api/Service";
@@ -69,26 +70,43 @@ const AddInvoice = ({
       try {
         const [accountsRes, fabricatorsRes, projectsRes, rfqsRes, invoicesRes] = await Promise.all([
           Service.GetBankAccounts(),
-          Service.GetAllFabricators(),
-          Service.GetAllProjects(),
+          Service.GetAllFabricators(1, 100),
+          Service.GetAllProjects(1, 100),
           Service.FetchAllRFQ(),
           Service.GetAllInvoice()
         ]);
 
-        const accountsData = accountsRes?.data || accountsRes || []
-        setAccounts(Array.isArray(accountsData) ? accountsData : []);
+        let accountsData = [];
+        if (Array.isArray(accountsRes)) accountsData = accountsRes;
+        else if (accountsRes?.data?.data && Array.isArray(accountsRes.data.data)) accountsData = accountsRes.data.data;
+        else if (accountsRes?.data && Array.isArray(accountsRes.data)) accountsData = accountsRes.data;
+        setAccounts(accountsData);
 
-        const fabricatorsData = fabricatorsRes?.data || fabricatorsRes || []
-        setFabricators(Array.isArray(fabricatorsData) ? fabricatorsData : []);
+        let fabricatorsData = [];
+        if (Array.isArray(fabricatorsRes)) fabricatorsData = fabricatorsRes;
+        else if (fabricatorsRes?.data?.data && Array.isArray(fabricatorsRes.data.data)) fabricatorsData = fabricatorsRes.data.data;
+        else if (fabricatorsRes?.data && Array.isArray(fabricatorsRes.data)) fabricatorsData = fabricatorsRes.data;
+        else if (fabricatorsRes?.fabricators && Array.isArray(fabricatorsRes.fabricators)) fabricatorsData = fabricatorsRes.fabricators;
+        setFabricators(fabricatorsData);
 
-        const projectsData = projectsRes?.data || projectsRes || []
-        setAllProjects(Array.isArray(projectsData) ? projectsData : []);
+        let projectsData = [];
+        if (Array.isArray(projectsRes)) projectsData = projectsRes;
+        else if (projectsRes?.data?.data && Array.isArray(projectsRes.data.data)) projectsData = projectsRes.data.data;
+        else if (projectsRes?.data && Array.isArray(projectsRes.data)) projectsData = projectsRes.data;
+        else if (projectsRes?.projects && Array.isArray(projectsRes.projects)) projectsData = projectsRes.projects;
+        setAllProjects(projectsData);
 
-        const rfqsData = rfqsRes?.data || rfqsRes || []
-        setAllRfqs(Array.isArray(rfqsData) ? rfqsData : []);
+        let rfqsData = [];
+        if (Array.isArray(rfqsRes)) rfqsData = rfqsRes;
+        else if (rfqsRes?.data?.data && Array.isArray(rfqsRes.data.data)) rfqsData = rfqsRes.data.data;
+        else if (rfqsRes?.data && Array.isArray(rfqsRes.data)) rfqsData = rfqsRes.data;
+        setAllRfqs(rfqsData);
 
-        const invoicesData = invoicesRes?.data || invoicesRes || []
-        setAllInvoices(Array.isArray(invoicesData) ? invoicesData : []);
+        let invoicesData = [];
+        if (Array.isArray(invoicesRes)) invoicesData = invoicesRes;
+        else if (invoicesRes?.data?.data && Array.isArray(invoicesRes.data.data)) invoicesData = invoicesRes.data.data;
+        else if (invoicesRes?.data && Array.isArray(invoicesRes.data)) invoicesData = invoicesRes.data;
+        setAllInvoices(invoicesData);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -97,6 +115,49 @@ const AddInvoice = ({
     };
     fetchData();
   }, []);
+
+  const handleFabricatorSearch = async (inputValue) => {
+    if (!inputValue || inputValue.length < 2) return;
+    try {
+      const res = await Service.GetAllFabricators(1, 100, inputValue);
+      let list = [];
+      if (Array.isArray(res)) list = res;
+      else if (res?.data?.data && Array.isArray(res.data.data)) list = res.data.data;
+      else if (res?.data && Array.isArray(res.data)) list = res.data;
+      else if (res?.fabricators && Array.isArray(res.fabricators)) list = res.fabricators;
+      if (list.length > 0) setFabricators(list);
+    } catch (err) {
+      console.error("Error searching fabricators:", err);
+    }
+  };
+
+  const handleProjectSearch = async (inputValue) => {
+    if (!inputValue || inputValue.length < 2) return;
+    try {
+      const res = await Service.GetAllProjects(1, 100, inputValue);
+      let list = [];
+      if (Array.isArray(res)) list = res;
+      else if (res?.data?.data && Array.isArray(res.data.data)) list = res.data.data;
+      else if (res?.data && Array.isArray(res.data)) list = res.data;
+      else if (res?.projects && Array.isArray(res.projects)) list = res.projects;
+      if (list.length > 0) setAllProjects(list);
+    } catch (err) {
+      console.error("Error searching projects:", err);
+    }
+  };
+
+  const customSelectStyles = {
+    control: (base) => ({
+      ...base,
+      backgroundColor: "rgba(240, 253, 244, 0.4)",
+      borderColor: "#bbf7d0",
+      borderRadius: "0.5rem",
+      minHeight: "40px",
+      boxShadow: "none",
+      "&:hover": { borderColor: "#22c55e" },
+    }),
+    menu: (base) => ({ ...base, zIndex: 9999 }),
+  };
 
   const selectFabricator = (fabricatorId) => {
     setSelectedFabricatorId(fabricatorId);
@@ -118,7 +179,7 @@ const AddInvoice = ({
       setValue("customerName", selectedFabricator.fabName || "");
       setValue("address", selectedFabricator.website || "");
       setContacts(selectedFabricator.pointOfContact || []);
-      
+
       // Set default SAC code for all current items
       const sacCode = selectedFabricator.SAC || "";
       const currentItems = watch("invoiceItems") || [];
@@ -267,16 +328,16 @@ const AddInvoice = ({
   const handleRfqSelect = (e) => {
     const rfqId = e.target.value;
     setValue("rfqId", rfqId);
-    
+
     if (rfqId) {
       const selectedRfq = availableRfqs.find(r => r.id === rfqId || r._id === rfqId);
       let isMTO = false;
       let isDetailing = false;
-      
+
       if (selectedRfq) {
         isMTO = selectedRfq.MTOManual || selectedRfq.mtoStickModelEnabled || selectedRfq.MTOStickModel || selectedRfq.MTOValue || selectedRfq.mto3dModel || selectedRfq.mtoTeklaSDS2 || selectedRfq.mtoIFC || selectedRfq.mtoEJE || selectedRfq.mtoKss || selectedRfq.mtoBoltList || selectedRfq.mtoMaterialSummary;
         isDetailing = selectedRfq.connectionDesign || selectedRfq.miscDesign || selectedRfq.customerDesign || selectedRfq.detailingMain || selectedRfq.detailingMisc;
-        
+
         if (isMTO && !isDetailing) {
           setValue("invoiceType", "MTO");
           setValue("jobName", selectedRfq.subject || selectedRfq.projectName || selectedRfq.jobName || selectedRfq.rfqNumber || "");
@@ -351,6 +412,31 @@ const AddInvoice = ({
     }
   };
 
+  const fabricatorOptions = (fabricators || []).map((fab) => ({
+    label: fab.fabName || fab.name || fab.fabricatorName || fab.companyName || "Unnamed Fabricator",
+    value: fab.id || fab._id,
+  }));
+
+  const rfqOptions = (availableRfqs || []).map((rfq) => ({
+    label: rfq.projectName || rfq.rfqNumber || String(rfq.id || rfq._id),
+    value: rfq.id || rfq._id,
+  }));
+
+  const projectOptions = (filteredProjects || []).map((project) => ({
+    label: project.name || project.projectName || "Unnamed Project",
+    value: project.id || project._id,
+  }));
+
+  const changeOrderOptions = (projectChangeOrders || []).map((co) => ({
+    label: co.coNumber || co.changeOrderNumber || co.title || String(co.id || co._id),
+    value: co.id || co._id,
+  }));
+
+  const accountOptions = (accounts || []).map((account) => ({
+    label: `${account.accountName} (${account.accountNumber})`,
+    value: account._id || account.id,
+  }));
+
   return (
     <div className="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full mx-auto">
       <header className="mb-6 border-b pb-4 border-green-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -358,91 +444,104 @@ const AddInvoice = ({
           <h1 className="text-2xl  text-green-700">
             Create New Invoice
           </h1>
-         
+
         </div>
         <div className="flex flex-wrap gap-4 w-full md:w-auto">
+          {/* Select Fabricator */}
           <div className="w-full md:w-64">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Select Fabricator
             </label>
-            <select
-              onChange={handleFabricatorSelect}
-              className="w-full p-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all bg-green-50/30"
-              disabled={loading}
-              value={selectedFabricatorId}
-            >
-              <option value="">-- Choose a Fabricator --</option>
-              {fabricators.map((fab) => (
-                <option key={fab.id || fab._id} value={fab.id || fab._id}>
-                  {fab.fabName}
-                </option>
-              ))}
-            </select>
+            <Select
+              options={fabricatorOptions}
+              value={fabricatorOptions.find((o) => String(o.value) === String(selectedFabricatorId)) || null}
+              onChange={(opt) => selectFabricator(opt?.value || "")}
+              onInputChange={(val, { action }) => {
+                if (action === "input-change") handleFabricatorSearch(val);
+              }}
+              placeholder="-- Choose a Fabricator --"
+              isClearable
+              isSearchable
+              isDisabled={loading}
+              styles={customSelectStyles}
+            />
           </div>
 
+          {/* Select RFQ */}
           {selectedFabricatorId && availableRfqs.length > 0 && (
             <div className="w-full md:w-64">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Select RFQ
               </label>
-              <select
-                {...register("rfqId")}
-                onChange={handleRfqSelect}
-                className="w-full p-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all bg-green-50/30"
-              >
-                <option value="">-- Choose an RFQ --</option>
-                {availableRfqs.map((rfq) => (
-                   <option key={rfq.id || rfq._id} value={rfq.id || rfq._id}>
-                     {rfq.projectName || rfq.rfqNumber || rfq.id || rfq._id}
-                   </option>
-                ))}
-              </select>
+              <Controller
+                name="rfqId"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    options={rfqOptions}
+                    value={rfqOptions.find((o) => String(o.value) === String(field.value)) || null}
+                    onChange={(opt) => {
+                      const val = opt?.value || "";
+                      field.onChange(val);
+                      handleRfqSelect({ target: { value: val } });
+                    }}
+                    placeholder="-- Choose an RFQ --"
+                    isClearable
+                    isSearchable
+                    styles={customSelectStyles}
+                  />
+                )}
+              />
             </div>
           )}
 
+          {/* Select Project */}
           {selectedFabricatorId && (
             <div className="w-full md:w-64">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Select Project
               </label>
-              <select
-                onChange={handleProjectSelect}
-                className="w-full p-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all bg-green-50/30"
-                disabled={loading}
-                value={selectedProjectId}
-              >
-                <option value="">-- Choose a Project --</option>
-                {filteredProjects.map((project) => (
-                  <option
-                    key={project.id || project._id}
-                    value={project.id || project._id}
-                  >
-                    {project.name}
-                  </option>
-                ))}
-              </select>
+              <Select
+                options={projectOptions}
+                value={projectOptions.find((o) => String(o.value) === String(selectedProjectId)) || null}
+                onChange={(opt) => selectProject(opt?.value || "")}
+                onInputChange={(val, { action }) => {
+                  if (action === "input-change") handleProjectSearch(val);
+                }}
+                placeholder="-- Choose a Project --"
+                isClearable
+                isSearchable
+                isDisabled={loading}
+                styles={customSelectStyles}
+              />
             </div>
           )}
 
+          {/* Select Change Order */}
           {selectedProjectId && projectChangeOrders.length > 0 && (
             <div className="w-full md:w-64">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Select Change Order
               </label>
-              <select
-                {...register("changeOrderId")}
-                className="w-full p-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all bg-green-50/30"
-              >
-                <option value="">-- Choose a Change Order --</option>
-                {projectChangeOrders.map((co) => (
-                  <option key={co.id || co._id} value={co.id || co._id}>
-                    {co.coNumber || co.title || co.id || co._id}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                name="changeOrderId"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    options={changeOrderOptions}
+                    value={changeOrderOptions.find((o) => String(o.value) === String(field.value)) || null}
+                    onChange={(opt) => field.onChange(opt?.value || "")}
+                    placeholder="-- Choose a Change Order --"
+                    isClearable
+                    isSearchable
+                    styles={customSelectStyles}
+                  />
+                )}
+              />
             </div>
           )}
 
+          {/* Invoice Type */}
           <div className="w-full md:w-64">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Invoice Type
@@ -478,25 +577,21 @@ const AddInvoice = ({
             </select>
           </div>
 
+          {/* Select Existing Account */}
           <div className="w-full md:w-64">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Select Existing Account
             </label>
-            <select
-              onChange={handleAccountSelect}
-              className="w-full p-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all bg-green-50/30"
-              disabled={loading}
-            >
-              <option value="">-- Choose an Account --</option>
-              {accounts.map((account) => (
-                <option
-                  key={account._id || account.id}
-                  value={account._id || account.id}
-                >
-                  {account.accountName} ({account.accountNumber})
-                </option>
-              ))}
-            </select>
+            <Select
+              options={accountOptions}
+              value={accountOptions.find((o) => String(o.value) === String(watch("accountId"))) || null}
+              onChange={(opt) => handleAccountSelect({ target: { value: opt?.value || "" } })}
+              placeholder="-- Choose an Account --"
+              isClearable
+              isSearchable
+              isDisabled={loading}
+              styles={customSelectStyles}
+            />
           </div>
         </div>
       </header>

@@ -399,12 +399,8 @@ const GetProjectById = ({ id, onClose }) => {
   }, [id])
 
   const handleCoSuccess = (createdCO) => {
-    const coId = createdCO?.id || createdCO?._id
-    if (coId) {
-      setSelectedCoId(coId)
-      setChangeOrderView('table')
-      fetchProject()
-    }
+    fetchProject()
+    setChangeOrderView('list')
   }
 
   const formatDate = (date) =>
