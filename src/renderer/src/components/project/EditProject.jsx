@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
@@ -33,6 +33,22 @@ const EditProject = ({
   onSuccess,
 }) => {
   const dispatch = useDispatch();
+  const backdropMouseDownRef = useRef(false);
+
+  const handleBackdropMouseDown = (e) => {
+    if (e.target === e.currentTarget) {
+      backdropMouseDownRef.current = true;
+    } else {
+      backdropMouseDownRef.current = false;
+    }
+  };
+
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget && backdropMouseDownRef.current) {
+      onCancel();
+    }
+    backdropMouseDownRef.current = false;
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [connectionDesigners, setConnectionDesigners] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -389,10 +405,12 @@ const EditProject = ({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onCancel}
+      onMouseDown={handleBackdropMouseDown}
+      onClick={handleBackdropClick}
     >
       <div
         className="bg-[#fcfdfc] w-full max-w-[96vw] rounded-3xl shadow-2xl overflow-hidden max-h-[96vh] flex flex-col p-6 border border-gray-100"
+        onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header-less Top Bar with Close Button */}

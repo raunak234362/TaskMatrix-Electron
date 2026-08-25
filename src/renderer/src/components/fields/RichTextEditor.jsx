@@ -56,7 +56,12 @@ const RichTextEditor = ({
   );
 
   return (
-    <div className={`rich-text-editor ${className}`}>
+    <div
+      className={`rich-text-editor ${className}`}
+      onMouseDown={(e) => e.stopPropagation()}
+      onMouseUp={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
       <style>
         {`
           .rich-text-editor .jodit-wysiwyg ul {
