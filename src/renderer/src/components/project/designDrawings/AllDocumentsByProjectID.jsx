@@ -48,6 +48,93 @@ const AllDocumentsByProjectID = ({ projectId }) => {
 
 
 
+  const getAllItemFiles = (item, defaultTable = "") => {
+    if (!item) return [];
+    const filesList = [];
+    const seenIds = new Set();
+
+    const addFile = (f, extraProps = {}) => {
+      if (!f) return;
+      const fileId = f.id || f._id || f.fileId;
+      const key = fileId || `${f.originalName || f.name}-${extraProps.documentID || item.id}`;
+      if (seenIds.has(key)) return;
+      seenIds.add(key);
+
+      filesList.push({
+        ...f,
+        id: fileId || f.id,
+        uploadedAt: f.uploadedAt || f.createdAt || item.createdAt || item.date,
+        user: f.user || item.user,
+        stage: f.stage || item.stage,
+        table: f.table || extraProps.table || defaultTable,
+        documentID: extraProps.documentID || item.id,
+        ...extraProps,
+      });
+    };
+
+    // 1. Direct files array / single file
+    if (Array.isArray(item.files)) {
+      item.files.forEach((f) => addFile(f));
+    }
+    if (item.file) {
+      addFile(item.file);
+    }
+
+    // 2. Submittal versions
+    if (item.currentVersion?.files && Array.isArray(item.currentVersion.files)) {
+      item.currentVersion.files.forEach((f) => addFile(f));
+    }
+    if (Array.isArray(item.versions)) {
+      item.versions.forEach((v) => {
+        if (Array.isArray(v.files)) {
+          v.files.forEach((f) => addFile(f, { versionId: v.id }));
+        }
+      });
+    }
+
+    // 3. Responses recursion (RFIs, Change Orders, Submittals, etc.)
+    const processResponses = (responses, respTable) => {
+      if (!Array.isArray(responses)) return;
+      responses.forEach((resp) => {
+        if (!resp) return;
+        const rFiles = resp.files || (resp.file ? [resp.file] : []);
+        if (Array.isArray(rFiles)) {
+          rFiles.forEach((f) =>
+            addFile(f, {
+              table: respTable || defaultTable,
+              documentID: resp.id,
+              uploadedAt: resp.createdAt || resp.date || f.uploadedAt,
+              user: resp.user || f.user,
+            })
+          );
+        }
+        if (Array.isArray(resp.childResponses)) {
+          processResponses(resp.childResponses, respTable);
+        }
+        if (Array.isArray(resp.responses)) {
+          processResponses(resp.responses, respTable);
+        }
+      });
+    };
+
+    const responses =
+      item.responses ||
+      item.rfiresponse ||
+      item.changeOrderResponses ||
+      item.submittalResponses;
+
+    let responseTable = "";
+    if (defaultTable === "rFI") responseTable = "rFIResponse";
+    else if (defaultTable === "changeOrders") responseTable = "cOResponse";
+    else if (defaultTable === "submittals") responseTable = "submittalsResponse";
+    else if (defaultTable === "coordinationDrawings") responseTable = "coordinationDrawingResponse";
+    else if (defaultTable === "progressReports") responseTable = "projectProgressReportResponse";
+
+    processResponses(responses, responseTable);
+
+    return filesList;
+  };
+
   const availableStages = useMemo(() => {
     if (!data) return ["All"];
     const stages = new Set();
@@ -57,11 +144,13 @@ const AllDocumentsByProjectID = ({ projectId }) => {
       ...(data.changeOrders || []),
       ...(data.notes || []),
       ...(data.rfi || []),
-      ...(data.submittals || [])
+      ...(data.submittals || []),
+      ...(data.coordinationDrawings || []),
+      ...(data.progressReports || []),
     ];
     allItems.forEach((item) => {
       if (item.stage) stages.add(item.stage);
-      const files = item.files || (item.file ? [item.file] : []);
+      const files = getAllItemFiles(item);
       files.forEach((f) => { if (f.stage) stages.add(f.stage); });
     });
     return ["All", ...Array.from(stages).sort()];
@@ -87,9 +176,9 @@ const AllDocumentsByProjectID = ({ projectId }) => {
     };
 
     const filterFlatFiles = (files) => files.filter(f => matchesFilters(f));
-    const filterNestedItems = (items) => {
+    const filterNestedItems = (items, defaultTable) => {
       return items.map(item => {
-        const itemFiles = item.files || (item.file ? [item.file] : []);
+        const itemFiles = getAllItemFiles(item, defaultTable);
         const filteredFiles = itemFiles.filter((f) => matchesFilters(f, item));
         return filteredFiles.length > 0 ? { ...item, files: filteredFiles } : null;
       }).filter(Boolean);
@@ -97,35 +186,31 @@ const AllDocumentsByProjectID = ({ projectId }) => {
 
     return {
       projectFiles: filterFlatFiles(data.project?.files || []),
-      designDrawings: filterNestedItems(data.designDrawings || []),
+      designDrawings: filterNestedItems(data.designDrawings || [], "designDrawings"),
       changeOrders: filterNestedItems((data.changeOrders || []).map((co) => ({
         ...co,
         description: `Change Order: ${co.changeOrderNumber || "Unknown"}`,
-      }))),
+      })), "changeOrders"),
       notes: filterNestedItems((data.notes || []).map((note) => ({
         ...note,
         description: `Note (${note.stage})`,
-      }))),
+      })), "notes"),
       rfis: filterNestedItems((data.rfi || []).map((rfi) => ({
         ...rfi,
         description: `RFI: ${rfi.subject}`,
-        files: rfi.files || [],
-      }))),
+      })), "rFI"),
       submittals: filterNestedItems((data.submittals || []).map((sub) => ({
         ...sub,
         description: `Submittal: ${sub.subject}`,
-        files: sub.currentVersion?.files || sub.files || [],
-      }))),
+      })), "submittals"),
       coordinationDrawings: filterNestedItems((data.coordinationDrawings || []).map((cd) => ({
         ...cd,
         description: `Coordination Drawing: ${cd.title || cd.description || "No Description"}`,
-        files: cd.files || [],
-      }))),
+      })), "coordinationDrawings"),
       progressReports: filterNestedItems((data.progressReports || []).map((pr) => ({
         ...pr,
         description: `Progress Report: ${pr.title || "No Title"}`,
-        files: pr.files || [],
-      }))),
+      })), "progressReports"),
     };
   }, [data, searchQuery, selectedStage, selectedDate]);
 

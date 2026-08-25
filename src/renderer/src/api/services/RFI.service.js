@@ -3,7 +3,7 @@ import api from '../api'
 class RFIService {
   static async DeleteRFIById(id) {
     try {
-      const response = await api.delete(`rfi/${id}`, {
+      const response = await api.delete(`rfi/delete/${id}`, {
         headers: {
           'Content-Type': 'application/json'
         }

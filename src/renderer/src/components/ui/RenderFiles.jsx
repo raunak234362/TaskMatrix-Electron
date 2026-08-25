@@ -34,11 +34,12 @@ const RenderFiles = ({
         curr.files.forEach((f) => {
           acc[desc].push({
             ...f,
-            uploadedAt: curr.uploadedAt,
-            user: curr.user,
-            documentID: table === "submittals" ? curr.id : ((table === "bfa") && parentId ? parentId : curr.id),
-            versionId: table === "submittals" ? (curr.currentVersionId || f.submittalVersionId || f.versionId || curr.id) : ((table === "bfa") ? curr.id : f.versionId),
-            stage: curr.stage,
+            uploadedAt: f.uploadedAt || curr.uploadedAt || f.createdAt,
+            user: f.user || curr.user,
+            documentID: f.documentID || (table === "submittals" ? curr.id : ((table === "bfa") && parentId ? parentId : curr.id)),
+            versionId: f.versionId || (table === "submittals" ? (curr.currentVersionId || f.submittalVersionId || f.versionId || curr.id) : ((table === "bfa") ? curr.id : f.versionId)),
+            stage: f.stage || curr.stage,
+            table: f.table || table,
           });
         });
       } else {
@@ -47,7 +48,8 @@ const RenderFiles = ({
         if (!acc[desc]) acc[desc] = [];
         acc[desc].push({
           ...curr,
-          documentID: parentId, // Use passed parentId for flat files
+          documentID: curr.documentID || parentId, // Use passed parentId for flat files
+          table: curr.table || table,
         });
       }
       return acc;
@@ -62,47 +64,49 @@ const RenderFiles = ({
     file
   ) => {
     const baseURL = import.meta.env.VITE_BASE_URL?.replace(/\/$/, "");
-    switch (table) {
+    const actualTable = file?.table || table;
+    const actualParentId = file?.documentID || parentId;
+    switch (actualTable) {
       case "bfa":
-        return `${baseURL}/bfa/viewFile/${parentId}/${fileId}`;
+        return `${baseURL}/bfa/viewFile/${actualParentId}/${fileId}`;
       case "project":
-        return `${baseURL}/project/viewFile/${parentId}/${fileId}`;
+        return `${baseURL}/project/viewFile/${actualParentId}/${fileId}`;
       case "notes":
-        return `${baseURL}/project/notes/viewFile/${parentId}/${fileId}`;
+        return `${baseURL}/project/notes/viewFile/${actualParentId}/${fileId}`;
       case "estimation":
-        return `${baseURL}/estimation/viewFile/${parentId}/${fileId}`;
+        return `${baseURL}/estimation/viewFile/${actualParentId}/${fileId}`;
       case "rFI":
       case "RFI":
-        return `${baseURL}/rfi/viewfile/${parentId}/${fileId}`;
+        return `${baseURL}/rfi/viewfile/${actualParentId}/${fileId}`;
       case "rFIResponse":
-        return `${baseURL}/rfi/response/viewfile/${parentId}/${fileId}`;
+        return `${baseURL}/rfi/response/viewfile/${actualParentId}/${fileId}`;
       case "submittals":
-        return `${baseURL}/submittal/${parentId}/versions/${file?.versionId || fileId}/${fileId}`;
+        return `${baseURL}/submittal/${actualParentId}/versions/${file?.versionId || fileId}/${fileId}`;
       case "submittalsResponse":
-        return `${baseURL}/submittal/response/${parentId}/viewfile/${fileId}`;
+        return `${baseURL}/submittal/response/${actualParentId}/viewfile/${fileId}`;
       case "rFQ":
       case "rfqCDAttachments":
       case "CDAttachments":
-        return `${baseURL}/rfq/viewFile/${parentId}/${fileId}`;
+        return `${baseURL}/rfq/viewFile/${actualParentId}/${fileId}`;
       case "estimationResponse":
-        return `${baseURL}/estimation/response/viewFile/${parentId}/${fileId}`;
+        return `${baseURL}/estimation/response/viewFile/${actualParentId}/${fileId}`;
       case "changeOrders":
-        return `${baseURL}/changeOrder/viewFile/${parentId}/${fileId}`;
+        return `${baseURL}/changeOrder/viewFile/${actualParentId}/${fileId}`;
       case "cOResponse":
-        return `${baseURL}/changeOrder/viewFile/${parentId}/files/${fileId}`;
+        return `${baseURL}/changeOrder/viewFile/${actualParentId}/files/${fileId}`;
       case "teamMeetingNotes":
-        return `${baseURL}/team-meeting-notes/viewFile/${parentId}/${fileId}`;
+        return `${baseURL}/team-meeting-notes/viewFile/${actualParentId}/${fileId}`;
       case "teamMeetingResponse":
       case "teamMeetingNotesResponse":
-        return `${baseURL}/team-meeting-notes/responses/viewFile/${parentId}/${fileId}`;
+        return `${baseURL}/team-meeting-notes/responses/viewFile/${actualParentId}/${fileId}`;
       case "connectionDesignerQuota":
-        return `${baseURL}/connectionDesignerQuota/viewFile/${parentId}/${fileId}`;
+        return `${baseURL}/connectionDesignerQuota/viewFile/${actualParentId}/${fileId}`;
       case "designDrawings":
-        return `${baseURL}/${table}/viewfile/${parentId}/${fileId}`;
+        return `${baseURL}/${actualTable}/viewfile/${actualParentId}/${fileId}`;
       case "followups":
-        return `${baseURL}/rfq/followups/viewFile/${parentId}/${fileId}`;
+        return `${baseURL}/rfq/followups/viewFile/${actualParentId}/${fileId}`;
       default:
-        return `${baseURL}/${table}/viewFile/${parentId}/${fileId}`;
+        return `${baseURL}/${actualTable}/viewFile/${actualParentId}/${fileId}`;
     }
   };
 
@@ -110,17 +114,18 @@ const RenderFiles = ({
     e.preventDefault();
     e.stopPropagation();
     try {
-      let shareTable = (table === "rfqCDAttachments" || table === "CDAttachments") ? "rFQ" : table;
-      let shareParentId = file.documentID;
+      let shareTable = file.table || table;
+      if (shareTable === "rfqCDAttachments" || shareTable === "CDAttachments") shareTable = "rFQ";
+      let shareParentId = file.documentID || parentId;
       let shareVersionId = file.versionId;
 
-      if (table === "submittals") {
+      if (shareTable === "submittals") {
         shareTable = "submittalVersion";
-        shareParentId = file.versionId || file.documentID;
+        shareParentId = file.versionId || file.documentID || parentId;
         shareVersionId = undefined;
-      } else if (table === "followups" || table === "followup") {
+      } else if (shareTable === "followups" || shareTable === "followup") {
         shareTable = "rFQFollowUp";
-        shareParentId = file.documentID;
+        shareParentId = file.documentID || parentId;
       }
 
       const response = await Service.createShareLink(
@@ -149,7 +154,7 @@ const RenderFiles = ({
   ) => {
     e.preventDefault();
     e.stopPropagation();
-    const downloadUrl = getDownloadUrl(table, file.documentID, file.id, file);
+    const downloadUrl = getDownloadUrl(file.table || table, file.documentID || parentId, file.id, file);
 
     try {
       const token = sessionStorage.getItem("token");
