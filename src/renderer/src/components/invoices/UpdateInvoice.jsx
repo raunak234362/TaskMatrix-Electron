@@ -65,9 +65,28 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
           // Find contacts for this fabricator if linked
           const fabricatorId = invoiceData.fabricator?._id || invoiceData.fabricator?.id || invoiceData.fabricatorId;
           if (fabricatorId) {
-            const fabricator = fabricatorsData.find(f => f.id === fabricatorId || f._id === fabricatorId);
-            if (fabricator && fabricator.pointOfContact) {
-              setContacts(fabricator.pointOfContact);
+            try {
+              const res = await Service.GetFabricatorPOC(fabricatorId);
+              let list = [];
+              if (Array.isArray(res)) list = res;
+              else if (res?.data?.pointOfContact && Array.isArray(res.data.pointOfContact)) list = res.data.pointOfContact;
+              else if (res?.pointOfContact && Array.isArray(res.pointOfContact)) list = res.pointOfContact;
+              else if (res?.data && Array.isArray(res.data)) list = res.data;
+              else if (res?.pocs && Array.isArray(res.pocs)) list = res.pocs;
+
+              if (list && list.length > 0) {
+                setContacts(list);
+              } else {
+                const fabricator = fabricatorsData.find(f => f.id === fabricatorId || f._id === fabricatorId);
+                if (fabricator && fabricator.pointOfContact) {
+                  setContacts(fabricator.pointOfContact);
+                }
+              }
+            } catch (err) {
+              const fabricator = fabricatorsData.find(f => f.id === fabricatorId || f._id === fabricatorId);
+              if (fabricator && fabricator.pointOfContact) {
+                setContacts(fabricator.pointOfContact);
+              }
             }
           }
 
@@ -211,12 +230,16 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
                   className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none bg-white font-medium shadow-sm transition-all"
                 >
                   <option value="">-- Select Contact --</option>
-                  {contacts.map((contact) => (
-                    <option key={contact._id || contact.id} value={contact.userName}>
-                      {contact.userName} ({contact.email})
-                    </option>
-                  ))}
-                  {watch("receiptId") && !contacts.some(c => c.userName === watch("receiptId")) && (
+                  {contacts.map((contact) => {
+                    const val = contact.id || contact._id || contact.userName;
+                    const name = `${contact.firstName || ""} ${contact.middleName ? contact.middleName + " " : ""}${contact.lastName || ""}`.trim() || contact.userName || contact.name || contact.email || "Unnamed Contact";
+                    return (
+                      <option key={val} value={val}>
+                        {name} {contact.email ? `(${contact.email})` : ""}
+                      </option>
+                    );
+                  })}
+                  {watch("receiptId") && !contacts.some(c => (c.id || c._id || c.userName) === watch("receiptId")) && (
                     <option value={watch("receiptId")}>{watch("receiptId")} (Current)</option>
                   )}
                 </select>

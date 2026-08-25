@@ -159,14 +159,16 @@ const AddInvoice = ({
     menu: (base) => ({ ...base, zIndex: 9999 }),
   };
 
-  const selectFabricator = (fabricatorId) => {
+  const selectFabricator = async (fabricatorId) => {
     setSelectedFabricatorId(fabricatorId);
     setValue("fabricatorId", fabricatorId);
     setSelectedProjectId("");
     setValue("projectId", "");
+    setValue("receiptId", "");
 
     if (!fabricatorId) {
-      setFilteredProjects();
+      setFilteredProjects([]);
+      setContacts([]);
       return;
     }
 
@@ -186,6 +188,27 @@ const AddInvoice = ({
       currentItems.forEach((_, index) => {
         setValue(`invoiceItems.${index}.sacCode`, sacCode);
       });
+    }
+
+    try {
+      const res = await Service.GetFabricatorPOC(fabricatorId);
+      let list = [];
+      if (Array.isArray(res)) {
+        list = res;
+      } else if (res?.data?.pointOfContact && Array.isArray(res.data.pointOfContact)) {
+        list = res.data.pointOfContact;
+      } else if (res?.pointOfContact && Array.isArray(res.pointOfContact)) {
+        list = res.pointOfContact;
+      } else if (res?.data && Array.isArray(res.data)) {
+        list = res.data;
+      } else if (res?.pocs && Array.isArray(res.pocs)) {
+        list = res.pocs;
+      }
+      if (list && list.length > 0) {
+        setContacts(list);
+      }
+    } catch (err) {
+      console.error("Error fetching fabricator POCs:", err);
     }
 
     const projects = allProjects.filter(
@@ -625,14 +648,17 @@ const AddInvoice = ({
                 className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
               >
                 <option value="">-- Select Contact --</option>
-                {contacts.map((contact) => (
-                  <option
-                    key={contact.id || contact._id}
-                    value={contact.id || contact._id}
-                  >
-                    {contact.firstName} {contact.lastName}
-                  </option>
-                ))}
+                {contacts.map((contact) => {
+                  const name = `${contact.firstName || ""} ${contact.middleName ? contact.middleName + " " : ""}${contact.lastName || ""}`.trim() || contact.email || contact.name || "Unnamed Contact";
+                  return (
+                    <option
+                      key={contact.id || contact._id}
+                      value={contact.id || contact._id}
+                    >
+                      {name}
+                    </option>
+                  );
+                })}
               </select>
             </div>
             <div className="space-y-1">

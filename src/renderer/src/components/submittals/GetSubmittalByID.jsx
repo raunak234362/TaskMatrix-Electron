@@ -287,9 +287,11 @@ const GetSubmittalByID = ({ id, onClose }) => {
 
           {/* Body */}
           <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6 bg-gray-50">
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* LEFT PANEL */}
-              <div className="bg-white p-6 rounded-none border border-gray-200 space-y-6">
+              <div className={`bg-white p-6 rounded-none border border-gray-200 space-y-6 ${
+                String(submittal?.stage || "").toUpperCase() === "IFC" ? "lg:col-span-2" : ""
+              }`}>
                 <div className="space-y-4">
                   <h1 className="text-xl font-bold text-black uppercase tracking-tight">
                     {submittal.subject}
@@ -426,6 +428,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
                       parentId={submittal.id}
                       versionId={sortedVersions[0]?.id}
                       hideHeader
+                      hideSectionTitle={true}
                     />
                   </div>
                 )}

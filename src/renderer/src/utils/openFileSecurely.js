@@ -5,7 +5,9 @@ const getDownloadUrl = (table, parentId, fileId, versionId) => {
   const baseURL = import.meta.env.VITE_BASE_URL?.replace(/\/$/, '')
   switch (table) {
     case 'bfa':
-      return `${baseURL}/bfa/viewFile/${parentId}/${fileId}`
+      return versionId
+        ? `${baseURL}/bfa/viewFile/${parentId}/${versionId}/${fileId}`
+        : `${baseURL}/bfa/viewFile/${parentId}/${fileId}`
     case 'project':
       return `${baseURL}/project/viewFile/${parentId}/${fileId}`
     case 'estimation':
@@ -143,7 +145,11 @@ export const shareFileSecurely = async (type, id, fileId, versionId) => {
         String(fileId)
       )
     } else if (type === 'bfa') {
-      response = await Service.createShareLink('bfa', String(id), String(fileId))
+      response = await Service.createShareLink(
+        'bfaVersion',
+        String(versionId || id),
+        String(fileId)
+      )
     } else if (type === 'rfqResponse' || type === 'rFQResponse' || type === 'rFQresponse') {
       response = await Service.createShareLink(
         'rFQResponse',

@@ -93,6 +93,7 @@ const BfaVersionRow = ({ version, index, total, isCurrent, bfaId }) => {
                       table="bfa"
                       parentId={bfaId}
                       hideHeader
+                      hideSectionTitle={true}
                     />
                   </div>
                 )}
@@ -286,26 +287,39 @@ const BfaManager = ({ submittalId, isAssist }) => {
               <span className="font-semibold text-black uppercase tracking-wider shrink-0">
                 BFA Status:
               </span>
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-xs font-bold uppercase tracking-tight border ${bfa.status === "APPROVED"
-                ? "bg-green-100 text-green-700 border-green-200"
-                : bfa.status === "REJECTED"
-                  ? "bg-red-100 text-red-700 border-red-200"
-                  : "bg-yellow-100 text-yellow-700 border-yellow-200"
-                }`}>
-                {bfa.status || "PENDING"}
-              </span>
+              {(() => {
+                const s = String(bfa.status || "").toUpperCase();
+                let styles = "bg-yellow-100 text-yellow-700 border-yellow-200";
+                if (s === "COMPLETE" || s === "APPROVED") {
+                  styles = "bg-green-100 text-green-700 border-green-200";
+                } else if (s === "REJECTED") {
+                  styles = "bg-red-100 text-red-700 border-red-200";
+                } else if (s === "PARTIAL") {
+                  styles = "bg-orange-100 text-orange-700 border-orange-200";
+                }
+                return (
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-none text-xs font-bold uppercase tracking-tight border ${styles}`}>
+                    {bfa.status || "PENDING"}
+                  </span>
+                );
+              })()}
             </div>
           </div>
 
-          {currentVersion?.description && (
-            <div className="space-y-4">
-              <SectionTitle title="Description" />
-              <div
-                className="p-4 bg-white border border-gray-200 rounded-none prose prose-sm max-w-none text-sm text-gray-700"
-                dangerouslySetInnerHTML={{ __html: currentVersion.description }}
-              />
-            </div>
-          )}
+          {(() => {
+            const rawDesc = currentVersion?.description || "";
+            const plainDesc = rawDesc.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+            if (!plainDesc) return null;
+            return (
+              <div className="space-y-4">
+                <SectionTitle title="Description" />
+                <div
+                  className="p-4 bg-white border border-gray-200 rounded-none prose prose-sm max-w-none text-sm text-gray-700"
+                  dangerouslySetInnerHTML={{ __html: currentVersion.description }}
+                />
+              </div>
+            );
+          })()}
 
           {(() => {
             const currentFiles = currentVersion?.files || currentVersion?.file || [];
@@ -327,6 +341,7 @@ const BfaManager = ({ submittalId, isAssist }) => {
                   table="bfa"
                   parentId={bfa.id}
                   hideHeader
+                  hideSectionTitle={true}
                 />
               </div>
             ) : null;
