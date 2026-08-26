@@ -1,8 +1,12 @@
-export const matchesDateFilter = (dateStr, dateFilter) => {
+export const matchesDateFilter = (dateStr, dateFilter, dueDateStr) => {
   if (!dateFilter || dateFilter.type === 'all') return true
-  if (!dateStr) return false
 
-  const date = new Date(dateStr)
+  // For specificDate filter, prioritize dueDate if provided
+  const targetDateStr =
+    dateFilter.type === 'specificDate' && dueDateStr ? dueDateStr : dateStr
+  if (!targetDateStr) return false
+
+  const date = new Date(targetDateStr)
   const { type } = dateFilter
 
   switch (type) {

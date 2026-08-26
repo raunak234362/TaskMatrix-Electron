@@ -275,8 +275,9 @@ const AllTasks = () => {
         : 'No Manager'
       if (filters.manager !== 'All Managers' && managerName !== filters.manager) return false
 
-      // Filter by Date (using created_on)
-      if (!matchesDateFilter(task.created_on, dateFilter)) return false
+      // Filter by Date (using due_date for specificDate, created_on for others)
+      if (!matchesDateFilter(task.created_on, dateFilter, task.due_date || task.dueDate))
+        return false
 
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase()

@@ -110,7 +110,7 @@ const AllActiveTask = () => {
         task.status !== 'WRONG_ALLOCATION' &&
         task.status !== 'ABSENT' &&
         task.status !== 'USER_FAULT' &&
-        matchesDateFilter(task.created_on, dateFilter)
+        matchesDateFilter(task.created_on, dateFilter, task.due_date || task.dueDate)
     )
   }, [tasks, dateFilter])
 
