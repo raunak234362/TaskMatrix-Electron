@@ -256,9 +256,9 @@ const EditTask = ({ id, onClose, refresh }) => {
                           options={stageOptions}
                           value={field.value}
                           onChange={(_, v) => field.onChange(v)}
-                          className="!text-sm !font-bold !text-black !uppercase !rounded-none !border-black"
-                          menuClassName="!text-sm !font-bold !text-black !uppercase !rounded-none !border-black"
-                          optionClassName="!text-sm !font-bold !text-black !uppercase !rounded-none"
+                          className="text-sm! font-bold! text-black! uppercase! rounded-none! border-black!"
+                          menuClassName="text-sm! font-bold! text-black! uppercase! rounded-none! border-black!"
+                          optionClassName="text-sm! font-bold! text-black! uppercase! rounded-none! border-black!"
                         />
                       )}
                     />
