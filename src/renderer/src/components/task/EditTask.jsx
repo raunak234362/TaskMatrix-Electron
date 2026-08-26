@@ -7,7 +7,6 @@ import { FileText, Layers, Flag } from 'lucide-react'
 import Service from '../../api/Service'
 import Input from '../fields/input'
 import Select from '../fields/Select'
-import RichTextEditor from '../fields/RichTextEditor'
 import { setMilestonesForProject } from '../../store/milestoneSlice'
 
 const LocalSectionTitle = ({ title }) => (
@@ -237,22 +236,6 @@ const EditTask = ({ id, onClose, refresh }) => {
                   <Input
                     className="!text-sm !font-bold !text-black !uppercase !rounded-none !border-black !placeholder-black/50"
                     {...register('name')}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-bold text-black uppercase tracking-wider block mb-2">
-                    Description
-                  </label>
-                  <Controller
-                    name="description"
-                    control={control}
-                    render={({ field }) => (
-                      <RichTextEditor
-                        value={field.value || ''}
-                        onChange={field.onChange}
-                        className="text-sm font-bold text-black"
-                      />
-                    )}
                   />
                 </div>
               </section>
