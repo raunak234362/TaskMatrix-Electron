@@ -20,6 +20,9 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
   const [fetchingEngineers, setFetchingEngineers] = useState(false)
   const [isCDMode, setIsCDMode] = useState(false)
   const [approving, setApproving] = useState(false)
+  const [isAproovedByAdmin, setIsAproovedByAdmin] = useState(
+    submittal?.isAproovedByAdmin ?? false
+  )
 
   const userRole = sessionStorage.getItem('userRole')?.toUpperCase()
   const canUpdateMilestone = ['ADMIN', 'OPERATION_EXECUTIVE', 'DEPUTY_MANAGER'].includes(userRole)
@@ -336,16 +339,19 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
     }
   }
 
-  const handleApprove = async () => {
+  const handleApprove = async (targetState = true) => {
     try {
       setApproving(true)
       setError(null)
-      await Service.updateSubmittalById(submittal.id, { isAproovedByAdmin: true })
-      toast.success('Submittal approved successfully!')
+      setIsAproovedByAdmin(targetState)
+      await Service.updateSubmittalById(submittal.id, { isAproovedByAdmin: targetState })
+      toast.success(
+        targetState ? 'Submittal approved successfully!' : 'Submittal approval updated!'
+      )
       onSuccess?.()
-      onClose()
     } catch (err) {
       console.error('Approve submittal failed:', err)
+      setIsAproovedByAdmin(!targetState)
       setError(err?.response?.data?.message || 'Failed to approve submittal. Please try again.')
     } finally {
       setApproving(false)
@@ -372,16 +378,8 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
       formData.append('description', description)
       formData.append('isConnectionDesign', String(isCDMode))
 
-      const userRoleStr = sessionStorage.getItem('userRole')?.toLowerCase() || ''
-      const autoApproveRoles = [
-        'admin',
-        'deputy_manager',
-        'dept_manager',
-        'operation_executive',
-        'project_manager'
-      ]
-      if (autoApproveRoles.includes(userRoleStr)) {
-        formData.append('isAproovedByAdmin', 'true')
+      if (canApprove) {
+        formData.append('isAproovedByAdmin', String(isAproovedByAdmin))
       }
       if (files && files.length > 0) {
         files.forEach((f) => formData.append('files', f))
@@ -592,6 +590,29 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                   })
                 }}
               />
+            </div>
+          )}
+
+          {/* Approval Field */}
+          {canApprove && (
+            <div className="flex items-center justify-between p-3.5 bg-gray-50 border border-gray-300 rounded-xl hover:border-gray-400 transition-all">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="isAproovedByAdmin"
+                  checked={isAproovedByAdmin}
+                  disabled={approving || submitting}
+                  onChange={(e) => handleApprove(e.target.checked)}
+                  className="w-4 h-4 text-[#6bbd45] border-gray-300 rounded focus:ring-[#6bbd45]/20 cursor-pointer accent-[#6bbd45] disabled:opacity-50"
+                />
+                <label
+                  htmlFor="isAproovedByAdmin"
+                  className="text-xs font-black text-black uppercase tracking-wider cursor-pointer select-none"
+                >
+                  Approve Submittal
+                </label>
+              </div>
+              {approving && <Loader2 className="w-4 h-4 animate-spin text-[#6bbd45]" />}
             </div>
           )}
 
