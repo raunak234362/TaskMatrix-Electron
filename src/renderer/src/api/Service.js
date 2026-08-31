@@ -45,7 +45,7 @@ const services = [
 services.forEach(service => {
   Object.getOwnPropertyNames(service).forEach(prop => {
     if (prop !== 'prototype' && prop !== 'name' && prop !== 'length') {
-      Service[prop] = service[prop]
+      Service[prop] = (...args) => service[prop](...args)
     }
   })
 })

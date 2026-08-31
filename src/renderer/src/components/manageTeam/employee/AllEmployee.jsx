@@ -112,7 +112,15 @@ const AllEmployee = () => {
   }, [employees, searchTerm, selectedRole, selectedDesignation, selectedStatus]);
 
   const columns = [
-    { accessorKey: "username", header: "Username" },
+    {
+      accessorKey: "username",
+      header: "Username",
+      cell: ({ row }) => (
+        <span className="uppercase font-medium">
+          {row.original.username ? String(row.original.username).toUpperCase() : "—"}
+        </span>
+      ),
+    },
     { accessorKey: "email", header: "Email" },
     {
       accessorFn: (r) =>

@@ -105,6 +105,9 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
         Object.keys(employee).forEach((key) => {
           let value = employee[key];
           if (key === "isActive") value = isTrue(value);
+          if (key === "username" && typeof value === "string") {
+            value = value.toUpperCase();
+          }
           if (value !== undefined && value !== null) {
             setValue(key, value);
           }
@@ -125,13 +128,32 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
     let success = false;
     let updatedEmployee = null;
 
+    const rawUser = data?.username || data?.email || employeeData?.username || employeeData?.email || "";
+    const formattedUsername = String(rawUser).trim().toUpperCase();
+    const payload = {
+      ...data,
+      username: formattedUsername,
+    };
+
     try {
       setSubmitting(true);
       const response = await Service.EditEmployeeByID(
         employeeData?.id,
-        data,
+        payload,
       );
-      updatedEmployee = response?.data?.user || response?.data || response;
+      const resUser = response?.data?.user || response?.data || response;
+      if (resUser && typeof resUser === "object") {
+        updatedEmployee = {
+          ...resUser,
+          username: formattedUsername || (resUser.username ? String(resUser.username).toUpperCase() : ""),
+        };
+      } else {
+        updatedEmployee = {
+          ...employeeData,
+          ...payload,
+          username: formattedUsername,
+        };
+      }
       success = true;
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to update employee");
@@ -231,7 +253,18 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {/* ── Row 1: Basic credentials & role ── */}
-              <Input label="Username" {...register("username")} className="w-full" />
+              <Input
+                label="Username"
+                {...register("username", {
+                  setValueAs: (v) => (typeof v === "string" ? v.toUpperCase() : v),
+                  onChange: (e) => {
+                    const upper = e.target.value.toUpperCase();
+                    e.target.value = upper;
+                    setValue("username", upper, { shouldDirty: true, shouldValidate: true });
+                  },
+                })}
+                className="w-full uppercase"
+              />
               <Input label="Email" type="email" {...register("email")} className="w-full" />
               <Input label="Designation" {...register("designation")} className="w-full" />
               <div className="space-y-1">

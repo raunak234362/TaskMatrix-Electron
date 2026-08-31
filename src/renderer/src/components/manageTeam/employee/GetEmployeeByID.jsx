@@ -1067,7 +1067,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
           {/* ── Profile Grid ── */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-6">
             <div className="space-y-4">
-              <InfoRow label="Username" value={employee.username} />
+              <InfoRow label="Username" value={employee.username ? String(employee.username).toUpperCase() : "—"} />
               <InfoRow label="Email" value={employee.email} href={`mailto:${employee.email}`} />
               <InfoRow
                 label="Phone"

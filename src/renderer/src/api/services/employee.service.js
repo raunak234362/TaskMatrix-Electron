@@ -22,7 +22,12 @@ class EmployeeService {
   //Add New Employee
   static async AddEmployee(employeeData) {
     try {
-      const response = await api.post(`employee`, employeeData, {
+      const rawUser = employeeData?.username || employeeData?.email || "";
+      const payload = {
+        ...employeeData,
+        username: String(rawUser).trim().toUpperCase()
+      }
+      const response = await api.post(`employee`, payload, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -118,7 +123,12 @@ class EmployeeService {
   //Edit Employee By ID
   static async EditEmployeeByID(id, data) {
     try {
-      const response = await api.put(`employee/update/${id}`, data, {
+      const rawUser = data?.username || data?.email || "";
+      const payload = {
+        ...data,
+        username: String(rawUser).trim().toUpperCase()
+      }
+      const response = await api.put(`employee/update/${id}`, payload, {
         headers: {
           'Content-Type': 'application/json'
         }

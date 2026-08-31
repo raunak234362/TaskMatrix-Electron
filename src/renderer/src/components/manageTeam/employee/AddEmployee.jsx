@@ -93,9 +93,17 @@ const AddEmployee = () => {
           <Input
             label="Username"
             type="text"
-            {...register("username", { required: "Username is required" })}
+            {...register("username", {
+              required: "Username is required",
+              setValueAs: (v) => (typeof v === "string" ? v.toUpperCase() : v),
+              onChange: (e) => {
+                const upper = e.target.value.toUpperCase();
+                e.target.value = upper;
+                setValue("username", upper, { shouldDirty: true, shouldValidate: true });
+              },
+            })}
             placeholder="Enter username"
-            className="w-full"
+            className="w-full uppercase"
           />
           {errors.username && (
             <p className="text-red-500 text-[10px] font-black uppercase ml-1">
