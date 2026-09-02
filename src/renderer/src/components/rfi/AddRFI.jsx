@@ -84,18 +84,39 @@ const AddRFI = ({
     (f) => String(f.id) === String(fabricatorID),
   );
 
+  const projectClientPMs = project?.clientProjectManagers || project?.data?.clientProjectManagers;
+
+  const clientPMOptions =
+    Array.isArray(projectClientPMs) && projectClientPMs.length > 0
+      ? projectClientPMs.map((m) => {
+          if (typeof m === "object" && m !== null) {
+            const name = `${m.firstName || ""} ${m.middleName ? m.middleName + " " : ""}${m.lastName || ""}`.trim();
+            return {
+              label: name || m.username || m.email || "Unnamed Client PM",
+              value: m.id || m._id,
+            };
+          }
+          return { label: String(m), value: String(m) };
+        })
+      : [];
+
   const fetchedPocOptions = pocs.map((p) => ({
     label: `${p.firstName || ""} ${p.middleName ? p.middleName + " " : ""}${p.lastName || ""}`.trim() || p.email || p.name || "Unnamed POC",
     value: p.id || p._id,
   }));
 
   // Fallback to redux pointOfContact if needed
-  const pocOptions = fetchedPocOptions.length > 0 ? fetchedPocOptions : (
-    selectedFabricator?.pointOfContact?.map((p) => ({
-      label: `${p.firstName} ${p.middleName ?? ""} ${p.lastName}`.trim(),
-      value: p.id,
-    })) ?? []
-  );
+  const pocOptions =
+    clientPMOptions.length > 0
+      ? clientPMOptions
+      : fetchedPocOptions.length > 0
+      ? fetchedPocOptions
+      : (
+          selectedFabricator?.pointOfContact?.map((p) => ({
+            label: `${p.firstName} ${p.middleName ?? ""} ${p.lastName}`.trim(),
+            value: p.id,
+          })) ?? []
+        );
 
   const projectOptions =
     selectedFabricator?.project?.map((p) => ({

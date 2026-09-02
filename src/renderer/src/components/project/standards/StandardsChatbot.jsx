@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback, memo } from 'react'
 import {
   Bot,
   Send,
@@ -19,6 +19,290 @@ import {
 import Service from '../../../api/Service'
 import { toast } from 'react-toastify'
 import UploadFabricatorStandard from '../../fabricator/fabricator/UploadFabricatorStandard'
+
+const ChatMessageItem = memo(({ item, onOpenReferenceImage }) => {
+  const isTemp = String(item.id).startsWith('temp-')
+  const rawAnswers = Array.isArray(item.answers) ? item.answers : []
+
+  // Filter out answers stating "not covered" (case-insensitive)
+  const filteredAnswers = rawAnswers.filter((answer) => {
+    const hasCitations = Array.isArray(answer.citations) && answer.citations.length > 0
+    let displayText = answer.answerText
+    if (!displayText && hasCitations) {
+      const foundTxt = answer.citations.find(
+        (c) => c.answerText || c.text || c.content || c.snippet
+      )
+      if (foundTxt) {
+        displayText =
+          foundTxt.answerText || foundTxt.text || foundTxt.content || foundTxt.snippet
+      }
+    }
+    if (!displayText) return true
+    const txt = displayText.toLowerCase()
+    return !txt.includes('not covered')
+  })
+
+  const hasFilteredAnswers = filteredAnswers.length > 0
+
+  return (
+    <div className="space-y-4 w-full">
+      {/* User Question */}
+      <div className="flex items-start justify-end gap-3 w-full">
+        <div className="max-w-[85%] bg-green-600 text-white p-3 px-4 rounded-md shadow-sm">
+          <p className="text-sm font-medium whitespace-pre-wrap">{item.queryText}</p>
+          <span className="text-[10px] text-green-100 mt-1 block text-right">
+            {item.createdAt
+              ? new Date(item.createdAt).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              : ''}
+          </span>
+        </div>
+        <div className="w-8 h-8 rounded-full bg-green-700 text-white flex items-center justify-center shrink-0 text-xs font-bold shadow-xs">
+          <User className="w-4 h-4" />
+        </div>
+      </div>
+
+      {/* Bot Answer(s) */}
+      {isTemp ? (
+        <div className="flex items-start gap-3 w-full">
+          <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
+            <Bot className="w-4 h-4 text-green-100" />
+          </div>
+          <div className="flex-1 bg-white border border-black border-l-4 border-l-green-600 p-4 rounded-md shadow-sm flex items-center gap-2 text-xs text-black font-semibold font-sans">
+            <Loader2 className="w-4 h-4 animate-spin text-green-600" />
+            <span>Synthesizing answer from project standards vector DB...</span>
+          </div>
+        </div>
+      ) : hasFilteredAnswers ? (
+        <div className="flex flex-col gap-4 w-full">
+          {filteredAnswers.map((answer, aIdx) => {
+            const hasCitations =
+              Array.isArray(answer.citations) && answer.citations.length > 0
+
+            const citationsList = hasCitations
+              ? answer.citations
+              : answer.citationPdfName ||
+                  (Array.isArray(answer.imagePaths) && answer.imagePaths.length > 0)
+                ? [answer]
+                : []
+
+            const allImageItems = []
+            if (Array.isArray(answer.imagePaths)) {
+              answer.imagePaths.forEach((imgPath) => {
+                if (imgPath && !allImageItems.some((item) => item.path === imgPath)) {
+                  allImageItems.push({
+                    path: imgPath,
+                    citation: answer
+                  })
+                }
+              })
+            }
+            if (hasCitations) {
+              answer.citations.forEach((c) => {
+                if (Array.isArray(c.imagePaths)) {
+                  c.imagePaths.forEach((imgPath) => {
+                    if (imgPath && !allImageItems.some((item) => item.path === imgPath)) {
+                      allImageItems.push({
+                        path: imgPath,
+                        citation: c
+                      })
+                    }
+                  })
+                }
+              })
+            }
+
+            let displayText = answer.answerText
+            if (!displayText && hasCitations) {
+              const foundTxt = answer.citations.find(
+                (c) => c.answerText || c.text || c.content || c.snippet
+              )
+              if (foundTxt) {
+                displayText =
+                  foundTxt.answerText ||
+                  foundTxt.text ||
+                  foundTxt.content ||
+                  foundTxt.snippet
+              }
+            }
+            if (!displayText) {
+              if (allImageItems.length > 0 || citationsList.length > 0) {
+                displayText =
+                  'Reference standard visual specification matched from uploaded document:'
+              } else {
+                displayText = 'No answer text provided.'
+              }
+            }
+
+            const sourceType =
+              answer.sourceType || citationsList.find((c) => c.sourceType)?.sourceType
+            const chunkType =
+              answer.chunkType || citationsList.find((c) => c.chunkType)?.chunkType
+
+            return (
+              <div key={answer.id || aIdx} className="flex items-start gap-3 w-full">
+                <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
+                  <Bot className="w-4 h-4 text-green-100" />
+                </div>
+                <div className="flex-1 bg-white border border-black border-l-4 border-l-green-600 p-4 rounded-md shadow-sm flex flex-col justify-between space-y-3">
+                  <div className="space-y-2">
+                    <div className="text-sm text-black leading-relaxed whitespace-pre-wrap font-sans font-medium">
+                      {displayText}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-1">
+                    {(citationsList.length > 0 || sourceType || chunkType) && (
+                      <div className="pt-2 border-t border-gray-100 flex flex-wrap items-center gap-1.5 text-[11px]">
+                        {citationsList.map((cit, cIdx) => {
+                          const pdfName = cit.citationPdfName
+                          const pStart =
+                            cit.citationPageStart !== undefined &&
+                            cit.citationPageStart !== null
+                              ? cit.citationPageStart
+                              : cit.anchorPageStart
+                          const pEnd =
+                            cit.citationPageEnd !== undefined &&
+                            cit.citationPageEnd !== null
+                              ? cit.citationPageEnd
+                              : cit.anchorPageEnd
+
+                          if (!pdfName) return null
+                          return (
+                            <div
+                              key={cit.id || cIdx}
+                              className="flex items-center gap-1 bg-green-50/50 text-black px-2 py-0.5 rounded border border-green-100/60 font-semibold"
+                            >
+                              <FileText className="w-3 h-3 text-green-600" />
+                              <span>
+                                Citation:{' '}
+                                <strong className="font-bold text-black">
+                                  {pdfName}
+                                </strong>
+                              </span>
+                              {pStart !== undefined && pStart !== null && (
+                                <span className="ml-1 text-black bg-green-100/80 px-1 rounded text-[10px] font-bold">
+                                  Pg {pStart}
+                                  {pEnd && pEnd !== pStart ? `-${pEnd}` : ''}
+                                </span>
+                              )}
+                            </div>
+                          )
+                        })}
+
+                        {sourceType && (
+                          <span className="bg-gray-100 text-black px-2 py-0.5 rounded text-[10px] font-bold uppercase">
+                            Source: {sourceType}
+                          </span>
+                        )}
+
+                        {chunkType && (
+                          <span className="bg-gray-100 text-black px-2 py-0.5 rounded text-[10px] font-bold">
+                            Chunk: {chunkType}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {allImageItems.length > 0 && (
+                      <div className="pt-1.5 flex flex-wrap gap-1.5">
+                        {allImageItems.map((item, imgIdx) => {
+                          const pageNum =
+                            item.citation?.citationPageStart ||
+                            item.citation?.anchorPageStart ||
+                            ''
+                          return (
+                            <button
+                              key={imgIdx}
+                              type="button"
+                              onClick={() =>
+                                onOpenReferenceImage(item.path, imgIdx, item.citation)
+                              }
+                              className="flex items-center gap-1 text-[11px] font-bold text-black bg-green-50/60 hover:bg-green-100/80 px-2.5 py-1 rounded-md border border-green-200 transition-all cursor-pointer shadow-3xs group animate-in fade-in duration-200"
+                            >
+                              <ImageIcon className="w-3.5 h-3.5 text-green-600 group-hover:scale-110 transition-transform" />
+                              <span>
+                                View Reference Image {imgIdx + 1}
+                                {pageNum ? ` (Pg ${pageNum})` : ''}
+                              </span>
+                              <Maximize2 className="w-3 h-3 text-green-600 ml-0.5" />
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="flex items-start gap-3 w-full animate-in fade-in duration-200">
+          <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
+            <Bot className="w-4 h-4 text-green-100" />
+          </div>
+          <div className="flex-1 bg-white border border-black border-l-4 border-l-green-600 p-4 rounded-md shadow-sm">
+            <div className="text-sm text-black font-semibold leading-relaxed font-sans">
+              Not covered by the current standards.
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+})
+
+const ChatMessageList = memo(
+  ({ messages, loadingHistory, sending, onOpenReferenceImage, chatEndRef }) => {
+    return (
+      <div className="flex-1 p-6 overflow-y-auto bg-[#f0f4f2] space-y-6">
+        {loadingHistory ? (
+          <div className="flex flex-col items-center justify-center h-full text-black gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+            <p className="text-sm font-medium">Loading project standards chat history...</p>
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center max-w-md mx-auto py-12">
+            <div className="w-16 h-16 bg-green-100/80 text-green-700 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
+              <BookOpen className="w-8 h-8" />
+            </div>
+            <h4 className="text-lg font-bold text-black mb-1">No Standards Chat Yet</h4>
+            <p className="text-xs text-black mb-2 leading-relaxed">
+              Ask any question regarding structural steel standards, AISC specifications, welding
+              codes, or uploaded project standards.
+            </p>
+          </div>
+        ) : (
+          messages.map((item, index) => (
+            <ChatMessageItem
+              key={item.id || index}
+              item={item}
+              onOpenReferenceImage={onOpenReferenceImage}
+            />
+          ))
+        )}
+
+        {sending && (
+          <div className="flex items-start gap-3 w-full">
+            <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
+              <Bot className="w-4 h-4 text-green-100" />
+            </div>
+            <div className="flex-1 bg-white border border-black border-l-4 border-l-green-600 p-4 rounded-md shadow-sm flex items-center gap-3">
+              <Loader2 className="w-4 h-4 animate-spin text-green-600" />
+              <span className="text-xs font-bold text-black">
+                Searching project standards & generating response...
+              </span>
+            </div>
+          </div>
+        )}
+        <div ref={chatEndRef} />
+      </div>
+    )
+  }
+)
 
 const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
   const [messages, setMessages] = useState([])
@@ -230,7 +514,7 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
     chatEndRef.current?.scrollIntoView({ behavior })
   }
 
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     const targetId = projectId || selectedFabricatorId || 'general'
     try {
       setLoadingHistory(true)
@@ -267,11 +551,11 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
         scrollToBottom('auto')
       }, 100)
     }
-  }
+  }, [projectId, selectedFabricatorId])
 
   useEffect(() => {
     fetchHistory()
-  }, [projectId, selectedFabricatorId])
+  }, [fetchHistory])
 
   useEffect(() => {
     if (!loadingHistory) {
@@ -352,7 +636,7 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
     }
   }
 
-  const handleOpenReferenceImage = async (imgPath, imgIdx, answer) => {
+  const handleOpenReferenceImage = useCallback(async (imgPath, imgIdx, answer) => {
     const pageNum = answer?.anchorPageStart || answer?.citationPageStart || ''
     const title = `Reference Image ${imgIdx + 1}${pageNum ? ` (Page ${pageNum})` : ''}`
 
@@ -381,7 +665,7 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
       toast.error('Failed to load reference image from server')
       setImageModal({ isOpen: false, url: '', loading: false, title: '' })
     }
-  }
+  }, [])
 
   const handleMouseDown = (e) => {
     if (zoomScale <= 1) return
@@ -448,285 +732,13 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
       </div>
 
       {/* Main Chat Message Container */}
-      <div className="flex-1 p-6 overflow-y-auto bg-[#f0f4f2] space-y-6">
-        {loadingHistory ? (
-          <div className="flex flex-col items-center justify-center h-full text-black gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-            <p className="text-sm font-medium">Loading project standards chat history...</p>
-          </div>
-        ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center max-w-md mx-auto py-12">
-            <div className="w-16 h-16 bg-green-100/80 text-green-700 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
-              <BookOpen className="w-8 h-8" />
-            </div>
-            <h4 className="text-lg font-bold text-black mb-1">No Standards Chat Yet</h4>
-            <p className="text-xs text-black mb-2 leading-relaxed">
-              Ask any question regarding structural steel standards, AISC specifications, welding
-              codes, or uploaded project standards.
-            </p>
-          </div>
-        ) : (
-          messages.map((item, index) => {
-            const isTemp = String(item.id).startsWith('temp-')
-            const rawAnswers = Array.isArray(item.answers) ? item.answers : []
-
-            // Filter out answers stating "not covered" (case-insensitive)
-            const filteredAnswers = rawAnswers.filter((answer) => {
-              const hasCitations = Array.isArray(answer.citations) && answer.citations.length > 0
-              let displayText = answer.answerText
-              if (!displayText && hasCitations) {
-                const foundTxt = answer.citations.find(
-                  (c) => c.answerText || c.text || c.content || c.snippet
-                )
-                if (foundTxt) {
-                  displayText =
-                    foundTxt.answerText || foundTxt.text || foundTxt.content || foundTxt.snippet
-                }
-              }
-              if (!displayText) return true
-              const txt = displayText.toLowerCase()
-              return !txt.includes('not covered')
-            })
-
-            const hasFilteredAnswers = filteredAnswers.length > 0
-
-            return (
-              <div key={item.id || index} className="space-y-4 w-full">
-                {/* User Question */}
-                <div className="flex items-start justify-end gap-3 w-full">
-                  <div className="max-w-[85%] bg-green-600 text-white p-3 px-4 rounded-md shadow-sm">
-                    <p className="text-sm font-medium whitespace-pre-wrap">{item.queryText}</p>
-                    <span className="text-[10px] text-green-155 text-green-100 mt-1 block text-right">
-                      {item.createdAt
-                        ? new Date(item.createdAt).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })
-                        : ''}
-                    </span>
-                  </div>
-                  <div className="w-8 h-8 rounded-full bg-green-700 text-white flex items-center justify-center shrink-0 text-xs font-bold shadow-xs">
-                    <User className="w-4 h-4" />
-                  </div>
-                </div>
-
-                {/* Bot Answer(s) */}
-                {isTemp ? (
-                  // Pending or fallback answer display
-                  <div className="flex items-start gap-3 w-full">
-                    <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
-                      <Bot className="w-4 h-4 text-green-100" />
-                    </div>
-                    <div className="flex-1 bg-white border border-black border-l-4 border-l-green-600 p-4 rounded-md shadow-sm flex items-center gap-2 text-xs text-black font-semibold font-sans">
-                      <Loader2 className="w-4 h-4 animate-spin text-green-600" />
-                      <span>Synthesizing answer from project standards vector DB...</span>
-                    </div>
-                  </div>
-                ) : hasFilteredAnswers ? (
-                  <div className="flex flex-col gap-4 w-full">
-                    {filteredAnswers.map((answer, aIdx) => {
-                      const hasCitations =
-                        Array.isArray(answer.citations) && answer.citations.length > 0
-
-                      // Collect all citations (nested or top-level)
-                      const citationsList = hasCitations
-                        ? answer.citations
-                        : answer.citationPdfName ||
-                            (Array.isArray(answer.imagePaths) && answer.imagePaths.length > 0)
-                          ? [answer]
-                          : []
-
-                      // Collect all unique image paths (from top-level and nested citations)
-                      const allImageItems = []
-                      if (Array.isArray(answer.imagePaths)) {
-                        answer.imagePaths.forEach((imgPath) => {
-                          if (imgPath && !allImageItems.some((item) => item.path === imgPath)) {
-                            allImageItems.push({
-                              path: imgPath,
-                              citation: answer
-                            })
-                          }
-                        })
-                      }
-                      if (hasCitations) {
-                        answer.citations.forEach((c) => {
-                          if (Array.isArray(c.imagePaths)) {
-                            c.imagePaths.forEach((imgPath) => {
-                              if (imgPath && !allImageItems.some((item) => item.path === imgPath)) {
-                                allImageItems.push({
-                                  path: imgPath,
-                                  citation: c
-                                })
-                              }
-                            })
-                          }
-                        })
-                      }
-
-                      // Determine answer text to display
-                      let displayText = answer.answerText
-                      if (!displayText && hasCitations) {
-                        const foundTxt = answer.citations.find(
-                          (c) => c.answerText || c.text || c.content || c.snippet
-                        )
-                        if (foundTxt) {
-                          displayText =
-                            foundTxt.answerText ||
-                            foundTxt.text ||
-                            foundTxt.content ||
-                            foundTxt.snippet
-                        }
-                      }
-                      if (!displayText) {
-                        if (allImageItems.length > 0 || citationsList.length > 0) {
-                          displayText =
-                            'Reference standard visual specification matched from uploaded document:'
-                        } else {
-                          displayText = 'No answer text provided.'
-                        }
-                      }
-
-                      // Metadata
-                      const sourceType =
-                        answer.sourceType || citationsList.find((c) => c.sourceType)?.sourceType
-                      const chunkType =
-                        answer.chunkType || citationsList.find((c) => c.chunkType)?.chunkType
-
-                      return (
-                        <div key={answer.id || aIdx} className="flex items-start gap-3 w-full">
-                          <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
-                            <Bot className="w-4 h-4 text-green-100" />
-                          </div>
-                          <div className="flex-1 bg-white border border-black border-l-4 border-l-green-600 p-4 rounded-md shadow-sm flex flex-col justify-between space-y-3">
-                            <div className="space-y-2">
-                              {/* Answer Text */}
-                              <div className="text-sm text-black leading-relaxed whitespace-pre-wrap font-sans font-medium">
-                                {displayText}
-                              </div>
-                            </div>
-
-                            <div className="space-y-2 pt-1">
-                              {/* Citation Badges & Metadata */}
-                              {(citationsList.length > 0 || sourceType || chunkType) && (
-                                <div className="pt-2 border-t border-gray-100 flex flex-wrap items-center gap-1.5 text-[11px]">
-                                  {citationsList.map((cit, cIdx) => {
-                                    const pdfName = cit.citationPdfName
-                                    const pStart =
-                                      cit.citationPageStart !== undefined &&
-                                      cit.citationPageStart !== null
-                                        ? cit.citationPageStart
-                                        : cit.anchorPageStart
-                                    const pEnd =
-                                      cit.citationPageEnd !== undefined &&
-                                      cit.citationPageEnd !== null
-                                        ? cit.citationPageEnd
-                                        : cit.anchorPageEnd
-
-                                    if (!pdfName) return null
-                                    return (
-                                      <div
-                                        key={cit.id || cIdx}
-                                        className="flex items-center gap-1 bg-green-50/50 text-black px-2 py-0.5 rounded border border-green-100/60 font-semibold"
-                                      >
-                                        <FileText className="w-3 h-3 text-green-600" />
-                                        <span>
-                                          Citation:{' '}
-                                          <strong className="font-bold text-black">
-                                            {pdfName}
-                                          </strong>
-                                        </span>
-                                        {pStart !== undefined && pStart !== null && (
-                                          <span className="ml-1 text-black bg-green-100/80 px-1 rounded text-[10px] font-bold">
-                                            Pg {pStart}
-                                            {pEnd && pEnd !== pStart ? `-${pEnd}` : ''}
-                                          </span>
-                                        )}
-                                      </div>
-                                    )
-                                  })}
-
-                                  {sourceType && (
-                                    <span className="bg-gray-100 text-black px-2 py-0.5 rounded text-[10px] font-bold uppercase">
-                                      Source: {sourceType}
-                                    </span>
-                                  )}
-
-                                  {chunkType && (
-                                    <span className="bg-gray-100 text-black px-2 py-0.5 rounded text-[10px] font-bold">
-                                      Chunk: {chunkType}
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* Image Attachments if present */}
-                              {allImageItems.length > 0 && (
-                                <div className="pt-1.5 flex flex-wrap gap-1.5">
-                                  {allImageItems.map((item, imgIdx) => {
-                                    const pageNum =
-                                      item.citation?.citationPageStart ||
-                                      item.citation?.anchorPageStart ||
-                                      ''
-                                    return (
-                                      <button
-                                        key={imgIdx}
-                                        type="button"
-                                        onClick={() =>
-                                          handleOpenReferenceImage(item.path, imgIdx, item.citation)
-                                        }
-                                        className="flex items-center gap-1 text-[11px] font-bold text-black bg-green-50/60 hover:bg-green-100/80 px-2.5 py-1 rounded-md border border-green-200 transition-all cursor-pointer shadow-3xs group animate-in fade-in duration-200"
-                                      >
-                                        <ImageIcon className="w-3.5 h-3.5 text-green-600 group-hover:scale-110 transition-transform" />
-                                        <span>
-                                          View Reference Image {imgIdx + 1}
-                                          {pageNum ? ` (Pg ${pageNum})` : ''}
-                                        </span>
-                                        <Maximize2 className="w-3 h-3 text-green-600 ml-0.5" />
-                                      </button>
-                                    )
-                                  })}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  // Completed but only "not covered" / empty answers
-                  <div className="flex items-start gap-3 w-full animate-in fade-in duration-200">
-                    <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
-                      <Bot className="w-4 h-4 text-green-100" />
-                    </div>
-                    <div className="flex-1 bg-white border border-black border-l-4 border-l-green-600 p-4 rounded-md shadow-sm">
-                      <div className="text-sm text-black font-semibold leading-relaxed font-sans">
-                        Not covered by the current standards.
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )
-          })
-        )}
-
-        {/* Sending state spinner */}
-        {sending && (
-          <div className="flex items-start gap-3 w-full">
-            <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-1">
-              <Bot className="w-4 h-4 text-green-100" />
-            </div>
-            <div className="flex-1 bg-white border border-black border-l-4 border-l-green-600 p-4 rounded-md shadow-sm flex items-center gap-3">
-              <Loader2 className="w-4 h-4 animate-spin text-green-600" />
-              <span className="text-xs font-bold text-black">
-                Searching project standards & generating response...
-              </span>
-            </div>
-          </div>
-        )}
-        <div ref={chatEndRef} />
-      </div>
+      <ChatMessageList
+        messages={messages}
+        loadingHistory={loadingHistory}
+        sending={sending}
+        onOpenReferenceImage={handleOpenReferenceImage}
+        chatEndRef={chatEndRef}
+      />
 
       {/* Input Form Bar */}
       <div className="p-4 bg-white border-t border-gray-100 shrink-0">

@@ -727,7 +727,7 @@ const GetProjectById = ({ id, onClose }) => {
                     >
                       All Change Order
                     </button>
-                    {canCreate && userRole !== 'staff' && (
+                    
                       <button
                         onClick={() => setChangeOrderView('add')}
                         className={`whitespace-nowrap px-6 py-1.5 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer ${changeOrderView === 'add'
@@ -737,7 +737,7 @@ const GetProjectById = ({ id, onClose }) => {
                       >
                         Raise Change Order
                       </button>
-                    )}
+                    
                   </nav>
                 </div>
 
