@@ -217,6 +217,22 @@ class FabricatorService {
       console.error('cannot find clients', error)
     }
   }
+
+  static async GetFabricatorStandardFamilies(fabricatorId) {
+    try {
+      const response = await api.get(`standards/fabricators/${fabricatorId}/families`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Get Fabricator Standard Families response:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching fabricator standard families:', error)
+      throw error
+    }
+  }
+
 }
 
 export default FabricatorService

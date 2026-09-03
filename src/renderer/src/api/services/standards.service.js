@@ -224,6 +224,15 @@ class StandardsService {
       throw error
     }
   }
+
+  /**
+   * Alias: Get fabricator standards by fabricator ID
+   * GET /standards/fabricators/{fabricatorId}/families
+   * @param {string} fabricatorId - UUID of the fabricator
+   */
+  static async GetFabricatorStandards(fabricatorId) {
+    return this.GetFabricatorStandardFamilies(fabricatorId)
+  }
   /**
    * Set standard preferences for a project
    * POST /standards/projects/{projectId}/preferences

@@ -246,7 +246,7 @@ const ChatMessageItem = memo(({ item, onOpenReferenceImage }) => {
           </div>
           <div className="flex-1 bg-white border border-black border-l-4 border-l-green-600 p-4 rounded-md shadow-sm">
             <div className="text-sm text-black font-semibold leading-relaxed font-sans">
-              Not covered by the current standards.
+              Answer Not Available
             </div>
           </div>
         </div>
@@ -381,17 +381,30 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
           '[StandardsChatbot] Fetching families & preferences for tier:',
           selectedTier,
           'projectId:',
-          targetProjectId
+          targetProjectId,
+          'fabricatorId:',
+          targetFabricatorId
         )
 
-        // GET /standards/families
-        const famRes = await Service.GetAvailableStandardFamilies(
-          selectedTier,
-          selectedTier === 'PROJECT' ? targetProjectId : undefined
-        ).catch((err) => {
-          console.warn('[StandardsChatbot] Error fetching available standard families:', err)
-          return null
-        })
+        let famRes = null
+
+        if (targetFabricatorId && (selectedTier === 'FABRICATOR' || !selectedTier)) {
+          famRes = await Service.GetFabricatorStandardFamilies(targetFabricatorId).catch((err) => {
+            console.warn('[StandardsChatbot] Error fetching fabricator standard families:', err)
+            return null
+          })
+        }
+
+        if (!famRes) {
+          // GET /standards/families
+          famRes = await Service.GetAvailableStandardFamilies(
+            selectedTier,
+            selectedTier === 'PROJECT' ? targetProjectId : undefined
+          ).catch((err) => {
+            console.warn('[StandardsChatbot] Error fetching available standard families:', err)
+            return null
+          })
+        }
 
         // GET /standards/projects/{projectId}/preferences
         const prefProjId = targetProjectId || 'general'
@@ -586,19 +599,16 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
     if (!queryTextToSend) setQuery('')
 
     try {
+      const famIds =
+        selectedFamilyIds.length > 0
+          ? selectedFamilyIds
+          : documentFamilyId
+            ? [documentFamilyId]
+            : []
+
       const chatPayload = {
         query: textToSubmit,
-        ...(selectedTier ? { tier: selectedTier, sourceType: selectedTier } : {}),
-        ...(selectedFamilyIds.length > 0
-          ? {
-              standardFamilyIds: selectedFamilyIds,
-              documentFamilyIds: selectedFamilyIds,
-              documentFamilyId: selectedFamilyIds[0]
-            }
-          : documentFamilyId
-            ? { documentFamilyId, standardFamilyIds: [documentFamilyId] }
-            : {}),
-        ...(selectedFabricatorId ? { fabricatorId: selectedFabricatorId } : {})
+        standardFamilyIds: famIds
       }
       const targetId = projectId || 'general'
       const response = await Service.ChatWithStandards(targetId, chatPayload)
@@ -610,6 +620,11 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
         projectId: response?.projectId || projectId,
         queryText: response?.queryText || textToSubmit,
         createdAt: response?.createdAt || new Date().toISOString(),
+        generationStatus:
+          response?.generationStatus ||
+          response?.data?.generationStatus ||
+          response?.status ||
+          response?.data?.status,
         answers: Array.isArray(response?.answers)
           ? response.answers
           : response?.answers
@@ -754,23 +769,32 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
                 <button
                   type="button"
                   onClick={() => setSelectedTier(selectedTier === 'GENERAL' ? '' : 'GENERAL')}
-                  className={`px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
-                    selectedTier === 'GENERAL'
+                  className={`px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${selectedTier === 'GENERAL'
                       ? 'bg-green-600 text-white border-green-600 shadow-2xs'
                       : 'bg-white text-black border-gray-250 hover:bg-gray-100'
-                  }`}
+                    }`}
                 >
                   <span>GENERAL</span>
                   {selectedTier === 'GENERAL' && <Check className="w-3 h-3 text-white" />}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setSelectedTier(selectedTier === 'PROJECT' ? '' : 'PROJECT')}
-                  className={`px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
-                    selectedTier === 'PROJECT'
+                  onClick={() => setSelectedTier(selectedTier === 'FABRICATOR' ? '' : 'FABRICATOR')}
+                  className={`px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${selectedTier === 'FABRICATOR'
                       ? 'bg-green-600 text-white border-green-600 shadow-2xs'
                       : 'bg-white text-black border-gray-250 hover:bg-gray-100'
-                  }`}
+                    }`}
+                >
+                  <span>FABRICATOR</span>
+                  {selectedTier === 'FABRICATOR' && <Check className="w-3 h-3 text-white" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTier(selectedTier === 'PROJECT' ? '' : 'PROJECT')}
+                  className={`px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${selectedTier === 'PROJECT'
+                      ? 'bg-green-600 text-white border-green-600 shadow-2xs'
+                      : 'bg-white text-black border-gray-250 hover:bg-gray-100'
+                    }`}
                 >
                   <span>PROJECT</span>
                   {selectedTier === 'PROJECT' && <Check className="w-3 h-3 text-white" />}
@@ -793,11 +817,10 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
                           key={fam.id}
                           type="button"
                           onClick={() => toggleFamilySelection(fam.id)}
-                          className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${
-                            isSelected
+                          className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer flex items-center gap-1 ${isSelected
                               ? 'bg-green-700 text-white border-green-700 font-semibold shadow-2xs'
                               : 'bg-white text-black border-gray-250 hover:bg-gray-100'
-                          }`}
+                            }`}
                         >
                           <span>{fam.label || fam.id}</span>
                           {isSelected && <Check className="w-3 h-3 text-green-200" />}

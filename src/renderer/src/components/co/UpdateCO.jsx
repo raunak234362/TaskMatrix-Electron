@@ -27,8 +27,9 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
     ? ["description", "referenceDoc", "elements", "QtyNo", "hours", "cost", "remarks"]
     : ["description", "referenceDoc", "elements", "QtyNo", "hours", "remarks"];
 
-  const hideStatus = ["staff", "project_manager", "dept_manager"].includes(userRole);
-  const showManagerApproval = ["project_manager", "dept_manager"].includes(userRole);
+  const bothApprovalRoles = ["admin", "deputy_manager", "operation_executive", "project_manager_officer", "pmo"];
+  const showAdminApproval = bothApprovalRoles.includes(userRole);
+  const showManagerApproval = [...bothApprovalRoles, "project_manager", "dept_manager"].includes(userRole);
   const canDelete = ["deputy_manager", "operation_executive", "admin"].includes(userRole);
 
   const handleDelete = () => {
@@ -457,7 +458,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                 label="Subject *"
                 {...register("remarks", { required: true })}
               />
-              {!hideStatus && (
+              {showAdminApproval && (
                 <div className="space-y-1 flex items-center pt-6">
                   <input
                     type="checkbox"
