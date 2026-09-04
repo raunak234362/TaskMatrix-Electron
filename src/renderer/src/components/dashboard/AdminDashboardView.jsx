@@ -51,7 +51,7 @@ const OperationExecutiveMTOSection = ({ allRfqs = [], invoices = [], onRFQClick 
         // Upcoming MTOs — not yet awarded/closed
         const upcomingMTOs = rfqs
             .filter(r => {
-                const isMTO = r.MTOManual || r.mtoStickModelEnabled || r.MTOStickModel
+                const isMTO = r.MTOManual || r.mtoStickModelEnabled || r.isMTOStickModel || r.MTOStickModel
                 const status = (r.status || '').toUpperCase()
                 const wbtStatus = (r.wbtStatus || '').toUpperCase()
                 return isMTO && status !== 'AWARDED' && status !== 'CLOSED' && wbtStatus !== 'AWARDED' && wbtStatus !== 'CLOSED'
@@ -64,7 +64,7 @@ const OperationExecutiveMTOSection = ({ allRfqs = [], invoices = [], onRFQClick 
         setRecentRFQs(upcomingMTOs)
 
         // MTO Stats
-        const mtoRfqs = rfqs.filter(r => r.MTOManual || r.mtoStickModelEnabled || r.MTOStickModel)
+        const mtoRfqs = rfqs.filter(r => r.MTOManual || r.mtoStickModelEnabled || r.isMTOStickModel || r.MTOStickModel)
         const totalMTO = mtoRfqs.length
         const awardedMTO = mtoRfqs.filter(r => r.status === 'AWARDED' || r.wbtStatus === 'AWARDED').length
         const pendingMTO = mtoRfqs.filter(r => r.status !== 'AWARDED' && r.wbtStatus !== 'AWARDED').length
@@ -76,9 +76,9 @@ const OperationExecutiveMTOSection = ({ allRfqs = [], invoices = [], onRFQClick 
         const rfqs = Array.isArray(allRfqs) ? allRfqs : []
         let data = []
         let title = ''
-        if (type === 'ALL_MTO') { data = rfqs.filter(r => r.MTOManual || r.mtoStickModelEnabled || r.MTOStickModel); title = 'All MTO RFQs' }
-        else if (type === 'COMPLETED_MTO') { data = rfqs.filter(r => (r.MTOManual || r.mtoStickModelEnabled || r.MTOStickModel) && (r.status === 'AWARDED' || r.wbtStatus === 'AWARDED')); title = 'Completed MTOs' }
-        else if (type === 'PENDING_MTO') { data = rfqs.filter(r => (r.MTOManual || r.mtoStickModelEnabled || r.MTOStickModel) && r.status !== 'AWARDED' && r.wbtStatus !== 'AWARDED'); title = 'Ongoing MTOs' }
+        if (type === 'ALL_MTO') { data = rfqs.filter(r => r.MTOManual || r.mtoStickModelEnabled || r.isMTOStickModel || r.MTOStickModel); title = 'All MTO RFQs' }
+        else if (type === 'COMPLETED_MTO') { data = rfqs.filter(r => (r.MTOManual || r.mtoStickModelEnabled || r.isMTOStickModel || r.MTOStickModel) && (r.status === 'AWARDED' || r.wbtStatus === 'AWARDED')); title = 'Completed MTOs' }
+        else if (type === 'PENDING_MTO') { data = rfqs.filter(r => (r.MTOManual || r.mtoStickModelEnabled || r.isMTOStickModel || r.MTOStickModel) && r.status !== 'AWARDED' && r.wbtStatus !== 'AWARDED'); title = 'Ongoing MTOs' }
         else if (type === 'ALL_RFQ') { data = rfqs.filter(r => r.connectionDesign || r.customerDesign || r.detailingMain || r.detailingMisc || r.miscDesign); title = 'All Detailing RFQs' }
         else if (type === 'AWARDED_RFQ') { data = rfqs.filter(r => (r.connectionDesign || r.customerDesign || r.detailingMain || r.detailingMisc || r.miscDesign) && (r.status === 'AWARDED' || r.wbtStatus === 'AWARDED')); title = 'Awarded RFQs' }
         else if (type === 'PENDING_RFQ') { data = rfqs.filter(r => (r.connectionDesign || r.customerDesign || r.detailingMain || r.detailingMisc || r.miscDesign) && r.status !== 'AWARDED' && r.wbtStatus !== 'AWARDED'); title = 'Pending RFQs' }

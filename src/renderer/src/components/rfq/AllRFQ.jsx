@@ -185,7 +185,7 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
         const r = row.original
         const types = []
         const isTrue = (val) => val === true || val === 'true'
-        const isMTO = isTrue(r.MTOManual) || r.MTOStickModel || r.MTOValue
+        const isMTO = isTrue(r.MTOManual) || r.MTOStickModel || r.mtoStickModelEnabled || isTrue(r.isMTOStickModel) || r.MTOValue
         const isDetailing =
           isTrue(r.detailingMain) ||
           isTrue(r.detailingMisc) ||
@@ -272,7 +272,7 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
         if (status === 'AWARDED') {
           const r = row.original
           const isTrue = (val) => val === true || val === 'true'
-          const isMTO = isTrue(r.MTOManual) || r.MTOStickModel || r.MTOValue
+          const isMTO = isTrue(r.MTOManual) || r.MTOStickModel || r.mtoStickModelEnabled || isTrue(r.isMTOStickModel) || r.MTOValue
           if (isMTO) {
             status = 'SUBMITTED'
           }
@@ -386,7 +386,7 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
 
       // 3. MTO / Type Filter
       const isTrue = (val) => val === true || val === 'true'
-      const isMTO = isTrue(item.MTOManual) || !!item.MTOStickModel || !!item.MTOValue
+      const isMTO = isTrue(item.MTOManual) || !!item.MTOStickModel || item.mtoStickModelEnabled || isTrue(item.isMTOStickModel) || !!item.MTOValue
       const isDetailing =
         isTrue(item.detailingMain) ||
         isTrue(item.detailingMisc) ||

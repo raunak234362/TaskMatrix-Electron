@@ -87,7 +87,7 @@ const EditRFQByID = ({ id, onSuccess, onDelete, onCancel }) => {
                         detailingMain: d.detailingMain ?? false,
                         detailingMisc: d.detailingMisc ?? false,
                         MTOManual: d.MTOManual ?? false,
-                        mtoStickModelEnabled: d.mtoStickModelEnabled ?? !!d.MTOStickModel,
+                        mtoStickModelEnabled: d.mtoStickModelEnabled ?? d.isMTOStickModel ?? !!d.MTOStickModel,
                         MTOStickModel: d.MTOStickModel || ""
                     })
                     setFabricatorName(d.fabricator?.fabName || d.sender?.fabricator?.fabName || d.fabricatorName || '')
@@ -107,7 +107,9 @@ const EditRFQByID = ({ id, onSuccess, onDelete, onCancel }) => {
         try {
             const payload = {
                 ...data,
-                MTOStickModel: data.mtoStickModelEnabled ? (data.MTOStickModel || "") : "",
+                isMTOStickModel: !!data.mtoStickModelEnabled,
+                mtoStickModelEnabled: !!data.mtoStickModelEnabled,
+                MTOStickModel: "",
                 bidPrice: data.bidPrice !== '' && data.bidPrice !== null && data.bidPrice !== undefined
                     ? String(data.bidPrice)
                     : '',
@@ -374,15 +376,7 @@ const EditRFQByID = ({ id, onSuccess, onDelete, onCancel }) => {
                                 </label>
                             </div>
 
-                            {mtoStickModelEnabled && (
-                                <div className="pt-4 border-t border-gray-50">
-                                    <Input
-                                        label="MTO Stick Model Details"
-                                        {...register('MTOStickModel')}
-                                        placeholder="Enter details..."
-                                    />
-                                </div>
-                            )}
+
                         </div>
 
                     </form>

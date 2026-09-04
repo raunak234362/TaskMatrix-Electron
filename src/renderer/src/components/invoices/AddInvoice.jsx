@@ -358,7 +358,7 @@ const AddInvoice = ({
       let isDetailing = false;
 
       if (selectedRfq) {
-        isMTO = selectedRfq.MTOManual || selectedRfq.mtoStickModelEnabled || selectedRfq.MTOStickModel || selectedRfq.MTOValue || selectedRfq.mto3dModel || selectedRfq.mtoTeklaSDS2 || selectedRfq.mtoIFC || selectedRfq.mtoEJE || selectedRfq.mtoKss || selectedRfq.mtoBoltList || selectedRfq.mtoMaterialSummary;
+        isMTO = selectedRfq.MTOManual || selectedRfq.mtoStickModelEnabled || selectedRfq.isMTOStickModel || selectedRfq.MTOStickModel || selectedRfq.MTOValue || selectedRfq.mto3dModel || selectedRfq.mtoTeklaSDS2 || selectedRfq.mtoIFC || selectedRfq.mtoEJE || selectedRfq.mtoKss || selectedRfq.mtoBoltList || selectedRfq.mtoMaterialSummary;
         isDetailing = selectedRfq.connectionDesign || selectedRfq.miscDesign || selectedRfq.customerDesign || selectedRfq.detailingMain || selectedRfq.detailingMisc;
 
         if (isMTO && !isDetailing) {

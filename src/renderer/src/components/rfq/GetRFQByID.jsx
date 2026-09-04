@@ -832,7 +832,7 @@ const GetRFQByID = ({ id, onClose, onDelete }) => {
                                     icon={<Layout className="w-4 h-4" />}
                                     items={[
                                         { label: "MTO - Manual", value: rfq?.MTOManual },
-                                        { label: "MTO - Stick Model", value: isTrue(rfq?.MTOStickModel) || isTrue(rfq?.mtoStickModelEnabled) }
+                                        { label: "MTO - Stick Model", value: isTrue(rfq?.MTOStickModel) || isTrue(rfq?.mtoStickModelEnabled) || isTrue(rfq?.isMTOStickModel) }
                                     ]}
                                 />
 
