@@ -65,6 +65,8 @@ const ProjectSidebar = ({ activeTab, setActiveTab, userRole }) => {
         'admin',
         'operation_executive',
         'deputy_manager',
+        'dept_manager',
+        'project_manager',
         'project_manager_officer'
       ].includes(userRole)
     }

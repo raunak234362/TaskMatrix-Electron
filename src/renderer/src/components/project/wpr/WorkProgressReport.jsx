@@ -23,6 +23,7 @@ import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 import Logo from '../../../assets/logo.png';
 import WprScheduleTable from "./WprScheduleTable";
+import Select from "../../fields/Select";
 
 const WorkProgressReport = ({
   projectId,
@@ -139,6 +140,14 @@ const WorkProgressReport = ({
 
     return weeks;
   }, [project]);
+
+  const weekOptions = useMemo(() => {
+    const opts = [{ label: "All Weeks", value: "All" }];
+    projectWeeks.forEach((w) => {
+      opts.push({ label: w.label, value: w.label });
+    });
+    return opts;
+  }, [projectWeeks]);
 
   // Set default week ending date to current week
   useEffect(() => {
@@ -1167,19 +1176,17 @@ const WorkProgressReport = ({
           <h2 className="text-sm font-bold uppercase tracking-wider text-black">WPR Spreadsheet Control</h2>
           {projectWeeks.length > 0 && (
             <div className="flex items-center gap-2 ml-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-black">Select Week:</span>
-              <select
-                value={selectedWeek}
-                onChange={(e) => handleWeekChange(e.target.value)}
-                className="px-3 py-1.5 bg-white border border-black rounded-none text-xs font-bold uppercase tracking-wider outline-none focus:border-[#6bbd45] transition-all cursor-pointer"
-              >
-                <option value="All">All Weeks</option>
-                {projectWeeks.map((w) => (
-                  <option key={w.label} value={w.label}>
-                    {w.label}
-                  </option>
-                ))}
-              </select>
+              <span className="text-xs font-bold uppercase tracking-wider text-black whitespace-nowrap">Select Week:</span>
+              <div className="min-w-[280px] md:min-w-[320px]">
+                <Select
+                  options={weekOptions}
+                  value={selectedWeek}
+                  onChange={(_, val) => handleWeekChange(val)}
+                  placeholder="SELECT WEEK"
+                  showSearch={false}
+                  className="!py-1.5 !px-3 !border-black !rounded-none !bg-white focus:!border-[#6bbd45]"
+                />
+              </div>
             </div>
           )}
         </div>
