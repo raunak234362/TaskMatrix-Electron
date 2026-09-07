@@ -61,12 +61,12 @@ const AllTasks = () => {
         if (showLoader) setLoading(true)
         const response =
           userRole === 'admin' ||
-          userRole === 'operation_executive' ||
-          userRole === 'project_manager' ||
-          userRole === 'department_manager' ||
-          userRole === 'deputy_manager' ||
-          userRole === 'dept_manager' ||
-          userRole === 'human_resource'
+            userRole === 'operation_executive' ||
+            userRole === 'project_manager' ||
+            userRole === 'department_manager' ||
+            userRole === 'deputy_manager' ||
+            userRole === 'dept_manager' ||
+            userRole === 'human_resource'
             ? await Service.GetAllTask()
             : await Service.GetMyTask()
 
@@ -116,12 +116,12 @@ const AllTasks = () => {
       setLoading(true)
       const response =
         userRole === 'admin' ||
-        userRole === 'operation_executive' ||
-        userRole === 'project_manager' ||
-        userRole === 'department_manager' ||
-        userRole === 'deputy_manager' ||
-        userRole === 'dept_manager' ||
-        userRole === 'human_resource'
+          userRole === 'operation_executive' ||
+          userRole === 'project_manager' ||
+          userRole === 'department_manager' ||
+          userRole === 'deputy_manager' ||
+          userRole === 'dept_manager' ||
+          userRole === 'human_resource'
           ? await Service.GetAllTask()
           : await Service.GetMyTask()
 
@@ -158,10 +158,10 @@ const AllTasks = () => {
   const formatDate = (date) =>
     date
       ? new Date(date).toLocaleDateString('en-IN', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric'
-        })
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      })
       : '—'
 
   const getStatusColor = (status) => {
@@ -333,6 +333,17 @@ const AllTasks = () => {
       .trim()
   }
 
+  const getCommentText = (comment) => {
+    if (!comment) return ''
+
+    const rawContent =
+      typeof comment.data === 'string'
+        ? comment.data
+        : comment.content || comment.comment || comment.text || ''
+
+    return stripHtml(rawContent)
+  }
+
   const formatSecondsToHHMM = (totalSeconds) => {
     if (!totalSeconds || isNaN(totalSeconds)) return '00:00'
     const hours = Math.floor(totalSeconds / 3600)
@@ -400,18 +411,18 @@ const AllTasks = () => {
 
         const dueDates = [...new Set(groupTasks.map((t) => formatDate(t.due_date)))].join(', ')
 
-      const allComments = groupTasks.flatMap(
-  (t) => t.taskcomment || []
-)
+        const allComments = groupTasks.flatMap(
+          (t) => t.taskcomment || []
+        )
 
-const hasUnacknowledgedComments = allComments.some(
-  (c) => c.acknowledged === false
-)
+        const hasUnacknowledgedComments = allComments.some(
+          (c) => c.acknowledged === false
+        )
 
-const commentsText = allComments
-  .map((c) => stripHtml(c.data))
-  .filter(Boolean)
-  .join('\n---\n')
+        const commentsText = allComments
+          .map(getCommentText)
+          .filter(Boolean)
+          .join('\n---\n')
 
         const firstTask = groupTasks[0]
         const username = firstTask.user ? `${firstTask.user.firstName} ${firstTask.user.lastName}` : 'Unassigned'
@@ -436,16 +447,16 @@ const commentsText = allComments
         const task = groupTasks[0]
         const totalSeconds = task.workingHourTask?.reduce((acc, wh) => acc + (Number(wh.duration_seconds) || 0), 0) || 0
         const formattedWorkingHours = formatSecondsToHHMM(totalSeconds)
-      const allComments = task.taskcomment || []
+        const allComments = task.taskcomment || []
 
-const hasUnacknowledgedComments = allComments.some(
-  (c) => c.acknowledged === false
-)
+        const hasUnacknowledgedComments = allComments.some(
+          (c) => c.acknowledged === false
+        )
 
-const commentsText = allComments
-  .map((c) => stripHtml(c.data))
-  .filter(Boolean)
-  .join('\n---\n')
+        const commentsText = allComments
+          .map(getCommentText)
+          .filter(Boolean)
+          .join('\n---\n')
 
         const mObj = task.project?.manager
         const managerName = mObj
@@ -877,19 +888,19 @@ const commentsText = allComments
             'deputy_manager',
             'dept_manager'
           ].includes(userRole) && (
-            <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
-              <label className="text-[10px] font-bold text-black uppercase tracking-wider">
-                Assigned User
-              </label>
-              <Select
-                options={userOptions}
-                value={filters.assignedUser}
-                onChange={(_, val) => setFilters((prev) => ({ ...prev, assignedUser: val }))}
-                placeholder="Select User"
-                className="font-semibold text-black bg-gray-50"
-              />
-            </div>
-          )}
+              <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
+                <label className="text-[10px] font-bold text-black uppercase tracking-wider">
+                  Assigned User
+                </label>
+                <Select
+                  options={userOptions}
+                  value={filters.assignedUser}
+                  onChange={(_, val) => setFilters((prev) => ({ ...prev, assignedUser: val }))}
+                  placeholder="Select User"
+                  className="font-semibold text-black bg-gray-50"
+                />
+              </div>
+            )}
 
           {/* WBS Type Filter */}
           <div className="flex flex-col gap-1 w-full sm:w-auto min-w-[200px]">
