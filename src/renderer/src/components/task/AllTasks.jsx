@@ -400,9 +400,18 @@ const AllTasks = () => {
 
         const dueDates = [...new Set(groupTasks.map((t) => formatDate(t.due_date)))].join(', ')
 
-        const unacknowledgedComments = groupTasks.flatMap((t) => t.taskcomment?.filter((c) => c.acknowledged === false) || [])
-        const hasUnacknowledgedComments = unacknowledgedComments.length > 0
-        const commentsText = unacknowledgedComments.map((c) => stripHtml(c.data)).join('\n---\n')
+      const allComments = groupTasks.flatMap(
+  (t) => t.taskcomment || []
+)
+
+const hasUnacknowledgedComments = allComments.some(
+  (c) => c.acknowledged === false
+)
+
+const commentsText = allComments
+  .map((c) => stripHtml(c.data))
+  .filter(Boolean)
+  .join('\n---\n')
 
         const firstTask = groupTasks[0]
         const username = firstTask.user ? `${firstTask.user.firstName} ${firstTask.user.lastName}` : 'Unassigned'
@@ -427,9 +436,16 @@ const AllTasks = () => {
         const task = groupTasks[0]
         const totalSeconds = task.workingHourTask?.reduce((acc, wh) => acc + (Number(wh.duration_seconds) || 0), 0) || 0
         const formattedWorkingHours = formatSecondsToHHMM(totalSeconds)
-        const unacknowledgedComments = task.taskcomment?.filter((c) => c.acknowledged === false) || []
-        const hasUnacknowledgedComments = unacknowledgedComments.length > 0
-        const commentsText = unacknowledgedComments.map((c) => stripHtml(c.data)).join('\n---\n')
+      const allComments = task.taskcomment || []
+
+const hasUnacknowledgedComments = allComments.some(
+  (c) => c.acknowledged === false
+)
+
+const commentsText = allComments
+  .map((c) => stripHtml(c.data))
+  .filter(Boolean)
+  .join('\n---\n')
 
         const mObj = task.project?.manager
         const managerName = mObj
