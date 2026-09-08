@@ -81,8 +81,8 @@ const EditTask = ({ id, onClose, refresh }) => {
             name: task.name || '',
             description: task.description || '',
             priority: task.priority || 2,
-            start_date: task.start_date ? new Date(task.start_date).toISOString().slice(0, 16) : '',
-            due_date: task.due_date ? new Date(task.due_date).toISOString().slice(0, 16) : '',
+            start_date: task.start_date ? new Date(task.start_date).toISOString().slice(0, 10) : '',
+            due_date: task.due_date ? new Date(task.due_date).toISOString().slice(0, 10) : '',
             hours: initialHours,
             minutes: initialMinutes,
             Stage: task.Stage || 'IFA',
@@ -335,7 +335,7 @@ const EditTask = ({ id, onClose, refresh }) => {
                         Start Date
                       </label>
                       <Input
-                        type="datetime-local"
+                        type="date"
                         className="!text-sm !font-bold !text-black !uppercase !rounded-none !border-black"
                         {...register('start_date')}
                       />
@@ -345,7 +345,7 @@ const EditTask = ({ id, onClose, refresh }) => {
                         Due Date
                       </label>
                       <Input
-                        type="datetime-local"
+                        type="date"
                         className="!text-sm !font-bold !text-black !uppercase !rounded-none !border-black"
                         {...register('due_date')}
                       />

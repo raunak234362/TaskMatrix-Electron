@@ -148,6 +148,20 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
     }
   }
 
+  const formatDate = (dateString) => {
+    if (!dateString) return '—'
+    try {
+      return new Intl.DateTimeFormat('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      }).format(new Date(dateString))
+    } catch (e) {
+      return String(dateString)
+    }
+  }
+
   const formatSecondsToHHMM = (totalSeconds) => {
     if (!totalSeconds || isNaN(totalSeconds)) return '00:00'
     const hours = Math.floor(totalSeconds / 3600)
@@ -325,7 +339,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                       task.user ? `${task.user.firstName} ${task.user.lastName}` : 'Unassigned'
                     }
                   />
-                  <InfoItem label="Due Date" value={toIST(task.due_date)} />
+                  <InfoItem label="Due Date" value={formatDate(task.due_date)} />
                   <InfoItem label="Created At" value={toIST(task.created_on)} />
                   <InfoItem
                     label="Allocated Time"

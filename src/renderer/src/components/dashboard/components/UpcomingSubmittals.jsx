@@ -15,6 +15,8 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
     return approvalDate < today;
   };
 
+  
+
   const groupedSubmittals = useMemo(() => {
     const groups = {};
 
@@ -151,7 +153,7 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
                               >
                                 {dueDate
                                   ? new Date(dueDate).toLocaleDateString("en-US", {
-                                    month: "short",
+                                    month: "numeric",
                                     day: "numeric",
                                     year: "numeric",
                                   })
@@ -176,7 +178,7 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
                               >
                                 {dueDate
                                   ? new Date(dueDate).toLocaleDateString("en-US", {
-                                    month: "short",
+                                    month: "numeric",
                                     day: "numeric",
                                     year: "numeric",
                                   })
