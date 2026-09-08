@@ -15,6 +15,15 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
     return approvalDate < today;
   };
 
+  const formatDueDate = (dateString) =>
+    dateString
+      ? new Date(dateString).toLocaleDateString("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
+      })
+      : "No Date";
+
   const groupedSubmittals = useMemo(() => {
     const groups = {};
 
@@ -28,13 +37,6 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
       if (!groups[projectName]) groups[projectName] = [];
       groups[projectName].push(submittal);
     });
-
-    return groups;
-  }, [pendingSubmittals]);
-
-  const invoiceNeedRaise = useMemo(() => {
-    return invoices.filter((inv) => !inv.paymentStatus);
-  }, [invoices]);
 
   return (
     <div className="bg-white flex-1 flex flex-col min-h-0 rounded-none p-4 shadow-sm border border-gray-200">
@@ -149,13 +151,7 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
                                   : "text-gray-500"
                                   }`}
                               >
-                                {dueDate
-                                  ? new Date(dueDate).toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  })
-                                  : "No Date"}
+                                {formatDueDate(dueDate)}
                               </span>
                             </div>
 
@@ -174,13 +170,7 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
                                   : "text-gray-600"
                                   }`}
                               >
-                                {dueDate
-                                  ? new Date(dueDate).toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  })
-                                  : "No Date"}
+                                {formatDueDate(dueDate)}
                               </span>
                             </div>
 
@@ -196,8 +186,7 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
                       })}
                     </div>
                   </div>
-                ),
-              )}
+                ))}
             </div>
           ) : (
             <EmptyState text="No upcoming submittals" />
@@ -228,7 +217,8 @@ const UpcomingSubmittals = ({ pendingSubmittals = [], invoices = [], onSubmittal
       </div>
     </div>
   );
-};
+});
+}
 
 const EmptyState = ({ text }) => (
   <div className="flex flex-col items-center justify-center h-40 text-gray-300">
@@ -236,5 +226,4 @@ const EmptyState = ({ text }) => (
     <p className="text-xs font-semibold uppercase mt-2">{text}</p>
   </div>
 );
-
 export default UpcomingSubmittals;
