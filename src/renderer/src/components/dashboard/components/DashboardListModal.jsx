@@ -138,7 +138,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             accessorKey: 'subject',
             header: 'Subject / Title',
             cell: ({ row }) => (
-                <span className="font-semibold text-gray-800 truncate max-w-[250px] inline-block">
+                <span className="font-semibold text-black truncate max-w-[250px] inline-block">
                     {row.original.subject || row.original.title || row.original.name || row.original.remarks || row.original.remark || 'No Subject'}
                 </span>
             )
@@ -147,7 +147,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             accessorKey: 'project',
             header: 'Project',
             cell: ({ row }) => (
-                <span className="text-gray-600 font-medium truncate max-w-[280px] inline-block">
+                <span className="text-black font-medium truncate max-w-[280px] inline-block">
                     {row.original.Project?.name || row.original.project?.name || row.original.projectName || (typeof row.original.project === 'string' ? row.original.project : null) || '—'}
                 </span>
             )
@@ -156,7 +156,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             id: 'fabricator',
             header: 'Fabricator',
             cell: ({ row }) => (
-                <span className="text-gray-600 font-medium truncate max-w-[200px] inline-block">
+                <span className="text-black font-medium truncate max-w-[200px] inline-block">
                     {row.original.Project?.fabricator?.fabName || row.original.project?.fabricator?.fabName || row.original.fabricator?.fabName || row.original.fabName || '—'}
                 </span>
             )
@@ -228,7 +228,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
                     senderName = `${item.firstName || ''} ${item.middleName || ''} ${item.lastName || ''}`.replace(/\s+/g, ' ').trim() || item.username || item.fabName || '';
                 }
                 return (
-                    <span className="text-gray-700 font-semibold truncate max-w-[200px] inline-block">
+                    <span className="text-black font-medium truncate max-w-[200px] inline-block">
                         {senderName || '—'}
                     </span>
                 );
@@ -243,7 +243,7 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
                 let recipientName = item.recipientName || item.receipntName || item.recipient_name || item.recepientName || '';
                 if (recipientName) {
                     return (
-                        <span className="text-gray-700 font-medium truncate max-w-[320px] inline-block" title={recipientName}>
+                        <span className="text-black font-medium truncate max-w-[320px] inline-block" title={recipientName}>
                             {recipientName}
                         </span>
                     );
@@ -382,16 +382,21 @@ const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSid
             accessorKey: 'createdAt',
             header: 'Date',
             cell: ({ row }) => (
-                <span className="text-xs text-gray-500 whitespace-nowrap">
+                <span className="text-sm text-black whitespace-nowrap">
                     {row.original.createdAt ? new Date(row.original.createdAt).toLocaleDateString() :
                         row.original.date ? new Date(row.original.date).toLocaleDateString() : 'N/A'}
                 </span>
             )
         }
-    ]
+    ].filter(col => {
+        if (type === 'PENDING_RFQ') {
+            return !['subject', 'multipleRecipients'].includes(col.accessorKey)
+        }
+
+        return true
+    })
 
     const columns = type === 'CHANGE_ORDERS' ? changeOrderColumns : defaultColumns
-
     return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
             <div className="bg-white w-[96%] max-w-[1700px] h-[92vh] max-h-[92vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in zoom-in-95 duration-200">
