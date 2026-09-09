@@ -88,6 +88,7 @@ const Login = () => {
     console.log("Login Successful:", responseData);
   };
 
+  // Function for login and OTP verification check
   const Submit = async (data) => {
     try {
       setIsLoggingIn(true);
@@ -129,6 +130,7 @@ const Login = () => {
     }
   };
 
+  // Function for handling OTP verification
   const handleVerify = async (e) => {
     e.preventDefault();
     const otpValue = otp.join("");
