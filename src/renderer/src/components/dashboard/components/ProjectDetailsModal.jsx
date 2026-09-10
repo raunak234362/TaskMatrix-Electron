@@ -1,6 +1,6 @@
 import { X } from 'lucide-react'
 import { createPortal } from 'react-dom'
-import GetProjectById from '../../project/GetProjectById'
+import GetProjectById from '../../project/projects/GetProjectById'
 
 const ProjectDetailsModal = ({ project, onClose }) => {
   if (!project) return null

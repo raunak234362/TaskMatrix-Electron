@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import DataTable from "../../ui/table";
-import GetProjectById from "../../project/GetProjectById";
+import GetProjectById from "../../project/projects/GetProjectById";
 import Modal from "../../ui/Modal";
 
 const FabricatorDashboard = ({ fabricator }) => {

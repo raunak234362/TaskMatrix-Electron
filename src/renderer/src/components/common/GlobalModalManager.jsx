@@ -10,7 +10,7 @@ import GetRFIByID from '../rfi/GetRFIByID'
 import GetTaskByID from '../task/GetTaskByID'
 import GetSubmittalByID from '../submittals/GetSubmittalByID'
 import GetMilestoneByID from '../project/mileStone/GetMilestoneByID'
-import GetProjectById from '../project/GetProjectById'
+import GetProjectById from '../project/projects/GetProjectById'
 import GetCOByID from '../co/GetCOByID'
 
 /**

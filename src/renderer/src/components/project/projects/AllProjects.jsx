@@ -10,7 +10,7 @@ import { matchesDateFilter } from "../../../utils/dateFilter";
 import RenderFiles from "../../common/RenderFiles";
 
 const GetProjectById = React.lazy(() =>
-  import("../GetProjectById").then((module) => ({ default: module.default }))
+  import("./GetProjectById").then((module) => ({ default: module.default }))
 );
 
 const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatusFilterProp }) => {
