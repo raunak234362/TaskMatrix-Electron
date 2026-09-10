@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import Service from "../../api/Service";
 import { Calendar, Loader2, ChevronLeft } from "lucide-react";
 import { setProjectData, updateProject } from "../../store/projectSlice";
-import { setMilestonesForProject } from "../../store/milestoneSlice";
-import ProjectDetailsModal from "./components/ProjectDetailsModal";
+import Modal from "../ui/Modal";
+import GetProjectById from "../project/projects/GetProjectById";
 import MonthlyProjectStats from "./components/MonthlyProjectStats";
 import ProjectListModal from "./components/ProjectListModal";
 
@@ -306,10 +306,18 @@ const ProjectDashboard = () => {
         }}
       />
 
-      <ProjectDetailsModal
-        project={selectedProjectForModal}
-        onClose={() => setSelectedProjectForModal(null)}
-      />
+      {selectedProjectForModal && (
+        <Modal
+          isOpen={!!selectedProjectForModal}
+          onClose={() => setSelectedProjectForModal(null)}
+          hideHeader={true}
+        >
+          <GetProjectById
+            id={selectedProjectForModal.id}
+            onClose={() => setSelectedProjectForModal(null)}
+          />
+        </Modal>
+      )}
     </div>
   );
 };

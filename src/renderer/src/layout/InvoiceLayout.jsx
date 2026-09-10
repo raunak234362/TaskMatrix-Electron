@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AddInvoice, AllInvoices, InvoiceDashboard, WireTransfers } from "../components";
-import AccountLayout from "./AccountLayout";
+import AccountPage from "../pages/AccountPage";
 
 const InvoiceLayout = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -78,7 +78,7 @@ const InvoiceLayout = () => {
         )}
         {activeTab === "accounts" && (
           <div>
-            <AccountLayout />
+            <AccountPage />
           </div>
         )}
         {activeTab === "wireTransfers" && (

@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux'
 import { setModalOpen } from '../../store/userSlice'
 import { format } from 'date-fns'
 import { Calendar } from 'lucide-react'
+import Modal from '../ui/Modal'
 
 // Hooks and Views
 import { useDashboardData } from './hooks/useDashboardData'
@@ -19,7 +20,7 @@ import UnreadCommentsWidget from './components/UnreadCommentsWidget'
 const FetchTaskByID = lazy(() => import('../task/FetchTaskByID'))
 const ProjectListModal = lazy(() => import('./components/ProjectListModal'))
 const DashboardListModal = lazy(() => import('./components/DashboardListModal'))
-const ProjectDetailsModal = lazy(() => import('./components/ProjectDetailsModal'))
+const GetProjectById = lazy(() => import('../project/projects/GetProjectById'))
 
 // Detail Components for Modals
 const GetRFIByID = lazy(() => import('../rfi/GetRFIByID'))
@@ -365,10 +366,18 @@ const WBTDashboard = () => {
 
         {/* Project Details Modal */}
         {selectedProject && (
-          <ProjectDetailsModal
-            project={selectedProject}
+          <Modal
+            isOpen={!!selectedProject}
             onClose={() => setSelectedProject(null)}
-          />
+            hideHeader={true}
+          >
+            <Suspense fallback={<div className="p-4 text-center">Loading project details...</div>}>
+              <GetProjectById
+                id={selectedProject.id}
+                onClose={() => setSelectedProject(null)}
+              />
+            </Suspense>
+          </Modal>
         )}
 
         {/* Widget Popups */}
