@@ -3,7 +3,7 @@ import { X, FileText, ClipboardList, RefreshCw, Search } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import DataTable from '../../ui/table'
 
-const DashboardListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSide: [] }, onItemSelect }) => {
+const PendingListModal = ({ isOpen, onClose, type, data = { wbt: [], clientSide: [] }, onItemSelect }) => {
     const [activeTab, setActiveTab] = useState('')
     const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
     const showTabs = ['admin', 'deputy_manager', 'operation_executive', 'dept_manager', 'project_manager'].includes(userRole)
