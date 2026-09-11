@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import Button from "../fields/Button";
 import Service from "../../api/Service";
 import RichTextEditor from "../fields/RichTextEditor";
 import MultipleFileUpload from "../fields/MultipleFileUpload";
 import { toast } from "react-toastify";
-
+import { isCurrentCheckerOrModeler, getProjectManager, getProjectManagerName } from "../../utils/designationUtils";
 
 const SubmittalResponseModal = ({
   submittalId,
   submittalVersionId,
+  project,
   onClose,
   onSuccess,
   parentResponseId = null,
@@ -18,17 +20,53 @@ const SubmittalResponseModal = ({
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
   const [isClientSide, setIsClientSide] = useState(false);
-
   const [files, setFiles] = useState([]);
+
+  const staffData = useSelector((state) => state.userInfo?.staffData || []);
+  const currentUserDetail = useSelector((state) => state.userInfo?.userDetail);
+  const [resolvedProject, setResolvedProject] = useState(project || null);
+
+  useEffect(() => {
+    if (project && (project.manager || project.managerID || project.managerId)) {
+      setResolvedProject(project);
+      return;
+    }
+    const loadProject = async () => {
+      if (!submittalId) return;
+      try {
+        const submittalDetails = await Service.GetSubmittalbyId(submittalId);
+        const pid = submittalDetails?.projectId || submittalDetails?.project_id || submittalDetails?.data?.projectId || submittalDetails?.data?.project_id || submittalDetails?.project?.id || submittalDetails?.data?.project?.id;
+        if (pid) {
+          const projectRes = await Service.GetProjectById(pid);
+          setResolvedProject(projectRes?.data || projectRes);
+        } else if (submittalDetails?.project) {
+          setResolvedProject(submittalDetails.project);
+        }
+      } catch (err) {
+        console.error("Error loading project in SubmittalResponseModal:", err);
+      }
+    };
+    loadProject();
+  }, [submittalId, project]);
 
   const userRoleSession = sessionStorage.getItem("userRole")?.toUpperCase() || "";
   const isEligibleForClientSide = ["ADMIN", "OPERATION_EXECUTIVE", "PROJECT_MANAGER", "DEPT_MANAGER", "DEPUTY_MANAGER"].includes(userRoleSession);
+  const isCheckerOrModeler = isCurrentCheckerOrModeler(staffData, currentUserDetail);
+  const pmName = isCheckerOrModeler ? getProjectManagerName(resolvedProject, staffData) : null;
 
   const handleSubmit = async () => {
     const userId = sessionStorage.getItem("userId") || "";
     let finalUserRole = sessionStorage.getItem("userRole") || "";
+    let effectiveUserId = userId;
+
     if (isClientSide) {
       finalUserRole = "CLIENT";
+    } else if (isCheckerOrModeler) {
+      const pm = getProjectManager(resolvedProject, staffData);
+      if (pm?.id || resolvedProject?.managerID) {
+        effectiveUserId = pm?.id || resolvedProject?.managerID;
+        finalUserRole = "PROJECT_MANAGER";
+      }
     }
 
     if (!reason.trim()) {
@@ -49,7 +87,7 @@ const SubmittalResponseModal = ({
 
     formData.append("submittalsId", submittalId);
     formData.append("submittalVersionId", submittalVersionId || "");
-    formData.append("userId", userId);
+    formData.append("userId", effectiveUserId);
     formData.append("userRole", finalUserRole);
 
     if (parentResponseId) {
@@ -65,9 +103,9 @@ const SubmittalResponseModal = ({
       const pid = submittalDetails?.projectId || submittalDetails?.project_id || submittalDetails?.data?.projectId || submittalDetails?.data?.project_id || submittalDetails?.project?.id || submittalDetails?.data?.project?.id;
       if (pid) {
         const projectRes = await Service.GetProjectById(pid);
-        const project = projectRes?.data || projectRes;
-        fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
-        projectName = project?.projectName || project?.name || "";
+        const p = projectRes?.data || projectRes;
+        fabricatorName = p?.fabricator?.fabName || p?.fabricatorName || "";
+        projectName = p?.projectName || p?.name || "";
       }
       await Service.addSubmittalResponse(formData, fabricatorName, projectName);
       toast.success("Response submitted successfully");
@@ -80,7 +118,7 @@ const SubmittalResponseModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[200]">
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-200">
       <div className="bg-white p-6 rounded-xl w-full max-w-lg shadow-lg relative space-y-4">
         {/* CLOSE BUTTON */}
         {/* <button onClick={onClose} className="absolute top-3 right-3">
@@ -90,6 +128,12 @@ const SubmittalResponseModal = ({
         <h2 className="text-xl font-semibold text-green-700">
           Add Submittal Response
         </h2>
+
+        {isCheckerOrModeler && !isClientSide && pmName && (
+          <div className="bg-blue-50 border border-blue-200 text-blue-800 text-xs px-3 py-2 font-medium rounded-md">
+            Submitting as Project Manager: <span className="font-bold">{pmName}</span>
+          </div>
+        )}
 
         {/* REASON */}
         <div>

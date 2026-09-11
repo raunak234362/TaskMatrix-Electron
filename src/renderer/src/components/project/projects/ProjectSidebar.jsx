@@ -11,6 +11,8 @@ import {
   Bot
 } from 'lucide-react'
 
+import { isCurrentCheckerOrModeler } from '../../../utils/designationUtils'
+
 const TABS_CONFIG = [
   { key: 'overview', label: 'Overview', icon: ClipboardList },
   { key: 'standardsChat', label: 'Standards Chatbot', icon: Bot },
@@ -29,6 +31,8 @@ const TABS_CONFIG = [
 ]
 
 const ProjectSidebar = ({ activeTab, setActiveTab, userRole }) => {
+  const isCheckerOrModeler = isCurrentCheckerOrModeler()
+
   const visibleTabs = TABS_CONFIG.filter((tab) => {
     if (userRole === 'human_resource') {
       return ['analytics', 'teamAnalytics'].includes(tab.key)
@@ -61,14 +65,16 @@ const ProjectSidebar = ({ activeTab, setActiveTab, userRole }) => {
       ].includes(userRole)
     }
     if (tab.key === 'wpr') {
-      return [
-        'admin',
-        'operation_executive',
-        'deputy_manager',
-        'dept_manager',
-        'project_manager',
-        'project_manager_officer'
-      ].includes(userRole)
+      return (
+        [
+          'admin',
+          'operation_executive',
+          'deputy_manager',
+          'dept_manager',
+          'project_manager',
+          'project_manager_officer'
+        ].includes(userRole) || isCheckerOrModeler
+      )
     }
     return true
   })

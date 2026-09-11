@@ -1,14 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Send, Loader2 } from 'lucide-react';
+import { useSelector } from 'react-redux';
 import Service from '../../../api/Service';
 import { toast } from 'react-toastify';
 import RichTextEditor from '../../fields/RichTextEditor';
 import MultipleFileUpload from '../../fields/MultipleFileUpload';
+import {
+  isCurrentCheckerOrModeler,
+  getProjectManager,
+  getProjectManagerName
+} from '../../../utils/designationUtils';
 
-const AddCoordinationDrawingResponse = ({ drawingId, parentResponseId, onCancel, onSuccess }) => {
+const AddCoordinationDrawingResponse = ({ drawingId, project, parentResponseId, onCancel, onSuccess }) => {
   const [description, setDescription] = useState('');
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const staffData = useSelector((state) => state.userInfo?.staffData || []);
+  const currentUserDetail = useSelector((state) => state.userInfo?.userDetail);
+  const [resolvedProject, setResolvedProject] = useState(project || null);
+
+  useEffect(() => {
+    if (project && (project.manager || project.managerID || project.managerId)) {
+      setResolvedProject(project);
+      return;
+    }
+    const loadProject = async () => {
+      if (!drawingId) return;
+      try {
+        const drawingRes = await Service.getCoordinationDrawingById(drawingId);
+        const drawing = drawingRes?.data || drawingRes;
+        const pid = drawing?.projectId || drawing?.project_id;
+        if (pid) {
+          const projectRes = await Service.GetProjectById(pid);
+          setResolvedProject(projectRes?.data || projectRes);
+        }
+      } catch (err) {
+        console.error('Error loading project in AddCoordinationDrawingResponse:', err);
+      }
+    };
+    loadProject();
+  }, [drawingId, project]);
+
+  const isCheckerOrModeler = isCurrentCheckerOrModeler(staffData, currentUserDetail);
+  const pmName = isCheckerOrModeler ? getProjectManagerName(resolvedProject, staffData) : null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,20 +60,35 @@ const AddCoordinationDrawingResponse = ({ drawingId, parentResponseId, onCancel,
       if (parentResponseId) {
         data.append('parentResponseId', parentResponseId);
       }
+
+      if (isCheckerOrModeler) {
+        const pm = getProjectManager(resolvedProject, staffData);
+        if (pm?.id || resolvedProject?.managerID) {
+          data.append('userId', pm?.id || resolvedProject?.managerID);
+          data.append('userRole', 'PROJECT_MANAGER');
+        }
+      }
+
       files.forEach((file) => {
         data.append('files', file);
       });
 
       let fabricatorName = "";
       let projectName = "";
-      const drawingRes = await Service.getCoordinationDrawingById(drawingId);
-      const drawing = drawingRes?.data || drawingRes;
-      const pid = drawing?.projectId || drawing?.project_id;
-      if (pid) {
-        const projectRes = await Service.GetProjectById(pid);
-        const project = projectRes?.data || projectRes;
-        fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
-        projectName = project?.projectName || project?.name || "";
+      const currentProj = resolvedProject;
+      if (currentProj) {
+        fabricatorName = currentProj?.fabricator?.fabName || currentProj?.fabricatorName || "";
+        projectName = currentProj?.projectName || currentProj?.name || "";
+      } else {
+        const drawingRes = await Service.getCoordinationDrawingById(drawingId);
+        const drawing = drawingRes?.data || drawingRes;
+        const pid = drawing?.projectId || drawing?.project_id;
+        if (pid) {
+          const projectRes = await Service.GetProjectById(pid);
+          const p = projectRes?.data || projectRes;
+          fabricatorName = p?.fabricator?.fabName || p?.fabricatorName || "";
+          projectName = p?.projectName || p?.name || "";
+        }
       }
 
       await Service.createCoordinationDrawingResponse(data, fabricatorName, projectName);
@@ -62,6 +112,12 @@ const AddCoordinationDrawingResponse = ({ drawingId, parentResponseId, onCancel,
           <X className="w-5 h-5" />
         </button>
       </div>
+
+      {isCheckerOrModeler && pmName && (
+        <div className="bg-blue-50 border border-blue-200 text-blue-800 text-xs px-4 py-2 font-medium mx-6 mt-4 rounded-xl">
+          Submitting as Project Manager: <span className="font-bold">{pmName}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         <div className="space-y-4">

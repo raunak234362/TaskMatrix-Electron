@@ -1,11 +1,17 @@
 import { X, CalendarDays } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import Button from "../fields/Button";
 import Service from "../../api/Service";
 import RichTextEditor from "../fields/RichTextEditor";
 import RenderFiles from "../common/RenderFiles";
 import MultipleFileUpload from "../fields/MultipleFileUpload";
-
+import {
+  isCurrentCheckerOrModeler,
+  isUserCheckerOrModeler,
+  getProjectManager,
+  getProjectManagerName
+} from "../../utils/designationUtils";
 
 const Info = ({ label, value }) => (
   <div className="space-y-1">
@@ -19,20 +25,60 @@ const Info = ({ label, value }) => (
 
 const SubmittalResponseDetailsModal = ({
   response,
+  project,
   onClose,
 }) => {
   const [replyMode, setReplyMode] = useState(false);
   const [replyMessage, setReplyMessage] = useState("");
   const [replyFiles, setReplyFiles] = useState([]);
+  const staffData = useSelector((state) => state.userInfo?.staffData || []);
+  const currentUserDetail = useSelector((state) => state.userInfo?.userDetail);
+  const [resolvedProject, setResolvedProject] = useState(project || null);
+
+  useEffect(() => {
+    if (project && (project.manager || project.managerID || project.managerId)) {
+      setResolvedProject(project);
+      return;
+    }
+    const loadProject = async () => {
+      const subId = response?.submittalsId;
+      if (!subId) return;
+      try {
+        const submittalDetails = await Service.GetSubmittalbyId(subId);
+        const pid = submittalDetails?.projectId || submittalDetails?.project_id || submittalDetails?.data?.projectId || submittalDetails?.data?.project_id || submittalDetails?.project?.id || submittalDetails?.data?.project?.id;
+        if (pid) {
+          const projectRes = await Service.GetProjectById(pid);
+          setResolvedProject(projectRes?.data || projectRes);
+        } else if (submittalDetails?.project) {
+          setResolvedProject(submittalDetails.project);
+        }
+      } catch (err) {
+        console.error("Failed to load project in SubmittalResponseDetailsModal:", err);
+      }
+    };
+    loadProject();
+  }, [response?.submittalsId, project]);
 
   const userRole = sessionStorage.getItem("userRole")?.toUpperCase() || "";
   const userId = sessionStorage.getItem("userId") || "";
+  const isCheckerOrModeler = isCurrentCheckerOrModeler(staffData, currentUserDetail);
+  const pmName = isCheckerOrModeler ? getProjectManagerName(resolvedProject, staffData) : null;
 
-  // Define roles that can reply
-  const canReply = ["ADMIN", "STAFF", "MANAGER", "PROJECT_MANAGER", "DEPT_MANAGER", "DEPUTY_MANAGER", "CLIENT_ADMIN"].includes(userRole);
+  // Define roles that can reply (including CHECKER and MODELER)
+  const canReply = ["ADMIN", "STAFF", "MANAGER", "PROJECT_MANAGER", "DEPT_MANAGER", "DEPUTY_MANAGER", "CLIENT_ADMIN"].includes(userRole) || isCheckerOrModeler;
 
   const handleReplySubmit = async () => {
     if (!replyMessage.trim()) return;
+
+    let effectiveUserId = userId;
+    let effectiveUserRole = userRole;
+    if (isCheckerOrModeler) {
+      const pm = getProjectManager(resolvedProject, staffData);
+      if (pm?.id || resolvedProject?.managerID) {
+        effectiveUserId = pm?.id || resolvedProject?.managerID;
+        effectiveUserRole = "PROJECT_MANAGER";
+      }
+    }
 
     const formData = new FormData();
     formData.append("reason", replyMessage);
@@ -40,8 +86,8 @@ const SubmittalResponseDetailsModal = ({
     formData.append("submittalsId", response.submittalsId);
     formData.append("submittalVersionId", response.submittalVersionId);
     formData.append("parentResponseId", response.id);
-    formData.append("userId", userId);
-    formData.append("userRole", userRole);
+    formData.append("userId", effectiveUserId);
+    formData.append("userRole", effectiveUserRole);
 
     replyFiles.forEach((file) => formData.append("files", file));
 
@@ -52,9 +98,9 @@ const SubmittalResponseDetailsModal = ({
       const pid = submittalDetails?.projectId || submittalDetails?.project_id || submittalDetails?.data?.projectId || submittalDetails?.data?.project_id || submittalDetails?.project?.id || submittalDetails?.data?.project?.id;
       if (pid) {
         const projectRes = await Service.GetProjectById(pid);
-        const project = projectRes?.data || projectRes;
-        fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
-        projectName = project?.projectName || project?.name || "";
+        const p = projectRes?.data || projectRes;
+        fabricatorName = p?.fabricator?.fabName || p?.fabricatorName || "";
+        projectName = p?.projectName || p?.name || "";
       }
       await Service.addSubmittalResponse(formData, fabricatorName, projectName);
       onClose();
@@ -64,7 +110,7 @@ const SubmittalResponseDetailsModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-4xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
@@ -123,42 +169,52 @@ const SubmittalResponseDetailsModal = ({
               </div>
 
               <div className="space-y-3">
-                {response.childResponses.map((child) => (
-                  <div
-                    key={child.id}
-                    className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-3"
-                  >
-                    <div className="flex justify-between items-start text-xs">
-                      <span className="font-bold text-gray-700 uppercase tracking-tight">
-                        {child.user?.firstName || "User"} {child.user?.lastName || ""}
-                        <span className="ml-2 px-2 py-0.5 bg-gray-100 rounded text-[10px] text-gray-400">
-                          {child.user?.role || "N/A"}
-                        </span>
-                      </span>
-                      <span className="text-[10px] text-gray-400 font-medium">
-                        {new Date(child.createdAt).toLocaleString()}
-                      </span>
-                    </div>
+                {response.childResponses.map((child) => {
+                  const isChildCM = isUserCheckerOrModeler(child.user, staffData);
+                  const childDisplayName = (isChildCM && pmName)
+                    ? pmName
+                    : `${child.user?.firstName || "User"} ${child.user?.lastName || ""}`.trim();
+                  const childDisplayRole = (isChildCM && pmName)
+                    ? "PROJECT MANAGER"
+                    : (child.user?.role || "N/A");
 
+                  return (
                     <div
-                      className="text-sm text-gray-600 prose prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{
-                        __html: child.reason || child.description,
-                      }}
-                    />
-
-                    {child.files?.length > 0 && (
-                      <div className="pt-2">
-                        <RenderFiles
-                          files={child.files}
-                          table="submittalsResponse"
-                          parentId={child.id}
-                          hideHeader
-                        />
+                      key={child.id}
+                      className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-3"
+                    >
+                      <div className="flex justify-between items-start text-xs">
+                        <span className="font-bold text-gray-700 uppercase tracking-tight">
+                          {childDisplayName}
+                          <span className="ml-2 px-2 py-0.5 bg-gray-100 rounded text-[10px] text-gray-400">
+                            {childDisplayRole}
+                          </span>
+                        </span>
+                        <span className="text-[10px] text-gray-400 font-medium">
+                          {new Date(child.createdAt).toLocaleString()}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      <div
+                        className="text-sm text-gray-600 prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{
+                          __html: child.reason || child.description,
+                        }}
+                      />
+
+                      {child.files?.length > 0 && (
+                        <div className="pt-2">
+                          <RenderFiles
+                            files={child.files}
+                            table="submittalsResponse"
+                            parentId={child.id}
+                            hideHeader
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -180,6 +236,12 @@ const SubmittalResponseDetailsModal = ({
                     <X size={16} />
                   </button>
                 </div>
+
+                {isCheckerOrModeler && pmName && (
+                  <div className="bg-blue-50 border border-blue-200 text-blue-800 text-xs px-3 py-2 font-medium rounded-md">
+                    Submitting as Project Manager: <span className="font-bold">{pmName}</span>
+                  </div>
+                )}
 
                 <div className="space-y-4">
                   <RichTextEditor

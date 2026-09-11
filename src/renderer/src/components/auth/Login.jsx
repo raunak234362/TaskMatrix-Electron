@@ -67,8 +67,23 @@ const Login = () => {
     }
 
     sessionStorage.setItem("token", token);
+    if (userDetail?.id) {
+      sessionStorage.setItem("userId", userDetail.id);
+    }
+    if (userDetail?.username) {
+      sessionStorage.setItem("username", userDetail.username);
+    }
+    if (userDetail?.firstName) {
+      sessionStorage.setItem("firstName", userDetail.firstName);
+    }
+    if (userDetail?.lastName) {
+      sessionStorage.setItem("lastName", userDetail.lastName);
+    }
     if (userDetail?.role) {
       sessionStorage.setItem("userRole", userDetail.role);
+    }
+    if (userDetail?.designation) {
+      sessionStorage.setItem("designation", userDetail.designation);
     }
 
     dispatch(login(token));

@@ -7,6 +7,7 @@ import RFIResponseModal from "./RFIResponseModal";
 import RFIResponseDetailsModal from "./RFIResponseDetailsModal";
 import { useSelector } from "react-redux";
 import EditRFI from "./EditRFI";
+import { isCurrentCheckerOrModeler, getEffectiveDisplayName } from "../../utils/designationUtils";
 
 const Info = ({ label, value, noBorder }) => (
   <div className={`flex items-center pb-2 text-sm gap-2 ${noBorder ? "" : "border-b border-gray-200"}`}>
@@ -34,12 +35,26 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedResponse, setSelectedResponse] = useState(null);
   const users = useSelector((state) => state.userInfo?.staffData || []);
+  const currentUserDetail = useSelector((state) => state.userInfo?.userDetail);
 
   const fetchRfi = async () => {
     try {
       setLoading(true);
       const response = await Service.GetRFIbyId(id);
-      setRfi(response.data);
+      const rfiData = response.data;
+      const pid = rfiData?.projectId || rfiData?.project_id || rfiData?.project?.id;
+      if (pid && (!rfiData.project || !rfiData.project.manager)) {
+        try {
+          const projRes = await Service.GetProjectById(pid);
+          const fullProj = projRes?.data?.data || projRes?.data || projRes;
+          if (fullProj) {
+            rfiData.project = { ...fullProj, ...rfiData.project, manager: fullProj.manager || rfiData.project?.manager };
+          }
+        } catch (e) {
+          console.error("Error fetching project details for RFI:", e);
+        }
+      }
+      setRfi(rfiData);
     } catch (err) {
       setError("Failed to load RFI");
     } finally {
@@ -53,7 +68,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-110 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div className="bg-white rounded-none p-8 flex items-center justify-center border border-gray-200 shadow-2xl">
           <Loader2 className="w-5 h-5 animate-spin mr-2 text-black" />
           <span className="text-sm font-semibold uppercase tracking-normal text-black">Loading RFI details...</span>
@@ -64,7 +79,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
 
   if (error || !rfi) {
     return (
-      <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-110 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div className="bg-white rounded-none p-8 flex items-center justify-center border border-red-200 shadow-2xl text-red-600">
           <AlertCircle className="w-5 h-5 mr-2" />
           <span className="text-sm font-semibold uppercase tracking-normal">{error || "RFI not found"}</span>
@@ -85,6 +100,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
     String(assist.userId) === String(currentUserId) || 
     String(assist.user?.id) === String(currentUserId)
   );
+  const isCheckerOrModeler = isCurrentCheckerOrModeler(users, currentUserDetail);
 
   const responseColumns = [
     {
@@ -93,9 +109,14 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
       cell: ({ row }) => {
         const user = row.original.user;
         if (user) {
+          const displayName = getEffectiveDisplayName({
+            user,
+            project: rfi?.project,
+            staffData: users
+          });
           return (
             <span className="font-semibold text-sm text-black">
-              {`${user.firstName || ""} ${user.lastName || ""}`.trim()}
+              {displayName}
             </span>
           );
         }
@@ -163,7 +184,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-[110] flex items-center justify-center p-1 md:p-2 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-110 flex items-center justify-center p-1 md:p-2 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
         <div className="bg-white rounded-none shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[98%] flex flex-col h-full max-h-[98vh]">
           {/* Header */}
           <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
@@ -290,7 +311,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
                     <div className="w-1.5 h-6 bg-[#6bbd45] rounded-none" />
                     <h2 className="text-sm font-semibold text-black tracking-normal uppercase">Responses</h2>
                   </div>
-                  {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole?.includes("MANAGER") || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole === "DEPUTY_MANAGER" || isAssist) && (
+                  {(userRole === "CLIENT" || userRole === "CLIENT_ADMIN" || userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole?.includes("MANAGER") || userRole === "PROJECT_MANAGER" || userRole === "DEPT_MANAGER" || userRole === "DEPUTY_MANAGER" || isAssist || isCheckerOrModeler) && (
                     <button
                       className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
                       onClick={() => setShowModal(true)}
@@ -326,6 +347,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
       {showModal && (
         <RFIResponseModal
           rfiId={id}
+          project={rfi.project}
           onClose={() => setShowModal(false)}
           onSuccess={() => {
             fetchRfi();
@@ -336,7 +358,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
 
       {/* Edit RFI Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-120 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-none shadow-2xl border border-gray-200 overflow-hidden w-full max-w-2xl max-h-[90vh] flex flex-col relative">
             <EditRFI
               id={id}
@@ -358,6 +380,7 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
       {selectedResponse && (
         <RFIResponseDetailsModal
           response={selectedResponse}
+          project={rfi.project}
           onClose={() => {
             setSelectedResponse(null);
             fetchRfi();

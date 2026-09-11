@@ -1,11 +1,19 @@
 import { CalendarDays, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 import { formatDateTime } from "../../utils/dateUtils";
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import Button from "../fields/Button";
 import Service from "../../api/Service";
 import RichTextEditor from "../fields/RichTextEditor";
 import RenderFiles from "../ui/RenderFiles";
 import MultipleFileUpload from "../fields/MultipleFileUpload";
+import {
+  isCurrentCheckerOrModeler,
+  isUserCheckerOrModeler,
+  getProjectManager,
+  getProjectManagerName,
+  getInitialsFromName
+} from "../../utils/designationUtils";
 
 // Status dropdown options
 const STATUS_OPTIONS = [
@@ -27,7 +35,9 @@ const HistoryNode = ({
   replyParentId,
   setReplyParentId,
   setReplyMode,
-  renderReplyForm
+  renderReplyForm,
+  project,
+  staffData = []
 }) => {
   const [child, setChild] = useState(initialChild);
 
@@ -47,13 +57,20 @@ const HistoryNode = ({
     fetchChild();
   }, [initialChild.id]);
 
-  const userName = child.user ? `${child.user.firstName || ""} ${child.user.lastName || ""}`.trim() : "User";
-  const initials = getInitials(child.user?.firstName, child.user?.lastName);
+  const isChildCM = isUserCheckerOrModeler(child.user, staffData);
+  const pmName = getProjectManagerName(project, staffData);
+  const userName = (isChildCM && pmName)
+    ? pmName
+    : (child.user ? `${child.user.firstName || ""} ${child.user.lastName || ""}`.trim() : "User");
+  const childRole = (isChildCM && pmName) ? "PROJECT MANAGER" : child.user?.role;
+  const initials = (isChildCM && pmName)
+    ? getInitialsFromName(pmName)
+    : getInitials(child.user?.firstName, child.user?.lastName);
 
   return (
     <div className="flex gap-3 w-full mt-2">
       {/* Avatar */}
-      <div className="flex-shrink-0 mt-1">
+      <div className="shrink-0 mt-1">
         <div className="w-8 h-8 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center text-xs font-bold shadow-sm">
           {initials}
         </div>
@@ -66,9 +83,9 @@ const HistoryNode = ({
           <div className="flex justify-between items-center px-4 py-3 bg-gray-50/80 border-b border-gray-100">
             <div className="flex items-center gap-2">
               <span className="font-bold text-gray-900 text-sm">{userName}</span>
-              {child.user?.role && (
+              {childRole && (
                 <span className="text-[10px] uppercase font-bold text-gray-600 bg-gray-200 px-2 py-0.5 rounded-full tracking-wider">
-                  {child.user.role}
+                  {childRole}
                 </span>
               )}
             </div>
@@ -136,6 +153,8 @@ const HistoryNode = ({
                   setReplyParentId={setReplyParentId}
                   setReplyMode={setReplyMode}
                   renderReplyForm={renderReplyForm}
+                  project={project}
+                  staffData={staffData}
                 />
               ))}
           </div>
@@ -145,7 +164,7 @@ const HistoryNode = ({
   );
 };
 
-const RFIResponseDetailsModal = ({ response, onClose }) => {
+const RFIResponseDetailsModal = ({ response, project, onClose }) => {
   const [fullResponse, setFullResponse] = useState(response);
   const [isLoading, setIsLoading] = useState(false);
   const [replyMode, setReplyMode] = useState(false);
@@ -153,6 +172,34 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
   const [replyFiles, setReplyFiles] = useState([]);
   const [replyStatus, setReplyStatus] = useState(response.wbtStatus);
   const [replyParentId, setReplyParentId] = useState(response.id);
+  const staffData = useSelector((state) => state.userInfo?.staffData || []);
+  const currentUserDetail = useSelector((state) => state.userInfo?.userDetail);
+  const [resolvedProject, setResolvedProject] = useState(project || null);
+
+  useEffect(() => {
+    if (project && (project.manager || project.managerID || project.managerId)) {
+      setResolvedProject(project);
+      return;
+    }
+    const loadProject = async () => {
+      const targetRfiId = response?.rfiId;
+      if (!targetRfiId) return;
+      try {
+        const rfiRes = await Service.GetRFIbyId(targetRfiId);
+        const rfi = rfiRes?.data || rfiRes;
+        const pid = rfi?.projectId || rfi?.project_id || rfi?.project?.id;
+        if (pid) {
+          const pRes = await Service.GetProjectById(pid);
+          setResolvedProject(pRes?.data?.data || pRes?.data || pRes || rfi?.project);
+        } else if (rfi?.project) {
+          setResolvedProject(rfi.project);
+        }
+      } catch (err) {
+        console.error("Error loading project in RFIResponseDetailsModal:", err);
+      }
+    };
+    loadProject();
+  }, [response?.rfiId, project]);
 
   useEffect(() => {
     const fetchFullResponse = async () => {
@@ -182,20 +229,32 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
 
   const userRole = sessionStorage.getItem("userRole")?.toUpperCase() || "";
   const userId = sessionStorage.getItem("userId") || "";
-  console.log(response);
+  const isCheckerOrModeler = isCurrentCheckerOrModeler(staffData, currentUserDetail);
+  const pmName = getProjectManagerName(resolvedProject, staffData);
 
-  // 🔒 Allow Admin/Team and Client roles to reply
-  const canReply = ["ADMIN", "STAFF", "MANAGER", "CLIENT", "CLIENT_ADMIN", "CLIENT_ESTIMATOR"].includes(userRole);
+  // 🔒 Allow Admin/Team, Client roles, and CHECKER / MODELER to reply
+  const canReply = ["ADMIN", "STAFF", "MANAGER", "CLIENT", "CLIENT_ADMIN", "CLIENT_ESTIMATOR"].includes(userRole) || isCheckerOrModeler;
 
   const handleReplySubmit = async () => {
     if (!replyMessage.trim()) return;
+
+    let effectiveUserId = userId;
+    let effectiveUserRole = userRole;
+    if (isCheckerOrModeler) {
+      const pm = getProjectManager(resolvedProject, staffData);
+      if (pm?.id || resolvedProject?.managerID) {
+        effectiveUserId = pm?.id || resolvedProject?.managerID;
+        effectiveUserRole = "PROJECT_MANAGER";
+      }
+    }
 
     const formData = new FormData();
     formData.append("reason", replyMessage);
     formData.append("rfiId", fullResponse.rfiId || response.rfiId);
     formData.append("parentResponseId", replyParentId);
-    formData.append("userId", userId);
-    formData.append("wbtStatus", replyStatus); // 👈 send selected status
+    formData.append("userId", effectiveUserId);
+    formData.append("userRole", effectiveUserRole);
+    formData.append("wbtStatus", replyStatus);
 
     replyFiles.forEach((file) => formData.append("files", file));
 
@@ -224,6 +283,12 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
 
   const renderReplyForm = () => (
     <div className="pt-4 space-y-4 border-t w-full animate-in fade-in zoom-in duration-200">
+      {isCheckerOrModeler && pmName && (
+        <div className="bg-blue-50 border border-blue-200 text-blue-800 text-xs px-3 py-2 font-medium">
+          Submitting as Project Manager: <span className="font-bold">{pmName}</span>
+        </div>
+      )}
+
       <div className="space-y-1">
         <label className="text-sm font-medium text-gray-700">
           Your Reply
@@ -276,8 +341,17 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
     </div>
   );
 
+  const isMainCM = isUserCheckerOrModeler(fullResponse.user, staffData);
+  const mainUserName = (isMainCM && pmName)
+    ? pmName
+    : (fullResponse.user ? `${fullResponse.user.firstName || ""} ${fullResponse.user.lastName || ""}`.trim() : "User");
+  const mainRole = (isMainCM && pmName) ? "PROJECT MANAGER" : fullResponse.user?.role;
+  const mainInitials = (isMainCM && pmName)
+    ? getInitialsFromName(pmName)
+    : getInitials(fullResponse.user?.firstName, fullResponse.user?.lastName);
+
   return (
-    <div className="project-component-container fixed inset-0 bg-black/60 flex justify-center items-center z-[120] backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    <div className="project-component-container fixed inset-0 bg-black/60 flex justify-center items-center z-120 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="bg-[#fafffb] w-full max-h-[95vh] overflow-y-auto p-5 rounded-3xl shadow-2xl space-y-5 relative border border-gray-100">
         {/* Close Button */}
         <div className="flex justify-between items-center mb-2">
@@ -301,9 +375,9 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
           ) : (
             <div className="flex gap-4 w-full pt-2">
               {/* Main Avatar */}
-              <div className="flex-shrink-0 mt-1">
+              <div className="shrink-0 mt-1">
                 <div className="w-11 h-11 bg-black text-white rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
-                  {getInitials(fullResponse.user?.firstName, fullResponse.user?.lastName)}
+                  {mainInitials}
                 </div>
               </div>
 
@@ -312,11 +386,11 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
                   <div className="flex justify-between items-center px-5 py-4 bg-gray-50 border-b border-gray-200">
                     <div className="flex items-center gap-2">
                       <span className="font-extrabold text-gray-900">
-                        {fullResponse.user ? `${fullResponse.user.firstName || ""} ${fullResponse.user.lastName || ""}`.trim() : "User"}
+                        {mainUserName}
                       </span>
-                      {fullResponse.user?.role && (
+                      {mainRole && (
                         <span className="text-[10px] uppercase font-bold text-gray-600 bg-gray-200 px-2 py-0.5 rounded-full tracking-wider">
-                          {fullResponse.user.role}
+                          {mainRole}
                         </span>
                       )}
                     </div>
@@ -386,6 +460,8 @@ const RFIResponseDetailsModal = ({ response, onClose }) => {
                             setReplyParentId={setReplyParentId}
                             setReplyMode={setReplyMode}
                             renderReplyForm={renderReplyForm}
+                            project={resolvedProject}
+                            staffData={staffData}
                           />
                         ))}
                     </div>

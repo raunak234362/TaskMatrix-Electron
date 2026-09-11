@@ -6,16 +6,27 @@ import RichTextEditor from "../fields/RichTextEditor";
 import MultipleFileUpload from "../fields/MultipleFileUpload";
 import RenderFiles from "../common/RenderFiles";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import {
+  isCurrentCheckerOrModeler,
+  isUserCheckerOrModeler,
+  getProjectManager,
+  getProjectManagerName
+} from "../../utils/designationUtils";
 
 // ── Version History Row ──────────────────────────────────────────────────────
-const BfaVersionRow = ({ version, index, total, isCurrent, bfaId }) => {
+const BfaVersionRow = ({ version, index, total, isCurrent, bfaId, project, staffData = [] }) => {
   const [open, setOpen] = useState(false);
 
   const uploadedAt = version.createdAt || version.updatedAt || version.date;
   const uploader = version.user || version.sender;
-  const uploaderName = uploader
-    ? `${uploader.firstName || uploader.f_name || ""} ${uploader.lastName || uploader.l_name || ""}`.trim()
-    : null;
+  const isUploaderCM = isUserCheckerOrModeler(uploader, staffData);
+  const pmName = getProjectManagerName(project, staffData);
+  const uploaderName = (isUploaderCM && pmName)
+    ? pmName
+    : (uploader
+      ? `${uploader.firstName || uploader.f_name || ""} ${uploader.lastName || uploader.l_name || ""}`.trim()
+      : null);
 
   return (
     <div
@@ -113,12 +124,42 @@ const BfaVersionRow = ({ version, index, total, isCurrent, bfaId }) => {
 };
 
 // ── Main BfaManager Component ────────────────────────────────────────────────
-const BfaManager = ({ submittalId, isAssist }) => {
+const BfaManager = ({ submittalId, isAssist, project }) => {
   const [bfa, setBfa] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const userRole = sessionStorage.getItem("userRole")?.toUpperCase();
+  const staffData = useSelector((state) => state.userInfo?.staffData || []);
+  const currentUserDetail = useSelector((state) => state.userInfo?.userDetail);
+  const [resolvedProject, setResolvedProject] = useState(project || null);
+
+  useEffect(() => {
+    if (project && (project.manager || project.managerID || project.managerId)) {
+      setResolvedProject(project);
+      return;
+    }
+    const loadProject = async () => {
+      if (!submittalId) return;
+      try {
+        const submittalDetails = await Service.GetSubmittalbyId(submittalId);
+        const pid = submittalDetails?.projectId || submittalDetails?.project_id || submittalDetails?.data?.projectId || submittalDetails?.data?.project_id || submittalDetails?.project?.id || submittalDetails?.data?.project?.id;
+        if (pid) {
+          const projectRes = await Service.GetProjectById(pid);
+          setResolvedProject(projectRes?.data || projectRes);
+        } else if (submittalDetails?.project) {
+          setResolvedProject(submittalDetails.project);
+        }
+      } catch (err) {
+        console.error("Error loading project in BfaManager:", err);
+      }
+    };
+    loadProject();
+  }, [submittalId, project]);
+
+  const isCheckerOrModeler = isCurrentCheckerOrModeler(staffData, currentUserDetail);
+  const canManageBfa = userRole !== "STAFF" || isAssist || isCheckerOrModeler;
+  const pmName = isCheckerOrModeler ? getProjectManagerName(resolvedProject, staffData) : null;
 
   // Form Fields State
   const [subject, setSubject] = useState("");
@@ -158,6 +199,15 @@ const BfaManager = ({ submittalId, isAssist }) => {
       formData.append("subject", subject);
       formData.append("description", description);
       formData.append("status", status);
+
+      if (isCheckerOrModeler) {
+        const pm = getProjectManager(resolvedProject, staffData);
+        if (pm?.id || resolvedProject?.managerID) {
+          formData.append("userId", pm?.id || resolvedProject?.managerID);
+          formData.append("userRole", "PROJECT_MANAGER");
+        }
+      }
+
       files.forEach((file) => formData.append("files", file));
 
       const submittalDetails = await Service.GetSubmittalbyId(submittalId);
@@ -195,6 +245,15 @@ const BfaManager = ({ submittalId, isAssist }) => {
       const formData = new FormData();
       formData.append("description", description);
       formData.append("status", status);
+
+      if (isCheckerOrModeler) {
+        const pm = getProjectManager(resolvedProject, staffData);
+        if (pm?.id || resolvedProject?.managerID) {
+          formData.append("userId", pm?.id || resolvedProject?.managerID);
+          formData.append("userRole", "PROJECT_MANAGER");
+        }
+      }
+
       files.forEach((file) => formData.append("files", file));
 
       const submittalDetails = await Service.GetSubmittalbyId(submittalId);
@@ -248,7 +307,7 @@ const BfaManager = ({ submittalId, isAssist }) => {
       <div className="flex justify-between items-center pb-4">
         <SectionTitle title="BFA" />
         {bfa ? (
-          (userRole !== "STAFF" || isAssist) && (
+          canManageBfa && (
             <button
               className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
               onClick={() => {
@@ -262,7 +321,7 @@ const BfaManager = ({ submittalId, isAssist }) => {
             </button>
           )
         ) : (
-          (userRole !== "STAFF" || isAssist) && (
+          canManageBfa && (
             <button
               className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
               onClick={() => {
@@ -368,6 +427,8 @@ const BfaManager = ({ submittalId, isAssist }) => {
                     total={sortedVersions.length}
                     isCurrent={index === 0}
                     bfaId={bfa.id}
+                    project={resolvedProject}
+                    staffData={staffData}
                   />
                 ))}
               </div>
@@ -378,22 +439,30 @@ const BfaManager = ({ submittalId, isAssist }) => {
         <div className="text-center py-8 border border-dashed border-gray-300 rounded-none bg-white flex flex-col items-center justify-center">
           <FileText className="w-10 h-10 text-gray-300 mb-2" />
           <p className="text-sm font-semibold text-black uppercase tracking-wider">No BACK FROM APPROVAL (BFA) associated with this submittal yet.</p>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="mt-3 px-4 py-1.5 bg-gray-100 text-black border border-gray-300 rounded-none hover:bg-gray-200 transition-all font-bold text-xs uppercase tracking-wider cursor-pointer"
-          >
-            Raise BFA Now
-          </button>
+          {canManageBfa && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="mt-3 px-4 py-1.5 bg-gray-100 text-black border border-gray-300 rounded-none hover:bg-gray-200 transition-all font-bold text-xs uppercase tracking-wider cursor-pointer"
+            >
+              Raise BFA Now
+            </button>
+          )}
         </div>
       )}
 
       {/* CREATE BFA MODAL */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[210] animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-210 animate-in fade-in duration-200">
           <div className="bg-white h-[80vh] overflow-y-auto p-6 rounded-xl w-full max-w-2xl shadow-lg relative space-y-4 border border-gray-100">
             <h2 className="text-xl font-bold text-green-700">
               BFA
             </h2>
+
+            {isCheckerOrModeler && pmName && (
+              <div className="bg-blue-50 border border-blue-200 text-blue-800 text-xs px-3 py-2 font-medium rounded-md">
+                Submitting as Project Manager: <span className="font-bold">{pmName}</span>
+              </div>
+            )}
 
             <div>
               <label className="text-sm font-medium">BFA Subject (Optional)</label>
@@ -446,11 +515,17 @@ const BfaManager = ({ submittalId, isAssist }) => {
 
       {/* UPDATE BFA MODAL */}
       {showUpdateModal && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-[210] animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-210 animate-in fade-in duration-200">
           <div className="bg-white p-6 rounded-xl w-full max-w-lg shadow-lg relative space-y-4 border border-gray-100">
             <h2 className="text-xl font-bold text-green-700">
               Update BFA (New Version)
             </h2>
+
+            {isCheckerOrModeler && pmName && (
+              <div className="bg-blue-50 border border-blue-200 text-blue-800 text-xs px-3 py-2 font-medium rounded-md">
+                Submitting as Project Manager: <span className="font-bold">{pmName}</span>
+              </div>
+            )}
 
             <div>
               <label className="text-sm font-medium">BFA Status *</label>

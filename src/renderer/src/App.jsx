@@ -150,7 +150,7 @@ const AppContent = () => {
   const fetchSignedinUser = async () => {
     try {
       const response = await Service.GetUserByToken()
-      const fetchedUser = response?.data?.user
+      const fetchedUser = response?.data?.user || response?.user || response?.data
       if (!fetchedUser?.id) throw new Error('Invalid user')
 
       sessionStorage.setItem('userId', fetchedUser.id)
@@ -158,7 +158,9 @@ const AppContent = () => {
       sessionStorage.setItem('firstName', fetchedUser.firstName)
       sessionStorage.setItem('lastName', fetchedUser.lastName)
       sessionStorage.setItem('userRole', fetchedUser.role)
-      sessionStorage.setItem('designation', fetchedUser.designation)
+      if (fetchedUser.designation) {
+        sessionStorage.setItem('designation', fetchedUser.designation)
+      }
 
       const fabId =
         response?.data?.FabricatorPointOfContacts?.[0]?.id ||
@@ -193,6 +195,20 @@ const AppContent = () => {
         const response = await Service.FetchAllEmployee()
         const data = response?.data?.employees || []
         dispatch(showStaff(data))
+
+        // Also sync designation for current user if missing
+        const currentUserId = sessionStorage.getItem('userId')
+        const currentUsername = sessionStorage.getItem('username')?.toUpperCase()
+        const currentDesig = sessionStorage.getItem('designation')
+        if (data.length > 0 && (!currentDesig || currentDesig === 'undefined' || currentDesig === 'null')) {
+          const matched = data.find(emp =>
+            (currentUserId && (String(emp.id) === String(currentUserId) || String(emp._id) === String(currentUserId))) ||
+            (currentUsername && String(emp.username || '').toUpperCase() === currentUsername)
+          )
+          if (matched?.designation) {
+            sessionStorage.setItem('designation', matched.designation)
+          }
+        }
       } catch (err) {
         console.error('Failed to fetch employees:', err)
         toast.error('Failed to load employees')

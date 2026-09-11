@@ -1,22 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Send, Loader2 } from 'lucide-react';
+import { useSelector } from 'react-redux';
 import Service from '../../../api/Service';
 import { toast } from 'react-toastify';
 import RichTextEditor from '../../fields/RichTextEditor';
 import MultipleFileUpload from '../../fields/MultipleFileUpload';
+import {
+  isCurrentCheckerOrModeler,
+  getProjectManager,
+  getProjectManagerName
+} from '../../../utils/designationUtils';
 
-const AddCoordinationDrawing = ({ projectId, onCancel, onSuccess }) => {
+const AddCoordinationDrawing = ({ projectId, project, onCancel, onSuccess }) => {
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
+    message: '',
     stage: 'IFA',
   });
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const staffData = useSelector((state) => state.userInfo?.staffData || []);
+  const currentUserDetail = useSelector((state) => state.userInfo?.userDetail);
+  const [resolvedProject, setResolvedProject] = useState(project || null);
+
+  useEffect(() => {
+    if (project && (project.manager || project.managerID || project.managerId)) {
+      setResolvedProject(project);
+      return;
+    }
+    const loadProject = async () => {
+      if (!projectId) return;
+      try {
+        const projectRes = await Service.GetProjectById(projectId);
+        setResolvedProject(projectRes?.data || projectRes);
+      } catch (err) {
+        console.error('Error loading project in AddCoordinationDrawing:', err);
+      }
+    };
+    loadProject();
+  }, [projectId, project]);
+
+  const isCheckerOrModeler = isCurrentCheckerOrModeler(staffData, currentUserDetail);
+  const pmName = isCheckerOrModeler ? getProjectManagerName(resolvedProject, staffData) : null;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.message ) {
+    if (!formData.title || !formData.message) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -26,19 +56,32 @@ const AddCoordinationDrawing = ({ projectId, onCancel, onSuccess }) => {
       const data = new FormData();
       data.append('projectId', projectId);
       data.append('title', formData.title);
-      data.append('message', formData.message );
+      data.append('message', formData.message);
       data.append('stage', formData.stage);
+
+      if (isCheckerOrModeler) {
+        const pm = getProjectManager(resolvedProject, staffData);
+        if (pm?.id || resolvedProject?.managerID) {
+          data.append('userId', pm?.id || resolvedProject?.managerID);
+          data.append('userRole', 'PROJECT_MANAGER');
+        }
+      }
+
       files.forEach((file) => {
         data.append('files', file);
       });
 
       let fabricatorName = "";
       let projectName = "";
-      if (projectId) {
+      const currentProj = resolvedProject;
+      if (currentProj) {
+        fabricatorName = currentProj?.fabricator?.fabName || currentProj?.fabricatorName || "";
+        projectName = currentProj?.projectName || currentProj?.name || "";
+      } else if (projectId) {
         const projectRes = await Service.GetProjectById(projectId);
-        const project = projectRes?.data || projectRes;
-        fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
-        projectName = project?.projectName || project?.name || "";
+        const p = projectRes?.data || projectRes;
+        fabricatorName = p?.fabricator?.fabName || p?.fabricatorName || "";
+        projectName = p?.projectName || p?.name || "";
       }
 
       await Service.createCoordinationDrawing(data, fabricatorName, projectName);
@@ -60,6 +103,12 @@ const AddCoordinationDrawing = ({ projectId, onCancel, onSuccess }) => {
           <X className="w-5 h-5" />
         </button>
       </div>
+
+      {isCheckerOrModeler && pmName && (
+        <div className="bg-blue-50 border border-blue-200 text-blue-800 text-xs px-4 py-2 font-medium mx-6 mt-4 rounded-xl">
+          Submitting as Project Manager: <span className="font-bold">{pmName}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         <div className="space-y-4">
@@ -92,8 +141,8 @@ const AddCoordinationDrawing = ({ projectId, onCancel, onSuccess }) => {
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Description *</label>
             <RichTextEditor
-              value={formData.message }
-              onChange={(content) => setFormData({ ...formData, message : content })}
+              value={formData.message}
+              onChange={(content) => setFormData({ ...formData, message: content })}
               placeholder="Enter details..."
             />
           </div>

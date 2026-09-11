@@ -1,12 +1,26 @@
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import AllDesignDrawings from "../designDrawings/AllDesignDrawings";
 import AddDesignDrawing from "../designDrawings/AddDesignDrawing";
 import AllDocumentsByProjectID from "../designDrawings/AllDocumentsByProjectID";
+import { isCurrentCheckerOrModeler } from "../../../utils/designationUtils";
 
-const AllDocument = ({ projectId }) => {
+const AllDocument = ({ projectId, project }) => {
   const [view, setView] = useState("all");
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+  const staffData = useSelector((state) => state.userInfo?.staffData || []);
+  const currentUserDetail = useSelector((state) => state.userInfo?.userDetail);
+  const isCheckerOrModeler = isCurrentCheckerOrModeler(staffData, currentUserDetail);
+
   if (!projectId) return null;
+
+  const canAddDesignDrawing =
+    userRole === "admin" ||
+    userRole === "operation_executive" ||
+    userRole === "project_manager" ||
+    userRole === "department_manager" ||
+    userRole === "dept_manager" ||
+    isCheckerOrModeler;
 
   return (
     <div className="space-y-4">
@@ -31,7 +45,7 @@ const AllDocument = ({ projectId }) => {
           >
             Design Drawings
           </button>
-          {userRole === "admin" || userRole === "operation_executive" || userRole === "project_manager" || userRole === "department_manager" ? (
+          {canAddDesignDrawing ? (
             <button
               onClick={() => setView("add")}
               className={`px-4 py-1.5 text-sm font-bold uppercase tracking-tight rounded-none border-2 transition-all cursor-pointer shadow-sm ${view === "add"
@@ -47,7 +61,7 @@ const AllDocument = ({ projectId }) => {
 
       {view === "all" && <AllDocumentsByProjectID projectId={projectId} />}
       {view === "list" && <AllDesignDrawings projectId={projectId} />}
-      {view === "add" && <AddDesignDrawing projectId={projectId} onSuccess={() => setView("list")} />}
+      {view === "add" && <AddDesignDrawing projectId={projectId} project={project} onSuccess={() => setView("list")} />}
     </div>
   );
 };

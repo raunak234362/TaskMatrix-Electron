@@ -1,22 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { X, ArrowLeft, MessageSquare, Download, Clock, User, Paperclip, Share2, Reply } from 'lucide-react';
+import { useSelector } from 'react-redux';
 import Service from '../../../api/Service';
 import { format } from 'date-fns';
 import AddCoordinationDrawingResponse from './AddCoordinationDrawingResponse';
 import { getBaseURL } from '../../../api/backendConfig';
 import { toast } from 'react-toastify';
 import RenderFiles from '../../ui/RenderFiles';
+import {
+  getEffectiveDisplayName,
+  getInitialsFromName
+} from '../../../utils/designationUtils';
 
-const ResponseItem = ({ response, isChild = false, onReply }) => {
+const ResponseItem = ({ response, isChild = false, onReply, project, staffData }) => {
   const [showChildren, setShowChildren] = useState(false);
   const user = response.user || response.createdBy;
   const hasChildren = response.childResponses && response.childResponses.length > 0;
   
-  const displayName = user?.firstName 
-    ? `${user.firstName} ${user.lastName || ''}` 
-    : (user?.username || 'Unknown User');
+  const displayName = getEffectiveDisplayName({
+    user,
+    project,
+    staffData
+  });
 
-  const initials = user?.firstName?.[0] || user?.username?.[0] || 'U';
+  const initials = getInitialsFromName(displayName);
 
   return (
     <div className={`space-y-4 ${isChild ? 'ml-12 mt-4 pt-4 border-l-2 border-black/5 pl-6' : ''}`}>
@@ -79,7 +86,14 @@ const ResponseItem = ({ response, isChild = false, onReply }) => {
       {hasChildren && showChildren && (
         <div className="space-y-4">
           {response.childResponses.map((child) => (
-            <ResponseItem key={child.id} response={child} isChild={true} onReply={onReply} />
+            <ResponseItem
+              key={child.id}
+              response={child}
+              isChild={true}
+              onReply={onReply}
+              project={project}
+              staffData={staffData}
+            />
           ))}
         </div>
       )}
@@ -87,12 +101,15 @@ const ResponseItem = ({ response, isChild = false, onReply }) => {
   );
 };
 
-const CoordinationDrawingDetails = ({ drawingId, onBack }) => {
+const CoordinationDrawingDetails = ({ drawingId, project, onBack }) => {
   const [drawing, setDrawing] = useState(null);
   const [responses, setResponses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddResponse, setShowAddResponse] = useState(false);
   const [selectedParentId, setSelectedParentId] = useState(null);
+
+  const staffData = useSelector((state) => state.userInfo?.staffData || []);
+  const [resolvedProject, setResolvedProject] = useState(project || null);
 
   const fetchData = async () => {
     try {
@@ -102,14 +119,33 @@ const CoordinationDrawingDetails = ({ drawingId, onBack }) => {
         Service.getResponsesByDrawingId(drawingId)
       ]);
       
-      setDrawing(Array.isArray(drawingRes) ? drawingRes[0] : (drawingRes?.data || drawingRes));
+      const loadedDrawing = Array.isArray(drawingRes) ? drawingRes[0] : (drawingRes?.data || drawingRes);
+      setDrawing(loadedDrawing);
       setResponses(Array.isArray(responsesRes) ? responsesRes : (responsesRes?.data || []));
+
+      if (!project || (!project.manager && !project.managerID && !project.managerId)) {
+        const pid = loadedDrawing?.projectId || loadedDrawing?.project_id;
+        if (pid) {
+          try {
+            const pRes = await Service.GetProjectById(pid);
+            setResolvedProject(pRes?.data || pRes);
+          } catch (err) {
+            console.error("Error loading project in CoordinationDrawingDetails:", err);
+          }
+        }
+      }
     } catch (error) {
       console.error('Error fetching drawing details:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (project && (project.manager || project.managerID || project.managerId)) {
+      setResolvedProject(project);
+    }
+  }, [project]);
 
   const handleDownload = async (e, parentId, fileId, originalName, type = 'drawing') => {
     e.preventDefault();
@@ -193,6 +229,12 @@ const CoordinationDrawingDetails = ({ drawingId, onBack }) => {
     );
   }
 
+  const creatorDisplayName = getEffectiveDisplayName({
+    user: drawing.createdBy,
+    project: resolvedProject,
+    staffData
+  });
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-white w-full max-w-6xl rounded-lg overflow-hidden shadow-2xl flex flex-col h-[90vh] border border-black">
@@ -262,6 +304,8 @@ const CoordinationDrawingDetails = ({ drawingId, onBack }) => {
                       <ResponseItem 
                         key={response.id} 
                         response={response} 
+                        project={resolvedProject}
+                        staffData={staffData}
                         onReply={(id) => {
                           setSelectedParentId(id);
                           setShowAddResponse(true);
@@ -284,7 +328,7 @@ const CoordinationDrawingDetails = ({ drawingId, onBack }) => {
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-black text-black uppercase tracking-widest opacity-60">Created By:</span>
                     <span className="text-xs font-black text-black uppercase">
-                      {drawing.createdBy?.firstName} {drawing.createdBy?.lastName}
+                      {creatorDisplayName}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -318,6 +362,7 @@ const CoordinationDrawingDetails = ({ drawingId, onBack }) => {
           <div className="w-full max-w-2xl">
             <AddCoordinationDrawingResponse
               drawingId={drawingId}
+              project={resolvedProject}
               parentResponseId={selectedParentId}
               onCancel={() => setShowAddResponse(false)}
               onSuccess={() => {

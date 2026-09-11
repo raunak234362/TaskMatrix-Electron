@@ -1,17 +1,45 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { FileText, Plus, Loader2, Compass } from 'lucide-react';
+import { useSelector } from 'react-redux';
 import Service from '../../../api/Service';
 import AddCoordinationDrawing from './AddCoordinationDrawing';
 import CoordinationDrawingDetails from './CoordinationDrawingDetails';
 import DataTable from '../../ui/table';
 import { format } from 'date-fns';
+import {
+  isCurrentCheckerOrModeler,
+  getEffectiveDisplayName,
+  getInitialsFromName
+} from '../../../utils/designationUtils';
 
-const CoordinationDrawings = ({ projectId }) => {
+const CoordinationDrawings = ({ projectId, project }) => {
   const [drawings, setDrawings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [selectedDrawingId, setSelectedDrawingId] = useState(null);
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+  const staffData = useSelector((state) => state.userInfo?.staffData || []);
+  const currentUserDetail = useSelector((state) => state.userInfo?.userDetail);
+  const [resolvedProject, setResolvedProject] = useState(project || null);
+
+  useEffect(() => {
+    if (project && (project.manager || project.managerID || project.managerId)) {
+      setResolvedProject(project);
+      return;
+    }
+    const loadProject = async () => {
+      if (!projectId) return;
+      try {
+        const pRes = await Service.GetProjectById(projectId);
+        setResolvedProject(pRes?.data || pRes);
+      } catch (err) {
+        console.error("Error loading project in CoordinationDrawings:", err);
+      }
+    };
+    loadProject();
+  }, [projectId, project]);
+
+  const isCheckerOrModeler = isCurrentCheckerOrModeler(staffData, currentUserDetail);
 
   const fetchDrawings = async () => {
     try {
@@ -81,23 +109,33 @@ const CoordinationDrawings = ({ projectId }) => {
     {
       header: 'Created By',
       accessorKey: 'createdBy.firstName',
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-none bg-gray-100 flex items-center justify-center text-sm font-normal text-black border border-gray-200 shadow-sm">
-            {row.original.createdBy?.firstName?.[0] || 'U'}
+      cell: ({ row }) => {
+        const user = row.original.createdBy;
+        const displayName = getEffectiveDisplayName({
+          user,
+          project: resolvedProject,
+          staffData
+        });
+        const initials = getInitialsFromName(displayName);
+        return (
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-none bg-gray-100 flex items-center justify-center text-sm font-normal text-black border border-gray-200 shadow-sm">
+              {initials}
+            </div>
+            <span className="text-sm font-normal text-black">
+              {displayName}
+            </span>
           </div>
-          <span className="text-sm font-normal text-black">
-            {row.original.createdBy?.firstName} {row.original.createdBy?.lastName}
-          </span>
-        </div>
-      ),
+        );
+      },
     }
-  ], []);
+  ], [resolvedProject, staffData]);
 
   if (selectedDrawingId) {
     return (
       <CoordinationDrawingDetails
         drawingId={selectedDrawingId}
+        project={resolvedProject}
         onBack={() => setSelectedDrawingId(null)}
       />
     );
@@ -110,7 +148,7 @@ const CoordinationDrawings = ({ projectId }) => {
          
          
         </div>
-        {userRole !== "staff" && (
+        {(userRole !== "staff" || isCheckerOrModeler) && (
           <button
             onClick={() => setIsAdding(true)}
             className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm inline-flex items-center justify-center cursor-pointer"
@@ -141,6 +179,7 @@ const CoordinationDrawings = ({ projectId }) => {
           <div className="w-full max-w-2xl">
             <AddCoordinationDrawing
               projectId={projectId}
+              project={resolvedProject}
               onCancel={() => setIsAdding(false)}
               onSuccess={() => {
                 setIsAdding(false);

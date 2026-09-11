@@ -18,6 +18,8 @@ import SubmittalResponseModal from './SubmittalResponseModal'
 import SubmittalResponseDetailsModal from './SubmittalResponseDetailsModal'
 import UpdateSubmittalById from './UpdateSubmittalById'
 import BfaManager from './BfaManager'
+import { useSelector } from 'react-redux'
+import { isCurrentCheckerOrModeler, getEffectiveDisplayName } from '../../utils/designationUtils'
 
 const Info = ({ label, value, noBorder }) => (
   <div
@@ -161,6 +163,8 @@ const GetSubmittalByID = ({ id, onClose }) => {
   const [showResponseModal, setShowResponseModal] = useState(false)
   const [showUpdateModal, setShowUpdateModal] = useState(false)
   const [selectedResponse, setSelectedResponse] = useState(null)
+  const staffData = useSelector((state) => state.userInfo?.staffData || [])
+  const currentUserDetail = useSelector((state) => state.userInfo?.userDetail)
   const userRole = sessionStorage.getItem('userRole')?.toUpperCase()
   const currentUserId = sessionStorage.getItem('userId')
   const isAssist = submittal?.project?.assists?.some(
@@ -168,12 +172,26 @@ const GetSubmittalByID = ({ id, onClose }) => {
       String(assist.userId) === String(currentUserId) ||
       String(assist.user?.id) === String(currentUserId)
   )
+  const isCheckerOrModeler = isCurrentCheckerOrModeler(staffData, currentUserDetail)
 
   const fetchData = async () => {
     try {
       setLoading(true)
       const res = await Service.GetSubmittalbyId(id)
-      setSubmittal(res.data)
+      const subData = res.data
+      const pid = subData?.projectId || subData?.project_id || subData?.project?.id
+      if (pid && (!subData.project || !subData.project.manager)) {
+        try {
+          const pRes = await Service.GetProjectById(pid)
+          const fullProj = pRes?.data?.data || pRes?.data || pRes
+          if (fullProj) {
+            subData.project = { ...fullProj, ...subData.project, manager: fullProj.manager || subData.project?.manager }
+          }
+        } catch (e) {
+          console.error('Error fetching project details for Submittal:', e)
+        }
+      }
+      setSubmittal(subData)
     } catch {
       setError('Failed to load submittal')
     } finally {
@@ -217,9 +235,14 @@ const GetSubmittalByID = ({ id, onClose }) => {
       header: 'From',
       cell: ({ row }) => {
         const user = row.original.user
+        const displayName = getEffectiveDisplayName({
+          user,
+          project: submittal?.project,
+          staffData
+        })
         return (
           <span className="font-medium text-sm text-gray-700">
-            {user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '—'}
+            {displayName || (user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '—')}
           </span>
         )
       }
@@ -255,7 +278,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-[110] flex items-center justify-center p-1 md:p-2 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-110 flex items-center justify-center p-1 md:p-2 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
         <div className="bg-white rounded-none shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-[98%] flex flex-col h-full max-h-[98vh]">
           {/* Header */}
           <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
@@ -436,7 +459,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
 
               {/* RIGHT PANEL - BFA Manager */}
               {String(submittal?.stage || "").toUpperCase() !== "IFC" && (
-                <BfaManager submittalId={submittal.id} isAssist={isAssist} />
+                <BfaManager submittalId={submittal.id} isAssist={isAssist} project={submittal.project} />
               )}
 
               {/* ── VERSION HISTORY (only when > 1 versions) ── */}
@@ -485,7 +508,8 @@ const GetSubmittalByID = ({ id, onClose }) => {
                     userRole === 'DEPUTY_MANAGER' ||
                     userRole === 'OPERATION_EXECUTIVE' ||
                     userRole === 'STAFF' ||
-                    isAssist) && (
+                    isAssist ||
+                    isCheckerOrModeler) && (
                     <button
                       className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
                       onClick={() => setShowResponseModal(true)}
@@ -521,6 +545,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
         <SubmittalResponseModal
           submittalId={submittal.id}
           submittalVersionId={submittal.currentVersionId || sortedVersions[0]?.id}
+          project={submittal.project}
           onClose={() => setShowResponseModal(false)}
           onSuccess={() => {
             setShowResponseModal(false)
@@ -533,6 +558,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
       {selectedResponse && (
         <SubmittalResponseDetailsModal
           response={selectedResponse}
+          project={submittal.project}
           onClose={() => {
             setSelectedResponse(null)
             fetchData()

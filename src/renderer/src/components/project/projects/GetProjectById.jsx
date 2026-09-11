@@ -479,7 +479,7 @@ const GetProjectById = ({ id, onClose }) => {
             {/* Files */}
             {activeTab === 'files' && (
               <div className="space-y-4">
-                <AllDocument projectId={id} />
+                <AllDocument projectId={id} project={project} />
               </div>
             )}
             {activeTab === 'milestones' && (
@@ -780,7 +780,7 @@ const GetProjectById = ({ id, onClose }) => {
             {activeTab === 'projectNotes' && <AllProjectNotes projectId={id} project={project} />}
 
             {/* Coordination Drawings */}
-            {activeTab === 'coordinationDrawings' && <CoordinationDrawings projectId={id} />}
+            {activeTab === 'coordinationDrawings' && <CoordinationDrawings projectId={id} project={project} />}
 
             {/* Standards Chatbot */}
             {activeTab === 'standardsChat' && (
