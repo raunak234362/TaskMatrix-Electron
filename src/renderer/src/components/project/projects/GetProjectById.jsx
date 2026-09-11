@@ -6,13 +6,10 @@ import AllDocument from '../projectDocument/AllDocument'
 import WBS from '../wbs/WBS'
 import WbsBreakdownPanel from '../wbs/WbsBreakdownPanel'
 import RfiLayout from '../../../layout/RfiLayout'
-import AllSubmittals from '../../submittals/AllSubmittals'
+import SubmittalLayout from '../../../layout/SubmittalLayout'
+import COLayout from '../../../layout/COLayout'
 import AllNotes from '../notes/AllNotes'
 import EditProject from '../EditProject'
-import AddSubmittal from '../../submittals/AddSubmittals'
-import AllCO from '../../co/AllCO'
-import AddCO from '../../co/AddCO'
-import CoTable from '../../co/CoTable'
 import ProjectAnalyticsDashboard from './ProjectAnalyticsDashboard'
 import TeamsAnalytics from '../TeamsAnalytics'
 import AllProjectNotes from '../notes/AllProjectNotes'
@@ -88,10 +85,7 @@ const GetProjectById = ({ id, onClose }) => {
     }))
   }
 
-  const [submittalView, setSubmittalView] = useState('list')
   const [editModel, setEditModel] = useState(null)
-  const [changeOrderView, setChangeOrderView] = useState('list')
-  const [selectedCoId, setSelectedCoId] = useState(null)
   const [selectedTaskId, setSelectedTaskId] = useState(null)
   const [projectTasks, setProjectTasks] = useState([])
   const [showAssistsModal, setShowAssistsModal] = useState(false)
@@ -396,11 +390,6 @@ const GetProjectById = ({ id, onClose }) => {
     if (id) fetchProject()
   }, [id])
 
-  const handleCoSuccess = (createdCO) => {
-    fetchProject()
-    setChangeOrderView('list')
-  }
-
   const formatDate = (date) =>
     date
       ? new Date(date).toLocaleString('en-IN', {
@@ -551,45 +540,13 @@ const GetProjectById = ({ id, onClose }) => {
 
             {/* Submittals */}
             {activeTab === 'submittals' && (
-              <div className="space-y-4">
-                <div className="flex justify-start mb-4">
-                  <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                    <button
-                      onClick={() => setSubmittalView('list')}
-                      className={`whitespace-nowrap px-6 py-1.5 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer ${submittalView === 'list'
-                          ? 'bg-green-50 text-black border-2 border-green-700/80'
-                          : 'bg-gray-100 text-black border border-gray-300 hover:bg-gray-200'
-                        }`}
-                    >
-                      All Submittals
-                    </button>
-                    {canCreate && (
-                      <button
-                        onClick={() => setSubmittalView('add')}
-                        className={`whitespace-nowrap px-6 py-1.5 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer ${submittalView === 'add'
-                            ? 'bg-green-50 text-black border-2 border-green-700/80'
-                            : 'bg-gray-100 text-black border border-gray-300 hover:bg-gray-200'
-                          }`}
-                      >
-                        Create Submittal
-                      </button>
-                    )}
-                  </nav>
-                </div>
-
-                {submittalView === 'list' ? (
-                  <AllSubmittals submittalData={submittalData} projectId={id} onUpdate={fetchProject} />
-                ) : (
-                  <AddSubmittal
-                    project={project}
-                    submittalData={submittalData}
-                    onSuccess={() => {
-                      fetchProject()
-                      setSubmittalView('list')
-                    }}
-                  />
-                )}
-              </div>
+              <SubmittalLayout
+                project={project}
+                submittalData={submittalData}
+                projectId={id}
+                fetchProject={fetchProject}
+                canCreate={canCreate}
+              />
             )}
 
             {/* CD RFI */}
@@ -604,100 +561,23 @@ const GetProjectById = ({ id, onClose }) => {
 
             {/* CD Submittals */}
             {activeTab === 'CDsubmittals' && (userRole !== 'staff' || isAssist) && (
-              <div className="space-y-4">
-                <div className="flex justify-start mb-4">
-                  <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                    <button
-                      onClick={() => setSubmittalView('list')}
-                      className={`whitespace-nowrap px-6 py-1.5 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer ${submittalView === 'list'
-                          ? 'bg-green-50 text-black border-2 border-green-700/80'
-                          : 'bg-gray-100 text-black border border-gray-300 hover:bg-gray-200'
-                        }`}
-                    >
-                      All Submittals
-                    </button>
-                    {canCreate && (
-                      <button
-                        onClick={() => setSubmittalView('add')}
-                        className={`whitespace-nowrap px-6 py-1.5 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer ${submittalView === 'add'
-                            ? 'bg-green-50 text-black border-2 border-green-700/80'
-                            : 'bg-gray-100 text-black border border-gray-300 hover:bg-gray-200'
-                          }`}
-                      >
-                        Create Submittal
-                      </button>
-                    )}
-                  </nav>
-                </div>
-
-                {submittalView === 'list' ? (
-                  <AllSubmittals submittalData={submittalData} projectId={id} onUpdate={fetchProject} />
-                ) : (
-                  <AddSubmittal
-                    project={project}
-                    submittalData={submittalData}
-                    onSuccess={() => {
-                      fetchProject()
-                      setSubmittalView('list')
-                    }}
-                  />
-                )}
-              </div>
+              <SubmittalLayout
+                project={project}
+                submittalData={submittalData}
+                projectId={id}
+                fetchProject={fetchProject}
+                canCreate={canCreate}
+              />
             )}
 
             {/* Change Order */}
             {activeTab === 'changeOrder' && (
-              <div className="space-y-4">
-                <div className="flex justify-start mb-4">
-                  <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                    <button
-                      onClick={() => setChangeOrderView('list')}
-                      className={`whitespace-nowrap px-6 py-1.5 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer ${changeOrderView === 'list'
-                          ? 'bg-green-50 text-black border-2 border-green-700/80'
-                          : 'bg-gray-100 text-black border border-gray-300 hover:bg-gray-200'
-                        }`}
-                    >
-                      All Change Order
-                    </button>
-                    
-                      <button
-                        onClick={() => setChangeOrderView('add')}
-                        className={`whitespace-nowrap px-6 py-1.5 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer ${changeOrderView === 'add'
-                            ? 'bg-green-50 text-black border-2 border-green-700/80'
-                            : 'bg-gray-100 text-black border border-gray-300 hover:bg-gray-200'
-                          }`}
-                      >
-                        Raise Change Order
-                      </button>
-                    
-                  </nav>
-                </div>
-
-                {changeOrderView === 'list' ? (
-                  <AllCO changeOrderData={changeOrderData} onUpdate={fetchProject} />
-                ) : changeOrderView === 'add' ? (
-                  <AddCO
-                    project={project}
-                    onSuccess={handleCoSuccess}
-                    changeOrderData={changeOrderData}
-                  />
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <h4 className="text-lg font-semibold text-black">Change Order Table</h4>
-                      <button
-                        onClick={() => setChangeOrderView('list')}
-                        className="text-sm text-black hover:text-black font-medium"
-                      >
-                        &larr; Back to List
-                      </button>
-                    </div>
-                    {selectedCoId && (
-                      <CoTable coId={selectedCoId} onSuccess={() => setChangeOrderView('add')} />
-                    )}
-                  </div>
-                )}
-              </div>
+              <COLayout
+                project={project}
+                changeOrderData={changeOrderData}
+                fetchProject={fetchProject}
+                canCreate={canCreate}
+              />
             )}
 
             {/* Analytics */}
