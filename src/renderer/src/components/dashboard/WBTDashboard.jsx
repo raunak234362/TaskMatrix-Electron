@@ -19,7 +19,7 @@ import UnreadCommentsWidget from './components/UnreadCommentsWidget'
 // Lazy load components
 const FetchTaskByID = lazy(() => import('../task/FetchTaskByID'))
 const ProjectListModal = lazy(() => import('./components/ProjectListModal'))
-const DashboardListModal = lazy(() => import('./components/PendingActionList'))
+const PendingActionList = lazy(() => import('./components/PendingActionList'))
 const GetProjectById = lazy(() => import('../project/projects/GetProjectById'))
 
 // Detail Components for Modals
@@ -178,51 +178,53 @@ const WBTDashboard = () => {
     setProjectModal({ isOpen: true, status, data: filteredProjects })
   }
 
-  const handleActionClick = (type) => {
-    let data = { wbt: [], clientSide: [] }
+  const getActionModalData = (type) => {
     switch (type) {
       case 'PENDING_RFQ':
-        data = {
+        return {
           wbt: adminData.pendingRFQ || [],
           clientSide: adminData.clientSidePendingRFQ || []
         }
-        break
       case 'PENDING_RFI':
-        data = {
+        return {
           wbt: adminData.pendingRFI || [],
           clientSide: adminData.clientSidePendingRFI || []
         }
-        break
       case 'PENDING_SUBMITTALS':
-        data = {
+        return {
           wbt: adminData.pendingSubmittals || [],
           clientSide: adminData.clientSidePendingSubmittals || []
         }
-        break
       case 'CHANGE_ORDERS':
-        data = {
+        return {
           wbt: adminData.pendingCO || [],
           clientSide: adminData.clientSidePendingCO || []
         }
-        break
       case 'UNAPPROVED_CHANGE_ORDERS':
-        data = {
+        return {
           wbt: adminData.unapprovedCO || [],
           clientSide: []
         }
-        break
       case 'PENDING_APPROVALS': {
         const d = adminData.unapprovedListsData || {};
-        data = {
+        return {
           RFI: Array.isArray(d.unapprovedRFIsList) ? d.unapprovedRFIsList.map(r => ({ ...r, __approvalType: 'RFI' })) : [],
           Submittals: Array.isArray(d.unapprovedSubmittalsList) ? d.unapprovedSubmittalsList.map(s => ({ ...s, __approvalType: 'SUBMITTAL' })) : [],
           ChangeOrder: Array.isArray(d.unapprovedChangeOrdersList) ? d.unapprovedChangeOrdersList.map(c => ({ ...c, __approvalType: 'CO' })) : []
         };
-        break;
       }
       default:
-        data = { wbt: [], clientSide: [] }
+        return { wbt: [], clientSide: [] }
     }
+  }
+
+  const currentActionData = useMemo(() => {
+    if (!actionModal.isOpen || !actionModal.type) return { wbt: [], clientSide: [] }
+    return getActionModalData(actionModal.type)
+  }, [actionModal.isOpen, actionModal.type, adminData])
+
+  const handleActionClick = (type) => {
+    const data = getActionModalData(type)
     setActionModal({ isOpen: true, type, data })
   }
 
@@ -240,7 +242,7 @@ const WBTDashboard = () => {
       }
 
       if (type && (item.id || item._id)) {
-        setActionModal({ ...actionModal, isOpen: false })
+        // Keep actionModal open so closing a particular item returns to the pending list
         const projectId = item.projectId || item.project?.id || item.project?._id || (typeof item.project === 'string' ? item.project : null);
 
         setDetailModal({
@@ -355,11 +357,11 @@ const WBTDashboard = () => {
 
         {/* Admin Dashboard Actions List Modal */}
         {actionModal.isOpen && (
-          <DashboardListModal
+          <PendingActionList
             isOpen={actionModal.isOpen}
             onClose={() => setActionModal({ ...actionModal, isOpen: false })}
             type={actionModal.type}
-            data={actionModal.data}
+            data={currentActionData}
             onItemSelect={handleItemSelect}
           />
         )}
@@ -472,73 +474,56 @@ const WBTDashboard = () => {
           document.body
         )}
 
-        {/* Item Detail Modal Wrapper */}
-        {detailModal.isOpen && detailModal.type === 'RFQ' && createPortal(
-          <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center"><div className="p-8 text-center text-xs font-bold uppercase tracking-widest text-gray-400">Loading RFQ...</div></div>}>
-            <GetRFQByID id={detailModal.id} onClose={() => setDetailModal({ isOpen: false, type: null, id: null })} />
+        {/* Item Detail Modal */}
+        {detailModal.isOpen && createPortal(
+          <Suspense fallback={<div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm"><div className="p-8 text-center text-xs font-bold uppercase tracking-widest text-white">Loading details...</div></div>}>
+            {detailModal.type === 'RFQ' && (
+              <GetRFQByID
+                id={detailModal.id}
+                onClose={() => {
+                  setDetailModal({ isOpen: false, type: null, id: null, projectId: null })
+                  fetchData()
+                }}
+              />
+            )}
+            {detailModal.type === 'RFI' && (
+              <GetRFIByID
+                id={detailModal.id}
+                onClose={(wasDeleted) => {
+                  setDetailModal({ isOpen: false, type: null, id: null, projectId: null })
+                  fetchData()
+                }}
+              />
+            )}
+            {detailModal.type === 'SUBMITTAL' && (
+              <GetSubmittalByID
+                id={detailModal.id}
+                onClose={(wasDeleted) => {
+                  setDetailModal({ isOpen: false, type: null, id: null, projectId: null })
+                  fetchData()
+                }}
+              />
+            )}
+            {detailModal.type === 'CO' && (
+              <GetCOByID
+                id={detailModal.id}
+                projectId={detailModal.projectId}
+                onClose={(wasDeleted) => {
+                  setDetailModal({ isOpen: false, type: null, id: null, projectId: null })
+                  fetchData()
+                }}
+              />
+            )}
+            {detailModal.type === 'INVOICE' && (
+              <GetInvoiceById
+                id={detailModal.id}
+                onClose={() => {
+                  setDetailModal({ isOpen: false, type: null, id: null, projectId: null })
+                  fetchData()
+                }}
+              />
+            )}
           </Suspense>,
-          document.body
-        )}
-
-        {detailModal.isOpen && detailModal.type !== 'RFQ' && createPortal(
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="bg-white w-[95%] max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in fade-in zoom-in duration-200">
-              <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                <h3 className="text-sm font-bold text-gray-700 uppercase tracking-widest">
-                  {detailModal.type === 'RFQ' && 'RFQ Details'}
-                  {detailModal.type === 'RFI' && 'RFI Details'}
-                  {detailModal.type === 'SUBMITTAL' && 'Submittal Details'}
-                  {detailModal.type === 'CO' && 'Change Order Details'}
-                  {detailModal.type === 'INVOICE' && 'Invoice Details'}
-                </h3>
-                <button
-                  onClick={() => setDetailModal({ isOpen: false, type: null, id: null })}
-                  className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
-                >
-                  Close
-                </button>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4 bg-gray-50/30">
-                <Suspense fallback={<div className="p-8 text-center text-xs font-bold uppercase tracking-widest text-gray-400">Loading details...</div>}>
-                  {detailModal.type === 'RFI' && (
-                    <GetRFIByID
-                      id={detailModal.id}
-                      onClose={(wasDeleted) => {
-                        setDetailModal({ isOpen: false, type: null, id: null })
-                        if (wasDeleted === true) {
-                          fetchData()
-                        }
-                      }}
-                    />
-                  )}
-                  {detailModal.type === 'SUBMITTAL' && (
-                    <GetSubmittalByID
-                      id={detailModal.id}
-                      onClose={(wasDeleted) => {
-                        setDetailModal({ isOpen: false, type: null, id: null })
-                        if (wasDeleted === true) {
-                          fetchData()
-                        }
-                      }}
-                    />
-                  )}
-                  {detailModal.type === 'CO' && (
-                    <GetCOByID
-                      id={detailModal.id}
-                      projectId={detailModal.projectId}
-                      onClose={(wasDeleted) => {
-                        setDetailModal({ isOpen: false, type: null, id: null })
-                        if (wasDeleted === true) {
-                          fetchData()
-                        }
-                      }}
-                    />
-                  )}
-                  {detailModal.type === 'INVOICE' && <GetInvoiceById id={detailModal.id} onClose={() => setDetailModal({ isOpen: false, type: null, id: null })} />}
-                </Suspense>
-              </div>
-            </div>
-          </div>,
           document.body
         )}
         {selectedMilestone && createPortal(
