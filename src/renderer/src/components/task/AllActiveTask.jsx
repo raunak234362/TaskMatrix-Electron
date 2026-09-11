@@ -18,6 +18,7 @@ import DataTable from '../ui/table'
 import FetchTaskByID from './FetchTaskByID'
 
 const AllActiveTask = () => {
+  const userRole = (sessionStorage.getItem('userRole') || '').toLowerCase().trim()
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -34,14 +35,20 @@ const AllActiveTask = () => {
     const fetchTasks = async () => {
       try {
         setLoading(true)
-        const response = await Service.GetNonCompletedTasks()
+        const response = (userRole === 'operation_executive_trainee' || userRole === 'operation_executive')
+          ? await Service.GetAllTask()
+          : await Service.GetNonCompletedTasks()
 
         // Ensure tasks is an array
-        const taskData = Array.isArray(response.data)
-          ? response.data
-          : response.data
-            ? Object.values(response.data)
-            : []
+        const taskData = Array.isArray(response)
+          ? response
+          : Array.isArray(response?.data)
+            ? response.data
+            : Array.isArray(response?.tasks)
+              ? response.tasks
+              : response?.data
+                ? Object.values(response.data)
+                : []
 
         setTasks(taskData)
         setLoading(false)
@@ -105,6 +112,7 @@ const AllActiveTask = () => {
   const filteredTasks = useMemo(() => {
     return tasks.filter(
       (task) =>
+        (userRole !== 'operation_executive_trainee' || task.status !== 'COMPLETED') &&
         task.status !== 'VALIDATE_COMPLETE' &&
         task.status !== 'COMPLETE_OTHER' &&
         task.status !== 'WRONG_ALLOCATION' &&
@@ -112,7 +120,7 @@ const AllActiveTask = () => {
         task.status !== 'USER_FAULT' &&
         matchesDateFilter(task.created_on, dateFilter, task.due_date || task.dueDate)
     )
-  }, [tasks, dateFilter])
+  }, [tasks, dateFilter, userRole])
 
   // Find the highest-priority unlockable task from ASSIGNED, IN_PROGRESS, BREAK, or REWORK
   const unlockableStatuses = ['ASSIGNED', 'IN_PROGRESS', 'BREAK', 'REWORK']
@@ -235,7 +243,17 @@ const AllActiveTask = () => {
         header: 'View',
         cell: ({ row }) => {
           const task = row.original
-          const canView = task.status === 'IN_REVIEW' || task.id === unlockableTaskId
+          const canView =
+            [
+              'admin',
+              'operation_executive',
+              'operation_executive_trainee',
+              'deputy_manager',
+              'project_manager',
+              'dept_manager'
+            ].includes(userRole) ||
+            task.status === 'IN_REVIEW' ||
+            task.id === unlockableTaskId
           return (
             <button
               onClick={() => handleTaskView(task.id)}
@@ -253,7 +271,7 @@ const AllActiveTask = () => {
         }
       }
     ],
-    [unlockableTaskId]
+    [unlockableTaskId, userRole]
   )
 
   if (loading) {
@@ -267,43 +285,35 @@ const AllActiveTask = () => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-red-500 p-6 bg-red-50 rounded-xl border border-red-100 mx-4">
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-red-500">
         <AlertCircle className="w-12 h-12 mb-4" />
-        <h3 className="text-lg  mb-2">Failed to Load Active Tasks</h3>
-        <p className="text-center max-w-md">
-          {error.message ||
-            'An unexpected error occurred while fetching tasks. Please try again later.'}
-        </p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-6 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-md"
-        >
-          Retry
-        </button>
+        <h2 className="text-xl font-bold mb-2">Failed to load active tasks</h2>
+        <p className="text-sm opacity-80">{error.message || 'Something went wrong'}</p>
       </div>
     )
   }
 
   return (
-    <div className="p-4 md:p-2 w-full mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-        <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full border border-green-100">
-          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-          <span className="text-sm font-semibold text-green-700">{tasks.length} Active Tasks</span>
-        </div>
-
-        <div className="flex flex-col gap-1 w-full sm:w-auto">
-          <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
+    <div className="p-4 bg-white rounded-none border border-green-600 min-h-screen">
+      <div className="mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-bold uppercase tracking-wider text-black">Active Tasks</h1>
+            <span className="text-xs font-bold text-black border border-green-300 px-3 py-1 rounded-none bg-green-50 shadow-sm">
+              {filteredTasks.length} Active {filteredTasks.length === 1 ? 'Task' : 'Tasks'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <DateFilter dateFilter={dateFilter} setDateFilter={setDateFilter} />
+          </div>
         </div>
       </div>
 
       {tasks.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
-          <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ClipboardList className="w-10 h-10 text-gray-300" />
-          </div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">No Active Tasks Found</h3>
-          <p className="text-gray-700">You don't have any active tasks at the moment.</p>
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-12 text-center">
+          <ClipboardList className="w-16 h-16 text-gray-400 mx-auto mb-4 animate-bounce" />
+          <h3 className="text-lg font-bold text-gray-700">No Active Tasks</h3>
+          <p className="text-gray-500 text-sm mt-1">You do not have any tasks currently pending.</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-4">
@@ -318,12 +328,18 @@ const AllActiveTask = () => {
           refresh={async () => {
             try {
               setLoading(true)
-              const response = await Service.GetNonCompletedTasks()
-              const taskData = Array.isArray(response.data)
-                ? response.data
-                : response.data
-                  ? Object.values(response.data)
-                  : []
+              const response = (userRole === 'operation_executive_trainee' || userRole === 'operation_executive')
+                ? await Service.GetAllTask()
+                : await Service.GetNonCompletedTasks()
+              const taskData = Array.isArray(response)
+                ? response
+                : Array.isArray(response?.data)
+                  ? response.data
+                  : Array.isArray(response?.tasks)
+                    ? response.tasks
+                    : response?.data
+                      ? Object.values(response.data)
+                      : []
               setTasks(taskData)
               setLoading(false)
             } catch (err) {

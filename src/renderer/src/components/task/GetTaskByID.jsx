@@ -15,7 +15,7 @@ const LocalSectionTitle = ({ title }) => (
 )
 
 const GetTaskByID = ({ id, onClose, refresh }) => {
-  const userRole = sessionStorage.getItem('userRole')?.toLowerCase()
+  const userRole = (sessionStorage.getItem('userRole') || '').toLowerCase().trim()
   const [task, setTask] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
@@ -291,6 +291,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
           <div className="flex items-center gap-3">
             {(userRole === 'admin' ||
               userRole === 'operation_executive' ||
+              userRole === 'operation_executive_trainee' ||
               userRole === 'project_manager' ||
               userRole === 'dept_manager' ||
               userRole === 'deputy_manager') && (
@@ -481,7 +482,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
               )}
 
               {/* Allocation Hours History — admin / operation_executive / deputy_manager / human_resource only */}
-              {['admin', 'operation_executive', 'deputy_manager', 'human_resource'].includes(userRole) &&
+              {['admin', 'operation_executive', 'operation_executive_trainee', 'deputy_manager', 'human_resource'].includes(userRole) &&
                 task?.allocationLog && (
                   <div className="bg-[#f4faf0]/30 p-6 border border-green-600 rounded-none shadow-sm">
                     <div className="flex items-center gap-3 mb-5">

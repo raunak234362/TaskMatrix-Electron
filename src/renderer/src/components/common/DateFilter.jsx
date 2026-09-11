@@ -2,7 +2,9 @@
 import { useState, useEffect } from "react";
 import { Filter, ChevronDown } from "lucide-react";
 
-const DateFilter = ({ dateFilter, setDateFilter }) => {
+const DateFilter = ({ dateFilter: propDateFilter, filter, setDateFilter: propSetDateFilter, onChange }) => {
+    const dateFilter = propDateFilter || filter || { type: 'all', year: new Date().getFullYear(), month: new Date().getMonth() };
+    const setDateFilter = propSetDateFilter || onChange || (() => {});
     const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
     const months = [
@@ -30,7 +32,7 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
         if (showFilterDropdown) {
             setLocalDateFilter(dateFilter);
         }
-    }, [showFilterDropdown]);
+    }, [showFilterDropdown, dateFilter]);
 
     return (
         <div className="relative z-50">
@@ -40,19 +42,19 @@ const DateFilter = ({ dateFilter, setDateFilter }) => {
                 type="button"
             >
                 <Filter size={14} />
-                {dateFilter?.type === "all"
+                {!dateFilter || dateFilter.type === "all"
                     ? "All Time"
-                    : dateFilter?.type === "month"
+                    : dateFilter.type === "month"
                         ? `${months[dateFilter.month]} ${dateFilter.year}`
-                        : dateFilter?.type === "week"
-                            ? `Week of ${new Date(dateFilter.weekStart).toLocaleDateString()}`
-                            : dateFilter?.type === "range"
+                        : dateFilter.type === "week"
+                            ? `Week of ${dateFilter.weekStart ? new Date(dateFilter.weekStart).toLocaleDateString() : ''}`
+                            : dateFilter.type === "range"
                                 ? `${months[dateFilter.startMonth]} - ${months[dateFilter.endMonth]} ${dateFilter.year}`
-                                : dateFilter?.type === "dateRange"
-                                    ? `${new Date(dateFilter.startDate).toLocaleDateString()} - ${new Date(dateFilter.endDate).toLocaleDateString()}`
-                                    : dateFilter?.type === "specificDate"
-                                        ? `${new Date(dateFilter.date).toLocaleDateString()}`
-                                        : `Year ${dateFilter.year}`}
+                                : dateFilter.type === "dateRange"
+                                    ? `${dateFilter.startDate ? new Date(dateFilter.startDate).toLocaleDateString() : ''} - ${dateFilter.endDate ? new Date(dateFilter.endDate).toLocaleDateString() : ''}`
+                                    : dateFilter.type === "specificDate"
+                                        ? `${dateFilter.date ? new Date(dateFilter.date).toLocaleDateString() : ''}`
+                                        : `Year ${dateFilter.year || currentYear}`}
                 <ChevronDown size={14} />
             </button>
 

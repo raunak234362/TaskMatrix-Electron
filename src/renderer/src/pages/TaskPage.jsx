@@ -10,21 +10,21 @@ import TrainingReport from '../components/training/TrainingReport'
 import { ChevronDown } from 'lucide-react'
 
 const TaskPage = () => {
-  const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
+  const userRole = (sessionStorage.getItem('userRole') || '').toLowerCase().trim()
   const [isTrainingDropdownOpen, setIsTrainingDropdownOpen] = useState(false)
   const [activeTab, setActiveTab] = useState(
     userRole === 'connection_designer_engineer' ||
       userRole === 'estimation_head' ||
       userRole === 'project_manager' ||
-      userRole === 'dept_manager'
+      userRole === 'dept_manager' ||
+      userRole === 'operation_executive_trainee'
       ? 'allTask'
       : 'activeTask'
   )
   //   const task = useSelector((state) => state.RFQInfos.RFQData);
   return (
-    <div className="w-full overflow-y-hidden overflow-x-hidden">
-      <div className="flex flex-col w-full h-full">
-        <div className="relative z-100 px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 rounded-none flex flex-wrap items-center justify-center md:justify-end gap-3">
+    <div className="w-full h-full flex flex-col overflow-hidden">
+      <div className="relative z-30 px-3 py-2 backdrop-blur-2xl bg-gradient-to-t from-white/60 to-white/80 rounded-none flex flex-wrap items-center justify-center md:justify-end gap-3 shrink-0 border-b border-gray-100">
           <button
             onClick={() => setActiveTab('activeTask')}
             className={`px-6 py-1.5 border-2 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm inline-flex items-center justify-center transition-all cursor-pointer ${
@@ -47,6 +47,7 @@ const TaskPage = () => {
           </button>
           {userRole === 'admin' ||
           userRole === 'operation_executive' ||
+          userRole === 'operation_executive_trainee' ||
           userRole === 'project_manager' ||
           userRole === 'department_manager' ||
           userRole === 'dept_manager' ? (
@@ -78,7 +79,7 @@ const TaskPage = () => {
             {/* Dropdown Menu */}
             {isTrainingDropdownOpen && (
               <div className="absolute top-full mt-1 right-0 w-48 bg-white border border-gray-200 shadow-xl rounded-none flex flex-col z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
-                {['admin', 'operation_executive', 'deputy_manager', 'human_resource'].includes(userRole) && (
+                {['admin', 'operation_executive', 'operation_executive_trainee', 'deputy_manager', 'human_resource'].includes(userRole) && (
                   <button
                     onClick={() => setActiveTab('pendingTraining')}
                     className={`px-4 py-3 text-sm font-bold text-left uppercase hover:bg-green-50 transition-colors border-b border-gray-100 ${activeTab === 'pendingTraining' ? 'bg-green-100 text-green-800' : 'text-gray-700'}`}
@@ -92,7 +93,7 @@ const TaskPage = () => {
                 >
                   My Trainings
                 </button>
-                {['admin','deputy_manager', 'operation_executive', 'project_manager', 'dept_manager'].includes(userRole) && (
+                {['admin','deputy_manager', 'operation_executive', 'operation_executive_trainee', 'project_manager', 'dept_manager'].includes(userRole) && (
                   <button
                     onClick={() => setActiveTab('trainingReport')}
                     className={`px-4 py-3 text-sm font-bold text-left uppercase hover:bg-green-50 transition-colors ${activeTab === 'trainingReport' ? 'bg-green-100 text-green-800' : 'text-gray-700'}`}
@@ -104,7 +105,6 @@ const TaskPage = () => {
             )}
           </div>
         </div>
-      </div>
       <div className="flex-1 min-h-0 bg-white p-2 rounded-b-2xl overflow-y-auto">
         {activeTab === 'activeTask' && (
           <div>

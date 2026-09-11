@@ -466,6 +466,7 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
             <div className="px-6 py-3 border-b border-gray-100 flex flex-wrap gap-3 items-center justify-end bg-white">
               {(userRole === 'admin' ||
                 userRole === 'operation_executive' ||
+                userRole === 'operation_executive_trainee' ||
                 userRole === 'project_manager' ||
                 userRole === 'department_manager' ||
                 userRole === 'deputy_manager') && (
@@ -681,6 +682,7 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
                 'deputy_manager',
                 'human_resource',
                 'operation_executive',
+                'operation_executive_trainee',
                 'staff',
                 'project_manager',
                 'department_manager'
@@ -719,7 +721,7 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
                     </div>
                   )}
                   {showWorkSummary &&
-                    ['admin', 'human_resource', 'operation_executive'].includes(userRole) && (
+                    ['admin', 'human_resource', 'operation_executive', 'operation_executive_trainee'].includes(userRole) && (
                       <div className="mt-6 bg-white/50 rounded-xl border border-indigo-100 overflow-hidden">
                         <table className="w-full text-left text-sm">
                           <thead>

@@ -32,7 +32,7 @@ const TaskDetailWrapper = ({ row, close }) => {
 }
 
 const AllTasks = () => {
-  const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
+  const userRole = (sessionStorage.getItem('userRole') || '').toLowerCase().trim()
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -62,6 +62,7 @@ const AllTasks = () => {
         const response =
           userRole === 'admin' ||
             userRole === 'operation_executive' ||
+            userRole === 'operation_executive_trainee' ||
             userRole === 'project_manager' ||
             userRole === 'department_manager' ||
             userRole === 'deputy_manager' ||
@@ -71,11 +72,15 @@ const AllTasks = () => {
             : await Service.GetMyTask()
 
         // Ensure tasks is an array
-        const taskData = Array.isArray(response.data)
-          ? response.data
-          : response.data
-            ? Object.values(response.data)
-            : []
+        const taskData = Array.isArray(response)
+          ? response
+          : Array.isArray(response?.data)
+            ? response.data
+            : Array.isArray(response?.tasks)
+              ? response.tasks
+              : response?.data
+                ? Object.values(response.data)
+                : []
 
         // Fetch unread comments async
         const fetchUnread = [
@@ -117,6 +122,7 @@ const AllTasks = () => {
       const response =
         userRole === 'admin' ||
           userRole === 'operation_executive' ||
+          userRole === 'operation_executive_trainee' ||
           userRole === 'project_manager' ||
           userRole === 'department_manager' ||
           userRole === 'deputy_manager' ||
@@ -125,11 +131,15 @@ const AllTasks = () => {
           ? await Service.GetAllTask()
           : await Service.GetMyTask()
 
-      const taskData = Array.isArray(response.data)
-        ? response.data
-        : response.data
-          ? Object.values(response.data)
-          : []
+      const taskData = Array.isArray(response)
+        ? response
+        : Array.isArray(response?.data)
+          ? response.data
+          : Array.isArray(response?.tasks)
+            ? response.tasks
+            : response?.data
+              ? Object.values(response.data)
+              : []
 
       // Fetch unread comments async
       const fetchUnread = [
@@ -883,6 +893,7 @@ const AllTasks = () => {
             'admin',
             'project_manager',
             'operation_executive',
+            'operation_executive_trainee',
             'department_manager',
             'human_resource',
             'deputy_manager',
