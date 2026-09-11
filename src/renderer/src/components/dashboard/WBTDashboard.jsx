@@ -19,7 +19,7 @@ import UnreadCommentsWidget from './components/UnreadCommentsWidget'
 // Lazy load components
 const FetchTaskByID = lazy(() => import('../task/FetchTaskByID'))
 const ProjectListModal = lazy(() => import('./components/ProjectListModal'))
-const DashboardListModal = lazy(() => import('./components/DashboardListModal'))
+const DashboardListModal = lazy(() => import('./components/PendingActionList'))
 const GetProjectById = lazy(() => import('../project/projects/GetProjectById'))
 
 // Detail Components for Modals
