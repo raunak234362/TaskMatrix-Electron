@@ -5,8 +5,7 @@ import AllMileStone from '../mileStone/AllMileStone'
 import AllDocument from '../projectDocument/AllDocument'
 import WBS from '../wbs/WBS'
 import WbsBreakdownPanel from '../wbs/WbsBreakdownPanel'
-import AllRFI from '../../rfi/AllRfi'
-import AddRFI from '../../rfi/AddRFI'
+import RfiLayout from '../../../layout/RfiLayout'
 import AllSubmittals from '../../submittals/AllSubmittals'
 import AllNotes from '../notes/AllNotes'
 import EditProject from '../EditProject'
@@ -89,7 +88,6 @@ const GetProjectById = ({ id, onClose }) => {
     }))
   }
 
-  const [rfiView, setRfiView] = useState('list')
   const [submittalView, setSubmittalView] = useState('list')
   const [editModel, setEditModel] = useState(null)
   const [changeOrderView, setChangeOrderView] = useState('list')
@@ -543,45 +541,12 @@ const GetProjectById = ({ id, onClose }) => {
 
             {/* RFI */}
             {activeTab === 'rfi' && (
-              <div className="space-y-4">
-                <div className="flex justify-start mb-4">
-                  <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                    <button
-                      onClick={() => setRfiView('list')}
-                      className={`whitespace-nowrap px-6 py-1.5 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer ${rfiView === 'list'
-                          ? 'bg-green-50 text-black border-2 border-green-700/80'
-                          : 'bg-gray-100 text-black border border-gray-300 hover:bg-gray-200'
-                        }`}
-                    >
-                      All RFIs
-                    </button>
-                    {canCreate && (
-                      <button
-                        onClick={() => setRfiView('add')}
-                        className={`whitespace-nowrap px-6 py-1.5 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer ${rfiView === 'add'
-                            ? 'bg-green-50 text-black border-2 border-green-700/80'
-                            : 'bg-gray-100 text-black border border-gray-300 hover:bg-gray-200'
-                          }`}
-                      >
-                        Create RFI
-                      </button>
-                    )}
-                  </nav>
-                </div>
-
-                {rfiView === 'list' ? (
-                  <AllRFI rfiData={rfiData} onUpdate={fetchProject} />
-                ) : (
-                  <AddRFI
-                    project={project}
-                    rfiData={rfiData}
-                    onSuccess={() => {
-                      fetchProject()
-                      setRfiView('list')
-                    }}
-                  />
-                )}
-              </div>
+              <RfiLayout
+                project={project}
+                rfiData={rfiData}
+                fetchProject={fetchProject}
+                canCreate={canCreate}
+              />
             )}
 
             {/* Submittals */}
@@ -629,45 +594,12 @@ const GetProjectById = ({ id, onClose }) => {
 
             {/* CD RFI */}
             {activeTab === 'CDrfi' && (userRole !== 'staff' || isAssist) && (
-              <div className="space-y-4">
-                <div className="flex justify-start mb-4">
-                  <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                    <button
-                      onClick={() => setRfiView('list')}
-                      className={`whitespace-nowrap px-6 py-1.5 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer ${rfiView === 'list'
-                          ? 'bg-green-50 text-black border-2 border-green-700/80'
-                          : 'bg-gray-100 text-black border border-gray-300 hover:bg-gray-200'
-                        }`}
-                    >
-                      All RFIs
-                    </button>
-                    {canCreate && (
-                      <button
-                        onClick={() => setRfiView('add')}
-                        className={`whitespace-nowrap px-6 py-1.5 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer ${rfiView === 'add'
-                            ? 'bg-green-50 text-black border-2 border-green-700/80'
-                            : 'bg-gray-100 text-black border border-gray-300 hover:bg-gray-200'
-                          }`}
-                      >
-                        Create RFI
-                      </button>
-                    )}
-                  </nav>
-                </div>
-
-                {rfiView === 'list' ? (
-                  <AllRFI rfiData={rfiData} onUpdate={fetchProject} />
-                ) : (
-                  <AddRFI
-                    project={project}
-                    rfiData={rfiData}
-                    onSuccess={() => {
-                      fetchProject()
-                      setRfiView('list')
-                    }}
-                  />
-                )}
-              </div>
+              <RfiLayout
+                project={project}
+                rfiData={rfiData}
+                fetchProject={fetchProject}
+                canCreate={canCreate}
+              />
             )}
 
             {/* CD Submittals */}

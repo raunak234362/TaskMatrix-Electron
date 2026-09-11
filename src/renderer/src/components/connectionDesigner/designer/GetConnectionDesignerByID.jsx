@@ -26,7 +26,7 @@ import {
 import EditConnectionDesigner from './EditConnectionDesigner'
 import { AllCDEngineer } from '../..'
 import RenderFiles from '../../common/RenderFiles'
-import GetProjectById from '../../project/GetProjectById'
+import GetProjectById from '../../project/projects/GetProjectById'
 
 const getStatesList = (stateVal) => {
   let states = []

@@ -2,7 +2,7 @@ import { useEffect, useState, Suspense, lazy } from "react";
 import { createPortal } from "react-dom";
 import Modal from "../../ui/Modal";
 
-const GetProjectById = lazy(() => import("../../project/GetProjectById"));
+const GetProjectById = lazy(() => import("../../project/projects/GetProjectById"));
 import Service from "../../../api/Service";
 import { Loader2, AlertCircle, Link2, FileText, Building2, Hash, CreditCard, Landmark, X } from "lucide-react";
 import { motion } from "framer-motion";

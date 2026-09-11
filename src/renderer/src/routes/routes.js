@@ -4,7 +4,7 @@ import { WBTDashboard } from '../components'
 import ProfilePage from '../pages/ProfilePage'
 import { ChatPage } from '../pages/ChatPage'
 import ChangePasswordPage from '../pages/ChangePasswordPage'
-import RFIPage from '../pages/RFIPage'
+import RfiLayout from '../layout/RfiLayout'
 import EstimationPage from '../pages/EstimationPage'
 import TaskPage from '../pages/TaskPage'
 import ProjectPage from '../pages/ProjectPage'
@@ -40,7 +40,7 @@ const routes = [
           { path: 'tasks', Component: TaskPage },
           { path: 'estimation', Component: EstimationPage },
           { path: 'chats', Component: ChatPage },
-          { path: 'rfi', Component: RFIPage },
+          { path: 'rfi', Component: RfiLayout },
           { path: 'projects', Component: ProjectPage },
           { path: 'notes', Component: NotesPage },
           { path: 'vendor', Component: VendorPage },
