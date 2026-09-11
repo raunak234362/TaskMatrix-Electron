@@ -384,28 +384,21 @@ const WBTDashboard = () => {
 
         {/* Widget Popups */}
         {showSubmittalsPopup && createPortal(
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="bg-white w-full max-w-6xl max-h-[85vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
-              <div className="flex-1 overflow-auto">
-                <div className="sticky top-0 right-0 p-3 flex justify-end z-20 bg-white/80 backdrop-blur-sm">
-                  <button
-                    onClick={() => setShowSubmittalsPopup(false)}
-                    className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
-                  >
-                    Close
-                  </button>
-                </div>
-                <div className="px-6 pb-6">
-                  <UpcomingSubmittals
-                    pendingSubmittals={adminData.upcomingMilestones}
-                    invoices={adminData.invoices}
-                    onSubmittalClick={(submittal) => {
-                      setSelectedMilestone(submittal);
-                      setShowSubmittalsPopup(false);
-                    }}
-                  />
-                </div>
-              </div>
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowSubmittalsPopup(false);
+            }}
+          >
+            <div className="bg-white w-full max-w-6xl h-[88vh] max-h-[88vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-gray-200 animate-in zoom-in-95 duration-200">
+              <UpcomingSubmittals
+                pendingSubmittals={adminData.upcomingMilestones}
+                invoices={adminData.invoices}
+                onClose={() => setShowSubmittalsPopup(false)}
+                onSubmittalClick={(submittal) => {
+                  setSelectedMilestone(submittal);
+                }}
+              />
             </div>
           </div>,
           document.body
@@ -527,7 +520,7 @@ const WBTDashboard = () => {
           document.body
         )}
         {selectedMilestone && createPortal(
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <div className="bg-white w-[95%] max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in fade-in zoom-in duration-200">
               <Suspense fallback={<div className="p-8 text-center text-xs font-bold uppercase tracking-widest text-gray-400">Loading milestone...</div>}>
                 <GetMilestoneByID
