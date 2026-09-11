@@ -21,7 +21,7 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
     (state) => state.fabricatorInfo.fabricatorData,
   );
 
-  const userRoleStr = sessionStorage.getItem('userRole')?.toLowerCase() || "";
+  const userRoleStr = (sessionStorage.getItem('userRole') || "").toLowerCase().trim();
   const isAdminRole = ["admin", "deputy_manager", "operation_executive"].includes(userRoleStr);
 
   const { register, handleSubmit, control, reset, setValue } =
@@ -30,6 +30,14 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
         isAproovedByAdmin: isAdminRole
       }
     });
+
+  if (userRoleStr === "operation_executive_trainee") {
+    return (
+      <div className="p-4 text-center text-red-500 font-medium">
+        You do not have permission to add a Change Order.
+      </div>
+    );
+  }
   const [step, setStep] = useState(1); // 1 = Draft CO Details, 2 = CO Table
   const [coFormData, setCoFormData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

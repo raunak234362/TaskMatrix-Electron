@@ -105,8 +105,9 @@ const GetProjectById = ({ id, onClose }) => {
   }, [project, currentUserId])
 
   const canCreate = useMemo(() => {
-    if (isAssist) return true
     const role = (userRole || sessionStorage.getItem('userRole') || '').toLowerCase().trim()
+    if (role === 'operation_executive_trainee') return false
+    if (isAssist) return true
     return !['client', 'estimator'].includes(role)
   }, [isAssist, userRole])
 

@@ -20,6 +20,15 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
   const staff = useSelector((state) => state.userInfo.staffData);
   const [milestones, setMilestones] = useState([]);
   const [submittedMilestoneIds, setSubmittedMilestoneIds] = useState(new Set());
+  const userRoleStr = (sessionStorage.getItem('userRole') || "").toLowerCase().trim();
+  if (userRoleStr === "operation_executive_trainee") {
+    return (
+      <div className="p-4 text-center text-red-500 font-medium">
+        You do not have permission to add a Submittal.
+      </div>
+    );
+  }
+
   const projectId = project?.id;
   const fabricatorId = project?.fabricatorID;
 

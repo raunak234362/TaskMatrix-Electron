@@ -12,6 +12,9 @@ const SubmittalLayout = ({
   const [submittalView, setSubmittalView] = useState("list");
   const targetProjectId = projectId || project?.id;
 
+  const userRole = (sessionStorage.getItem("userRole") || "").toLowerCase().trim();
+  const isCreationAllowed = canCreate && userRole !== "operation_executive_trainee";
+
   return (
     <div className="w-full space-y-4">
       <div className="flex justify-start mb-4">
@@ -26,7 +29,7 @@ const SubmittalLayout = ({
           >
             All Submittals
           </button>
-          {canCreate && (
+          {isCreationAllowed && (
             <button
               onClick={() => setSubmittalView("add")}
               className={`whitespace-nowrap px-6 py-1.5 rounded-none transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer ${
@@ -42,13 +45,7 @@ const SubmittalLayout = ({
       </div>
 
       <div className="flex-1 min-h-0 bg-white p-2 rounded-b-2xl overflow-y-auto">
-        {submittalView === "list" ? (
-          <AllSubmittals
-            submittalData={submittalData}
-            projectId={targetProjectId}
-            onUpdate={fetchProject}
-          />
-        ) : (
+        {submittalView === "add" && isCreationAllowed ? (
           <AddSubmittal
             project={project}
             submittalData={submittalData}
@@ -56,6 +53,12 @@ const SubmittalLayout = ({
               if (fetchProject) fetchProject();
               setSubmittalView("list");
             }}
+          />
+        ) : (
+          <AllSubmittals
+            submittalData={submittalData}
+            projectId={targetProjectId}
+            onUpdate={fetchProject}
           />
         )}
       </div>

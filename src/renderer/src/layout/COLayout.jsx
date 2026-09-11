@@ -57,15 +57,13 @@ const COLayout = ({
       </div>
 
       <div className="flex-1 min-h-0 bg-white p-2 rounded-b-2xl overflow-y-auto">
-        {changeOrderView === "list" ? (
-          <AllCO changeOrderData={changeOrderData} onUpdate={fetchProject} />
-        ) : changeOrderView === "add" && isCreationAllowed ? (
+        {changeOrderView === "add" && isCreationAllowed ? (
           <AddCO
             project={project}
             onSuccess={handleCoSuccess}
             changeOrderData={changeOrderData}
           />
-        ) : (
+        ) : changeOrderView === "table" && selectedCoId ? (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h4 className="text-lg font-semibold text-black">Change Order Table</h4>
@@ -76,13 +74,13 @@ const COLayout = ({
                 &larr; Back to List
               </button>
             </div>
-            {selectedCoId && (
-              <CoTable
-                coId={selectedCoId}
-                onSuccess={() => setChangeOrderView("add")}
-              />
-            )}
+            <CoTable
+              coId={selectedCoId}
+              onSuccess={() => setChangeOrderView(isCreationAllowed ? "add" : "list")}
+            />
           </div>
+        ) : (
+          <AllCO changeOrderData={changeOrderData} onUpdate={fetchProject} />
         )}
       </div>
     </div>
