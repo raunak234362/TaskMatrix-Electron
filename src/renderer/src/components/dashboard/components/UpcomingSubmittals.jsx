@@ -24,7 +24,7 @@ const UpcomingSubmittals = ({
 }) => {
   const [activeTab, setActiveTab] = useState("submittals");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState("ALL"); // ALL, OVERDUE, DUE_SOON
+  const [filterType, setFilterType] = useState("ALL"); // ALL, OVERDUE, DUE_2_DAYS, DUE_SOON
   const [collapsedProjects, setCollapsedProjects] = useState({});
 
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
@@ -38,6 +38,7 @@ const UpcomingSubmittals = ({
         isOverdue: false,
         isToday: false,
         isDueSoon: false,
+        isDueIn2Days: false,
         diffDays: null,
         label: "No Date",
       };
@@ -53,6 +54,7 @@ const UpcomingSubmittals = ({
         isOverdue: false,
         isToday: false,
         isDueSoon: false,
+        isDueIn2Days: false,
         diffDays: null,
         label: "Invalid Date",
       };
@@ -77,6 +79,7 @@ const UpcomingSubmittals = ({
         isOverdue: true,
         isToday: false,
         isDueSoon: false,
+        isDueIn2Days: false,
         diffDays,
         label: days === 1 ? "Overdue by 1 day" : `Overdue by ${days} days`,
       };
@@ -88,6 +91,7 @@ const UpcomingSubmittals = ({
         isOverdue: false,
         isToday: true,
         isDueSoon: true,
+        isDueIn2Days: true,
         diffDays: 0,
         label: "Due Today",
       };
@@ -99,6 +103,7 @@ const UpcomingSubmittals = ({
         isOverdue: false,
         isToday: false,
         isDueSoon: true,
+        isDueIn2Days: diffDays <= 2,
         diffDays,
         label: diffDays === 1 ? "Due tomorrow" : `Due in ${diffDays} days`,
       };
@@ -109,6 +114,7 @@ const UpcomingSubmittals = ({
       isOverdue: false,
       isToday: false,
       isDueSoon: false,
+      isDueIn2Days: false,
       diffDays,
       label: `Due in ${diffDays} days`,
     };
@@ -151,6 +157,7 @@ const UpcomingSubmittals = ({
   // Overall metrics
   const stats = useMemo(() => {
     let overdue = 0;
+    let dueIn2Days = 0;
     let dueSoon = 0;
 
     pendingSubmittals.forEach((submittal) => {
@@ -158,7 +165,8 @@ const UpcomingSubmittals = ({
         submittal.approvalDate || submittal.dueDate || submittal.date;
       const info = getDateInfo(dateVal);
       if (info.isOverdue) overdue++;
-      else if (info.isDueSoon) dueSoon++;
+      if (info.isDueIn2Days) dueIn2Days++;
+      if (info.isDueSoon) dueSoon++;
     });
 
     const uniqueProjects = new Set(
@@ -168,6 +176,7 @@ const UpcomingSubmittals = ({
     return {
       total: pendingSubmittals.length,
       overdue,
+      dueIn2Days,
       dueSoon,
       projectsCount: uniqueProjects.size,
     };
@@ -184,6 +193,7 @@ const UpcomingSubmittals = ({
 
       // Filter pill logic
       if (filterType === "OVERDUE" && !dateInfo.isOverdue) return false;
+      if (filterType === "DUE_2_DAYS" && !dateInfo.isDueIn2Days) return false;
       if (filterType === "DUE_SOON" && !dateInfo.isDueSoon) return false;
 
       // Search query logic
@@ -402,6 +412,20 @@ const UpcomingSubmittals = ({
             </button>
 
             <button
+              onClick={() => setFilterType(filterType === "DUE_2_DAYS" ? "ALL" : "DUE_2_DAYS")}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
+                filterType === "DUE_2_DAYS"
+                  ? "bg-orange-500 text-white shadow-sm"
+                  : stats.dueIn2Days > 0
+                  ? "bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200"
+                  : "bg-white text-gray-400 hover:bg-gray-100 border border-gray-200"
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              Due in 2 Days ({stats.dueIn2Days})
+            </button>
+
+            <button
               onClick={() => setFilterType(filterType === "DUE_SOON" ? "ALL" : "DUE_SOON")}
               className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
                 filterType === "DUE_SOON"
@@ -528,12 +552,14 @@ const UpcomingSubmittals = ({
                                         ? "bg-red-50 text-red-600 border border-red-200"
                                         : dateInfo.isToday
                                         ? "bg-amber-50 text-amber-600 border border-amber-200"
+                                        : dateInfo.isDueIn2Days
+                                        ? "bg-orange-50 text-orange-600 border border-orange-200"
                                         : "bg-primary/10 text-primary border border-primary/20"
                                     }`}
                                   >
                                     {dateInfo.isOverdue ? (
                                       <AlertCircle className="w-4 h-4" />
-                                    ) : dateInfo.isToday ? (
+                                    ) : dateInfo.isToday || dateInfo.isDueIn2Days ? (
                                       <Clock className="w-4 h-4" />
                                     ) : (
                                       <ClipboardList className="w-4 h-4" />
@@ -582,6 +608,8 @@ const UpcomingSubmittals = ({
                                         className={`font-semibold ${
                                           dateInfo.isOverdue
                                             ? "text-red-600 font-bold"
+                                            : dateInfo.isDueIn2Days
+                                            ? "text-orange-600 font-bold"
                                             : "text-gray-600"
                                         }`}
                                       >
@@ -624,6 +652,8 @@ const UpcomingSubmittals = ({
                                           ? "text-red-600"
                                           : dateInfo.isToday
                                           ? "text-amber-600"
+                                          : dateInfo.isDueIn2Days
+                                          ? "text-orange-600"
                                           : "text-gray-800"
                                       }`}
                                     >
@@ -635,6 +665,8 @@ const UpcomingSubmittals = ({
                                           ? "text-red-500"
                                           : dateInfo.isToday
                                           ? "text-amber-500"
+                                          : dateInfo.isDueIn2Days
+                                          ? "text-orange-500"
                                           : "text-gray-400"
                                       }`}
                                     >

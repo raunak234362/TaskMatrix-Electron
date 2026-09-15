@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, memo } from 'react'
+import { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react'
 import {
   Bot,
   Send,
@@ -14,15 +14,284 @@ import {
   Maximize2,
   Check,
   ZoomIn,
-  ZoomOut
+  ZoomOut,
+  AlertCircle
 } from 'lucide-react'
 import Service from '../../../api/Service'
 import { toast } from 'react-toastify'
 import UploadFabricatorStandard from '../../fabricator/fabricator/UploadFabricatorStandard'
 
+const formatStandardMessage = (item) => {
+  if (!item) return null
+
+  // If item already contains structured answers array with contents
+  if (Array.isArray(item.answers) && item.answers.length > 0) {
+    return item
+  }
+
+  const rawResults = Array.isArray(item.results) ? item.results : []
+  const citations = rawResults.map((r, idx) => ({
+    id: r.documentId ? `${r.documentId}-${idx}` : `cit-${idx}`,
+    documentId: r.documentId,
+    pageNumber: r.pageStart,
+    pageStart: r.pageStart,
+    pageEnd: r.pageEnd,
+    citationPdfName: r.documentName || r.documentFamilyId || 'Standard Document',
+    documentName: r.documentName,
+    documentFamilyId: r.documentFamilyId,
+    familyCode: r.familyCode,
+    edition: r.edition,
+    citationPageStart: r.pageStart,
+    citationPageEnd: r.pageEnd,
+    anchorPageStart: r.pageStart,
+    anchorPageEnd: r.pageEnd,
+    imageUrl: r.imageUrl,
+    imagePaths: r.imageUrl ? [r.imageUrl] : [],
+    sourceType: r.edition
+      ? `${r.familyCode || r.documentFamilyId} (Ed. ${r.edition})`
+      : r.familyCode || r.documentFamilyId || 'STANDARD',
+    chunkType: r.chunkType || 'PROSE',
+    score: r.score,
+    isPrimarySource: !!r.isPrimarySource
+  }))
+
+  const allImagePaths = rawResults
+    .map((r) => r.imageUrl)
+    .filter(Boolean)
+
+  let displayText = item.aiSummary || ''
+
+  const answers = [
+    {
+      id: item.messageId || item.id || `ans-${Date.now()}`,
+      answerText: displayText,
+      citations,
+      imagePaths: allImagePaths,
+      deferralReason: item.deferralReason || null,
+      generationStatus: item.aiSummary
+        ? 'SUCCESS'
+        : item.deferralReason
+          ? 'DEFERRED'
+          : 'COMPLETED'
+    }
+  ]
+
+  return {
+    id: item.messageId || item.id || `msg-${Date.now()}`,
+    projectId: item.projectId,
+    queryText: item.queryText || '',
+    createdAt: item.createdAt || new Date().toISOString(),
+    generationStatus: item.deferralReason
+      ? 'DEFERRED'
+      : item.aiSummary
+        ? 'SUCCESS'
+        : 'COMPLETED',
+    answers,
+    aiSummary: item.aiSummary,
+    deferralReason: item.deferralReason,
+    results: item.results
+  }
+}
+
+const InlineStandardImage = memo(({ docId, pageStart, imagePath, citation, onOpenReferenceImage, index }) => {
+  const [imageUrl, setImageUrl] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  let resolvedDocId = docId || citation?.documentId
+  let resolvedPageStart =
+    pageStart ??
+    citation?.pageStart ??
+    citation?.pageNumber ??
+    citation?.citationPageStart ??
+    citation?.anchorPageStart ??
+    ''
+
+  const targetPath = imagePath || citation?.imageUrl || (Array.isArray(citation?.imagePaths) ? citation.imagePaths[0] : '')
+
+  if ((!resolvedDocId || resolvedPageStart === '' || resolvedPageStart === undefined || resolvedPageStart === null) && targetPath) {
+    const match = String(targetPath).match(/standards\/image\/([^/]+)\/([^/?#]+)/)
+    if (match) {
+      if (!resolvedDocId) resolvedDocId = match[1]
+      if (resolvedPageStart === '' || resolvedPageStart === undefined || resolvedPageStart === null) {
+        resolvedPageStart = match[2]
+      }
+    }
+  }
+
+  const docName =
+    citation?.citationPdfName ||
+    citation?.documentName ||
+    citation?.documentFamilyId ||
+    'Standard Document'
+  const familyCode = citation?.familyCode || citation?.documentFamilyId || ''
+  const edition = citation?.edition || ''
+  const chunkType = citation?.chunkType || ''
+  const isPrimary = !!citation?.isPrimarySource
+
+  useEffect(() => {
+    let active = true
+    let objectUrl = ''
+
+    const loadImage = async () => {
+      setLoading(true)
+      setError(false)
+      try {
+        let blob = null
+        // Prioritize Service.GetStandardImagePage with documentId and pageStart
+        if (resolvedDocId && resolvedPageStart !== '' && resolvedPageStart !== undefined && resolvedPageStart !== null) {
+          blob = await Service.GetStandardImagePage(resolvedDocId, resolvedPageStart)
+        } else if (targetPath) {
+          const match = String(targetPath).match(/standards\/image\/([^/]+)\/([^/?#]+)/)
+          if (match) {
+            blob = await Service.GetStandardImagePage(match[1], match[2])
+          } else {
+            blob = await Service.GetStandardImageBlob(targetPath)
+          }
+        }
+
+        if (!active) return
+        if (blob) {
+          objectUrl = window.URL.createObjectURL(blob)
+          setImageUrl(objectUrl)
+        } else {
+          setError(true)
+        }
+      } catch (err) {
+        console.error('Failed to load standard image page:', resolvedDocId, resolvedPageStart, err)
+        if (active) setError(true)
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+
+    loadImage()
+
+    return () => {
+      active = false
+      if (objectUrl) {
+        window.URL.revokeObjectURL(objectUrl)
+      }
+    }
+  }, [resolvedDocId, resolvedPageStart, targetPath])
+
+  const handleClick = (e) => {
+    e?.stopPropagation?.()
+    if (onOpenReferenceImage) {
+      onOpenReferenceImage(
+        {
+          docId: resolvedDocId,
+          pageStart: resolvedPageStart,
+          path: targetPath,
+          citation,
+          existingUrl: imageUrl
+        },
+        index,
+        citation
+      )
+    }
+  }
+
+  return (
+    <div
+      onClick={handleClick}
+      className="group relative flex flex-col rounded-xl border border-gray-250 bg-white hover:border-green-600 hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer w-full text-left select-none"
+    >
+      {/* Visual Thumbnail Area (Google Search Image Reference Style) */}
+      <div className="relative w-full h-44 bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center p-2 overflow-hidden border-b border-gray-100">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center gap-2 py-8 text-gray-400">
+            <Loader2 className="w-5 h-5 animate-spin text-green-600" />
+            <span className="text-[11px] font-medium text-gray-500">
+              Loading Page {resolvedPageStart || ''}...
+            </span>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center gap-1.5 py-8 text-gray-400">
+            <AlertCircle className="w-5 h-5 text-amber-500" />
+            <span className="text-[11px] font-medium text-gray-500">Preview not available</span>
+            {resolvedPageStart && (
+              <span className="text-[10px] text-gray-400">Standard Page {resolvedPageStart}</span>
+            )}
+          </div>
+        ) : imageUrl ? (
+          <>
+            <img
+              src={imageUrl}
+              alt={`${docName} ${resolvedPageStart ? `Page ${resolvedPageStart}` : ''}`}
+              className="max-h-full max-w-full object-contain rounded drop-shadow-2xs group-hover:scale-105 transition-transform duration-300"
+            />
+            {/* Hover overlay hint */}
+            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-end p-2 pointer-events-none">
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-black/80 text-white text-[10px] font-semibold shadow-sm backdrop-blur-xs">
+                <Maximize2 className="w-3 h-3" /> Enlarge
+              </span>
+            </div>
+          </>
+        ) : null}
+
+        {/* Top-left: Page badge */}
+        <div className="absolute top-2 left-2 flex items-center gap-1.5 pointer-events-none">
+          {resolvedPageStart !== '' && resolvedPageStart !== undefined && resolvedPageStart !== null && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-black/75 backdrop-blur-xs text-white shadow-xs">
+              <BookOpen className="w-2.5 h-2.5 text-green-400" />
+              Pg {resolvedPageStart}
+            </span>
+          )}
+        </div>
+
+        {/* Top-right: Primary Source badge */}
+        {isPrimary && (
+          <div className="absolute top-2 right-2 pointer-events-none">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-green-600 text-white shadow-xs">
+              Primary
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Card Body / Google-style Reference Footer */}
+      <div className="p-3 flex flex-col justify-between flex-1 gap-1.5 bg-white">
+        <div>
+          {/* Family & Chunk type meta row */}
+          <div className="flex items-center gap-1.5 flex-wrap mb-1">
+            {(familyCode || edition) && (
+              <span className="text-[10px] font-extrabold uppercase tracking-wide text-green-800 bg-green-50 px-1.5 py-0.5 rounded border border-green-200/60">
+                {familyCode || 'STANDARD'} {edition ? `• Ed. ${edition}` : ''}
+              </span>
+            )}
+            {chunkType && (
+              <span className="text-[10px] font-bold text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">
+                {chunkType}
+              </span>
+            )}
+          </div>
+
+          {/* Document Name */}
+          <h5
+            className="text-xs font-bold text-gray-900 group-hover:text-green-700 transition-colors line-clamp-2 leading-snug"
+            title={docName}
+          >
+            {docName}
+          </h5>
+        </div>
+
+        {/* Action Link Footer */}
+        <div className="flex items-center justify-between text-[11px] pt-2 border-t border-gray-100 text-gray-400">
+          <span className="text-[10px] text-gray-500 font-medium">Standard Reference</span>
+          <span className="text-green-700 font-bold group-hover:underline inline-flex items-center gap-1 text-[11px]">
+            View Page <ExternalLink className="w-2.5 h-2.5" />
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+})
+
 const ChatMessageItem = memo(({ item, onOpenReferenceImage }) => {
   const isTemp = String(item.id).startsWith('temp-')
-  const rawAnswers = Array.isArray(item.answers) ? item.answers : []
+  const formattedItem = useMemo(() => formatStandardMessage(item) || item, [item])
+  const rawAnswers = Array.isArray(formattedItem.answers) ? formattedItem.answers : []
 
   // Filter out answers stating "not covered" (case-insensitive)
   const filteredAnswers = rawAnswers.filter((answer) => {
@@ -42,7 +311,7 @@ const ChatMessageItem = memo(({ item, onOpenReferenceImage }) => {
     return !txt.includes('not covered')
   })
 
-  const hasFilteredAnswers = filteredAnswers.length > 0
+  const hasFilteredAnswers = filteredAnswers.length > 0 || (Array.isArray(formattedItem.results) && formattedItem.results.length > 0)
 
   return (
     <div className="space-y-4 w-full">
@@ -89,27 +358,101 @@ const ChatMessageItem = memo(({ item, onOpenReferenceImage }) => {
                 : []
 
             const allImageItems = []
-            if (Array.isArray(answer.imagePaths)) {
-              answer.imagePaths.forEach((imgPath) => {
-                if (imgPath && !allImageItems.some((item) => item.path === imgPath)) {
-                  allImageItems.push({
-                    path: imgPath,
-                    citation: answer
-                  })
+
+            // 1. Gather from citationsList
+            if (Array.isArray(citationsList)) {
+              citationsList.forEach((c) => {
+                let docId = c.documentId
+                let pageStart =
+                  c.pageStart ?? c.pageNumber ?? c.citationPageStart ?? c.anchorPageStart
+                const path =
+                  c.imageUrl || (Array.isArray(c.imagePaths) ? c.imagePaths[0] : null)
+
+                if ((!docId || pageStart === undefined || pageStart === null || pageStart === '') && path) {
+                  const match = String(path).match(/standards\/image\/([^/]+)\/([^/?#]+)/)
+                  if (match) {
+                    if (!docId) docId = match[1]
+                    if (pageStart === undefined || pageStart === null || pageStart === '') pageStart = match[2]
+                  }
+                }
+
+                if ((docId && pageStart !== undefined && pageStart !== null && pageStart !== '') || path) {
+                  const key = docId && pageStart ? `${docId}-${pageStart}` : path
+                  if (!allImageItems.some((item) => item.key === key)) {
+                    allImageItems.push({
+                      key,
+                      docId,
+                      pageStart,
+                      path,
+                      citation: c
+                    })
+                  }
                 }
               })
             }
-            if (hasCitations) {
-              answer.citations.forEach((c) => {
-                if (Array.isArray(c.imagePaths)) {
-                  c.imagePaths.forEach((imgPath) => {
-                    if (imgPath && !allImageItems.some((item) => item.path === imgPath)) {
-                      allImageItems.push({
-                        path: imgPath,
-                        citation: c
-                      })
-                    }
-                  })
+
+            // 2. Gather from answer.imagePaths
+            if (Array.isArray(answer.imagePaths)) {
+              answer.imagePaths.forEach((imgPath) => {
+                if (imgPath) {
+                  const match = String(imgPath).match(/standards\/image\/([^/]+)\/([^/?#]+)/)
+                  const docId = match ? match[1] : null
+                  const pageStart = match ? match[2] : null
+                  const key = docId && pageStart ? `${docId}-${pageStart}` : imgPath
+                  if (!allImageItems.some((item) => item.key === key)) {
+                    allImageItems.push({
+                      key,
+                      docId,
+                      pageStart,
+                      path: imgPath,
+                      citation: answer
+                    })
+                  }
+                }
+              })
+            }
+
+            // 3. Gather from formattedItem.results
+            if (Array.isArray(formattedItem.results)) {
+              formattedItem.results.forEach((r) => {
+                let docId = r.documentId
+                let pageStart = r.pageStart ?? r.pageEnd
+                const path = r.imageUrl
+
+                if ((!docId || pageStart === undefined || pageStart === null || pageStart === '') && path) {
+                  const match = String(path).match(/standards\/image\/([^/]+)\/([^/?#]+)/)
+                  if (match) {
+                    if (!docId) docId = match[1]
+                    if (pageStart === undefined || pageStart === null || pageStart === '') pageStart = match[2]
+                  }
+                }
+
+                if ((docId && pageStart !== undefined && pageStart !== null && pageStart !== '') || path) {
+                  const key = docId && pageStart ? `${docId}-${pageStart}` : path
+                  if (!allImageItems.some((item) => item.key === key)) {
+                    allImageItems.push({
+                      key,
+                      docId,
+                      pageStart,
+                      path,
+                      citation: {
+                        documentId: r.documentId,
+                        documentName: r.documentName,
+                        documentFamilyId: r.documentFamilyId,
+                        familyCode: r.familyCode,
+                        edition: r.edition,
+                        citationPdfName: r.documentName || r.documentFamilyId,
+                        citationPageStart: r.pageStart,
+                        citationPageEnd: r.pageEnd,
+                        pageNumber: r.pageStart,
+                        pageStart: r.pageStart,
+                        pageEnd: r.pageEnd,
+                        chunkType: r.chunkType,
+                        isPrimarySource: r.isPrimarySource,
+                        imageUrl: r.imageUrl
+                      }
+                    })
+                  }
                 }
               })
             }
@@ -130,7 +473,7 @@ const ChatMessageItem = memo(({ item, onOpenReferenceImage }) => {
             if (!displayText) {
               if (allImageItems.length > 0 || citationsList.length > 0) {
                 displayText =
-                  'Reference standard visual specification matched from uploaded document:'
+                  'Top standard references matched for your query:'
               } else {
                 displayText = 'No answer text provided.'
               }
@@ -148,6 +491,11 @@ const ChatMessageItem = memo(({ item, onOpenReferenceImage }) => {
                 </div>
                 <div className="flex-1 bg-white border border-black border-l-4 border-l-green-600 p-4 rounded-md shadow-sm flex flex-col justify-between space-y-3">
                   <div className="space-y-2">
+                    {answer.deferralReason && (
+                      <div className="bg-amber-50 text-amber-900 border border-amber-200 px-2.5 py-1 rounded text-xs font-bold w-fit">
+                        Status: {answer.deferralReason}
+                      </div>
+                    )}
                     <div className="text-sm text-black leading-relaxed whitespace-pre-wrap font-sans font-medium">
                       {displayText}
                     </div>
@@ -188,6 +536,11 @@ const ChatMessageItem = memo(({ item, onOpenReferenceImage }) => {
                                   {pEnd && pEnd !== pStart ? `-${pEnd}` : ''}
                                 </span>
                               )}
+                              {cit.isPrimarySource && (
+                                <span className="ml-1 text-green-900 bg-green-200/90 px-1 rounded text-[10px] font-extrabold uppercase">
+                                  Primary
+                                </span>
+                              )}
                             </div>
                           )
                         })}
@@ -206,31 +559,29 @@ const ChatMessageItem = memo(({ item, onOpenReferenceImage }) => {
                       </div>
                     )}
 
+                    {/* Google-style visual reference cards */}
                     {allImageItems.length > 0 && (
-                      <div className="pt-1.5 flex flex-wrap gap-1.5">
-                        {allImageItems.map((item, imgIdx) => {
-                          const pageNum =
-                            item.citation?.citationPageStart ||
-                            item.citation?.anchorPageStart ||
-                            ''
-                          return (
-                            <button
-                              key={imgIdx}
-                              type="button"
-                              onClick={() =>
-                                onOpenReferenceImage(item.path, imgIdx, item.citation)
-                              }
-                              className="flex items-center gap-1 text-[11px] font-bold text-black bg-green-50/60 hover:bg-green-100/80 px-2.5 py-1 rounded-md border border-green-200 transition-all cursor-pointer shadow-3xs group animate-in fade-in duration-200"
-                            >
-                              <ImageIcon className="w-3.5 h-3.5 text-green-600 group-hover:scale-110 transition-transform" />
-                              <span>
-                                View Reference Image {imgIdx + 1}
-                                {pageNum ? ` (Pg ${pageNum})` : ''}
-                              </span>
-                              <Maximize2 className="w-3 h-3 text-green-600 ml-0.5" />
-                            </button>
-                          )
-                        })}
+                      <div className="pt-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-gray-800">
+                            <ImageIcon className="w-3.5 h-3.5 text-green-700" />
+                            <span>Visual Reference{allImageItems.length > 1 ? 's' : ''} ({allImageItems.length})</span>
+                          </div>
+                          <span className="text-[10px] text-gray-500 font-medium">Click card to expand & zoom</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {allImageItems.map((imgItem, imgIdx) => (
+                            <InlineStandardImage
+                              key={`${imgItem.key || imgItem.path || imgIdx}-${imgIdx}`}
+                              docId={imgItem.docId}
+                              pageStart={imgItem.pageStart}
+                              imagePath={imgItem.path}
+                              citation={imgItem.citation}
+                              index={imgIdx}
+                              onOpenReferenceImage={onOpenReferenceImage}
+                            />
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -547,11 +898,14 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
       }
 
       // Sort history chronologically ascending (oldest top, latest/newest at bottom)
-      const sortedHistory = [...historyList].sort((a, b) => {
-        const timeA = new Date(a?.createdAt || a?.timestamp || a?.updatedAt || 0).getTime()
-        const timeB = new Date(b?.createdAt || b?.timestamp || b?.updatedAt || 0).getTime()
-        return timeA - timeB
-      })
+      const sortedHistory = [...historyList]
+        .map(formatStandardMessage)
+        .filter(Boolean)
+        .sort((a, b) => {
+          const timeA = new Date(a?.createdAt || a?.timestamp || a?.updatedAt || 0).getTime()
+          const timeB = new Date(b?.createdAt || b?.timestamp || b?.updatedAt || 0).getTime()
+          return timeA - timeB
+        })
 
       setMessages(sortedHistory)
     } catch (err) {
@@ -606,31 +960,24 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
             ? [documentFamilyId]
             : []
 
-      const chatPayload = {
+      const queryPayload = {
         query: textToSubmit,
-        standardFamilyIds: famIds
+        ...(famIds.length > 0 ? { standardFamilyIds: famIds } : {})
       }
       const targetId = projectId || 'general'
-      const response = await Service.ChatWithStandards(targetId, chatPayload)
-      console.log('Standards chat response:', response)
+      const response = await Service.QueryProjectStandards(targetId, queryPayload)
+      console.log('Standards query response:', response)
 
-      // Format response to message item format
-      const formattedResponse = {
-        id: response?.id || `msg-${Date.now()}`,
+      const formattedResponse = formatStandardMessage({
+        messageId: response?.messageId || response?.id,
         projectId: response?.projectId || projectId,
         queryText: response?.queryText || textToSubmit,
         createdAt: response?.createdAt || new Date().toISOString(),
-        generationStatus:
-          response?.generationStatus ||
-          response?.data?.generationStatus ||
-          response?.status ||
-          response?.data?.status,
-        answers: Array.isArray(response?.answers)
-          ? response.answers
-          : response?.answers
-            ? [response.answers]
-            : []
-      }
+        aiSummary: response?.aiSummary,
+        deferralReason: response?.deferralReason,
+        results: response?.results,
+        answers: response?.answers
+      })
 
       setMessages((prev) => {
         // Replace temp msg or append
@@ -643,7 +990,7 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
         })
       })
     } catch (err) {
-      console.error('Error sending query to standards chat:', err)
+      console.error('Error sending query to standards assistant:', err)
       toast.error('Failed to get answer from standards assistant')
       setMessages((prev) => prev.filter((m) => m.id !== tempUserMsg.id))
     } finally {
@@ -651,13 +998,68 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
     }
   }
 
-  const handleOpenReferenceImage = useCallback(async (imgPath, imgIdx, answer) => {
-    const pageNum = answer?.anchorPageStart || answer?.citationPageStart || ''
-    const title = `Reference Image ${imgIdx + 1}${pageNum ? ` (Page ${pageNum})` : ''}`
+  const handleOpenReferenceImage = useCallback(async (itemOrPath, imgIdx, citation) => {
+    let existingUrl =
+      itemOrPath?.existingUrl ||
+      itemOrPath?.url ||
+      (typeof itemOrPath === 'string' && itemOrPath.startsWith('blob:') ? itemOrPath : '')
+
+    let docId =
+      itemOrPath?.docId ||
+      citation?.documentId ||
+      itemOrPath?.citation?.documentId ||
+      null
+
+    let pageStart =
+      itemOrPath?.pageStart ??
+      itemOrPath?.pageNum ??
+      citation?.pageStart ??
+      citation?.pageNumber ??
+      citation?.citationPageStart ??
+      citation?.anchorPageStart ??
+      itemOrPath?.citation?.pageStart ??
+      itemOrPath?.citation?.pageNumber ??
+      null
+
+    let imgPath =
+      typeof itemOrPath === 'string' && !itemOrPath.startsWith('blob:')
+        ? itemOrPath
+        : itemOrPath?.path ||
+          itemOrPath?.imageUrl ||
+          citation?.imageUrl ||
+          (Array.isArray(citation?.imagePaths) ? citation.imagePaths[0] : null) ||
+          (Array.isArray(itemOrPath?.citation?.imagePaths) ? itemOrPath.citation.imagePaths[0] : null)
+
+    if ((!docId || pageStart === null || pageStart === undefined || pageStart === '') && imgPath) {
+      const match = String(imgPath).match(/standards\/image\/([^/]+)\/([^/?#]+)/)
+      if (match) {
+        if (!docId) docId = match[1]
+        if (pageStart === null || pageStart === undefined || pageStart === '') pageStart = match[2]
+      }
+    }
+
+    const docName =
+      citation?.citationPdfName ||
+      citation?.documentName ||
+      itemOrPath?.citation?.citationPdfName ||
+      itemOrPath?.citation?.documentName ||
+      'Standard Document'
+    const title = `${docName}${pageStart !== undefined && pageStart !== null && pageStart !== '' ? ` (Page ${pageStart})` : ''}`
 
     // Reset zoom and pan offsets for the new image
     setZoomScale(1)
     setPanOffset({ x: 0, y: 0 })
+
+    // If an existing loaded blob URL is available, open immediately without re-fetching!
+    if (existingUrl) {
+      setImageModal({
+        isOpen: true,
+        url: existingUrl,
+        loading: false,
+        title
+      })
+      return
+    }
 
     setImageModal({
       isOpen: true,
@@ -667,7 +1069,20 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
     })
 
     try {
-      const blob = await Service.GetStandardImageBlob(imgPath)
+      let blob = null
+      if (docId && pageStart !== undefined && pageStart !== null && pageStart !== '') {
+        blob = await Service.GetStandardImagePage(docId, pageStart)
+      } else if (imgPath) {
+        const match = String(imgPath).match(/standards\/image\/([^/]+)\/([^/?#]+)/)
+        if (match) {
+          blob = await Service.GetStandardImagePage(match[1], match[2])
+        } else {
+          blob = await Service.GetStandardImageBlob(imgPath)
+        }
+      } else {
+        throw new Error('Reference image details not found.')
+      }
+
       const objectUrl = window.URL.createObjectURL(blob)
       setImageModal({
         isOpen: true,

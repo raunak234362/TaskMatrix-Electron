@@ -65,6 +65,51 @@ class StandardsService {
   }
 
   /**
+   * Query project standards (Phase 6, Google-style)
+   * POST /projects/{projectId}/standards/query
+   * @param {string} projectId - UUID of the project
+   * @param {string|object} queryData - Query string or object { query: string }
+   */
+  static async QueryProjectStandards(projectId, queryData) {
+    try {
+      const query = typeof queryData === 'string' ? queryData.trim() : queryData?.query?.trim()
+      if (!query) {
+        throw new Error('Query string is required')
+      }
+
+      const payload = typeof queryData === 'object' && queryData !== null
+        ? { ...queryData, query }
+        : { query }
+
+      const response = await api.post(`projects/${projectId}/standards/query`, payload, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Query project standards response:', response.data)
+      return {
+        messageId: response.data?.messageId,
+        aiSummary: response.data?.aiSummary ?? null,
+        deferralReason: response.data?.deferralReason ?? null,
+        results: Array.isArray(response.data?.results) ? response.data.results : [],
+        ...response.data
+      }
+    } catch (error) {
+      const serverMessage = error.response?.data?.message || error.message
+      console.error('Error querying project standards:', serverMessage, error)
+      throw error
+    }
+  }
+
+  /**
+   * Alias: Query project standards
+   * POST /projects/{projectId}/standards/query
+   */
+  static async QueryStandards(projectId, queryData) {
+    return this.QueryProjectStandards(projectId, queryData)
+  }
+
+  /**
    * Get a standard document image page
    * GET /standards/image/{documentId}/{pageNumber}
    * @param {string} documentId - UUID of the document
@@ -137,6 +182,92 @@ class StandardsService {
   }
 
   /**
+   * Upload a standard document (Phase 6, async)
+   * POST /standards/documents
+   * @param {FormData|object} data - FormData containing file & metadata, or document payload
+   */
+  static async UploadStandardDocument(data) {
+    try {
+      const isFormData = data instanceof FormData
+      const response = await api.post('standards/documents', data, {
+        headers: {
+          ...(isFormData ? { 'Content-Type': 'multipart/form-data' } : { 'Content-Type': 'application/json' })
+        }
+      })
+      console.log('Upload standard document response:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error uploading standard document (async):', error)
+      throw error
+    }
+  }
+
+  /**
+   * Alias: Upload a standard document (Phase 6, async)
+   * POST /standards/documents
+   */
+  static async UploadStandardDocumentAsync(data) {
+    return this.UploadStandardDocument(data)
+  }
+
+  /**
+   * List standard documents (Phase 6)
+   * GET /standards/documents
+   * @param {object} [params] - Optional query parameters (status, projectId, fabricatorId, limit, page, etc.)
+   */
+  static async GetStandardDocuments(params = {}) {
+    try {
+      const response = await api.get('standards/documents', {
+        params,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('List standard documents response:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error listing standard documents:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Alias: List standard documents (Phase 6)
+   * GET /standards/documents
+   */
+  static async ListStandardDocuments(params = {}) {
+    return this.GetStandardDocuments(params)
+  }
+
+  /**
+   * Get a single document's status (Phase 6)
+   * GET /standards/documents/{id}
+   * @param {string} id - Document UUID
+   */
+  static async GetStandardDocumentById(id) {
+    try {
+      const response = await api.get(`standards/documents/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Get standard document status response:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error fetching standard document status:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Alias: Get single document status (Phase 6)
+   * GET /standards/documents/{id}
+   */
+  static async GetStandardDocumentStatus(id) {
+    return this.GetStandardDocumentById(id)
+  }
+
+  /**
    * Get document ingestion progress
    * GET /standards/documents/{id}/progress
    * @param {string} id - Document UUID
@@ -152,6 +283,27 @@ class StandardsService {
       return response.data
     } catch (error) {
       console.error('Error fetching document progress:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Activate a document (Phase 6)
+   * POST /standards/documents/{id}/activate
+   * @param {string} id - Document UUID
+   * @param {object} [payload] - Optional activation payload
+   */
+  static async ActivateStandardDocument(id, payload = {}) {
+    try {
+      const response = await api.post(`standards/documents/${id}/activate`, payload, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log('Activate standard document response:', response.data)
+      return response.data
+    } catch (error) {
+      console.error('Error activating standard document:', error)
       throw error
     }
   }
