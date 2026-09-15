@@ -1174,9 +1174,9 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
       <div className="p-4 bg-white border-t border-gray-100 shrink-0">
         <div className="w-full space-y-3">
           {/* Tier and Family Controls (Boolean Toggles - neither default true) */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-gray-50/80 p-2 rounded-2xl border border-gray-200 text-xs shadow-3xs">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Tier Boolean Toggles */}
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <span className="text-black font-bold text-[10px] uppercase tracking-wider pl-1">
                 Tier:
               </span>
@@ -1215,10 +1215,10 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
                   {selectedTier === 'PROJECT' && <Check className="w-3 h-3 text-white" />}
                 </button>
               </div>
-            </div>
+            </div> */}
 
             {/* Families Boolean Toggles */}
-            {selectedTier ? (
+            {/* {selectedTier ? (
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-black font-bold text-[10px] uppercase tracking-wider">
                   Families:
@@ -1267,7 +1267,7 @@ const StandardsChatbot = ({ projectId, project, defaultSourceType = '' }) => {
               <span className="text-black italic text-[10px] pr-2 font-medium">
                 Select a Tier above to view standard family options
               </span>
-            )}
+            )} */}
           </div>
 
           <form

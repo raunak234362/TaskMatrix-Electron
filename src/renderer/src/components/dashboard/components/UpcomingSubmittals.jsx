@@ -358,9 +358,9 @@ const UpcomingSubmittals = ({
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-gray-400 hover:text-gray-600 rounded-full"
+                className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
               >
-                <X className="w-3.5 h-3.5" />
+                Close
               </button>
             )}
           </div>
@@ -368,10 +368,10 @@ const UpcomingSubmittals = ({
           {onClose && (
             <button
               onClick={onClose}
-              className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200 cursor-pointer"
+              className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
               title="Close (Esc)"
             >
-              <X className="w-5 h-5" />
+           Close
             </button>
           )}
         </div>
