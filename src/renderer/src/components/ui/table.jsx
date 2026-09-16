@@ -188,16 +188,32 @@ export default function DataTable({
 
   // Manual pagination props
   manualPagination = false,
+  manualFiltering,
   pageCount,
   pageIndex,
   onPageChange,
   isLoading = false,
+
+  // Controlled column filters
+  columnFilters: propColumnFilters,
+  onColumnFiltersChange: propOnColumnFiltersChange,
+  onClearFilters,
 }) {
   const { isMobile } = useScreen();
 
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState(initialSorting);
-  const [columnFilters, setColumnFilters] = useState([]);
+  const [internalColumnFilters, setInternalColumnFilters] = useState([]);
+  const columnFilters = propColumnFilters !== undefined ? propColumnFilters : internalColumnFilters;
+
+  const handleColumnFiltersChange = (updater) => {
+    const nextVal = typeof updater === "function" ? updater(columnFilters) : updater;
+    if (propColumnFilters === undefined) {
+      setInternalColumnFilters(nextVal);
+    }
+    propOnColumnFiltersChange?.(nextVal);
+  };
+
   const [expandedRowId, setExpandedRowId] = useState(null);
 
   const [pagination, setPagination] = useState({
@@ -301,13 +317,14 @@ export default function DataTable({
       }
     },
     manualPagination,
+    manualFiltering: manualFiltering !== undefined ? manualFiltering : manualPagination,
     pageCount,
     enableRowSelection,
     onRowSelectionChange,
     getRowId,
     onGlobalFilterChange: setGlobalFilter,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
+    onColumnFiltersChange: handleColumnFiltersChange,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -346,7 +363,14 @@ export default function DataTable({
                 </div>
               ))}
             <button
-              onClick={() => table.resetColumnFilters()}
+              onClick={() => {
+                table.resetColumnFilters();
+                if (propColumnFilters === undefined) {
+                  setInternalColumnFilters([]);
+                }
+                propOnColumnFiltersChange?.([]);
+                onClearFilters?.();
+              }}
               className="px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-none hover:bg-green-100 transition-all font-semibold text-sm uppercase tracking-normal shadow-sm flex items-center"
             >
               <X className="w-4 h-4 mr-2 text-black" /> Clear Filters

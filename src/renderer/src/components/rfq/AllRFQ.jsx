@@ -21,6 +21,7 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [mtoFilter, setMtoFilter] = useState('ALL')
   const [showAwarded, setShowAwarded] = useState(false)
+  const [columnFilters, setColumnFilters] = useState([])
 
   // Debounce search input for API calls
   useEffect(() => {
@@ -30,14 +31,111 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
     return () => clearTimeout(handler)
   }, [searchQuery])
 
+  // Extract values from DataTable columnFilters
+  const fabricatorFilterValue = useMemo(() => {
+    const f = columnFilters.find((c) => c.id === 'fabricator')
+    return f?.value && f.value !== 'ALL FABRICATOR' && f.value !== 'All Fabricators'
+      ? f.value
+      : undefined
+  }, [columnFilters])
+
+  const tableStatusValue = useMemo(() => {
+    const s = columnFilters.find((c) => c.id === 'wbtStatus')
+    return s?.value && s.value !== 'ALL STATUS' && s.value !== 'ALL' ? s.value : undefined
+  }, [columnFilters])
+
+  const createdDateFilterValue = useMemo(() => {
+    const d = columnFilters.find((c) => c.id === 'createdAt')
+    return d?.value || undefined
+  }, [columnFilters])
+
+  const dueDateFilterValue = useMemo(() => {
+    const d = columnFilters.find((c) => c.id === 'estimationDate')
+    return d?.value || undefined
+  }, [columnFilters])
+
   // Derive status parameter for API request
   const activeStatusParam = useMemo(() => {
-    if (showAwarded) return 'AWARDED'
-    if (statusFilter && statusFilter !== 'ALL') return statusFilter
+    if (showAwarded) return 'AWARDED_SUBMITTED'
+    if (tableStatusValue) return tableStatusValue
+    if (statusFilter && statusFilter !== 'ALL' && statusFilter !== 'All Statuses') return statusFilter
     return undefined
-  }, [showAwarded, statusFilter])
+  }, [showAwarded, tableStatusValue, statusFilter])
 
-  // Fetch paginated RFQs with searchByProjectName & status query params
+  // Derive MTO / Type parameter
+  const activeMtoParam = useMemo(() => {
+    if (mtoFilter && mtoFilter !== 'ALL') return mtoFilter
+    return undefined
+  }, [mtoFilter])
+
+  // Handlers for synchronization between top bar and table column filters
+  const handleColumnFiltersChange = (newFilters) => {
+    setColumnFilters(newFilters)
+    setCurrentPage(1)
+    const statusCol = newFilters.find((c) => c.id === 'wbtStatus')
+    if (statusCol?.value) {
+      setStatusFilter(statusCol.value)
+      if (
+        statusCol.value === 'AWARDED_SUBMITTED' ||
+        statusCol.value === 'AWARDED' ||
+        statusCol.value === 'SUBMITTED'
+      ) {
+        setShowAwarded(true)
+      } else if (showAwarded) {
+        setShowAwarded(false)
+      }
+    } else {
+      if (statusFilter !== 'ALL' && !showAwarded) {
+        setStatusFilter('ALL')
+      }
+    }
+  }
+
+  const handleStatusFilterChange = (val) => {
+    setStatusFilter(val)
+    setCurrentPage(1)
+    if (val === 'AWARDED_SUBMITTED' || val === 'AWARDED' || val === 'SUBMITTED') {
+      setShowAwarded(true)
+    } else if (showAwarded) {
+      setShowAwarded(false)
+    }
+    setColumnFilters((prev) => {
+      const filtered = prev.filter((c) => c.id !== 'wbtStatus')
+      if (val && val !== 'ALL') {
+        return [...filtered, { id: 'wbtStatus', value: val }]
+      }
+      return filtered
+    })
+  }
+
+  const handleAwardedToggle = () => {
+    setShowAwarded((prev) => {
+      const next = !prev
+      setCurrentPage(1)
+      if (next) {
+        setStatusFilter('AWARDED_SUBMITTED')
+        setColumnFilters((curr) => [
+          ...curr.filter((c) => c.id !== 'wbtStatus'),
+          { id: 'wbtStatus', value: 'AWARDED_SUBMITTED' }
+        ])
+      } else {
+        setStatusFilter('ALL')
+        setColumnFilters((curr) => curr.filter((c) => c.id !== 'wbtStatus'))
+      }
+      return next
+    })
+  }
+
+  const handleClearFilters = () => {
+    setColumnFilters([])
+    setStatusFilter('ALL')
+    setMtoFilter('ALL')
+    setShowAwarded(false)
+    setSearchQuery('')
+    setCurrentPage(1)
+  }
+
+  // Fetch paginated RFQs with all active filter query params
   useEffect(() => {
     const fetchPaginated = async () => {
       try {
@@ -45,10 +143,42 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
         let response
         const searchParam = debouncedSearch.trim() || undefined
 
+        const resolvedStatus =
+          activeStatusParam === 'IN_REVIEW_RECEIVED'
+            ? 'IN_REVIEW'
+            : activeStatusParam === 'AWARDED_SUBMITTED'
+              ? 'AWARDED'
+              : activeStatusParam
+
+        const resolvedWbtStatus =
+          activeStatusParam === 'IN_REVIEW_RECEIVED'
+            ? 'RECEIVED'
+            : activeStatusParam === 'AWARDED_SUBMITTED'
+              ? 'SUBMITTED'
+              : activeStatusParam
+
+        const filterParams = {
+          searchByProjectName: searchParam,
+          search: searchParam,
+          status: resolvedStatus,
+          wbtStatus: resolvedWbtStatus,
+          fabricatorName: fabricatorFilterValue,
+          fabricator: fabricatorFilterValue,
+          createdAt: createdDateFilterValue,
+          createdDate: createdDateFilterValue,
+          startDate: createdDateFilterValue,
+          estimationDate: dueDateFilterValue,
+          dueDate: dueDateFilterValue,
+          endDate: dueDateFilterValue,
+          mtoType: activeMtoParam,
+          rfqType: activeMtoParam,
+          type: activeMtoParam
+        }
+
         if (userType === 'CLIENT') {
-          response = await Service.RfqSent(currentPage, 10, searchParam, activeStatusParam)
+          response = await Service.RfqSent(currentPage, 10, filterParams)
         } else {
-          response = await Service.FetchAllRFQ(currentPage, 10, searchParam, activeStatusParam)
+          response = await Service.FetchAllRFQ(currentPage, 10, filterParams)
         }
 
         if (response) {
@@ -86,7 +216,16 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
       }
     }
     fetchPaginated()
-  }, [currentPage, userType, debouncedSearch, activeStatusParam])
+  }, [
+    currentPage,
+    userType,
+    debouncedSearch,
+    activeStatusParam,
+    fabricatorFilterValue,
+    createdDateFilterValue,
+    dueDateFilterValue,
+    activeMtoParam
+  ])
 
   const [allFabricators, setAllFabricators] = useState([])
 
@@ -129,13 +268,15 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
 
   // Dynamic filter options extraction
   const statusOptions = useMemo(() => {
-    const statuses = new Set()
-    rfqList?.forEach((item) => {
-      const status = item.wbtStatus || item.status || 'PENDING'
-      statuses.add(status)
-    })
-    return Array.from(statuses).map((s) => ({ label: s, value: s }))
-  }, [rfqList])
+    return [
+      { label: 'IN REVIEW / RECEIVED', value: 'IN_REVIEW_RECEIVED' },
+      { label: 'AWARDED / SUBMITTED', value: 'AWARDED_SUBMITTED' },
+      { label: 'SENT', value: 'SENT' },
+      { label: 'COMPLETED', value: 'COMPLETED' },
+      { label: 'REJECTED', value: 'REJECTED' },
+      { label: 'CLOSED', value: 'CLOSED' }
+    ]
+  }, [])
 
   const fabricatorOptions = useMemo(() => {
     const fabs = new Set()
@@ -263,8 +404,25 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
       filterType: 'select',
       filterOptions: statusOptions,
       filterFn: (row, columnId, filterValue) => {
-        const status = row.original.wbtStatus || row.original.status || 'PENDING'
-        return status === filterValue
+        if (!filterValue || filterValue === 'ALL') return true
+        const s = row.original.wbtStatus || row.original.status || 'RECEIVED'
+        if (
+          filterValue === 'IN_REVIEW_RECEIVED' ||
+          filterValue === 'IN_REVIEW' ||
+          filterValue === 'RECEIVED' ||
+          filterValue === 'PENDING'
+        ) {
+          return s === 'IN_REVIEW' || s === 'RECEIVED' || s === 'PENDING'
+        }
+        if (
+          filterValue === 'AWARDED_SUBMITTED' ||
+          filterValue === 'AWARDED' ||
+          filterValue === 'SUBMITTED' ||
+          filterValue === 'WBT_SUBMITTED'
+        ) {
+          return s === 'AWARDED' || s === 'SUBMITTED' || s === 'WBT_SUBMITTED'
+        }
+        return s === filterValue
       },
       cell: ({ row }) => {
         let status = row.original.wbtStatus || row.original.status || 'PENDING'
@@ -272,7 +430,12 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
         if (status === 'AWARDED') {
           const r = row.original
           const isTrue = (val) => val === true || val === 'true'
-          const isMTO = isTrue(r.MTOManual) || r.MTOStickModel || r.mtoStickModelEnabled || isTrue(r.isMTOStickModel) || r.MTOValue
+          const isMTO =
+            isTrue(r.MTOManual) ||
+            r.MTOStickModel ||
+            r.mtoStickModelEnabled ||
+            isTrue(r.isMTOStickModel) ||
+            r.MTOValue
           if (isMTO) {
             status = 'SUBMITTED'
           }
@@ -286,6 +449,7 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
           SENT: 'bg-green-100 text-black shadow-sm border border-black',
           AWARDED: 'bg-green-200 text-black shadow-sm border border-black',
           SUBMITTED: 'bg-green-200 text-black shadow-sm border border-black',
+          WBT_SUBMITTED: 'bg-green-200 text-black shadow-sm border border-black',
           OPEN: 'bg-blue-50 text-blue-800 shadow-sm border border-black',
           CLOSED: 'bg-red-100 text-red-800 shadow-sm border border-black',
           RE_APPROVAL: 'bg-yellow-100 text-yellow-800 shadow-sm border border-black',
@@ -359,12 +523,9 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
 
   const STATUS_FILTER_OPTIONS = [
     { label: 'All Statuses', value: 'ALL' },
-    { label: 'Pending', value: 'PENDING' },
-    { label: 'In Review', value: 'IN_REVIEW' },
-    { label: 'Received', value: 'RECEIVED' },
+    { label: 'In Review / Received', value: 'IN_REVIEW_RECEIVED' },
+    { label: 'Awarded / Submitted', value: 'AWARDED_SUBMITTED' },
     { label: 'Sent', value: 'SENT' },
-    { label: 'Awarded', value: 'AWARDED' },
-    { label: 'Submitted', value: 'SUBMITTED' },
     { label: 'Completed', value: 'COMPLETED' },
     { label: 'Rejected', value: 'REJECTED' },
     { label: 'Closed', value: 'CLOSED' }
@@ -372,21 +533,25 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
 
   const filteredRfq = useMemo(() => {
     return (rfqList || []).filter((item) => {
-      // 1. Search Filter
-      const matchesSearch =
-        item.projectName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.projectNumber?.toLowerCase().includes(searchQuery.toLowerCase())
-      if (!matchesSearch) return false
-
-      // 2. Awarded Toggle
+      // 1. Awarded / Submitted Toggle
       if (showAwarded) {
-        const isAwarded = item.wbtStatus === 'AWARDED' || item.status === 'AWARDED'
+        const isAwarded =
+          item.wbtStatus === 'AWARDED' ||
+          item.status === 'AWARDED' ||
+          item.wbtStatus === 'SUBMITTED' ||
+          item.status === 'SUBMITTED' ||
+          item.wbtStatus === 'WBT_SUBMITTED'
         if (!isAwarded) return false
       }
 
-      // 3. MTO / Type Filter
+      // 2. MTO / Type Filter
       const isTrue = (val) => val === true || val === 'true'
-      const isMTO = isTrue(item.MTOManual) || !!item.MTOStickModel || item.mtoStickModelEnabled || isTrue(item.isMTOStickModel) || !!item.MTOValue
+      const isMTO =
+        isTrue(item.MTOManual) ||
+        !!item.MTOStickModel ||
+        item.mtoStickModelEnabled ||
+        isTrue(item.isMTOStickModel) ||
+        !!item.MTOValue
       const isDetailing =
         isTrue(item.detailingMain) ||
         isTrue(item.detailingMisc) ||
@@ -400,7 +565,7 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
 
       return true
     })
-  }, [rfqList, searchQuery, showAwarded, mtoFilter])
+  }, [rfqList, showAwarded, mtoFilter])
 
   if (loading && rfqList.length === 0) {
     return (
@@ -450,10 +615,7 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
             <div className="relative">
               <select
                 value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value)
-                  setCurrentPage(1)
-                }}
+                onChange={(e) => handleStatusFilterChange(e.target.value)}
                 className="appearance-none bg-white border-2 border-gray-200 rounded-lg px-4 py-2 pr-9 text-sm font-bold text-gray-700 uppercase tracking-tight shadow-sm hover:border-green-400 focus:outline-none focus:border-green-500 transition-all duration-200 cursor-pointer"
                 style={{ minWidth: 160 }}
               >
@@ -514,10 +676,7 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
                 Awarded
               </span>
               <div
-                onClick={() => {
-                  setShowAwarded((v) => !v)
-                  setCurrentPage(1)
-                }}
+                onClick={handleAwardedToggle}
                 className={`relative inline-flex items-center w-12 h-6 rounded-full border-2 transition-all duration-300 ${
                   showAwarded
                     ? 'bg-green-500 border-green-600 shadow-md shadow-green-200'
@@ -556,6 +715,10 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
           )
         }}
         manualPagination={true}
+        manualFiltering={true}
+        columnFilters={columnFilters}
+        onColumnFiltersChange={handleColumnFiltersChange}
+        onClearFilters={handleClearFilters}
         pageCount={totalPages}
         pageIndex={currentPage - 1}
         onPageChange={(index) => setCurrentPage(index + 1)}

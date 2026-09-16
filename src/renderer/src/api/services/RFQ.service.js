@@ -17,16 +17,61 @@ class RFQService {
     return response.data
   }
 
+  // Helper to build query parameters for RFQ list requests
+  static _buildParams(page, limit = 10, ...rest) {
+    const params = {}
+    if (page !== undefined && page !== null) params.page = page
+    if (limit !== undefined && limit !== null) params.limit = limit
+
+    if (rest.length > 0) {
+      if (typeof rest[0] === 'object' && rest[0] !== null) {
+        const opts = rest[0]
+        Object.keys(opts).forEach((key) => {
+          const val = opts[key]
+          if (
+            val !== undefined &&
+            val !== null &&
+            val !== '' &&
+            val !== 'ALL' &&
+            val !== 'ALL FABRICATOR' &&
+            val !== 'All Fabricators' &&
+            val !== 'All Statuses'
+          ) {
+            params[key] = val
+          }
+        })
+      } else {
+        const [searchByProjectName, status, fabricatorName, startDate, endDate, mtoType] = rest
+        if (searchByProjectName) params.searchByProjectName = searchByProjectName
+        if (status && status !== 'ALL' && status !== 'All Statuses') params.status = status
+        if (fabricatorName && fabricatorName !== 'ALL FABRICATOR' && fabricatorName !== 'All Fabricators') {
+          params.fabricatorName = fabricatorName
+        }
+        if (startDate) {
+          params.startDate = startDate
+          params.createdDate = startDate
+          params.createdAt = startDate
+        }
+        if (endDate) {
+          params.endDate = endDate
+          params.dueDate = endDate
+          params.estimationDate = endDate
+        }
+        if (mtoType && mtoType !== 'ALL') {
+          params.mtoType = mtoType
+        }
+      }
+    }
+
+    return params
+  }
+
   //Fetch all the RFQ
-  static async FetchAllRFQ(page, limit = 10, searchByProjectName, status) {
+  static async FetchAllRFQ(page, limit = 10, ...rest) {
     try {
+      const params = RFQService._buildParams(page, limit, ...rest)
       const response = await api.get(`rfq/all`, {
-        params: {
-          page,
-          limit,
-          searchByProjectName: searchByProjectName || undefined,
-          status: status || undefined,
-        },
+        params,
         headers: {
           'Content-Type': 'application/json'
         }
@@ -39,15 +84,11 @@ class RFQService {
   }
 
   // api for sents :
-  static async RfqSent(page, limit = 10, searchByProjectName, status) {
+  static async RfqSent(page, limit = 10, ...rest) {
     try {
+      const params = RFQService._buildParams(page, limit, ...rest)
       const response = await api.get(`rfq/sents`, {
-        params: {
-          page,
-          limit,
-          searchByProjectName: searchByProjectName || undefined,
-          status: status || undefined,
-        },
+        params,
         headers: {
           'Content-Type': 'application/json'
         }
@@ -60,15 +101,12 @@ class RFQService {
   }
 
   //api for recieved:
-  static async RFQRecieved(page, limit = 10, searchByProjectName, status) {
+  static async RFQRecieved(page, limit = 10, ...rest) {
     try {
+      const params = RFQService._buildParams(page, limit, ...rest)
+      const token = sessionStorage.getItem('token')
       const response = await api.get(`rfq/received`, {
-        params: {
-          page,
-          limit,
-          searchByProjectName: searchByProjectName || undefined,
-          status: status || undefined,
-        },
+        params,
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
