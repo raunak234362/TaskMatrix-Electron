@@ -213,6 +213,7 @@ export const navItems = [
             'dept_manager',
             'project-manager',
             'operation_executive',
+            'operation_executive_trainee',
             'deputy_manager',
             'user',
             'human-resource'
