@@ -292,8 +292,6 @@ const ProjectDashboard = () => {
         />
       </div>
 
-      {/* Project Timeline Calendar */}
-      {/* <ProjectCalendar projects={projects} tasks={allTasks} /> */}
 
       <ProjectListModal
         isOpen={isListModalOpen}
