@@ -47,6 +47,7 @@ const TaskPage = () => {
         </button>
         {userRole === 'admin' ||
         userRole === 'operation_executive' ||
+        userRole === 'operation_executive_trainee' ||
         userRole === 'project_manager' ||
         userRole === 'department_manager' ||
         userRole === 'dept_manager' ? (
