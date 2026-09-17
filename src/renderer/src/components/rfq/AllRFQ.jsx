@@ -39,11 +39,6 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
       : undefined
   }, [columnFilters])
 
-  const tableStatusValue = useMemo(() => {
-    const s = columnFilters.find((c) => c.id === 'wbtStatus')
-    return s?.value && s.value !== 'ALL STATUS' && s.value !== 'ALL' ? s.value : undefined
-  }, [columnFilters])
-
   const createdDateFilterValue = useMemo(() => {
     const d = columnFilters.find((c) => c.id === 'createdAt')
     return d?.value || undefined
@@ -57,10 +52,9 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
   // Derive status parameter for API request
   const activeStatusParam = useMemo(() => {
     if (showAwarded) return 'AWARDED_SUBMITTED'
-    if (tableStatusValue) return tableStatusValue
     if (statusFilter && statusFilter !== 'ALL' && statusFilter !== 'All Statuses') return statusFilter
     return undefined
-  }, [showAwarded, tableStatusValue, statusFilter])
+  }, [showAwarded, statusFilter])
 
   // Derive MTO / Type parameter
   const activeMtoParam = useMemo(() => {
@@ -72,23 +66,6 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
   const handleColumnFiltersChange = (newFilters) => {
     setColumnFilters(newFilters)
     setCurrentPage(1)
-    const statusCol = newFilters.find((c) => c.id === 'wbtStatus')
-    if (statusCol?.value) {
-      setStatusFilter(statusCol.value)
-      if (
-        statusCol.value === 'AWARDED_SUBMITTED' ||
-        statusCol.value === 'AWARDED' ||
-        statusCol.value === 'SUBMITTED'
-      ) {
-        setShowAwarded(true)
-      } else if (showAwarded) {
-        setShowAwarded(false)
-      }
-    } else {
-      if (statusFilter !== 'ALL' && !showAwarded) {
-        setStatusFilter('ALL')
-      }
-    }
   }
 
   const handleStatusFilterChange = (val) => {
@@ -99,13 +76,6 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
     } else if (showAwarded) {
       setShowAwarded(false)
     }
-    setColumnFilters((prev) => {
-      const filtered = prev.filter((c) => c.id !== 'wbtStatus')
-      if (val && val !== 'ALL') {
-        return [...filtered, { id: 'wbtStatus', value: val }]
-      }
-      return filtered
-    })
   }
 
   const handleAwardedToggle = () => {
@@ -114,13 +84,8 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
       setCurrentPage(1)
       if (next) {
         setStatusFilter('AWARDED_SUBMITTED')
-        setColumnFilters((curr) => [
-          ...curr.filter((c) => c.id !== 'wbtStatus'),
-          { id: 'wbtStatus', value: 'AWARDED_SUBMITTED' }
-        ])
       } else {
         setStatusFilter('ALL')
-        setColumnFilters((curr) => curr.filter((c) => c.id !== 'wbtStatus'))
       }
       return next
     })
@@ -266,18 +231,6 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
     loadAllFabricators()
   }, [])
 
-  // Dynamic filter options extraction
-  const statusOptions = useMemo(() => {
-    return [
-      { label: 'IN REVIEW / RECEIVED', value: 'IN_REVIEW_RECEIVED' },
-      { label: 'AWARDED / SUBMITTED', value: 'AWARDED_SUBMITTED' },
-      { label: 'SENT', value: 'SENT' },
-      { label: 'COMPLETED', value: 'COMPLETED' },
-      { label: 'REJECTED', value: 'REJECTED' },
-      { label: 'CLOSED', value: 'CLOSED' }
-    ]
-  }, [])
-
   const fabricatorOptions = useMemo(() => {
     const fabs = new Set()
 
@@ -400,30 +353,6 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
     {
       accessorKey: 'wbtStatus',
       header: 'Status',
-      enableColumnFilter: true,
-      filterType: 'select',
-      filterOptions: statusOptions,
-      filterFn: (row, columnId, filterValue) => {
-        if (!filterValue || filterValue === 'ALL') return true
-        const s = row.original.wbtStatus || row.original.status || 'RECEIVED'
-        if (
-          filterValue === 'IN_REVIEW_RECEIVED' ||
-          filterValue === 'IN_REVIEW' ||
-          filterValue === 'RECEIVED' ||
-          filterValue === 'PENDING'
-        ) {
-          return s === 'IN_REVIEW' || s === 'RECEIVED' || s === 'PENDING'
-        }
-        if (
-          filterValue === 'AWARDED_SUBMITTED' ||
-          filterValue === 'AWARDED' ||
-          filterValue === 'SUBMITTED' ||
-          filterValue === 'WBT_SUBMITTED'
-        ) {
-          return s === 'AWARDED' || s === 'SUBMITTED' || s === 'WBT_SUBMITTED'
-        }
-        return s === filterValue
-      },
       cell: ({ row }) => {
         let status = row.original.wbtStatus || row.original.status || 'PENDING'
 
