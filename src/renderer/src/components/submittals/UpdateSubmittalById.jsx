@@ -526,16 +526,14 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-full max-w-2xl flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-11/12 max-w-7xl flex flex-col max-h-[90vh]">
         {/* ── Header ── */}
         <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
           <div>
-            <h2 className="text-xl font-black text-black tracking-tight uppercase">
+            <h2 className="text-xl font-semibold text-black tracking-tight uppercase">
               Update Submittal
             </h2>
-            <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5">
-              A new version will be created
-            </p>
+         
           </div>
           <button
             onClick={onClose}
@@ -556,7 +554,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
           )}
 
           {/* Recipient Category Toggle */}
-          <div className="flex bg-gray-100/50 p-1 rounded-lg gap-1">
+          <div className="flex gap-3">
             <button
               type="button"
               onClick={() => {
@@ -564,8 +562,8 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                 setMultipleRecipients([]) // Clear selection when switching modes
                 setSelectedMileStoneIds([]) // Clear milestone selection when switching modes
               }}
-              className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${
-                !isCDMode ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'
+              className={`flex-1 px-6 py-1.5 font-bold text-sm uppercase tracking-tight shadow-sm rounded-lg transition-all border-2 ${
+                !isCDMode ? 'bg-green-50 text-black border-green-700/80 hover:bg-green-100' : 'bg-gray-50 text-gray-500 border-gray-300 hover:bg-gray-100'
               }`}
             >
               Client
@@ -577,8 +575,8 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                 setMultipleRecipients([]) // Clear selection when switching modes
                 setSelectedMileStoneIds([]) // Clear milestone selection when switching modes
               }}
-              className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-md transition-all ${
-                isCDMode ? 'bg-white text-black shadow-sm' : 'text-gray-400 hover:text-gray-600'
+              className={`flex-1 px-6 py-1.5 font-bold text-sm uppercase tracking-tight shadow-sm rounded-lg transition-all border-2 ${
+                isCDMode ? 'bg-green-50 text-black border-green-700/80 hover:bg-green-100' : 'bg-gray-50 text-gray-500 border-gray-300 hover:bg-gray-100'
               }`}
             >
               Connection Designer
@@ -588,7 +586,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
 
           {/* Description */}
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
+            <label className="block text-md font-black text-black uppercase ml-1">
               Description
             </label>
             <div className="border border-gray-300 rounded-xl overflow-hidden bg-gray-50">
@@ -602,7 +600,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
 
           {/* Recipients */}
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
+            <label className="block text-md font-black text-black uppercase ml-1">
               {isCDMode ? 'CD Engineer' : 'Client'} Recipients
             </label>
             <Select
@@ -644,7 +642,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
           {/* Milestones Select (for authorized roles only) */}
           {canUpdateMilestone && (
             <div className="space-y-2">
-              <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
+              <label className="block text-md font-black text-black uppercase ml-1">
                 Milestones
               </label>
               <Select
@@ -667,6 +665,30 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                   })
                 }}
               />
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={handleSaveMilestoneOnly}
+                  disabled={savingMilestone || submitting || approving}
+                  className={`px-6 py-1.5 font-bold text-sm uppercase tracking-tight shadow-sm rounded-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 ${
+                    savingMilestone || submitting || approving
+                      ? 'bg-gray-100 text-black/20 cursor-not-allowed border-2 border-gray-200'
+                      : 'bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 active:scale-95'
+                  }`}
+                >
+                  {savingMilestone ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Save Milestone
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           )}
 
@@ -684,7 +706,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                 />
                 <label
                   htmlFor="isAproovedByAdmin"
-                  className="text-xs font-black text-black uppercase tracking-wider cursor-pointer select-none"
+                  className="text-sm font-black text-black uppercase cursor-pointer select-none"
                 >
                   Approve Submittal
                 </label>
@@ -695,7 +717,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
 
           {/* File Upload (new version) */}
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
+            <label className="block text-md font-black text-black uppercase ml-1">
               New Version File <span className="text-red-500">*</span>
             </label>
             <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
@@ -709,47 +731,24 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
               <button
                 type="button"
                 onClick={handleDelete}
-                className="px-8 py-3 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:text-red-700 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all active:scale-95 flex items-center gap-2"
+                className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm flex items-center gap-2 active:scale-95 cursor-pointer"
               >
-                <Trash2 className="w-4 h-4" />
+                
                 Delete
               </button>
             )}
           </div>
           <div className="flex gap-3">
-            {canUpdateMilestone && (
-              <button
-                type="button"
-                onClick={handleSaveMilestoneOnly}
-                disabled={savingMilestone || submitting || approving}
-                className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${
-                  savingMilestone || submitting || approving
-                    ? 'bg-gray-100 text-black/20 cursor-not-allowed'
-                    : 'bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-400 active:scale-95'
-                }`}
-              >
-                {savingMilestone ? (
-                  <>
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Check className="w-4 h-4" />
-                    Save Milestone
-                  </>
-                )}
-              </button>
-            )}
+
             {canApprove && !submittal?.isAproovedByAdmin && (
               <button
                 type="button"
                 onClick={handleApprove}
                 disabled={approving || submitting || savingMilestone}
-                className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${
+                className={`px-6 py-1.5 font-bold text-sm uppercase tracking-tight shadow-sm rounded-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 ${
                   approving || submitting || savingMilestone
-                    ? 'bg-gray-100 text-black/20 cursor-not-allowed'
-                    : 'bg-green-50 hover:bg-green-100 text-green-800 border border-green-400 active:scale-95'
+                    ? 'bg-gray-100 text-black/20 cursor-not-allowed border-2 border-gray-200'
+                    : 'bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 active:scale-95'
                 }`}
               >
                 {approving ? (
@@ -769,10 +768,10 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
               type="button"
               onClick={handleSubmit}
               disabled={submitting || savingMilestone || approving}
-              className={`px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm flex items-center gap-2 ${
-                submitting || savingMilestone
-                  ? 'bg-gray-100 text-black/20 cursor-not-allowed'
-                  : 'bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black active:scale-95'
+              className={`px-6 py-1.5 font-bold text-sm uppercase tracking-tight shadow-sm rounded-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 ${
+                submitting || savingMilestone || approving
+                  ? 'bg-gray-100 text-black/20 cursor-not-allowed border-2 border-gray-200'
+                  : 'bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 active:scale-95'
               }`}
             >
               {submitting ? (
