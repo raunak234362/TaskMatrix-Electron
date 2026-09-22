@@ -17,7 +17,7 @@ checkBackendHealth().finally(() => {
     <>
       <Provider store={store}>
         <RouterProvider router={router} />
-        <ToastContainer position="top-right" autoClose={5000} newestOnTop />
+        <ToastContainer position="top-right" autoClose={5000} newestOnTop style={{ zIndex: 99999 }} />
       </Provider>
     </>
   )
