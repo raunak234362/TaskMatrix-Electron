@@ -237,26 +237,46 @@ const AppContent = () => {
 
     const fetchInboxRFQ = async () => {
       try {
+        const extractRfqList = (res) => {
+          if (!res) return []
+          if (Array.isArray(res)) return res
+          if (Array.isArray(res.data)) return res.data
+          if (Array.isArray(res.data?.data)) return res.data.data
+          if (Array.isArray(res.data?.rfqs)) return res.data.rfqs
+          if (Array.isArray(res.data?.result)) return res.data.result
+          if (Array.isArray(res.rfqs)) return res.rfqs
+          if (res.data && typeof res.data === 'object') {
+            const arr = Object.values(res.data).find(Array.isArray)
+            if (arr) return arr
+          }
+          if (typeof res === 'object') {
+            const arr = Object.values(res).find(Array.isArray)
+            if (arr) return arr
+          }
+          return []
+        }
+
         let rfqs = []
         if (userType === 'CLIENT') {
-          const res = await Service.RfqSent()
-          rfqs = (res?.data || []).map((r) => ({ ...r, rfqType: 'Sent' }))
+          const res = await Service.RfqSent(1, 100)
+          rfqs = extractRfqList(res).map((r) => ({ ...r, rfqType: 'Sent' }))
         } else {
           // Fetch both Received and All RFQs
           const [receivedRes, allRes] = await Promise.all([
-            Service.RFQRecieved(),
-            Service.FetchAllRFQ()
+            Service.RFQRecieved(1, 100),
+            Service.FetchAllRFQ(1, 100)
           ])
 
-          const receivedData = (receivedRes?.data || []).map((r) => ({ ...r, rfqType: 'Received' }))
-          const allData = (allRes?.data || []).map((r) => ({ ...r, rfqType: 'All' }))
+          const receivedData = extractRfqList(receivedRes).map((r) => ({ ...r, rfqType: 'Received' }))
+          const allData = extractRfqList(allRes).map((r) => ({ ...r, rfqType: 'All' }))
 
           // Combine with differentiation: prioritize 'Received' status
           const combined = [...receivedData]
-          const receivedIds = new Set(combined.map((r) => r.id))
+          const receivedIds = new Set(combined.map((r) => String(r.id || r._id)))
 
           allData.forEach((item) => {
-            if (!receivedIds.has(item.id)) {
+            const id = String(item.id || item._id)
+            if (!receivedIds.has(id)) {
               combined.push(item)
             }
           })

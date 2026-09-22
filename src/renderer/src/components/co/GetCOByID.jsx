@@ -122,16 +122,17 @@ const GetCOByID = ({ id, projectId, onClose }) => {
   /* -------------------- FETCH CO -------------------- */
   const fetchCO = async () => {
     try {
-      if (!projectId) {
-        setError("Project ID is missing");
+      if (!id) {
+        setError("Change Order ID is missing");
         return;
       }
 
       setLoading(true);
       const response = await Service.GetChangeOrderByID(id);
-      setCO(response.data);
-      if (response.data?.currentVersionId) {
-        setViewingVersionId(response.data.currentVersionId);
+      const coData = response?.data?.data || response?.data || response;
+      setCO(coData);
+      if (coData?.currentVersionId) {
+        setViewingVersionId(coData.currentVersionId);
       }
     } catch (err) {
       console.error(err);
@@ -477,6 +478,35 @@ const GetCOByID = ({ id, projectId, onClose }) => {
       {showResponseModal && (
         <CoResponseModal
           CoId={id}
+          projectId={
+            projectId ||
+            co?.projectId ||
+            co?.project_id ||
+            co?.ProjectId ||
+            (typeof co?.project === "string" ? co?.project : (co?.project?.id || co?.project?._id)) ||
+            (typeof co?.Project === "string" ? co?.Project : (co?.Project?.id || co?.Project?._id))
+          }
+          co={co}
+          fabricatorName={
+            co?.fabricator?.fabName ||
+            co?.fabricator?.name ||
+            co?.fabricatorName ||
+            co?.Project?.fabricator?.fabName ||
+            co?.Project?.fabricator?.name ||
+            co?.Project?.fabricatorName ||
+            co?.project?.fabricator?.fabName ||
+            co?.project?.fabricator?.name ||
+            co?.project?.fabricatorName ||
+            ""
+          }
+          projectName={
+            co?.projectName ||
+            co?.project?.projectName ||
+            co?.project?.name ||
+            co?.Project?.projectName ||
+            co?.Project?.name ||
+            ""
+          }
           onClose={() => setShowResponseModal(false)}
           onSuccess={fetchCO}
         />
@@ -485,7 +515,14 @@ const GetCOByID = ({ id, projectId, onClose }) => {
       {showUpdateModal && (
         <UpdateCO
           coData={co}
-          projectId={projectId}
+          projectId={
+            projectId ||
+            co?.projectId ||
+            co?.project_id ||
+            co?.ProjectId ||
+            (typeof co?.project === "string" ? co?.project : (co?.project?.id || co?.project?._id)) ||
+            (typeof co?.Project === "string" ? co?.Project : (co?.Project?.id || co?.Project?._id))
+          }
           onClose={() => setShowUpdateModal(false)}
           onSuccess={(isDeleted) => {
             setShowUpdateModal(false);
@@ -501,6 +538,36 @@ const GetCOByID = ({ id, projectId, onClose }) => {
       {selectedResponse && (
         <COResponseDetailsModal
           response={selectedResponse}
+          CoId={id}
+          projectId={
+            projectId ||
+            co?.projectId ||
+            co?.project_id ||
+            co?.ProjectId ||
+            (typeof co?.project === "string" ? co?.project : (co?.project?.id || co?.project?._id)) ||
+            (typeof co?.Project === "string" ? co?.Project : (co?.Project?.id || co?.Project?._id))
+          }
+          co={co}
+          fabricatorName={
+            co?.fabricator?.fabName ||
+            co?.fabricator?.name ||
+            co?.fabricatorName ||
+            co?.Project?.fabricator?.fabName ||
+            co?.Project?.fabricator?.name ||
+            co?.Project?.fabricatorName ||
+            co?.project?.fabricator?.fabName ||
+            co?.project?.fabricator?.name ||
+            co?.project?.fabricatorName ||
+            ""
+          }
+          projectName={
+            co?.projectName ||
+            co?.project?.projectName ||
+            co?.project?.name ||
+            co?.Project?.projectName ||
+            co?.Project?.name ||
+            ""
+          }
           onClose={() => setSelectedResponse(null)}
           onSuccess={fetchCO}
         />

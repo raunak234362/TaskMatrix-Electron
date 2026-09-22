@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,6 +24,7 @@ import ToggleField from "../fields/Toggle";
 import RichTextEditor from "../fields/RichTextEditor";
 
 import { addProject } from "../../store/projectSlice";
+import { setRFQData } from "../../store/rfqSlice";
 
 const AddProject = ({ onSuccess }) => {
   const dispatch = useDispatch();
@@ -42,7 +43,14 @@ const AddProject = ({ onSuccess }) => {
   console.log("teamDatas", teamDatas)
   const rfqData = useSelector((state) => state.RFQInfos?.RFQData || []);
   const projectData = useSelector((state) => state.projectInfo?.projectData || []);
-  const usedRfqIds = projectData.map((p) => p.rfqId).filter(Boolean);
+  const usedRfqIds = useMemo(() => {
+    const ids = new Set();
+    (projectData || []).forEach((p) => {
+      const id = p.rfqId || p.rfqID || p.rfq_id || p.rfq?.id || p.rfq?._id || (typeof p.rfq === "string" ? p.rfq : null);
+      if (id) ids.add(String(id));
+    });
+    return ids;
+  }, [projectData]);
   const managerOption = useSelector((state) =>
     (state.userInfo?.staffData || [])
       .filter((user) =>
@@ -134,15 +142,134 @@ const AddProject = ({ onSuccess }) => {
     fetchFabricators();
   }, []);
 
+  const [rfqList, setRfqList] = useState([]);
+
+  const extractRfqList = (res) => {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res.data)) return res.data;
+    if (Array.isArray(res.data?.data)) return res.data.data;
+    if (Array.isArray(res.data?.rfqs)) return res.data.rfqs;
+    if (Array.isArray(res.data?.result)) return res.data.result;
+    if (Array.isArray(res.rfqs)) return res.rfqs;
+    if (res.data && typeof res.data === "object") {
+      const arr = Object.values(res.data).find(Array.isArray);
+      if (arr) return arr;
+    }
+    if (typeof res === "object") {
+      const arr = Object.values(res).find(Array.isArray);
+      if (arr) return arr;
+    }
+    return [];
+  };
+
+  useEffect(() => {
+    const fetchRfqs = async () => {
+      try {
+        const userType = sessionStorage.getItem('userRole') || sessionStorage.getItem('userType') || '';
+        let rfqs = [];
+        if (userType === 'CLIENT') {
+          const res = await Service.RfqSent(1, 1000);
+          rfqs = extractRfqList(res).map((r) => ({ ...r, rfqType: 'Sent' }));
+        } else {
+          const [receivedRes, allRes] = await Promise.all([
+            Service.RFQRecieved(1, 1000),
+            Service.FetchAllRFQ(1, 1000)
+          ]);
+
+          const receivedData = extractRfqList(receivedRes).map((r) => ({ ...r, rfqType: 'Received' }));
+          const allData = extractRfqList(allRes).map((r) => ({ ...r, rfqType: 'All' }));
+
+          const combined = [...receivedData];
+          const receivedIds = new Set(combined.map((r) => String(r.id || r._id)));
+
+          allData.forEach((item) => {
+            const id = String(item.id || item._id);
+            if (!receivedIds.has(id)) {
+              combined.push(item);
+            }
+          });
+          rfqs = combined;
+        }
+        setRfqList(rfqs);
+        if (rfqs.length > 0) {
+          dispatch(setRFQData(rfqs));
+        }
+      } catch (err) {
+        console.error("Failed to fetch RFQs in AddProject:", err);
+      }
+    };
+    fetchRfqs();
+  }, [dispatch]);
+
   const activeFabricatorList = allFabricators.length > 0 ? allFabricators : (Array.isArray(fabricators) ? fabricators : []);
+  
+  // Combine both Redux store RFQs and freshly fetched RFQs so newly added items always appear
+  const activeRfqData = useMemo(() => {
+    const map = new Map();
+    (Array.isArray(rfqData) ? rfqData : []).forEach((r) => {
+      const id = String(r?.id || r?._id || "");
+      if (id) map.set(id, r);
+    });
+    (Array.isArray(rfqList) ? rfqList : []).forEach((r) => {
+      const id = String(r?.id || r?._id || "");
+      if (id) map.set(id, { ...(map.get(id) || {}), ...r });
+    });
+    return Array.from(map.values());
+  }, [rfqList, rfqData]);
 
   const options = {
-    rfqs: rfqData
-      .filter((r) => !usedRfqIds.includes(r.id))
-      .map((r) => ({
-        label: `${r.projectName} • ${r.fabricator?.fabName || r.fabricator?.name || r.fabricatorName || ""}`,
-        value: r.id,
-      })),
+    rfqs: activeRfqData
+      .filter((r) => {
+        if (!r) return false;
+        if (r.deletedAt) return false;
+
+        // User explicit requirement: "just show me those RFQ which are not having project. project:null."
+        // If project is assigned (object with id/name, or non-empty string ID), exclude it
+        if (r.project !== null && r.project !== undefined && r.project !== "") {
+          if (typeof r.project === "object") {
+            if (r.project.id || r.project._id || r.project.name || r.project.projectName) return false;
+          } else if (typeof r.project === "string" && r.project.trim() !== "") {
+            return false;
+          }
+        }
+
+        // Also exclude if already assigned in existing projects list
+        const rfqId = String(r.id || r._id || "");
+        if (rfqId && usedRfqIds.has(rfqId)) {
+          return false;
+        }
+
+        return true;
+      })
+      .map((r) => {
+        const id = r.id || r._id;
+        const cleanDesc = r.description
+          ? r.description.replace(/<[^>]*>?/gm, "").replace(/&nbsp;/g, " ").trim()
+          : "";
+        const descSnippet = cleanDesc ? cleanDesc.slice(0, 40).trim() : "";
+
+        const title = r.projectName || r.subject || descSnippet || "RFQ";
+        const fab = r.fabricator?.fabName || r.fabricator?.name || r.fabricatorName || "";
+        const serial = r.serialNo || "";
+
+        let label = "";
+        if (serial && title !== serial) {
+          label = `${serial} • ${title}`;
+        } else {
+          label = title;
+        }
+
+        if (fab) {
+          label += ` (${fab})`;
+        }
+
+        return {
+          label,
+          value: id,
+          rfq: r,
+        };
+      }),
     fabricators: activeFabricatorList
       .filter((f, idx, self) => {
         const id = String(f.id || f._id || idx);
@@ -179,8 +306,8 @@ const AddProject = ({ onSuccess }) => {
 
   const selectedRfqId = watch("rfqId");
   const selectedDeptId = watch("departmentID");
-  const selectedRfq = rfqData.find(
-    (r) => String(r.id) === String(selectedRfqId),
+  const selectedRfq = activeRfqData.find(
+    (r) => String(r.id || r._id) === String(selectedRfqId),
   );
   console.log(selectedRfq,"================");
   
@@ -188,7 +315,17 @@ const AddProject = ({ onSuccess }) => {
   useEffect(() => {
     if (!selectedRfq) return;
 
-    setValue("name", selectedRfq.projectName || "");
+    const cleanDesc = selectedRfq.description
+      ? selectedRfq.description.replace(/<[^>]*>?/gm, "").replace(/&nbsp;/g, " ").trim()
+      : "";
+    const firstLine = cleanDesc.split("\n")[0].split(",")[0].trim();
+    const suggestedProjectName =
+      selectedRfq.projectName ||
+      selectedRfq.subject ||
+      firstLine ||
+      selectedRfq.serialNo ||
+      "";
+    setValue("name", suggestedProjectName);
     
     let baseNumber = selectedRfq.projectNumber || `PROJ-${new Date().getFullYear()}-${String(projectData.length + 1).padStart(3, "0")}`;
     let suggestedNumber = baseNumber;
@@ -260,7 +397,7 @@ const AddProject = ({ onSuccess }) => {
     toast.success("RFQ data auto-filled!", {
       icon: <Sparkles className="w-5 h-5" />,
     });
-  }, [selectedRfq, setValue, rfqData, activeFabricatorList]);
+  }, [selectedRfq, setValue, activeRfqData, activeFabricatorList]);
 
   const onSubmit = async (data) => {
     try {
@@ -374,13 +511,21 @@ const AddProject = ({ onSuccess }) => {
               {selectedRfq && (
                 <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 px-4 py-4 bg-white rounded-xl border border-green-100/50 animate-in fade-in slide-in-from-top-2">
                   <div className="space-y-0.5">
-                    <span className="text-[10px] uppercase font-bold text-gray-400">Project</span>
-                    <p className="text-xs font-bold text-gray-800 truncate">{selectedRfq.projectName}</p>
+                    <span className="text-[10px] uppercase font-bold text-gray-400">Project / RFQ Name</span>
+                    <p className="text-xs font-bold text-gray-800 truncate" title={selectedRfq.projectName || selectedRfq.subject || selectedRfq.serialNo || ""}>
+                      {selectedRfq.projectName || selectedRfq.subject || selectedRfq.serialNo || "—"}
+                    </p>
                   </div>
                   <div className="space-y-0.5">
                     <span className="text-[10px] uppercase font-bold text-gray-400">Fabricator</span>
-                    <p className="text-xs font-bold text-gray-800">
+                    <p className="text-xs font-bold text-gray-800 truncate">
                       {selectedRfq.fabricator?.fabName || selectedRfq.fabricator?.name || selectedRfq.fabricatorName || "N/A"}
+                    </p>
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] uppercase font-bold text-gray-400">RFQ Serial No</span>
+                    <p className="text-xs font-bold text-gray-800 truncate">
+                      {selectedRfq.serialNo || "—"}
                     </p>
                   </div>
                   <div className="space-y-0.5">

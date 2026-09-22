@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import Button from "../fields/Button";
 import Service from "../../api/Service";
 import { CalendarDays, Loader2 } from "lucide-react";
@@ -124,9 +126,22 @@ const HistoryNode = ({
   );
 };
 
-const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
+const COResponseDetailsModal = ({
+  response,
+  onClose,
+  onSuccess,
+  CoId: propCoId,
+  projectId: propProjectId,
+  co: propCo,
+  fabricatorName: propFabName,
+  projectName: propProjName,
+}) => {
+  const reduxProjects = useSelector((state) => state.projectInfo?.projectData || []);
+  const reduxFabricators = useSelector((state) => state.fabricatorInfo?.fabricatorData || []);
+
   const [fullResponse, setFullResponse] = useState(response);
   const [isLoading, setIsLoading] = useState(false);
+  const [submittingReply, setSubmittingReply] = useState(false);
   const [replyMode, setReplyMode] = useState(false);
   const [replyMessage, setReplyMessage] = useState("");
   const [replyFiles, setReplyFiles] = useState([]);
@@ -134,9 +149,11 @@ const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
   const [replyParentId, setReplyParentId] = useState(response.id || response._id);
 
   const fetchCO = async () => {
+    const coIdToFetch = propCoId || response?.CoId || response?.coId || response?.changeOrderId;
+    if (!coIdToFetch) return;
     setIsLoading(true);
     try {
-      const res = await Service.GetChangeOrderByID(response.CoId);
+      const res = await Service.GetChangeOrderByID(coIdToFetch);
       if (res?.data) {
         const parsed = Array.isArray(res.data.coResponses)
           ? res.data.coResponses
@@ -172,10 +189,10 @@ const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
   };
 
   useEffect(() => {
-    if (response?.CoId) {
+    if (propCoId || response?.CoId || response?.coId) {
       fetchCO();
     }
-  }, [response?.id, response?.CoId]);
+  }, [response?.id, response?.CoId, propCoId]);
 
   const userRole = sessionStorage.getItem("userRole")?.toUpperCase() || "";
   const userId = sessionStorage.getItem("userId") || "";
@@ -184,40 +201,140 @@ const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
   const canReply = ["ADMIN", "STAFF", "MANAGER", "CLIENT", "CLIENT_ADMIN", "PROJECT_MANAGER", "DEPT_MANAGER", "DEPUTY_MANAGER"].includes(userRole);
 
   const handleReplySubmit = async () => {
-    if (!replyMessage.trim()) return;
+    if (!replyMessage.trim() || submittingReply) return;
 
-    const formData = new FormData();
-    formData.append("CoId", response.CoId);
-    formData.append("description", replyMessage);
-    formData.append("status", replyStatus);
-    formData.append("userId", userId);
-    formData.append("userRole", userRole);
-    formData.append("parentResponseId", replyParentId);
+    try {
+      setSubmittingReply(true);
+      const coIdToUse = propCoId || response.CoId || response.coId || response.changeOrderId;
+      const formData = new FormData();
+      formData.append("CoId", coIdToUse || "");
+      formData.append("description", replyMessage);
+      formData.append("status", replyStatus);
+      formData.append("userId", userId);
+      formData.append("userRole", userRole);
+      formData.append("parentResponseId", replyParentId);
 
-    replyFiles.forEach((file) => formData.append("files", file));
+      replyFiles.forEach((file) => formData.append("files", file));
 
-    let fabricatorName = "";
-    let projectName = "";
-    const coRes = await Service.GetChangeOrderByID(response.CoId);
-    const co = coRes?.data || coRes;
-    const pid = co?.projectId || co?.project_id || co?.project?.id;
-    if (pid) {
-      const projectRes = await Service.GetProjectById(pid);
-      const project = projectRes?.data || projectRes;
-      fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
-      projectName = project?.projectName || project?.name || "";
+      let fabricatorName = propFabName || "";
+      let projectName = propProjName || "";
+      let co = propCo;
+
+      if (!co && coIdToUse) {
+        try {
+          const coRes = await Service.GetChangeOrderByID(coIdToUse);
+          co = coRes?.data?.data || coRes?.data || coRes;
+        } catch (e) {
+          console.error("Error fetching CO by ID in reply:", e);
+        }
+      }
+
+      if (!fabricatorName) {
+        fabricatorName =
+          co?.fabricator?.fabName ||
+          co?.fabricator?.name ||
+          co?.fabricatorName ||
+          co?.Project?.fabricator?.fabName ||
+          co?.Project?.fabricator?.name ||
+          co?.Project?.fabricatorName ||
+          co?.project?.fabricator?.fabName ||
+          co?.project?.fabricator?.name ||
+          co?.project?.fabricatorName ||
+          "";
+      }
+
+      if (!projectName) {
+        projectName =
+          co?.projectName ||
+          co?.project?.projectName ||
+          co?.project?.name ||
+          co?.Project?.projectName ||
+          co?.Project?.name ||
+          "";
+      }
+
+      const pid =
+        (typeof propProjectId === "object" ? (propProjectId?.id || propProjectId?._id) : propProjectId) ||
+        (typeof co?.project === "string" ? co.project : null) ||
+        (typeof co?.Project === "string" ? co.Project : null) ||
+        co?.projectId ||
+        co?.project_id ||
+        co?.ProjectId ||
+        co?.project?.id ||
+        co?.project?._id ||
+        co?.Project?.id ||
+        co?.Project?._id;
+
+      let project = null;
+      if (pid) {
+        project = reduxProjects.find((p) => String(p.id || p._id) === String(pid));
+
+        if (!project || !fabricatorName || !projectName) {
+          try {
+            const projectRes = await Service.GetProjectById(pid);
+            const apiProj = projectRes?.data?.project || projectRes?.data?.data || projectRes?.data || projectRes;
+            if (apiProj && typeof apiProj === "object") {
+              project = { ...project, ...apiProj };
+            }
+          } catch (e) {
+            console.error("Error fetching project by ID in reply:", e);
+          }
+        }
+      }
+
+      if (project) {
+        if (!projectName) {
+          projectName = project?.projectName || project?.name || "";
+        }
+        if (!fabricatorName) {
+          fabricatorName =
+            project?.fabricator?.fabName ||
+            project?.fabricator?.name ||
+            project?.fabricatorName ||
+            "";
+
+          if (!fabricatorName) {
+            const fabId = project?.fabricatorId || (typeof project?.fabricator === "string" ? project.fabricator : null);
+            if (fabId) {
+              const fab = reduxFabricators.find((f) => String(f.id || f._id) === String(fabId));
+              if (fab) {
+                fabricatorName = fab.fabName || fab.name || "";
+              }
+            }
+          }
+        }
+      }
+
+      if (!fabricatorName) {
+        const fabId = co?.fabricatorId || (typeof co?.fabricator === "string" ? co.fabricator : null);
+        if (fabId) {
+          const fab = reduxFabricators.find((f) => String(f.id || f._id) === String(fabId));
+          if (fab) {
+            fabricatorName = fab.fabName || fab.name || "";
+          }
+        }
+      }
+
+      if (!fabricatorName) fabricatorName = "UNKNOWN";
+      if (!projectName) projectName = "UNKNOWN";
+
+      await Service.addCOResponse(formData, response.id || response._id, fabricatorName, projectName);
+
+      toast.success("Reply submitted successfully");
+      setReplyMode(false);
+      setReplyMessage("");
+      setReplyFiles([]);
+      setReplyStatus("PENDING");
+      setReplyParentId(response.id || response._id);
+
+      if (onSuccess) onSuccess();
+      onClose();
+    } catch (error) {
+      console.error("Failed to submit reply:", error);
+      toast.error(error?.response?.data?.message || "Failed to submit reply");
+    } finally {
+      setSubmittingReply(false);
     }
-
-    await Service.addCOResponse(formData, response.id || response._id, fabricatorName, projectName);
-
-    setReplyMode(false);
-    setReplyMessage("");
-    setReplyFiles([]);
-    setReplyStatus("PENDING");
-    setReplyParentId(response.id || response._id);
-
-    if (onSuccess) onSuccess();
-    onClose();
   };
 
   const renderReplyForm = () => (
@@ -233,14 +350,26 @@ const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-bold uppercase tracking-wide text-gray-700 mb-1">
-          Response Status
+      {/* Attachments */}
+      <div className="space-y-1">
+        <label className="text-sm font-bold uppercase tracking-wide text-gray-700">
+          Attachments
+        </label>
+        <MultipleFileUpload
+          initialFiles={replyFiles}
+          onFilesChange={setReplyFiles}
+        />
+      </div>
+
+      {/* Status Picker for reply */}
+      <div className="space-y-1">
+        <label className="text-sm font-bold uppercase tracking-wide text-gray-700">
+          Update Status
         </label>
         <select
-          className="w-full border rounded-md p-2"
           value={replyStatus}
           onChange={(e) => setReplyStatus(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg p-2.5 text-sm uppercase font-semibold text-gray-800 bg-white"
         >
           {STATUS_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -248,13 +377,6 @@ const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
             </option>
           ))}
         </select>
-      </div>
-
-      <div className="mt-2">
-        <label className="block text-sm font-bold uppercase tracking-wide text-gray-700 mb-1">
-          Attach Files
-        </label>
-        <MultipleFileUpload onFilesChange={setReplyFiles} initialFiles={replyFiles} />
       </div>
 
       <div className="flex justify-end gap-3 pt-2">
@@ -267,8 +389,9 @@ const COResponseDetailsModal = ({ response, onClose, onSuccess }) => {
         <Button
           className="px-6 py-2 rounded-lg font-bold bg-[#6bbd45]/20 text-black uppercase tracking-tight border border-[#6bbd45]/40 hover:bg-[#6bbd45]/30 transition-all shadow-sm text-xs"
           onClick={handleReplySubmit}
+          disabled={submittingReply}
         >
-          Send Reply
+          {submittingReply ? "Sending..." : "Send Reply"}
         </Button>
       </div>
     </div>

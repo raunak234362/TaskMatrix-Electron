@@ -407,12 +407,50 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
       // 3. Sequential Updates
       let fabricatorName = "";
       let projectName = "";
-      const pid = projectId || coData.project?._id || coData.project?.id;
+      const pid =
+        (typeof projectId === "object" ? (projectId?.id || projectId?._id) : projectId) ||
+        (typeof coData?.project === "string" ? coData.project : null) ||
+        (typeof coData?.Project === "string" ? coData.Project : null) ||
+        coData?.projectId ||
+        coData?.project_id ||
+        coData?.project?._id ||
+        coData?.project?.id ||
+        coData?.Project?._id ||
+        coData?.Project?.id;
+
       if (pid) {
-        const projectRes = await Service.GetProjectById(pid);
-        const project = projectRes?.data || projectRes;
-        fabricatorName = project?.fabricator?.fabName || project?.fabricatorName || "";
-        projectName = project?.projectName || project?.name || "";
+        try {
+          const projectRes = await Service.GetProjectById(pid);
+          const project = projectRes?.data?.project || projectRes?.data?.data || projectRes?.data || projectRes;
+          fabricatorName = project?.fabricator?.fabName || project?.fabricator?.name || project?.fabricatorName || "";
+          projectName = project?.projectName || project?.name || "";
+        } catch (e) {
+          console.error("Error fetching project in UpdateCO:", e);
+        }
+      }
+
+      if (!fabricatorName) {
+        fabricatorName =
+          coData?.fabricator?.fabName ||
+          coData?.fabricator?.name ||
+          coData?.fabricatorName ||
+          coData?.Project?.fabricator?.fabName ||
+          coData?.Project?.fabricator?.name ||
+          coData?.project?.fabricator?.fabName ||
+          coData?.project?.fabricator?.name ||
+          selectedFabricator?.fabName ||
+          selectedFabricator?.name ||
+          "";
+      }
+
+      if (!projectName) {
+        projectName =
+          coData?.projectName ||
+          coData?.Project?.projectName ||
+          coData?.Project?.name ||
+          coData?.project?.projectName ||
+          coData?.project?.name ||
+          "";
       }
 
       const coRes = await Service.EditCoById(coId, formData, fabricatorName, projectName);
