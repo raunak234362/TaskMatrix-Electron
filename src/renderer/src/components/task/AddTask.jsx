@@ -700,33 +700,95 @@ const AddTask = () => {
     return milestones
       .filter((m) => {
         const mId = String(m.id || m._id || m.milestoneId || m.mileStoneId || "");
-        if (!mId) return false;
-        const hasSubmittals = projectSubmittals.some((sub) => {
-          const subMilestoneId = String(
-            sub.mileStoneId ||
-            sub.milestoneId ||
-            sub.milestone?.id ||
-            sub.milestone?._id ||
-            sub.mileStone?.id ||
-            sub.mileStone?._id ||
-            ""
-          );
-          return subMilestoneId === mId;
-        });
-        return !hasSubmittals;
+        return Boolean(mId);
       })
       .map((m) => {
+        const mId = String(m.id || m._id || m.milestoneId || m.mileStoneId || "");
         const milestoneName = m.subject || m.name || m.title || "Unnamed Milestone";
         const subSubjectName = m.subSubject || "";
         const stageName = m.stage || "";
         const labelParts = [milestoneName, subSubjectName, stageName].filter(Boolean);
-        const mId = m.id || m._id || m.milestoneId || m.mileStoneId;
+
+        const statusUpper = String(m.status || "").toUpperCase();
+        const isComplete = statusUpper === "COMPLETE" || statusUpper === "COMPLETED";
+
+        const hasSubmittals =
+          (Array.isArray(m.milestoneSubmittals) && m.milestoneSubmittals.length > 0) ||
+          (Array.isArray(m.submittals) && m.submittals.length > 0) ||
+          statusUpper === "SUBMITTED" ||
+          (Array.isArray(projectSubmittals) &&
+            projectSubmittals.some((sub) => {
+              if (
+                String(
+                  sub.mileStoneId ||
+                    sub.milestoneId ||
+                    sub.milestone?.id ||
+                    sub.milestone?._id ||
+                    sub.mileStone?.id ||
+                    sub.mileStone?._id ||
+                    "",
+                ) === mId
+              ) {
+                return true;
+              }
+              if (
+                sub.mileStoneBelongsTo &&
+                String(sub.mileStoneBelongsTo.id || sub.mileStoneBelongsTo._id || "") === mId
+              ) {
+                return true;
+              }
+              if (
+                Array.isArray(sub.mileStones) &&
+                sub.mileStones.some((ms) => String(ms.id || ms._id || ms) === mId)
+              ) {
+                return true;
+              }
+              if (
+                Array.isArray(sub.mileStoneLinks) &&
+                sub.mileStoneLinks.some(
+                  (link) => String(link.mileStoneId || link.milestoneId || link.id || link) === mId,
+                )
+              ) {
+                return true;
+              }
+              return false;
+            }));
+
+        let badge = "ACTIVE";
+        let badgeColor = "bg-emerald-100 text-emerald-800 border-emerald-300";
+        let disabled = false;
+
+        if (isComplete) {
+          badge = "COMPLETED";
+          badgeColor = "bg-gray-100 text-gray-400 border-gray-300";
+          disabled = true; // Blocked from selection
+        } else if (hasSubmittals) {
+          badge = "STILL ACTIVE";
+          badgeColor = "bg-sky-100 text-sky-800 border-sky-300";
+          disabled = false;
+        }
+
         return {
           label: labelParts.join(" - "),
           value: mId ? String(mId) : "",
+          status: m.status,
+          badge,
+          badgeColor,
+          disabled,
+          isSubmitted: hasSubmittals,
+          isComplete,
         };
       })
-      .filter((opt) => opt.value !== "");
+      .filter((opt) => opt.value !== "")
+      .sort((a, b) => {
+        // Active first, Submitted second, Completed (disabled) at the bottom
+        const getPriority = (opt) => {
+          if (opt.disabled) return 3;
+          if (opt.isSubmitted) return 2;
+          return 1; // Active
+        };
+        return getPriority(a) - getPriority(b);
+      });
   }, [milestones, projectSubmittals]);
 
   const wbsTypeOptions = [

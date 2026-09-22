@@ -1,4 +1,7 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setMilestonesForProject } from "../../../store/milestoneSlice";
+import Service from "../../../api/Service";
 import {
   ClipboardList,
   AlertCircle,
@@ -22,6 +25,7 @@ const UpcomingSubmittals = ({
   onSubmittalClick,
   onClose,
 }) => {
+  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("submittals");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("ALL"); // ALL, OVERDUE, DUE_2_DAYS, DUE_SOON
@@ -29,6 +33,13 @@ const UpcomingSubmittals = ({
 
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const isPMO = userRole === "project_manager_officer";
+
+  const projectList = useSelector(
+    (state) => state.projectInfo?.projectData || []
+  );
+  const milestonesByProject = useSelector(
+    (state) => state.milestoneInfo?.milestonesByProject || {}
+  );
 
   // Calculate date information and urgency
   const getDateInfo = (dateString) => {
@@ -152,6 +163,192 @@ const UpcomingSubmittals = ({
 
   const getStage = (item) => {
     return item.stage || item.submittalStage || "";
+  };
+
+  // Helper to extract project ID from a submittal item
+  const getProjectId = (item) => {
+    if (!item) return null;
+    const directId =
+      item.project_id ||
+      item.projectId ||
+      item.project?.id ||
+      item.project?._id ||
+      item.project?.project_id ||
+      item.project?.projectId;
+    if (directId) return String(directId);
+
+    const pName = getProjectName(item);
+    if (pName && pName !== "Other Projects") {
+      const match = projectList.find(
+        (p) =>
+          (p.name || "").trim().toLowerCase() === pName.trim().toLowerCase() ||
+          (p.projectName || "").trim().toLowerCase() === pName.trim().toLowerCase()
+      );
+      if (match) return String(match.id || match._id);
+    }
+
+    const pNum = getProjectNumber(item);
+    if (pNum) {
+      const match = projectList.find(
+        (p) =>
+          (p.projectNumber || "").trim().toLowerCase() === pNum.trim().toLowerCase() ||
+          (p.project_number || "").trim().toLowerCase() === pNum.trim().toLowerCase()
+      );
+      if (match) return String(match.id || match._id);
+    }
+
+    return null;
+  };
+
+  // Collect unique project IDs across all pending submittals
+  const projectIds = useMemo(() => {
+    const ids = new Set();
+    pendingSubmittals.forEach((item) => {
+      const pid = getProjectId(item);
+      if (pid) {
+        ids.add(pid);
+      }
+    });
+    return Array.from(ids);
+  }, [pendingSubmittals, projectList]);
+
+  // Track in-flight project milestone requests to avoid duplicate fetches
+  const fetchingProjectsRef = useRef(new Set());
+
+  // Fetch full milestone data (including tasks) for each project if not already in Redux
+  useEffect(() => {
+    projectIds.forEach(async (pid) => {
+      if (!milestonesByProject[pid] && !fetchingProjectsRef.current.has(pid)) {
+        fetchingProjectsRef.current.add(pid);
+        try {
+          const response = await Service.GetProjectMilestoneById(pid);
+          const milestoneList = Array.isArray(response?.data)
+            ? response.data
+            : Array.isArray(response)
+            ? response
+            : response?.data || [];
+          if (milestoneList && milestoneList.length > 0) {
+            dispatch(
+              setMilestonesForProject({
+                projectId: pid,
+                milestones: milestoneList,
+              })
+            );
+          }
+        } catch (error) {
+          console.error(`Error fetching milestones for project ${pid}:`, error);
+        } finally {
+          fetchingProjectsRef.current.delete(pid);
+        }
+      }
+    });
+  }, [projectIds, milestonesByProject, dispatch]);
+
+  // Resolve full milestone object (with Tasks array and metrics) from Redux cache
+  const getFullMilestone = (item) => {
+    if (!item) return item;
+    const pid = getProjectId(item);
+    const projectMilestones =
+      (pid && (milestonesByProject[String(pid)] || milestonesByProject[pid])) || [];
+    const itemId = String(
+      item.id || item._id || item.milestone_id || item.milestoneId || ""
+    );
+
+    const matched = projectMilestones.find((m) => {
+      const mId = String(m.id || m._id || "");
+      if (itemId && mId && mId === itemId) return true;
+      const mSubj = (m.subject || m.name || "").trim().toLowerCase();
+      const itemSubj = (item.subject || item.name || "").trim().toLowerCase();
+      const mStage = (m.stage || "").trim().toLowerCase();
+      const itemStage = (item.stage || "").trim().toLowerCase();
+      return (
+        mSubj &&
+        itemSubj &&
+        mSubj === itemSubj &&
+        (!mStage || !itemStage || mStage === itemStage)
+      );
+    });
+
+    if (matched) {
+      return {
+        ...item,
+        ...matched,
+        Tasks:
+          matched.Tasks && matched.Tasks.length > 0
+            ? matched.Tasks
+            : item.Tasks || item.tasks || matched.tasks || [],
+      };
+    }
+
+    return item;
+  };
+
+  // Milestone Progress & Timing calculation (matching GetProjectById Overview / ProjectMilestoneMetrics)
+  const getMilestoneProgressStats = (rawItem) => {
+    const item = getFullMilestone(rawItem);
+
+    let timePercent = 0;
+    const start = new Date(
+      item.startDate || item.StartDate || item.date || item.createdAt
+    );
+    const approval = new Date(
+      item.approvalDate || item.ApprovalDate || item.dueDate
+    );
+
+    if (!isNaN(start.getTime()) && !isNaN(approval.getTime())) {
+      const totalDuration = approval.getTime() - start.getTime();
+      const elapsed = Date.now() - start.getTime();
+
+      if (totalDuration > 0) {
+        timePercent = Math.min(
+          100,
+          Math.max(0, Math.round((elapsed / totalDuration) * 100))
+        );
+      } else if (Date.now() > approval.getTime()) {
+        timePercent = 100;
+      }
+    }
+
+    const msTasks = item.Tasks || item.tasks || [];
+    const totalTasks = msTasks.length;
+    let taskProgress = 0;
+    if (totalTasks > 0) {
+      const completedStatuses = [
+        "COMPLETE",
+        "VALIDATE_COMPLETE",
+        "COMPLETE_OTHER",
+        "USER_FAULT",
+        "COMPLETED",
+        "VALIDATE_COMPLETED",
+      ];
+      const completedCount = msTasks.filter((t) =>
+        completedStatuses.includes((t.status || "").trim().toUpperCase())
+      ).length;
+      taskProgress = Math.round((completedCount / totalTasks) * 100);
+    }
+
+    let manualProgress = 0;
+    if (item.completeionPercentage > 0) {
+      manualProgress = Number(item.completeionPercentage);
+    } else if (item.completionPercentage > 0) {
+      manualProgress = Number(item.completionPercentage);
+    } else if (item.percentage > 0) {
+      manualProgress = Number(item.percentage);
+    }
+
+    let finalProgress = manualProgress > 0 ? manualProgress : taskProgress;
+
+    if (
+      (item.status || "").toUpperCase() === "COMPLETED" ||
+      (item.status || "").toUpperCase() === "APPROVED"
+    ) {
+      finalProgress = 100;
+    }
+
+    return {
+      progress: Math.min(100, Math.max(0, finalProgress)),
+      timePercent: Math.min(100, Math.max(0, timePercent)),
+    };
   };
 
   // Overall metrics
@@ -518,26 +715,29 @@ const UpcomingSubmittals = ({
                       <div>
                         {/* Table Header Bar */}
                         <div className="hidden lg:grid grid-cols-12 gap-4 px-5 py-2 bg-gray-50/60 border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-wider">
-                          <div className="col-span-5">Subject / Milestone</div>
-                          <div className="col-span-2">Stage</div>
-                          <div className="col-span-3">Fabricator</div>
+                          <div className="col-span-4">Subject / Milestone</div>
+                          <div className="col-span-1">Stage</div>
+                          <div className="col-span-2">Fabricator</div>
+                          <div className="col-span-3">Completion Progress</div>
                           <div className="col-span-2 text-right">Due Date</div>
                         </div>
 
                         {/* Rows */}
                         <div className="divide-y divide-gray-100">
                           {group.items.map((submittal, index) => {
+                            const fullSubmittal = getFullMilestone(submittal);
                             const dateInfo = submittal._dateInfo;
-                            const subject = getSubject(submittal);
-                            const subSubject = getSubSubject(submittal);
-                            const fabricator = getFabricator(submittal);
-                            const stage = getStage(submittal);
+                            const subject = getSubject(fullSubmittal);
+                            const subSubject = getSubSubject(fullSubmittal);
+                            const fabricator = getFabricator(fullSubmittal);
+                            const stage = getStage(fullSubmittal);
+                            const progressStats = getMilestoneProgressStats(fullSubmittal);
 
                             return (
                               <div
                                 key={submittal.id || submittal._id || index}
                                 onClick={() =>
-                                  onSubmittalClick && onSubmittalClick(submittal)
+                                  onSubmittalClick && onSubmittalClick(fullSubmittal)
                                 }
                                 className="group px-5 py-3.5 flex flex-col lg:grid lg:grid-cols-12 gap-3 lg:gap-4 items-start lg:items-center hover:bg-slate-50/80 transition-all cursor-pointer relative"
                               >
@@ -545,7 +745,7 @@ const UpcomingSubmittals = ({
                                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-primary transition-colors"></div>
 
                                 {/* Subject & Urgency Status */}
-                                <div className="lg:col-span-5 flex items-start gap-3 min-w-0 w-full">
+                                <div className="lg:col-span-4 flex items-start gap-3 min-w-0 w-full">
                                   <div
                                     className={`p-2 rounded-lg shrink-0 mt-0.5 transition-transform group-hover:scale-105 ${
                                       dateInfo.isOverdue
@@ -616,11 +816,44 @@ const UpcomingSubmittals = ({
                                         {dateInfo.label}
                                       </span>
                                     </div>
+
+                                    {/* Mobile Milestone Completion Progress (matching GetProjectById overview page) */}
+                                    <div className="w-full mt-2 lg:hidden">
+                                      <div className="flex justify-between items-center text-xs font-semibold text-black mb-1">
+                                        <span className="uppercase text-[11px] tracking-normal text-black">
+                                          Completion Percentage:
+                                        </span>
+                                        <span
+                                          className={`px-1 py-0.5 rounded-none text-xs uppercase font-semibold tracking-normal ${
+                                            (fullSubmittal.status || "").toUpperCase() === "APPROVED" ||
+                                            (fullSubmittal.status || "").toUpperCase() === "COMPLETED"
+                                              ? "text-green-700"
+                                              : "text-green-950"
+                                          }`}
+                                        >
+                                          {progressStats.progress}%
+                                        </span>
+                                      </div>
+                                      <div className="w-full bg-red-500 rounded-none h-2 relative overflow-hidden">
+                                        {/* Time Progress (background shadow layer) */}
+                                        <div
+                                          className="absolute top-0 left-0 h-2 bg-gray-400 opacity-40 transition-all duration-500"
+                                          style={{ width: `${progressStats.timePercent}%` }}
+                                        ></div>
+                                        {/* Task Completion (real progress) */}
+                                        <div
+                                          className="absolute top-0 left-0 h-2 rounded-none bg-teal-500 transition-all duration-500"
+                                          style={{
+                                            width: `${progressStats.progress || 0}%`,
+                                          }}
+                                        ></div>
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
 
                                 {/* Stage Column (Desktop) */}
-                                <div className="hidden lg:flex lg:col-span-2 items-center">
+                                <div className="hidden lg:flex lg:col-span-1 items-center">
                                   {stage ? (
                                     <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-gray-100 text-gray-700 border border-gray-200 uppercase tracking-wide">
                                       {stage}
@@ -633,7 +866,7 @@ const UpcomingSubmittals = ({
                                 </div>
 
                                 {/* Fabricator Column (Desktop) */}
-                                <div className="hidden lg:flex lg:col-span-3 items-center gap-2 min-w-0">
+                                <div className="hidden lg:flex lg:col-span-2 items-center gap-2 min-w-0">
                                   <Building2 className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                                   <span
                                     className="text-xs font-medium text-gray-700 truncate"
@@ -641,6 +874,39 @@ const UpcomingSubmittals = ({
                                   >
                                     {fabricator}
                                   </span>
+                                </div>
+
+                                {/* Milestone Completion Progress Column (Desktop - matching GetProjectById overview page) */}
+                                <div className="hidden lg:flex lg:col-span-3 flex-col justify-center gap-1 min-w-0 pr-3">
+                                  <div className="flex justify-between items-center text-xs font-semibold text-black">
+                                    <span className="uppercase tracking-normal text-[11px] text-black font-semibold">
+                                      Completion Percentage:
+                                    </span>
+                                    <span
+                                      className={`px-1 py-0.5 rounded-none text-xs uppercase font-semibold tracking-normal ${
+                                        (fullSubmittal.status || "").toUpperCase() === "APPROVED" ||
+                                        (fullSubmittal.status || "").toUpperCase() === "COMPLETED"
+                                          ? "text-green-700"
+                                          : "text-green-950"
+                                      }`}
+                                    >
+                                      {progressStats.progress}%
+                                    </span>
+                                  </div>
+                                  <div className="w-full bg-red-500 rounded-none h-2 relative overflow-hidden">
+                                    {/* Time Progress (background shadow layer) */}
+                                    <div
+                                      className="absolute top-0 left-0 h-2 bg-gray-400 opacity-40 transition-all duration-500"
+                                      style={{ width: `${progressStats.timePercent}%` }}
+                                    ></div>
+                                    {/* Task Completion (real progress) */}
+                                    <div
+                                      className="absolute top-0 left-0 h-2 rounded-none bg-teal-500 transition-all duration-500"
+                                      style={{
+                                        width: `${progressStats.progress || 0}%`,
+                                      }}
+                                    ></div>
+                                  </div>
                                 </div>
 
                                 {/* Due Date & Action Column (Desktop) */}

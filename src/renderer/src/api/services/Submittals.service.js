@@ -172,10 +172,12 @@ class SubmittalsService {
   }
 
   //update  submittal version by ID
-  static async updateSubmittalVersionById(id, data, fabricatorName, projectName) {
+  static async updateSubmittalVersionById(id, data, fabricatorName = '', projectName = '') {
     try {
+      const safeFabName = fabricatorName || ''
+      const safeProjName = projectName || ''
       const response = await api.post(
-        `submittal/${id}/versions?fabricatorName=${encodeURIComponent(fabricatorName)}&projectName=${encodeURIComponent(projectName)}`,
+        `submittal/${id}/versions?fabricatorName=${encodeURIComponent(safeFabName)}&projectName=${encodeURIComponent(safeProjName)}`,
         data,
         {
           headers: {

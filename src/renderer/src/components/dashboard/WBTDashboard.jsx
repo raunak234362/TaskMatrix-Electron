@@ -1,8 +1,9 @@
-/* eslint-disable react/prop-types */
-import { useState, Suspense, lazy, useMemo, useEffect } from 'react'
+import { useState, Suspense, lazy, useMemo, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { setModalOpen } from '../../store/userSlice'
+import { setMilestonesForProject } from '../../store/milestoneSlice'
+import Service from '../../api/Service'
 import { format } from 'date-fns'
 import { Calendar } from 'lucide-react'
 import Modal from '../ui/Modal'
@@ -136,6 +137,56 @@ const WBTDashboard = () => {
     showUnreadCommentsPopup,
     dispatch
   ])
+
+  // Prefetch milestone tasks for upcoming milestones in the background so completion progress is instant
+  const milestonesByProject = useSelector(
+    (state) => state.milestoneInfo?.milestonesByProject || {}
+  )
+  const upcomingMilestones = adminData?.upcomingMilestones || []
+  const prefetchingProjectsRef = useRef(new Set())
+
+  useEffect(() => {
+    if (!upcomingMilestones.length) return
+    const ids = new Set()
+    upcomingMilestones.forEach((m) => {
+      const pid =
+        m.project_id ||
+        m.projectId ||
+        m.project?.id ||
+        m.project?._id
+      if (
+        pid &&
+        !milestonesByProject[String(pid)] &&
+        !prefetchingProjectsRef.current.has(String(pid))
+      ) {
+        ids.add(String(pid))
+      }
+    })
+
+    ids.forEach(async (pid) => {
+      prefetchingProjectsRef.current.add(pid)
+      try {
+        const response = await Service.GetProjectMilestoneById(pid)
+        const milestoneList = Array.isArray(response?.data)
+          ? response.data
+          : Array.isArray(response)
+          ? response
+          : response?.data || []
+        if (milestoneList && milestoneList.length > 0) {
+          dispatch(
+            setMilestonesForProject({
+              projectId: pid,
+              milestones: milestoneList,
+            })
+          )
+        }
+      } catch (err) {
+        console.error(`Error prefetching milestones for project ${pid}:`, err)
+      } finally {
+        prefetchingProjectsRef.current.delete(pid)
+      }
+    })
+  }, [upcomingMilestones, milestonesByProject, dispatch])
 
   const currentTask = useMemo(() => {
     const normalizedTasks = Array.isArray(tasks) ? tasks : []

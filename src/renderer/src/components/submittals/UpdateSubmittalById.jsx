@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 
 const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
-  const [subject, setSubject] = useState(submittal?.subject || '')
+  const subject = submittal?.subject || ''
   const [description, setDescription] = useState(
     submittal?.description || submittal?.currentVersion?.description || ''
   )
@@ -47,7 +47,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
                 closeToast()
                 try {
                   setSubmitting(true)
-                  await Service.DeleteSubmittalById(submittal.id)
+                  await Service.DeleteSubmittalById(submittalId)
                   toast.success('Submittal deleted successfully!', {
                     position: 'bottom-right'
                   })
@@ -113,7 +113,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
   const fabricators = useSelector(
     (state) => state.fabricatorInfo?.fabricatorData || state.fabricatorData?.fabricatorData || []
   )
-  const targetFabricatorID =
+  const fabricatorId =
     submittal?.fabricator_id ||
     submittal?.fabricator?.id ||
     submittal?.fabricator?._id ||
@@ -122,6 +122,43 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
     submittal?.project?.fabricator_id ||
     submittal?.project?.fabricator?.id ||
     submittal?.project?.fabricator?._id
+
+  const targetFabricatorID = fabricatorId
+
+  const projectId =
+    submittal?.project_id ||
+    submittal?.projectId ||
+    submittal?.project?.id ||
+    submittal?.project?._id
+
+  const [fabricatorDetails, setFabricatorDetails] = useState(
+    typeof submittal?.fabricator === 'object' ? submittal?.fabricator : null
+  )
+
+  useEffect(() => {
+    const loadFabricator = async () => {
+      if (fabricatorId && (!fabricatorDetails || !fabricatorDetails.fabName)) {
+        try {
+          const res = await Service.GetFabricatorByID(fabricatorId)
+          const fab = res?.data || res
+          if (fab) setFabricatorDetails(fab)
+        } catch (e) {
+          console.error('Error fetching fabricator details:', e)
+        }
+      }
+    }
+    loadFabricator()
+  }, [fabricatorId])
+
+  const selectedFabricator =
+    fabricatorDetails ||
+    fabricators?.find(
+      (f) => String(f.id || f._id) === String(targetFabricatorID)
+    ) ||
+    (typeof submittal?.fabricator === 'object' ? submittal?.fabricator : null) ||
+    (typeof submittal?.project?.fabricator === 'object' ? submittal?.project?.fabricator : null)
+
+  const submittalId = submittal?.id || submittal?._id
   const connectionDesignerID = submittal?.project?.connectionDesignerID
 
   const [pocs, setPocs] = useState([])
@@ -296,7 +333,9 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
   })
 
   const [multipleRecipients, setMultipleRecipients] = useState(
-    submittal?.multipleRecipients?.map((r) => r.id) || []
+    submittal?.multipleRecipients?.map((r) =>
+      typeof r === 'object' && r !== null ? r.id || r._id : r
+    ) || []
   )
 
   const handleSaveMilestoneOnly = async () => {
@@ -342,14 +381,14 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
       }
 
       // Update the submittal with the new milestone IDs
-      await Service.updateSubmittalById(submittal.id, { mileStoneIds: selectedMileStoneIds })
+      await Service.updateSubmittalById(submittalId, { mileStoneIds: selectedMileStoneIds })
 
       toast.success('Milestone updated successfully!')
       onSuccess?.()
       onClose()
     } catch (err) {
       console.error('Save milestone failed:', err)
-      setError(err?.response?.data?.message || 'Failed to update milestone. Please try again.')
+      setError(err?.response?.data?.message || err?.message || 'Failed to update milestone. Please try again.')
     } finally {
       setSavingMilestone(false)
     }
@@ -360,7 +399,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
       setApproving(true)
       setError(null)
       setIsAproovedByAdmin(targetState)
-      await Service.updateSubmittalById(submittal.id, { isAproovedByAdmin: targetState })
+      await Service.updateSubmittalById(submittalId, { isAproovedByAdmin: targetState })
       toast.success(
         targetState ? 'Submittal approved successfully!' : 'Submittal approval updated!'
       )
@@ -368,20 +407,20 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
     } catch (err) {
       console.error('Approve submittal failed:', err)
       setIsAproovedByAdmin(!targetState)
-      setError(err?.response?.data?.message || 'Failed to approve submittal. Please try again.')
+      setError(err?.response?.data?.message || err?.message || 'Failed to approve submittal. Please try again.')
     } finally {
       setApproving(false)
     }
   }
 
   const handleSubmit = async () => {
-    if (!subject.trim()) {
-      setError('Subject is required.')
+    if (!files || files.length === 0) {
+      toast.error('File is required')
       return
     }
 
-    if (!files || files.length === 0) {
-      toast.error('File is required')
+    if (!submittalId) {
+      setError('Submittal ID is missing.')
       return
     }
 
@@ -404,23 +443,37 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
         multipleRecipients.forEach((id) => formData.append('multipleRecipients[]', id))
       }
       if (canUpdateMilestone) {
-        selectedMileStoneIds.forEach((id) => formData.append('mileStoneId[]', id))
+        selectedMileStoneIds.forEach((id) => {
+          formData.append('mileStoneId[]', id)
+          formData.append('mileStoneIds[]', id)
+        })
         if (selectedMileStoneIds.length > 0) {
           formData.append('mileStoneId', selectedMileStoneIds[0])
         }
       }
 
-      const fabricatorName =
+      if (fabricatorId) {
+        formData.append('fabricator_id', fabricatorId)
+        formData.append('fabricatorId', fabricatorId)
+      }
+      if (projectId) {
+        formData.append('project_id', projectId)
+        formData.append('projectId', projectId)
+      }
+
+      let fabricatorName =
         selectedFabricator?.fabName ||
         selectedFabricator?.fabricatorName ||
         selectedFabricator?.name ||
         selectedFabricator?.companyName ||
         selectedFabricator?.fab_name ||
-        submittal?.fabricatorName ||
+        fabricatorDetails?.fabName ||
+        fabricatorDetails?.fabricatorName ||
+        fabricatorDetails?.name ||
         submittal?.fabricator?.fabName ||
-        submittal?.fabricator?.name ||
         submittal?.fabricator?.fabricatorName ||
-        submittal?.fabricator?.companyName ||
+        submittal?.fabricator?.name ||
+        submittal?.fabricatorName ||
         submittal?.project?.fabricatorName ||
         submittal?.project?.fabricator?.fabName ||
         submittal?.project?.fabricator?.name ||
@@ -428,23 +481,44 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
         (typeof submittal?.fabricator === 'string' ? submittal.fabricator : '') ||
         ''
 
-      const projectName =
+      if (!fabricatorName && fabricatorId) {
+        try {
+          const res = await Service.GetFabricatorByID(fabricatorId)
+          const fab = res?.data || res
+          fabricatorName = fab?.fabName || fab?.fabricatorName || fab?.name || fab?.companyName || ''
+        } catch (e) {
+          console.error('Error fetching fabricator name:', e)
+        }
+      }
+
+      let projectName =
         submittal?.project?.projectName ||
         submittal?.project?.name ||
         submittal?.projectName ||
         (typeof submittal?.project === 'string' ? submittal.project : '') ||
         ''
 
+      if (!projectName && projectId) {
+        try {
+          const pRes = await Service.GetProjectById(projectId)
+          const p = pRes?.data?.data || pRes?.data || pRes
+          projectName = p?.projectName || p?.name || ''
+        } catch (e) {
+          console.error('Error fetching project name:', e)
+        }
+      }
+
       formData.append('fabricatorName', fabricatorName)
       formData.append('projectName', projectName)
 
-      await Service.updateSubmittalVersionById(submittal.id, formData, fabricatorName, projectName)
+      await Service.updateSubmittalVersionById(submittalId, formData, fabricatorName, projectName)
 
+      toast.success('Submittal updated successfully!')
       onSuccess?.()
       onClose()
     } catch (err) {
       console.error('Update submittal failed:', err)
-      setError(err?.response?.data?.message || 'Failed to update submittal. Please try again.')
+      setError(err?.response?.data?.message || err?.message || 'Failed to update submittal. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -511,19 +585,6 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
             </button>
           </div>
 
-          {/* Subject */}
-          <div className="space-y-2">
-            <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
-              Subject *
-            </label>
-            <input
-              type="text"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="Enter subject"
-              className="w-full px-4 py-2.5 text-sm font-medium text-black bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:border-[#6bbd45] focus:ring-2 focus:ring-[#6bbd45]/20 hover:border-gray-400 transition-all placeholder:text-gray-400"
-            />
-          </div>
 
           {/* Description */}
           <div className="space-y-2">
