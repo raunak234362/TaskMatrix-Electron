@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 
 const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
-  const [subject, setSubject] = useState(submittal?.subject || '')
+  const subject = submittal?.subject || ''
   const [description, setDescription] = useState(
     submittal?.description || submittal?.currentVersion?.description || ''
   )
@@ -414,11 +414,6 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
   }
 
   const handleSubmit = async () => {
-    if (!subject.trim()) {
-      setError('Subject is required.')
-      return
-    }
-
     if (!files || files.length === 0) {
       toast.error('File is required')
       return
@@ -590,19 +585,6 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
             </button>
           </div>
 
-          {/* Subject */}
-          <div className="space-y-2">
-            <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
-              Subject *
-            </label>
-            <input
-              type="text"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="Enter subject"
-              className="w-full px-4 py-2.5 text-sm font-medium text-black bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:border-[#6bbd45] focus:ring-2 focus:ring-[#6bbd45]/20 hover:border-gray-400 transition-all placeholder:text-gray-400"
-            />
-          </div>
 
           {/* Description */}
           <div className="space-y-2">
