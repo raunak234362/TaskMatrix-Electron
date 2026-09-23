@@ -441,6 +441,22 @@ const GetSubmittalByID = ({ id, onClose }) => {
                   </div>
                 </div>
 
+                {/* Submittal Description */}
+                {(() => {
+                  const rawDesc = submittal.currentVersion?.description || sortedVersions[0]?.description || "";
+                  const plainDesc = rawDesc.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+                  if (!plainDesc) return null;
+                  return (
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <SectionTitle title="Description" />
+                      <div
+                        className="p-4 bg-white border border-gray-200 rounded-none prose prose-sm max-w-none text-sm text-gray-700 overflow-x-auto"
+                        dangerouslySetInnerHTML={{ __html: rawDesc }}
+                      />
+                    </div>
+                  );
+                })()}
+
                 {/* Single Version File Display */}
                 {!hasMultipleVersions && sortedVersions.length === 1 && (
                   <div className="mt-6 pt-6 border-t border-gray-200">
