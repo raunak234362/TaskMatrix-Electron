@@ -229,7 +229,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
 
   if (loading) {
     return createPortal(
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-100">
         <div className="bg-white rounded-none border-2 border-black p-10 flex flex-col items-center">
           <Loader2 className="w-12 h-12 animate-spin text-[#6bbd45]" />
           <p className="mt-4 text-sm font-bold text-black uppercase">Loading task details...</p>
@@ -241,7 +241,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
 
   if (!task) {
     return createPortal(
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-100">
         <div className="bg-white rounded-none border-2 border-black p-10 text-center max-w-md">
           <div className="w-16 h-16 bg-gray-200 rounded-none mx-auto mb-4 flex items-center justify-center border border-black">
             <FileText className="w-10 h-10 text-black" />
