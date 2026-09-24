@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Loader2, FileText, Timer, ClipboardList, Edit, History } from 'lucide-react'
+import { Loader2, FileText, Timer, ClipboardList, Edit, History, ChevronDown, ChevronRight } from 'lucide-react'
 import Service from '../../api/Service'
 import { toast } from 'react-toastify'
 import EditTask from './EditTask'
@@ -22,6 +22,16 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
   const [staffData, setStaffData] = useState([])
   const [showAllSessions, setShowAllSessions] = useState(false)
+  const [expandedWorkingDates, setExpandedWorkingDates] = useState({})
+  const [expandedHistoryDates, setExpandedHistoryDates] = useState({})
+
+  const toggleWorkingDate = (date) => {
+    setExpandedWorkingDates((prev) => ({ ...prev, [date]: !prev[date] }))
+  }
+
+  const toggleHistoryDate = (date) => {
+    setExpandedHistoryDates((prev) => ({ ...prev, [date]: !prev[date] }))
+  }
 
   const fetchTask = async () => {
     if (!id) return
@@ -265,6 +275,37 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
   const statusConfig = getStatusConfig(task.status)
   const priority = getPriorityLabel(task.priority)
 
+  const allSessions = [...(task?.workingHourTask || [])].reverse()
+  const dailyTotals = allSessions.reduce((acc, session) => {
+    const dateStr = toIST(session.started_at).split(',')[0].trim()
+    acc[dateStr] = (acc[dateStr] || 0) + (Number(session.duration_seconds) || 0)
+    return acc
+  }, {})
+
+  const sessionsToDisplay = allSessions.slice(0, showAllSessions ? allSessions.length : 5)
+  const groupedDisplay = []
+  sessionsToDisplay.forEach((session) => {
+    const dateStr = toIST(session.started_at).split(',')[0].trim()
+    let group = groupedDisplay.find((g) => g.date === dateStr)
+    if (!group) {
+      group = { date: dateStr, totalDuration: dailyTotals[dateStr], sessions: [] }
+      groupedDisplay.push(group)
+    }
+    group.sessions.push(session)
+  })
+
+  const allHistory = [...(task?.allocationLog?.history || [])].reverse()
+  const groupedHistory = []
+  allHistory.forEach((entry, idx) => {
+    const dateStr = toIST(entry.updatedAt).split(',')[0].trim()
+    let group = groupedHistory.find((g) => g.date === dateStr)
+    if (!group) {
+      group = { date: dateStr, entries: [] }
+      groupedHistory.push(group)
+    }
+    group.entries.push({ ...entry, originalIndex: task.allocationLog.history.length - idx })
+  })
+
   return createPortal(
     <div className="fixed inset-0 z-90 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="bg-[#fcfdfc] rounded-none shadow-2xl w-full max-w-[95vw] lg:max-w-7xl h-[90vh] border-2 border-black overflow-hidden flex flex-col relative">
@@ -428,42 +469,65 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-black">
-                          {[...task.workingHourTask]
-                            .reverse()
-                            .slice(0, showAllSessions ? task.workingHourTask.length : 5)
-                            .map((session, idx) => (
-                              <tr key={idx}>
-                                <td className="px-3 py-2 text-black text-sm font-medium uppercase">
-                                  <div className="font-medium">
-                                    {toIST(session.started_at).split(',')[1]}
-                                  </div>
-                                  <div className="text-sm text-black uppercase font-medium">
-                                    {toIST(session.started_at).split(',')[0]}
-                                  </div>
-                                </td>
-                                <td className="px-3 py-2 text-black text-sm font-medium uppercase">
-                                  {session.ended_at ? (
-                                    <>
+                          {groupedDisplay.map((group, groupIdx) => {
+                            const isExpanded = expandedWorkingDates[group.date]
+                            return (
+                              <React.Fragment key={groupIdx}>
+                                <tr 
+                                  className="bg-gray-100 cursor-pointer hover:bg-gray-200 transition-colors"
+                                  onClick={() => toggleWorkingDate(group.date)}
+                                >
+                                  <td
+                                    colSpan="3"
+                                    className="px-3 py-2 text-black text-sm font-bold uppercase border-y border-black"
+                                  >
+                                    <div className="flex justify-between items-center w-full">
+                                      <div className="flex items-center gap-2">
+                                        {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                        <span>{group.date} ({group.sessions.length})</span>
+                                      </div>
+                                      <span>
+                                        Total: {group.totalDuration ? formatHours(group.totalDuration / 3600) : '--:--'}
+                                      </span>
+                                    </div>
+                                  </td>
+                                </tr>
+                                {isExpanded && group.sessions.map((session, idx) => (
+                                  <tr key={`${groupIdx}-${idx}`}>
+                                    <td className="px-3 py-2 text-black text-sm font-medium uppercase">
                                       <div className="font-medium">
-                                        {toIST(session.ended_at).split(',')[1]}
+                                        {toIST(session.started_at).split(',')[1]}
                                       </div>
-                                      <div className="text-sm text-black uppercase font-medium">
-                                        {toIST(session.ended_at).split(',')[0]}
+                                      <div className="text-xs text-gray-600 uppercase font-medium">
+                                        {toIST(session.started_at).split(',')[0]}
                                       </div>
-                                    </>
-                                  ) : (
-                                    <span className="text-green-600 font-medium uppercase text-sm animate-pulse">
-                                      Active
-                                    </span>
-                                  )}
-                                </td>
-                                <td className="px-3 py-2 text-right font-medium text-black text-sm uppercase">
-                                  {session.duration_seconds
-                                    ? formatHours(session.duration_seconds / 3600)
-                                    : '--:--'}
-                                </td>
-                              </tr>
-                            ))}
+                                    </td>
+                                    <td className="px-3 py-2 text-black text-sm font-medium uppercase">
+                                      {session.ended_at ? (
+                                        <>
+                                          <div className="font-medium">
+                                            {toIST(session.ended_at).split(',')[1]}
+                                          </div>
+                                          <div className="text-xs text-gray-600 uppercase font-medium">
+                                            {toIST(session.ended_at).split(',')[0]}
+                                          </div>
+                                        </>
+                                      ) : (
+                                        <span className="text-green-600 font-medium uppercase text-sm animate-pulse">
+                                          Active
+                                        </span>
+                                      )}
+                                    </td>
+                                    <td className="px-3 py-2 text-right font-medium text-black text-sm uppercase">
+                                      {session.duration_seconds
+                                        ? formatHours(session.duration_seconds / 3600)
+                                        : '--:--'}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </React.Fragment>
+                            )
+                          })}
                         </tbody>
                       </table>
                       {task.workingHourTask.length > 5 && (
@@ -513,26 +577,42 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-black/10">
-                            {[...task.allocationLog.history]
-                              .reverse()
-                              .map((entry, idx) => (
-                                <tr key={idx} className="hover:bg-slate-50 transition-all">
-                                  <td className="px-3 py-2 font-bold text-black">
-                                    {task.allocationLog.history.length - idx}
-                                  </td>
-                                  <td className="px-3 py-2 font-bold text-black uppercase">
-                                    {entry.allocatedHours || '—'}
-                                  </td>
-                                  <td className="px-3 py-2 text-black">
-                                    <div className="font-medium">
-                                      {toIST(entry.updatedAt).split(',')[1]?.trim() || '—'}
-                                    </div>
-                                    <div className="text-black/60 font-medium">
-                                      {toIST(entry.updatedAt).split(',')[0]}
-                                    </div>
-                                  </td>
-                                </tr>
-                              ))}
+                            {groupedHistory.map((group, groupIdx) => {
+                              const isExpanded = expandedHistoryDates[group.date]
+                              return (
+                                <React.Fragment key={groupIdx}>
+                                  <tr 
+                                    className="bg-gray-100 cursor-pointer hover:bg-gray-200 transition-colors"
+                                    onClick={() => toggleHistoryDate(group.date)}
+                                  >
+                                    <td
+                                      colSpan="3"
+                                      className="px-3 py-2 text-black text-sm font-bold uppercase border-y border-black"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                        <span>{group.date} ({group.entries.length})</span>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                  {isExpanded && group.entries.map((entry, idx) => (
+                                    <tr key={`${groupIdx}-${idx}`} className="hover:bg-slate-50 transition-all">
+                                      <td className="px-3 py-2 font-bold text-black">
+                                        {entry.originalIndex}
+                                      </td>
+                                      <td className="px-3 py-2 font-bold text-black uppercase">
+                                        {entry.allocatedHours || '—'}
+                                      </td>
+                                      <td className="px-3 py-2 text-black">
+                                        <div className="font-medium">
+                                          {toIST(entry.updatedAt).split(',')[1]?.trim() || '—'}
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </React.Fragment>
+                              )
+                            })}
                           </tbody>
                         </table>
                       </div>
