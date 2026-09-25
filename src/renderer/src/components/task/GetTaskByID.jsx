@@ -449,6 +449,8 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                     'admin',
                     'project_manager',
                     'human_resource',
+                    'operation_executive',
+                    'operation_executive_trainee',
                     'department_manager',
                     'deputy_manager',
                     'dept_manager'
