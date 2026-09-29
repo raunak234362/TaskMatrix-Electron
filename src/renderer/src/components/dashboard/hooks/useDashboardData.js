@@ -48,7 +48,7 @@ export const useDashboardData = () => {
     clientSidePendingRFI: [],
     clientSidePendingRFQ: [],
     clientSidePendingCO: [],
-    pmDashboard: [],
+    pmDashboard: {},
     projectStats: {
       totalProjects: 0,
       activeProjects: 0,
@@ -159,7 +159,7 @@ export const useDashboardData = () => {
         let clientRfiRes, clientSubRes, clientCoRes, clientRfqRes, pendingSubRes
 
         const requests = [
-          Service.GetAllProjects(),
+          Service.GetAllProjects(1, 10000),
           Service.FetchAllRFQ(),
           Service.GetAllInvoice(),
           Service.GetMyTask()
@@ -433,6 +433,15 @@ export const useDashboardData = () => {
 
         const basePendingSubmittalsArray = (userRole === 'admin' || userRole === 'deputy_manager' || userRole === 'project_manager_officer') ? submittals : submittals;
 
+        const opExecPendingApprovals =
+          (pmDashboard?.unapprovedRFIsCount || 0) +
+          (pmDashboard?.unapprovedSubmittalsCount || 0) +
+          (pmDashboard?.unapprovedChangeOrdersCount || 0)
+
+        if (opExecPendingApprovals > 0) {
+          setUnapprovedListsCount((prev) => prev || opExecPendingApprovals)
+        }
+
         setAdminData(prev => ({
           ...prev,
           projects,
@@ -451,16 +460,27 @@ export const useDashboardData = () => {
           clientSidePendingRFQ: clientRfqs,
           unapprovedCO: unapprovedCOList,
           pmDashboard,
+          projectTrackingActions: pmDashboard?.projectTrackingActions || {},
           allRfqs,
           projectStats: {
-            totalProjects: pmDashboard?.totalProjects ?? projects.length,
+            ...pmDashboard?.projectStats,
+            totalProjects:
+              pmDashboard?.projectStats?.totalProjects ??
+              pmDashboard?.totalProjects ??
+              projects.length,
             activeProjects:
+              pmDashboard?.projectStats?.ACTIVE ??
+              pmDashboard?.projectStats?.activeProjects ??
               pmDashboard?.totalActiveProjects ??
               projects.filter((p) => p.status?.toUpperCase() === 'ACTIVE' || p.status?.toUpperCase() === 'IN_PROGRESS').length,
             completedProjects:
+              pmDashboard?.projectStats?.COMPLETE ??
+              pmDashboard?.projectStats?.completedProjects ??
               pmDashboard?.totalCompleteProject ??
               projects.filter((p) => p.status?.toUpperCase() === 'COMPLETED' || p.status?.toUpperCase() === 'COMPLETE').length,
             onHoldProjects:
+              pmDashboard?.projectStats?.ONHOLD ??
+              pmDashboard?.projectStats?.onHoldProjects ??
               pmDashboard?.totalOnHoldProject ??
               projects.filter((p) => p.status?.toUpperCase() === 'ON_HOLD' || p.status?.toUpperCase() === 'ON-HOLD').length
           },
@@ -478,7 +498,7 @@ export const useDashboardData = () => {
             pendingChangeOrdersWbt: pmDashboard?.pendingChangeOrders ?? coList.length,
             pendingChangeOrdersClient: pmDashboard?.clientSidePendingActions?.changeOrders ?? clientCos.length,
             newChangeOrders: pmDashboard?.newChangeOrders ?? 0,
-            unapprovedChangeOrders: unapprovedCOList.length,
+            unapprovedChangeOrders: pmDashboard?.unapprovedChangeOrdersCount ?? unapprovedCOList.length,
             
             pendingRFQ: (pmDashboard?.pendingRFQ ?? rfqList.length) + (pmDashboard?.clientSidePendingActions?.rfq ?? clientRfqs.length),
             pendingRfqWbt: pmDashboard?.pendingRFQ ?? rfqList.length,
@@ -492,10 +512,25 @@ export const useDashboardData = () => {
           console.log(`📊 ${userRole.toUpperCase()} Dashboard Data:`, {
             pmDashboard,
             projectStats: {
-              totalProjects: pmDashboard?.totalProjects ?? projects.length,
-              activeProjects: pmDashboard?.totalActiveProjects,
-              completedProjects: pmDashboard?.totalCompleteProject,
-              onHoldProjects: pmDashboard?.totalOnHoldProject
+              totalProjects:
+                pmDashboard?.projectStats?.totalProjects ??
+                pmDashboard?.totalProjects ??
+                projects.length,
+              activeProjects:
+                pmDashboard?.projectStats?.ACTIVE ??
+                pmDashboard?.projectStats?.activeProjects ??
+                pmDashboard?.totalActiveProjects ??
+                projects.filter((p) => p.status?.toUpperCase() === 'ACTIVE' || p.status?.toUpperCase() === 'IN_PROGRESS').length,
+              completedProjects:
+                pmDashboard?.projectStats?.COMPLETE ??
+                pmDashboard?.projectStats?.completedProjects ??
+                pmDashboard?.totalCompleteProject ??
+                projects.filter((p) => p.status?.toUpperCase() === 'COMPLETED' || p.status?.toUpperCase() === 'COMPLETE').length,
+              onHoldProjects:
+                pmDashboard?.projectStats?.ONHOLD ??
+                pmDashboard?.projectStats?.onHoldProjects ??
+                pmDashboard?.totalOnHoldProject ??
+                projects.filter((p) => p.status?.toUpperCase() === 'ON_HOLD' || p.status?.toUpperCase() === 'ON-HOLD').length
             },
             dashboardStats: {
               pendingRFI: pmDashboard?.pendingRFI ?? rfis.length,
