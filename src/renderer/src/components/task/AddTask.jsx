@@ -103,6 +103,29 @@ const formatBundleDisplayName = (w) => {
   return "Unnamed Bundle";
 };
 
+const getBundleStage = (w) => {
+  if (!w) return "";
+  const raw =
+    w.stage ||
+    w.bundle?.stage ||
+    w.Stage ||
+    w.bundle?.Stage ||
+    (Array.isArray(w.wbs) && w.wbs[0]?.stage) ||
+    "";
+  return String(raw).toUpperCase().trim();
+};
+
+const normalizeStage = (stage) => {
+  if (!stage) return "";
+  const s = String(stage).toUpperCase().replace(/[-_\s]/g, "").trim();
+  if (s.includes("RIFA")) return "RIFA";
+  if (s.includes("RIFC")) return "RIFC";
+  if (s.includes("IFA")) return "IFA";
+  if (s.includes("IFC")) return "IFC";
+  if (s === "CO" || s === "COR" || s.includes("CHANGORDER") || s.includes("CHANGEORDER")) return "CO";
+  return s;
+};
+
 const AddTask = () => {
   const [taskCategory, setTaskCategory] = useState("MILESTONE");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -348,12 +371,8 @@ const AddTask = () => {
         (m) => String(m.id || m._id || m.milestoneId || m.mileStoneId) === String(selectedMilestoneId),
       );
       if (milestone) {
-        const msStage = (milestone.stage || "").toUpperCase();
-        if (msStage.includes("RIFA")) {
-          setValue("Stage", "RIFA");
-        } else if (msStage.includes("RIFC")) {
-          setValue("Stage", "RIFC");
-        } else if (msStage === "IFA" || msStage === "IFC") {
+        const msStage = normalizeStage(milestone.stage || "");
+        if (msStage === "RIFA" || msStage === "RIFC" || msStage === "IFA" || msStage === "IFC" || msStage === "CO") {
           setValue("Stage", msStage);
         }
       }
@@ -474,35 +493,21 @@ const AddTask = () => {
       selectedWbsType === "others" ||
       category === baseType;
 
-    // Normalize selectedStage for comparison (RIFA -> IFA, RIFC -> IFC)
-    const normalizedSelectedStage = (selectedStage || "").toUpperCase().trim();
-    let compareStage = normalizedSelectedStage;
-    if (compareStage.includes("RIFA")) compareStage = "IFA";
-    else if (compareStage.includes("RIFC")) compareStage = "IFC";
+    if (!typeOk) return false;
 
-    const wStage = (w.stage || "").toUpperCase().trim();
+    if (!selectedStage) return true;
 
-    // Check if any bundle in this project has a matching stage
-    const hasMatchingStageInBundles = bundles.some((b) => {
-      const bs = (b.stage || "").toUpperCase().trim();
-      return (
-        bs === compareStage ||
-        bs === normalizedSelectedStage ||
-        (compareStage.includes("IFA") && bs.includes("IFA")) ||
-        (compareStage.includes("IFC") && bs.includes("IFC"))
-      );
-    });
+    const normSelected = normalizeStage(selectedStage);
+    const wStage = normalizeStage(getBundleStage(w));
 
-    const stageOk =
-      !selectedStage ||
-      !hasMatchingStageInBundles ||
-      !wStage ||
-      wStage === compareStage ||
-      wStage === normalizedSelectedStage ||
-      (compareStage.includes("IFA") && wStage.includes("IFA")) ||
-      (compareStage.includes("IFC") && wStage.includes("IFC"));
+    // Check if any bundle in this project has a valid stage defined
+    const hasAnyStageInBundles = bundles.some((b) =>
+      Boolean(normalizeStage(getBundleStage(b)))
+    );
+    if (!hasAnyStageInBundles) return true;
 
-    return typeOk && stageOk;
+    // STRICT MATCH: Only show bundles matching the selected stage (IFA, IFC, RIFA, RIFC, CO)
+    return wStage === normSelected;
   });
 
   const assignments = watch("assignments") || [];
@@ -517,8 +522,8 @@ const AddTask = () => {
 
   const totalWbsHours = selectedWbs && !isOtherWbs
     ? (selectedWbsType?.toLowerCase().includes("checking")
-      ? selectedWbs.totalCheckHr || 0
-      : selectedWbs.totalExecHr || 0) / 60
+      ? selectedWbs.totalCheckHr || selectedWbs.bundle?.totalCheckHr || 0
+      : selectedWbs.totalExecHr || selectedWbs.bundle?.totalExecHr || 0) / 60
     : 0;
 
   // For 'Other', we don't calculate limits
@@ -887,14 +892,18 @@ const AddTask = () => {
 
   const wbsOptions = selectedWbsType === "others"
     ? (() => {
-      const otherBundles = bundles.filter((w) => {
+      const otherBundles = filteredWbsItems.filter((w) => {
         return getBundleCategory(w) === "others";
       });
 
-      const items = otherBundles.flatMap(bundle => (bundle.wbs || []).map(item => ({
-        label: `${item.wbsTemplate?.name || item.name || "Unnamed Activity"}${bundle.stage && String(bundle.stage).toLowerCase() !== String(selectedStage).toLowerCase() ? ` (${bundle.stage})` : ""}`,
-        value: item.id,
-      })));
+      const items = otherBundles.flatMap(bundle => (bundle.wbs || []).map(item => {
+        const bStage = getBundleStage(bundle);
+        const showStage = bStage && bStage.toLowerCase() !== String(selectedStage || "").toLowerCase();
+        return {
+          label: `${item.wbsTemplate?.name || item.name || "Unnamed Activity"}${showStage ? ` (${bStage})` : ""}`,
+          value: item.id,
+        };
+      }));
 
       if (items.length > 0) {
         return [
@@ -917,7 +926,9 @@ const AddTask = () => {
       const bundleName = formatBundleDisplayName(w);
 
       // Fallback if no nested wbs items
-      const totalMinutes = isChecking ? w.totalCheckHr || 0 : w.totalExecHr || 0;
+      const totalMinutes = isChecking
+        ? (w.totalCheckHr || w.bundle?.totalCheckHr || 0)
+        : (w.totalExecHr || w.bundle?.totalExecHr || 0);
       let existingHours = 0;
       const filtered = projectTasks.filter((t) => {
         const taskId = t.project_bundle_id || t.wbs_id;
@@ -1120,7 +1131,7 @@ const AddTask = () => {
                               setValue("project_bundle_id", "");
                               setSelectedWbs(null);
                             }}
-                            placeholder="Select Stage"
+                            placeholder="Select Status"
                           />
                         )}
                       />
@@ -1171,6 +1182,7 @@ const AddTask = () => {
                               { label: "IFC", value: "IFC" },
                               { label: "R-IFA", value: "RIFA" },
                               { label: "R-IFC", value: "RIFC" },
+                              { label: "CO", value: "CO" },
                             ]}
                             value={field.value}
                             onChange={(_, val) => {
