@@ -487,7 +487,7 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
             Description
           </label>
           <RichTextEditor
-            value={description}
+            value={description || ''}
             onChange={setDescription}
             placeholder="Enter submittal description..."
           />
@@ -498,7 +498,7 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
             Submittals Notes
           </label>
           <RichTextEditor
-            value={notes}
+            value={notes || ''}
             onChange={setNotes}
             placeholder="Enter submittal notes..."
           />

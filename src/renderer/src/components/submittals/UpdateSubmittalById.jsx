@@ -12,6 +12,9 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
   const [description, setDescription] = useState(
     submittal?.description || submittal?.currentVersion?.description || ''
   )
+  const [notes, setNotes] = useState(
+    submittal?.notes || submittal?.currentVersion?.notes || ''
+  )
   const [files, setFiles] = useState([])
   const [submitting, setSubmitting] = useState(false)
   const [savingMilestone, setSavingMilestone] = useState(false)
@@ -431,6 +434,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
       const formData = new FormData()
       formData.append('subject', subject)
       formData.append('description', description)
+      formData.append('notes', notes)
       formData.append('isConnectionDesign', String(isCDMode))
 
       if (canApprove) {
@@ -591,9 +595,23 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
             </label>
             <div className="border border-gray-300 rounded-xl overflow-hidden bg-gray-50">
               <RichTextEditor
-                value={description}
+                value={description || ''}
                 onChange={setDescription}
                 placeholder="Write the submittal description..."
+              />
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-2">
+            <label className="block text-md font-black text-black uppercase ml-1">
+              Notes
+            </label>
+            <div className="border border-gray-300 rounded-xl overflow-hidden bg-gray-50">
+              <RichTextEditor
+                value={notes || ''}
+                onChange={setNotes}
+                placeholder="Write submittal notes..."
               />
             </div>
           </div>
