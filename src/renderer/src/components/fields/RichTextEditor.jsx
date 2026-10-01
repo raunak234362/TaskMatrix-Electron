@@ -83,7 +83,7 @@ const RichTextEditor = ({
       </style>
       <JoditEditor
         ref={editor}
-        value={value}
+        value={typeof value === 'string' ? value : ''}
         config={config}
         onBlur={(newContent) => onChange(newContent)}
         onChange={() => {}}

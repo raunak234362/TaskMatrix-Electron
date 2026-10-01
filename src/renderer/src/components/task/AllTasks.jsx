@@ -33,6 +33,16 @@ const TaskDetailWrapper = ({ row, close }) => {
 
 const AllTasks = () => {
   const userRole = (sessionStorage.getItem('userRole') || '').toLowerCase().trim()
+  const canSelectRows = [
+    'admin',
+    'project_manager',
+    'operation_executive',
+    'operation_executive_trainee',
+    'department_manager',
+    'human_resource',
+    'deputy_manager',
+    'dept_manager'
+  ].includes(userRole)
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -946,7 +956,7 @@ const AllTasks = () => {
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        {Object.keys(rowSelection).length > 0 && (
+        {canSelectRows && Object.keys(rowSelection).length > 0 && (
           <button
             onClick={() => setShowBulkUpdateModal(true)}
             className="flex items-center gap-2 px-4 py-2 border border-black  hover:bg-gray-200 text-black rounded-lg transition-colors shadow-sm"
@@ -971,7 +981,7 @@ const AllTasks = () => {
             columns={columns}
             data={filteredTasks}
             detailComponent={TaskDetailWrapper}
-            enableRowSelection={true}
+            enableRowSelection={canSelectRows}
             rowSelection={rowSelection}
             onRowSelectionChange={setRowSelection}
             getRowId={(row) => row.id}

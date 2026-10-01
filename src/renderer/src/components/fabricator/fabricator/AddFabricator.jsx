@@ -52,6 +52,12 @@ const AddFabricator = () => {
           "fabricatPercentage",
           String(parseFloat(String(data.fabricatPercentage))),
         );
+      if (data.wprDate !== undefined && data.wprDate !== "" && data.wprDate !== null) {
+        formData.append(
+          "wprDate",
+          String(parseInt(String(data.wprDate), 10)),
+        );
+      }
 
       if (Array.isArray(data.files) && data.files.length > 0) {
         // Append each file to the FormData
@@ -155,6 +161,31 @@ const AddFabricator = () => {
               {String(errors.fabStage.message)}
             </p>
           )}
+        </div>
+
+        {/* WPR Date Selection */}
+        <div>
+          <label className="block text-gray-700 font-semibold mb-1">
+            WPR Date (Weekly Report Day)
+          </label>
+          <select
+            {...register("wprDate", {
+              setValueAs: (v) =>
+                v === "" || v === null || v === undefined
+                  ? ""
+                  : parseInt(String(v), 10),
+            })}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-green-500 focus:border-green-500 outline-none bg-white transition-all shadow-sm"
+          >
+            <option value="">Select WPR Day</option>
+            <option value={1}>1 - Monday</option>
+            <option value={2}>2 - Tuesday</option>
+            <option value={3}>3 - Wednesday</option>
+            <option value={4}>4 - Thursday</option>
+            <option value={5}>5 - Friday</option>
+            <option value={6}>6 - Saturday</option>
+            <option value={7}>7 - Sunday</option>
+          </select>
         </div>
         {(userRole === "ADMIN" || userRole === "PROJECT_MANAGER_OFFICER") && (
           <>

@@ -8,6 +8,7 @@ import {
   Clock4,
   ChevronDown,
   ChevronUp,
+  ChevronRight,
   Building2,
   Hash,
   Timer,
@@ -39,6 +40,12 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
   const [completionPercentage, setCompletionPercentage] = useState('')
   const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
   const [isRequestingTraining, setIsRequestingTraining] = useState(false)
+  const [expandedWorkingDates, setExpandedWorkingDates] = useState({})
+  
+  const toggleWorkingDate = (date) => {
+    setExpandedWorkingDates((prev) => ({ ...prev, [date]: !prev[date] }))
+  }
+
   const fetchTask = async () => {
     if (!id) return
     try {
@@ -446,6 +453,24 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
   const statusConfig = getStatusConfig(task.status)
   const priority = getPriorityLabel(task.priority)
 
+  const allSessions = [...(task?.workingHourTask || [])].reverse()
+  const dailyTotals = allSessions.reduce((acc, session) => {
+    const dateStr = toIST(session.started_at).split(',')[0].trim()
+    acc[dateStr] = (acc[dateStr] || 0) + (Number(session.duration_seconds) || 0)
+    return acc
+  }, {})
+
+  const groupedDisplay = []
+  allSessions.forEach((session) => {
+    const dateStr = toIST(session.started_at).split(',')[0].trim()
+    let group = groupedDisplay.find((g) => g.date === dateStr)
+    if (!group) {
+      group = { date: dateStr, totalDuration: dailyTotals[dateStr], sessions: [] }
+      groupedDisplay.push(group)
+    }
+    group.sessions.push(session)
+  })
+
   return createPortal(
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] overflow-hidden flex flex-col relative">
@@ -733,33 +758,68 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-indigo-100">
-                            {[...task.workingHourTask].reverse().map((session, idx) => (
-                              <tr
-                                key={session.id || idx}
-                                className="hover:bg-indigo-50/30 transition-colors"
-                              >
-                                <td className="px-4 py-3 font-semibold text-indigo-900 capitalize">
-                                  {session.type?.toLowerCase() || 'Work'}
-                                </td>
-                                <td className="px-4 py-3 text-gray-700">
-                                  {toIST(session.started_at)}
-                                </td>
-                                <td className="px-4 py-3 text-gray-700">
-                                  {session.ended_at ? (
-                                    toIST(session.ended_at)
-                                  ) : (
-                                    <span className="text-emerald-600  animate-pulse flex items-center gap-1">
-                                      <Play className="w-3 h-3 fill-current" /> Running...
-                                    </span>
-                                  )}
-                                </td>
-                                <td className="px-4 py-3 text-right font-mono  text-indigo-700">
-                                  {session.duration_seconds
-                                    ? formatSecondsToHHMM(session.duration_seconds)
-                                    : '—'}
-                                </td>
-                              </tr>
-                            ))}
+                            {groupedDisplay.map((group, groupIdx) => {
+                              const isExpanded = expandedWorkingDates[group.date]
+                              return (
+                                <React.Fragment key={groupIdx}>
+                                  <tr 
+                                    className="bg-indigo-50/30 cursor-pointer hover:bg-indigo-50 transition-colors"
+                                    onClick={() => toggleWorkingDate(group.date)}
+                                  >
+                                    <td colSpan="4" className="px-4 py-3 font-bold text-indigo-900 border-y border-indigo-100">
+                                      <div className="flex justify-between items-center w-full">
+                                        <div className="flex items-center gap-2">
+                                          {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                          <span>{group.date} ({group.sessions.length})</span>
+                                        </div>
+                                        <span>
+                                          Total: {group.totalDuration ? formatSecondsToHHMM(group.totalDuration) : '—'}
+                                        </span>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                  {isExpanded && group.sessions.map((session, idx) => (
+                                    <tr
+                                      key={session.id || `${groupIdx}-${idx}`}
+                                      className="hover:bg-indigo-50/30 transition-colors"
+                                    >
+                                      <td className="px-4 py-3 font-semibold text-indigo-900 capitalize">
+                                        {session.type?.toLowerCase() || 'Work'}
+                                      </td>
+                                      <td className="px-4 py-3 text-gray-700">
+                                        <div className="font-medium">
+                                          {toIST(session.started_at).split(',')[1]}
+                                        </div>
+                                        <div className="text-xs text-gray-500 uppercase">
+                                          {toIST(session.started_at).split(',')[0]}
+                                        </div>
+                                      </td>
+                                      <td className="px-4 py-3 text-gray-700">
+                                        {session.ended_at ? (
+                                          <>
+                                            <div className="font-medium">
+                                              {toIST(session.ended_at).split(',')[1]}
+                                            </div>
+                                            <div className="text-xs text-gray-500 uppercase">
+                                              {toIST(session.ended_at).split(',')[0]}
+                                            </div>
+                                          </>
+                                        ) : (
+                                          <span className="text-emerald-600 animate-pulse flex items-center gap-1">
+                                            <Play className="w-3 h-3 fill-current" /> Running...
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td className="px-4 py-3 text-right font-mono text-indigo-700">
+                                        {session.duration_seconds
+                                          ? formatSecondsToHHMM(session.duration_seconds)
+                                          : '—'}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </React.Fragment>
+                              )
+                            })}
                           </tbody>
                         </table>
                       </div>

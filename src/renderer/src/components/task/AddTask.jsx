@@ -41,6 +41,91 @@ const parseHHMMToMinutes = (hhmm) => {
   return h * 60 + m;
 };
 
+const normType = (s) =>
+  String(s || "")
+    .toLowerCase()
+    .replace(/[\s_-]+/g, "")
+    .replace(/modelling/g, "modeling");
+
+const getBundleCategory = (w) => {
+  if (!w) return "";
+
+  // 1. Direct category on w or w.bundle
+  const rawCat = (
+    w.category ||
+    w.bundle?.category ||
+    w.type ||
+    ""
+  ).toLowerCase().trim();
+
+  if (rawCat) {
+    if (rawCat.includes("model")) return "modeling";
+    if (rawCat.includes("detail")) return "detailing";
+    if (rawCat.includes("erect")) return "erection";
+    if (rawCat.includes("other")) return "others";
+    return rawCat.replace(/modelling/g, "modeling");
+  }
+
+  // 2. Infer from bundleKey or w.bundle?.bundleKey
+  const rawKey = (w.bundleKey || w.bundle?.bundleKey || "").toUpperCase();
+  if (
+    rawKey.includes("PLACEMENT") ||
+    rawKey.includes("CONNECTION") ||
+    rawKey.includes("MODEL")
+  ) {
+    return "modeling";
+  }
+  if (rawKey.includes("DETAIL")) return "detailing";
+  if (rawKey.includes("ERECT")) return "erection";
+  if (rawKey.includes("OTHER")) return "others";
+
+  // 3. Infer from name
+  const rawName = (w.name || w.bundle?.name || "").toLowerCase();
+  if (rawName.includes("model")) return "modeling";
+  if (rawName.includes("detail")) return "detailing";
+  if (rawName.includes("erect")) return "erection";
+  if (rawName.includes("other")) return "others";
+
+  return "";
+};
+
+const formatBundleDisplayName = (w) => {
+  if (!w) return "Unnamed Bundle";
+  if (w.name) return String(w.name).trim();
+  if (w.bundle?.name) return String(w.bundle.name).trim();
+  const key = w.bundleKey || w.bundle?.bundleKey;
+  if (key) {
+    return String(key)
+      .replace(/_/g, " ")
+      .toLowerCase()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  return "Unnamed Bundle";
+};
+
+const getBundleStage = (w) => {
+  if (!w) return "";
+  const raw =
+    w.stage ||
+    w.bundle?.stage ||
+    w.Stage ||
+    w.bundle?.Stage ||
+    (Array.isArray(w.wbs) && w.wbs[0]?.stage) ||
+    "";
+  return String(raw).toUpperCase().trim();
+};
+
+const normalizeStage = (stage) => {
+  if (!stage) return "";
+  const s = String(stage).toUpperCase().replace(/[-_\s]/g, "").trim();
+  if (s.includes("RIFA")) return "RIFA";
+  if (s.includes("RIFC")) return "RIFC";
+  if (s.includes("IFA")) return "IFA";
+  if (s.includes("IFC")) return "IFC";
+  if (s === "CO" || s === "COR" || s.includes("CHANGORDER") || s.includes("CHANGEORDER")) return "CO";
+  return s;
+};
+
 const AddTask = () => {
   const [taskCategory, setTaskCategory] = useState("MILESTONE");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -286,12 +371,8 @@ const AddTask = () => {
         (m) => String(m.id || m._id || m.milestoneId || m.mileStoneId) === String(selectedMilestoneId),
       );
       if (milestone) {
-        const msStage = (milestone.stage || "").toUpperCase();
-        if (msStage.includes("RIFA")) {
-          setValue("Stage", "RIFA");
-        } else if (msStage.includes("RIFC")) {
-          setValue("Stage", "RIFC");
-        } else if (msStage === "IFA" || msStage === "IFC") {
+        const msStage = normalizeStage(milestone.stage || "");
+        if (msStage === "RIFA" || msStage === "RIFC" || msStage === "IFA" || msStage === "IFC" || msStage === "CO") {
           setValue("Stage", msStage);
         }
       }
@@ -308,7 +389,12 @@ const AddTask = () => {
           if (b.wbs && Array.isArray(b.wbs)) {
             const found = b.wbs.find((w) => String(w.id) === String(selectedWbsId));
             if (found) {
-              localWbs = found;
+              localWbs = {
+                ...found,
+                projectBundleId: b.id,
+                totalExecHr: found.totalExecHr || b.totalExecHr,
+                totalCheckHr: found.totalCheckHr || b.totalCheckHr,
+              };
               break;
             }
           }
@@ -328,7 +414,7 @@ const AddTask = () => {
           // Fetch full/updated info from API
           const res = await Service.GetWBSById(selectedWbsId);
           if (res?.data) {
-            setSelectedWbs(res.data);
+            setSelectedWbs((prev) => ({ ...(prev || {}), ...res.data }));
           }
         } catch (error) {
           console.error("Error fetching WBS details:", error);
@@ -346,14 +432,15 @@ const AddTask = () => {
   useEffect(() => {
     if (selectedWbsId && selectedWbsType) {
       const isChecking = selectedWbsType.toLowerCase().includes("checking");
+      const normSelType = normType(selectedWbsType);
 
       // Check projectTasks first as it covers all tasks
       if (projectTasks.length > 0) {
         const filtered = projectTasks.filter((t) => {
           const taskId = t.project_bundle_id || t.wbs_id;
           const typeMatch =
-            String(t.wbsType).toLowerCase() ===
-            String(selectedWbsType).toLowerCase();
+            !selectedWbsType ||
+            normType(t.wbsType) === normSelType;
           return String(taskId) === String(selectedWbsId) && typeMatch;
         });
         const totalMinutes = filtered.reduce((sum, t) => {
@@ -366,13 +453,12 @@ const AddTask = () => {
       } else if (selectedWbs?.tasks && selectedWbs.tasks.length > 0) {
         // Use tasks from the object if projectTasks isn't loaded/available
         const filtered = selectedWbs.tasks.filter((t) => {
-          const taskWbsType = (t.wbsType || "").toLowerCase();
           if (isChecking) {
-            return taskWbsType === selectedWbsType.toLowerCase();
+            return normType(t.wbsType) === normSelType;
           } else {
             return (
-              taskWbsType === selectedWbsType.toLowerCase() ||
-              taskWbsType === ""
+              normType(t.wbsType) === normSelType ||
+              !t.wbsType
             );
           }
         });
@@ -393,32 +479,35 @@ const AddTask = () => {
   }, [selectedWbsId, selectedWbs, projectTasks, selectedWbsType]);
 
   const filteredWbsItems = bundles.filter((w) => {
-    const category = (w.bundle?.category || w.type || "").toLowerCase();
-    const isCheckingType = selectedWbsType?.toLowerCase().includes("checking");
-    const baseType = selectedWbsType
-      ?.toLowerCase()
-      .replace("_checking", "")
-      .replace(" checking", "");
+    const category = getBundleCategory(w);
+
+    const baseType = (selectedWbsType || "")
+      .toLowerCase()
+      .replace(/_checking/g, "")
+      .replace(/ checking/g, "")
+      .replace(/modelling/g, "modeling")
+      .trim();
 
     const typeOk =
       !selectedWbsType ||
       selectedWbsType === "others" ||
-      (isCheckingType
-        ? category === baseType
-        : category === selectedWbsType.toLowerCase());
+      category === baseType;
 
-    // Normalize selectedStage for comparison (RIFA -> IFA, RIFC -> IFC)
-    const normalizedSelectedStage = (selectedStage || "").toUpperCase();
-    let compareStage = normalizedSelectedStage;
-    if (compareStage.includes("RIFA")) compareStage = "IFA";
-    else if (compareStage.includes("RIFC")) compareStage = "IFC";
+    if (!typeOk) return false;
 
-    const wStage = (w.stage || "").toUpperCase();
-    const stageOk =
-      !selectedStage ||
-      (wStage === compareStage);
+    if (!selectedStage) return true;
 
-    return typeOk && stageOk;
+    const normSelected = normalizeStage(selectedStage);
+    const wStage = normalizeStage(getBundleStage(w));
+
+    // Check if any bundle in this project has a valid stage defined
+    const hasAnyStageInBundles = bundles.some((b) =>
+      Boolean(normalizeStage(getBundleStage(b)))
+    );
+    if (!hasAnyStageInBundles) return true;
+
+    // STRICT MATCH: Only show bundles matching the selected stage (IFA, IFC, RIFA, RIFC, CO)
+    return wStage === normSelected;
   });
 
   const assignments = watch("assignments") || [];
@@ -433,8 +522,8 @@ const AddTask = () => {
 
   const totalWbsHours = selectedWbs && !isOtherWbs
     ? (selectedWbsType?.toLowerCase().includes("checking")
-      ? selectedWbs.totalCheckHr || 0
-      : selectedWbs.totalExecHr || 0) / 60
+      ? selectedWbs.totalCheckHr || selectedWbs.bundle?.totalCheckHr || 0
+      : selectedWbs.totalExecHr || selectedWbs.bundle?.totalExecHr || 0) / 60
     : 0;
 
   // For 'Other', we don't calculate limits
@@ -803,15 +892,18 @@ const AddTask = () => {
 
   const wbsOptions = selectedWbsType === "others"
     ? (() => {
-      const otherBundles = bundles.filter((w) => {
-        const category = (w.bundle?.category || w.bundleKey || w.category || w.type || "").toLowerCase();
-        return (category === "other" || category === "others");
+      const otherBundles = filteredWbsItems.filter((w) => {
+        return getBundleCategory(w) === "others";
       });
 
-      const items = otherBundles.flatMap(bundle => (bundle.wbs || []).map(item => ({
-        label: `${item.wbsTemplate?.name || item.name || "Unnamed Activity"}${bundle.stage && String(bundle.stage).toLowerCase() !== String(selectedStage).toLowerCase() ? ` (${bundle.stage})` : ""}`,
-        value: item.id,
-      })));
+      const items = otherBundles.flatMap(bundle => (bundle.wbs || []).map(item => {
+        const bStage = getBundleStage(bundle);
+        const showStage = bStage && bStage.toLowerCase() !== String(selectedStage || "").toLowerCase();
+        return {
+          label: `${item.wbsTemplate?.name || item.name || "Unnamed Activity"}${showStage ? ` (${bStage})` : ""}`,
+          value: item.id,
+        };
+      }));
 
       if (items.length > 0) {
         return [
@@ -831,17 +923,18 @@ const AddTask = () => {
     })()
     : filteredWbsItems.map((w) => {
       const isChecking = selectedWbsType?.toLowerCase().includes("checking");
-      const bundleName = w.name || w.bundle?.name || "Unnamed Bundle";
+      const bundleName = formatBundleDisplayName(w);
 
       // Fallback if no nested wbs items
-      const totalMinutes = isChecking ? w.totalCheckHr || 0 : w.totalExecHr || 0;
+      const totalMinutes = isChecking
+        ? (w.totalCheckHr || w.bundle?.totalCheckHr || 0)
+        : (w.totalExecHr || w.bundle?.totalExecHr || 0);
       let existingHours = 0;
       const filtered = projectTasks.filter((t) => {
         const taskId = t.project_bundle_id || t.wbs_id;
-        const typeMatch =
-          !selectedWbsType ||
-          String(t.wbsType).toLowerCase() ===
-          String(selectedWbsType).toLowerCase();
+        const normTaskType = normType(t.wbsType);
+        const normSelType = normType(selectedWbsType);
+        const typeMatch = !selectedWbsType || normTaskType === normSelType;
         return (
           String(taskId) === String(w.id || w._id || (w.wbs && w.wbs[0]?.id)) &&
           typeMatch
@@ -1038,7 +1131,7 @@ const AddTask = () => {
                               setValue("project_bundle_id", "");
                               setSelectedWbs(null);
                             }}
-                            placeholder="Select Stage"
+                            placeholder="Select Status"
                           />
                         )}
                       />
@@ -1089,6 +1182,7 @@ const AddTask = () => {
                               { label: "IFC", value: "IFC" },
                               { label: "R-IFA", value: "RIFA" },
                               { label: "R-IFC", value: "RIFC" },
+                              { label: "CO", value: "CO" },
                             ]}
                             value={field.value}
                             onChange={(_, val) => {

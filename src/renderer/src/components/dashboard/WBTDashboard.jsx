@@ -221,7 +221,7 @@ const WBTDashboard = () => {
 
   const handleProjectStatClick = (status) => {
     const filteredProjects = adminData.projects.filter(p => {
-      if (status === 'ACTIVE') return !p.status || p.status.toUpperCase() === 'ACTIVE'
+      if (status === 'ACTIVE') return !p.status || p.status.toUpperCase() === 'ACTIVE' || p.status.toUpperCase() === 'IN_PROGRESS'
       if (status === 'COMPLETED') return p.status?.toUpperCase() === 'COMPLETED' || p.status?.toUpperCase() === 'COMPLETE'
       if (status === 'ON_HOLD') return p.status?.toUpperCase() === 'ON_HOLD' || p.status?.toUpperCase() === 'ON-HOLD'
       return p.status?.toUpperCase() === status

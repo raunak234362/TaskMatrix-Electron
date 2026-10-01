@@ -159,6 +159,8 @@ const EditTask = ({ id, onClose, refresh }) => {
     { label: 'IFA', value: 'IFA' },
     { label: 'IFC', value: 'IFC' },
     { label: 'R-IFA', value: 'RIFA' },
+    { label: 'R-IFC', value: 'RIFC' },
+    { label: 'CO', value: 'CO' },
     { label: 'COR', value: 'COR' }
   ]
 

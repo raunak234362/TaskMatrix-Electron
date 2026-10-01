@@ -63,6 +63,8 @@ const EditMileStone = ({
     { label: "Main Steel Connection Design", value: "Main Steel Connection Design" },
     { label: "Misc Steel", value: "Misc Steel" },
     { label: "Misc Steel Connection Design", value: "Misc Steel Connection Design" },
+    { label: "Main And Misc Steel", value: "Main And Misc Steel" },
+    { label: "Main And Misc Steel Connection Design", value: "Main And Misc Steel Connection Design" },
     { label: "Foundation Embeds", value: "Foundation Embeds" },
     { label: "Panel Embeds", value: "Panel Embeds" },
     { label: "Others", value: "Others" },

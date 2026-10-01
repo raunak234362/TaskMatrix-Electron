@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   FileSpreadsheet,
   Printer,
@@ -14,7 +14,10 @@ import {
   ArrowRight,
   TrendingUp,
   Loader2,
-  Compass
+  Compass,
+  Mail,
+  RefreshCw,
+  List
 } from "lucide-react";
 import Service from "../../../api/Service";
 import { toast } from "react-toastify";
@@ -23,6 +26,8 @@ import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 import Logo from '../../../assets/logo.png';
 import WprScheduleTable from "./WprScheduleTable";
+import WprWeeksTable from "./WprWeeksTable";
+import WprDeliveryLogsModal from "./WprDeliveryLogsModal";
 import Select from "../../fields/Select";
 
 const WorkProgressReport = ({
@@ -58,6 +63,27 @@ const WorkProgressReport = ({
   const [rawCoRows, setRawCoRows] = useState([]);
   const [rawCoordDrawings, setRawCoordDrawings] = useState([]);
 
+  // Helper to format date to YYYY-MM-DD
+  const formatDateToYYYYMMDD = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "";
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // View Mode: 'spreadsheet' | 'weeks'
+  const [viewMode, setViewMode] = useState("spreadsheet");
+
+  // API states
+  const [apiWeeks, setApiWeeks] = useState([]);
+  const [loadingWeeks, setLoadingWeeks] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [isDeliveryLogsOpen, setIsDeliveryLogsOpen] = useState(false);
+  const [isFetchingReportJson, setIsFetchingReportJson] = useState(false);
+
   // Selected week state
   const [selectedWeek, setSelectedWeek] = useState("All");
 
@@ -66,6 +92,33 @@ const WorkProgressReport = ({
   const [activeCell, setActiveCell] = useState(null);
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef(null);
+
+  // 1. Fetch Dynamic Reporting Weeks from API (GET /wpr/projects/:projectId/weeks)
+  const fetchReportWeeks = useCallback(async () => {
+    if (!projectId) return;
+    try {
+      setLoadingWeeks(true);
+      const res = await Service.GetProjectReportWeeks(projectId);
+      const list = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+      if (list.length > 0) {
+        const parsed = list.map((w, idx) => ({
+          index: w.index || idx + 1,
+          label: w.label || `Week ${w.index || idx + 1}`,
+          start: new Date(w.start),
+          end: new Date(w.end)
+        }));
+        setApiWeeks(parsed);
+      }
+    } catch (err) {
+      console.warn("Could not fetch reporting weeks from API, falling back to local calculation:", err);
+    } finally {
+      setLoadingWeeks(false);
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    fetchReportWeeks();
+  }, [fetchReportWeeks]);
 
   // Date helper functions for week calculation
   const getMonday = (d) => {
@@ -92,8 +145,12 @@ const WorkProgressReport = ({
     return d >= start && d <= end;
   };
 
-  // Generate Available Weeks from Project Start Date to End Date / Today
+  // Generate Available Weeks: Prefer API weeks, fallback to Project Dates
   const projectWeeks = useMemo(() => {
+    if (apiWeeks.length > 0) {
+      return apiWeeks;
+    }
+
     if (!project || !project.startDate) return [];
 
     const start = new Date(project.startDate);
@@ -139,7 +196,7 @@ const WorkProgressReport = ({
     }
 
     return weeks;
-  }, [project]);
+  }, [apiWeeks, project]);
 
   const weekOptions = useMemo(() => {
     const opts = [{ label: "All Weeks", value: "All" }];
@@ -667,64 +724,249 @@ const WorkProgressReport = ({
     processSchedule();
   }, [milestones, submittalData, project]);
 
-  // Sync Change Orders Month-by-month
+  // Sync Change Orders Month-by-month with Latest Version Pricing
   useEffect(() => {
-    const rawCOs = changeOrderData || [];
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    let isCancelled = false;
 
-    const rows = rawCOs.map((co) => {
-      let totalAmount = 0;
-      const monthlyBreakdown = {};
-      months.forEach(m => monthlyBreakdown[m] = "");
+    const processChangeOrders = async () => {
+      const rawCOs = changeOrderData || [];
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-      if (Array.isArray(co.CoRefersTo) && co.CoRefersTo.length > 0) {
-        const monthSums = {};
-        let hasAnyAmount = false;
-
-        co.CoRefersTo.forEach(item => {
-          const itemDate = item.createdAt ? new Date(item.createdAt) : (co.createdAt ? new Date(co.createdAt) : null);
-          if (itemDate) {
-            const mIdx = itemDate.getMonth();
-            const mName = months[mIdx];
-            monthSums[mName] = (monthSums[mName] || 0) + (Number(item.cost) || 0);
-          }
-        });
-
-        months.forEach(m => {
-          if (monthSums[m] > 0) {
-            monthlyBreakdown[m] = `$${monthSums[m].toLocaleString()}`;
-            totalAmount += monthSums[m];
-            hasAnyAmount = true;
-          }
-        });
-
-        if (!hasAnyAmount) {
-          const fallbackMonthIdx = co.createdAt ? new Date(co.createdAt).getMonth() : -1;
-          if (fallbackMonthIdx >= 0) {
-            monthlyBreakdown[months[fallbackMonthIdx]] = "SENT";
-          }
+      // Helper to sum numeric cost
+      const parseCost = (val) => {
+        if (val === undefined || val === null) return 0;
+        if (val === "_MERGED_LEFT_" || val === "_MERGED_UP_" || val === -999999 || val === -999998) return 0;
+        if (typeof val === "string") {
+          const cleaned = val.replace(/[^0-9.-]/g, "");
+          return parseFloat(cleaned) || 0;
         }
-      } else {
-        const amount = Number(co.totalCost) || Number(co.amount) || 0;
-        totalAmount = amount;
-        const coDate = co.createdAt || co.date ? new Date(co.createdAt || co.date) : null;
-        const coMonthIndex = coDate ? coDate.getMonth() : -1;
-
-        if (coMonthIndex >= 0) {
-          monthlyBreakdown[months[coMonthIndex]] = amount > 0 ? `$${amount.toLocaleString()}` : "SENT";
-        }
-      }
-
-      return {
-        id: co.id || co._id,
-        createdAt: co.createdAt || co.date || new Date().toISOString(),
-        changeOrder: co.changeOrderNumber ? `COR-${String(co.changeOrderNumber).padStart(3, "0")}` : "COR-New",
-        ...monthlyBreakdown,
-        total: totalAmount > 0 ? `$${totalAmount.toLocaleString()}` : "—"
+        return Number(val) || 0;
       };
-    });
 
-    setRawCoRows(rows);
+      // Helper to extract rows from any object
+      const extractRows = (obj) => {
+        if (!obj) return null;
+        if (Array.isArray(obj.changeOrderTables) && obj.changeOrderTables.length > 0) return obj.changeOrderTables;
+        if (Array.isArray(obj.CoRefersTo) && obj.CoRefersTo.length > 0) return obj.CoRefersTo;
+        if (Array.isArray(obj.rows) && obj.rows.length > 0) return obj.rows;
+        if (Array.isArray(obj.tables) && obj.tables.length > 0) return obj.tables;
+        return null;
+      };
+
+      // Helper to resolve the latest version
+      const getLatestVersionInfo = (coObj) => {
+        if (!coObj) return { version: null, versionLabel: "" };
+
+        const versions = Array.isArray(coObj.versions) ? coObj.versions : [];
+        if (versions.length > 0) {
+          // Sort versions descending: highest versionNumber first, or newest createdAt
+          const sorted = [...versions].sort((a, b) => {
+            const numA = parseFloat(a.versionNumber || a.version || 0);
+            const numB = parseFloat(b.versionNumber || b.version || 0);
+            if (numA && numB && numA !== numB) return numB - numA;
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateB - dateA;
+          });
+
+          let selected = sorted[0];
+          if (coObj.currentVersionId) {
+            const match = versions.find(v => String(v.id || v._id) === String(coObj.currentVersionId));
+            if (match) selected = match;
+          }
+
+          const vNum = selected?.versionNumber || selected?.version;
+          const versionLabel = vNum ? `v${vNum}` : (versions.length > 1 ? `v${versions.length}` : "");
+          return { version: selected, versionLabel };
+        }
+
+        if (coObj.currentVersion && typeof coObj.currentVersion === "object") {
+          const vNum = coObj.currentVersion.versionNumber || coObj.currentVersion.version;
+          return {
+            version: coObj.currentVersion,
+            versionLabel: vNum ? `v${vNum}` : ""
+          };
+        }
+
+        return { version: coObj, versionLabel: "" };
+      };
+
+      // Fetch full details and table rows for each Change Order
+      const coDetailsMap = {};
+      await Promise.all(rawCOs.map(async (co) => {
+        const coId = co.id || co._id;
+        if (!coId) return;
+
+        let fullCO = co;
+        try {
+          const res = await Service.GetChangeOrderByID(coId);
+          const fetched = res?.data?.data || res?.data || res;
+          if (fetched && typeof fetched === "object") {
+            fullCO = { ...co, ...fetched };
+          }
+        } catch (err) {
+          console.warn(`Could not fetch full CO for ${coId}:`, err);
+        }
+
+        const { version: latestVer, versionLabel: vLabel } = getLatestVersionInfo(fullCO);
+
+        // Extract rows from latest version, then root fullCO
+        let rows = extractRows(latestVer) || extractRows(fullCO);
+
+        // If still no rows found, fetch live table rows from GetAllCOTableRows API
+        if (!rows || rows.length === 0) {
+          try {
+            const resTable = await Service.GetAllCOTableRows(coId);
+            const data = resTable?.data || (Array.isArray(resTable) ? resTable : []);
+            if (Array.isArray(data) && data.length > 0) {
+              rows = data;
+            }
+          } catch (err) {
+            console.warn(`Could not fetch table rows for ${coId}:`, err);
+          }
+        }
+
+        coDetailsMap[coId] = {
+          fullCO,
+          latestVersion: latestVer,
+          versionLabel: vLabel,
+          rows: rows || []
+        };
+      }));
+
+      if (isCancelled) return;
+
+      const rows = rawCOs.map((co) => {
+        const coId = co.id || co._id;
+        const details = coDetailsMap[coId] || {};
+        const fullCO = details.fullCO || co;
+        const latestVersion = details.latestVersion || fullCO;
+        const versionLabel = details.versionLabel || "";
+        const rowsData = details.rows || extractRows(latestVersion) || extractRows(fullCO);
+
+        let totalAmount = 0;
+        const monthlyBreakdown = {};
+        months.forEach(m => monthlyBreakdown[m] = "");
+
+        if (Array.isArray(rowsData) && rowsData.length > 0) {
+          const monthSums = {};
+          let hasAnyAmount = false;
+
+          rowsData.forEach(item => {
+            const itemDateRaw =
+              item.createdAt ||
+              item.date ||
+              latestVersion?.createdAt ||
+              latestVersion?.date ||
+              fullCO.createdAt ||
+              fullCO.sentOn ||
+              fullCO.date;
+            const itemDate = itemDateRaw ? new Date(itemDateRaw) : null;
+            let costVal = parseCost(item.cost ?? item.totalCost ?? item.amount ?? item.price);
+
+            // Fallback: if cost is 0 but hours are present, calculate with coPerHourPrice if available
+            if (costVal === 0 && Number(item.hours) > 0) {
+              const coHourlyPrice = Number(project?.fabricator?.COPerHourPrice || project?.COPerHourPrice || 0);
+              if (coHourlyPrice > 0) {
+                costVal = Number(item.hours) * coHourlyPrice;
+              }
+            }
+
+            if (itemDate && !isNaN(itemDate.getTime())) {
+              const mIdx = itemDate.getMonth();
+              const mName = months[mIdx];
+              monthSums[mName] = (monthSums[mName] || 0) + costVal;
+            } else {
+              const coDateRaw = latestVersion?.createdAt || fullCO.createdAt || fullCO.sentOn || fullCO.date;
+              const coDate = coDateRaw ? new Date(coDateRaw) : null;
+              if (coDate && !isNaN(coDate.getTime())) {
+                const mIdx = coDate.getMonth();
+                const mName = months[mIdx];
+                monthSums[mName] = (monthSums[mName] || 0) + costVal;
+              }
+            }
+          });
+
+          months.forEach(m => {
+            if (monthSums[m] > 0) {
+              monthlyBreakdown[m] = `$${monthSums[m].toLocaleString()}`;
+              totalAmount += monthSums[m];
+              hasAnyAmount = true;
+            }
+          });
+
+          // Check if latest version has direct totalCost if rows summed to 0
+          if (!hasAnyAmount) {
+            const directCost = parseCost(
+              latestVersion?.totalCost ??
+              latestVersion?.amount ??
+              latestVersion?.cost ??
+              latestVersion?.price ??
+              fullCO.totalCost ??
+              fullCO.amount
+            );
+
+            if (directCost > 0) {
+              totalAmount = directCost;
+              const fallbackDateRaw = latestVersion?.createdAt || fullCO.createdAt || fullCO.sentOn || fullCO.date;
+              const fallbackDate = fallbackDateRaw ? new Date(fallbackDateRaw) : null;
+              const fallbackMonthIdx = fallbackDate && !isNaN(fallbackDate.getTime()) ? fallbackDate.getMonth() : -1;
+              if (fallbackMonthIdx >= 0) {
+                monthlyBreakdown[months[fallbackMonthIdx]] = `$${directCost.toLocaleString()}`;
+              }
+            } else {
+              const fallbackDateRaw = latestVersion?.createdAt || fullCO.createdAt || fullCO.sentOn || fullCO.date;
+              const fallbackDate = fallbackDateRaw ? new Date(fallbackDateRaw) : null;
+              const fallbackMonthIdx = fallbackDate && !isNaN(fallbackDate.getTime()) ? fallbackDate.getMonth() : -1;
+              if (fallbackMonthIdx >= 0) {
+                monthlyBreakdown[months[fallbackMonthIdx]] = "SENT";
+              }
+            }
+          }
+        } else {
+          // If no rows at all, check direct amount on latest version first, then root CO
+          const amount = parseCost(
+            latestVersion?.totalCost ??
+            latestVersion?.amount ??
+            latestVersion?.cost ??
+            latestVersion?.price ??
+            fullCO.totalCost ??
+            fullCO.amount ??
+            fullCO.cost ??
+            fullCO.price
+          );
+          totalAmount = amount;
+          const coDateRaw = latestVersion?.createdAt || fullCO.createdAt || fullCO.sentOn || fullCO.date;
+          const coDate = coDateRaw ? new Date(coDateRaw) : null;
+          const coMonthIndex = coDate && !isNaN(coDate.getTime()) ? coDate.getMonth() : -1;
+
+          if (coMonthIndex >= 0) {
+            monthlyBreakdown[months[coMonthIndex]] = amount > 0 ? `$${amount.toLocaleString()}` : "SENT";
+          }
+        }
+
+        return {
+          id: coId,
+          versionLabel,
+          createdAt: latestVersion?.createdAt || fullCO.createdAt || fullCO.sentOn || fullCO.date || new Date().toISOString(),
+          changeOrder: co.changeOrderNumber
+            ? (String(co.changeOrderNumber).toUpperCase().startsWith("COR-")
+                ? co.changeOrderNumber
+                : `COR-${String(co.changeOrderNumber).padStart(3, "0")}`)
+            : "COR-New",
+          ...monthlyBreakdown,
+          total: totalAmount > 0 ? `$${totalAmount.toLocaleString()}` : "—"
+        };
+      });
+
+      setRawCoRows(rows);
+    };
+
+    processChangeOrders();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [changeOrderData, project]);
 
   // Sync Coordination Drawings
@@ -746,6 +988,42 @@ const WorkProgressReport = ({
     if (selectedWeek === "All") return null;
     return projectWeeks.find(w => w.label === selectedWeek) || null;
   }, [selectedWeek, projectWeeks]);
+
+  // 2. Fetch Assembled Report JSON Data from API (GET /wpr/projects/:projectId/report.json)
+  const fetchServerReportData = useCallback(async (targetDate, showNotification = false) => {
+    if (!projectId) return;
+    try {
+      setIsFetchingReportJson(true);
+      const dateParam = targetDate ? formatDateToYYYYMMDD(targetDate) : undefined;
+      const res = await Service.GetReportJson(projectId, dateParam);
+      const data = res?.data || res;
+      if (data?.meta) {
+        if (data.meta.fabProjectManager) setFabProjectManager(data.meta.fabProjectManager);
+        if (data.meta.wbtCirculatedTo) setWbtCirculatedTo(data.meta.wbtCirculatedTo);
+        if (data.meta.fabCirculatedTo) setFabCirculatedTo(data.meta.fabCirculatedTo);
+        if (data.meta.software) setSoftware(data.meta.software);
+      }
+      if (showNotification) {
+        toast.success("WPR report data synchronized with server!");
+      }
+    } catch (err) {
+      console.warn("WPR server report JSON fetch warning:", err);
+      if (showNotification) {
+        toast.warn("Could not sync server report data, using active records.");
+      }
+    } finally {
+      setIsFetchingReportJson(false);
+    }
+  }, [projectId]);
+
+  // Trigger server report JSON fetch on week change
+  useEffect(() => {
+    if (selectedWeek && selectedWeek !== "All" && activeWeekRange?.end) {
+      fetchServerReportData(activeWeekRange.end);
+    } else if (selectedWeek === "All") {
+      fetchServerReportData();
+    }
+  }, [selectedWeek, activeWeekRange, fetchServerReportData]);
 
   const filteredRfis = useMemo(() => {
     const list = activeWeekRange
@@ -1059,8 +1337,11 @@ const WorkProgressReport = ({
 
     // Sheet 3: Change Orders
     const coWS = XLSX.utils.json_to_sheet(filteredCoRows.map(c => {
-      const { id, createdAt, ...rest } = c;
-      return rest;
+      const { id, createdAt, versionLabel, ...rest } = c;
+      return {
+        "Change Order": versionLabel ? `${c.changeOrder} (${versionLabel})` : c.changeOrder,
+        ...rest
+      };
     }));
     XLSX.utils.book_append_sheet(workbook, coWS, "Change Orders");
 
@@ -1133,7 +1414,8 @@ const WorkProgressReport = ({
       startY: finalCoY + 10,
       head: [["Change Order", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "FY Total"]],
       body: filteredCoRows.map(c => [
-        c.changeOrder, c.Jan, c.Feb, c.Mar, c.Apr, c.May, c.Jun, c.Jul, c.Aug, c.Sep, c.Oct, c.Nov, c.Dec, c.total
+        c.versionLabel ? `${c.changeOrder} (${c.versionLabel})` : c.changeOrder,
+        c.Jan, c.Feb, c.Mar, c.Apr, c.May, c.Jun, c.Jul, c.Aug, c.Sep, c.Oct, c.Nov, c.Dec, c.total
       ]),
       theme: "grid",
       styles: { fontSize: 7, cellPadding: 2 },
@@ -1161,6 +1443,46 @@ const WorkProgressReport = ({
     toast.success("PDF report exported successfully!");
   };
 
+  // 3. Download WPR Report PDF from backend (GET /wpr/projects/:projectId/report.pdf)
+  const handleDownloadPdf = async (weekLabel) => {
+    try {
+      setIsExportingPdf(true);
+      let targetWeekDate = "";
+      if (weekLabel && weekLabel !== "All") {
+        const wk = projectWeeks.find(w => w.label === weekLabel);
+        if (wk?.end) targetWeekDate = formatDateToYYYYMMDD(wk.end);
+      } else if (activeWeekRange?.end) {
+        targetWeekDate = formatDateToYYYYMMDD(activeWeekRange.end);
+      }
+
+      const blob = await Service.DownloadReportPdf(projectId, targetWeekDate);
+      if (blob) {
+        const url = window.URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+        const link = document.createElement("a");
+        link.href = url;
+        const safeProjName = (project?.projectName || project?.name || "Project").replace(/[^a-zA-Z0-9_-]/g, "_");
+        const safeWeek = targetWeekDate || "Current";
+        link.setAttribute("download", `${safeProjName}_WPR_${safeWeek}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        toast.success("WPR PDF report downloaded successfully!");
+        return;
+      }
+    } catch (err) {
+      console.error("Error downloading backend WPR PDF:", err);
+      if (err?.response?.status === 429) {
+        toast.error("Another WPR report is currently generating. Please wait a moment and try again.");
+        return;
+      }
+      toast.info("Server PDF unavailable, generating client fallback PDF...");
+      exportToPDF();
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
   // Print layout handler
   const handlePrint = () => {
     window.print();
@@ -1170,14 +1492,38 @@ const WorkProgressReport = ({
     <div className="space-y-8 p-1 animate-in fade-in slide-in-from-bottom-2 duration-500">
 
       {/* ── ACTION TOOLBAR ── */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white shrink-0">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-3 border border-black shadow-sm shrink-0">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="w-2.5 h-6 bg-[#6bbd45] rounded-none" />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-black">WPR Spreadsheet Control</h2>
-          {projectWeeks.length > 0 && (
-            <div className="flex items-center gap-2 ml-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-black whitespace-nowrap">Select Week:</span>
-              <div className="min-w-[280px] md:min-w-[320px]">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-black">WPR Control Panel</h2>
+
+          {/* View Mode Switcher: Spreadsheet vs Weeks Table */}
+          <div className="flex items-center border border-black rounded-none overflow-hidden ml-2 bg-slate-100">
+            <button
+              onClick={() => setViewMode("spreadsheet")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                viewMode === "spreadsheet" ? "bg-black text-white" : "text-black hover:bg-slate-200"
+              }`}
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              Report
+            </button>
+            <button
+              onClick={() => setViewMode("weeks")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors border-l border-black cursor-pointer ${
+                viewMode === "weeks" ? "bg-black text-white" : "text-black hover:bg-slate-200"
+              }`}
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              All Weeks ({projectWeeks.length})
+            </button>
+          </div>
+
+          {/* Week Selector in Spreadsheet mode */}
+          {viewMode === "spreadsheet" && projectWeeks.length > 0 && (
+            <div className="flex items-center gap-2 ml-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-black whitespace-nowrap">Week:</span>
+              <div className="min-w-[240px] md:min-w-[280px]">
                 <Select
                   options={weekOptions}
                   value={selectedWeek}
@@ -1190,17 +1536,56 @@ const WorkProgressReport = ({
             </div>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Sync Server Data Button */}
           <button
-            onClick={exportToPDF}
-            className="flex items-center gap-2 px-5 py-2 bg-red-50 text-black border-2 border-red-700/80 hover:bg-red-100 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm transition-all cursor-pointer"
+            onClick={() => fetchServerReportData(activeWeekRange?.end, true)}
+            disabled={isFetchingReportJson}
+            className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-black border border-black rounded-none text-xs font-bold uppercase tracking-tight shadow-sm transition-all cursor-pointer disabled:opacity-50"
+            title="Sync WPR JSON Data from Server"
           >
-            <Download className="w-3.5 h-3.5" />
-            PDF Export
+            <RefreshCw className={`w-3.5 h-3.5 ${isFetchingReportJson ? "animate-spin" : ""}`} />
+            Sync Data
           </button>
 
+          {/* Automated Delivery Logs Button */}
+          <button
+            onClick={() => setIsDeliveryLogsOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-600 rounded-none text-xs font-bold uppercase tracking-tight shadow-sm transition-all cursor-pointer"
+            title="View Automated Email Deliveries"
+          >
+            <Mail className="w-3.5 h-3.5 text-emerald-700" />
+            Email Deliveries
+          </button>
+
+          {/* PDF Export Button (Backend Streaming PDF) */}
+          <button
+            onClick={() => handleDownloadPdf(selectedWeek)}
+            disabled={isExportingPdf}
+            className={`flex items-center gap-2 px-4 py-2 text-black border-2 border-red-700/80 rounded-none text-xs font-bold uppercase tracking-tight shadow-sm transition-all ${
+              isExportingPdf ? "bg-red-100 cursor-not-allowed" : "bg-red-50 hover:bg-red-100 cursor-pointer"
+            }`}
+            title="Download WPR PDF (Streamed from Server)"
+          >
+            {isExportingPdf ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+            {isExportingPdf ? "Generating PDF..." : "PDF Export"}
+          </button>
         </div>
       </div>
+
+      {viewMode === "weeks" ? (
+        <WprWeeksTable
+          projectWeeks={projectWeeks}
+          currentWeekLabel={selectedWeek}
+          onSelectWeek={(label) => {
+            handleWeekChange(label);
+            setViewMode("spreadsheet");
+          }}
+          onDownloadWeek={(label) => handleDownloadPdf(label)}
+        />
+      ) : (
+        <>
 
       {/* ── REPORT METADATA GRID (SPREADSHEET HEADER) ── */}
       <div className="border border-black overflow-hidden mb-6 bg-white shadow-sm mt-4">
@@ -1565,7 +1950,14 @@ const WorkProgressReport = ({
                         className="w-full bg-white border border-black px-2 py-1 rounded-none font-bold text-xs text-black"
                       />
                     ) : (
-                      <span>{row.changeOrder}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span>{row.changeOrder}</span>
+                        {row.versionLabel && (
+                          <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-slate-200 text-slate-800 rounded">
+                            {row.versionLabel}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </td>
 
@@ -1600,6 +1992,16 @@ const WorkProgressReport = ({
           </table>
         </div>
       </div>
+        </>
+      )}
+
+      {/* 4. Automated Email Delivery Logs Modal (GET /wpr/deliveries) */}
+      <WprDeliveryLogsModal
+        isOpen={isDeliveryLogsOpen}
+        onClose={() => setIsDeliveryLogsOpen(false)}
+        projectId={projectId}
+        fabricatorId={project?.fabricatorID || project?.fabricator?.id}
+      />
     </div>
   );
 };
