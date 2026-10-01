@@ -525,7 +525,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
   }
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-120 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden animate-in fade-in zoom-in duration-200 w-11/12 max-w-7xl flex flex-col max-h-[90vh]">
         {/* ── Header ── */}
         <header className="flex items-center justify-between p-6 border-b border-gray-200 bg-white shrink-0">
@@ -533,7 +533,7 @@ const UpdateSubmittalById = ({ submittal, onClose, onSuccess }) => {
             <h2 className="text-xl font-semibold text-black tracking-tight uppercase">
               Update Submittal
             </h2>
-         
+
           </div>
           <button
             onClick={onClose}
