@@ -17,6 +17,7 @@ import InvoiceService from './services/invoice.service'
 import MeetingService from './services/meeting.service'
 import MiscellaneousService from './services/miscellaneous.service'
 import StandardsService from './services/standards.service'
+import WPRService from './services/wpr.service'
 
 class Service { }
 
@@ -39,7 +40,8 @@ const services = [
   InvoiceService,
   MeetingService,
   MiscellaneousService,
-  StandardsService
+  StandardsService,
+  WPRService
 ]
 
 services.forEach(service => {
@@ -69,7 +71,8 @@ export {
   InvoiceService,
   MeetingService,
   MiscellaneousService,
-  StandardsService
+  StandardsService,
+  WPRService
 }
 
 export default Service

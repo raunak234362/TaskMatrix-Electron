@@ -54,6 +54,7 @@ const EditFabricator = ({
       currencyType: "",
       COPerHourPrice: 0,
       wbtFabricatorPointOfContact: "",
+      wprDate: "",
       files: null, // Initialize new files to null
     },
   });
@@ -155,6 +156,12 @@ const EditFabricator = ({
       wbtFabricatorPointOfContact: Array.isArray(fabricatorData.wbtFabricatorPointOfContact)
         ? fabricatorData.wbtFabricatorPointOfContact[0]?._id || fabricatorData.wbtFabricatorPointOfContact[0]?.id || fabricatorData.wbtFabricatorPointOfContact[0] || ""
         : fabricatorData.wbtFabricatorPointOfContact?._id || fabricatorData.wbtFabricatorPointOfContact?.id || fabricatorData.wbtFabricatorPointOfContact || "",
+      wprDate:
+        fabricatorData.wprDate !== undefined &&
+        fabricatorData.wprDate !== null &&
+        fabricatorData.wprDate !== ""
+          ? Number(fabricatorData.wprDate)
+          : "",
       files: null,
     });
     setFilesToKeep(fabricatorData.files || []);
@@ -215,6 +222,12 @@ const EditFabricator = ({
           String(parseFloat(String(data.COPerHourPrice)))
         );
       if (data.currencyType) formData.append("currencyType", data.currencyType);
+      if (data.wprDate !== undefined && data.wprDate !== "" && data.wprDate !== null) {
+        formData.append(
+          "wprDate",
+          String(parseInt(String(data.wprDate), 10))
+        );
+      }
 
       // 2. Append IDs of files to KEEP (only if not empty)
       const fileIdsToKeep = filesToKeep.map((file) => file.id || file._id);
@@ -328,23 +341,48 @@ const EditFabricator = ({
                 </select>
               </div>
             </div>
-            <div className="space-y-4 font-bold border border-gray-200 rounded-2xl p-4 bg-zinc-100">
-              <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
-                WBT Point of Contact
-              </label>
-              <Controller
-                name="wbtFabricatorPointOfContact"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    name="wbtFabricatorPointOfContact"
-                    options={wbtContactOptions}
-                    label=""
-                    value={field.value}
-                    onChange={(_, val) => field.onChange(val)}
-                  />
-                )}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-bold border border-gray-200 rounded-2xl p-4 bg-zinc-100">
+              <div>
+                <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                  WBT Point of Contact
+                </label>
+                <Controller
+                  name="wbtFabricatorPointOfContact"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      name="wbtFabricatorPointOfContact"
+                      options={wbtContactOptions}
+                      label=""
+                      value={field.value}
+                      onChange={(_, val) => field.onChange(val)}
+                    />
+                  )}
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                  WPR Date (Weekly Report Day)
+                </label>
+                <select
+                  {...register("wprDate", {
+                    setValueAs: (v) =>
+                      v === "" || v === null || v === undefined
+                        ? ""
+                        : parseInt(String(v), 10),
+                  })}
+                  className="w-full h-[46px] border border-slate-200 bg-slate-50 rounded-2xl px-4 py-2 focus:ring-4 focus:ring-green-500/10 focus:border-green-500 focus:bg-white outline-none transition-all shadow-sm text-slate-800 font-bold"
+                >
+                  <option value="">Select WPR Day</option>
+                  <option value={1}>1 - Monday</option>
+                  <option value={2}>2 - Tuesday</option>
+                  <option value={3}>3 - Wednesday</option>
+                  <option value={4}>4 - Thursday</option>
+                  <option value={5}>5 - Friday</option>
+                  <option value={6}>6 - Saturday</option>
+                  <option value={7}>7 - Sunday</option>
+                </select>
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-bold border border-gray-200 rounded-2xl p-4 bg-zinc-100">
               <div>
