@@ -25,7 +25,6 @@ const AllDocument = ({ projectId, project }) => {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center pb-2 pt-2">
-        <h2 className="text-sm font-bold text-black uppercase tracking-widest">Documents</h2>
         <div className="flex gap-2">
           <button
             onClick={() => setView("all")}

@@ -122,7 +122,7 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
     <div className="space-y-0 animate-in fade-in duration-500">
 
       {/* Sub-tab & View Switchers */}
-      <div className="flex justify-between items-center mb-6 pr-[36px]">
+      <div className="flex justify-between items-center mb-6 pr-[26px]">
         {/* Left: Sub-tab Switcher */}
         <div className="flex gap-2">
           {["team", "manager"].map((t) => (
@@ -130,8 +130,8 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
               key={t}
               onClick={() => setSubTab(t)}
               className={`px-5 py-2 rounded-none font-normal text-sm uppercase tracking-tight border-2 transition-all cursor-pointer ${subTab === t
-                ? "bg-green-50 text-black border-green-700/80 hover:bg-green-100 shadow-sm"
-                : "bg-white text-black border-gray-300 hover:bg-slate-50 shadow-sm"
+                ? "bg-green-50 text-black font-semibold border-green-700/80 hover:bg-green-100 shadow-sm"
+                : "bg-white text-black font-semibold border-gray-300 hover:bg-slate-50 shadow-sm"
                 }`}
             >
               {t === "team" ? " Team Analytics" : " Manager Analytics"}
@@ -148,8 +148,8 @@ const TeamsAnalytics = ({ projectId, managerId, tasks = [] }) => {
                 onClick={() => setView(tab)}
                 className={`px-6 py-1.5 rounded-none font-normal text-sm uppercase tracking-tight border-2 transition-all cursor-pointer ${
                   view === tab
-                    ? "bg-green-50 text-black border-green-700/80 hover:bg-green-100 shadow-sm"
-                    : "bg-white text-black border-gray-300 hover:bg-slate-50 shadow-sm"
+                    ? "bg-green-50 text-black font-semibold border-green-700/80 hover:bg-green-100 shadow-sm"
+                    : "bg-white text-black font-semibold border-gray-300 hover:bg-slate-50 shadow-sm"
                 }`}
               >
                 {tab}
