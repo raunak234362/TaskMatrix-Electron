@@ -6,6 +6,21 @@ import { useDispatch } from "react-redux";
 import { incrementModalCount, decrementModalCount } from "../../store/uiSlice";
 import UpdateInvoice from "./UpdateInvoice";
 
+const getContacts = (response) => {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data?.pointOfContact)) return response.data.pointOfContact;
+  if (Array.isArray(response?.pointOfContact)) return response.pointOfContact;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.pocs)) return response.pocs;
+  return [];
+};
+
+const getContactName = (contact) =>
+  [contact?.firstName, contact?.middleName, contact?.lastName]
+    .filter(Boolean)
+    .join(" ") || contact?.name || contact?.email || "";
+
 const GetInvoiceById = ({
   id,
   onClose,
@@ -37,7 +52,39 @@ const GetInvoiceById = ({
         setError(null);
         const response = await Service.GetInvoiceById(id);
         const data = response?.data || response || null;
-        setInvoice(data);
+        if (!data) {
+          setInvoice(null);
+          return;
+        }
+
+        const contactId = data.receiptId || data.clientId || data.contactId || data.contactName;
+        let contacts = getContacts(data.pointOfContact);
+        if (!contacts.length) contacts = getContacts(data.fabricator?.pointOfContact);
+
+        let selectedContact = contacts.find((contact) =>
+          [contact.id, contact._id, contact.userName]
+            .filter(Boolean)
+            .some((value) => String(value) === String(contactId)),
+        );
+
+        if (!selectedContact && contactId) {
+          const fabricatorId =
+            data.fabricator?._id || data.fabricator?.id || data.fabricatorId;
+          if (fabricatorId) {
+            const contactResponse = await Service.GetFabricatorPOC(fabricatorId);
+            contacts = getContacts(contactResponse);
+            selectedContact = contacts.find((contact) =>
+              [contact.id, contact._id, contact.userName]
+                .filter(Boolean)
+                .some((value) => String(value) === String(contactId)),
+            );
+          }
+        }
+
+        setInvoice({
+          ...data,
+          contactName: getContactName(selectedContact) || data.contactName || "—",
+        });
       } catch (err) {
         setError("Failed to load invoice details");
         console.error("Error fetching invoice:", err);
