@@ -301,7 +301,7 @@ const UploadFabricatorStandard = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-green-900 via-emerald-800 to-green-950 text-white">
+        <div className="flex items-center justify-between px-6 py-5 bg-linear-to-r from-green-900 via-emerald-800 to-green-950 text-white">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white/10 rounded-lg backdrop-blur-xs">
               <UploadCloud className="w-6 h-6 text-emerald-300" />
@@ -348,7 +348,7 @@ const UploadFabricatorStandard = ({
                 <select
                   value={sourceType}
                   onChange={(e) => setSourceType(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-green-500 focus:outline-none font-medium text-gray-800 font-semibold"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-green-500 focus:outline-none font-medium text-gray-800"
                   required
                 >
                   <option value="GENERAL">GENERAL</option>
@@ -568,7 +568,7 @@ const UploadFabricatorStandard = ({
                         ? 'bg-rose-500'
                         : progressData.percent >= 100
                         ? 'bg-emerald-600'
-                        : 'bg-gradient-to-r from-emerald-500 to-green-600 animate-pulse'
+                        : 'bg-linear-to-r from-emerald-500 to-green-600 animate-pulse'
                     }`}
                     style={{ width: `${progressData.percent}%` }}
                   />

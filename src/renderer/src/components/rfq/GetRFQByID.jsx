@@ -52,6 +52,9 @@ const GetRFQByID = ({ id, onClose, onDelete }) => {
             ? "cdSent"
             : "responses"
     );
+    const [followups, setFollowups] = useState([]);
+    const [selectedFollowUp, setSelectedFollowUp] = useState(null);
+    const [isLoadingFollowUpDetails, setIsLoadingFollowUpDetails] = useState(false);
     const [followUpDescription, setFollowUpDescription] = useState("");
     const [followUpFiles, setFollowUpFiles] = useState([]);
     const [isSubmittingFollowUp, setIsSubmittingFollowUp] = useState(false);
@@ -108,6 +111,34 @@ const GetRFQByID = ({ id, onClose, onDelete }) => {
         }
     };
 
+    const fetchFollowups = async () => {
+        try {
+            const cleanId = typeof id === "object" && id !== null ? (id.id || id._id) : id;
+            if (!cleanId) return;
+            const fuRes = await Service.getRFQFollowups(cleanId);
+            const fetchedFollowups = extractResponsesArray(fuRes);
+            setFollowups(fetchedFollowups || []);
+        } catch (err) {
+            console.error("Error fetching RFQ followups:", err);
+            setFollowups([]);
+        }
+    };
+
+    const handleFollowUpRowClick = async (row) => {
+        setSelectedFollowUp(row);
+        try {
+            setIsLoadingFollowUpDetails(true);
+            const followupId = row.id || row._id;
+            const details = await Service.getRFQFollowupsById(followupId);
+            const detailData = details?.data || details || row;
+            setSelectedFollowUp(detailData);
+        } catch (err) {
+            console.error("Failed to fetch followup details:", err);
+        } finally {
+            setIsLoadingFollowUpDetails(false);
+        }
+    };
+
     const handleCDQuotationModal = () => {
         setShowCDQuotationModal(true);
     };
@@ -119,6 +150,7 @@ const GetRFQByID = ({ id, onClose, onDelete }) => {
         if (id) {
             fetchRfq();
             fetchResponses();
+            fetchFollowups();
         } else {
             setLoading(false);
             setError("No RFQ ID provided");
@@ -223,6 +255,7 @@ const GetRFQByID = ({ id, onClose, onDelete }) => {
             setFollowUpFiles([]);
             setShowFollowUpForm(false);
             fetchRfq(); // Refresh data
+            fetchFollowups();
         } catch (err) {
             console.error("Follow-up submission failed:", err);
             toast.error("Failed to add follow-up");
@@ -392,6 +425,68 @@ const GetRFQByID = ({ id, onClose, onDelete }) => {
                     </span>
                 );
             },
+        },
+    ];
+
+    const followUpColumns = [
+        {
+            accessorKey: "createdByRole",
+            header: "From",
+            cell: ({ row }) => {
+                const fu = row.original;
+                const isClient = fu.createdByRole === "CLIENT";
+                const displayName = isClient
+                    ? rfq?.sender?.fabricator?.fabName || "Client"
+                    : fu.user
+                        ? `${fu.user.firstName || ""} ${fu.user.lastName || ""}`.trim() || fu.user.username
+                        : "WBT Team";
+                return (
+                    <div className="flex flex-col">
+                        <span className="font-bold text-black text-sm">{displayName}</span>
+                        <span className={`text-[10px] w-fit px-1.5 py-0.5 rounded-sm font-semibold uppercase tracking-wider mt-0.5 ${isClient
+                            ? "bg-green-50 text-green-700 border border-green-200/30"
+                            : "bg-blue-50 text-blue-700 border border-blue-200/30"
+                            }`}>
+                            {isClient ? "Client" : "WBT Team"}
+                        </span>
+                    </div>
+                );
+            }
+        },
+        {
+            accessorKey: "description",
+            header: "Message",
+            cell: ({ row }) => {
+                const htmlText = row.original.description || "";
+                const plainText = htmlText.replace(/<[^>]*>/g, "");
+                const truncated = truncateWords(plainText, 20);
+                return (
+                    <div className="flex flex-col max-w-[200px]">
+                        <p className="truncate text-sm font-bold text-black" title={plainText}>{truncated || "—"}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-black font-bold uppercase tracking-wider">
+                                {row.original.files?.length || 0} Attachments
+                            </span>
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
+            accessorKey: "createdAt",
+            header: "Created",
+            cell: ({ row }) => (
+                <span className="text-black text-xs font-bold uppercase tracking-widest leading-none">
+                    {new Date(row.original.createdAt).toLocaleDateString("en-IN", {
+                        day: '2-digit',
+                        month: 'short'
+                    })}
+                    {" : "}
+                    <span className="text-xs">
+                        {new Date(row.original.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                </span>
+            ),
         },
     ];
 
@@ -723,73 +818,14 @@ const GetRFQByID = ({ id, onClose, onDelete }) => {
 
                                 {/* Follow-ups List */}
                                 <div className="space-y-4">
-                                    {rfq?.followUps && rfq.followUps.length > 0 ? (
-                                        rfq.followUps.map((fu, idx) => {
-                                            const isClient = fu.createdByRole === "CLIENT";
-                                            return (
-                                                <div
-                                                    key={fu.id || idx}
-                                                    className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs hover:shadow-md transition-all duration-300 space-y-3 relative overflow-hidden pl-5"
-                                                >
-                                                    {/* Color strip indicating role */}
-                                                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${isClient ? "bg-green-600" : "bg-blue-600"
-                                                        }`} />
-
-                                                    <div className="flex items-center justify-between border-b border-gray-100 pb-2">
-                                                        <div className="flex items-center gap-2.5">
-                                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs uppercase ${isClient
-                                                                    ? "bg-green-50 text-green-700 border border-green-200/50"
-                                                                    : "bg-blue-50 text-blue-700 border border-blue-200/50"
-                                                                }`}>
-                                                                {isClient ? "CL" : "WT"}
-                                                            </div>
-                                                            <div className="flex flex-col">
-                                                                <span className="text-sm font-semibold text-gray-800 leading-tight">
-                                                                    {isClient
-                                                                        ? rfq?.sender?.fabricator?.fabName || "Client"
-                                                                        : fu.user
-                                                                            ? `${fu.user.firstName || ""} ${fu.user.lastName || ""}`.trim() || fu.user.username
-                                                                            : "WBT Team"}
-                                                                </span>
-                                                                <span className={`text-[10px] w-fit px-1.5 py-0.5 rounded-sm font-semibold uppercase tracking-wider mt-0.5 ${isClient
-                                                                        ? "bg-green-50 text-green-700 border border-green-200/30"
-                                                                        : "bg-blue-50 text-blue-700 border border-blue-200/30"
-                                                                    }`}>
-                                                                    {isClient ? "Client" : "WBT Team"}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500">
-                                                            <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                                            {new Date(fu.createdAt).toLocaleString("en-IN", {
-                                                                day: '2-digit',
-                                                                month: 'short',
-                                                                year: 'numeric',
-                                                                hour: '2-digit',
-                                                                minute: '2-digit'
-                                                            })}
-                                                        </div>
-                                                    </div>
-
-                                                    <div
-                                                        className="text-xs text-gray-700 leading-relaxed font-normal prose prose-sm max-w-none px-1"
-                                                        dangerouslySetInnerHTML={{ __html: fu.description }}
-                                                    />
-
-                                                    {fu.files && fu.files.length > 0 && (
-                                                        <div className="pt-2 border-t border-gray-100">
-                                                            <RenderFiles
-                                                                files={fu.files}
-                                                                table="followups"
-                                                                parentId={fu.id || fu._id}
-                                                                rfqId={id}
-                                                                formatDate={(date) => new Date(date).toLocaleDateString()}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })
+                                    {followups && followups.length > 0 ? (
+                                        <div className="mt-4">
+                                            <DataTable
+                                                columns={followUpColumns}
+                                                data={followups}
+                                                onRowClick={handleFollowUpRowClick}
+                                            />
+                                        </div>
                                     ) : (
                                         <div className="p-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
                                             <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">
@@ -884,6 +920,76 @@ const GetRFQByID = ({ id, onClose, onDelete }) => {
 
                     </div>
                 </div>
+                {selectedFollowUp && (
+                    <div className="fixed inset-0 z-[10003] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative animate-in zoom-in-95 duration-200">
+                            {isLoadingFollowUpDetails ? (
+                                <div className="p-12 flex flex-col items-center justify-center">
+                                    <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
+                                    <p className="text-gray-700 font-bold uppercase tracking-widest text-xs">Loading details...</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 sticky top-0 z-10">
+                                        <h3 className="text-xl font-bold text-black uppercase tracking-tight flex items-center gap-2">
+                                            <MessageSquare className="w-5 h-5" /> Follow-up Details
+                                        </h3>
+                                        <button onClick={() => setSelectedFollowUp(null)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                            <X className="w-6 h-6" />
+                                        </button>
+                                    </div>
+                                    <div className="p-6 space-y-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm uppercase ${selectedFollowUp.createdByRole === "CLIENT" ? "bg-green-50 text-green-700 border-green-200/50" : "bg-blue-50 text-blue-700 border-blue-200/50"}`}>
+                                                {selectedFollowUp.createdByRole === "CLIENT" ? "CL" : "WT"}
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-gray-900">
+                                                    {selectedFollowUp.createdByRole === "CLIENT"
+                                                        ? rfq?.sender?.fabricator?.fabName || "Client"
+                                                        : selectedFollowUp.user
+                                                            ? `${selectedFollowUp.user.firstName || ""} ${selectedFollowUp.user.lastName || ""}`.trim() || selectedFollowUp.user.username
+                                                            : "WBT Team"}
+                                                </div>
+                                                <div className="text-xs text-gray-500 font-medium flex items-center gap-1.5 mt-0.5">
+                                                    <Clock className="w-3.5 h-3.5" />
+                                                    {new Date(selectedFollowUp.createdAt).toLocaleString("en-IN", {
+                                                        day: '2-digit', month: 'short', year: 'numeric',
+                                                        hour: '2-digit', minute: '2-digit'
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="space-y-3">
+                                            <h4 className="text-sm font-bold text-black uppercase tracking-wider border-b pb-2">Message</h4>
+                                            <div 
+                                                className="prose prose-sm max-w-none text-gray-700 font-medium break-words"
+                                                dangerouslySetInnerHTML={{ __html: selectedFollowUp.description }}
+                                            />
+                                        </div>
+                                        
+                                        {selectedFollowUp.files?.length > 0 && (
+                                            <div className="space-y-3 pt-4 border-t border-gray-100">
+                                                <h4 className="text-sm font-bold text-black uppercase tracking-wider flex items-center gap-2">
+                                                    <Paperclip className="w-4 h-4" /> Attachments ({selectedFollowUp.files.length})
+                                                </h4>
+                                                <RenderFiles
+                                                    files={selectedFollowUp.files}
+                                                    table="followups"
+                                                    parentId={selectedFollowUp.id || selectedFollowUp._id}
+                                                    rfqId={id}
+                                                    formatDate={(date) => new Date(date).toLocaleDateString()}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                )}
+
                 {showCDQuotationModal && (
                     <QuotationRaise
                         rfqId={id}

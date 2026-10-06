@@ -211,6 +211,27 @@ class RFQService {
       console.error('cannot add RFQ followups', error)
     }
   }
+//rfq get followup route 
+static async getRFQFollowups(rfqId) {
+  try {
+    const response = await api.get(`rfq/${rfqId}/followups`)
+    console.log('RFQ followups fetched:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('cannot fetch RFQ followups', error)
+  }
+}
+
+//get followups by id 
+static async getRFQFollowupsById(followupId) {
+  try {
+    const response = await api.get(`rfq/followups/${followupId}`)
+    console.log('RFQ followups fetched by ID:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('cannot fetch RFQ followups by ID', error)
+  }
+}
 
   //rfq file
   static async viewRfqFile(Id, fileId) {
