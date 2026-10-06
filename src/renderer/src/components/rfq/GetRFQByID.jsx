@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Service from "../../api/Service";
 
-import { Loader2, AlertCircle, Settings, Paperclip, User, Clock, MessageSquare, Send, Layout } from "lucide-react";
+import { Loader2, AlertCircle, Settings, Paperclip, User, Clock, MessageSquare, Send, Layout, ChevronDown, ChevronUp } from "lucide-react";
 import ResponseModal from "./ResponseModal";
 import RichTextEditor from "../fields/RichTextEditor";
 import MultipleFileUpload from "../fields/MultipleFileUpload";
@@ -55,6 +55,7 @@ const GetRFQByID = ({ id, onClose, onDelete }) => {
     const [followups, setFollowups] = useState([]);
     const [selectedFollowUp, setSelectedFollowUp] = useState(null);
     const [isLoadingFollowUpDetails, setIsLoadingFollowUpDetails] = useState(false);
+    const [showFollowupFiles, setShowFollowupFiles] = useState(true);
     const [followUpDescription, setFollowUpDescription] = useState("");
     const [followUpFiles, setFollowUpFiles] = useState([]);
     const [isSubmittingFollowUp, setIsSubmittingFollowUp] = useState(false);
@@ -921,8 +922,8 @@ const GetRFQByID = ({ id, onClose, onDelete }) => {
                     </div>
                 </div>
                 {selectedFollowUp && (
-                    <div className="fixed inset-0 z-[10003] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative animate-in zoom-in-95 duration-200">
+                    <div className="fixed inset-0 z-[10003] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                        <div className="bg-white rounded-none shadow-2xl border border-gray-300 w-full max-w-3xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
                             {isLoadingFollowUpDetails ? (
                                 <div className="p-12 flex flex-col items-center justify-center">
                                     <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
@@ -930,59 +931,79 @@ const GetRFQByID = ({ id, onClose, onDelete }) => {
                                 </div>
                             ) : (
                                 <>
-                                    <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 sticky top-0 z-10">
-                                        <h3 className="text-xl font-bold text-black uppercase tracking-tight flex items-center gap-2">
-                                            <MessageSquare className="w-5 h-5" /> Follow-up Details
-                                        </h3>
-                                        <button onClick={() => setSelectedFollowUp(null)} className="text-gray-400 hover:text-gray-600 transition-colors">
-                                            <X className="w-6 h-6" />
+                                    {/* Header */}
+                                    <div className="px-6 py-5 flex justify-between items-center bg-[#fcfdfc] border-b border-black/10 shrink-0">
+                                        <div className="flex items-center gap-3">
+                                            <h2 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight">
+                                                FOLLOW-UP DETAILS
+                                            </h2>
+                                        </div>
+                                        <button
+                                            onClick={() => setSelectedFollowUp(null)}
+                                            className="px-6 py-1.5 bg-white text-black border border-red-600 font-bold text-xs sm:text-sm uppercase tracking-tight hover:bg-red-50"
+                                        >
+                                            CLOSE
                                         </button>
                                     </div>
-                                    <div className="p-6 space-y-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm uppercase ${selectedFollowUp.createdByRole === "CLIENT" ? "bg-green-50 text-green-700 border-green-200/50" : "bg-blue-50 text-blue-700 border-blue-200/50"}`}>
-                                                {selectedFollowUp.createdByRole === "CLIENT" ? "CL" : "WT"}
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-gray-900">
+                                    
+                                    {/* Content Body */}
+                                    <div className="overflow-y-auto flex-1 p-6 custom-scrollbar space-y-6">
+                                        <div className="space-y-4">
+                                            {/* Top Row: Sender & Date */}
+                                            <div className="flex justify-between items-center pb-1">
+                                                <div className="font-bold text-black uppercase text-sm">
                                                     {selectedFollowUp.createdByRole === "CLIENT"
                                                         ? rfq?.sender?.fabricator?.fabName || "Client"
                                                         : selectedFollowUp.user
                                                             ? `${selectedFollowUp.user.firstName || ""} ${selectedFollowUp.user.lastName || ""}`.trim() || selectedFollowUp.user.username
                                                             : "WBT Team"}
                                                 </div>
-                                                <div className="text-xs text-gray-500 font-medium flex items-center gap-1.5 mt-0.5">
-                                                    <Clock className="w-3.5 h-3.5" />
-                                                    {new Date(selectedFollowUp.createdAt).toLocaleString("en-IN", {
-                                                        day: '2-digit', month: 'short', year: 'numeric',
+                                                <div className="text-[11px] text-gray-500 font-bold uppercase">
+                                                    {new Date(selectedFollowUp.createdAt).toLocaleString("en-US", {
+                                                        month: '2-digit', day: '2-digit', year: 'numeric',
                                                         hour: '2-digit', minute: '2-digit'
                                                     })}
                                                 </div>
                                             </div>
-                                        </div>
-                                        
-                                        <div className="space-y-3">
-                                            <h4 className="text-sm font-bold text-black uppercase tracking-wider border-b pb-2">Message</h4>
+                                            
+                                            {/* Message Block */}
                                             <div 
-                                                className="prose prose-sm max-w-none text-gray-700 font-medium break-words"
+                                                className="bg-[#f8f9fa] p-4 text-sm text-gray-800 font-semibold break-words uppercase"
                                                 dangerouslySetInnerHTML={{ __html: selectedFollowUp.description }}
                                             />
+                                            
+                                            {/* Attachments Section */}
+                                            {selectedFollowUp.files?.length > 0 && (
+                                                <div className="border border-gray-200 rounded-sm">
+                                                    <div 
+                                                        className="p-3 bg-white flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors"
+                                                        onClick={() => setShowFollowupFiles(!showFollowupFiles)}
+                                                    >
+                                                        <div className="flex items-center">
+                                                            <div className="w-1 h-4 bg-[#6bbd45] mr-3 rounded-full"></div>
+                                                            <span className="font-black text-black text-xs uppercase tracking-wider mr-3">ATTACHMENTS</span>
+                                                            <span className="text-[9px] font-bold text-[#6bbd45] uppercase tracking-wider border border-green-200/50 px-2 py-0.5 rounded-sm bg-green-50/50">
+                                                                {selectedFollowUp.files.length} {selectedFollowUp.files.length === 1 ? 'FILE' : 'FILES'}
+                                                            </span>
+                                                        </div>
+                                                        <div className="bg-gray-50 p-1 rounded-sm border border-gray-200">
+                                                            {showFollowupFiles ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                                                        </div>
+                                                    </div>
+                                                    {showFollowupFiles && (
+                                                        <div className="p-4 bg-white border-t border-gray-100">
+                                                            <RenderFiles
+                                                                files={selectedFollowUp.files}
+                                                                table="followups"
+                                                                parentId={selectedFollowUp.id || selectedFollowUp._id}
+                                                                rfqId={id}
+                                                                formatDate={(date) => new Date(date).toLocaleDateString()}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
-                                        
-                                        {selectedFollowUp.files?.length > 0 && (
-                                            <div className="space-y-3 pt-4 border-t border-gray-100">
-                                                <h4 className="text-sm font-bold text-black uppercase tracking-wider flex items-center gap-2">
-                                                    <Paperclip className="w-4 h-4" /> Attachments ({selectedFollowUp.files.length})
-                                                </h4>
-                                                <RenderFiles
-                                                    files={selectedFollowUp.files}
-                                                    table="followups"
-                                                    parentId={selectedFollowUp.id || selectedFollowUp._id}
-                                                    rfqId={id}
-                                                    formatDate={(date) => new Date(date).toLocaleDateString()}
-                                                />
-                                            </div>
-                                        )}
                                     </div>
                                 </>
                             )}
