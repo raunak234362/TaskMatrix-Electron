@@ -54,7 +54,7 @@ const EditFabricator = ({
       currencyType: "",
       COPerHourPrice: 0,
       wbtFabricatorPointOfContact: "",
-      wprDate: "",
+      wprDay: "",
       files: null, // Initialize new files to null
     },
   });
@@ -156,11 +156,11 @@ const EditFabricator = ({
       wbtFabricatorPointOfContact: Array.isArray(fabricatorData.wbtFabricatorPointOfContact)
         ? fabricatorData.wbtFabricatorPointOfContact[0]?._id || fabricatorData.wbtFabricatorPointOfContact[0]?.id || fabricatorData.wbtFabricatorPointOfContact[0] || ""
         : fabricatorData.wbtFabricatorPointOfContact?._id || fabricatorData.wbtFabricatorPointOfContact?.id || fabricatorData.wbtFabricatorPointOfContact || "",
-      wprDate:
-        fabricatorData.wprDate !== undefined &&
-        fabricatorData.wprDate !== null &&
-        fabricatorData.wprDate !== ""
-          ? Number(fabricatorData.wprDate)
+      wprDay:
+        fabricatorData.wprDay !== undefined &&
+        fabricatorData.wprDay !== null &&
+        fabricatorData.wprDay !== ""
+          ? Number(fabricatorData.wprDay)
           : "",
       files: null,
     });
@@ -222,10 +222,10 @@ const EditFabricator = ({
           String(parseFloat(String(data.COPerHourPrice)))
         );
       if (data.currencyType) formData.append("currencyType", data.currencyType);
-      if (data.wprDate !== undefined && data.wprDate !== "" && data.wprDate !== null) {
+      if (data.wprDay !== undefined && data.wprDay !== "" && data.wprDay !== null) {
         formData.append(
-          "wprDate",
-          String(parseInt(String(data.wprDate), 10))
+          "wprDay",
+          String(parseInt(String(data.wprDay), 10))
         );
       }
 
@@ -365,7 +365,7 @@ const EditFabricator = ({
                   WPR Date (Weekly Report Day)
                 </label>
                 <select
-                  {...register("wprDate", {
+                  {...register("wprDay", {
                     setValueAs: (v) =>
                       v === "" || v === null || v === undefined
                         ? ""

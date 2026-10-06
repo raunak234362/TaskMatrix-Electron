@@ -5,7 +5,8 @@ import { ipcRenderer } from 'electron'
 
 // Custom APIs for renderer
 const api = {
-  getOSUser: () => ipcRenderer.invoke('get-os-user')
+  getOSUser: () => ipcRenderer.invoke('get-os-user'),
+  exportInvoicePdf: (options) => ipcRenderer.invoke('export-invoice-pdf', options)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

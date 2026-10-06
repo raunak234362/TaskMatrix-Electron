@@ -1,10 +1,106 @@
 import { useEffect, useState, useRef } from "react";
 import { Loader2, AlertCircle, X, Download, Pencil } from "lucide-react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import Service from "../../api/Service";
 import logo from "../../assets/logo.png";
 import { useDispatch } from "react-redux";
 import { incrementModalCount, decrementModalCount } from "../../store/uiSlice";
 import UpdateInvoice from "./UpdateInvoice";
+
+const getContacts = (response) => {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data?.pointOfContact)) return response.data.pointOfContact;
+  if (Array.isArray(response?.pointOfContact)) return response.pointOfContact;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.pocs)) return response.pocs;
+  return [];
+};
+
+const getContactName = (contact) =>
+  [contact?.firstName, contact?.middleName, contact?.lastName]
+    .filter(Boolean)
+    .join(" ") || contact?.name || contact?.email || "";
+
+const normalizeReceiptIds = (value) => {
+  let parsedValue = value;
+  if (typeof value === "string") {
+    try {
+      parsedValue = JSON.parse(value);
+    } catch {
+      parsedValue = value;
+    }
+  }
+  const values = Array.isArray(parsedValue) ? parsedValue : [parsedValue];
+  return values
+    .map((item) => typeof item === "object" ? item?.id || item?._id : item)
+    .filter(Boolean)
+    .map(String);
+};
+
+const loadImageAsDataUrl = async (imageUrl) => {
+  const response = await fetch(imageUrl);
+  const blob = await response.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+};
+
+const downloadInvoicePdfInBrowser = async (html, filename) => {
+  const frame = document.createElement("iframe");
+  frame.style.cssText =
+    "position:fixed;left:-10000px;top:0;width:794px;height:1123px;border:0;";
+  const htmlUrl = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+  const frameReady = new Promise((resolve, reject) => {
+    frame.onload = resolve;
+    frame.onerror = reject;
+    frame.src = htmlUrl;
+  });
+  document.body.appendChild(frame);
+
+  try {
+    await frameReady;
+    const frameDocument = frame.contentDocument;
+    if (!frameDocument) throw new Error("Unable to render invoice content");
+    await frameDocument.fonts?.ready;
+    await Promise.all(
+      Array.from(frameDocument.images, async (image) => {
+        try {
+          await image.decode();
+        } catch {
+          image.remove();
+        }
+      }),
+    );
+
+    const pages = Array.from(frameDocument.querySelectorAll(".print-page"));
+    if (!pages.length) throw new Error("No invoice pages were generated");
+
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    for (const [index, page] of pages.entries()) {
+      if (index > 0) pdf.addPage("a4", "portrait");
+      const canvas = await html2canvas(page, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        logging: false,
+        width: page.scrollWidth,
+        height: page.scrollHeight,
+      });
+      pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, 210, 297);
+    }
+
+    const safeFilename = filename.replace(/[<>:"/\\|?*\x00-\x1f]/g, "_");
+    pdf.save(safeFilename.toLowerCase().endsWith(".pdf") ? safeFilename : `${safeFilename}.pdf`);
+  } finally {
+    frame.remove();
+    URL.revokeObjectURL(htmlUrl);
+  }
+};
 
 const GetInvoiceById = ({
   id,
@@ -16,6 +112,7 @@ const GetInvoiceById = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editMode, setEditMode] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const userRole = sessionStorage.getItem("userRole")?.toUpperCase();
   const canEdit = ["ADMIN", "PROJECT_MANAGER_OFFICER"].includes(userRole);
@@ -37,7 +134,41 @@ const GetInvoiceById = ({
         setError(null);
         const response = await Service.GetInvoiceById(id);
         const data = response?.data || response || null;
-        setInvoice(data);
+        if (!data) {
+          setInvoice(null);
+          return;
+        }
+
+        const contactIds = normalizeReceiptIds(
+          data.multipleReceipients || data.receiptId || data.clientId || data.contactId || data.contactName,
+        );
+        let contacts = getContacts(data.pointOfContact);
+        if (!contacts.length) contacts = getContacts(data.fabricator?.pointOfContact);
+
+        let selectedContacts = contacts.filter((contact) =>
+          [contact.id, contact._id, contact.userName]
+            .filter(Boolean)
+            .some((value) => contactIds.includes(String(value))),
+        );
+
+        if (selectedContacts.length < contactIds.length && contactIds.length) {
+          const fabricatorId =
+            data.fabricator?._id || data.fabricator?.id || data.fabricatorId;
+          if (fabricatorId) {
+            const contactResponse = await Service.GetFabricatorPOC(fabricatorId);
+            contacts = getContacts(contactResponse);
+            selectedContacts = contacts.filter((contact) =>
+              [contact.id, contact._id, contact.userName]
+                .filter(Boolean)
+                .some((value) => contactIds.includes(String(value))),
+            );
+          }
+        }
+
+        setInvoice({
+          ...data,
+          contactName: selectedContacts.map(getContactName).filter(Boolean).join(", ") || data.contactName || "—",
+        });
       } catch (err) {
         setError("Failed to load invoice details");
         console.error("Error fetching invoice:", err);
@@ -49,11 +180,8 @@ const GetInvoiceById = ({
   }, [id]);
 
   // 🔥 HTML PRINT (RFQ STYLE) - PIXEL PERFECT REPLICATION
-  const handleHtmlPrint = () => {
+  const handleHtmlPrint = async () => {
     if (!invoice) return;
-
-    const printWindow = window.open("", "_blank", "width=1200,height=800");
-    if (!printWindow) return;
 
     const formatDateStr = (date) => {
       if (!date) return "—";
@@ -83,13 +211,14 @@ const GetInvoiceById = ({
 
     const bankInfo = invoice?.fabricator?.bankAccount || null;
 
-    printWindow.document.open();
-    printWindow.document.write(`
+    setIsDownloading(true);
+    try {
+      const logoDataUrl = await loadImageAsDataUrl(logo);
+      const html = `
       <html>
         <head>
           <title>Invoice_${invoice.invoiceNumber || "NA"}</title>
           <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap');
             @page { size: A4; margin: 0; }
             body { margin: 0; padding: 0; background: white; font-family: 'Inter', 'Roboto', sans-serif; color: #000; }
             .print-page {
@@ -120,8 +249,8 @@ const GetInvoiceById = ({
             .meta-grid { display: grid; grid-template-columns: 1fr 100px; gap: 4px; text-align: left; }
             
             table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border: 1px solid #6bbd45; }
-            thead { background: #6bbd45; color: white; font-size: 11px; font-weight: bold; }
-            th { padding: 8px; text-align: center; text-transform: uppercase; border-right: 1px solid rgba(255,255,255,0.8); }
+            thead { background: #6bbd45 !important; color: #fff !important; font-size: 11px; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            th { padding: 8px; color: #fff !important; text-align: center; text-transform: uppercase; border-right: 1px solid rgba(255,255,255,0.8); }
             th:last-child { border-right: none; }
             tbody { font-size: 12px; }
             
@@ -152,7 +281,7 @@ const GetInvoiceById = ({
           <div class="print-page">
             <div class="header">
               <h1 class="company-name">Whiteboard Technologies LLC</h1>
-              <img src="${logo}" class="logo" />
+              <img src="${logoDataUrl}" class="logo" />
             </div>
             <div class="divider-red"></div>
             
@@ -268,7 +397,7 @@ const GetInvoiceById = ({
           <div class="print-page">
             <div class="header">
               <h1 class="company-name">Whiteboard Technologies LLC</h1>
-              <img src="${logo}" class="logo" />
+              <img src="${logoDataUrl}" class="logo" />
             </div>
             <div class="divider-red"></div>
             
@@ -315,18 +444,37 @@ const GetInvoiceById = ({
             </div>
           </div>
 
-          <script>
-            window.onload = function () {
-              setTimeout(function () {
-                window.print();
-                window.close();
-              }, 700);
-            };
-          </script>
         </body>
       </html>
-    `);
-    printWindow.document.close();
+      `;
+      const exportOptions = {
+        html,
+        filename: `Invoice_${invoice.invoiceNumber || "NA"}.pdf`,
+      };
+      const invokeExport = window.api?.exportInvoicePdf
+        ? (options) => window.api.exportInvoicePdf(options)
+        : window.electron?.ipcRenderer?.invoke
+          ? (options) => window.electron.ipcRenderer.invoke("export-invoice-pdf", options)
+          : null;
+      if (!invokeExport) {
+        await downloadInvoicePdfInBrowser(html, exportOptions.filename);
+        return;
+      }
+      const result = await invokeExport(exportOptions);
+
+      if (result?.canceled) return;
+      if (!result?.success) {
+        throw new Error(result?.error || "Unable to create the invoice PDF");
+      }
+      if (result.openError) {
+        window.alert(`PDF saved, but it could not be opened: ${result.openError}`);
+      }
+    } catch (exportError) {
+      console.error("Error exporting invoice PDF:", exportError);
+      window.alert(exportError.message || "Failed to export invoice PDF");
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   if (loading)
@@ -392,10 +540,11 @@ const GetInvoiceById = ({
         <div className="fixed top-6 right-10 z-[10002] flex gap-4 no-print">
           <button
             onClick={handleHtmlPrint}
+            disabled={isDownloading}
             className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"
           >
-            <Download className="w-4 h-4" />
-            Download PDF
+            {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            {isDownloading ? "Preparing PDF" : "Download PDF"}
           </button>
 
           {/* Edit button — ADMIN / PROJECT_MANAGER_OFFICER only */}

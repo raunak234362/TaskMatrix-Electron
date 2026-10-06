@@ -8,6 +8,22 @@ import { toast } from "react-toastify";
 import { Plus, Trash2 } from "lucide-react";
 import { numberToWords } from "../../utils/numberToWords";
 
+const normalizeReceiptIds = (value) => {
+  let parsedValue = value;
+  if (typeof value === "string") {
+    try {
+      parsedValue = JSON.parse(value);
+    } catch {
+      parsedValue = value;
+    }
+  }
+  const values = Array.isArray(parsedValue) ? parsedValue : [parsedValue];
+  return values
+    .map((item) => typeof item === "object" ? item?.id || item?._id : item)
+    .filter(Boolean)
+    .map(String);
+};
+
 
 
 
@@ -164,7 +180,6 @@ const AddInvoice = ({
     setValue("fabricatorId", fabricatorId);
     setSelectedProjectId("");
     setValue("projectId", "");
-    setValue("receiptId", "");
 
     if (!fabricatorId) {
       setFilteredProjects([]);
@@ -274,21 +289,6 @@ const AddInvoice = ({
 
     if (project) {
       setValue("jobName", project.name || "");
-
-      if (project.rfqId) {
-        try {
-          const rfqRes = await Service.GetRFQbyId(project.rfqId);
-          const rfq = rfqRes.data;
-          console.log("RFQ Data-------", rfq);
-
-          if (rfq && rfq.sender) {
-            // Keep customerName as the fabricator name. Do not overwrite it with sender name.
-            setValue("clientId", rfq.senderId || rfq.sender.id);
-          }
-        } catch (error) {
-          console.error("Error fetching RFQ:", error);
-        }
-      }
     }
   };
 
@@ -407,10 +407,14 @@ const AddInvoice = ({
     selectProject(e.target.value);
   };
   const onSubmit = async (data) => {
+    const receiptIds = normalizeReceiptIds(data.receiptIds);
+    const invoiceFields = { ...data };
+    delete invoiceFields.clientId;
     // Ensure numeric fields are numbers
     const formattedData = {
-      ...data,
-      clientId: data.receiptId || data.clientId || "",
+      ...invoiceFields,
+      fabricatorId: data.fabricatorId || selectedFabricatorId,
+      multipleReceipients: receiptIds,
       totalInvoiceValue: Number(data.totalInvoiceValue),
       changeOrderId: data.changeOrderId || "",
       rfqId: data.rfqId || "",
@@ -458,6 +462,11 @@ const AddInvoice = ({
   const accountOptions = (accounts || []).map((account) => ({
     label: `${account.accountName} (${account.accountNumber})`,
     value: account._id || account.id,
+  }));
+
+  const contactOptions = contacts.map((contact) => ({
+    label: `${contact.firstName || ""} ${contact.middleName ? `${contact.middleName} ` : ""}${contact.lastName || ""}`.trim() || contact.email || contact.name || "Unnamed Contact",
+    value: String(contact.id || contact._id || contact.userName),
   }));
 
   return (
@@ -643,23 +652,26 @@ const AddInvoice = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Receipt ID (Contact)
               </label>
-              <select
-                {...register("receiptId")}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-              >
-                <option value="">-- Select Contact --</option>
-                {contacts.map((contact) => {
-                  const name = `${contact.firstName || ""} ${contact.middleName ? contact.middleName + " " : ""}${contact.lastName || ""}`.trim() || contact.email || contact.name || "Unnamed Contact";
+              <Controller
+                name="receiptIds"
+                control={control}
+                render={({ field }) => {
+                  const selectedIds = normalizeReceiptIds(field.value);
                   return (
-                    <option
-                      key={contact.id || contact._id}
-                      value={contact.id || contact._id}
-                    >
-                      {name}
-                    </option>
+                    <Select
+                      {...field}
+                      isMulti
+                      options={contactOptions}
+                      value={contactOptions.filter((option) => selectedIds.includes(option.value))}
+                      onChange={(options) => field.onChange((options || []).map((option) => option.value))}
+                      placeholder="-- Select Contacts --"
+                      isClearable
+                      isSearchable
+                      styles={customSelectStyles}
+                    />
                   );
-                })}
-              </select>
+                }}
+              />
             </div>
             <div className="space-y-1">
               <Input label="GSTIN" {...register("GSTIN")} />

@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
-import { app, shell, BrowserWindow, Notification, ipcMain, session, powerMonitor } from 'electron'
-import { join } from 'path'
+import { app, shell, BrowserWindow, Notification, ipcMain, session, powerMonitor, dialog } from 'electron'
+import { basename, join } from 'path'
+import { writeFile } from 'fs/promises'
 import { tmpdir } from 'os'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -41,6 +42,7 @@ function createWindow() {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
+      contextIsolation: true,
       sandbox: false,
       webSecurity: !is.dev
     }
@@ -106,6 +108,50 @@ ipcMain.handle('get-os-user', () => {
   } catch (err) {
     console.error('Error fetching OS user:', err);
     return '';
+  }
+})
+
+ipcMain.handle('export-invoice-pdf', async (event, { html, filename }) => {
+  if (typeof html !== 'string' || !html.trim()) {
+    return { success: false, error: 'Invoice content is empty' }
+  }
+
+  const safeFilename = basename(String(filename || 'Invoice.pdf'))
+    .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_')
+    .replace(/\.pdf$/i, '')
+  const defaultPath = join(app.getPath('downloads'), `${safeFilename || 'Invoice'}.pdf`)
+  const parentWindow = BrowserWindow.fromWebContents(event.sender)
+  const saveResult = await dialog.showSaveDialog(parentWindow, {
+    title: 'Save invoice as PDF',
+    defaultPath,
+    filters: [{ name: 'PDF', extensions: ['pdf'] }]
+  })
+
+  if (saveResult.canceled || !saveResult.filePath) {
+    return { canceled: true }
+  }
+
+  const pdfWindow = new BrowserWindow({
+    show: false,
+    webPreferences: { sandbox: true }
+  })
+
+  try {
+    await pdfWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`)
+    const pdf = await pdfWindow.webContents.printToPDF({
+      pageSize: 'A4',
+      printBackground: true,
+      preferCSSPageSize: true,
+      margins: { top: 0, bottom: 0, left: 0, right: 0 }
+    })
+    await writeFile(saveResult.filePath, pdf)
+    const openError = await shell.openPath(saveResult.filePath)
+    return { success: true, filePath: saveResult.filePath, openError }
+  } catch (error) {
+    console.error('Error exporting invoice PDF:', error)
+    return { success: false, error: error.message || 'Failed to export invoice PDF' }
+  } finally {
+    if (!pdfWindow.isDestroyed()) pdfWindow.destroy()
   }
 })
 
