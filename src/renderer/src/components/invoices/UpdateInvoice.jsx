@@ -1,11 +1,28 @@
 import { useEffect, useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { Controller, useForm, useFieldArray } from "react-hook-form";
+import Select from "react-select";
 import Input from "../fields/input";
 import Service from "../../api/Service";
 import { toast } from "react-toastify";
 import { Plus, Trash2, X, Save, Loader2 } from "lucide-react";
 import { numberToWords } from "../../utils/numberToWords";
 import Modal from "../ui/Modal";
+
+const normalizeReceiptIds = (value) => {
+  let parsedValue = value;
+  if (typeof value === "string") {
+    try {
+      parsedValue = JSON.parse(value);
+    } catch {
+      parsedValue = value;
+    }
+  }
+  const values = Array.isArray(parsedValue) ? parsedValue : [parsedValue];
+  return values
+    .map((item) => typeof item === "object" ? item?.id || item?._id : item)
+    .filter(Boolean)
+    .map(String);
+};
 
 const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
   const [accounts, setAccounts] = useState([]);
@@ -92,8 +109,15 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
 
           // Pre-fill form
           reset({
+            fabricatorId:
+              invoiceData.fabricatorId ||
+              invoiceData.fabricator?._id ||
+              invoiceData.fabricator?.id ||
+              "",
             customerName: invoiceData.customerName,
-            receiptId: invoiceData.receiptId,
+            receiptId: normalizeReceiptIds(
+              invoiceData.multipleReceipients ?? invoiceData.receiptId ?? invoiceData.clientId,
+            ),
             GSTIN: invoiceData.GSTIN,
             address: invoiceData.address,
             stateCode: invoiceData.stateCode,
@@ -162,8 +186,13 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
   };
 
   const onSubmit = async (data) => {
+    const receiptIds = normalizeReceiptIds(data.receiptId);
+    const invoiceFields = { ...data };
+    delete invoiceFields.clientId;
     const formattedData = {
-      ...data,
+      ...invoiceFields,
+      multipleReceipients: receiptIds,
+      receiptId: receiptIds,
       totalInvoiceValue: Number(data.totalInvoiceValue),
       invoiceItems: data.invoiceItems?.map((item) => ({
         ...item,
@@ -201,6 +230,16 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
     );
   }
 
+  const contactOptions = contacts.map((contact) => ({
+    label: `${contact.firstName || ""} ${contact.middleName ? `${contact.middleName} ` : ""}${contact.lastName || ""}`.trim() || contact.userName || contact.name || contact.email || "Unnamed Contact",
+    value: String(contact.id || contact._id || contact.userName),
+  }));
+  const selectedReceiptIds = normalizeReceiptIds(watch("receiptId"));
+  const missingContactOptions = selectedReceiptIds
+    .filter((receiptId) => !contactOptions.some((option) => option.value === receiptId))
+    .map((receiptId) => ({ label: `${receiptId} (Current)`, value: receiptId }));
+  const receiptOptions = [...contactOptions, ...missingContactOptions];
+
   return (
     <div className="bg-white rounded-xl w-full max-w-5xl mx-auto overflow-hidden flex flex-col max-h-[90vh]">
       <header className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 sticky top-0 z-10">
@@ -225,24 +264,23 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
               
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Receipt ID (Contact)</label>
-                <select
-                  {...register("receiptId")}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none bg-white font-medium shadow-sm transition-all"
-                >
-                  <option value="">-- Select Contact --</option>
-                  {contacts.map((contact) => {
-                    const val = contact.id || contact._id || contact.userName;
-                    const name = `${contact.firstName || ""} ${contact.middleName ? contact.middleName + " " : ""}${contact.lastName || ""}`.trim() || contact.userName || contact.name || contact.email || "Unnamed Contact";
-                    return (
-                      <option key={val} value={val}>
-                        {name} {contact.email ? `(${contact.email})` : ""}
-                      </option>
-                    );
-                  })}
-                  {watch("receiptId") && !contacts.some(c => (c.id || c._id || c.userName) === watch("receiptId")) && (
-                    <option value={watch("receiptId")}>{watch("receiptId")} (Current)</option>
+                <Controller
+                  name="receiptId"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      isMulti
+                      options={receiptOptions}
+                      value={receiptOptions.filter((option) => selectedReceiptIds.includes(option.value))}
+                      onChange={(options) => field.onChange((options || []).map((option) => option.value))}
+                      placeholder="-- Select Contacts --"
+                      isClearable
+                      isSearchable
+                      classNamePrefix="invoice-contact"
+                    />
                   )}
-                </select>
+                />
               </div>
 
               <Input label="GSTIN" {...register("GSTIN")} />
