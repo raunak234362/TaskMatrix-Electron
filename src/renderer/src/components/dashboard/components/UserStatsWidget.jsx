@@ -9,7 +9,7 @@ const StatCard = ({
   trend,
 }) => (
   <div
-    className="p-3 lg:p-4 rounded-none border border-gray-200 border-l-4 border-l-[#48b614] shadow-sm transition-all duration-700 group hover:shadow-md hover:-translate-y-1 relative overflow-hidden bg-white rounded-xl"
+    className="p-3 lg:p-4 rounded-none border border-gray-600 border-l-4 border-l-[#48b614] shadow-sm transition-all duration-700 group hover:shadow-md hover:-translate-y-1 relative overflow-hidden bg-white rounded-xl"
   >
     <div className="flex flex-col h-full justify-between gap-2 lg:gap-3 relative z-10">
       <div className="flex items-start justify-between">
@@ -18,7 +18,7 @@ const StatCard = ({
         </div>
         {trend && (
           <span
-            className="text-[10px] font-black px-3 py-1 rounded-full bg-white border border-black text-black uppercase tracking-widest shadow-sm"
+            className="text-sm font-black px-3 py-1 rounded-full bg-white border border-black text-black uppercase tracking-normal shadow-sm"
           >
             {trend}
           </span>
@@ -26,8 +26,8 @@ const StatCard = ({
       </div>
 
       <div>
-        <p className="text-[12px] lg:text-[14px] font-semibold text-black/40 uppercase tracking-[0.15em]">{title}</p>
-        <h3 className="text-lg lg:text-xl font-black text-black mt-1 tracking-tighter">
+        <p className="text-sm font-semibold text-black uppercase tracking-normal">{title}</p>
+        <h3 className="text-lg font-black text-black mt-1 tracking-tighter">
           {value}
         </h3>
         {subtext && (
