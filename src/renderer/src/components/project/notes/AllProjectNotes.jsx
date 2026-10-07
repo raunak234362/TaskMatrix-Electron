@@ -344,7 +344,7 @@ const AllProjectNotes = ({ projectId, project }) => {
                                                 });
                                             })()}
                                         </div>
-                                        <div className="text-lg font-semibold text-black truncate pr-4 uppercase tracking-tight mb-2">
+                                        <div className="text-sm font-semibold text-black truncate pr-4 uppercase tracking-tight mb-2">
                                             {note.title || truncateWords(note.content?.replace(/<[^>]*>?/gm, "").replace(/&nbsp;/g, " ") || "Untitled Note", 10)}
                                         </div>
                                         <div className="flex items-center gap-4 text-sm font-normal text-black uppercase tracking-widest">

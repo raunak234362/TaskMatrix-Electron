@@ -307,7 +307,7 @@ const AdminDashboardView = ({
                         {/* 2. Upcoming Deadlines Trigger - Hidden for PMO, OE, and Admin */}
                         {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && userRole !== 'admin' && (
                             <div
-                                className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                                className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                                 onClick={() => setShowDeadlinesPopup(true)}
                             >
                                 <div className="flex items-center justify-between">
@@ -315,9 +315,9 @@ const AdminDashboardView = ({
                                         <div className="p-2.5 bg-blue-100/60 rounded-xl border border-blue-200 shadow-sm group-hover:scale-110 transition-transform">
                                             <Calendar className="w-5 h-5 text-blue-600" strokeWidth={2.5} />
                                         </div>
-                                        <span className="text-[15px] font-black text-gray-700 uppercase tracking-wide">Upcoming Assigned Task Deadlines</span>
+                                        <span className="text-sm font-black text-gray-700 uppercase tracking-wide">Upcoming Assigned Task Deadlines</span>
                                     </div>
-                                    <span className="text-3xl font-black text-blue-600 tracking-tighter">
+                                    <span className="text-2xl font-black text-blue-600 tracking-tighter">
                                         {tasks.filter(t => t.status === 'ASSIGNED' || t.status === 'REWORK').length}
                                     </span>
                                 </div>
@@ -326,7 +326,7 @@ const AdminDashboardView = ({
 
                         {/* 3. Upcoming Submittals Trigger */}
                         <div
-                            className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                            className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                             onClick={() => setShowSubmittalsPopup(true)}
                         >
                             <div className="flex items-center justify-between">
@@ -334,10 +334,10 @@ const AdminDashboardView = ({
                                     <div className="p-2.5 bg-indigo-100/60 rounded-xl border border-indigo-200 shadow-sm group-hover:scale-110 transition-transform">
                                         <Briefcase className="w-5 h-5 text-indigo-600" strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-[14px] font-semibold
-                                     text-black uppercase tracking-widest">Upcoming Submittal</span>
+                                    <span className="text-sm font-semibold
+                                     text-black uppercase tracking-normal">Upcoming Submittal</span>
                                 </div>
-                                <span className="text-3xl font-black text-indigo-600 tracking-tighter">
+                                <span className="text-2xl font-black text-indigo-600 tracking-tighter">
                                     {adminData?.upcomingMilestones?.length || 0}
                                 </span>
                             </div>
@@ -345,7 +345,7 @@ const AdminDashboardView = ({
 
                         {/* 4. Notes & Updates Trigger */}
                         <div
-                            className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                            className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                             onClick={() => setShowNotesPopup(true)}
                         >
                             <div className="flex items-center justify-between">
@@ -353,10 +353,10 @@ const AdminDashboardView = ({
                                     <div className="p-2.5 bg-amber-100/60 rounded-xl border border-amber-200 shadow-sm group-hover:scale-110 transition-transform">
                                         <Bell className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-[14px] font-semibold
-                                     text-black uppercase tracking-widest">Notes & Updates</span>
+                                    <span className="text-sm font-semibold
+                                     text-black uppercase tracking-normal">Notes & Updates</span>
                                 </div>
-                                    <span className="text-3xl font-black text-amber-600 tracking-tighter">
+                                    <span className="text-2xl font-black text-amber-600 tracking-tighter">
                                         {projectNotes.length}
                                     </span>
                                 </div>
@@ -364,7 +364,7 @@ const AdminDashboardView = ({
                             
                             {/* Unread Comments Trigger */}
                             <div
-                                className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                                className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                                 onClick={() => handlers.setShowUnreadCommentsPopup?.(true)}
                             >
                                 <div className="flex items-center justify-between">
@@ -372,10 +372,10 @@ const AdminDashboardView = ({
                                         <div className="p-2.5 bg-red-100/60 rounded-xl border border-red-200 shadow-sm group-hover:scale-110 transition-transform">
                                             <MessageCircleWarning className="w-5 h-5 text-red-600" strokeWidth={2.5} />
                                         </div>
-                                        <span className="text-[15px] font-semibold
-                                     text-black uppercase tracking-widest">Unread Comments</span>
+                                        <span className="text-sm font-semibold
+                                     text-black uppercase tracking-normal">Unread Comments</span>
                                     </div>
-                                    <span className="text-3xl font-black text-red-600 tracking-tighter">
+                                    <span className="text-2xl font-black text-red-600 tracking-tighter">
                                         {unreadComments?.length || 0}
                                     </span>
                                 </div>
@@ -384,7 +384,7 @@ const AdminDashboardView = ({
                             {/* 5. Unapproved Change Orders */}
                             {['admin', 'deputy_manager', 'operation_executive', 'project_manager_officer', 'project_manager', 'dept_manager'].includes(userRole?.toLowerCase()) && (
                                 <div
-                                    className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                                    className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                                     onClick={() => handlers.handleActionClick && handlers.handleActionClick('UNAPPROVED_CHANGE_ORDERS')}
                                 >
                                     <div className="flex items-center justify-between">
@@ -393,9 +393,9 @@ const AdminDashboardView = ({
                                                 <RefreshCw className="w-5 h-5 text-red-600" strokeWidth={2.5} />
                                             </div>
                                             <span className="text-[14px] font-semibold
-                                     text-black uppercase tracking-widest">Unapproved Change Orders</span>
+                                     text-black uppercase tracking-normal">Unapproved Change Orders</span>
                                         </div>
-                                        <span className="text-3xl font-black text-red-600 tracking-tighter">
+                                        <span className="text-2xl font-black text-red-600 tracking-tighter">
                                             {adminData?.dashboardStats?.unapprovedChangeOrders || 0}
                                         </span>
                                     </div>
@@ -404,7 +404,7 @@ const AdminDashboardView = ({
 
                             {/* 6. Pending Approvals */}
                             <div
-                                className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                                className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                                 onClick={() => handlers.handleActionClick && handlers.handleActionClick('PENDING_APPROVALS')}
                             >
                                 <div className="flex items-center justify-between">
@@ -412,9 +412,9 @@ const AdminDashboardView = ({
                                         <div className="p-2.5 bg-purple-100/60 rounded-xl border border-purple-200 shadow-sm group-hover:scale-110 transition-transform">
                                             <Bell className="w-5 h-5 text-purple-600" strokeWidth={2.5} />
                                         </div>
-                                        <span className="text-[14px] font-semibold text-black uppercase tracking-widest">Pending Approvals</span>
+                                        <span className="text-sm font-semibold text-black uppercase tracking-normal">Pending Approvals</span>
                                     </div>
-                                    <span className="text-3xl font-black text-purple-600 tracking-tighter">
+                                    <span className="text-2xl font-black text-purple-600 tracking-tighter">
                                         {unapprovedListsCount || 0}
                                     </span>
                                 </div>

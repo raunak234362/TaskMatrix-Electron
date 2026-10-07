@@ -108,7 +108,7 @@ const StaffDashboardView = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 relative z-10">
                     {/* 1. Priority Focus */}
                     <div
-                        className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-between hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group"
+                        className="bg-green-50/60 p-4 rounded-lg border border-black shadow-sm flex flex-col justify-between hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group"
                         onClick={() => displayTask && setDetailTaskId(displayTask.id)}
                     >
                         <div className="flex items-center justify-between mb-4">
@@ -117,7 +117,7 @@ const StaffDashboardView = ({
                                     <Clock className="w-5 h-5 text-primary" strokeWidth={2.5} />
                                 </div>
 
-                                <span className="text-[13px] font-black text-black uppercase tracking-widest">Priority Focus</span>
+                                <span className="text-sm font-semibold text-black uppercase tracking-normal">Priority Focus</span>
                             </div>
 
                             {displayTask && (
@@ -128,10 +128,10 @@ const StaffDashboardView = ({
                             )}
                         </div>
                         <div className="flex-1 mt-auto">
-                            <h3 className="text-base font-black text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">
+                            <h3 className="text-sm font-semibold text-primary line-clamp-1 group-hover:text-primary transition-colors">
                                 {displayTask?.project?.name || 'No Active Task'}
                             </h3>
-                            <p className="text-[12px] text-gray-500 font-bold uppercase mt-1">
+                            <p className="text-xs font-semibold  tracking-normal mt-1">
                                 {displayTask?.name || 'Ready to start'}
                             </p>
                         </div>
@@ -139,7 +139,7 @@ const StaffDashboardView = ({
 
                     {/* 2. Deadlines Trigger */}
                     <div
-                        className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                        className="bg-green-50/60 p-4 rounded-lg border border-black shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                         onClick={() => setShowDeadlinesPopup(true)}
                     >
                         <div className="flex items-center justify-between">
@@ -147,7 +147,7 @@ const StaffDashboardView = ({
                                 <div className="p-2.5 bg-blue-100/60 rounded-xl border border-blue-200 shadow-sm group-hover:scale-110 transition-transform">
                                     <Calendar className="w-5 h-5 text-blue-600" strokeWidth={2.5} />
                                 </div>
-                                <span className="text-[13px] font-black text-gray-700 uppercase tracking-widest">Upcoming Assigned Task Deadlines</span>
+                                <span className="text-sm font-semibold text-black uppercase tracking-normal">Upcoming Assigned Task Deadlines</span>
                             </div>
                             <span className="text-3xl font-black text-blue-600 tracking-tighter">
                                 {tasks.filter(t => t.status === 'ASSIGNED' || t.status === 'REWORK').length}
@@ -157,7 +157,7 @@ const StaffDashboardView = ({
 
                     {/* 3. Notes Trigger */}
                     <div
-                        className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                        className="bg-green-50/60 p-4 rounded-lg border border-black shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                         onClick={() => setShowNotesPopup(true)}
                     >
                         <div className="flex items-center justify-between">
@@ -165,7 +165,7 @@ const StaffDashboardView = ({
                                 <div className="p-2.5 bg-amber-100/60 rounded-xl border border-amber-200 shadow-sm group-hover:scale-110 transition-transform">
                                     <Bell className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
                                 </div>
-                                <span className="text-[13px] font-black text-gray-700 uppercase tracking-widest">Notes & Updates</span>
+                                <span className="text-sm font-semibold text-black uppercase tracking-normal">Notes & Updates</span>
                             </div>
                             <span className="text-3xl font-black text-amber-600 tracking-tighter">
                                 {projectNotes?.length || 0}
@@ -175,7 +175,7 @@ const StaffDashboardView = ({
 
                     {/* 4. Unread Comments Trigger */}
                     <div
-                        className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                        className="bg-green-50/60 p-4 rounded-lg border border-black shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                         onClick={() => handlers.setShowUnreadCommentsPopup?.(true)}
                     >
                         <div className="flex items-center justify-between">
@@ -183,7 +183,7 @@ const StaffDashboardView = ({
                                 <div className="p-2.5 bg-red-100/60 rounded-xl border border-red-200 shadow-sm group-hover:scale-110 transition-transform">
                                     <MessageCircleWarning className="w-5 h-5 text-red-600" strokeWidth={2.5} />
                                 </div>
-                                <span className="text-[13px] font-black text-gray-700 uppercase tracking-widest">Unread Comments</span>
+                                <span className="text-sm font-semibold text-black uppercase tracking-normal">Unread Comments</span>
                             </div>
                             <span className="text-3xl font-black text-red-600 tracking-tighter">
                                 {unreadComments?.length || 0}
