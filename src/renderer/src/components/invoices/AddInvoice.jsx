@@ -24,6 +24,18 @@ const normalizeReceiptIds = (value) => {
     .map(String);
 };
 
+const getAccountName = (account) =>
+  [
+    account?.accountName,
+    account?.account_name,
+    account?.accountHolderName,
+    account?.account_holder_name,
+    account?.name,
+    account?.beneficiaryName,
+    account?.beneficiaryInfo,
+    account?.bankName,
+  ].find((name) => typeof name === "string" && name.trim()) || "Unnamed Account";
+
 
 
 
@@ -250,7 +262,7 @@ const AddInvoice = ({
         const accountInfo = {
           abaRoutingNumber: selectedAccount.abaRoutingNumber || "",
           accountNumber: selectedAccount.accountNumber || "",
-          accountName: selectedAccount.accountName || "",
+          accountName: getAccountName(selectedAccount),
           paymentMethod: selectedAccount.paymentMethod || "",
           institutionNumber: selectedAccount.institutionNumber || "",
           transitNumber: selectedAccount.transitNumber || "",
@@ -319,17 +331,22 @@ const AddInvoice = ({
   };
 
   const handleAccountSelect = (e) => {
-    const accountId = e.target.value;
-    if (!accountId) return;
+    const accountId = e.target.value || "";
+    setValue("accountId", accountId);
+
+    if (!accountId) {
+      setValue("accountInfo", []);
+      return;
+    }
 
     const selectedAccount = accounts.find(
-      (a) => a._id === accountId || a.id === accountId
+      (a) => String(a._id || a.id) === String(accountId)
     );
     if (selectedAccount) {
       const accountInfo = {
         abaRoutingNumber: selectedAccount.abaRoutingNumber || "",
         accountNumber: selectedAccount.accountNumber || "",
-        accountName: selectedAccount.accountName || "",
+        accountName: getAccountName(selectedAccount),
         paymentMethod: selectedAccount.paymentMethod || "",
         institutionNumber: selectedAccount.institutionNumber || "",
         transitNumber: selectedAccount.transitNumber || "",
@@ -460,7 +477,7 @@ const AddInvoice = ({
   }));
 
   const accountOptions = (accounts || []).map((account) => ({
-    label: `${account.accountName} (${account.accountNumber})`,
+    label: `${getAccountName(account)} (${account.accountNumber || "No account number"})`,
     value: account._id || account.id,
   }));
 

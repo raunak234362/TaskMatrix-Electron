@@ -17,7 +17,10 @@ const ChatSidebar = ({
   onAddGroupClick,
   setRecentChats,
   refreshKey,
+  projectName,
 }) => {
+  const normalizedProjectName = projectName?.trim().toLocaleLowerCase();
+
   useEffect(() => {
     const fetchChats = async () => {
       try {
@@ -68,7 +71,12 @@ const ChatSidebar = ({
               updatedAt: fallbackTimestamp,
             };
           })
-          .filter((chat) => Boolean(chat))
+          .filter(
+            (chat) =>
+              Boolean(chat) &&
+              (!normalizedProjectName ||
+                chat.group.name.trim().toLocaleLowerCase() === normalizedProjectName)
+          )
           .sort(
             (a, b) => {
               const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
@@ -84,7 +92,7 @@ const ChatSidebar = ({
     };
 
     fetchChats();
-  }, [setRecentChats, refreshKey]);
+  }, [setRecentChats, refreshKey, normalizedProjectName]);
 
   const selectChat = (chat) => {
     setActiveChat(chat);
@@ -137,7 +145,7 @@ const ChatSidebar = ({
           );
         })}
       </div>
-      {userRole === "ADMIN" && (
+      {userRole === "ADMIN" && !projectName && (
         <>
           {/* Footer Buttons */}
           <div className="p-3 border-t flex gap-2">

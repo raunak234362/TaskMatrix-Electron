@@ -6,9 +6,10 @@ import useGroupMessages from "../../hooks/userGroupMessages";
 
 import AddChatGroup from "./AddChatGroup";
 
-const Chats = () => {
+const Chats = ({ projectName }) => {
   const [recentChats, setRecentChats] = useState([]);
   const [activeChat, setActiveChat] = useState(() => {
+    if (projectName) return null;
     try {
       const saved = sessionStorage.getItem('activeChat');
       return saved ? JSON.parse(saved) : null;
@@ -18,12 +19,13 @@ const Chats = () => {
   });
 
   useEffect(() => {
+    if (projectName) return;
     if (activeChat) {
       sessionStorage.setItem('activeChat', JSON.stringify(activeChat));
     } else {
       sessionStorage.removeItem('activeChat');
     }
-  }, [activeChat]);
+  }, [activeChat, projectName]);
 
   const [unreadIds, setUnreadIds] = useState([]);
   const [isAddGroupOpen, setIsAddGroupOpen] = useState(false);
@@ -96,6 +98,7 @@ const Chats = () => {
             onAddGroupClick={handleAddGroupClick}
             setRecentChats={setRecentChats}
             refreshKey={refreshKey}
+            projectName={projectName}
           />
         </div>
         <div className="flex-1 h-full">
@@ -136,6 +139,7 @@ const Chats = () => {
             onAddGroupClick={handleAddGroupClick}
             setRecentChats={setRecentChats}
             refreshKey={refreshKey}
+            projectName={projectName}
           />
         ) : (
           <ChatMain

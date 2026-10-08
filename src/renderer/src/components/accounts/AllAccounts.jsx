@@ -22,7 +22,7 @@ const AllAccounts = ({ accounts, loading }) => {
       header: "Account Name",
       cell: ({ row }) => (
         <span className="text-[#6bbd45] font-bold hover:underline cursor-pointer">
-          {truncateWords(row.original.accountName, 20)}
+          {truncateWords(row.original.accountName || row.original.beneficiaryInfo, 20)}
         </span>
       ),
     },
