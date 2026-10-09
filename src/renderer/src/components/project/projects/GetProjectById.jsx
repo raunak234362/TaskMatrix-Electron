@@ -464,7 +464,9 @@ const GetProjectById = ({ id, onClose }) => {
                 fetchProject={fetchProject}
               />
             )}
-            {activeTab === 'Chat' && <Chats projectName={project.name} />}
+            {activeTab === 'Chat' && (
+              <Chats key={id} projectName={project.name} project={project} />
+            )}
 
             {/* Files */}
             {activeTab === 'files' && (

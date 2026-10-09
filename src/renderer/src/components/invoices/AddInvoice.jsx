@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import Select from "react-select";
 import Input from "../fields/input";
@@ -56,8 +56,10 @@ const AddInvoice = ({
   const [loading, setLoading] = useState(false);
 
   const [selectedFabricatorId, setSelectedFabricatorId] = useState("");
+  const [selectedFabricatorSAC, setSelectedFabricatorSAC] = useState("");
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [contacts, setContacts] = useState([]);
+  const fabricatorRequestId = useRef(0);
 
   const {
     register,
@@ -71,6 +73,7 @@ const AddInvoice = ({
     defaultValues: {
       currencyType: "USD",
       totalInvoiceValue: 0,
+      PONumber: "",
       invoiceItems: [
         {
           description: "",
@@ -188,19 +191,21 @@ const AddInvoice = ({
   };
 
   const selectFabricator = async (fabricatorId) => {
+    const requestId = ++fabricatorRequestId.current;
     setSelectedFabricatorId(fabricatorId);
     setValue("fabricatorId", fabricatorId);
     setSelectedProjectId("");
     setValue("projectId", "");
 
     if (!fabricatorId) {
+      setSelectedFabricatorSAC("");
       setFilteredProjects([]);
       setContacts([]);
       return;
     }
 
     const selectedFabricator = fabricators.find(
-      (f) => f.id === fabricatorId || f._id === fabricatorId
+      (f) => String(f.id || f._id) === String(fabricatorId)
     );
     console.log(selectedFabricator);
 
@@ -209,13 +214,29 @@ const AddInvoice = ({
       setValue("address", selectedFabricator.website || "");
       setContacts(selectedFabricator.pointOfContact || []);
 
-      // Set default SAC code for all current items
-      const sacCode = selectedFabricator.SAC || "";
-      const currentItems = watch("invoiceItems") || [];
-      currentItems.forEach((_, index) => {
-        setValue(`invoiceItems.${index}.sacCode`, sacCode);
-      });
     }
+
+    let fabricatorDetails = selectedFabricator;
+    try {
+      const response = await Service.GetFabricatorByID(fabricatorId);
+      fabricatorDetails =
+        response?.data?.data ||
+        response?.data?.fabricator ||
+        response?.data ||
+        response?.fabricator ||
+        response ||
+        selectedFabricator;
+    } catch (error) {
+      console.error("Error fetching fabricator details:", error);
+    }
+
+    if (requestId !== fabricatorRequestId.current) return;
+
+    const sacCode = fabricatorDetails?.SAC || fabricatorDetails?.data?.SAC || "";
+    setSelectedFabricatorSAC(sacCode);
+    (watch("invoiceItems") || []).forEach((_, index) => {
+      setValue(`invoiceItems.${index}.sacCode`, sacCode);
+    });
 
     try {
       const res = await Service.GetFabricatorPOC(fabricatorId);
@@ -729,6 +750,9 @@ const AddInvoice = ({
               />
             </div>
             <div className="space-y-1">
+              <Input label="PO Number" {...register("PONumber")} />
+            </div>
+            <div className="space-y-1">
               <Input
                 label="Job Name *"
                 {...register("jobName", { required: "Job Name is required" })}
@@ -871,13 +895,12 @@ const AddInvoice = ({
             <button
               type="button"
               onClick={() => {
-                const selectedFab = fabricators.find(f => f.id === selectedFabricatorId || f._id === selectedFabricatorId);
                 append({
                   description: "",
                   unit: 1,
                   rateUSD: 0,
                   totalUSD: 0,
-                  sacCode: selectedFab?.SAC || "",
+                  sacCode: selectedFabricatorSAC || "",
                   remarks: "",
                 });
               }}

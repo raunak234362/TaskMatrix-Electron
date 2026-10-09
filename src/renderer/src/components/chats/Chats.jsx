@@ -6,7 +6,7 @@ import useGroupMessages from "../../hooks/userGroupMessages";
 
 import AddChatGroup from "./AddChatGroup";
 
-const Chats = ({ projectName }) => {
+const Chats = ({ projectName, project }) => {
   const [recentChats, setRecentChats] = useState([]);
   const [activeChat, setActiveChat] = useState(() => {
     if (projectName) return null;
@@ -58,6 +58,17 @@ const Chats = ({ projectName }) => {
 
   useGroupMessages(handleGroupMessage);
 
+  useEffect(() => {
+    const projectChat = recentChats[0];
+    if (
+      projectName &&
+      projectChat &&
+      activeChat?.group?.id !== projectChat.group.id
+    ) {
+      setActiveChat(projectChat);
+    }
+  }, [projectName, recentChats, activeChat?.group?.id]);
+
   const handleMessageSent = (content, groupId) => {
     setRecentChats((prev) => {
       const updated = prev.map((c) =>
@@ -85,10 +96,12 @@ const Chats = ({ projectName }) => {
   };
 
   return (
-    <div className="flex h-full overflow-y-hidden bg-gray-50 rounded-2xl">
+    <div
+      className={`flex w-full ${projectName ? "h-[min(65vh,600px)] min-h-[360px]" : "h-full"} overflow-y-hidden bg-gray-50 rounded-2xl`}
+    >
       {/* Desktop */}
       <div className="hidden md:flex w-full h-full rounded-2xl">
-        <div className="w-80 border-r h-full">
+        <div className={projectName ? "hidden" : "w-80 border-r h-full"}>
           <ChatSidebar
             recentChats={recentChats}
             activeChat={activeChat}
@@ -101,8 +114,8 @@ const Chats = ({ projectName }) => {
             projectName={projectName}
           />
         </div>
-        <div className="flex-1 h-full">
-          {isAddGroupOpen ? (
+        <div className={`${projectName ? "w-full" : "flex-1"} h-full`}>
+          {!projectName && isAddGroupOpen ? (
             <AddChatGroup
               onClose={handleCloseAddGroup}
               onCreated={handleGroupCreated}
@@ -113,10 +126,11 @@ const Chats = ({ projectName }) => {
               setActiveChat={setActiveChat}
               recentChats={recentChats}
               onMessageSent={handleMessageSent}
+              project={project}
             />
           ) : (
             <div className="flex items-center justify-center h-full text-gray-700">
-              Select a chat to start messaging
+              {projectName ? "No project chat group found" : "Select a chat to start messaging"}
             </div>
           )}
         </div>
@@ -124,7 +138,21 @@ const Chats = ({ projectName }) => {
 
       {/* Mobile */}
       <div className="md:hidden w-full h-full">
-        {isAddGroupOpen ? (
+        {projectName ? (
+          activeChat ? (
+            <ChatMain
+              activeChat={activeChat}
+              setActiveChat={setActiveChat}
+              recentChats={recentChats}
+              onMessageSent={handleMessageSent}
+              project={project}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-gray-700">
+              No project chat group found
+            </div>
+          )
+        ) : isAddGroupOpen ? (
           <AddChatGroup
             onClose={handleCloseAddGroup}
             onCreated={handleGroupCreated}
@@ -147,6 +175,7 @@ const Chats = ({ projectName }) => {
             setActiveChat={setActiveChat}
             recentChats={recentChats}
             onMessageSent={handleMessageSent}
+            project={project}
           />
         )}
       </div>

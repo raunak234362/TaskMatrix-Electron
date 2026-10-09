@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 
 import Service from "../../api/Service";
 
-const GroupDetail = ({ group, onClose }) => {
+const GroupDetail = ({ group, onClose, project }) => {
   const allEmployees = useSelector(
     (state) =>
       (state.userData?.staffData ?? state.userInfo?.staffData ?? [])
@@ -17,6 +17,7 @@ const GroupDetail = ({ group, onClose }) => {
   const [activeTab, setActiveTab] = useState("members");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [groupMembers, setGroupMembers] = useState([]);
+  const [projectClients, setProjectClients] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -37,6 +38,34 @@ const GroupDetail = ({ group, onClose }) => {
   useEffect(() => {
     fetchGroupMembers();
   }, [group.id]);
+
+  useEffect(() => {
+    const fabricatorId =
+      project?.fabricatorID ||
+      project?.fabricatorId ||
+      project?.fabricator?.id ||
+      project?.fabricator?._id;
+    if (!fabricatorId) {
+      setProjectClients([]);
+      return;
+    }
+
+    const fetchProjectClients = async () => {
+      try {
+        const response = await Service.FetchAllClientsByFabricatorID(fabricatorId);
+        const data = response?.data || response;
+        const clients = Array.isArray(data)
+          ? data
+          : data?.clients || data?.data?.clients || [];
+        setProjectClients(Array.isArray(clients) ? clients : []);
+      } catch (error) {
+        console.error("Failed to fetch project clients", error);
+        setProjectClients([]);
+      }
+    };
+
+    fetchProjectClients();
+  }, [project]);
 
   const handleAddMembers = async () => {
     if (selectedUsers.length === 0) return;
@@ -97,11 +126,30 @@ const GroupDetail = ({ group, onClose }) => {
     );
   };
 
-  const filteredEmployees = allEmployees.filter((user) =>
-    `${user.firstName} ${user.lastName}`
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
+  const memberIds = new Set(
+    groupMembers.map((member) => String(member.id || member._id))
   );
+  const filterAvailableUsers = (users) => {
+    const availableUsers = new Map();
+    users.forEach((user) => {
+      const userId = user?.id || user?._id;
+      if (userId && !memberIds.has(String(userId))) {
+        availableUsers.set(String(userId), { ...user, id: userId });
+      }
+    });
+    return [...availableUsers.values()].filter((user) =>
+      `${user.firstName || ""} ${user.lastName || ""}`
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
+    );
+  };
+  const clientRoles = ["CLIENT", "CLIENT_ADMIN", "CLIENT_ESTIMATOR"];
+  const employeeCandidates = project
+    ? allEmployees.filter((user) => !clientRoles.includes(user.role?.toUpperCase()))
+    : allEmployees;
+  const filteredEmployees = filterAvailableUsers(employeeCandidates);
+  const filteredClients = project ? filterAvailableUsers(projectClients) : [];
+  const visibleCandidates = activeTab === "clients" ? filteredClients : filteredEmployees;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -130,15 +178,28 @@ const GroupDetail = ({ group, onClose }) => {
           </button>
           {
             (userRole === "ADMIN" || userRole === "OPERATION_EXECUTIVE" || userRole === "DEPUTY_MANAGER" || userRole === "HUMAN_RESOURCE") && (
-              <button
-                className={`flex-1 py-3 text-sm font-medium transition ${activeTab === "add"
-                  ? "text-green-600 border-b-2 border-green-600 bg-green-50"
-                  : "text-gray-700 hover:text-gray-700 hover:bg-gray-50"
-                }`}
-                onClick={() => setActiveTab("add")}
-              >
-                Add Members
-              </button>
+              <>
+                <button
+                  className={`flex-1 py-3 text-sm font-medium transition ${activeTab === "add"
+                    ? "text-green-600 border-b-2 border-green-600 bg-green-50"
+                    : "text-gray-700 hover:text-gray-700 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setActiveTab("add")}
+                >
+                  {project ? "Add Employees" : "Add Members"}
+                </button>
+                {project && (
+                  <button
+                    className={`flex-1 py-3 text-sm font-medium transition ${activeTab === "clients"
+                      ? "text-green-600 border-b-2 border-green-600 bg-green-50"
+                      : "text-gray-700 hover:text-gray-700 hover:bg-gray-50"
+                    }`}
+                    onClick={() => setActiveTab("clients")}
+                  >
+                    Clients
+                  </button>
+                )}
+              </>
             )
           }
 
@@ -193,7 +254,7 @@ const GroupDetail = ({ group, onClose }) => {
                 />
                 <input
                   type="text"
-                  placeholder="Search employees..."
+                  placeholder={activeTab === "clients" ? "Search clients..." : "Search employees..."}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -201,7 +262,11 @@ const GroupDetail = ({ group, onClose }) => {
               </div>
 
               <div className="space-y-2">
-                {filteredEmployees.map((user) => (
+                {visibleCandidates.length === 0 ? (
+                  <p className="py-4 text-center text-sm text-gray-500">
+                    {activeTab === "clients" ? "No clients available to add." : "No employees available to add."}
+                  </p>
+                ) : visibleCandidates.map((user) => (
                   <div
                     key={user.id}
                     onClick={() => toggleUserSelection(user.id)}
@@ -242,7 +307,7 @@ const GroupDetail = ({ group, onClose }) => {
             Delete Group
           </Button>
 
-          {activeTab === "add" && (
+          {(activeTab === "add" || activeTab === "clients") && (
             <div className="flex gap-3">
               <Button
                 onClick={() => setSelectedUsers([])}
