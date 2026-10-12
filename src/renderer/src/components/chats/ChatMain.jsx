@@ -12,7 +12,7 @@ import "./chatMain.css";
 
 
 
-const ChatMain = ({ activeChat, setActiveChat, onMessageSent }) => {
+const ChatMain = ({ activeChat, setActiveChat, onMessageSent, project }) => {
   const userInfo = useSelector((state) => state.userData?.userData ?? state.userInfo?.userDetail ?? {});
   const staffData = useSelector((state) => state.userData?.staffData ?? state.userInfo?.staffData ?? []);
 
@@ -233,7 +233,11 @@ const ChatMain = ({ activeChat, setActiveChat, onMessageSent }) => {
       className="chat-main-bg flex flex-col h-full overflow-hidden"
     >
       <div className="shrink-0">
-        <ChatHead contact={activeChat} onBack={() => setActiveChat(null)} />
+        <ChatHead
+          contact={activeChat}
+          onBack={() => setActiveChat(null)}
+          project={project}
+        />
       </div>
 
       <div

@@ -6,7 +6,7 @@ import { useState } from "react";
 import GroupDetail from "./GroupDetail";
 
 
-const ChatHead = ({ contact, onBack }) => {
+const ChatHead = ({ contact, onBack, project }) => {
     const [detailOpen, setDetailOpen] = useState(false);
   const group = contact?.group;
 
@@ -37,7 +37,11 @@ const ChatHead = ({ contact, onBack }) => {
       </Button>
 
       {detailOpen && group && (
-        <GroupDetail group={group} onClose={() => setDetailOpen(false)} />
+        <GroupDetail
+          group={group}
+          project={project}
+          onClose={() => setDetailOpen(false)}
+        />
       )}
     </div>
   );

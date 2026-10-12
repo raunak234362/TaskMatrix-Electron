@@ -447,10 +447,14 @@ const GetInvoiceById = ({
         </body>
       </html>
       `;
-      const exportOptions = {
-        html,
-        filename: `Invoice_${invoice.invoiceNumber || "NA"}.pdf`,
-      };
+      const projectName =
+        invoice.project?.name || invoice.projectName || invoice.jobName || "Project";
+      const invoiceNumber = invoice.invoiceNumber || "NA";
+      const filename = `${projectName}_${invoiceNumber}.pdf`.replace(
+        /[<>:"/\\|?*\x00-\x1f]/g,
+        "_"
+      );
+      const exportOptions = { html, filename };
       const invokeExport = window.api?.exportInvoicePdf
         ? (options) => window.api.exportInvoicePdf(options)
         : window.electron?.ipcRenderer?.invoke
@@ -791,7 +795,7 @@ const GetInvoiceById = ({
               <p className="text-xs text-gray-700 leading-relaxed border border-green-500/20 p-2 mb-1 rounded-lg bg-green-50/30">
                 Consulting Proforma Invoice for Steel Detailing of{" "}
                 {invoice.jobName} - {invoice.fabricator?.fabName} P.O. #{" "}
-                {invoice.project?.projectNumber || invoice.project?.projectCode || ""}
+                {invoice?.PONumber || ""}
               </p>
               <p className="text-xs text-black">
                 All payments to be made to{" "}
@@ -800,17 +804,22 @@ const GetInvoiceById = ({
               </p>
             </div>
 
-            {/* Signature Area at Base */}
-            <div className="mt-auto flex flex-col items-center pr-10 self-end">
+             {/* Signature Area at Base */}
+            <div className="mt-auto flex flex-col items-center pr-2 self-end">
               <p className="text-[#6bbd45] font-semibold text-[13px] mb-8 text-center">
                 Thank you for your business!
               </p>
-              <div className="text-center w-[220px]">
-                <p className="text-[12px] font-bold text-gray-900 mb-10">
+              <div className="text-center w-[280px]">
+                <p className="text-[12px] font-bold text-gray-900 mb-2">
                   For Whiteboard Technologies Pvt Ltd
                 </p>
+                <img
+                  src="https://res.cloudinary.com/dp7yxzrgw/image/upload/v1791467591/rajSignature_ftfqml.png"
+                  alt="Raj signature"
+                  className="mx-auto h-18 object-contain mb-2"
+                />
                 <div className="border-t border-[#6bbd45]/20 w-full pt-1">
-                  <p className="text-[10px] font-semibold text-black uppercase tracking-wider">
+                  <p className="text-[10px] font-bold text-black uppercase tracking-wider">
                     Authorised signatory
                   </p>
                 </div>

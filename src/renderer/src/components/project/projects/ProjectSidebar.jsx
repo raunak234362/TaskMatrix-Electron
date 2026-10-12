@@ -21,6 +21,7 @@ const TABS_CONFIG = [
   { key: 'teamAnalytics', label: 'Team Analytics', icon: Users },
   { key: 'files', label: 'Files', icon: FolderOpenDot },
   { key: 'wbs', label: 'WBS', icon: ClipboardList },
+  {key:'Chat', label:'Chat', icon:FolderOpenDot},
   { key: 'milestones', label: 'Milestones', icon: Clock },
   { key: 'notes', label: 'Notes', icon: FileText },
   { key: 'projectNotes', label: 'Project Notes', icon: FileText },

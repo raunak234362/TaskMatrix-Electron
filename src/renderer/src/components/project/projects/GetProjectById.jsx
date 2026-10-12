@@ -23,6 +23,7 @@ import ProjectHeader from './ProjectHeader'
 import ProjectSidebar from './ProjectSidebar'
 import ProjectOverviewTab from './ProjectOverviewTab'
 import StandardsChatbot from '../standards/StandardsChatbot'
+import Chats from '../../chats/Chats'
 
 const WBS_TYPE_ALIAS = {
   modeling: 'modelling',
@@ -462,6 +463,9 @@ const GetProjectById = ({ id, onClose }) => {
                 wbsCategoryTotals={wbsCategoryTotals}
                 fetchProject={fetchProject}
               />
+            )}
+            {activeTab === 'Chat' && (
+              <Chats key={id} projectName={project.name} project={project} />
             )}
 
             {/* Files */}
