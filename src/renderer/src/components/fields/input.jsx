@@ -1,10 +1,10 @@
 import React, { useId, useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-
+import { cn } from "../../lib/utils";
 
 const Input = React.forwardRef(
   (
-    { label, type = "text", className = "", variant = "default", ...props },
+    { label, labelClassName = "", type = "text", className = "", variant = "default", ...props },
     ref
   ) => {
     const id = useId();
@@ -29,13 +29,13 @@ const Input = React.forwardRef(
     return (
       <div className="w-full flex flex-col gap-1">
         {label && (
-          <label htmlFor={id} className="text-sm font-medium text-gray-700">
+          <label htmlFor={id} className={cn("text-sm font-medium text-gray-700", labelClassName)}>
             {label}
           </label>
         )}
         {type === "textarea" ? (
           <textarea
-            className={`${baseStyles} ${variantStyles[variant]} resize-y min-h-[80px] ${className}`}
+            className={cn(baseStyles, variantStyles[variant], className)}
             ref={ref}
             {...props}
             id={id}
@@ -44,7 +44,7 @@ const Input = React.forwardRef(
           <div className="relative">
             <input
               type={showPassword && type === "password" ? "text" : type}
-              className={`${baseStyles} ${variantStyles[variant]} ${className}`}
+              className={cn(baseStyles, variantStyles[variant], className)}
               ref={ref}
               {...props}
               id={id}
@@ -53,7 +53,7 @@ const Input = React.forwardRef(
               <button
                 type="button"
                 onClick={togglePasswordVisibility}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700 hover:text-gray-700 focus:outline-none"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700 hover:text-gray-900 focus:outline-none cursor-pointer"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
