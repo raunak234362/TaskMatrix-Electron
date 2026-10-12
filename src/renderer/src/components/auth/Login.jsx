@@ -216,7 +216,7 @@ const Login = () => {
                     label="USERNAME:"
                     labelClassName="text-sm font-semibold text-black tracking-wider mb-1"
                     placeholder="USERNAME"
-                    className="rounded-[4px] border-gray-300 focus:border-green-600 focus:ring-1 focus:ring-green-600 py-2.5 px-3.5 text-sm bg-white placeholder:text-gray-400 placeholder:text-xs placeholder:tracking-wider"
+                    className=" border-black py-2.5 px-3.5 text-sm bg-primary/20 placeholder:text-gray-900 placeholder:text-xs placeholder:tracking-wider"
                     type="text"
                     {...register("username", {
                       required: "Username is required",
@@ -230,7 +230,7 @@ const Login = () => {
                     labelClassName="text-sm font-semibold text-black tracking-wider mb-1"
                     placeholder="PASSWORD"
                     type="password"
-                    className="rounded-[4px] border-gray-300 focus:border-green-600 focus:ring-1 focus:ring-green-600 py-2.5 px-3.5 text-sm bg-white placeholder:text-gray-400 placeholder:text-xs placeholder:tracking-wider"
+                    className=" border-black  py-2.5 px-3.5 text-sm bg-primary/20 placeholder:text-gray-900 placeholder:text-xs placeholder:tracking-wider"
                     {...register("password", {
                       required: "Password is required",
                     })}
@@ -241,7 +241,7 @@ const Login = () => {
                   <Button
                     type="submit"
                     disabled={isLoggingIn}
-                    className="w-full py-2.5 rounded-[4px] bg-[#ebf5ea] hover:bg-[#dcecdb] text-black border border-black transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 flex items-center justify-center cursor-pointer font-bold tracking-wider text-sm sm:text-base uppercase"
+                    className="w-full py-2.5 bg-primary hover:bg-primary/80 text-black border border-black transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 flex items-center justify-center cursor-pointer font-bold tracking-wider text-sm sm:text-base uppercase"
                   >
                     {isLoggingIn ? (
                       <>
