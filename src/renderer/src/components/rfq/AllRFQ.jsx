@@ -19,7 +19,8 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
-  const [mtoFilter, setMtoFilter] = useState('ALL')
+  const [mtoManualFilter, setMtoManualFilter] = useState(false)
+  const [mtoStickModelFilter, setMtoStickModelFilter] = useState(false)
   const [showAwarded, setShowAwarded] = useState(false)
   const [columnFilters, setColumnFilters] = useState([])
 
@@ -56,12 +57,6 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
     return undefined
   }, [showAwarded, statusFilter])
 
-  // Derive MTO / Type parameter
-  const activeMtoParam = useMemo(() => {
-    if (mtoFilter && mtoFilter !== 'ALL') return mtoFilter
-    return undefined
-  }, [mtoFilter])
-
   // Handlers for synchronization between top bar and table column filters
   const handleColumnFiltersChange = (newFilters) => {
     setColumnFilters(newFilters)
@@ -94,7 +89,8 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
   const handleClearFilters = () => {
     setColumnFilters([])
     setStatusFilter('ALL')
-    setMtoFilter('ALL')
+    setMtoManualFilter(false)
+    setMtoStickModelFilter(false)
     setShowAwarded(false)
     setSearchQuery('')
     setCurrentPage(1)
@@ -135,9 +131,8 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
           estimationDate: dueDateFilterValue,
           dueDate: dueDateFilterValue,
           endDate: dueDateFilterValue,
-          mtoType: activeMtoParam,
-          rfqType: activeMtoParam,
-          type: activeMtoParam
+          MTOManual: mtoManualFilter ? true : undefined,
+          isMTOStickModel: mtoStickModelFilter ? true : undefined
         }
 
         if (userType === 'CLIENT') {
@@ -189,7 +184,8 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
     fabricatorFilterValue,
     createdDateFilterValue,
     dueDateFilterValue,
-    activeMtoParam
+    mtoManualFilter,
+    mtoStickModelFilter
   ])
 
   const [allFabricators, setAllFabricators] = useState([])
@@ -443,13 +439,6 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
     }
   )
 
-  const MTO_TYPE_OPTIONS = [
-    { label: 'All', value: 'ALL' },
-    { label: 'MTO', value: 'MTO' },
-    { label: 'Detailing', value: 'DETAILING' },
-    { label: 'Both', value: 'BOTH' }
-  ]
-
   const STATUS_FILTER_OPTIONS = [
     { label: 'All Statuses', value: 'ALL' },
     { label: 'In Review / Received', value: 'IN_REVIEW_RECEIVED' },
@@ -473,28 +462,22 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
         if (!isAwarded) return false
       }
 
-      // 2. MTO / Type Filter
       const isTrue = (val) => val === true || val === 'true'
-      const isMTO =
-        isTrue(item.MTOManual) ||
-        !!item.MTOStickModel ||
-        item.mtoStickModelEnabled ||
-        isTrue(item.isMTOStickModel) ||
-        !!item.MTOValue
-      const isDetailing =
-        isTrue(item.detailingMain) ||
-        isTrue(item.detailingMisc) ||
-        isTrue(item.miscDesign) ||
-        isTrue(item.customerDesign) ||
-        isTrue(item.connectionDesign)
+      const matchesManual = isTrue(item.MTOManual)
+      const matchesStickModel =
+        isTrue(item.isMTOStickModel) || isTrue(item.mtoStickModelEnabled) || isTrue(item.MTOStickModel)
+      const hasMtoFilter = mtoManualFilter || mtoStickModelFilter
 
-      if (mtoFilter === 'MTO' && !isMTO) return false
-      if (mtoFilter === 'DETAILING' && !isDetailing) return false
-      if (mtoFilter === 'BOTH' && !(isMTO && isDetailing)) return false
+      if (
+        hasMtoFilter &&
+        !((mtoManualFilter && matchesManual) || (mtoStickModelFilter && matchesStickModel))
+      ) {
+        return false
+      }
 
       return true
     })
-  }, [rfqList, showAwarded, mtoFilter])
+  }, [rfqList, showAwarded, mtoManualFilter, mtoStickModelFilter])
 
   if (loading && rfqList.length === 0) {
     return (
@@ -567,35 +550,30 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
               </span>
             </div>
 
-            {/* Type / MTO Dropdown */}
-            <div className="relative">
-              <select
-                value={mtoFilter}
+            <label className="flex items-center gap-2 text-sm font-bold text-gray-700">
+              <input
+                type="checkbox"
+                checked={mtoManualFilter}
                 onChange={(e) => {
-                  setMtoFilter(e.target.value)
+                  setMtoManualFilter(e.target.checked)
                   setCurrentPage(1)
                 }}
-                className="appearance-none bg-white border-2 border-gray-200 rounded-lg px-4 py-2 pr-9 text-sm font-bold text-gray-700 uppercase tracking-tight shadow-sm hover:border-purple-400 focus:outline-none focus:border-purple-500 transition-all duration-200 cursor-pointer"
-                style={{ minWidth: 150 }}
-              >
-                {MTO_TYPE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-purple-400">
-                <svg width="14" height="14" fill="none" viewBox="0 0 20 20">
-                  <path
-                    d="M5 7l5 5 5-5"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-            </div>
+                className="h-4 w-4 accent-purple-600"
+              />
+              MTO Manual
+            </label>
+            <label className="flex items-center gap-2 text-sm font-bold text-gray-700">
+              <input
+                type="checkbox"
+                checked={mtoStickModelFilter}
+                onChange={(e) => {
+                  setMtoStickModelFilter(e.target.checked)
+                  setCurrentPage(1)
+                }}
+                className="h-4 w-4 accent-purple-600"
+              />
+              MTO Stick Model
+            </label>
 
             {/* Awarded Toggle */}
             <label className="flex items-center gap-3 cursor-pointer select-none group">
