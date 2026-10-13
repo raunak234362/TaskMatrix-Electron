@@ -185,32 +185,38 @@ const Login = () => {
       <div className="relative z-10 grid w-screen min-h-screen grid-cols-1 md:grid-cols-2 overflow-x-hidden">
         {/* Logo section */}
         <div className="flex items-center justify-center p-4 md:p-6">
-          <div className="flex items-center justify-center p-6 md:p-12 shadow-2xl shadow-green-950/20 bg-white/90 backdrop-blur-sm border-2 border-white rounded-[6px] w-full max-w-sm">
+          <div className="flex items-center justify-center p-6 md:p-12 shadow-2xl shadow-green-950/20 bg-white/90 backdrop-blur-sm border-2 border-white w-full max-w-lg">
             <img src={LOGO} alt="Logo" className="w-full h-auto" />
           </div>
         </div>
 
         {/* Login form */}
-        <div className="flex items-center md:bg-white/10 md:backdrop-blur-xl justify-center p-4 md:p-6">
-          <div className="bg-white/95 h-fit w-full max-w-md rounded-[6px] border border-green-900/10 p-6 sm:p-8 md:p-10 shadow-2xl shadow-green-950/20">
+        <div className="flex items-center md:bg-white/10 md:backdrop-blur-xl justify-center p-4 md:p-8">
+          <div className="bg-white/95 w-full max-w-[400px] sm:max-w-[500px] min-h-[450px] sm:min-h-[500px] border border-green-900/10 p-8 sm:p-12 md:p-14 shadow-2xl shadow-green-950/20 flex flex-col justify-between">
             {/* Welcome Message */}
-            <div className="mb-6">
-              <p className="text-center text-2xl sm:text-3xl text-gray-700 font-light leading-tight">
-                Welcome to <br />
-                <span className="text-green-700 font-normal">Task Matrix <span className="text-green-700 text-[10px] font-light">version: 1.3.0</span></span>
-              </p>
-              <p className="text-center text-sm text-gray-500 mt-2">
+            <div className="mb-6 sm:mb-8 text-center">
+              <h1 className="text-2xl sm:text-3xl text-black font-normal  uppercase">
+                Welcome to
+              </h1>
+              <div className="text-3xl sm:text-4xl md:text-[42px] text-green-600 font-normal  uppercase leading-tight mt-1 sm:mt-2">
+                <div>Task Matrix</div>
+              </div>
+               <span className="text-sm text-black font-semibold tracking-widest uppercase">
+                version: 1.3.0
+              </span>
+              <p className="text-xs sm:text-sm text-black font-semibold uppercase mt-4 sm:mt-6">
                 {showOTP ? "Verify your identity" : "Please login to continue"}
               </p>
             </div>
 
             {!showOTP ? (
-              <form onSubmit={handleSubmit(Submit)} className="flex flex-col w-full gap-4">
+              <form onSubmit={handleSubmit(Submit)} className="flex flex-col w-full gap-5">
                 <div>
                   <Input
-                    label="Username"
+                    label="USERNAME:"
+                    labelClassName="text-sm font-semibold text-black tracking-wider mb-1"
                     placeholder="USERNAME"
-                    className="rounded-[6px] border-gray-200 focus:border-green-600 focus:ring-green-600 py-2 text-sm"
+                    className=" border-black py-2.5 px-3.5 text-sm bg-primary/20 placeholder:text-gray-900 placeholder:text-xs placeholder:tracking-wider"
                     type="text"
                     {...register("username", {
                       required: "Username is required",
@@ -220,25 +226,26 @@ const Login = () => {
 
                 <div>
                   <Input
-                    label="Password"
+                    label="PASSWORD:"
+                    labelClassName="text-sm font-semibold text-black tracking-wider mb-1"
                     placeholder="PASSWORD"
                     type="password"
-                    className="rounded-[6px] border-gray-200 focus:border-green-600 focus:ring-green-600 py-2 text-sm"
+                    className=" border-black  py-2.5 px-3.5 text-sm bg-primary/20 placeholder:text-gray-900 placeholder:text-xs placeholder:tracking-wider"
                     {...register("password", {
                       required: "Password is required",
                     })}
                   />
                 </div>
 
-                <div className="mt-2">
+                <div className="mt-4 sm:mt-6">
                   <Button
                     type="submit"
                     disabled={isLoggingIn}
-                    className="w-full text-lg py-2.5 rounded-[6px] bg-green-600 hover:bg-green-700 transition-all duration-300 shadow-lg shadow-green-600/30 text-white disabled:opacity-50 flex items-center justify-center cursor-pointer font-semibold"
+                    className="w-full py-2.5 bg-primary hover:bg-primary/80 text-black border border-black transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 flex items-center justify-center cursor-pointer font-bold tracking-wider text-sm sm:text-base uppercase"
                   >
                     {isLoggingIn ? (
                       <>
-                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         Logging in...
                       </>
                     ) : (
@@ -248,15 +255,15 @@ const Login = () => {
                 </div>
               </form>
             ) : (
-              <form onSubmit={handleVerify} className="flex flex-col w-full gap-4 items-center">
+              <form onSubmit={handleVerify} className="flex flex-col w-full gap-5 items-center">
                 <p className="text-xs text-gray-600 text-center mb-1">
                   Enter the 6-digit OTP sent to your registered email address.
                 </p>
-                <div className="flex gap-1.5 justify-center">
+                <div className="flex gap-2 justify-center">
                   {otp.map((data, index) => {
                     return (
                       <input
-                        className="w-10 h-12 text-center text-lg font-bold border border-gray-300 rounded-[6px] focus:border-green-600 focus:ring-green-600 outline-none"
+                        className="w-10 h-12 text-center text-lg font-bold border border-gray-300 rounded-[4px] focus:border-green-600 focus:ring-green-600 outline-none"
                         type="text"
                         name="otp"
                         maxLength="1"
@@ -270,11 +277,11 @@ const Login = () => {
                   })}
                 </div>
 
-                <div className="mt-2 w-full">
+                <div className="mt-4 w-full">
                   <Button
                     type="submit"
                     disabled={isVerifying}
-                    className="w-full text-lg py-2.5 rounded-[6px] bg-green-600 hover:bg-green-700 transition-all duration-300 shadow-lg shadow-green-600/30 text-white disabled:opacity-50 cursor-pointer font-semibold"
+                    className="w-full py-2.5 rounded-[4px] bg-[#ebf5ea] hover:bg-[#dcecdb] text-black border border-black transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 flex items-center justify-center cursor-pointer font-bold tracking-wider text-sm sm:text-base uppercase"
                   >
                     {isVerifying ? "Verifying..." : "Verify OTP"}
                   </Button>
@@ -283,12 +290,15 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowOTP(false)}
-                  className="mt-2 text-green-600 hover:text-green-700 underline text-xs font-medium cursor-pointer"
+                  className="mt-2 text-green-600 hover:text-green-700 underline text-xs font-medium cursor-pointer uppercase tracking-wider"
                 >
                   Back to Login
                 </button>
               </form>
             )}
+
+            {/* Version Footer */}
+           
           </div>
         </div>
       </div>
