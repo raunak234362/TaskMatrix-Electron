@@ -53,7 +53,13 @@ const OperationExecutiveMTOSection = ({ allRfqs = [], invoices = [], onRFQClick 
                 const isMTO = r.MTOManual || r.mtoStickModelEnabled || r.isMTOStickModel || r.MTOStickModel
                 const status = (r.status || '').toUpperCase()
                 const wbtStatus = (r.wbtStatus || '').toUpperCase()
-                return isMTO && status !== 'AWARDED' && status !== 'CLOSED' && wbtStatus !== 'AWARDED' && wbtStatus !== 'CLOSED'
+                return isMTO &&
+                    status !== 'AWARDED' &&
+                    status !== 'CLOSED' &&
+                    status !== 'WBT_SUBMITTED' &&
+                    wbtStatus !== 'AWARDED' &&
+                    wbtStatus !== 'CLOSED' &&
+                    wbtStatus !== 'WBT_SUBMITTED'
             })
             .sort((a, b) => {
                 const dA = a.estimationDate ? new Date(a.estimationDate).getTime() : Infinity
@@ -89,7 +95,7 @@ const OperationExecutiveMTOSection = ({ allRfqs = [], invoices = [], onRFQClick 
     const formatDate = (d) => d ? new Date(d).toLocaleDateString() : '—'
 
     const statusBadge = (row) => {
-        const s = (row.status || row.wbtStatus || 'PENDING').toUpperCase()
+        const s = (row.wbtStatus || row.status || 'PENDING').toUpperCase()
         let cls = 'bg-gray-50 text-gray-700 border-gray-200'
         if (s === 'AWARDED') cls = 'bg-green-50 text-green-700 border-green-200'
         else if (['PENDING', 'IN_REVIEW'].includes(s)) cls = 'bg-yellow-50 text-yellow-700 border-yellow-200'
