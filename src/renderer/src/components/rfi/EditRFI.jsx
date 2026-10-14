@@ -99,7 +99,8 @@ const EditRFI = ({ id, onSuccess }) => {
       reset({
         subject: data.subject,
         multipleRecipients: data.multipleRecipients?.map(r => r.id || r._id || r) || [],
-        isAproovedByAdmin: data.isAproovedByAdmin || false
+        isAproovedByAdmin: data.isAproovedByAdmin || false,
+        expectedResponseDate: data.expectedResponseDate || data.expected_response_date || ''
       })
 
       // Fetch CD engineers if there's a connectionDesignerID
@@ -420,6 +421,14 @@ const EditRFI = ({ id, onSuccess }) => {
             label="Subject"
             placeholder="Enter the subject of this RFI"
             {...register('subject', { required: 'Subject is required' })}
+            className="rounded-none border-gray-200 focus:border-black focus:ring-0"
+          />
+
+          <Input
+            label="Expected Response Date"
+            type="date"
+            placeholder="Select expected response date"
+            {...register('expectedResponseDate')}
             className="rounded-none border-gray-200 focus:border-black focus:ring-0"
           />
 

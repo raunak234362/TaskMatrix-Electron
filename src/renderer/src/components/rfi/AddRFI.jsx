@@ -31,7 +31,8 @@ const AddRFI = ({
   const { register, setValue, handleSubmit, control, reset } =
     useForm({
       defaultValues: {
-        isConnectionDesign: false
+        isConnectionDesign: false,
+        expectedResponseDate: "",
       }
     });
   const [description, setDescription] = useState("");
@@ -382,6 +383,13 @@ const AddRFI = ({
           label="Subject"
           placeholder="Enter subject"
           {...register("subject", { required: true })}
+        />
+
+        <Input
+          label="Expected Response Date"
+          type="date"
+          placeholder="Select expected response date"
+          {...register("expectedResponseDate")}
         />
 
         <div className="space-y-1">
