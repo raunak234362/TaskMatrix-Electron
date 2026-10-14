@@ -23,20 +23,21 @@ const getContactName = (contact) =>
     .filter(Boolean)
     .join(" ") || contact?.name || contact?.email || "";
 
-const normalizeReceiptIds = (value) => {
-  let parsedValue = value;
-  if (typeof value === "string") {
-    try {
-      parsedValue = JSON.parse(value);
-    } catch {
-      parsedValue = value;
-    }
-  }
-  const values = Array.isArray(parsedValue) ? parsedValue : [parsedValue];
-  return values
-    .map((item) => typeof item === "object" ? item?.id || item?._id : item)
-    .filter(Boolean)
-    .map(String);
+const resolveInvoiceContactName = (data) => {
+  const contacts = [
+    ...getContacts(data.pointOfContact),
+    ...getContacts(data.multipleReceipients),
+    ...getContacts(data.fabricator?.pointOfContact),
+  ];
+  const contactNames = [...new Set(contacts.map(getContactName).filter(Boolean))];
+
+  return {
+    ...data,
+    contactName:
+      contactNames.join(", ") ||
+      data.contactName ||
+      "—",
+  };
 };
 
 const loadImageAsDataUrl = async (imageUrl) => {
@@ -139,36 +140,7 @@ const GetInvoiceById = ({
           return;
         }
 
-        const contactIds = normalizeReceiptIds(
-          data.multipleReceipients || data.receiptId || data.clientId || data.contactId || data.contactName,
-        );
-        let contacts = getContacts(data.pointOfContact);
-        if (!contacts.length) contacts = getContacts(data.fabricator?.pointOfContact);
-
-        let selectedContacts = contacts.filter((contact) =>
-          [contact.id, contact._id, contact.userName]
-            .filter(Boolean)
-            .some((value) => contactIds.includes(String(value))),
-        );
-
-        if (selectedContacts.length < contactIds.length && contactIds.length) {
-          const fabricatorId =
-            data.fabricator?._id || data.fabricator?.id || data.fabricatorId;
-          if (fabricatorId) {
-            const contactResponse = await Service.GetFabricatorPOC(fabricatorId);
-            contacts = getContacts(contactResponse);
-            selectedContacts = contacts.filter((contact) =>
-              [contact.id, contact._id, contact.userName]
-                .filter(Boolean)
-                .some((value) => contactIds.includes(String(value))),
-            );
-          }
-        }
-
-        setInvoice({
-          ...data,
-          contactName: selectedContacts.map(getContactName).filter(Boolean).join(", ") || data.contactName || "—",
-        });
+        setInvoice(resolveInvoiceContactName(data));
       } catch (err) {
         setError("Failed to load invoice details");
         console.error("Error fetching invoice:", err);
@@ -996,9 +968,15 @@ const GetInvoiceById = ({
                 invoiceId={id}
                 onSuccess={() => {
                   setEditMode(false);
-                  Service.GetInvoiceById(id).then((res) =>
-                    setInvoice(res?.data || res || null)
-                  );
+                  Service.GetInvoiceById(id)
+                    .then((res) => {
+                      const data = res?.data || res || null;
+                      setInvoice(data ? resolveInvoiceContactName(data) : null);
+                    })
+                    .catch((err) => {
+                      console.error("Error refreshing invoice:", err);
+                      setError("Failed to refresh invoice details");
+                    });
                 }}
               />
             </div>

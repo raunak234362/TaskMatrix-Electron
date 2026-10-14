@@ -115,7 +115,7 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
               invoiceData.fabricator?.id ||
               "",
             customerName: invoiceData.customerName,
-            receiptId: normalizeReceiptIds(
+            multipleReceipients: normalizeReceiptIds(
               invoiceData.multipleReceipients ?? invoiceData.receiptId ?? invoiceData.clientId,
             ),
             GSTIN: invoiceData.GSTIN,
@@ -186,13 +186,12 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
   };
 
   const onSubmit = async (data) => {
-    const receiptIds = normalizeReceiptIds(data.receiptId);
+    const receipientIds = normalizeReceiptIds(data.multipleReceipients);
     const invoiceFields = { ...data };
     delete invoiceFields.clientId;
     const formattedData = {
       ...invoiceFields,
-      multipleReceipients: receiptIds,
-      receiptId: receiptIds,
+      multipleReceipients: receipientIds,
       totalInvoiceValue: Number(data.totalInvoiceValue),
       invoiceItems: data.invoiceItems?.map((item) => ({
         ...item,
@@ -234,10 +233,10 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
     label: `${contact.firstName || ""} ${contact.middleName ? `${contact.middleName} ` : ""}${contact.lastName || ""}`.trim() || contact.userName || contact.name || contact.email || "Unnamed Contact",
     value: String(contact.id || contact._id || contact.userName),
   }));
-  const selectedReceiptIds = normalizeReceiptIds(watch("receiptId"));
-  const missingContactOptions = selectedReceiptIds
-    .filter((receiptId) => !contactOptions.some((option) => option.value === receiptId))
-    .map((receiptId) => ({ label: `${receiptId} (Current)`, value: receiptId }));
+  const selectedReceipientIds = normalizeReceiptIds(watch("multipleReceipients"));
+  const missingContactOptions = selectedReceipientIds
+    .filter((receipientId) => !contactOptions.some((option) => option.value === receipientId))
+    .map((receipientId) => ({ label: `${receipientId} (Current)`, value: receipientId }));
   const receiptOptions = [...contactOptions, ...missingContactOptions];
 
   return (
@@ -263,16 +262,16 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
               <Input label="Customer Name *" {...register("customerName", { required: true })} />
               
               <div className="space-y-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Receipt ID (Contact)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Recipients (Contact)</label>
                 <Controller
-                  name="receiptId"
+                  name="multipleReceipients"
                   control={control}
                   render={({ field }) => (
                     <Select
                       {...field}
                       isMulti
                       options={receiptOptions}
-                      value={receiptOptions.filter((option) => selectedReceiptIds.includes(option.value))}
+                      value={receiptOptions.filter((option) => selectedReceipientIds.includes(option.value))}
                       onChange={(options) => field.onChange((options || []).map((option) => option.value))}
                       placeholder="-- Select Contacts --"
                       isClearable
