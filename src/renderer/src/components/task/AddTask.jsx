@@ -47,6 +47,77 @@ const normType = (s) =>
     .replace(/[\s_-]+/g, "")
     .replace(/modelling/g, "modeling");
 
+const COMPLETED_TASK_STATUSES = new Set([
+  "ABSENT",
+  "CANCELED",
+  "CANCELLED",
+  "COMPLETE",
+  "COMPLETED",
+  "COMPLETE_OTHER",
+  "DONE",
+  "VALIDATE_COMPLETE",
+  "VALIDATED_COMPLETE",
+  "USER_FAULT",
+  "WRONG_ALLOCATION",
+]);
+
+const normalizeTaskStatus = (status) =>
+  String(status || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[\s-]+/g, "_");
+
+const getTasksFromResponse = (response) => {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  if (Array.isArray(response?.tasks)) return response.tasks;
+  return [];
+};
+
+const getWorkingHoursSince = (dateValue, now = new Date()) => {
+  const start = new Date(dateValue);
+  if (Number.isNaN(start.getTime()) || start >= now) return 0;
+
+  let current = start;
+  let totalMs = 0;
+  while (current < now) {
+    const nextDay = new Date(current);
+    nextDay.setDate(nextDay.getDate() + 1);
+    nextDay.setHours(0, 0, 0, 0);
+    const stepEnd = nextDay < now ? nextDay : now;
+
+    if (current.getDay() !== 0 && current.getDay() !== 6) {
+      totalMs += stepEnd - current;
+    }
+    current = stepEnd;
+  }
+
+  return totalMs / (1000 * 60 * 60);
+};
+
+const getEmployeeTaskBlocker = (tasks, now = new Date()) => {
+  for (const task of tasks) {
+    const status = normalizeTaskStatus(task.status);
+    if (!status || COMPLETED_TASK_STATUSES.has(status)) continue;
+
+    const isReview = status === "IN_REVIEW";
+    const referenceDate =
+      isReview
+        ? task.updatedAt ||
+          task.updated_at ||
+          task.created_at ||
+          task.createdAt
+        : task.created_at || task.createdAt;
+
+    if (referenceDate && getWorkingHoursSince(referenceDate, now) > 24) {
+      return isReview ? "REVIEW_OVERDUE" : "OVERDUE";
+    }
+  }
+
+  return false;
+};
+
 const getBundleCategory = (w) => {
   if (!w) return "";
 
@@ -530,8 +601,7 @@ const AddTask = () => {
   const availableHours = isOtherWbs ? Infinity : (totalWbsHours - existingWbsHours);
   const remainingHours = isOtherWbs ? Infinity : (availableHours - totalAssignedHours);
 
-  // Check for 24hr uncompleted tasks dynamically to disable button
-  // IN_REVIEW tasks are NOT a blocker — only tasks overdue >24 working hours (Mon–Fri) block assignment
+  // Show a warning for blockers, but check again at submit time before creating tasks.
   useEffect(() => {
     assignments.forEach(async (assignment) => {
       const empId = assignment.employeeId;
@@ -539,67 +609,7 @@ const AddTask = () => {
         setOverdueEmployees((prev) => ({ ...prev, [empId]: false })); // Prevent multiple calls
         try {
           const res = await Service.GetAllTaskByUserID(empId);
-          const tasks = Array.isArray(res) ? res : (res?.data || []);
-          const now = new Date();
-          const completedStatuses = ["VALIDATE_COMPLETE", "COMPLETE_OTHER", "WRONG_ALLOCATION", "ABSENT", "USER_FAULT"];
-
-          let overdueType = false;
-          for (const task of tasks) {
-            if (completedStatuses.includes(String(task.status).toUpperCase())) continue;
-
-            const taskStatus = String(task.status).toUpperCase();
-            let referenceDateStr;
-            let isReview = false;
-
-            if (taskStatus === "IN_REVIEW") {
-              isReview = true;
-              if (task.workingHourTask && Array.isArray(task.workingHourTask) && task.workingHourTask.length > 0) {
-                const sortedWork = [...task.workingHourTask]
-                  .filter(w => w.ended_at || w.updated_at)
-                  .sort((a, b) => {
-                    const dateA = new Date(a.ended_at || a.updated_at).getTime();
-                    const dateB = new Date(b.ended_at || b.updated_at).getTime();
-                    return dateA - dateB;
-                  });
-                if (sortedWork.length > 0) {
-                  const lastWork = sortedWork[sortedWork.length - 1];
-                  referenceDateStr = lastWork.ended_at || lastWork.updated_at;
-                }
-              }
-              if (!referenceDateStr) {
-                referenceDateStr = task.updatedAt || task.updated_at || task.created_at || task.createdAt;
-              }
-            } else {
-              referenceDateStr = task.created_at || task.createdAt;
-            }
-
-            if (!referenceDateStr) continue;
-
-            const refDate = new Date(referenceDateStr);
-            if (isNaN(refDate.getTime())) continue;
-
-            let current = new Date(refDate);
-            let totalMs = 0;
-
-            while (current < now) {
-              let nextDay = new Date(current);
-              nextDay.setDate(nextDay.getDate() + 1);
-              nextDay.setHours(0, 0, 0, 0);
-              let stepEnd = nextDay < now ? nextDay : now;
-
-              if (current.getDay() !== 0 && current.getDay() !== 6) {
-                totalMs += (stepEnd - current);
-              }
-              current = stepEnd;
-            }
-
-            const totalHours = totalMs / (1000 * 60 * 60);
-            if (totalHours > 24) {
-              overdueType = isReview ? "REVIEW_OVERDUE" : "OVERDUE";
-              break;
-            }
-          }
-
+          const overdueType = getEmployeeTaskBlocker(getTasksFromResponse(res));
           setOverdueEmployees((prev) => ({ ...prev, [empId]: overdueType }));
         } catch (err) {
           console.error("Error checking employee tasks:", err);
@@ -607,8 +617,6 @@ const AddTask = () => {
       }
     });
   }, [assignments, overdueEmployees]);
-
-  const hasAnyOverdue = assignments.some(a => a.employeeId && overdueEmployees[a.employeeId]);
 
   const onSubmit = async (data) => {
     console.log("Form Data Submitted:", data);
@@ -618,72 +626,12 @@ const AddTask = () => {
     try {
       setIsSubmitting(true);
 
-      // 24-hour overdue check (weekdays only — Saturday & Sunday are excluded)
-      // IN_REVIEW tasks are fine and do NOT block assignment.
+      // Recheck current task statuses before assignment; weekends do not count toward 24 hours.
       for (const assignment of data.assignments) {
         if (!assignment.employeeId) continue;
         try {
           const res = await Service.GetAllTaskByUserID(assignment.employeeId);
-          const tasks = Array.isArray(res) ? res : (res?.data || []);
-          const now = new Date();
-          const completedStatuses = ["VALIDATE_COMPLETE", "COMPLETE_OTHER", "WRONG_ALLOCATION", "ABSENT", "USER_FAULT"];
-
-          let overdueType = false;
-          for (const task of tasks) {
-            if (completedStatuses.includes(String(task.status).toUpperCase())) continue;
-
-            const taskStatus = String(task.status).toUpperCase();
-            let referenceDateStr;
-            let isReview = false;
-
-            if (taskStatus === "IN_REVIEW") {
-              isReview = true;
-              if (task.workingHourTask && Array.isArray(task.workingHourTask) && task.workingHourTask.length > 0) {
-                const sortedWork = [...task.workingHourTask]
-                  .filter(w => w.ended_at || w.updated_at)
-                  .sort((a, b) => {
-                    const dateA = new Date(a.ended_at || a.updated_at).getTime();
-                    const dateB = new Date(b.ended_at || b.updated_at).getTime();
-                    return dateA - dateB;
-                  });
-                if (sortedWork.length > 0) {
-                  const lastWork = sortedWork[sortedWork.length - 1];
-                  referenceDateStr = lastWork.ended_at || lastWork.updated_at;
-                }
-              }
-              if (!referenceDateStr) {
-                referenceDateStr = task.updatedAt || task.updated_at || task.created_at || task.createdAt;
-              }
-            } else {
-              referenceDateStr = task.created_at || task.createdAt;
-            }
-
-            if (!referenceDateStr) continue;
-
-            const refDate = new Date(referenceDateStr);
-            if (isNaN(refDate.getTime())) continue;
-
-            let current = new Date(refDate);
-            let totalMs = 0;
-
-            while (current < now) {
-              let nextDay = new Date(current);
-              nextDay.setDate(nextDay.getDate() + 1);
-              nextDay.setHours(0, 0, 0, 0);
-              let stepEnd = nextDay < now ? nextDay : now;
-
-              if (current.getDay() !== 0 && current.getDay() !== 6) {
-                totalMs += (stepEnd - current);
-              }
-              current = stepEnd;
-            }
-
-            const totalHours = totalMs / (1000 * 60 * 60);
-            if (totalHours > 24) {
-              overdueType = isReview ? "REVIEW_OVERDUE" : "OVERDUE";
-              break;
-            }
-          }
+          const overdueType = getEmployeeTaskBlocker(getTasksFromResponse(res));
 
           if (overdueType) {
             const empName = employees.find(e => e.id === assignment.employeeId)?.firstName || "This employee";
@@ -691,11 +639,23 @@ const AddTask = () => {
               ? `${empName} has tasks in review for more than 24 working hours. Cannot assign new tasks.`
               : `${empName} has incomplete tasks older than 24 working hours. Cannot assign new tasks.`;
             toast.error(msg);
+            setOverdueEmployees((prev) => ({
+              ...prev,
+              [assignment.employeeId]: overdueType,
+            }));
             setIsSubmitting(false);
             return;
           }
+
+          setOverdueEmployees((prev) => ({
+            ...prev,
+            [assignment.employeeId]: false,
+          }));
         } catch (err) {
           console.error("Error checking employee tasks:", err);
+          toast.error("Could not verify the employee's task status. Please try again.");
+          setIsSubmitting(false);
+          return;
         }
       }
 
@@ -1531,7 +1491,7 @@ const AddTask = () => {
                 <div className="flex justify-center w-full pt-6 border-t border-slate-100">
                   <Button
                     type="submit"
-                    disabled={isSubmitting || hasAnyOverdue}
+                    disabled={isSubmitting}
                     className="w-full py-3 bg-[#6bbd45]/50 hover:bg-primary/80 text-black  shadow-lg shadow-indigo-200 transition-all active:scale-95 disabled:opacity-50"
                   >
                     {isSubmitting ? "Assigning..." : "Confirm & Assign Tasks"}

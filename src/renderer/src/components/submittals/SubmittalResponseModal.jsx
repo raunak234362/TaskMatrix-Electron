@@ -119,7 +119,7 @@ const SubmittalResponseModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-200">
-      <div className="bg-white p-6 rounded-xl w-full max-w-lg shadow-lg relative space-y-4">
+      <div className="bg-white p-6 rounded-xl w-full max-w-3xl h-[90vh] overflow-y-auto shadow-lg relative space-y-4">
         {/* CLOSE BUTTON */}
         {/* <button onClick={onClose} className="absolute top-3 right-3">
           <X size={18} />
