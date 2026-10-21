@@ -12,7 +12,7 @@ export const useDashboardData = () => {
 
   // Role Based Logic
   const userRoleRaw = sessionStorage.getItem('userRole')
-  const userRole = (userRoleRaw || '').toLowerCase().trim()
+  const userRole = (userRoleRaw || '').toLowerCase().trim().replace(/[\s-]+/g, '_')
   const isAdminRole = [
     'admin',
     'dept_manager',
@@ -465,23 +465,23 @@ export const useDashboardData = () => {
           projectStats: {
             ...pmDashboard?.projectStats,
             totalProjects:
-              pmDashboard?.projectStats?.totalProjects ??
-              pmDashboard?.totalProjects ??
+              pmDashboard?.projectStats?.totalProjects ||
+              pmDashboard?.totalProjects ||
               projects.length,
             activeProjects:
-              pmDashboard?.projectStats?.ACTIVE ??
-              pmDashboard?.projectStats?.activeProjects ??
-              pmDashboard?.totalActiveProjects ??
+              pmDashboard?.projectStats?.ACTIVE ||
+              pmDashboard?.projectStats?.activeProjects ||
+              pmDashboard?.totalActiveProjects ||
               projects.filter((p) => p.status?.toUpperCase() === 'ACTIVE' || p.status?.toUpperCase() === 'IN_PROGRESS').length,
             completedProjects:
-              pmDashboard?.projectStats?.COMPLETE ??
-              pmDashboard?.projectStats?.completedProjects ??
-              pmDashboard?.totalCompleteProject ??
+              pmDashboard?.projectStats?.COMPLETE ||
+              pmDashboard?.projectStats?.completedProjects ||
+              pmDashboard?.totalCompleteProject ||
               projects.filter((p) => p.status?.toUpperCase() === 'COMPLETED' || p.status?.toUpperCase() === 'COMPLETE').length,
             onHoldProjects:
-              pmDashboard?.projectStats?.ONHOLD ??
-              pmDashboard?.projectStats?.onHoldProjects ??
-              pmDashboard?.totalOnHoldProject ??
+              pmDashboard?.projectStats?.ONHOLD ||
+              pmDashboard?.projectStats?.onHoldProjects ||
+              pmDashboard?.totalOnHoldProject ||
               projects.filter((p) => p.status?.toUpperCase() === 'ON_HOLD' || p.status?.toUpperCase() === 'ON-HOLD').length
           },
           dashboardStats: {
