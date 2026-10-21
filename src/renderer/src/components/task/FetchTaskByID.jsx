@@ -18,7 +18,9 @@ import {
   Square,
   ClipboardList,
   Clock,
-  GraduationCap
+  GraduationCap,
+  Target,
+  ProjectorIcon
 } from 'lucide-react'
 import Service from '../../api/Service'
 import { toast } from 'react-toastify'
@@ -363,7 +365,7 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
     const configs = {
       ASSIGNED: {
         label: 'Assigned',
-        bg: 'bg-purple-100',
+        bg: 'bg-purple-200',
         text: 'text-purple-700',
         border: 'border-purple-300'
       },
@@ -505,9 +507,9 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
               {/* Request Training — visible to all roles */}
               <button
                 onClick={() => setIsRequestingTraining(true)}
-                className="flex items-center gap-2 px-4 py-1.5 bg-green-50 text-green-700 border border-black rounded-lg text-sm font-bold uppercase hover:bg-green-100 transition-colors"
+                className="flex items-center gap-2 px-6 py-1.5 bg-green-50 text-black border-primary border-2 rounded-lg text-sm font-bold uppercase hover:bg-green-100 transition-colors"
               >
-                <GraduationCap className="w-4 h-4" /> Request Training
+                Request Training
               </button>
             </div>
             <button
@@ -526,12 +528,10 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           <>
             {/* Task Info Card */}
-            <div className="bg-green-50 rounded-2xl p-4 border border-green-200">
-              <h3 className="text-2xl  text-green-900 mb-6 flex items-center gap-3">
-                Task Information
-              </h3>
+            <div className="bg-zinc-100 rounded-2xl p-4">
+             
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-sm">
                 <InfoItem icon={<Building2 />} label="Project" value={task.project?.name || '—'} />
                 <InfoItem
                   icon={<Building2 />}
@@ -561,25 +561,25 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
                 />
 
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
-                    <div
-                      className={`w-6 h-6 rounded-full ${priority.color.replace('text', 'bg')}`}
-                    ></div>
+                  <div className="p-3 rounded-xl bg-white shadow-sm shrink-0">
+                    <div className='bg-primary/10'>
+                      <Target className="w-6 h-6 text-primary"/>
+                    </div>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-700">Priority</p>
+                    <p className="text-sm font-semibold text-black">Priority</p>
                     <p className={` mt-1 ${priority.color}`}>{priority.label}</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-white rounded-xl shadow-sm shrink-0">
-                    <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                    <div className="w-6 h-6 rounded-full"><ProjectorIcon className='text-primary'/></div>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-700">Status</p>
+                    <p className="text-sm font-semibold text-black">Status</p>
                     <span
-                      className={`inline-block mt-1 px-4 py-2 rounded-full font-semibold text-sm border-2 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}
+                      className={`inline-block mt-1 px-2 py-1 rounded-full font-semibold text-sm ${statusConfig.bg} ${statusConfig.text}`}
                     >
                       {statusConfig.label.replace(/_/g, ' ') || '—'}
                     </span>
@@ -590,12 +590,12 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
               {/* Description */}
               {task.description && (
                 <div className="mt-8 p-6 bg-white/70 backdrop-blur rounded-xl border border-green-100">
-                  <h4 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <h4 className="font-semibold text-black mb-3 flex items-center gap-2 text-md">
                     <FileText className="w-5 h-5 text-green-600" />
                     Description
                   </h4>
                   <div
-                    className="text-gray-700 leading-relaxed prose prose-sm max-w-none"
+                    className="text-black leading-relaxed prose prose-sm max-w-none"
                     dangerouslySetInnerHTML={{ __html: task.description }}
                   />
                 </div>
@@ -644,12 +644,12 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
               )}
 
               {/* Actions */}
-              <div className="mt-8 pt-6 border-t border-green-200">
+              <div className="mt-8 pt-6">
                 <div className="flex flex-wrap items-center gap-4">
                   {(task.status === 'ASSIGNED' || task.status === 'REWORK') && (
                     <ActionButton
                       icon={<Play />}
-                      color="emerald"
+                      color="green"
                       onClick={() => handleAction('start')}
                       disabled={processing}
                     >
@@ -960,8 +960,8 @@ const InfoItem = ({ icon, label, value }) => (
       {icon && <div className="w-6 h-6 text-green-600">{icon}</div>}
     </div>
     <div>
-      <p className="text-sm font-medium text-gray-700">{label}</p>
-      <p className="font-semibold text-gray-700 mt-1">{value}</p>
+      <p className="text-md font-semibold text-black">{label}</p>
+      <p className="font-normal text-gray-700 mt-1">{value}</p>
     </div>
   </div>
 )
