@@ -61,7 +61,7 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
         const [accountsRes, invoiceRes, fabricatorsRes] = await Promise.all([
           Service.GetBankAccounts(),
           Service.GetInvoiceById(invoiceId),
-          Service.GetAllFabricators(1, 1000),
+          Service.GetAllFabricators(1, 100),
         ]);
 
         let accountsData = [];

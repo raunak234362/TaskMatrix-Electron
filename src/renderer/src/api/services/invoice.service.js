@@ -236,45 +236,63 @@ class InvoiceService {
   }
 
   // Wire Transfer API methods
+  static async CreateWireTransfer(data) {
+    try {
+      const response = await api.post(`invoiceWireTransfer/create`, data, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.error('Cannot create wire transfer', error)
+      throw error
+    }
+  }
+
   static async GetAllWireTransfers() {
     try {
-      const response = await api.get(`wireTransfer`)
+      const response = await api.get(`invoiceWireTransfer/all`)
       return response.data
     } catch (error) {
       console.error('Cannot find wire transfers', error)
+      throw error
     }
   }
 
   static async GetWireTransfersByInvoiceId(invoiceId) {
     try {
-      const response = await api.get(`wireTransfer/invoice/${invoiceId}`)
+      const response = await api.get(`invoiceWireTransfer/byInvoiceId/${invoiceId}`)
       return response.data
     } catch (error) {
       console.error('Cannot find wire transfers by invoice ID', error)
+      throw error
     }
   }
 
   static async GetMyWireTransfers() {
     try {
-      const response = await api.get(`wireTransfer/my`)
+      const response = await api.get(`invoiceWireTransfer/my-transfers`)
       return response.data
     } catch (error) {
       console.error('Cannot find my wire transfers', error)
+      throw error
     }
   }
 
   static async GetWireTransferById(id) {
     try {
-      const response = await api.get(`wireTransfer/${id}`)
+      const response = await api.get(`invoiceWireTransfer/byId/${id}`)
       return response.data
     } catch (error) {
       console.error('Cannot find wire transfer by ID', error)
+      throw error
     }
   }
 
   static async UpdateWireTransfer(id, data) {
     try {
-      const response = await api.put(`wireTransfer/${id}`, data)
+      const response = await api.put(`invoiceWireTransfer/${id}`, data)
       return response.data
     } catch (error) {
       console.error('Cannot update wire transfer', error)
@@ -284,10 +302,11 @@ class InvoiceService {
 
   static async DeleteWireTransfer(id) {
     try {
-      const response = await api.delete(`wireTransfer/${id}`)
+      const response = await api.delete(`invoiceWireTransfer/${id}`)
       return response.data
     } catch (error) {
       console.error('Cannot delete wire transfer', error)
+      throw error
     }
   }
 }

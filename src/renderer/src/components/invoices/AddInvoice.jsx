@@ -454,7 +454,11 @@ const AddInvoice = ({
       fabricatorId: data.fabricatorId || selectedFabricatorId,
       multipleReceipients: receiptIds,
       totalInvoiceValue: Number(data.totalInvoiceValue),
-      changeOrderId: data.changeOrderId || "",
+      changeOrderId: Array.isArray(data.changeOrderId)
+        ? data.changeOrderId
+        : data.changeOrderId
+          ? [data.changeOrderId]
+          : [],
       rfqId: data.rfqId || "",
       invoiceItems: data.invoiceItems?.map((item) => ({
         ...item,
@@ -599,9 +603,19 @@ const AddInvoice = ({
                 render={({ field }) => (
                   <Select
                     options={changeOrderOptions}
-                    value={changeOrderOptions.find((o) => String(o.value) === String(field.value)) || null}
-                    onChange={(opt) => field.onChange(opt?.value || "")}
-                    placeholder="-- Choose a Change Order --"
+                    isMulti
+                    value={changeOrderOptions.filter((option) =>
+                      (Array.isArray(field.value)
+                        ? field.value
+                        : field.value
+                          ? [field.value]
+                          : []
+                      ).some((value) => String(value) === String(option.value)),
+                    )}
+                    onChange={(options) =>
+                      field.onChange((options || []).map((option) => option.value))
+                    }
+                    placeholder="-- Choose Change Orders --"
                     isClearable
                     isSearchable
                     styles={customSelectStyles}
