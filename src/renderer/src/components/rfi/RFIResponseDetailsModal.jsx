@@ -351,21 +351,21 @@ const RFIResponseDetailsModal = ({ response, project, onClose }) => {
     : getInitials(fullResponse.user?.firstName, fullResponse.user?.lastName);
 
   return (
-    <div className="project-component-container fixed inset-0 bg-black/60 flex justify-center items-center z-120 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-[#fafffb] w-full max-h-[95vh] overflow-y-auto p-5 rounded-3xl shadow-2xl space-y-5 relative border border-gray-100">
+    <div className="project-component-container fixed inset-0 bg-black/60 flex justify-center items-center z-120 backdrop-blur-sm p-4 animate-in fade-in duration-200 overflow-y-auto">
+      <div className="bg-[#fafffb] w-full max-w-4xl max-h-[90vh] flex flex-col p-5 rounded-3xl shadow-2xl relative border border-gray-100 my-auto overflow-hidden">
         {/* Close Button */}
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200 shrink-0">
           <h2 className="text-xl font-black text-black uppercase tracking-tight">
             Response Details
           </h2>
           <button
             onClick={onClose}
-            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
           >
             Close
           </button>
         </div>
-        <div className="h-[80vh] overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-2">
           {/* Main message */}
           {isLoading ? (
             <div className="flex flex-col justify-center items-center py-20">

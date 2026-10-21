@@ -104,81 +104,96 @@ const RFIResponseModal = ({
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-120 bg-black/40">
-      <div className="bg-white w-full max-w-lg p-6 rounded-none shadow-2xl border border-gray-200 relative">
-        <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-200">
+    <div className="fixed inset-0 flex items-center justify-center z-120 bg-black/40 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-200">
+      <div className="bg-white w-full max-w-xl rounded-none shadow-2xl border border-gray-200 relative flex flex-col max-h-[90vh] my-auto overflow-hidden">
+        {/* Fixed Header */}
+        <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-white shrink-0">
           <h2 className="text-sm font-semibold text-black uppercase tracking-normal">Add Response</h2>
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-normal shadow-sm"
+            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-normal shadow-sm cursor-pointer"
           >
             Close
           </button>
         </div>
 
-        {isCheckerOrModeler && pmName && (
-          <div className="mb-4 bg-blue-50 border border-blue-200 text-blue-800 text-xs px-3 py-2 font-medium">
-            Submitting as Project Manager: <span className="font-bold">{pmName}</span>
-          </div>
-        )}
-
-        <form className="space-y-4 mt-2" onSubmit={handleSubmit(onSubmit)}>
-          {/* Message */}
-          <Controller
-            name="reason"
-            control={control}
-            rules={{ required: "Message is required" }}
-            render={({ field }) => (
-              <RichTextEditor
-                value={field.value || ""}
-                onChange={field.onChange}
-                placeholder="Write your response..."
-              />
-            )}
-          />
-
-          {/* File uploader */}
-          <Controller
-            name="files"
-            control={control}
-            render={() => (
-              <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
-            )}
-          />
-
-          {/* Status Dropdown */}
-          <Controller
-            name="wbtStatus"
-            control={control}
-            rules={{ required: true }}
-            render={({ field }) => (
-              <div className="flex flex-col gap-1">
-                <select
-                  {...field}
-                  className="w-full border border-gray-300 rounded-none p-2 text-sm text-black bg-white focus:outline-none focus:border-black uppercase font-medium"
-                  required
-                >
-                  <option value="">Select Status</option>
-                  <option value="PARTIAL">Partial</option>
-                  <option value="COMPLETE">Closed</option>
-                </select>
+        {/* Scrollable Form Body */}
+        <form className="flex-1 flex flex-col min-h-0 overflow-hidden" onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
+            {isCheckerOrModeler && pmName && (
+              <div className="bg-blue-50 border border-blue-200 text-blue-800 text-xs px-3 py-2 font-medium">
+                Submitting as Project Manager: <span className="font-bold">{pmName}</span>
               </div>
             )}
-          />
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2 bg-red-50 text-black border-2 border-red-700/80 rounded-none hover:bg-red-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer"
-            >
-              Cancel
-            </button>
+            {/* Message */}
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-black uppercase tracking-normal">
+                Message *
+              </label>
+              <Controller
+                name="reason"
+                control={control}
+                rules={{ required: "Message is required" }}
+                render={({ field }) => (
+                  <RichTextEditor
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    placeholder="Write your response..."
+                    height={200}
+                  />
+                )}
+              />
+            </div>
+
+            {/* File uploader */}
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-black uppercase tracking-normal">
+                Attachments
+              </label>
+              <Controller
+                name="files"
+                control={control}
+                render={() => (
+                  <MultipleFileUpload onFilesChange={setFiles} initialFiles={files} />
+                )}
+              />
+            </div>
+
+            {/* Status Dropdown */}
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-black uppercase tracking-normal">
+                Status *
+              </label>
+              <Controller
+                name="wbtStatus"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <div className="flex flex-col gap-1">
+                    <select
+                      {...field}
+                      className="w-full border border-gray-300 rounded-none p-2 text-sm text-black bg-white focus:outline-none focus:border-black uppercase font-medium cursor-pointer"
+                      required
+                    >
+                      <option value="">Select Status</option>
+                      <option value="PARTIAL">Partial</option>
+                      <option value="COMPLETE">Closed</option>
+                    </select>
+                  </div>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Fixed Footer */}
+          <div className="flex justify-end gap-3 p-4 px-6 border-t border-gray-200 bg-white shrink-0">
+          
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer rounded-none"
+              className="px-6 py-2 bg-green-50 text-black border-2 border-green-700/80 hover:bg-green-100 transition-all font-semibold text-sm uppercase tracking-normal cursor-pointer rounded-none disabled:opacity-50"
             >
               {loading ? "Submitting..." : "Submit Response"}
             </button>

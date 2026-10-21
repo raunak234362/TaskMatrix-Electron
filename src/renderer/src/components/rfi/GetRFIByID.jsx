@@ -358,8 +358,8 @@ const GetRFIByID = ({ id, onClose, onUpdate }) => {
 
       {/* Edit RFI Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 z-120 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-none shadow-2xl border border-gray-200 overflow-hidden w-full max-w-2xl max-h-[90vh] flex flex-col relative">
+        <div className="fixed inset-0 z-120 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200 overflow-y-auto">
+          <div className="bg-white rounded-none shadow-2xl border border-gray-200 overflow-hidden w-full max-w-2xl max-h-[90vh] flex flex-col relative my-auto">
             <EditRFI
               id={id}
               onSuccess={(isDeleted) => {
