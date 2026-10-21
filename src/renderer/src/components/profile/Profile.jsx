@@ -42,6 +42,13 @@ const Profile = () => {
 
   // Get user data from Redux
   const user = useSelector((state) => state.userInfo.userDetail);
+  const isFirstLogin = user?.isFirstLogin ?? user?.is_firstLogin ?? user?.firstLogin;
+
+  useEffect(() => {
+    if (isFirstLogin === false) {
+      setIsChangePasswordModalOpen(true);
+    }
+  }, [isFirstLogin]);
 
   const handleUpdateSuccess = async () => {
     try {
