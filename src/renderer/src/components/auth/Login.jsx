@@ -17,6 +17,21 @@ const Login = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    const token = sessionStorage.getItem("token");
+    if (token) {
+      const role = (sessionStorage.getItem("userRole") || "").toLowerCase().trim().replace(/[\s-]+/g, "_");
+      if (role === "sales" || role === "sales_manager") {
+        navigate("/dashboard/sales", { replace: true });
+      } else if (role === "connection_designer_engineer") {
+        navigate("/dashboard/designer", { replace: true });
+      } else if (role === "human_resource") {
+        navigate("/dashboard/manage-team", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+      return;
+    }
+
     const fetchOSUser = async () => {
       try {
         if (window.api && window.api.getOSUser) {
@@ -34,7 +49,7 @@ const Login = () => {
       }
     };
     fetchOSUser();
-  }, [setValue]);
+  }, [setValue, navigate]);
 
   const [showOTP, setShowOTP] = useState(false);
   const [challengeToken, setChallengeToken] = useState("");
@@ -91,11 +106,13 @@ const Login = () => {
       dispatch(setUserData(userDetail));
     }
 
-    const role = userDetail?.role?.toLowerCase() || "";
+    const role = (userDetail?.role || "").toLowerCase().trim().replace(/[\s-]+/g, "_");
     if (role === "sales" || role === "sales_manager") {
       navigate("/dashboard/sales");
     } else if (role === "connection_designer_engineer") {
       navigate("/dashboard/designer");
+    } else if (role === "human_resource") {
+      navigate("/dashboard/manage-team");
     } else {
       navigate("/dashboard");
     }
