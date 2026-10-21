@@ -954,18 +954,11 @@ const GetInvoiceById = ({
       {editMode && invoice && (
         <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 overflow-auto">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-gray-100">
-              <h2 className="text-lg font-black text-black uppercase tracking-tight">Edit Invoice</h2>
-              <button
-                onClick={() => setEditMode(false)}
-                className="p-2 rounded-full hover:bg-red-50 hover:text-red-600 transition-all text-gray-500"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+          
             <div className="p-6">
               <UpdateInvoice
                 invoiceId={id}
+                onClose={() => setEditMode(false)}
                 onSuccess={() => {
                   setEditMode(false);
                   Service.GetInvoiceById(id)

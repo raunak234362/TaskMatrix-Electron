@@ -1,26 +1,30 @@
 import { useForm } from "react-hook-form";
-import { X, Users } from "lucide-react";
+import { Users } from "lucide-react";
+import { toast } from "react-toastify";
 import Input from "../fields/input";
 import Button from "../fields/Button";
 import Service from "../../api/Service";
 
 
 
-const AddChatGroup = ({ onClose, onCreated }) => {
+const AddChatGroup = ({ onClose, onCreated, projectName }) => {
   const {
     register,
     handleSubmit,
     formState: { isSubmitting, errors },
-  } = useForm();
+  } = useForm({ defaultValues: { name: projectName || "" } });
 
   const onSubmit = async (data) => {
     try {
       const response = await Service.AddGroup(data);
-      console.log(response);
-      onCreated?.();
+      onCreated?.(response);
       onClose();
     } catch (error) {
-      console.log(error);
+      console.error("Failed to create chat group", error);
+      toast.error(
+        error?.response?.data?.message ||
+          "Failed to create chat group. Please try again.",
+      );
     }
   };
 
@@ -34,7 +38,7 @@ const AddChatGroup = ({ onClose, onCreated }) => {
               <Users size={20} />
             </div>
             <h2 className="text-lg  text-gray-700">
-              Create New Group
+              {projectName ? "Create Project Chat Group" : "Create New Group"}
             </h2>
           </div>
           <button
@@ -50,14 +54,16 @@ const AddChatGroup = ({ onClose, onCreated }) => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
               <p className="text-sm text-gray-700 mb-4">
-                Give your group a name. You can add members after creating the
-                group.
+                {projectName
+                  ? "This group will use the project name. You can add members after creating it."
+                  : "Give your group a name. You can add members after creating the group."}
               </p>
               <Input
-                label="Group Name"
+                label={projectName ? "Project Name" : "Group Name"}
                 type="text"
                 {...register("name", { required: "Group name is required" })}
                 placeholder="e.g. Marketing Team, Project Alpha"
+                readOnly={Boolean(projectName)}
                 className="w-full"
               />
               {errors.name?.message && (

@@ -9,10 +9,10 @@ class ChatService {
           'Content-Type': 'application/json'
         }
       })
-      console.log(response)
       return response.data
     } catch (error) {
-      console.log(error)
+      console.error('Failed to create chat group', error)
+      throw error
     }
   }
 
@@ -24,10 +24,10 @@ class ChatService {
           'Content-Type': 'application/json'
         }
       })
-      console.log(response)
       return response.data
     } catch (error) {
-      console.log(error)
+      console.error('Failed to fetch recent chats', error)
+      throw error
     }
   }
 
