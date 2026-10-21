@@ -7,9 +7,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { showDepartment, showTeam } from "../store/userSlice";
 
 const ProjectLayout = () => {
-  const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
+  const rawRole = sessionStorage.getItem("userRole") || "";
+  const userRole = rawRole.toLowerCase().trim().replace(/[\s-]+/g, "_");
   const [activeTab, setActiveTab] = useState(
-    ["client_admin","operation_executive_trainee", "connection_designer_engineer", "estimation_head", "estimator", "project_manager", "staff", "user"].includes(userRole)
+    ["client_admin", "operation_executive_trainee", "connection_designer_engineer", "estimation_head", "estimator", "project_manager", "staff", "user", "human_resource"].includes(userRole)
       ? "allProject"
       : "projectDashboard",
   );
@@ -80,9 +81,8 @@ const ProjectLayout = () => {
               "project_manager_officer",
               "operation_executive",
               "deputy_manager",
-            ].includes(
-              sessionStorage.getItem("userRole")?.toLowerCase() || "",
-            ) && (
+              "human_resource",
+            ].includes(userRole) && (
                 <button
                   onClick={() => setActiveTab("projectDashboard")}
                   className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "projectDashboard"
@@ -94,9 +94,18 @@ const ProjectLayout = () => {
                 </button>
               )}
 
-            {["connection_designer_engineer","estimator", "estimation_head", "project_manager_officer", "operation_executive", "project_manager", "deputy_manager", "admin", "dept_manager"].includes(
-              sessionStorage.getItem("userRole")?.toLowerCase() || "",
-            ) && (
+            {[
+              "connection_designer_engineer",
+              "estimator",
+              "estimation_head",
+              "project_manager_officer",
+              "operation_executive",
+              "project_manager",
+              "deputy_manager",
+              "admin",
+              "dept_manager",
+              "human_resource",
+            ].includes(userRole) && (
                 <button
                   onClick={() => setActiveTab("allProject")}
                   className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "allProject"
@@ -115,9 +124,7 @@ const ProjectLayout = () => {
               "estimation_head",
               "deputy_manager",
               "dept_manager",
-            ].includes(
-              sessionStorage.getItem("userRole")?.toLowerCase() || "",
-            ) && (
+            ].includes(userRole) && (
                 <button
                   onClick={() => setActiveTab("addProject")}
                   className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "addProject"
@@ -142,10 +149,8 @@ const ProjectLayout = () => {
               "connection_designer_engineer",
               "client",
               "project_manager",
-              "human_resource"
-            ].includes(
-              sessionStorage.getItem("userRole")?.toLowerCase() || "",
-            ) && (
+              "human_resource",
+            ].includes(userRole) && (
                 <button
                   onClick={() => setActiveTab("teamReports")}
                   className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${activeTab === "teamReports"

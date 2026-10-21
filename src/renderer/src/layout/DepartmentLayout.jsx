@@ -3,7 +3,8 @@ import { AddDepartment, AllDepartments } from "../components";
 
 const DepartmentLayout = () => {
   const [activeTab, setActiveTab] = useState("alldepartment");
-  const userRole = sessionStorage.getItem("userRole");
+  const rawRole = sessionStorage.getItem("userRole") || "";
+  const userRole = rawRole.toUpperCase().trim().replace(/[\s-]+/g, "_");
   return (
     <div className="w-full overflow-y-hidden overflow-x-hidden">
       <div className="flex flex-col w-full h-full">

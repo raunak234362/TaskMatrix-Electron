@@ -66,11 +66,7 @@ const GetProjectById = ({ id, onClose }) => {
   const [coordinationDrawings, setCoordinationDrawings] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [activeTab, setActiveTab] = useState(() => {
-    return sessionStorage.getItem('userRole')?.toLowerCase() === 'human_resource'
-      ? 'analytics'
-      : 'overview'
-  })
+  const [activeTab, setActiveTab] = useState('overview')
 
   const [expandedGroups, setExpandedGroups] = useState({
     'Training and Practice': false,

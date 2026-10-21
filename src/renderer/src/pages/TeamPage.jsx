@@ -12,7 +12,8 @@ const TeamPage = () => {
   const dispatch = useDispatch();
 
   const [activeTab, setActiveTab] = useState("teamDashboard");
-  const userRole = sessionStorage.getItem("userRole");
+  const rawRole = sessionStorage.getItem("userRole") || "";
+  const userRole = rawRole.toUpperCase().trim().replace(/[\s-]+/g, "_");
 
   const departmentDatas = useSelector(
     (state) => state?.userInfo?.departmentData

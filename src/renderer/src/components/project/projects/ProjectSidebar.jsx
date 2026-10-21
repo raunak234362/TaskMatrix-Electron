@@ -33,10 +33,11 @@ const TABS_CONFIG = [
 
 const ProjectSidebar = ({ activeTab, setActiveTab, userRole }) => {
   const isCheckerOrModeler = isCurrentCheckerOrModeler()
+  const cleanRole = (userRole || '').toLowerCase().trim().replace(/[\s-]+/g, '_')
 
   const visibleTabs = TABS_CONFIG.filter((tab) => {
-    if (userRole === 'human_resource') {
-      return ['analytics', 'teamAnalytics'].includes(tab.key)
+    if (cleanRole === 'human_resource') {
+      return ['overview', 'analytics', 'teamAnalytics'].includes(tab.key)
     }
     if (
       userRole === 'staff' &&

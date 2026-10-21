@@ -1,6 +1,7 @@
 import { useState, Suspense, lazy, useMemo, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { setModalOpen } from '../../store/userSlice'
 import { setMilestonesForProject } from '../../store/milestoneSlice'
 import Service from '../../api/Service'
@@ -54,6 +55,19 @@ const DashboardSkeleton = () => (
 
 const WBTDashboard = () => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const rawRole = sessionStorage.getItem('userRole') || ''
+  const normalizedRole = rawRole.toLowerCase().trim().replace(/[\s-]+/g, '_')
+
+  useEffect(() => {
+    if (normalizedRole === 'human_resource') {
+      navigate('/dashboard/manage-team', { replace: true })
+    }
+  }, [normalizedRole, navigate])
+
+  if (normalizedRole === 'human_resource') {
+    return null
+  }
 
   // Use Custom Hook for Data
   const {
