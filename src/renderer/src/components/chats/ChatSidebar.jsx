@@ -18,11 +18,13 @@ const ChatSidebar = ({
   setRecentChats,
   refreshKey,
   projectName,
+  onLoadStateChange,
 }) => {
   const normalizedProjectName = projectName?.trim().toLocaleLowerCase();
 
   useEffect(() => {
     const fetchChats = async () => {
+      onLoadStateChange?.("loading");
       try {
         const response = await Service.AllChats();
         const rawList = Array.isArray(response)
@@ -86,13 +88,15 @@ const ChatSidebar = ({
           );
 
         setRecentChats(normalized);
+        onLoadStateChange?.("loaded");
       } catch (error) {
         console.error("Failed to fetch chats", error);
+        onLoadStateChange?.("error");
       }
     };
 
     fetchChats();
-  }, [setRecentChats, refreshKey, normalizedProjectName]);
+  }, [setRecentChats, refreshKey, normalizedProjectName, onLoadStateChange]);
 
   const selectChat = (chat) => {
     setActiveChat(chat);

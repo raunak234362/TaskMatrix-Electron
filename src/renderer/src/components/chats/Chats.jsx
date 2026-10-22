@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect } from "react";
 import ChatMain from "./ChatMain";
 import ChatSidebar from "./ChatSidebar";
 import useGroupMessages from "../../hooks/userGroupMessages";
+import Button from "../fields/Button";
 
 import AddChatGroup from "./AddChatGroup";
 
@@ -30,6 +31,9 @@ const Chats = ({ projectName, project }) => {
   const [unreadIds, setUnreadIds] = useState([]);
   const [isAddGroupOpen, setIsAddGroupOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [chatLoadState, setChatLoadState] = useState(
+    projectName ? "loading" : "loaded",
+  );
 
   // Real‑time updates
   const handleGroupMessage = useCallback(
@@ -92,8 +96,27 @@ const Chats = ({ projectName, project }) => {
   const handleCloseAddGroup = () => setIsAddGroupOpen(false);
   const handleGroupCreated = () => {
     setRefreshKey((prev) => prev + 1);
-    setIsAddGroupOpen(false);
   };
+
+  const renderEmptyProjectChat = () => (
+    <div className="flex h-full flex-col items-center justify-center gap-4 text-center text-gray-700">
+      {chatLoadState === "loading" ? (
+        <p>Loading project chats...</p>
+      ) : chatLoadState === "error" ? (
+        <>
+          <p>Unable to load project chats</p>
+          <Button onClick={() => setRefreshKey((prev) => prev + 1)}>
+            Retry
+          </Button>
+        </>
+      ) : (
+        <>
+          <p>No project chat group found</p>
+          <Button onClick={handleAddGroupClick}>Add Chat Group</Button>
+        </>
+      )}
+    </div>
+  );
 
   return (
     <div
@@ -112,13 +135,15 @@ const Chats = ({ projectName, project }) => {
             setRecentChats={setRecentChats}
             refreshKey={refreshKey}
             projectName={projectName}
+            onLoadStateChange={setChatLoadState}
           />
         </div>
         <div className={`${projectName ? "w-full" : "flex-1"} h-full`}>
-          {!projectName && isAddGroupOpen ? (
+          {isAddGroupOpen ? (
             <AddChatGroup
               onClose={handleCloseAddGroup}
               onCreated={handleGroupCreated}
+              projectName={projectName}
             />
           ) : activeChat ? (
             <ChatMain
@@ -129,9 +154,13 @@ const Chats = ({ projectName, project }) => {
               project={project}
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-700">
-              {projectName ? "No project chat group found" : "Select a chat to start messaging"}
-            </div>
+            projectName ? (
+              renderEmptyProjectChat()
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-700">
+                Select a chat to start messaging
+              </div>
+            )
           )}
         </div>
       </div>
@@ -139,7 +168,13 @@ const Chats = ({ projectName, project }) => {
       {/* Mobile */}
       <div className="md:hidden w-full h-full">
         {projectName ? (
-          activeChat ? (
+          isAddGroupOpen ? (
+            <AddChatGroup
+              onClose={handleCloseAddGroup}
+              onCreated={handleGroupCreated}
+              projectName={projectName}
+            />
+          ) : activeChat ? (
             <ChatMain
               activeChat={activeChat}
               setActiveChat={setActiveChat}
@@ -148,14 +183,13 @@ const Chats = ({ projectName, project }) => {
               project={project}
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-700">
-              No project chat group found
-            </div>
+            renderEmptyProjectChat()
           )
         ) : isAddGroupOpen ? (
           <AddChatGroup
             onClose={handleCloseAddGroup}
             onCreated={handleGroupCreated}
+            projectName={projectName}
           />
         ) : !activeChat ? (
           <ChatSidebar
@@ -168,6 +202,7 @@ const Chats = ({ projectName, project }) => {
             setRecentChats={setRecentChats}
             refreshKey={refreshKey}
             projectName={projectName}
+            onLoadStateChange={setChatLoadState}
           />
         ) : (
           <ChatMain

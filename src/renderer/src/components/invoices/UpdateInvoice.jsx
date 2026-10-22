@@ -61,7 +61,7 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
         const [accountsRes, invoiceRes, fabricatorsRes] = await Promise.all([
           Service.GetBankAccounts(),
           Service.GetInvoiceById(invoiceId),
-          Service.GetAllFabricators(1, 1000),
+          Service.GetAllFabricators(1, 100),
         ]);
 
         let accountsData = [];
@@ -244,6 +244,7 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
       <header className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 sticky top-0 z-10">
         <h3 className="text-lg font-bold text-gray-700 uppercase tracking-tight">Update Invoice #{watch("invoiceNumber")}</h3>
         <button
+          type="button"
           onClick={onClose}
           className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
         >
@@ -458,13 +459,6 @@ const UpdateInvoice = ({ invoiceId, onClose, onSuccess }) => {
           </div>
 
           <div className="sticky bottom-0 bg-white pt-4 pb-2 border-t border-gray-100 flex gap-4">
-             <button
-                type="button"
-                className="flex-1 px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm text-center"
-                onClick={onClose}
-              >
-                Discard Changes
-              </button>
               <button
                 type="submit"
                 className="flex-[2] flex items-center justify-center gap-3 px-6 py-1.5 bg-green-50 text-black border-2 border-green-700/80 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm active:scale-95"

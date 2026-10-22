@@ -16,6 +16,26 @@ import Service from "../../api/Service";
 import { toast } from "react-toastify";
 import React from "react";
 
+const copyToClipboard = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return;
+  } catch {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.setAttribute("readonly", "");
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.select();
+    const copied = document.execCommand("copy");
+    textArea.remove();
+    if (!copied) {
+      throw new Error("Clipboard copy was not successful.");
+    }
+  }
+};
+
 const RenderFiles = ({
   files,
   onAddFilesClick,
@@ -133,6 +153,8 @@ const RenderFiles = ({
   const handleShare = async (e, file) => {
     e.preventDefault();
     e.stopPropagation();
+    const isWireTransfer = (file.table || table) === "invoiceWireTransfer";
+
     try {
       let shareTable = file.table || table;
       if (shareTable === "rfqCDAttachments" || shareTable === "CDAttachments") shareTable = "rFQ";
@@ -156,23 +178,30 @@ const RenderFiles = ({
         shareParentId = file.documentID || parentId;
       }
 
-      const response = await Service.createShareLink(
-        shareTable,
-        shareParentId,
-        file.id,
-        shareVersionId
-      );
-      console.log("Share link response:", response);
+      let response;
+      try {
+        response = await Service.createShareLink(
+          shareTable,
+          shareParentId,
+          file.id,
+          shareVersionId
+        );
+      } catch (error) {
+        console.error("Error creating share link:", error);
+        toast.error("Error generating share link");
+        return;
+      }
+
       const shareUrl = response?.shareUrl || response?.data?.shareUrl || (typeof response === "string" ? response : null);
       if (shareUrl) {
-        await navigator.clipboard.writeText(shareUrl);
-        toast.success("Link copied to clipboard!");
+        await copyToClipboard(shareUrl);
+        toast.success(isWireTransfer ? "Share URL copied to clipboard." : "Link copied to clipboard!");
       } else {
         toast.error("Failed to generate link");
       }
     } catch (error) {
-      console.error("Error sharing file:", error);
-      toast.error("Error generating share link");
+      console.error("Error copying share URL:", error);
+      toast.error("Could not copy share URL to clipboard.");
     }
   };
 

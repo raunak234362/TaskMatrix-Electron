@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Service from "../../api/Service";
 import { Loader2 } from "lucide-react";
+import RenderFiles from "../ui/RenderFiles";
 
 const WireTransferDetails = ({ id }) => {
   const [data, setData] = useState(null);
@@ -73,18 +74,11 @@ const WireTransferDetails = ({ id }) => {
         />
       </div>
       {data.files && data.files.length > 0 && (
-        <div>
-          <p className="text-sm text-gray-500 mb-2">
-            Attached Files ({data.files.length})
-          </p>
-          <ul className="list-disc pl-5">
-            {data.files.map((file) => (
-              <li key={file.id} className="text-sm text-gray-700">
-                {file.originalName || file.id}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <RenderFiles
+          files={data.files}
+          table="invoiceWireTransfer"
+          parentId={id}
+        />
       )}
     </div>
   );
