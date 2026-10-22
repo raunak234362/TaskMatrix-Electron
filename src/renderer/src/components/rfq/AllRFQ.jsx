@@ -126,11 +126,7 @@ const AllRFQ = ({ newRfqId, onRfqOpened }) => {
           fabricatorName: fabricatorFilterValue,
           fabricator: fabricatorFilterValue,
           createdAt: createdDateFilterValue,
-          createdDate: createdDateFilterValue,
-          startDate: createdDateFilterValue,
           estimationDate: dueDateFilterValue,
-          dueDate: dueDateFilterValue,
-          endDate: dueDateFilterValue,
           MTOManual: mtoManualFilter ? true : undefined,
           isMTOStickModel: mtoStickModelFilter ? true : undefined
         }
