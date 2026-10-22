@@ -258,7 +258,7 @@ const Login = () => {
                   <Button
                     type="submit"
                     disabled={isLoggingIn}
-                    className="w-full py-2.5 bg-primary hover:bg-primary/80 text-black border border-black transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 flex items-center justify-center cursor-pointer font-bold tracking-wider text-sm sm:text-base uppercase"
+                    className="w-full py-2.5 bg-primary/30 hover:bg-primary text-black border-2 border-primary transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 flex items-center justify-center cursor-pointer font-bold tracking-wider text-sm sm:text-base uppercase"
                   >
                     {isLoggingIn ? (
                       <>

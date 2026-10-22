@@ -66,13 +66,13 @@ const TaskPage = () => {
           <button
             onClick={() => setIsTrainingDropdownOpen(!isTrainingDropdownOpen)}
             onBlur={() => setTimeout(() => setIsTrainingDropdownOpen(false), 200)}
-            className={`px-6 py-1.5 border-2 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm inline-flex items-center justify-center gap-2 transition-all cursor-pointer ${
+            className={`px-5 py-1.5 border-2 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm inline-flex items-center justify-center gap-2 transition-all cursor-pointer ${
               ['pendingTraining', 'myTraining', 'trainingReport'].includes(activeTab)
                 ? 'bg-green-200 text-black border-green-700/80'
                 : 'bg-green-50 text-black border-green-700/80 hover:bg-green-100'
             }`}
           >
-            🎓 Training <ChevronDown className="w-4 h-4 ml-1" />
+            Training <ChevronDown className="w-4 h-4 ml-1" />
           </button>
           
           {/* Dropdown Menu */}
