@@ -177,7 +177,7 @@ const ProjectMilestoneMetrics = ({
                       >
                         <div>
                           <h5 className="font-semibold text-black text-sm mb-1 line-clamp-1">
-                            {ms.subject}
+                            {ms.subject} | {ms?.subSubject}
                           </h5>
                           <div className="flex justify-between items-center text-sm text-black font-semibold mb-2">
                             <span className="uppercase tracking-normal">Status:</span>
