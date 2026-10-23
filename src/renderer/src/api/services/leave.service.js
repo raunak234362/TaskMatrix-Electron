@@ -25,7 +25,7 @@ class LeaveService {
     const response = await api.post(`hr/policies/${encodeURIComponent(payload.type)}`, {
       userType: payload.userType,
       annualAllowance: payload.annualAllowance,
-      probationPeriodDays: payload.probationPeriodDays,
+      isProbation: payload.isProbation,
     })
     return response.data
   }
@@ -35,8 +35,8 @@ class LeaveService {
     return response.data
   }
 
-  static async DeleteLeavePolicy(type, userType = 'ALL') {
-    const response = await api.delete(`hr/policies/${encodeURIComponent(type)}`, { params: { userType } })
+  static async DeleteLeavePolicy(type, userType = 'ALL', isProbation = false) {
+    const response = await api.delete(`hr/policies/${encodeURIComponent(type)}`, { params: { userType, isProbation } })
     return response.data
   }
 

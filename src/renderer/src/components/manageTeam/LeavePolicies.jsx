@@ -6,7 +6,7 @@ import { extractList, getLeaveType } from './leaveUtils'
 
 const LEAVE_TYPES = ['SICK', 'PAID', 'CASUAL']
 const policyUserType = (policy) => policy?.userType || 'ALL'
-const policyKey = (policy) => `${getLeaveType(policy)}:${policyUserType(policy)}`
+const policyKey = (policy) => `${getLeaveType(policy)}:${policyUserType(policy)}:${policy?.isProbation ? 'probation' : 'regular'}`
 
 const LeavePolicies = () => {
   const [policies, setPolicies] = useState([])
@@ -16,7 +16,7 @@ const LeavePolicies = () => {
   const [formType, setFormType] = useState('')
   const [userType, setUserType] = useState('ALL')
   const [annualAllowance, setAnnualAllowance] = useState('')
-  const [probationPeriodDays, setProbationPeriodDays] = useState('90')
+  const [isProbation, setIsProbation] = useState(false)
   const [creating, setCreating] = useState(false)
   const [deletingKey, setDeletingKey] = useState('')
 
@@ -41,7 +41,7 @@ const LeavePolicies = () => {
     setFormType('')
     setUserType('ALL')
     setAnnualAllowance('')
-    setProbationPeriodDays('90')
+    setIsProbation(false)
     setCreating(false)
   }
 
@@ -50,7 +50,7 @@ const LeavePolicies = () => {
     setFormType(getLeaveType(policy))
     setUserType(policyUserType(policy))
     setAnnualAllowance(String(policy.annualAllowance ?? ''))
-    setProbationPeriodDays(String(policy.probationPeriodDays ?? 90))
+    setIsProbation(Boolean(policy.isProbation))
   }
 
   const beginCreate = () => {
@@ -63,7 +63,6 @@ const LeavePolicies = () => {
     const type = creating ? formType : getLeaveType(policies.find((policy) => policyKey(policy) === editingKey))
     const designation = userType.trim() || 'ALL'
     const allowance = Number(annualAllowance)
-    const probationDays = Number(probationPeriodDays)
     if (!type) {
       toast.error('A leave policy type is required.')
       return
@@ -72,16 +71,12 @@ const LeavePolicies = () => {
       toast.error('Annual allowance must be a whole number between 0 and 365.')
       return
     }
-    if (probationPeriodDays === '' || !Number.isInteger(probationDays) || probationDays < 0 || probationDays > 3650) {
-      toast.error('Probation period must be a whole number between 0 and 3650 days.')
-      return
-    }
-    if (creating && policies.some((policy) => getLeaveType(policy) === type && policyUserType(policy).toLowerCase() === designation.toLowerCase())) {
-      toast.error('A policy already exists for this leave type and designation.')
+    if (creating && policies.some((policy) => getLeaveType(policy) === type && policyUserType(policy).toLowerCase() === designation.toLowerCase() && Boolean(policy.isProbation) === isProbation)) {
+      toast.error('A policy already exists for this leave type, designation, and stage.')
       return
     }
 
-    const payload = { userType: designation, annualAllowance: allowance, probationPeriodDays: probationDays }
+    const payload = { userType: designation, annualAllowance: allowance, isProbation }
     setSaving(true)
     try {
       if (creating) {
@@ -104,10 +99,11 @@ const LeavePolicies = () => {
     const key = policyKey(policy)
     const type = getLeaveType(policy)
     const designation = policyUserType(policy)
-    if (!window.confirm(`Delete the ${type} leave policy for ${designation}? This cannot be undone.`)) return
+    const probation = Boolean(policy.isProbation)
+    if (!window.confirm(`Delete the ${type} ${probation ? 'probation' : 'regular'} leave policy for ${designation}? This cannot be undone.`)) return
     setDeletingKey(key)
     try {
-      await Service.DeleteLeavePolicy(type, designation)
+      await Service.DeleteLeavePolicy(type, designation, probation)
       toast.success('Leave policy deleted.')
       await loadPolicies()
     } catch (error) {
@@ -138,9 +134,11 @@ const LeavePolicies = () => {
           <input type="number" min="0" max="365" step="1" required value={annualAllowance} onChange={(event) => setAnnualAllowance(event.target.value)} className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" />
         </label>
         <label className="block text-sm font-medium text-gray-700">
-          Probation period (days)
-          <input type="number" min="0" max="3650" step="1" required value={probationPeriodDays} onChange={(event) => setProbationPeriodDays(event.target.value)} className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" />
-          <span className="mt-1 block text-xs font-normal text-gray-500">Defaults to 90 days.</span>
+          Employee stage
+          <select value={isProbation ? 'probation' : 'regular'} onChange={(event) => setIsProbation(event.target.value === 'probation')} disabled={!creating} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100 disabled:bg-gray-100">
+            <option value="regular">Regular (probation completed)</option>
+            <option value="probation">On probation</option>
+          </select>
         </label>
       </div>
       <div className="mt-3 flex justify-end gap-2">
@@ -156,7 +154,7 @@ const LeavePolicies = () => {
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-green-700">Human resources</p>
           <h2 className="mt-1 text-2xl font-bold text-gray-900">Leave policies</h2>
-          <p className="mt-1 text-sm text-gray-500">Set leave allowances and probation periods by employee designation.</p>
+          <p className="mt-1 text-sm text-gray-500">Set separate leave allowances for employees on probation and regular employees.</p>
         </div>
         <div className="flex gap-2">
           <button type="button" onClick={beginCreate} className="inline-flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800"><Plus size={15} /> Add policy</button>
@@ -175,6 +173,7 @@ const LeavePolicies = () => {
           {policies.map((policy, index) => {
             const type = getLeaveType(policy)
             const designation = policyUserType(policy)
+            const probation = Boolean(policy.isProbation)
             const key = policyKey(policy)
             const isEditing = editingKey === key
             return (
@@ -182,7 +181,7 @@ const LeavePolicies = () => {
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-gray-900">{type} · {designation}</h3>
-                    <p className="mt-1 text-xs text-gray-500">Policy matched against employee designation</p>
+                    <p className="mt-1 text-xs text-gray-500">{probation ? 'For employees currently on probation' : 'For employees who completed probation'}</p>
                   </div>
                   {!isEditing && (
                     <div className="flex gap-2">
@@ -194,7 +193,7 @@ const LeavePolicies = () => {
                 {isEditing ? policyForm('Edit leave policy', 'Save policy') : (
                   <dl className="grid grid-cols-2 gap-3 border-t border-gray-100 pt-3 text-sm">
                     <div><dt className="text-gray-500">Annual allowance</dt><dd className="font-semibold text-gray-800">{policy.annualAllowance} days</dd></div>
-                    <div><dt className="text-gray-500">Probation period</dt><dd className="font-semibold text-gray-800">{policy.probationPeriodDays ?? 90} days</dd></div>
+                    <div><dt className="text-gray-500">Employee stage</dt><dd className="font-semibold text-gray-800">{probation ? 'On probation' : 'Regular'}</dd></div>
                   </dl>
                 )}
               </article>
