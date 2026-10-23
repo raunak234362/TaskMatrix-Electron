@@ -4,6 +4,8 @@ import { TeamDashboard } from "../components";
 import EmployeeLayout from "../layout/EmployeeLayout";
 import DepartmentLayout from "../layout/DepartmentLayout";
 import TeamLayout from "../layout/TeamLayout";
+import LeaveRequests from "../components/manageTeam/LeaveRequests";
+import LeavePolicies from "../components/manageTeam/LeavePolicies";
 import Service from "../api/Service";
 import { useDispatch, useSelector } from "react-redux";
 import { showDepartment, showTeam } from "../store/userSlice";
@@ -114,6 +116,30 @@ const TeamPage = () => {
               Manage Team
             </button>
           )}
+
+          {["ADMIN", "HUMAN_RESOURCE", "DEPUTY_MANAGER"].includes(userRole) && (
+            <button
+              onClick={() => setActiveTab("leaveRequests")}
+              className={`px-6 py-2.5 rounded-none text-[13px] font-bold uppercase transition-all shadow-sm border-2 cursor-pointer ${activeTab === "leaveRequests"
+                ? "bg-green-50 text-black border-green-700/80"
+                : "bg-white border-gray-200 hover:border-black hover:text-black"
+                }`}
+            >
+              Leave Requests
+            </button>
+          )}
+
+          { ["ADMIN", "HUMAN_RESOURCE", "DEPUTY_MANAGER"].includes(userRole) && (
+            <button
+              onClick={() => setActiveTab("leavePolicies")}
+              className={`px-6 py-2.5 rounded-none text-[13px] font-bold uppercase transition-all shadow-sm border-2 cursor-pointer ${activeTab === "leavePolicies"
+                ? "bg-green-50 text-black border-green-700/80"
+                : "bg-white border-gray-200 hover:border-black hover:text-black"
+                }`}
+            >
+              Leave Policies
+            </button>
+          )}
         </div>
 
         {/* ---------- TAB CONTENT ---------- */}
@@ -121,6 +147,8 @@ const TeamPage = () => {
           {activeTab === "manageEmployee" && <EmployeeLayout />}
           {activeTab === "manageDepartment" && <DepartmentLayout />}
           {activeTab === "manageTeam" && <TeamLayout />}
+          {activeTab === "leaveRequests" && <LeaveRequests />}
+          {activeTab === "leavePolicies" && <LeavePolicies />}
           {activeTab === "teamDashboard" && <TeamDashboard />}
         </div>
       </div>

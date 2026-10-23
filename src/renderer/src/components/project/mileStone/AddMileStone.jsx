@@ -67,6 +67,7 @@ const AddMileStone = ({
     { label: "Main And Misc Steel Connection Design", value: "Main And Misc Steel Connection Design" },
     { label: "Foundation Embeds", value: "Foundation Embeds" },
     { label: "Panel Embeds", value: "Panel Embeds" },
+    { label: "Advance Bill of Material", value: "Advance Bill of Material" },
     { label: "Others", value: "Others" },
   ];
 
