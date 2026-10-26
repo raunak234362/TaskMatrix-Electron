@@ -8,6 +8,7 @@ import PendingTrainings from '../components/training/PendingTrainings'
 import MyTrainings from '../components/training/MyTrainings'
 import TrainingReport from '../components/training/TrainingReport'
 import { ChevronDown } from 'lucide-react'
+import SelfassignedTask from '../components/task/Self_assignedtasks/SelftaskPage'
 
 const TaskPage = () => {
   const userRole = (sessionStorage.getItem('userRole') || '').toLowerCase().trim()
@@ -61,6 +62,18 @@ const TaskPage = () => {
             Add Task
           </button>
         ) : null}
+        
+        <button
+          onClick={() => setActiveTab('selfTask')}
+          className={`px-6 py-1.5 border-2 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm inline-flex items-center justify-center transition-all cursor-pointer ${
+            activeTab === 'selfTask'
+              ? 'bg-green-200 text-black border-green-700/80'
+              : 'bg-green-50 text-black border-green-700/80 hover:bg-green-100'
+          }`}
+        >
+          Self Task
+        </button>
+        
         {/* Training Dropdown */}
         <div className="relative group">
           <button
@@ -74,11 +87,13 @@ const TaskPage = () => {
           >
             Training <ChevronDown className="w-4 h-4 ml-1" />
           </button>
-          
+
           {/* Dropdown Menu */}
           {isTrainingDropdownOpen && (
             <div className="absolute top-full mt-1 right-0 w-48 bg-white border border-gray-200 shadow-xl rounded-none flex flex-col z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
-              {['admin', 'operation_executive', 'deputy_manager', 'human_resource'].includes(userRole) && (
+              {['admin', 'operation_executive', 'deputy_manager', 'human_resource'].includes(
+                userRole
+              ) && (
                 <button
                   onClick={() => setActiveTab('pendingTraining')}
                   className={`px-4 py-3 text-sm font-bold text-left uppercase hover:bg-green-50 transition-colors border-b border-gray-100 ${activeTab === 'pendingTraining' ? 'bg-green-100 text-green-800' : 'text-gray-700'}`}
@@ -92,7 +107,13 @@ const TaskPage = () => {
               >
                 My Trainings
               </button>
-              {['admin','deputy_manager', 'operation_executive', 'project_manager', 'dept_manager'].includes(userRole) && (
+              {[
+                'admin',
+                'deputy_manager',
+                'operation_executive',
+                'project_manager',
+                'dept_manager'
+              ].includes(userRole) && (
                 <button
                   onClick={() => setActiveTab('trainingReport')}
                   className={`px-4 py-3 text-sm font-bold text-left uppercase hover:bg-green-50 transition-colors ${activeTab === 'trainingReport' ? 'bg-green-100 text-green-800' : 'text-gray-700'}`}
@@ -119,6 +140,11 @@ const TaskPage = () => {
         {activeTab === 'addTask' && (
           <div>
             <AddTask />
+          </div>
+        )}
+        {activeTab === 'selfTask' && (
+          <div>
+            <SelfassignedTask />
           </div>
         )}
         {activeTab === 'pendingTraining' && (

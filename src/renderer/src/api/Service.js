@@ -18,6 +18,7 @@ import MeetingService from './services/meeting.service'
 import MiscellaneousService from './services/miscellaneous.service'
 import StandardsService from './services/standards.service'
 import WPRService from './services/wpr.service'
+import SelfTaskService from './services/selftask.service'
 import LeaveService from './services/leave.service'
 
 class Service { }
@@ -43,6 +44,7 @@ const services = [
   MiscellaneousService,
   StandardsService,
   WPRService,
+  SelfTaskService,
   LeaveService
 ]
 
@@ -75,6 +77,7 @@ export {
   MiscellaneousService,
   StandardsService,
   WPRService,
+  SelfTaskService,
   LeaveService
 }
 
