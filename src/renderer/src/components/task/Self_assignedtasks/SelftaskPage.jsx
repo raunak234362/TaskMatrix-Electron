@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import AddSelfTask from './Addselftask'
 import SelfTaskService from '../../../api/services/selftask.service'
+import GetSelfTaskByID from './GetSelfTaskByID'
 
 const Selftask = () => {
   const [activeTab, setActiveTab] = useState('addTask')
@@ -23,6 +24,7 @@ const Selftask = () => {
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
+  const [selectedTaskId, setSelectedTaskId] = useState(null)
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -114,7 +116,7 @@ const Selftask = () => {
             Self Assigned Tasks
           </h1>
           <p className="text-xs text-gray-500">
-            Create, manage, and monitor personal tasks mapped to your department
+            Create, manage, and monitor your personal tasks
           </p>
         </div>
 
@@ -258,8 +260,22 @@ const Selftask = () => {
                     {filteredTasks.map((t, idx) => {
                       const prio = getPriorityBadge(t.priority)
                       const statCls = getStatusBadge(t.status)
+                      const taskId = t.id ?? t._id
                       return (
-                        <tr key={t.id || t._id || idx} className="hover:bg-gray-50/60 transition">
+                        <tr
+                          key={taskId ?? idx}
+                          onClick={() => taskId != null && setSelectedTaskId(taskId)}
+                          onKeyDown={(event) => {
+                            if (taskId != null && (event.key === 'Enter' || event.key === ' ')) {
+                              event.preventDefault()
+                              setSelectedTaskId(taskId)
+                            }
+                          }}
+                          role={taskId != null ? 'button' : undefined}
+                          tabIndex={taskId != null ? 0 : undefined}
+                          aria-label={taskId != null ? `Open task ${t.name || ''}` : undefined}
+                          className={`transition hover:bg-gray-50/60 ${taskId != null ? 'cursor-pointer focus:outline-none focus-visible:bg-green-50' : ''}`}
+                        >
                           <td className="py-3 px-4">
                             <div className="flex flex-col gap-0.5">
                               {t.serialNo && (
@@ -267,7 +283,9 @@ const Selftask = () => {
                                   #{t.serialNo}
                                 </span>
                               )}
-                              <span className="font-semibold text-gray-900">{t.name}</span>
+                              <span className="w-fit text-left font-semibold text-gray-900">
+                                {t.name}
+                              </span>
                               {t.description && (
                                 <span className="text-[11px] text-gray-500 line-clamp-1">
                                   {t.description}
@@ -327,6 +345,13 @@ const Selftask = () => {
           </div>
         )}
       </div>
+      {selectedTaskId != null && (
+        <GetSelfTaskByID
+          id={selectedTaskId}
+          onClose={() => setSelectedTaskId(null)}
+          refresh={fetchTasks}
+        />
+      )}
     </div>
   )
 }

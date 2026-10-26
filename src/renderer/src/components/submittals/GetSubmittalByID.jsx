@@ -457,6 +457,22 @@ const GetSubmittalByID = ({ id, onClose }) => {
                   );
                 })()}
 
+                {/* Submittal Notes */}
+                {(() => {
+                  const rawNotes = submittal.notes || submittal.currentVersion?.notes || sortedVersions[0]?.notes || "";
+                  const plainNotes = rawNotes.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+                  if (!plainNotes) return null;
+                  return (
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <SectionTitle title="Submittal Notes" />
+                      <div
+                        className="p-4 bg-white border border-gray-200 rounded-none prose prose-sm max-w-none text-sm text-gray-700 overflow-x-auto"
+                        dangerouslySetInnerHTML={{ __html: rawNotes }}
+                      />
+                    </div>
+                  );
+                })()}
+
                 {/* Single Version File Display */}
                 {!hasMultipleVersions && sortedVersions.length === 1 && (
                   <div className="mt-6 pt-6 border-t border-gray-200">

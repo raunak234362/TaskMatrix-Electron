@@ -48,6 +48,27 @@ const QUICK_CATEGORIES = [
   'Operations'
 ]
 
+const getDepartmentId = (record) => {
+  const department = record?.department
+  const candidates = [
+    record?.departmentId,
+    record?.departmentID,
+    record?.department_id,
+    typeof department === 'string' || typeof department === 'number' ? department : null,
+    department?.id,
+    department?._id,
+    department?.departmentId,
+    department?.departmentID,
+    department?.department_id,
+    record?.team?.departmentId,
+    record?.team?.departmentID,
+    record?.team?.department?.id,
+    record?.team?.department?._id
+  ]
+  const id = candidates.find((candidate) => candidate !== null && candidate !== undefined && candidate !== '')
+  return id === undefined ? '' : String(id)
+}
+
 const AddSelfTask = ({ onCancel, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -105,17 +126,11 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
 
   // Auto-fetch department ID from user details or matched staff
   const resolvedDepartmentId = useMemo(() => {
-    return String(
-      userDetail?.departmentId ||
-        userDetail?.departmentID ||
-        userDetail?.department?.id ||
-        userDetail?.department?._id ||
-        matchedStaff?.departmentId ||
-        matchedStaff?.departmentID ||
-        matchedStaff?.department?.id ||
-        matchedStaff?.department?._id ||
-        sessionStorage.getItem('departmentId') ||
-        ''
+    return (
+      getDepartmentId(userDetail) ||
+      getDepartmentId(matchedStaff) ||
+      sessionStorage.getItem('departmentId') ||
+      ''
     )
   }, [userDetail, matchedStaff])
 
@@ -167,7 +182,6 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
   })
 
   const watchedPriority = watch('priority')
-  const watchedDepartmentId = watch('departmentId')
   const watchedCategoryTag = watch('categoryTag')
 
   // Keep form values in sync with fetched user details
@@ -203,22 +217,21 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
       const finalPriority = Number(data.priority) || 2
       const finalStartDate = data.start_date || todayDate
 
-      // Construct FormData for multipart/form-data POST route
-      const payload = new FormData()
-      payload.append('name', data.name.trim())
-      payload.append('description', data.description.trim())
-      payload.append('status', data.status || 'ASSIGNED')
-      payload.append('priority', String(finalPriority))
-      payload.append('start_date', finalStartDate)
-      payload.append('departmentId', String(finalDeptId).trim())
-      payload.append('categoryTag', data.categoryTag.trim())
-      payload.append('user_id', String(finalUserId).trim())
-      payload.append('serialNo', String(finalSerialNo).trim())
-
-      console.log('Sending Self-Task Payload:')
-      for (const [key, value] of payload.entries()) {
-        console.log(`  ${key}:`, value)
+      const payload = {
+        name: data.name.trim(),
+        description: data.description.trim(),
+        status: data.status || 'ASSIGNED',
+        priority: finalPriority,
+        start_date: finalStartDate,
+        categoryTag: data.categoryTag.trim(),
+        user_id: String(finalUserId).trim(),
+        serialNo: String(finalSerialNo).trim()
       }
+      if (String(finalDeptId).trim()) {
+        payload.departmentId = String(finalDeptId).trim()
+      }
+
+      console.log('Sending Self-Task Payload:', payload)
 
       const response = await SelfTaskService.addSelfTask(payload)
 
@@ -268,35 +281,10 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
   const errorClass = 'text-xs text-red-500 font-medium mt-1 flex items-center gap-1'
 
   return (
-    <div className="w-full max-w-5xl mx-auto py-2 px-1">
+    <div className="w-full mx-auto py-2 px-1">
       <div className="bg-white border border-gray-200 rounded-xl shadow-xs overflow-hidden">
         {/* Form Header */}
-        <div className="px-6 py-4 bg-linear-to-r from-green-50/70 via-white to-green-50/40 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-green-600 text-white flex items-center justify-center shadow-xs">
-              <ClipboardList className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold uppercase tracking-tight text-gray-800">
-                Add Self Assigned Task
-              </h2>
-              <p className="text-xs text-gray-500">
-                Assign and track your individual task with department & category mapping
-              </p>
-            </div>
-          </div>
-
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-xs font-semibold uppercase text-gray-700 bg-white hover:bg-gray-50 transition cursor-pointer"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Back
-            </button>
-          )}
-        </div>
+        
 
         {/* User Details & Department Context Banner */}
         <div className="px-6 py-3 bg-gray-50/80 border-b border-gray-200 text-xs flex flex-wrap items-center justify-between gap-3">
@@ -549,60 +537,6 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
                 Custom string or auto-generated upon saving
               </p>
             </div>
-          </div>
-
-          {/* Department Selection / Confirmation */}
-          <div className="p-4 bg-gray-50/70 border border-gray-200 rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <label className={labelClass} style={{ marginBottom: 0 }}>
-                <span className="inline-flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-blue-600" />
-                  Department Assignment
-                </span>
-              </label>
-              <span className="text-[11px] text-gray-500 font-mono">
-                ID: {watchedDepartmentId || resolvedDepartmentId || 'None'}
-              </span>
-            </div>
-
-            {departmentData && departmentData.length > 0 ? (
-              <select
-                className={inputBaseClass}
-                {...register('departmentId', {
-                  required: 'Department is required'
-                })}
-              >
-                <option value="">-- Select Department --</option>
-                {departmentData.map((dept) => {
-                  const deptId = String(dept.id || dept._id || '')
-                  return (
-                    <option key={deptId} value={deptId}>
-                      {dept.name || dept.departmentName || `Department #${deptId}`}
-                    </option>
-                  )
-                })}
-              </select>
-            ) : (
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="Department ID"
-                  className={inputBaseClass}
-                  {...register('departmentId', {
-                    required: 'Department ID is required'
-                  })}
-                />
-              </div>
-            )}
-            {errors.departmentId && (
-              <p className={errorClass}>
-                <AlertCircle className="w-3.5 h-3.5" />
-                {errors.departmentId.message}
-              </p>
-            )}
-            <p className="text-[11px] text-gray-500 mt-1.5">
-              Fetched from your user profile. You can change this if you belong to another department.
-            </p>
           </div>
 
           {/* Actions Bar */}

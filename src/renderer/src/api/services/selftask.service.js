@@ -1,15 +1,9 @@
 import api from '../api'
-const token = sessionStorage.getItem('token')
 class SelfTaskService {
     //add self task 
     static async addSelfTask(taskData) {
-        console.log(taskData,"task data");
-        
-      const response = await api.post('/selfAssignedTasks', taskData,{
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'multipart/form-data'
-            } 
+      const response = await api.post('/selfAssignedTasks', taskData, {
+            headers: { 'Content-Type': 'application/json' }
         })
         return response.data
 
@@ -29,6 +23,36 @@ class SelfTaskService {
         console.error('Error fetching self tasks:', error)
         throw error
         }   
+    }
+
+    static async getSelfTaskById(id) {
+        const response = await api.get(`/selfAssignedTasks/${id}`)
+        return response.data
+    }
+
+    static async startSelfTask(id) {
+        const response = await api.post(`/selfAssignedTasks/${id}/start`)
+        return response.data
+    }
+
+    static async pauseSelfTask(id) {
+        const response = await api.patch(`/selfAssignedTasks/${id}/pause`)
+        return response.data
+    }
+
+    static async resumeSelfTask(id) {
+        const response = await api.post(`/selfAssignedTasks/${id}/resume`)
+        return response.data
+    }
+
+    static async endSelfTask(id) {
+        const response = await api.post(`/selfAssignedTasks/${id}/end`)
+        return response.data
+    }
+
+    static async addSelfTaskComment(id, data) {
+        const response = await api.post('/comment', { selfTask_id: id, data })
+        return response.data
     }
 
     //get my self tasks
@@ -57,7 +81,7 @@ class SelfTaskService {
        }  catch (error) {
         console.error('Error fetching self assigned not completed tasks:', error)
         throw error
-        }   
+        }       
     }
     
 
