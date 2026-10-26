@@ -12,11 +12,25 @@ import {
   Hash,
   Flag,
   Calendar,
-  Building2
+  Users
 } from 'lucide-react'
 import AddSelfTask from './Addselftask'
 import SelfTaskService from '../../../api/services/selftask.service'
 import GetSelfTaskByID from './GetSelfTaskByID'
+import { useSelector } from 'react-redux'
+
+const TASK_OWNER_OPTIONS = [
+  { value: 'OPERATION_EXECUTIVE', label: 'Operation Executive', field: 'role' },
+  {
+    value: 'PROJECT_MANAGER_OFFICER',
+    label: 'Project Manager Officer',
+    field: 'role'
+  },
+  { value: 'DEPUTY_MANAGER', label: 'Deputy Manager', field: 'role' },
+  { value: 'DEPT_MANAGER', label: 'Dept Manager', field: 'role' },
+  { value: 'PROJECT_MANAGER', label: 'Project Manager', field: 'role' },
+  { value: 'SOFTWARE_DEVELOPER', label: 'Software Developer', field: 'designation' }
+]
 
 const Selftask = () => {
   const [activeTab, setActiveTab] = useState('addTask')
@@ -25,12 +39,48 @@ const Selftask = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [selectedTaskId, setSelectedTaskId] = useState(null)
+  const [selectedOwnerType, setSelectedOwnerType] = useState('')
+  const [selectedUserId, setSelectedUserId] = useState('')
+  const [selectedTeamId, setSelectedTeamId] = useState('')
+  const staffData = useSelector((state) => state.userInfo?.staffData || [])
+  const teamData = useSelector((state) => state.userInfo?.teamData || [])
+
+  const ownerType = TASK_OWNER_OPTIONS.find((option) => option.value === selectedOwnerType)
+  const userOptions = ownerType
+    ? staffData
+        .filter(
+          (staff) =>
+            String(staff?.[ownerType.field] || '')
+              .trim()
+              .toUpperCase()
+              .replace(/[\s-]+/g, '_') === ownerType.value
+        )
+        .map((staff) => {
+          const id = staff.id ?? staff._id ?? staff.userId ?? staff.user_id
+          const name =
+            [staff.firstName, staff.lastName].filter(Boolean).join(' ') ||
+            staff.name ||
+            staff.username ||
+            ownerType.label
+
+          return { id, name }
+        })
+        .filter((staff) => staff.id != null && staff.id !== '')
+        .sort((a, b) => a.name.localeCompare(b.name))
+    : []
 
   const fetchTasks = useCallback(async () => {
     try {
       setLoading(true)
       let res
-      if (activeTab === 'notCompleted') {
+      if (selectedTeamId) {
+        res = await SelfTaskService.getSelfAssignedTasksByTeamId(selectedTeamId)
+      } else if (selectedUserId) {
+        res = await SelfTaskService.getSelfAssignedTasksByUserId(selectedUserId)
+      } else if (selectedOwnerType) {
+        setTasks([])
+        return
+      } else if (activeTab === 'notCompleted') {
         res = await SelfTaskService.getSelfAssignedNotCompletedTasks()
       } else {
         res = await SelfTaskService.getMySelfTask()
@@ -46,13 +96,17 @@ const Selftask = () => {
               ? res.result
               : []
 
-      setTasks(list)
+      setTasks(
+        selectedUserId && activeTab === 'notCompleted'
+          ? list.filter((task) => String(task.status || '').toUpperCase() !== 'COMPLETED')
+          : list
+      )
     } catch (err) {
       console.error('Failed to load self tasks:', err)
     } finally {
       setLoading(false)
     }
-  }, [activeTab])
+  }, [activeTab, selectedOwnerType, selectedUserId, selectedTeamId])
 
   useEffect(() => {
     if (activeTab === 'myTasks' || activeTab === 'notCompleted') {
@@ -190,6 +244,56 @@ const Selftask = () => {
                 <div className="flex items-center gap-1.5">
                   <Filter className="w-3.5 h-3.5 text-gray-500" />
                   <select
+                    value={selectedOwnerType}
+                    onChange={(e) => {
+                      setSelectedOwnerType(e.target.value)
+                      setSelectedUserId('')
+                    }}
+                    aria-label="Filter employees by role or designation"
+                    className="px-2.5 py-1.5 bg-white border border-gray-300 rounded-lg text-xs text-gray-700 font-semibold focus:outline-none"
+                  >
+                    <option value="">My Tasks</option>
+                    {TASK_OWNER_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={selectedTeamId}
+                    onChange={(e) => {
+                      setSelectedTeamId(e.target.value)
+                      setSelectedOwnerType('')
+                      setSelectedUserId('')
+                    }}
+                    aria-label="Filter self-assigned tasks by team"
+                    className="max-w-52 px-2.5 py-1.5 bg-white border border-gray-300 rounded-lg text-xs text-gray-700 font-semibold focus:outline-none"
+                  >
+                    <option value="">All Teams</option>
+                    {teamData.map((team) => (
+                      <option key={team.id || team._id} value={team.id || team._id}>
+                        {team.name || 'Unnamed Team'}
+                      </option>
+                    ))}
+                  </select>
+                  {selectedOwnerType && (
+                    <select
+                      value={selectedUserId}
+                      onChange={(e) => setSelectedUserId(e.target.value)}
+                      aria-label={`Select ${ownerType?.label || 'employee'}`}
+                      className="max-w-52 px-2.5 py-1.5 bg-white border border-gray-300 rounded-lg text-xs text-gray-700 font-semibold focus:outline-none"
+                    >
+                      <option value="">
+                        {userOptions.length ? 'Select employee' : 'No employees available'}
+                      </option>
+                      {userOptions.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                     className="px-2.5 py-1.5 bg-white border border-gray-300 rounded-lg text-xs text-gray-700 font-semibold focus:outline-none"
@@ -230,7 +334,9 @@ const Selftask = () => {
                 <div>
                   <h3 className="text-sm font-bold text-gray-700">No self-assigned tasks found</h3>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {searchQuery || statusFilter !== 'ALL'
+                    {selectedOwnerType && !selectedUserId
+                      ? 'Select an employee to view their self-assigned tasks.'
+                      : searchQuery || statusFilter !== 'ALL'
                       ? 'Try clearing your filters'
                       : 'You have not created any self-assigned tasks yet.'}
                   </p>
@@ -253,7 +359,7 @@ const Selftask = () => {
                       <th className="py-3 px-4">Priority</th>
                       <th className="py-3 px-4">Status</th>
                       <th className="py-3 px-4">Start Date</th>
-                      <th className="py-3 px-4">Department</th>
+                      <th className="py-3 px-4">Team</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 text-xs text-gray-700">
@@ -331,8 +437,8 @@ const Selftask = () => {
 
                           <td className="py-3 px-4">
                             <span className="text-gray-600 font-medium flex items-center gap-1 text-[11px]">
-                              <Building2 className="w-3.5 h-3.5 text-blue-500" />
-                              {t.department?.name || t.departmentId || '—'}
+                              <Users className="w-3.5 h-3.5 text-blue-500" />
+                              {t.team?.name || t.teamId || '—'}
                             </span>
                           </td>
                         </tr>

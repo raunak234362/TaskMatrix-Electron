@@ -6,7 +6,7 @@ import {
   ClipboardList,
   CalendarDays,
   Flag,
-  Building2,
+  Users,
   Tag,
   RotateCcw,
   Save,
@@ -48,25 +48,11 @@ const QUICK_CATEGORIES = [
   'Operations'
 ]
 
-const getDepartmentId = (record) => {
-  const department = record?.department
-  const candidates = [
-    record?.departmentId,
-    record?.departmentID,
-    record?.department_id,
-    typeof department === 'string' || typeof department === 'number' ? department : null,
-    department?.id,
-    department?._id,
-    department?.departmentId,
-    department?.departmentID,
-    department?.department_id,
-    record?.team?.departmentId,
-    record?.team?.departmentID,
-    record?.team?.department?.id,
-    record?.team?.department?._id
-  ]
-  const id = candidates.find((candidate) => candidate !== null && candidate !== undefined && candidate !== '')
-  return id === undefined ? '' : String(id)
+const getUserTeam = (record) => {
+  const membership = record?.teamMember?.[0] || record?.teamMembers?.[0]
+  const team = record?.team || membership?.team || record?.managedTeam?.[0]
+  const id = record?.teamId || team?.id || team?._id || membership?.teamId
+  return id ? { id: String(id), name: team?.name || '' } : null
 }
 
 const AddSelfTask = ({ onCancel, onSuccess }) => {
@@ -75,7 +61,6 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
   // Redux state
   const userDetail = useSelector((state) => state.userInfo?.userDetail)
   const staffData = useSelector((state) => state.userInfo?.staffData || [])
-  const departmentData = useSelector((state) => state.userInfo?.departmentData || [])
 
   // Auto-fetch User ID from user details / session
   const currentUserId = useMemo(() => {
@@ -124,30 +109,10 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
     )
   }, [staffData, currentUserId])
 
-  // Auto-fetch department ID from user details or matched staff
-  const resolvedDepartmentId = useMemo(() => {
-    return (
-      getDepartmentId(userDetail) ||
-      getDepartmentId(matchedStaff) ||
-      sessionStorage.getItem('departmentId') ||
-      ''
-    )
-  }, [userDetail, matchedStaff])
-
-  // Resolve department Name for display
-  const resolvedDepartmentName = useMemo(() => {
-    const matchedDept = departmentData.find(
-      (d) => String(d.id || d._id) === String(resolvedDepartmentId)
-    )
-    return (
-      matchedDept?.name ||
-      matchedDept?.departmentName ||
-      userDetail?.department?.name ||
-      matchedStaff?.department?.name ||
-      sessionStorage.getItem('deptName') ||
-      (resolvedDepartmentId ? `Department #${resolvedDepartmentId}` : 'Not Specified')
-    )
-  }, [departmentData, resolvedDepartmentId, userDetail, matchedStaff])
+  const resolvedTeam = useMemo(
+    () => getUserTeam(userDetail) || getUserTeam(matchedStaff),
+    [userDetail, matchedStaff]
+  )
 
   // Today's date in YYYY-MM-DD
   const todayDate = useMemo(() => new Date().toISOString().split('T')[0], [])
@@ -174,7 +139,7 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
       status: 'ASSIGNED',
       priority: 2,
       start_date: todayDate,
-      departmentId: resolvedDepartmentId,
+      teamId: resolvedTeam?.id || '',
       categoryTag: '',
       serialNo: '',
       user_id: currentUserId
@@ -186,8 +151,8 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
 
   // Keep form values in sync with fetched user details
   useEffect(() => {
-    if (resolvedDepartmentId) {
-      setValue('departmentId', resolvedDepartmentId)
+    if (resolvedTeam?.id) {
+      setValue('teamId', resolvedTeam.id)
     }
     if (currentUserId) {
       setValue('user_id', currentUserId)
@@ -195,7 +160,7 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
     if (!watch('start_date')) {
       setValue('start_date', todayDate)
     }
-  }, [resolvedDepartmentId, currentUserId, todayDate, setValue])
+  }, [resolvedTeam, currentUserId, todayDate, setValue])
 
   const handleGenerateSerial = () => {
     const newSerial = generateSerialNo()
@@ -212,7 +177,7 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
       setIsSubmitting(true)
 
       const finalUserId = data.user_id || currentUserId || sessionStorage.getItem('userId') || ''
-      const finalDeptId = data.departmentId || resolvedDepartmentId || ''
+      const finalTeamId = data.teamId || resolvedTeam?.id || ''
       const finalSerialNo = (data.serialNo && data.serialNo.trim()) || generateSerialNo()
       const finalPriority = Number(data.priority) || 2
       const finalStartDate = data.start_date || todayDate
@@ -227,8 +192,8 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
         user_id: String(finalUserId).trim(),
         serialNo: String(finalSerialNo).trim()
       }
-      if (String(finalDeptId).trim()) {
-        payload.departmentId = String(finalDeptId).trim()
+      if (String(finalTeamId).trim()) {
+        payload.teamId = String(finalTeamId).trim()
       }
 
       console.log('Sending Self-Task Payload:', payload)
@@ -254,7 +219,7 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
         status: 'ASSIGNED',
         priority: 2,
         start_date: todayDate,
-        departmentId: resolvedDepartmentId,
+        teamId: resolvedTeam?.id || '',
         categoryTag: '',
         serialNo: '',
         user_id: currentUserId
@@ -286,7 +251,7 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
         {/* Form Header */}
         
 
-        {/* User Details & Department Context Banner */}
+        {/* User Details & Team Context Banner */}
         <div className="px-6 py-3 bg-gray-50/80 border-b border-gray-200 text-xs flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-1.5 text-gray-700">
@@ -300,12 +265,12 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
             </div>
 
             <div className="flex items-center gap-1.5 text-gray-700">
-              <Building2 className="w-4 h-4 text-blue-600" />
+              <Users className="w-4 h-4 text-blue-600" />
               <span className="font-bold text-gray-500 uppercase tracking-wider text-[11px]">
-                Department:
+                Team:
               </span>
               <span className="font-semibold text-gray-900 bg-white px-2 py-0.5 rounded-md border border-gray-200">
-                {resolvedDepartmentName}
+                {resolvedTeam?.name || 'No team assigned'}
               </span>
             </div>
           </div>
@@ -550,7 +515,7 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
                   status: 'ASSIGNED',
                   priority: 2,
                   start_date: todayDate,
-                  departmentId: resolvedDepartmentId,
+                  teamId: resolvedTeam?.id || '',
                   categoryTag: '',
                   serialNo: '',
                   user_id: currentUserId

@@ -85,17 +85,17 @@ class SelfTaskService {
     }
     
 
-    //get self asssigned tasks by departmentid 
-    static async getSelfAssignedTasksByDepartmentId(departmentId) {
+    //get self assigned tasks by team id
+    static async getSelfAssignedTasksByTeamId(teamId) {
         try {
-        const response = await api.get(`/selfAssignedTasks/department/${departmentId}`, {
+        const response = await api.get(`/selfAssignedTasks/team/${teamId}`, {
             headers: {
                'Content-Type': 'application/json'
             },
         })
         return response.data
        }  catch (error) {
-        console.error('Error fetching self assigned tasks by department id:', error)
+        console.error('Error fetching self assigned tasks by team id:', error)
         throw error
         }   
     }

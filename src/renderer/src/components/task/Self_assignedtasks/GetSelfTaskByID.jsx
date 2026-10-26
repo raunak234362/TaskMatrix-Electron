@@ -173,7 +173,7 @@ const GetSelfTaskByID = ({ id, onClose, refresh }) => {
                   <div className="flex justify-between gap-3"><dt className="text-gray-500">Category</dt><dd className="font-medium text-gray-800">{task.categoryTag || '—'}</dd></div>
                   <div className="flex justify-between gap-3"><dt className="text-gray-500">Priority</dt><dd className="font-medium text-gray-800">{task.priority || '—'}</dd></div>
                   <div className="flex justify-between gap-3"><dt className="text-gray-500">Start date</dt><dd className="inline-flex items-center gap-1 font-medium text-gray-800"><CalendarDays className="h-3.5 w-3.5" />{formatDateTime(task.start_date)}</dd></div>
-                  <div className="flex justify-between gap-3"><dt className="text-gray-500">Department</dt><dd className="font-medium text-gray-800">{task.department?.name || '—'}</dd></div>
+                  <div className="flex justify-between gap-3"><dt className="text-gray-500">Team</dt><dd className="font-medium text-gray-800">{task.team?.name || '—'}</dd></div>
                 </dl>
               </div>
             </div>
