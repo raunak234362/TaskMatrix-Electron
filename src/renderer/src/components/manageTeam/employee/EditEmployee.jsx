@@ -84,6 +84,7 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
     roleOptions.find((opt) => opt.value === selectedRole) || null;
 
   const isTrue = (val) => val === true || val === "true" || val === 1;
+  const canEditProbation = ["ADMIN", "HUMAN_RESOURCE", "DEPUTY_MANAGER"].includes(currentUser?.role);
 
   // ── Fetch employee data & pre‑fill form ──
   useEffect(() => {
@@ -98,7 +99,8 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
         setLoading(true);
         setError(null);
 
-        const employee = employeeData;
+        const response = await Service.FetchEmployeeByID(employeeData.id);
+        const employee = response?.data?.user || response?.user || employeeData;
 
         if (!employee) throw new Error("Employee not found");
 
@@ -106,6 +108,9 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
         Object.keys(employee).forEach((key) => {
           let value = employee[key];
           if (key === "isActive") value = isTrue(value);
+          if (key === "joiningDate" && value) {
+            value = value instanceof Date ? value.toISOString().slice(0, 10) : String(value).slice(0, 10);
+          }
           if (key === "username" && typeof value === "string") {
             value = value.toUpperCase();
           }
@@ -268,6 +273,42 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
               />
               <Input label="Email" type="email" {...register("email")} className="w-full" />
               <Input label="Designation" {...register("designation")} className="w-full" />
+              {canEditProbation && (
+                <>
+                  <div>
+                    <Input
+                      label="Joining date"
+                      type="date"
+                      {...register("joiningDate", {
+                        required: "Joining date is required",
+                        setValueAs: (value) => value ? new Date(`${value}T00:00:00.000Z`) : undefined,
+                      })}
+                      className="w-full"
+                    />
+                    {errors.joiningDate && <p className="mt-1 text-xs text-red-600">{errors.joiningDate.message}</p>}
+                  </div>
+                  <div>
+                    <Input
+                      label="Employee probation period (days)"
+                      type="number"
+                      min="0"
+                      max="3650"
+                      step="1"
+                      required
+                      {...register("probationPeriodDays", {
+                        valueAsNumber: true,
+                        required: "Probation period is required",
+                        min: { value: 0, message: "Must be 0 or more days" },
+                        max: { value: 3650, message: "Must be 3650 days or less" },
+                        validate: (value) => Number.isInteger(value) || "Enter a whole number of days",
+                      })}
+                      className="w-full"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">Set per employee. Defaults to 90 days; their leave policy switches to regular after this period.</p>
+                    {errors.probationPeriodDays && <p className="mt-1 text-xs text-red-600">{errors.probationPeriodDays.message}</p>}
+                  </div>
+                </>
+              )}
               <div className="space-y-1">
                 <label className="block text-[10px] font-black text-black uppercase tracking-[0.15em] ml-1">
                   Role
