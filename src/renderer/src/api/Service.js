@@ -18,6 +18,7 @@ import MeetingService from './services/meeting.service'
 import MiscellaneousService from './services/miscellaneous.service'
 import StandardsService from './services/standards.service'
 import WPRService from './services/wpr.service'
+import SelfTaskService from './services/selftask.service'
 
 class Service { }
 
@@ -41,7 +42,8 @@ const services = [
   MeetingService,
   MiscellaneousService,
   StandardsService,
-  WPRService
+  WPRService,
+  SelfTaskService
 ]
 
 services.forEach(service => {
@@ -72,7 +74,8 @@ export {
   MeetingService,
   MiscellaneousService,
   StandardsService,
-  WPRService
+  WPRService,
+  SelfTaskService
 }
 
 export default Service
