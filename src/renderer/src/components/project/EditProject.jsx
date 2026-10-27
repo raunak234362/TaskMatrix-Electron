@@ -351,9 +351,42 @@ const EditProject = ({
       setIsSubmitting(true);
       const formData = new FormData();
 
-      Object.entries(data).forEach(([key, value]) => {
+      // Build the update body from editable project properties only. The
+      // project detail response also contains related records such as RFIs,
+      // milestones, submittals, and progress reports; those are managed by
+      // their own endpoints and must never be sent with a project update.
+      const projectFields = [
+        "name",
+        "projectNumber",
+        "description",
+        "fabricatorID",
+        "managerID",
+        "departmentID",
+        "teamID",
+        "tools",
+        "stage",
+        "status",
+        "estimatedHours",
+        "startDate",
+        "endDate",
+        "approvalDate",
+        "fabricationDate",
+        "connectionDesign",
+        "miscDesign",
+        "customerDesign",
+        "detailingMain",
+        "detailingMisc",
+        "isAwarded",
+        "connectionDesignerID",
+        "pocOfConnectionDesigner",
+        "clientProjectManagers",
+      ];
+      const projectUpdate = {};
+
+      projectFields.forEach((key) => {
+        const value = data[key];
         if (value === null || value === undefined) return;
-        if (key === "files") return;
+        projectUpdate[key] = value;
 
         if (Array.isArray(value)) {
           value.forEach((v) => {
@@ -375,13 +408,14 @@ const EditProject = ({
 
       const res = await Service.EditProjectById(projectId, formData);
       if (res && res.success !== false) {
+        const savedProject = res?.data?.data || res?.data?.project || res?.data || res?.project || res;
         if (res?.data) {
-          dispatch(updateProject(res.data));
+          dispatch(updateProject(savedProject));
         } else {
-          dispatch(updateProject(res));
+          dispatch(updateProject(savedProject));
         }
         toast.success("Project updated successfully!");
-        onSuccess();
+        onSuccess(projectUpdate, savedProject);
       } else {
         toast.error(res?.message || "Failed to update project");
       }

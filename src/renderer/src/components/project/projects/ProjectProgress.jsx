@@ -25,8 +25,24 @@ const ProjectProgress = ({ projectId }) => {
   };
 
   useEffect(() => {
-    if (projectId) {
-      fetchReports();
+    if (!projectId) return undefined
+
+    let cancelled = false
+    setLoading(true)
+    const debounceTimer = setTimeout(async () => {
+      try {
+        const data = await Service.getProjectProgressReportsByProjectId(projectId)
+        if (!cancelled) setReports(Array.isArray(data) ? data : (data?.data || []))
+      } catch (error) {
+        console.error('Error fetching project progress reports:', error)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }, 250)
+
+    return () => {
+      cancelled = true
+      clearTimeout(debounceTimer)
     }
   }, [projectId]);
 

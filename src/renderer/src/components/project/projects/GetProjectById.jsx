@@ -57,7 +57,14 @@ const normaliseWbsType = (raw) => {
   return WBS_TYPE_ALIAS[key] ?? 'others'
 }
 
-const GetProjectById = ({ id, onClose }) => {
+const RelatedDataLoading = ({ label }) => (
+  <div className="flex items-center justify-center gap-2 py-12 text-sm text-gray-500" role="status">
+    <Loader2 className="h-5 w-5 animate-spin text-green-600" />
+    Loading {label}...
+  </div>
+)
+
+const GetProjectById = ({ id, onClose, onProjectUpdated }) => {
   const [project, setProject] = useState(null)
   const [milestones, setMilestones] = useState([])
   const [rfiData, setRfiData] = useState([])
@@ -65,6 +72,14 @@ const GetProjectById = ({ id, onClose }) => {
   const [changeOrderData, setChangeOrderData] = useState([])
   const [coordinationDrawings, setCoordinationDrawings] = useState([])
   const [loading, setLoading] = useState(true)
+  const [relatedLoading, setRelatedLoading] = useState({
+    milestones: false,
+    rfi: false,
+    submittals: false,
+    changeOrders: false,
+    coordinationDrawings: false
+  })
+  const [relatedRefreshKey, setRelatedRefreshKey] = useState(0)
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('overview')
 
@@ -342,36 +357,21 @@ const GetProjectById = ({ id, onClose }) => {
 
   const fetchProject = async () => {
     try {
-      setLoading(true)
+      if (!project || String(project.id) !== String(id)) setLoading(true)
       setError(null)
-      const [projRes, mileRes, rfiRes, subRes, coordRes, coRes] = await Promise.all([
-        Service.GetProjectById(id),
-        Service.GetProjectMilestoneById(id),
-        Service.GetRFIByProjectId(id),
-        Service.GetSubmittalByProjectId(id),
-        Service.getCoordinationDrawingsByProjectId(id),
-        Service.GetChangeOrder(id),
-        fetchProjectTasks()
-      ])
+      const projRes = await Service.GetProjectCoreById(id)
       setProject(projRes?.data || null)
-      setMilestones(mileRes?.data || [])
-      let rfiArray = []
-      if (rfiRes) {
-        if (Array.isArray(rfiRes)) {
-          rfiArray = rfiRes
-        } else if (rfiRes['show rfi']) {
-          rfiArray = rfiRes['show rfi']
-        } else if (rfiRes.data) {
-          rfiArray = rfiRes.data
-        } else if (typeof rfiRes === 'object') {
-          const firstArray = Object.values(rfiRes).find(Array.isArray)
-          if (firstArray) rfiArray = firstArray
-        }
+      if (!projRes?.data) setError('Project not found')
+      else {
+        setRelatedLoading({
+          milestones: true,
+          rfi: true,
+          submittals: true,
+          changeOrders: true,
+          coordinationDrawings: true
+        })
+        setRelatedRefreshKey((key) => key + 1)
       }
-      setRfiData(rfiArray)
-      setSubmittalData(subRes?.data || (Array.isArray(subRes) ? subRes : []))
-      setCoordinationDrawings(coordRes?.data || (Array.isArray(coordRes) ? coordRes : []))
-      setChangeOrderData(coRes?.data || (Array.isArray(coRes) ? coRes : []))
     } catch (err) {
       setError('Failed to load project details')
       console.error('Error fetching project:', err)
@@ -379,6 +379,70 @@ const GetProjectById = ({ id, onClose }) => {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (!project || !id) return undefined
+
+    let cancelled = false
+    const debounceTimer = setTimeout(async () => {
+      setRelatedLoading({
+        milestones: true,
+        rfi: true,
+        submittals: true,
+        changeOrders: true,
+        coordinationDrawings: true
+      })
+
+      const results = await Promise.allSettled([
+        Service.GetProjectMilestoneById(id),
+        Service.GetRFIByProjectId(id),
+        Service.GetSubmittalByProjectId(id),
+        Service.GetChangeOrder(id),
+        Service.getCoordinationDrawingsByProjectId(id),
+        fetchProjectTasks(),
+        userRole !== 'staff' ? Service.GetProjectManagerAssists(id) : Promise.resolve(null)
+      ])
+      if (cancelled) return
+
+      const [mileResult, rfiResult, subResult, coResult, coordResult, , assistsResult] = results
+      const valueOf = (result) => result.status === 'fulfilled' ? result.value : null
+      const mileRes = valueOf(mileResult)
+      const rfiRes = valueOf(rfiResult)
+      const subRes = valueOf(subResult)
+      const coRes = valueOf(coResult)
+      const coordRes = valueOf(coordResult)
+
+      let rfiArray = []
+      if (Array.isArray(rfiRes)) rfiArray = rfiRes
+      else if (Array.isArray(rfiRes?.['show rfi'])) rfiArray = rfiRes['show rfi']
+      else if (Array.isArray(rfiRes?.data)) rfiArray = rfiRes.data
+      else if (rfiRes && typeof rfiRes === 'object') {
+        rfiArray = Object.values(rfiRes).find(Array.isArray) || []
+      }
+
+      if (mileResult.status === 'fulfilled') setMilestones(mileRes?.data || (Array.isArray(mileRes) ? mileRes : []))
+      if (rfiResult.status === 'fulfilled') setRfiData(rfiArray)
+      if (subResult.status === 'fulfilled') setSubmittalData(subRes?.data || (Array.isArray(subRes) ? subRes : []))
+      if (coResult.status === 'fulfilled') setChangeOrderData(coRes?.data || (Array.isArray(coRes) ? coRes : []))
+      if (coordResult.status === 'fulfilled') setCoordinationDrawings(coordRes?.data || (Array.isArray(coordRes) ? coordRes : []))
+      const assists = valueOf(assistsResult)
+      if (Array.isArray(assists) && assists.length) {
+        setProject((currentProject) => currentProject ? { ...currentProject, assists } : currentProject)
+      }
+      setRelatedLoading({
+        milestones: false,
+        rfi: false,
+        submittals: false,
+        changeOrders: false,
+        coordinationDrawings: false
+      })
+    }, 250)
+
+    return () => {
+      cancelled = true
+      clearTimeout(debounceTimer)
+    }
+  }, [id, project?.id, relatedRefreshKey, userRole])
 
   const handleEditModel = (projectToEdit) => {
     setEditModel(projectToEdit)
@@ -471,7 +535,9 @@ const GetProjectById = ({ id, onClose }) => {
               </div>
             )}
             {activeTab === 'milestones' && (
-              <AllMileStone project={project} onUpdate={fetchProject} />
+              relatedLoading.milestones
+                ? <RelatedDataLoading label="milestones" />
+                : <AllMileStone project={project} onUpdate={fetchProject} />
             )}
 
             {/* Team */}
@@ -531,54 +597,64 @@ const GetProjectById = ({ id, onClose }) => {
 
             {/* RFI */}
             {activeTab === 'rfi' && (
-              <RfiLayout
-                project={project}
-                rfiData={rfiData}
-                fetchProject={fetchProject}
-                canCreate={canCreate}
-              />
+              relatedLoading.rfi
+                ? <RelatedDataLoading label="RFIs" />
+                : <RfiLayout
+                    project={project}
+                    rfiData={rfiData}
+                    fetchProject={fetchProject}
+                    canCreate={canCreate}
+                  />
             )}
 
             {/* Submittals */}
             {activeTab === 'submittals' && (
-              <SubmittalLayout
-                project={project}
-                submittalData={submittalData}
-                projectId={id}
-                fetchProject={fetchProject}
-                canCreate={canCreate}
-              />
+              relatedLoading.submittals
+                ? <RelatedDataLoading label="submittals" />
+                : <SubmittalLayout
+                    project={project}
+                    submittalData={submittalData}
+                    projectId={id}
+                    fetchProject={fetchProject}
+                    canCreate={canCreate}
+                  />
             )}
 
             {/* CD RFI */}
             {activeTab === 'CDrfi' && (userRole !== 'staff' || isAssist) && (
-              <RfiLayout
-                project={project}
-                rfiData={rfiData}
-                fetchProject={fetchProject}
-                canCreate={canCreate}
-              />
+              relatedLoading.rfi
+                ? <RelatedDataLoading label="RFIs" />
+                : <RfiLayout
+                    project={project}
+                    rfiData={rfiData}
+                    fetchProject={fetchProject}
+                    canCreate={canCreate}
+                  />
             )}
 
             {/* CD Submittals */}
             {activeTab === 'CDsubmittals' && (userRole !== 'staff' || isAssist) && (
-              <SubmittalLayout
-                project={project}
-                submittalData={submittalData}
-                projectId={id}
-                fetchProject={fetchProject}
-                canCreate={canCreate}
-              />
+              relatedLoading.submittals
+                ? <RelatedDataLoading label="submittals" />
+                : <SubmittalLayout
+                    project={project}
+                    submittalData={submittalData}
+                    projectId={id}
+                    fetchProject={fetchProject}
+                    canCreate={canCreate}
+                  />
             )}
 
             {/* Change Order */}
             {activeTab === 'changeOrder' && (
-              <COLayout
-                project={project}
-                changeOrderData={changeOrderData}
-                fetchProject={fetchProject}
-                canCreate={canCreate}
-              />
+              relatedLoading.changeOrders
+                ? <RelatedDataLoading label="change orders" />
+                : <COLayout
+                    project={project}
+                    changeOrderData={changeOrderData}
+                    fetchProject={fetchProject}
+                    canCreate={canCreate}
+                  />
             )}
 
             {/* Analytics */}
@@ -593,7 +669,11 @@ const GetProjectById = ({ id, onClose }) => {
             {activeTab === 'projectNotes' && <AllProjectNotes projectId={id} project={project} />}
 
             {/* Coordination Drawings */}
-            {activeTab === 'coordinationDrawings' && <CoordinationDrawings projectId={id} project={project} />}
+            {activeTab === 'coordinationDrawings' && (
+              relatedLoading.coordinationDrawings
+                ? <RelatedDataLoading label="coordination drawings" />
+                : <CoordinationDrawings projectId={id} project={project} />
+            )}
 
             {/* Standards Chatbot */}
             {activeTab === 'standardsChat' && (
@@ -624,9 +704,18 @@ const GetProjectById = ({ id, onClose }) => {
         <EditProject
           projectId={id}
           onCancel={() => setEditModel(null)}
-          onSuccess={() => {
+          onSuccess={(updatedFields, savedProject) => {
             setEditModel(null)
-            fetchProject()
+            const mergedProject = {
+              ...updatedFields,
+              ...(savedProject && typeof savedProject === 'object' ? savedProject : {}),
+              id: savedProject?.id ?? id
+            }
+            setProject((currentProject) => ({
+              ...currentProject,
+              ...mergedProject
+            }))
+            onProjectUpdated?.(mergedProject)
           }}
         />
       )}

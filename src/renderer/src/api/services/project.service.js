@@ -78,6 +78,21 @@ class ProjectService {
     }
   }
 
+  // Get only the project record without loading its related resources.
+  static async GetProjectCoreById(id) {
+    try {
+      const response = await api.get(`project/projects/${id}`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      return response.data
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
   // Get Project Overall Dashboard
   static async GetProjectOverallDashboard(id, stage) {
     try {

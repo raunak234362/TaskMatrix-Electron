@@ -628,6 +628,16 @@ const AllProjects = ({ statusFilter: statusFilterProp, setStatusFilter: setStatu
             <GetProjectById
               id={selectedProject.id ?? selectedProject.fabId ?? ""}
               onClose={() => setSelectedProject(null)}
+              onProjectUpdated={(updatedProject) => {
+                const updatedId = updatedProject?.id ?? selectedProject.id ?? selectedProject.fabId
+                setProjectList((currentProjects) =>
+                  currentProjects.map((project) =>
+                    String(project.id ?? project.fabId) === String(updatedId)
+                      ? { ...project, ...updatedProject }
+                      : project
+                  )
+                )
+              }}
             />
           </Suspense>
         </Modal>
