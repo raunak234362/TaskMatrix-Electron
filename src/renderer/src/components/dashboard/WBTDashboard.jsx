@@ -388,7 +388,6 @@ const WBTDashboard = () => {
             tasks={tasks}
             projectNotes={projectNotes}
             unreadComments={unreadComments}
-            currentTask={currentTask}
             handlers={{
               setDetailTaskId,
               setShowDeadlinesPopup,

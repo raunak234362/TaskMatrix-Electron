@@ -14,7 +14,6 @@ const StaffDashboardView = ({
     tasks,
     projectNotes,
     unreadComments,
-    currentTask,
     handlers
 }) => {
     const {
@@ -36,44 +35,34 @@ const StaffDashboardView = ({
         return 0
     }
 
-    const isHighPriorityTask = (task) => getTaskPriorityValue(task) >= 3
-
-    const isFallbackTask = (task) => {
-        const normalizedStatus = task?.status?.toUpperCase()
-        return ['IN_PROGRESS', 'BREAK', 'ASSIGNED', 'REWORK'].includes(normalizedStatus)
-    }
+    const normalizeTaskStatus = (status) =>
+        String(status || '').trim().toUpperCase().replace(/[\s-]+/g, '_')
 
     const displayTask = useMemo(() => {
         const normalizedTasks = Array.isArray(tasks) ? tasks : []
+        const actionableStatuses = new Set(['IN_PROGRESS', 'BREAK', 'ASSIGNED', 'REWORK'])
+        const actionableTasks = normalizedTasks.filter((task) =>
+            actionableStatuses.has(normalizeTaskStatus(task?.status))
+        )
 
-        // Exclude completed-like statuses entirely
-        const aliveTasks = normalizedTasks.filter((t) => {
-            const s = (t?.status || '').toUpperCase()
-            return !['COMPLETED', 'VALIDATE_COMPLETED'].includes(s)
-        })
-
-        if (aliveTasks.length === 0) return currentTask || null
+        if (actionableTasks.length === 0) return null
 
         const statusWeight = (status) => {
-            const s = (status || '').toUpperCase()
+            const s = normalizeTaskStatus(status)
             if (s === 'IN_PROGRESS') return 4
             if (s === 'BREAK') return 3
             if (s === 'ASSIGNED') return 2
             if (s === 'REWORK') return 2
-            if (s === 'PENDING') return 1
             return 0
         }
 
-        // Determine highest numeric priority available
-        const priorities = aliveTasks.map(getTaskPriorityValue)
+        const priorities = actionableTasks.map(getTaskPriorityValue)
         const maxPriority = priorities.length ? Math.max(...priorities) : 0
 
-        // If there is a high priority (>=3), prefer among those tasks
         if (maxPriority >= 3) {
-            const candidates = aliveTasks.filter((t) => {
-                const s = (t?.status || '').toUpperCase()
-                return getTaskPriorityValue(t) === maxPriority && s !== 'IN_REVIEW'
-            })
+            const candidates = actionableTasks.filter(
+                (task) => getTaskPriorityValue(task) === maxPriority
+            )
 
             if (candidates.length > 0) {
                 candidates.sort((a, b) => {
@@ -91,15 +80,16 @@ const StaffDashboardView = ({
             }
         }
 
-        // Fallback order: current in-progress/break > assigned/rework > provided currentTask > any alive task
-        const inProgress = aliveTasks.find((t) => ['IN_PROGRESS', 'BREAK'].includes((t?.status || '').toUpperCase()))
+        const inProgress = actionableTasks.find((task) =>
+            ['IN_PROGRESS', 'BREAK'].includes(normalizeTaskStatus(task?.status))
+        )
         if (inProgress) return inProgress
 
-        const assigned = aliveTasks.find((t) => ['ASSIGNED', 'REWORK'].includes((t?.status || '').toUpperCase()))
-        if (assigned) return assigned
-
-        return currentTask || aliveTasks[0] || null
-    }, [tasks, currentTask])
+        const assigned = actionableTasks.find((task) =>
+            ['ASSIGNED', 'REWORK'].includes(normalizeTaskStatus(task?.status))
+        )
+        return assigned || null
+    }, [tasks])
 
     return (
         <div className="flex flex-col gap-8 lg:gap-10 transition-all duration-300 ease-in-out">

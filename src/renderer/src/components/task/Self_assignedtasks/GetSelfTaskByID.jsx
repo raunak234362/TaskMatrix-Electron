@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { CalendarDays, CheckCircle2, Clock3, Loader2, MessageSquare, Pause, Play, Square, X } from 'lucide-react'
 import { toast } from 'react-toastify'
+import { useSelector } from 'react-redux'
 import SelfTaskService from '../../../api/services/selftask.service'
 
 const formatDateTime = (value) => {
@@ -11,6 +12,8 @@ const formatDateTime = (value) => {
 }
 
 const GetSelfTaskByID = ({ id, onClose, refresh }) => {
+  const currentUser = useSelector((state) => state.userInfo?.userDetail)
+  const currentUserId = currentUser?.id ?? currentUser?._id ?? sessionStorage.getItem('userId')
   const [task, setTask] = useState(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
@@ -40,6 +43,16 @@ const GetSelfTaskByID = ({ id, onClose, refresh }) => {
     [task?.workingHourTask]
   )
   const status = String(task?.status || 'ASSIGNED').toUpperCase()
+  const taskOwnerId =
+    task?.user_id ??
+    task?.userId ??
+    task?.user?.id ??
+    task?.user?._id ??
+    task?.ownerId ??
+    task?.owner?.id ??
+    task?.owner?._id
+  const canControlTask =
+    currentUserId != null && taskOwnerId != null && String(currentUserId) === String(taskOwnerId)
   const totalSeconds = (task?.workingHourTask || []).reduce(
     (total, session) => total + (Number(session.duration_seconds) || 0),
     0
@@ -48,7 +61,7 @@ const GetSelfTaskByID = ({ id, onClose, refresh }) => {
 
   const runAction = async (action) => {
     const taskId = task?.id ?? task?._id ?? id
-    if (processing || taskId == null) return
+    if (processing || taskId == null || !canControlTask) return
     if (action === 'end' && !window.confirm('End this task and mark it completed?')) return
 
     const actionMap = {
@@ -133,12 +146,12 @@ const GetSelfTaskByID = ({ id, onClose, refresh }) => {
                 <p className="mt-1 font-semibold text-gray-900">{totalTime}</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {status === 'ASSIGNED' && (
+                {canControlTask && status === 'ASSIGNED' && (
                   <button type="button" disabled={processing} onClick={() => runAction('start')} className="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
                     <Play className="h-4 w-4" /> Start
                   </button>
                 )}
-                {status === 'IN_PROGRESS' && (
+                {canControlTask && status === 'IN_PROGRESS' && (
                   <>
                     <button type="button" disabled={processing} onClick={() => runAction('pause')} className="inline-flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-50">
                       <Pause className="h-4 w-4" /> Pause
@@ -148,7 +161,7 @@ const GetSelfTaskByID = ({ id, onClose, refresh }) => {
                     </button>
                   </>
                 )}
-                {(status === 'ON_HOLD' || status === 'BREAK') && (
+                {canControlTask && (status === 'ON_HOLD' || status === 'BREAK') && (
                   <>
                     <button type="button" disabled={processing} onClick={() => runAction('resume')} className="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
                       <Play className="h-4 w-4" /> Resume
