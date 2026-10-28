@@ -217,7 +217,6 @@ export const navItems = [
             'operation_executive',
             'operation_executive_trainee',
             'deputy_manager',
-            'user',
             'human-resource'
         ]
     },
@@ -225,7 +224,7 @@ export const navItems = [
         label: 'Leave Report',
         to: 'leave-report',
         icon: <CalendarCheck />,
-        roles: ['user', 'admin', 'human_resource', 'deputy_manager']
+        roles: ['staff', 'admin', 'human_resource', 'deputy_manager']
     },
     {
         label: 'Vendor',
