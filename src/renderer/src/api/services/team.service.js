@@ -99,17 +99,13 @@ class TeamService {
 
   // Add Team Members
   static async AddTeamMembers(role, data) {
-    try {
-      const response = await api.post(`team/addMembers/${role}`, data, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      console.log(response?.data)
-      return response?.data
-    } catch (error) {
-      console.log(error)
-    }
+    const response = await api.post(`team/addMembers/${role}`, data, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    console.log(response?.data)
+    return response?.data
   }
 
   // Update role of Team Member

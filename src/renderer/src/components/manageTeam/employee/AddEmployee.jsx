@@ -17,7 +17,11 @@ const AddEmployee = () => {
     watch,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      probationPeriodDays: 90,
+    },
+  });
 
   const onSubmit = async (data) => {
     const payload = {
@@ -204,6 +208,33 @@ const AddEmployee = () => {
           {errors.designation && (
             <p className="text-red-500 text-xs mt-1">
               {errors.designation.message}
+            </p>
+          )}
+        </div>
+
+        {/* Probation period */}
+        <div>
+          <Input
+            label="Employee probation period (days)"
+            type="number"
+            min="0"
+            max="3650"
+            step="1"
+            required
+            {...register("probationPeriodDays", {
+              setValueAs: (value) => value === "" ? undefined : Number(value),
+              min: { value: 0, message: "Must be 0 or more days" },
+              max: { value: 3650, message: "Must be 3650 days or less" },
+              validate: (value) => Number.isInteger(value) || "Enter a whole number of days",
+            })}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            Defaults to 90 days; the leave policy switches to regular after this period.
+          </p>
+          {errors.probationPeriodDays && (
+            <p className="text-red-500 text-xs mt-1">
+              {errors.probationPeriodDays.message}
             </p>
           )}
         </div>

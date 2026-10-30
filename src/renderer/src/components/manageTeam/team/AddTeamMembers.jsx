@@ -14,9 +14,20 @@ const roles = [
   "DESIGNER",
   "ESTIMATOR",
   "GUEST",
+  "DEVELOPER",
+  "INTERN",
+  "OPERATION_EXECUTIVE",
+  "SYSTEM_ADMIN",
+  "DEPUTY_MANAGER",
+  "PROJECT_MANAGER",
+  "PROJECT_MANAGER_OFFICER",
+  "HUMAN_RESOURCE",
+  "HR_RECRUITER",
+  "TRAINEE",
+  "DEPT_MANAGER",
 ];
 
-const AddTeamMembers = ({ teamMember, onClose }) => {
+const AddTeamMembers = ({ teamMember, onClose, onSuccess }) => {
   const teamId = teamMember?.id || "";
   const staffData = useSelector((state) => state.userInfo.staffData);
   const {
@@ -37,14 +48,15 @@ const AddTeamMembers = ({ teamMember, onClose }) => {
     if (!role) return toast.error("Please select a role!");
 
     try {
-      const res = await Service.AddTeamMembers(role, data);
-      if (res) {
-        toast.success("User added successfully!");
-        onClose();
-      }
+      await Service.AddTeamMembers(role, data);
+      await onSuccess?.();
+      toast.success("User added successfully!");
+      onClose();
     } catch (error) {
-      console.log(error);
-      toast.error("Error adding user");
+      console.error("Error adding team member:", error);
+      toast.error(
+        error?.response?.data?.message || error?.message || "Error adding user",
+      );
     }
   };
 

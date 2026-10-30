@@ -153,7 +153,6 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
     const editableFields = [
       "email",
       "designation",
-      "joiningDate",
       "probationPeriodDays",
       "role",
       "firstName",
@@ -313,19 +312,6 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
               />
               <Input label="Email" type="email" {...register("email")} className="w-full" />
               <Input label="Designation" {...register("designation")} className="w-full" />
-              {canEditEmploymentDates && (
-                <div>
-                  <Input
-                    label="Joining date"
-                    type="date"
-                    {...register("joiningDate", {
-                      setValueAs: (value) => value ? new Date(`${value}T00:00:00.000Z`) : undefined,
-                    })}
-                    className="w-full"
-                  />
-                  {errors.joiningDate && <p className="mt-1 text-xs text-red-600">{errors.joiningDate.message}</p>}
-                </div>
-              )}
               {canEditProbation && (
                 <div>
                   <Input
