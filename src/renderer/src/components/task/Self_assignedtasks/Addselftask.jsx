@@ -11,12 +11,9 @@ import {
   RotateCcw,
   Save,
   ArrowLeft,
-  Hash,
   UserCheck,
-  Sparkles,
   CheckCircle2,
-  AlertCircle,
-  Clock
+  AlertCircle
 } from 'lucide-react'
 
 import SelfTaskService from '../../../api/services/selftask.service'
@@ -28,25 +25,46 @@ const PRIORITY_OPTIONS = [
   { value: 4, label: 'Critical', badge: 'bg-rose-50 text-rose-700 border-rose-300' }
 ]
 
-const STATUS_OPTIONS = [
-  { value: 'ASSIGNED', label: 'Assigned' },
-  { value: 'IN_PROGRESS', label: 'In Progress' },
-  { value: 'COMPLETED', label: 'Completed' },
-  { value: 'ON_HOLD', label: 'On Hold' },
-  { value: 'CANCELLED', label: 'Cancelled' }
-]
-
 const QUICK_CATEGORIES = [
+  'Training',
+  'Task Assignment',
+  'Meeting',
+  'Report Update',
+  'Operations',
+  'Research',
+  'Daily Server Check',
+  'Hourly Basis Report',
   'Development',
   'Bug Fix',
-  'Documentation',
   'Code Review',
+  'Documentation',
   'Testing',
-  'Research',
-  'Training',
-  'Meeting',
-  'Operations'
 ]
+
+const normalizeAccessValue = (value) =>
+  String(value || '').toLowerCase().trim().replace(/[\s-]+/g, '_')
+
+const SELF_TASK_ROLES = [
+  'admin',
+  'dept_manager',
+  'deputy_manager',
+  'operation_executive',
+  'project_manager_officer',
+  'human_resource',
+  'project_manager'
+]
+
+const SELF_TASK_DESIGNATIONS = [
+  'software_developer',
+  'software_developer_trainee',
+  'system_admin',
+  'hr_recruiter'
+]
+
+const canCreateSelfTask = (user) =>
+  SELF_TASK_ROLES.includes(normalizeAccessValue(user?.role)) ||
+  (normalizeAccessValue(user?.role) === 'staff' &&
+    SELF_TASK_DESIGNATIONS.includes(normalizeAccessValue(user?.designation)))
 
 const getUserTeam = (record) => {
   const membership = record?.teamMember?.[0] || record?.teamMembers?.[0]
@@ -71,6 +89,33 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
       ''
     )
   }, [userDetail])
+
+  const currentUserRoleValue = normalizeAccessValue(
+    userDetail?.role || sessionStorage.getItem('userRole')
+  )
+  const canAssignToOtherUser = [
+    'admin',
+    'deputy_manager',
+    'operation_executive'
+  ].includes(currentUserRoleValue)
+  const eligibleAssignees = useMemo(
+    () =>
+      staffData
+        .filter((staff) => {
+          const id = staff?.id ?? staff?._id ?? staff?.userId ?? staff?.user_id
+          return (
+            id != null &&
+            String(id) !== String(currentUserId) &&
+            canCreateSelfTask(staff)
+          )
+        })
+        .sort((a, b) =>
+          `${a.firstName || ''} ${a.lastName || ''}`.localeCompare(
+            `${b.firstName || ''} ${b.lastName || ''}`
+          )
+        ),
+    [staffData, currentUserId]
+  )
 
   // Current user display name
   const currentUserName = useMemo(() => {
@@ -117,13 +162,6 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
   // Today's date in YYYY-MM-DD
   const todayDate = useMemo(() => new Date().toISOString().split('T')[0], [])
 
-  // Helper to generate a unique serial number
-  const generateSerialNo = () => {
-    const timePart = Date.now().toString().slice(-4)
-    const randPart = Math.floor(1000 + Math.random() * 9000)
-    return `ST-${timePart}-${randPart}`
-  }
-
   const {
     register,
     handleSubmit,
@@ -136,37 +174,47 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
     defaultValues: {
       name: '',
       description: '',
-      status: 'ASSIGNED',
       priority: 2,
       start_date: todayDate,
-      teamId: resolvedTeam?.id || '',
+      teamId: canAssignToOtherUser ? '' : resolvedTeam?.id || '',
       categoryTag: '',
-      serialNo: '',
-      user_id: currentUserId
+      user_id: canAssignToOtherUser ? '' : currentUserId
     }
   })
 
   const watchedPriority = watch('priority')
   const watchedCategoryTag = watch('categoryTag')
+  const selectedUserId = watch('user_id')
+  const selectedAssignee = eligibleAssignees.find((staff) =>
+    [staff.id, staff._id, staff.userId, staff.user_id]
+      .filter(Boolean)
+      .some((id) => String(id) === String(selectedUserId))
+  )
+  const assignedUserName = selectedAssignee
+    ? `${selectedAssignee.firstName || ''} ${selectedAssignee.lastName || ''}`.trim() ||
+      selectedAssignee.username ||
+      'Selected User'
+    : currentUserName
+  const assignedTeam = useMemo(
+    () =>
+      canAssignToOtherUser
+        ? selectedAssignee
+          ? getUserTeam(selectedAssignee)
+          : null
+        : resolvedTeam,
+    [canAssignToOtherUser, selectedAssignee, resolvedTeam]
+  )
 
   // Keep form values in sync with fetched user details
   useEffect(() => {
-    if (resolvedTeam?.id) {
-      setValue('teamId', resolvedTeam.id)
-    }
-    if (currentUserId) {
+    setValue('teamId', assignedTeam?.id || '')
+    if (currentUserId && !canAssignToOtherUser) {
       setValue('user_id', currentUserId)
     }
     if (!watch('start_date')) {
       setValue('start_date', todayDate)
     }
-  }, [resolvedTeam, currentUserId, todayDate, setValue])
-
-  const handleGenerateSerial = () => {
-    const newSerial = generateSerialNo()
-    setValue('serialNo', newSerial, { shouldValidate: true })
-    toast.info(`Generated Serial No: ${newSerial}`)
-  }
+  }, [assignedTeam, currentUserId, canAssignToOtherUser, todayDate, setValue])
 
   const handleQuickCategory = (cat) => {
     setValue('categoryTag', cat, { shouldValidate: true })
@@ -176,21 +224,30 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
     try {
       setIsSubmitting(true)
 
-      const finalUserId = data.user_id || currentUserId || sessionStorage.getItem('userId') || ''
-      const finalTeamId = data.teamId || resolvedTeam?.id || ''
-      const finalSerialNo = (data.serialNo && data.serialNo.trim()) || generateSerialNo()
+      const finalUserId = canAssignToOtherUser
+        ? data.user_id
+        : currentUserId || sessionStorage.getItem('userId') || ''
+      if (!finalUserId) {
+        throw new Error(
+          canAssignToOtherUser
+            ? 'Select an eligible user for this task.'
+            : 'Could not determine the task owner.'
+        )
+      }
+      const finalTeamId = canAssignToOtherUser
+        ? assignedTeam?.id || ''
+        : data.teamId || resolvedTeam?.id || ''
       const finalPriority = Number(data.priority) || 2
       const finalStartDate = data.start_date || todayDate
 
       const payload = {
         name: data.name.trim(),
-        description: data.description.trim(),
-        status: data.status || 'ASSIGNED',
+        description: data.description?.trim() || '',
+        status: 'ASSIGNED',
         priority: finalPriority,
         start_date: finalStartDate,
         categoryTag: data.categoryTag.trim(),
-        user_id: String(finalUserId).trim(),
-        serialNo: String(finalSerialNo).trim()
+        user_id: String(finalUserId).trim()
       }
       if (String(finalTeamId).trim()) {
         payload.teamId = String(finalTeamId).trim()
@@ -216,13 +273,11 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
       reset({
         name: '',
         description: '',
-        status: 'ASSIGNED',
         priority: 2,
         start_date: todayDate,
-        teamId: resolvedTeam?.id || '',
+        teamId: canAssignToOtherUser ? '' : resolvedTeam?.id || '',
         categoryTag: '',
-        serialNo: '',
-        user_id: currentUserId
+        user_id: canAssignToOtherUser ? '' : currentUserId
       })
 
       if (onSuccess) {
@@ -260,7 +315,7 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
                 Assigned To:
               </span>
               <span className="font-semibold text-gray-900 bg-white px-2 py-0.5 rounded-md border border-gray-200">
-                {currentUserName} ({currentUserRole})
+                {assignedUserName} ({selectedAssignee?.role || currentUserRole})
               </span>
             </div>
 
@@ -270,21 +325,54 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
                 Team:
               </span>
               <span className="font-semibold text-gray-900 bg-white px-2 py-0.5 rounded-md border border-gray-200">
-                {resolvedTeam?.name || 'No team assigned'}
+                {assignedTeam?.name || 'No team assigned'}
               </span>
             </div>
           </div>
 
           <div className="text-[11px] text-gray-500 flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-            Auto-linked to your profile
+            {canAssignToOtherUser ? 'Assigned to selected eligible user' : 'Auto-linked to your profile'}
           </div>
         </div>
 
         {/* Form Body */}
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-          {/* Hidden user_id field */}
-          <input type="hidden" {...register('user_id')} />
+          {canAssignToOtherUser ? (
+            <div>
+              <label className={labelClass}>
+                Assign To <span className="text-red-500">*</span>
+              </label>
+              <select
+                className={inputBaseClass}
+                {...register('user_id', {
+                  required: 'Select an eligible user'
+                })}
+              >
+                <option value="">Select an eligible user...</option>
+                {eligibleAssignees.map((staff) => {
+                  const id = staff.id ?? staff._id ?? staff.userId ?? staff.user_id
+                  const name =
+                    `${staff.firstName || ''} ${staff.lastName || ''}`.trim() ||
+                    staff.username ||
+                    'Unnamed User'
+                  return (
+                    <option key={id} value={id}>
+                      {name} ({staff.role || staff.designation})
+                    </option>
+                  )
+                })}
+              </select>
+              {errors.user_id && (
+                <p className={errorClass}>
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  {errors.user_id.message}
+                </p>
+              )}
+            </div>
+          ) : (
+            <input type="hidden" {...register('user_id')} />
+          )}
 
           {/* Task Name */}
           <div>
@@ -313,23 +401,14 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
           {/* Description */}
           <div>
             <label className={labelClass}>
-              Task Description <span className="text-red-500">*</span>
+              Task Description
             </label>
             <textarea
               rows={4}
               placeholder="Provide complete details, scope, instructions, or deliverables for this task..."
               className={`${inputBaseClass} resize-y min-h-[100px]`}
-              {...register('description', {
-                required: 'Task description is required',
-                validate: (v) => v.trim().length > 0 || 'Description cannot be empty'
-              })}
+              {...register('description')}
             />
-            {errors.description && (
-              <p className={errorClass}>
-                <AlertCircle className="w-3.5 h-3.5" />
-                {errors.description.message}
-              </p>
-            )}
           </div>
 
           {/* Two-Column Grid: Category & Priority */}
@@ -430,8 +509,8 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
             </div>
           </div>
 
-          {/* Three-Column Grid: Start Date, Status, Serial No */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Start Date */}
+          <div className="grid grid-cols-1 gap-5">
             {/* Start Date */}
             <div>
               <label className={labelClass}>
@@ -456,52 +535,6 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
               )}
             </div>
 
-            {/* Status */}
-            <div>
-              <label className={labelClass}>
-                <span className="inline-flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-green-600" />
-                  Initial Status
-                </span>
-              </label>
-              <select className={inputBaseClass} {...register('status')}>
-                {STATUS_OPTIONS.map((st) => (
-                  <option key={st.value} value={st.value}>
-                    {st.label}
-                  </option>
-                ))}
-              </select>
-              <p className="text-[11px] text-gray-400 mt-1">Defaults to ASSIGNED</p>
-            </div>
-
-            {/* Serial No */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className={labelClass} style={{ marginBottom: 0 }}>
-                  <span className="inline-flex items-center gap-1.5">
-                    <Hash className="w-3.5 h-3.5 text-green-600" />
-                    Serial No.
-                  </span>
-                </label>
-                <button
-                  type="button"
-                  onClick={handleGenerateSerial}
-                  className="text-[11px] text-green-700 hover:text-green-800 font-semibold inline-flex items-center gap-1 hover:underline cursor-pointer"
-                >
-                  <Sparkles className="w-3 h-3 text-green-600" />
-                  Auto-Gen
-                </button>
-              </div>
-              <input
-                type="text"
-                placeholder="e.g. ST-4091-2384"
-                className={inputBaseClass}
-                {...register('serialNo')}
-              />
-              <p className="text-[11px] text-gray-400 mt-1">
-                Custom string or auto-generated upon saving
-              </p>
-            </div>
           </div>
 
           {/* Actions Bar */}
@@ -512,12 +545,10 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
                 reset({
                   name: '',
                   description: '',
-                  status: 'ASSIGNED',
                   priority: 2,
                   start_date: todayDate,
                   teamId: resolvedTeam?.id || '',
                   categoryTag: '',
-                  serialNo: '',
                   user_id: currentUserId
                 })
               }}
