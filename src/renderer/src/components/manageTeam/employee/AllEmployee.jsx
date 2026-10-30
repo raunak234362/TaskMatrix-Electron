@@ -121,14 +121,12 @@ const AllEmployee = () => {
         </span>
       ),
     },
-    { accessorKey: "email", header: "Email" },
     {
       accessorFn: (r) =>
         [r?.firstName, r?.middleName, r?.lastName].filter(Boolean).join(" "),
       header: "Full Name",
       id: "fullName",
     },
-    { accessorKey: "phone", header: "Phone" },
     {
       accessorKey: "role",
       header: "Role",

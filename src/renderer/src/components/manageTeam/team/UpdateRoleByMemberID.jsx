@@ -14,6 +14,17 @@ const roles = [
   { label: "ESTIMATOR", value: "ESTIMATOR" },
   { label: "GUEST", value: "GUEST" },
   { label: "TEAM_LEAD", value: "TEAM_LEAD" },
+  { label: "DEVELOPER", value: "DEVELOPER" },
+  { label: "INTERN", value: "INTERN" },
+  { label: "OPERATION_EXECUTIVE", value: "OPERATION_EXECUTIVE" },
+  { label: "SYSTEM_ADMIN", value: "SYSTEM_ADMIN" },
+  { label: "DEPUTY_MANAGER", value: "DEPUTY_MANAGER" },
+  { label: "PROJECT_MANAGER", value: "PROJECT_MANAGER" },
+  { label: "PROJECT_MANAGER_OFFICER", value: "PROJECT_MANAGER_OFFICER" },
+  { label: "HUMAN_RESOURCE", value: "HUMAN_RESOURCE" },
+  { label: "HR_RECRUITER", value: "HR_RECRUITER" },
+  { label: "TRAINEE", value: "TRAINEE" },
+  { label: "DEPT_MANAGER", value: "DEPT_MANAGER" },
 ];
 
 const UpdateRoleByMemberID = ({ teamId, member, onClose, onSuccess }) => {

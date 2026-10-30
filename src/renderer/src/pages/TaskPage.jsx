@@ -11,7 +11,27 @@ import { ChevronDown } from 'lucide-react'
 import SelfassignedTask from '../components/task/Self_assignedtasks/SelftaskPage'
 
 const TaskPage = () => {
-  const userRole = (sessionStorage.getItem('userRole') || '').toLowerCase().trim()
+  const normalizeAccessValue = (value) =>
+    (value || '').toLowerCase().trim().replace(/[\s-]+/g, '_')
+  const userRole = normalizeAccessValue(sessionStorage.getItem('userRole'))
+  const designation = normalizeAccessValue(sessionStorage.getItem('designation'))
+  const canCreateSelfTask =
+    [
+      'admin',
+      'dept_manager',
+      'deputy_manager',
+      'operation_executive',
+      'project_manager_officer',
+      'human_resource',
+      'project_manager',
+    ].includes(userRole) ||
+    (userRole === 'staff' &&
+      [
+        'software_developer',
+        'software_developer_trainee',
+        'system_admin',
+        'hr_recruiter',
+      ].includes(designation))
   const [isTrainingDropdownOpen, setIsTrainingDropdownOpen] = useState(false)
   const [activeTab, setActiveTab] = useState(
     userRole === 'connection_designer_engineer' ||
@@ -63,16 +83,18 @@ const TaskPage = () => {
           </button>
         ) : null}
         
-        <button
-          onClick={() => setActiveTab('selfTask')}
-          className={`px-6 py-1.5 border-2 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm inline-flex items-center justify-center transition-all cursor-pointer ${
-            activeTab === 'selfTask'
-              ? 'bg-green-200 text-black border-green-700/80'
-              : 'bg-green-50 text-black border-green-700/80 hover:bg-green-100'
-          }`}
-        >
-          Self Task
-        </button>
+        {canCreateSelfTask && (
+          <button
+            onClick={() => setActiveTab('selfTask')}
+            className={`px-6 py-1.5 border-2 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm inline-flex items-center justify-center transition-all cursor-pointer ${
+              activeTab === 'selfTask'
+                ? 'bg-green-200 text-black border-green-700/80'
+                : 'bg-green-50 text-black border-green-700/80 hover:bg-green-100'
+            }`}
+          >
+            Self Task
+          </button>
+        )}
         
         {/* Training Dropdown */}
         <div className="relative group">
@@ -142,7 +164,7 @@ const TaskPage = () => {
             <AddTask />
           </div>
         )}
-        {activeTab === 'selfTask' && (
+        {canCreateSelfTask && activeTab === 'selfTask' && (
           <div>
             <SelfassignedTask />
           </div>

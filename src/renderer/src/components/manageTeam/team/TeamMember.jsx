@@ -5,6 +5,7 @@ import Button from "../../fields/Button";
 import AddTeamMembers from "./AddTeamMembers";
 import UpdateRoleByMemberID from "./UpdateRoleByMemberID";
 import Service from "../../../api/Service";
+import { toast } from "react-toastify";
 
 const TeamMember = ({ members, onClose }) => {
   const [addTeamModal, setAddTeamModal] = useState(false);
@@ -13,8 +14,15 @@ const TeamMember = ({ members, onClose }) => {
 
   const fetchTeamData = async () => {
     if (members?.id) {
-      const response = await Service.GetTeamByID(members.id);
-      setTeamData(response?.data);
+      try {
+        const response = await Service.GetTeamByID(members.id);
+        const updatedTeam = response?.data || response;
+        if (!updatedTeam) throw new Error("Team data was not returned");
+        setTeamData(updatedTeam);
+      } catch (error) {
+        console.error("Failed to refresh team members:", error);
+        toast.error("Failed to refresh team members.");
+      }
     }
   };
 
@@ -146,7 +154,11 @@ const TeamMember = ({ members, onClose }) => {
 
         {/* Add Member Modal */}
         {addTeamModal && (
-          <AddTeamMembers teamMember={members} onClose={handleCloseAddTeam} />
+          <AddTeamMembers
+            teamMember={members}
+            onClose={handleCloseAddTeam}
+            onSuccess={fetchTeamData}
+          />
         )}
 
         {editingMember && (
