@@ -38,7 +38,7 @@ const GetBranchByIDModal = ({ branchId, onClose }) => {
     <div className="fixed inset-0 z-[10200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-xl bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden border border-gray-100 animate-in fade-in zoom-in duration-150">
         <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-          <h2 className="text-sm font-bold text-black uppercase">Branch Details</h2>
+          <h2 className="text-xl font-bold text-black uppercase">Branch Details</h2>
           <button
             onClick={onClose}
             className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
@@ -59,25 +59,25 @@ const GetBranchByIDModal = ({ branchId, onClose }) => {
           ) : (
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <p className="text-xs font-bold text-black uppercase">Branch Name</p>
-                <p className="text-sm font-semibold text-black mt-0.5">{branchDetail.name}</p>
+                <p className="text-sm font-bold text-black uppercase">Branch Name : {branchDetail.name}</p>
+                
               </div>
               <div>
-                <p className="text-xs font-bold text-black uppercase">Secure Email</p>
-                <p className="text-sm font-semibold text-black mt-0.5">{branchDetail.email || "—"}</p>
+                <p className="text-sm font-bold text-black uppercase">Secure Email : {branchDetail.email || "—"}</p>
+                
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs font-bold text-black uppercase">Phone</p>
-                  <p className="text-sm font-semibold text-black mt-0.5">{branchDetail.phone || "—"}</p>
+                  <p className="text-sm font-bold text-black uppercase">Phone : {branchDetail.phone || "—"}</p>
+                  
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-black uppercase">Extension</p>
-                  <p className="text-sm font-semibold text-black mt-0.5">{branchDetail.extension || "—"}</p>
+                  <p className="text-sm font-bold text-black uppercase">Extension : {branchDetail.extension || "—"}</p>
+                  
                 </div>
               </div>
               <div>
-                <p className="text-xs font-bold text-black uppercase">Geographic Address</p>
+                <p className="text-sm font-bold text-primary uppercase">Geographic Address</p>
                 <p className="text-sm font-semibold text-black mt-0.5 leading-relaxed">
                   {branchDetail.address || ""}, {branchDetail.city || ""}, {branchDetail.state || ""} {branchDetail.zipCode || ""}, {branchDetail.country || ""}
                 </p>
