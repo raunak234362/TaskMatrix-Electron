@@ -105,7 +105,7 @@ const AddBranch = ({ fabricatorId, onClose, fabricatorName, onSuccess }) => {
         {/* Header Section */}
         <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-white">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-800 tracking-tight flex items-center gap-3">
+            <h2 className="text-2xl font-semibold text-black tracking-tight flex items-center gap-3">
              
               Add New Branch
             </h2>
@@ -130,11 +130,13 @@ const AddBranch = ({ fabricatorId, onClose, fabricatorName, onSuccess }) => {
                 <Input
                   label="Branch Identity"
                   type="text"
+
+                  
                   {...register("name", { required: "Branch name is required" })}
                   placeholder="Official Branch Name / HQ"
                 />
                 {errors.name && (
-                  <p className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-1">
+                  <p className="text-red-500 text-sm font-semibold  uppercase tracking-normal mt-1">
                     {errors.name.message}
                   </p>
                 )}
@@ -152,7 +154,7 @@ const AddBranch = ({ fabricatorId, onClose, fabricatorName, onSuccess }) => {
                   placeholder="branch@company.com"
                 />
                 {errors.email && (
-                  <p className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-1">{errors.email.message}</p>
+                  <p className="text-red-500 text-sm font-semibold  uppercase tracking-normal mt-1">{errors.email.message}</p>
                 )}
               </div>
 
@@ -166,7 +168,7 @@ const AddBranch = ({ fabricatorId, onClose, fabricatorName, onSuccess }) => {
                     placeholder="+1 XXX XXX XXXX"
                   />
                   {errors.phone && (
-                    <p className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-1">
+                    <p className="text-red-500 text-sm font-semibold  uppercase tracking-normal mt-1">
                       {errors.phone.message}
                     </p>
                   )}
@@ -206,13 +208,13 @@ const AddBranch = ({ fabricatorId, onClose, fabricatorName, onSuccess }) => {
                   placeholder="123 Industrial Complex, Suite 500"
                 />
                 {errors.address && (
-                  <p className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-1">{errors.address.message}</p>
+                  <p className="text-red-500 text-sm font-semibold  uppercase tracking-normal mt-1">{errors.address.message}</p>
                 )}
               </div>
 
               {/* Country */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                <label className="block text-sm font-semibold text-black uppercase tracking-normal mb-1.5 ml-1">
                   Country Region
                 </label>
                 <Controller
@@ -245,7 +247,7 @@ const AddBranch = ({ fabricatorId, onClose, fabricatorName, onSuccess }) => {
 
               {/* State */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                <label className="block text-sm font-semibold text-black uppercase tracking-normal mb-1.5 ml-1">
                   State / Province
                 </label>
                 <Controller
@@ -272,7 +274,7 @@ const AddBranch = ({ fabricatorId, onClose, fabricatorName, onSuccess }) => {
 
               {/* City */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                <label className="block text-sm font-semibold text-black uppercase tracking-normal mb-1.5 ml-1">
                   Municipal City
                 </label>
                 <Controller
@@ -295,14 +297,14 @@ const AddBranch = ({ fabricatorId, onClose, fabricatorName, onSuccess }) => {
               </div>
 
               {/* Is Headquarters */}
-              <div className="flex items-center gap-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100 self-end h-[50px]">
+              <div className="flex items-center gap-4 bg-zinc-100 p-4 rounded-2xl border border-gray-100 self-end h-[50px]">
                 <input
                   type="checkbox"
                   id="hq"
                   {...register("isHeadquarters")}
                   className="w-5 h-5 rounded-lg border-gray-200 text-[#6bbd45] focus:ring-[#6bbd45]/20 cursor-pointer"
                 />
-                <label htmlFor="hq" className="text-[10px] font-black text-gray-600 uppercase tracking-widest cursor-pointer select-none">
+                <label htmlFor="hq" className="text-sm font-semibold text-black uppercase tracking-normal cursor-pointer select-none">
                   Mark as Global Headquarters
                 </label>
               </div>
