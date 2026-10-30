@@ -278,11 +278,9 @@ const EditFabricator = ({
         {/* Header */}
         <div className="flex justify-between items-center px-10 py-8 border-b border-slate-100 shrink-0 bg-slate-50/50">
           <div>
-            <h2 className="text-3xl text-slate-900 tracking-tight leading-none mb-2 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-green-100 flex items-center justify-center text-green-600">
-                <Check className="w-6 h-6" />
-              </div>
-              Edit Engineering Partner
+            <h2 className="text-2xl text-slate-900 font-semibold tracking-tight leading-none mb-2 flex items-center gap-3">
+             
+              Edit Fabricator 
             </h2>
           </div>
           <button
@@ -310,7 +308,7 @@ const EditFabricator = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border border-gray-200 rounded-2xl p-4 bg-zinc-100">
               <div>
-                <label className="block text-xs text-black font-bold uppercase tracking-widest mb-2">
+                <label className="block text-sm text-black font-bold uppercase tracking-normal mb-2">
                   Partner Name
                 </label>
                 <Input
@@ -328,12 +326,12 @@ const EditFabricator = ({
                 )}
               </div>
               <div>
-                <label className="block text-xs text-black font-bold uppercase tracking-widest mb-2">
+                <label className="block text-sm text-black font-bold uppercase tracking-nomal mb-2">
                   Partner Stage
                 </label>
                 <select
                   {...register("fabStage", { required: "Stage is required" })}
-                  className="w-full h-[46px] border border-slate-200 bg-slate-50 rounded-2xl px-4 py-2 focus:ring-4 focus:ring-green-500/10 focus:border-green-500 focus:bg-white outline-none transition-all shadow-sm text-slate-800 font-bold"
+                  className="w-full h-9.5 border border-slate-200 bg-slate-50 rounded-2xl px-4 py-2 focus:ring-4 focus:ring-green-500/10 focus:border-green-500 focus:bg-white outline-none transition-all text-black text-sm font-bold"
                 >
                   <option value="">Select Stage</option>
                   <option value="RFQ">RFQ Analysis</option>
@@ -343,7 +341,7 @@ const EditFabricator = ({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-bold border border-gray-200 rounded-2xl p-4 bg-zinc-100">
               <div>
-                <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                <label className="block text-sm text-black font-semibold uppercase tracking-normal mb-2">
                   WBT Point of Contact
                 </label>
                 <Controller
@@ -361,7 +359,7 @@ const EditFabricator = ({
                 />
               </div>
               <div>
-                <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                <label className="block text-sm text-black font-semibold uppercase tracking-normal mb-2">
                   WPR Date (Weekly Report Day)
                 </label>
                 <select
@@ -386,7 +384,7 @@ const EditFabricator = ({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-bold border border-gray-200 rounded-2xl p-4 bg-zinc-100">
               <div>
-                <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                <label className="block text-sm text-black font-semibold uppercase tracking-normal mb-2">
                   Website (URL)
                 </label>
                 <Input
@@ -398,7 +396,7 @@ const EditFabricator = ({
                 />
               </div>
               <div>
-                <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                <label className="block text-sm text-black font-semibold uppercase tracking-normal mb-2">
                   Drive link (Cloud)
                 </label>
                 <Input
@@ -415,12 +413,12 @@ const EditFabricator = ({
           {/* Section 2: Financials & Compliance */}
           {(userRole === "ADMIN" || userRole === "PROJECT_MANAGER_OFFICER") && (
             <section className="space-y-6 pt-10 border-t border-slate-100">
-              <h3 className="text-sm text-black font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+              <h3 className="text-sm text-black font-bold uppercase flex items-center gap-2">
                 Financial Compliance & Policy
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 border border-gray-200 rounded-2xl p-4 bg-zinc-100">
                 <div>
-                  <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                  <label className="block text-sm text-black font-semibold uppercase tracking-normal mb-2">
                     SAC Code
                   </label>
                   <Input
@@ -431,7 +429,7 @@ const EditFabricator = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                  <label className="block text-sm text-black font-semibold uppercase tracking-normal mb-2">
                     Primary Currency
                   </label>
                   <select
@@ -445,7 +443,7 @@ const EditFabricator = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                  <label className="block text-sm text-black font-semibold uppercase tracking-normal mb-2">
                     Accounts
                   </label>
                   <select
@@ -468,7 +466,7 @@ const EditFabricator = ({
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-8 border border-gray-200 rounded-2xl p-4 bg-zinc-100">
                 <div>
-                  <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                  <label className="block text-sm text-black font-semibold uppercase tracking-normal mb-2">
                     Approval %
                   </label>
                   <Input
@@ -479,7 +477,7 @@ const EditFabricator = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                  <label className="block text-sm text-black font-semibold uppercase tracking-normal mb-2">
                     Fabrication %
                   </label>
                   <Input
@@ -490,7 +488,7 @@ const EditFabricator = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                  <label className="block text-sm text-black font-semibold uppercase tracking-normal mb-2">
                     Settlement Cycle
                   </label>
                   <div className="relative">
@@ -506,7 +504,7 @@ const EditFabricator = ({
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-700 uppercase tracking-widest mb-2">
+                  <label className="block text-sm text-black font-semibold uppercase tracking-normal mb-2">
                     CO Per Hour Price
                   </label>
                   <Input
@@ -524,13 +522,13 @@ const EditFabricator = ({
           {/* Section 3: Assets */}
           <section className="space-y-6 pt-10 border-t border-slate-100">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <h3 className="text-sm text-black font-bold uppercase tracking-[0.2em]">
+              <h3 className="text-sm text-black font-bold uppercase trackin-normal">
                 Partner Attachments & Fabrication Standards
               </h3>
               <button
                 type="button"
                 onClick={() => setShowUploadStandardModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-green-800 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
               >
                 <UploadCloud className="w-4 h-4" />
                 Upload Fabricator Standard PDF
@@ -580,7 +578,7 @@ const EditFabricator = ({
             )}
 
             {/* New Upload Area */}
-            <div className="bg-white border-2 border-dashed border-green-200 rounded-2xl p-10 hover:border-green-300 transition-all group">
+            <div className="bg-white   transition-all group">
               <Controller
                 name="files"
                 control={control}
@@ -596,18 +594,11 @@ const EditFabricator = ({
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-4 pt-10 border-t border-slate-100 sticky bottom-0 bg-white pb-6 mt-10">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={submitting}
-              className="px-8 py-3 text-[10px] uppercase tracking-widest text-black border border-black rounded-2xl hover:text-slate-600 transition-all active:scale-95 font-bold"
-            >
-              Cancel
-            </button>
+     
             <Button
               type="submit"
               disabled={submitting}
-              className="px-10 py-2 bg-green-200 border border-black hover:bg-green-300 hover:border-green-300 text-black  text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-green-100 transition-all active:scale-95 flex items-center gap-3 font-bold "
+              className="px-10 py-2 bg-green-50 border-2 border-primary  hover:bg-green-300  text-black  text-xs uppercase rounded-2xl shadow-xl shadow-green-100 transition-all active:scale-95 flex items-center gap-3 font-bold "
             >
               {submitting ? (
                 <>
