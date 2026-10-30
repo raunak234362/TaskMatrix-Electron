@@ -40,7 +40,6 @@ const AddEmployee = () => {
 
   const roleOptions = [
     { label: "STAFF", value: "STAFF" },
-    { label: "ADMIN", value: "ADMIN" },
     { label: "OPERATION_EXECUTIVE", value: "OPERATION_EXECUTIVE" },
     { label: "PROJECT_MANAGER_OFFICER", value: "PROJECT_MANAGER_OFFICER" },
     { label: "DEPUTY_MANAGER", value: "DEPUTY_MANAGER" },

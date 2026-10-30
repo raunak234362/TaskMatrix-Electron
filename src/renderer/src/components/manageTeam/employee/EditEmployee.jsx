@@ -62,7 +62,6 @@ const EditEmployee = ({ employeeData, onClose, onSuccess }) => {
         ]
         : [
           { label: "STAFF", value: "STAFF" },
-          { label: "ADMIN", value: "ADMIN" },
           { label: "OPERATION_EXECUTIVE", value: "OPERATION_EXECUTIVE" },
           { label: "OPERATION_EXECUTIVE_TRAINEE", value: "OPERATION_EXECUTIVE_TRAINEE" },
           { label: "PROJECT_MANAGER_OFFICER", value: "PROJECT_MANAGER_OFFICER" },
