@@ -4,9 +4,18 @@ import { toast } from 'react-toastify'
 import Service from '../../api/Service'
 import { extractList, getLeaveType } from './leaveUtils'
 
-const LEAVE_TYPES = ['SICK', 'PAID', 'CASUAL']
+const LEAVE_TYPES = ['SICK', 'PAID', 'CASUAL', 'LOP']
+const EMPLOYEE_STAGES = ['Permanent employee', 'Permanent Employee on Probation', 'Trainee', 'Trainee on probation', 'Internship']
+const STAGE_LABELS = {
+  PERMANENT_EMPLOYEE: 'Permanent employee',
+  PERMANENT_EMPLOYEE_ON_PROBATION: 'Permanent Employee on Probation',
+  TRAINEE: 'Trainee',
+  TRAINEE_ON_PROBATION: 'Trainee on probation',
+  INTERNSHIP: 'Internship'
+}
 const policyUserType = (policy) => policy?.userType || 'ALL'
-const policyKey = (policy) => `${getLeaveType(policy)}:${policyUserType(policy)}:${policy?.isProbation ? 'probation' : 'regular'}`
+const policyStage = (policy) => STAGE_LABELS[policy?.employeeStage] || policy?.employeeStage || (policy?.isProbation ? 'Permanent Employee on Probation' : 'Permanent employee')
+const policyKey = (policy) => `${getLeaveType(policy)}:${policyUserType(policy)}:${policyStage(policy)}`
 
 const LeavePolicies = () => {
   const [policies, setPolicies] = useState([])
@@ -16,7 +25,7 @@ const LeavePolicies = () => {
   const [formType, setFormType] = useState('')
   const [userType, setUserType] = useState('ALL')
   const [annualAllowance, setAnnualAllowance] = useState('')
-  const [isProbation, setIsProbation] = useState(false)
+  const [employeeStage, setEmployeeStage] = useState(EMPLOYEE_STAGES[0])
   const [creating, setCreating] = useState(false)
   const [deletingKey, setDeletingKey] = useState('')
 
@@ -41,7 +50,7 @@ const LeavePolicies = () => {
     setFormType('')
     setUserType('ALL')
     setAnnualAllowance('')
-    setIsProbation(false)
+    setEmployeeStage(EMPLOYEE_STAGES[0])
     setCreating(false)
   }
 
@@ -50,7 +59,7 @@ const LeavePolicies = () => {
     setFormType(getLeaveType(policy))
     setUserType(policyUserType(policy))
     setAnnualAllowance(String(policy.annualAllowance ?? ''))
-    setIsProbation(Boolean(policy.isProbation))
+    setEmployeeStage(policyStage(policy))
   }
 
   const beginCreate = () => {
@@ -71,12 +80,12 @@ const LeavePolicies = () => {
       toast.error('Annual allowance must be a whole number between 0 and 365.')
       return
     }
-    if (creating && policies.some((policy) => getLeaveType(policy) === type && policyUserType(policy).toLowerCase() === designation.toLowerCase() && Boolean(policy.isProbation) === isProbation)) {
+    if (creating && policies.some((policy) => getLeaveType(policy) === type && policyUserType(policy).toLowerCase() === designation.toLowerCase() && policyStage(policy) === employeeStage)) {
       toast.error('A policy already exists for this leave type, designation, and stage.')
       return
     }
 
-    const payload = { userType: designation, annualAllowance: allowance, isProbation }
+    const payload = { userType: designation, annualAllowance: allowance, employeeStage, isProbation: employeeStage.toLowerCase().includes('probation') }
     setSaving(true)
     try {
       if (creating) {
@@ -99,11 +108,11 @@ const LeavePolicies = () => {
     const key = policyKey(policy)
     const type = getLeaveType(policy)
     const designation = policyUserType(policy)
-    const probation = Boolean(policy.isProbation)
-    if (!window.confirm(`Delete the ${type} ${probation ? 'probation' : 'regular'} leave policy for ${designation}? This cannot be undone.`)) return
+    const stage = policyStage(policy)
+    if (!window.confirm(`Delete the ${type} leave policy for ${designation} (${stage})? This cannot be undone.`)) return
     setDeletingKey(key)
     try {
-      await Service.DeleteLeavePolicy(type, designation, probation)
+      await Service.DeleteLeavePolicy(type, designation, stage)
       toast.success('Leave policy deleted.')
       await loadPolicies()
     } catch (error) {
@@ -135,9 +144,8 @@ const LeavePolicies = () => {
         </label>
         <label className="block text-sm font-medium text-gray-700">
           Employee stage
-          <select value={isProbation ? 'probation' : 'regular'} onChange={(event) => setIsProbation(event.target.value === 'probation')} disabled={!creating} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100 disabled:bg-gray-100">
-            <option value="regular">Regular (probation completed)</option>
-            <option value="probation">On probation</option>
+          <select value={employeeStage} onChange={(event) => setEmployeeStage(event.target.value)} disabled={!creating} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100 disabled:bg-gray-100">
+            {EMPLOYEE_STAGES.map((stage) => <option key={stage} value={stage}>{stage}</option>)}
           </select>
         </label>
       </div>
@@ -154,7 +162,7 @@ const LeavePolicies = () => {
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-green-700">Human resources</p>
           <h2 className="mt-1 text-2xl font-bold text-gray-900">Leave policies</h2>
-          <p className="mt-1 text-sm text-gray-500">Set separate leave allowances for employees on probation and regular employees.</p>
+          <p className="mt-1 text-sm text-gray-500">Set leave allowances by employee stage and designation.</p>
         </div>
         <div className="flex gap-2">
           <button type="button" onClick={beginCreate} className="inline-flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800"><Plus size={15} /> Add policy</button>
@@ -173,7 +181,7 @@ const LeavePolicies = () => {
           {policies.map((policy, index) => {
             const type = getLeaveType(policy)
             const designation = policyUserType(policy)
-            const probation = Boolean(policy.isProbation)
+            const stage = policyStage(policy)
             const key = policyKey(policy)
             const isEditing = editingKey === key
             return (
@@ -181,7 +189,7 @@ const LeavePolicies = () => {
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-bold text-gray-900">{type} · {designation}</h3>
-                    <p className="mt-1 text-xs text-gray-500">{probation ? 'For employees currently on probation' : 'For employees who completed probation'}</p>
+                    <p className="mt-1 text-xs text-gray-500">For {stage}</p>
                   </div>
                   {!isEditing && (
                     <div className="flex gap-2">
@@ -193,7 +201,7 @@ const LeavePolicies = () => {
                 {isEditing ? policyForm('Edit leave policy', 'Save policy') : (
                   <dl className="grid grid-cols-2 gap-3 border-t border-gray-100 pt-3 text-sm">
                     <div><dt className="text-gray-500">Annual allowance</dt><dd className="font-semibold text-gray-800">{policy.annualAllowance} days</dd></div>
-                    <div><dt className="text-gray-500">Employee stage</dt><dd className="font-semibold text-gray-800">{probation ? 'On probation' : 'Regular'}</dd></div>
+                    <div><dt className="text-gray-500">Employee stage</dt><dd className="font-semibold text-gray-800">{stage}</dd></div>
                   </dl>
                 )}
               </article>

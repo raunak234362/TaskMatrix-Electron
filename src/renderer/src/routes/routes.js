@@ -24,6 +24,7 @@ import App from '../App'
 import CalendarLayout from '../layout/CalendarLayout'
 import CommunicationLayout from '../layout/CommunicationLayout'
 import LeaveReportPage from '../pages/LeaveReportPage'
+import TeamLeaveRequestsPage from '../pages/TeamLeaveRequestsPage'
 
 const routes = [
   { path: '/', Component: Login },
@@ -55,6 +56,7 @@ const routes = [
           { path: 'manage-team', Component: TeamPage },
           { path: 'team-reports', Component: TeamReportPage },
           { path: 'leave-report', Component: LeaveReportPage },
+          { path: 'team-leave-requests', Component: TeamLeaveRequestsPage },
           { path: 'sales', Component: SalesDashboard },
           { path: 'designer', Component: DesignerLandingDashboard }
         ]

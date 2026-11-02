@@ -15,7 +15,6 @@ import {
     Factory,
     FileText,
     Calendar,
-    FileSpreadsheet,
     CalendarCheck
 } from 'lucide-react'
 
@@ -219,6 +218,12 @@ export const navItems = [
             'deputy_manager',
             'human-resource'
         ]
+    },
+    {
+        label: 'Team Leave Requests',
+        to: 'team-leave-requests',
+        icon: <CalendarCheck />,
+        roles: ['project_manager', 'team_lead', 'dept_manager', 'department_manager']
     },
     {
         label: 'Leave Report',

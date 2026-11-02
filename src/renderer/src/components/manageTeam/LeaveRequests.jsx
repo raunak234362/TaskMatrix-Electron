@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Check, Clock3, RefreshCw, Search, X } from 'lucide-react'
+import { Check, Clock3, FileSpreadsheet, RefreshCw, Search, X } from 'lucide-react'
 import { toast } from 'react-toastify'
 import Service from '../../api/Service'
+import HrLeaveReportPage from '../../pages/HrLeaveReportPage'
 import {
   extractList,
   formatLeaveDate,
@@ -15,20 +16,47 @@ const statusStyles = {
   PENDING: 'bg-amber-50 text-amber-700 ring-amber-200',
   APPROVED: 'bg-green-50 text-green-700 ring-green-200',
   REJECTED: 'bg-red-50 text-red-700 ring-red-200',
+  LOP: 'bg-orange-50 text-orange-700 ring-orange-200',
   CANCELLED: 'bg-gray-100 text-gray-600 ring-gray-200'
 }
 
-const LeaveRequests = () => {
+const LeaveRequests = ({ teamManager = false }) => {
   const [requests, setRequests] = useState([])
+  const [managedTeamId, setManagedTeamId] = useState('')
   const [filter, setFilter] = useState('ALL')
+  const [leaveTypeFilter, setLeaveTypeFilter] = useState('ALL')
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [updatingId, setUpdatingId] = useState(null)
+  const [decisionRequest, setDecisionRequest] = useState(null)
+  const [decisionType, setDecisionType] = useState('APPROVED')
+  const [decisionNote, setDecisionNote] = useState('')
+  const [showHrReport, setShowHrReport] = useState(false)
 
   const loadRequests = useCallback(async () => {
     setLoading(true)
     try {
-      const response = await Service.GetLeaveRequests()
+      let response
+      if (teamManager) {
+        const teamsResponse = await Service.AllTeam()
+        const teams = extractList(teamsResponse, ['teams', 'items'])
+        const userId = String(sessionStorage.getItem('userId') || '')
+        const managedTeam = teams.find((team) => {
+          const manager = team.managerID || team.managerId || team.manager
+          const managerId = typeof manager === 'object' ? manager?.id || manager?._id : manager
+          return String(managerId || '') === userId
+        })
+        const teamId = managedTeam?.id || managedTeam?._id
+        if (!teamId) {
+          setManagedTeamId('')
+          setRequests([])
+          return
+        }
+        setManagedTeamId(teamId)
+        response = await Service.GetTeamLeaveRequests(teamId)
+      } else {
+        response = await Service.GetLeaveRequests()
+      }
       setRequests(extractList(response, ['requests', 'items']))
     } catch (error) {
       toast.error(error?.response?.data?.message || 'Unable to load leave requests.')
@@ -46,6 +74,7 @@ const LeaveRequests = () => {
       requests.filter((request) => {
         const status = getRequestStatus(request)
         const matchesFilter = filter === 'ALL' || status === filter
+        const matchesLeaveType = leaveTypeFilter === 'ALL' || getLeaveType(request).toUpperCase() === leaveTypeFilter
         const query = search.trim().toLowerCase()
         const matchesSearch =
           !query ||
@@ -60,9 +89,9 @@ const LeaveRequests = () => {
               .toLowerCase()
               .includes(query)
           )
-        return matchesFilter && matchesSearch
+        return matchesFilter && matchesLeaveType && matchesSearch
       }),
-    [filter, requests, search]
+    [filter, leaveTypeFilter, requests, search]
   )
 
   const updateRequest = async (request, action) => {
@@ -73,12 +102,47 @@ const LeaveRequests = () => {
     }
     setUpdatingId(id)
     try {
-      if (action === 'approve') await Service.ApproveLeaveRequest(id)
+      if (teamManager && action === 'approve') await Service.ApproveTeamLeaveRequest(managedTeamId, id)
+      else if (teamManager) await Service.RejectTeamLeaveRequest(managedTeamId, id)
+      else if (action === 'approve') await Service.ApproveLeaveRequest(id)
       else await Service.RejectLeaveRequest(id)
       toast.success(`Leave request ${action === 'approve' ? 'approved' : 'rejected'}.`)
       await loadRequests()
     } catch (error) {
       toast.error(error?.response?.data?.message || `Unable to ${action} this leave request.`)
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
+  const openDecision = (request) => {
+    setDecisionRequest(request)
+    setDecisionType('APPROVED')
+    setDecisionNote('')
+  }
+
+  const submitDecision = async (event) => {
+    event.preventDefault()
+    const requestId = getRequestId(decisionRequest)
+    if (!requestId) return toast.error('This leave request is missing its ID.')
+    const requiresNote = decisionType === 'REJECTED' || decisionType === 'LOP'
+    if (requiresNote && !decisionNote.trim()) return toast.error('Add a reason for rejection or LOP.')
+    setUpdatingId(requestId)
+    try {
+      const payload = { note: decisionNote.trim() || undefined }
+      if (decisionType === 'REJECTED') {
+        if (teamManager) await Service.RejectTeamLeaveRequest(managedTeamId, requestId, payload)
+        else await Service.RejectLeaveRequest(requestId, payload)
+      } else if (decisionType === 'LOP') {
+        if (teamManager) await Service.LopTeamLeaveRequest(managedTeamId, requestId, payload)
+        else await Service.LopLeaveRequest(requestId, payload)
+      } else if (teamManager) await Service.ApproveTeamLeaveRequest(managedTeamId, requestId, payload)
+      else await Service.ApproveLeaveRequest(requestId, payload)
+      toast.success(decisionType === 'REJECTED' ? 'Leave request rejected.' : decisionType === 'LOP' ? 'Leave request marked as LOP.' : 'Leave request approved.')
+      setDecisionRequest(null)
+      await loadRequests()
+    } catch (error) {
+      toast.error(error?.response?.data?.message || 'Unable to update this leave request.')
     } finally {
       setUpdatingId(null)
     }
@@ -93,20 +157,23 @@ const LeaveRequests = () => {
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-green-700">
             People operations
           </p>
-          <h2 className="mt-1 text-2xl font-bold text-gray-900">Leave requests</h2>
+          <h2 className="mt-1 text-2xl font-bold text-gray-900">{teamManager ? 'Team leave requests' : 'Leave requests'}</h2>
           <p className="mt-1 text-sm text-gray-500">
-            Review and manage employee leave applications.
+            {teamManager ? 'Review and manage leave applications from your team.' : 'Review and manage employee leave applications.'}
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-          <Clock3 size={18} className="text-amber-700" />
-          <span className="text-sm font-semibold text-amber-900">{pendingCount} pending</span>
+        <div className="flex items-center gap-3">
+          {!teamManager && <button type="button" onClick={() => setShowHrReport(true)} className="inline-flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-green-800"><FileSpreadsheet size={16} /> Generate HR report</button>}
+          <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <Clock3 size={18} className="text-amber-700" />
+            <span className="text-sm font-semibold text-amber-900">{pendingCount} pending</span>
+          </div>
         </div>
       </header>
 
       <div className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap gap-2">
-          {['ALL', 'PENDING', 'APPROVED', 'REJECTED'].map((status) => (
+          {['ALL', 'PENDING', 'APPROVED', 'REJECTED', 'LOP'].map((status) => (
             <button
               key={status}
               type="button"
@@ -129,6 +196,13 @@ const LeaveRequests = () => {
             placeholder="Search employee or leave type"
             className="w-full bg-transparent text-sm outline-none"
           />
+        </label>
+        <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          Leave type
+          <select value={leaveTypeFilter} onChange={(event) => setLeaveTypeFilter(event.target.value)} className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium normal-case text-gray-700 outline-none focus:border-green-600">
+            <option value="ALL">All types</option>
+            <option value="LOP">LOP</option>
+          </select>
         </label>
       </div>
 
@@ -184,6 +258,7 @@ const LeaveRequests = () => {
                       </td>
                       <td className="max-w-xs px-5 py-4 text-gray-600">
                         <p className="line-clamp-2">{request?.reason || '—'}</p>
+                        {request?.decisionNote && <p className="mt-1 line-clamp-2 text-xs text-gray-500">Decision note: {request.decisionNote}</p>}
                       </td>
                       <td className="px-5 py-4">
                         <span
@@ -194,24 +269,7 @@ const LeaveRequests = () => {
                       </td>
                       <td className="px-5 py-4">
                         {status === 'PENDING' ? (
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              disabled={isUpdating}
-                              onClick={() => updateRequest(request, 'approve')}
-                              className="inline-flex items-center gap-1 rounded-lg bg-green-700 px-3 py-2 text-xs font-bold text-white hover:bg-green-800 disabled:opacity-50"
-                            >
-                              <Check size={14} /> Approve
-                            </button>
-                            <button
-                              type="button"
-                              disabled={isUpdating}
-                              onClick={() => updateRequest(request, 'reject')}
-                              className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-50 disabled:opacity-50"
-                            >
-                              <X size={14} /> Reject
-                            </button>
-                          </div>
+                          <button type="button" disabled={isUpdating} onClick={() => openDecision(request)} className="inline-flex items-center gap-1 rounded-lg bg-green-700 px-3 py-2 text-xs font-bold text-white hover:bg-green-800 disabled:opacity-50">Review</button>
                         ) : (
                           <span className="text-xs text-gray-400">No action</span>
                         )}
@@ -224,6 +282,36 @@ const LeaveRequests = () => {
           </div>
         )}
       </div>
+      {decisionRequest && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="presentation">
+        <form onSubmit={submitDecision} role="dialog" aria-modal="true" aria-labelledby="team-leave-decision-title" className="w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-xl">
+          <div>
+            <h3 id="team-leave-decision-title" className="text-lg font-bold text-gray-900">Review leave request</h3>
+            <p className="mt-1 text-sm text-gray-500">{getEmployeeName(decisionRequest)} · {getLeaveType(decisionRequest)}</p>
+          </div>
+          <label className="block text-sm font-semibold text-gray-700">Decision
+            <select value={decisionType} onChange={(event) => setDecisionType(event.target.value)} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5">
+              <option value="APPROVED">Approve as requested</option>
+              <option value="LOP">Approve as LOP</option>
+              <option value="REJECTED">Reject request</option>
+            </select>
+          </label>
+          <label className="block text-sm font-semibold text-gray-700">{decisionType === 'REJECTED' ? 'Rejection reason' : 'Reason'}{decisionType !== 'APPROVED' && <span className="text-red-600"> *</span>}
+            <textarea value={decisionNote} onChange={(event) => setDecisionNote(event.target.value)} required={decisionType !== 'APPROVED'} rows={4} maxLength={2000} placeholder={decisionType === 'LOP' ? 'Explain why this leave is being recorded as LOP' : 'Add a note for the employee'} className="mt-1 block w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 outline-none focus:border-green-600" />
+          </label>
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={() => setDecisionRequest(null)} disabled={updatingId !== null} className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600">Cancel</button>
+            <button type="submit" disabled={updatingId !== null} className="rounded-lg bg-green-700 px-4 py-2 text-sm font-bold text-white disabled:opacity-50">{updatingId !== null ? 'Saving…' : 'Save decision'}</button>
+          </div>
+        </form>
+      </div>}
+      {showHrReport && <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 p-4" role="presentation">
+        <section role="dialog" aria-modal="true" aria-label="HR leave report" className="mx-auto my-4 max-h-[calc(100vh-2rem)] max-w-7xl overflow-y-auto rounded-2xl bg-gray-50 shadow-2xl">
+          <div className="sticky top-0 z-10 flex justify-end border-b border-gray-200 bg-white p-3">
+            <button type="button" onClick={() => setShowHrReport(false)} className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"><X size={15} /> Close report</button>
+          </div>
+          <HrLeaveReportPage />
+        </section>
+      </div>}
     </section>
   )
 }

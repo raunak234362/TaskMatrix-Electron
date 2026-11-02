@@ -17,7 +17,7 @@ const statusStyles = {
   CANCELLED: 'bg-gray-100 text-gray-600'
 }
 
-const defaultLeaveTypes = ['SICK', 'PAID', 'CASUAL']
+const defaultLeaveTypes = ['SICK', 'PAID', 'CASUAL', 'LOP']
 
 const getBalance = (balance, keys) => {
   for (const key of keys) {
@@ -42,7 +42,7 @@ const LeaveReportPage = () => {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const [form, setForm] = useState({ type: '', startDate: '', endDate: '', reason: '' })
+  const [form, setForm] = useState({ type: '', startDate: '', endDate: '', dayFraction: '1', reason: '' })
 
   const loadLeaveData = useCallback(async () => {
     setLoading(true)
@@ -74,7 +74,7 @@ const LeaveReportPage = () => {
     [requests]
   )
   const leaveTypes = useMemo(() => {
-    const availableTypes = [...new Set(balances.map((balance) => getLeaveType(balance)).filter(Boolean))]
+    const availableTypes = [...new Set([...balances.map((balance) => getLeaveType(balance)).filter(Boolean), 'LOP'])]
     return availableTypes.length ? availableTypes : defaultLeaveTypes
   }, [balances])
 
@@ -99,10 +99,11 @@ const LeaveReportPage = () => {
         type: form.type,
         startDate: form.startDate,
         endDate: form.endDate,
+        dayFraction: Number(form.dayFraction),
         reason: form.reason.trim() || undefined
       })
       toast.success('Your leave request has been submitted.')
-      setForm((current) => ({ ...current, startDate: '', endDate: '', reason: '' }))
+      setForm((current) => ({ ...current, startDate: '', endDate: '', dayFraction: '1', reason: '' }))
       await loadLeaveData()
     } catch (error) {
       toast.error(error?.response?.data?.message || 'Unable to submit your leave request.')
@@ -234,6 +235,21 @@ const LeaveReportPage = () => {
                     />
                   </label>
                 </div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Leave per day
+                  <select
+                    name="dayFraction"
+                    value={form.dayFraction}
+                    onChange={updateForm}
+                    className="mt-1.5 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100"
+                  >
+                    <option value="1">Full day</option>
+                    <option value="0.5">Half day (1/2)</option>
+                    <option value="0.3333333333333333">One-third day (1/3)</option>
+                    <option value="0.25">Quarter day (1/4)</option>
+                  </select>
+                  <span className="mt-1 block text-xs font-normal text-gray-500">This fraction applies to each day in the selected date range.</span>
+                </label>
                 <label className="block text-sm font-medium text-gray-700">
                   Reason
                   <textarea

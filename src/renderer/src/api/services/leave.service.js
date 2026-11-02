@@ -16,6 +16,26 @@ class LeaveService {
     return response.data
   }
 
+  static async GetTeamLeaveRequests(teamId) {
+    const response = await api.get(`hr/teams/${encodeURIComponent(teamId)}/requests`)
+    return response.data
+  }
+
+  static async ApproveTeamLeaveRequest(teamId, requestId, decision = {}) {
+    const response = await api.patch(`hr/teams/${encodeURIComponent(teamId)}/requests/${requestId}/approve`, decision)
+    return response.data
+  }
+
+  static async RejectTeamLeaveRequest(teamId, requestId, decision = {}) {
+    const response = await api.patch(`hr/teams/${encodeURIComponent(teamId)}/requests/${requestId}/reject`, decision)
+    return response.data
+  }
+
+  static async LopTeamLeaveRequest(teamId, requestId, decision) {
+    const response = await api.patch(`hr/teams/${encodeURIComponent(teamId)}/requests/${requestId}/lop`, decision)
+    return response.data
+  }
+
   static async GetLeavePolicies() {
     const response = await api.get('hr/policies')
     return response.data
@@ -26,6 +46,7 @@ class LeaveService {
       userType: payload.userType,
       annualAllowance: payload.annualAllowance,
       isProbation: payload.isProbation,
+      employeeStage: payload.employeeStage,
     })
     return response.data
   }
@@ -35,8 +56,8 @@ class LeaveService {
     return response.data
   }
 
-  static async DeleteLeavePolicy(type, userType = 'ALL', isProbation = false) {
-    const response = await api.delete(`hr/policies/${encodeURIComponent(type)}`, { params: { userType, isProbation } })
+  static async DeleteLeavePolicy(type, userType = 'ALL', employeeStage = 'Permanent employee') {
+    const response = await api.delete(`hr/policies/${encodeURIComponent(type)}`, { params: { userType, employeeStage } })
     return response.data
   }
 
@@ -50,13 +71,23 @@ class LeaveService {
     return response.data
   }
 
-  static async ApproveLeaveRequest(requestId) {
-    const response = await api.patch(`hr/requests/${requestId}/approve`)
+  static async ApproveLeaveRequest(requestId, decision = {}) {
+    const response = await api.patch(`hr/requests/${requestId}/approve`, decision)
     return response.data
   }
 
-  static async RejectLeaveRequest(requestId) {
-    const response = await api.patch(`hr/requests/${requestId}/reject`)
+  static async RejectLeaveRequest(requestId, decision) {
+    const response = await api.patch(`hr/requests/${requestId}/reject`, decision)
+    return response.data
+  }
+
+  static async LopLeaveRequest(requestId, decision) {
+    const response = await api.patch(`hr/requests/${requestId}/lop`, decision)
+    return response.data
+  }
+
+  static async GetAttendanceCalendar(params) {
+    const response = await api.get('hr/reports/attendance-calendar', { params })
     return response.data
   }
 
