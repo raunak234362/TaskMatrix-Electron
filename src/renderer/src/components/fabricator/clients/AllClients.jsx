@@ -106,14 +106,14 @@ const AllClients = ({ fabricator, onClose }) => {
           <div className="flex items-center gap-5">
             
             <div>
-              <h2 className="text-2xl font-black text-black tracking-tight uppercase">Fabricator POCs</h2>
+              <h2 className="text-2xl font-semibold text-black tracking-normal uppercase">Fabricator POCs</h2>
               <div className="flex items-center gap-3 mt-1">
-                <span className="text-sm font-bold text-black uppercase tracking-wider flex items-center gap-1.5">
+                <span className="text-sm font-bold text-black uppercase tracking-normal flex items-center gap-1.5">
                   <Building2 size={12} />
                   {fabricator.fabName}
                 </span>
                 <span className="w-1 h-1 rounded-full bg-black"></span>
-                <span className="text-sm font-bold text-black uppercase tracking-wider">
+                <span className="text-sm font-bold text-black uppercase tracking-normal">
                   {clients.length} CONNECTED ENTITIES
                 </span>
               </div>

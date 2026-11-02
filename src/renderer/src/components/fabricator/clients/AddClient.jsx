@@ -109,8 +109,8 @@ const AddClients = ({ fabricator, onClose }) => {
         {/* Header Section */}
         <div className="p-8 border-b border-gray-100 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-black text-gray-800 tracking-tight flex items-center gap-3">
-              <UserPlus className="text-[#6bbd45]" size={28} />
+            <h2 className="text-2xl font-semibold text-black tracking-normal flex items-center gap-3">
+             
               Add New POC
             </h2>
            
@@ -236,7 +236,7 @@ const AddClients = ({ fabricator, onClose }) => {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
+                <label className="block text-sm font-semibold text-black  mb-1.5 ml-1">
                  Access Role
                 </label>
                 <Select
@@ -259,17 +259,11 @@ const AddClients = ({ fabricator, onClose }) => {
             </div>
 
             <div className="flex justify-end gap-3 pt-6 border-t border-gray-50">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-8 py-3.5 bg-gray-50 border hover:bg-gray-100 text-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all"
-              >
-                Cancel
-              </button>
+            
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-10 py-3.5 bg-[#6bbd45]/15 hover:bg-[#6bbd45]/30 text-black border border-black rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-sm disabled:opacity-50 transition-all flex items-center gap-3 active:scale-95"
+                className="px-10 py-2 bg-primary/20 hover:bg-[#6bbd45]/30 text-black border-2 border-primary rounded-xl text-xs font-semibold shadow-sm disabled:opacity-50 transition-all flex items-center gap-3 active:scale-95"
               >
                 {isSubmitting ? (
                   <Loader2 className="animate-spin w-4 h-4" />
