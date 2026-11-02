@@ -40,13 +40,13 @@ const AddProject = ({ onSuccess }) => {
     (state) => state.userInfo?.departmentData || [],
   );
   const teamDatas = useSelector((state) => state.userInfo?.teamData || []);
-  console.log("teamDatas", teamDatas)
   const rfqData = useSelector((state) => state.RFQInfos?.RFQData || []);
   const projectData = useSelector((state) => state.projectInfo?.projectData || []);
   const usedRfqIds = useMemo(() => {
     const ids = new Set();
     (projectData || []).forEach((p) => {
-      const id = p.rfqId || p.rfqID || p.rfq_id || p.rfq?.id || p.rfq?._id || (typeof p.rfq === "string" ? p.rfq : null);
+      const id = p?.rfqId || p?.rfqID || p?.rfq_id || p?.rfq?.id || p?.rfq?._id ||
+        (typeof p?.rfq === "string" || typeof p?.rfq === "number" ? p.rfq : null);
       if (id) ids.add(String(id));
     });
     return ids;
@@ -163,22 +163,37 @@ const AddProject = ({ onSuccess }) => {
     return [];
   };
 
+  const fetchAllRfqPages = async (fetchPage) => {
+    const pageSize = 10;
+    const items = [];
+    for (let page = 1; page <= 100; page += 1) {
+      const response = await fetchPage(page, pageSize);
+      const pageItems = extractRfqList(response);
+      items.push(...pageItems);
+      const pagination = response?.data?.pagination || response?.data?.meta ||
+        response?.pagination || response?.meta || {};
+      const totalPages = Number(pagination.totalPages || pagination.total_pages || 0);
+      if (totalPages ? page >= totalPages : pageItems.length < pageSize) break;
+    }
+    return items;
+  };
+
   useEffect(() => {
     const fetchRfqs = async () => {
       try {
         const userType = sessionStorage.getItem('userRole') || sessionStorage.getItem('userType') || '';
         let rfqs = [];
         if (userType === 'CLIENT') {
-          const res = await Service.RfqSent(1, 1000);
-          rfqs = extractRfqList(res).map((r) => ({ ...r, rfqType: 'Sent' }));
+          rfqs = (await fetchAllRfqPages((page, limit) => Service.RfqSent(page, limit)))
+            .map((r) => ({ ...r, rfqType: 'Sent' }));
         } else {
           const [receivedRes, allRes] = await Promise.all([
-            Service.RFQRecieved(1, 1000),
-            Service.FetchAllRFQ(1, 1000)
+            fetchAllRfqPages((page, limit) => Service.RFQRecieved(page, limit)),
+            fetchAllRfqPages((page, limit) => Service.FetchAllRFQ(page, limit))
           ]);
 
-          const receivedData = extractRfqList(receivedRes).map((r) => ({ ...r, rfqType: 'Received' }));
-          const allData = extractRfqList(allRes).map((r) => ({ ...r, rfqType: 'All' }));
+          const receivedData = receivedRes.map((r) => ({ ...r, rfqType: 'Received' }));
+          const allData = allRes.map((r) => ({ ...r, rfqType: 'All' }));
 
           const combined = [...receivedData];
           const receivedIds = new Set(combined.map((r) => String(r.id || r._id)));
@@ -224,15 +239,13 @@ const AddProject = ({ onSuccess }) => {
         if (!r) return false;
         if (r.deletedAt) return false;
 
-        // User explicit requirement: "just show me those RFQ which are not having project. project:null."
-        // If project is assigned (object with id/name, or non-empty string ID), exclude it
-        if (r.project !== null && r.project !== undefined && r.project !== "") {
-          if (typeof r.project === "object") {
-            if (r.project.id || r.project._id || r.project.name || r.project.projectName) return false;
-          } else if (typeof r.project === "string" && r.project.trim() !== "") {
-            return false;
-          }
-        }
+        // Responses may include a project summary even when no project is linked.
+        // Exclude only RFQs with an actual project reference.
+        const projectRef = r.projectId ?? r.projectID ?? r.project_id ?? r.project;
+        const hasProjectReference = typeof projectRef === "object"
+          ? Boolean(projectRef && (projectRef.id || projectRef._id))
+          : projectRef !== null && projectRef !== undefined && String(projectRef).trim() !== "";
+        if (hasProjectReference) return false;
 
         // Also exclude if already assigned in existing projects list
         const rfqId = String(r.id || r._id || "");
@@ -249,20 +262,9 @@ const AddProject = ({ onSuccess }) => {
           : "";
         const descSnippet = cleanDesc ? cleanDesc.slice(0, 40).trim() : "";
 
-        const title = r.projectName || r.subject || descSnippet || "RFQ";
-        const fab = r.fabricator?.fabName || r.fabricator?.name || r.fabricatorName || "";
-        const serial = r.serialNo || "";
-
-        let label = "";
-        if (serial && title !== serial) {
-          label = `${serial} • ${title}`;
-        } else {
-          label = title;
-        }
-
-        if (fab) {
-          label += ` (${fab})`;
-        }
+        const title = r.projectName || "RFQ";
+        const fab = r.fabricator?.fabName || "";
+        const label = fab ? `${title} - ${fab}` : title;
 
         return {
           label,
@@ -309,8 +311,6 @@ const AddProject = ({ onSuccess }) => {
   const selectedRfq = activeRfqData.find(
     (r) => String(r.id || r._id) === String(selectedRfqId),
   );
-  console.log(selectedRfq,"================");
-  
 
   useEffect(() => {
     if (!selectedRfq) return;
