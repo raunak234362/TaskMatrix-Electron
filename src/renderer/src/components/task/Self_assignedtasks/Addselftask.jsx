@@ -44,28 +44,6 @@ const QUICK_CATEGORIES = [
 const normalizeAccessValue = (value) =>
   String(value || '').toLowerCase().trim().replace(/[\s-]+/g, '_')
 
-const SELF_TASK_ROLES = [
-  'admin',
-  'dept_manager',
-  'deputy_manager',
-  'operation_executive',
-  'project_manager_officer',
-  'human_resource',
-  'project_manager'
-]
-
-const SELF_TASK_DESIGNATIONS = [
-  'software_developer',
-  'software_developer_trainee',
-  'system_admin',
-  'hr_recruiter'
-]
-
-const canCreateSelfTask = (user) =>
-  SELF_TASK_ROLES.includes(normalizeAccessValue(user?.role)) ||
-  (normalizeAccessValue(user?.role) === 'staff' &&
-    SELF_TASK_DESIGNATIONS.includes(normalizeAccessValue(user?.designation)))
-
 const getUserTeam = (record) => {
   const membership = record?.teamMember?.[0] || record?.teamMembers?.[0]
   const team = record?.team || membership?.team || record?.managedTeam?.[0]
@@ -98,16 +76,12 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
     'deputy_manager',
     'operation_executive'
   ].includes(currentUserRoleValue)
-  const eligibleAssignees = useMemo(
+  const assignableStaff = useMemo(
     () =>
       staffData
         .filter((staff) => {
           const id = staff?.id ?? staff?._id ?? staff?.userId ?? staff?.user_id
-          return (
-            id != null &&
-            String(id) !== String(currentUserId) &&
-            canCreateSelfTask(staff)
-          )
+          return id != null && String(id) !== String(currentUserId)
         })
         .sort((a, b) =>
           `${a.firstName || ''} ${a.lastName || ''}`.localeCompare(
@@ -185,7 +159,7 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
   const watchedPriority = watch('priority')
   const watchedCategoryTag = watch('categoryTag')
   const selectedUserId = watch('user_id')
-  const selectedAssignee = eligibleAssignees.find((staff) =>
+  const selectedAssignee = assignableStaff.find((staff) =>
     [staff.id, staff._id, staff.userId, staff.user_id]
       .filter(Boolean)
       .some((id) => String(id) === String(selectedUserId))
@@ -200,7 +174,7 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
       canAssignToOtherUser
         ? selectedAssignee
           ? getUserTeam(selectedAssignee)
-          : null
+          : resolvedTeam
         : resolvedTeam,
     [canAssignToOtherUser, selectedAssignee, resolvedTeam]
   )
@@ -225,12 +199,12 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
       setIsSubmitting(true)
 
       const finalUserId = canAssignToOtherUser
-        ? data.user_id
+        ? data.user_id || currentUserId || sessionStorage.getItem('userId') || ''
         : currentUserId || sessionStorage.getItem('userId') || ''
       if (!finalUserId) {
         throw new Error(
           canAssignToOtherUser
-            ? 'Select an eligible user for this task.'
+            ? 'Select a user for this task.'
             : 'Could not determine the task owner.'
         )
       }
@@ -332,7 +306,7 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
 
           <div className="text-[11px] text-gray-500 flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-            {canAssignToOtherUser ? 'Assigned to selected eligible user' : 'Auto-linked to your profile'}
+            {canAssignToOtherUser && selectedUserId ? 'Assigned to selected user' : 'Auto-linked to your profile'}
           </div>
         </div>
 
@@ -341,16 +315,14 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
           {canAssignToOtherUser ? (
             <div>
               <label className={labelClass}>
-                Assign To <span className="text-red-500">*</span>
+                Assign To <span className="font-normal normal-case text-gray-500">(optional — defaults to you)</span>
               </label>
               <select
                 className={inputBaseClass}
-                {...register('user_id', {
-                  required: 'Select an eligible user'
-                })}
+                {...register('user_id')}
               >
-                <option value="">Select an eligible user...</option>
-                {eligibleAssignees.map((staff) => {
+                <option value="">Myself ({currentUserName})</option>
+                {assignableStaff.map((staff) => {
                   const id = staff.id ?? staff._id ?? staff.userId ?? staff.user_id
                   const name =
                     `${staff.firstName || ''} ${staff.lastName || ''}`.trim() ||
@@ -363,12 +335,6 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
                   )
                 })}
               </select>
-              {errors.user_id && (
-                <p className={errorClass}>
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  {errors.user_id.message}
-                </p>
-              )}
             </div>
           ) : (
             <input type="hidden" {...register('user_id')} />
