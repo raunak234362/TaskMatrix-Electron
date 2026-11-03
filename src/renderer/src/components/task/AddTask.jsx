@@ -41,6 +41,20 @@ const parseHHMMToMinutes = (hhmm) => {
   return h * 60 + m;
 };
 
+const getDateSuggestions = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return [0, 1, 2].map((offset) => {
+    const date = new Date(today);
+    date.setDate(date.getDate() + offset);
+    return {
+      value: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
+      label: ["Today", "Tomorrow", "Day after tomorrow"][offset],
+      dateLabel: date.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+    };
+  });
+};
+
 const normType = (s) =>
   String(s || "")
     .toLowerCase()
@@ -933,6 +947,8 @@ const AddTask = () => {
       value: e.id,
     }));
 
+  const dateSuggestions = getDateSuggestions();
+
   return (
     <div className="min-h-screen bg-slate-50/50">
       <div className="w-full mx-auto">
@@ -1261,6 +1277,13 @@ const AddTask = () => {
                           required: "Start date is required",
                         })}
                       />
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 pt-1" aria-label="Suggested start dates">
+                        {dateSuggestions.map((suggestion) => (
+                          <button key={suggestion.value} type="button" onClick={() => setValue("start_date", suggestion.value, { shouldValidate: true, shouldDirty: true })} className="text-xs font-medium text-blue-700 hover:text-blue-900 hover:underline">
+                            {suggestion.label} · {suggestion.dateLabel}
+                          </button>
+                        ))}
+                      </div>
                       {errors.start_date && (
                         <p className="text-xs text-red-500">
                           {errors.start_date.message}
@@ -1276,6 +1299,13 @@ const AddTask = () => {
                           required: "Due date is required",
                         })}
                       />
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 pt-1" aria-label="Suggested due dates">
+                        {dateSuggestions.map((suggestion) => (
+                          <button key={suggestion.value} type="button" onClick={() => setValue("due_date", suggestion.value, { shouldValidate: true, shouldDirty: true })} className="text-xs font-medium text-blue-700 hover:text-blue-900 hover:underline">
+                            {suggestion.label} · {suggestion.dateLabel}
+                          </button>
+                        ))}
+                      </div>
                       {errors.due_date && (
                         <p className="text-xs text-red-500">
                           {errors.due_date.message}
