@@ -21,6 +21,11 @@ class LeaveService {
     return response.data
   }
 
+  static async GetTeamLeaveRequestsByManager(teamId, managerId) {
+    const response = await api.get(`hr/teams/${encodeURIComponent(teamId)}/manager/${encodeURIComponent(managerId)}/requests`)
+    return response.data
+  }
+
   static async ApproveTeamLeaveRequest(teamId, requestId, decision = {}) {
     const response = await api.patch(`hr/teams/${encodeURIComponent(teamId)}/requests/${requestId}/approve`, decision)
     return response.data

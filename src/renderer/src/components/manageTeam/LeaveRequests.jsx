@@ -20,6 +20,21 @@ const statusStyles = {
   CANCELLED: 'bg-gray-100 text-gray-600 ring-gray-200'
 }
 
+const normalizeRole = (role) => String(role || '').toUpperCase().trim().replace(/[\s-]+/g, '_')
+const getRequesterRole = (request) => normalizeRole(
+  request?.employee?.role || request?.user?.role || request?.employeeRole || request?.userRole || request?.role
+)
+const getRequesterId = (request) => request?.user?.id || request?.employee?.id || request?.requester?.id || request?.userId || request?.employeeId
+const canReviewByRole = (approverRole, requesterRole) => {
+  if (approverRole === 'ADMIN') return true
+  if (requesterRole === 'HUMAN_RESOURCE') return approverRole === 'DEPUTY_MANAGER'
+  if (requesterRole === 'DEPUTY_MANAGER') return false
+  if (['OPERATION_EXECUTIVE', 'PROJECT_MANAGER_OFFICER'].includes(requesterRole)) {
+    return ['HUMAN_RESOURCE', 'DEPUTY_MANAGER'].includes(approverRole)
+  }
+  return ['HUMAN_RESOURCE', 'DEPUTY_MANAGER'].includes(approverRole)
+}
+
 const LeaveRequests = ({ teamManager = false }) => {
   const [requests, setRequests] = useState([])
   const [managedTeamId, setManagedTeamId] = useState('')
@@ -32,6 +47,7 @@ const LeaveRequests = ({ teamManager = false }) => {
   const [decisionType, setDecisionType] = useState('APPROVED')
   const [decisionNote, setDecisionNote] = useState('')
   const [showHrReport, setShowHrReport] = useState(false)
+  const approverRole = normalizeRole(sessionStorage.getItem('userRole'))
 
   const loadRequests = useCallback(async () => {
     setLoading(true)
@@ -41,19 +57,43 @@ const LeaveRequests = ({ teamManager = false }) => {
         const teamsResponse = await Service.AllTeam()
         const teams = extractList(teamsResponse, ['teams', 'items'])
         const userId = String(sessionStorage.getItem('userId') || '')
-        const managedTeam = teams.find((team) => {
+        const managedTeams = teams.filter((team) => {
           const manager = team.managerID || team.managerId || team.manager
           const managerId = typeof manager === 'object' ? manager?.id || manager?._id : manager
-          return String(managerId || '') === userId
+          const projectManaged = (team.project || team.projects || []).some((project) => {
+            const projectManager = project.managerID || project.managerId || project.manager
+            const projectManagerId = typeof projectManager === 'object' ? projectManager?.id || projectManager?._id : projectManager
+            return String(projectManagerId || '') === userId
+          })
+          const isTeamMember = (team.members || []).some((member) =>
+            String(member.userId || member.user?.id || member.member?.id || '') === userId
+          )
+          const directlyManaged = String(managerId || '') === userId || projectManaged
+          if (approverRole === 'PROJECT_MANAGER') return directlyManaged
+          return directlyManaged || isTeamMember || approverRole === 'DEPT_MANAGER'
         })
-        const teamId = managedTeam?.id || managedTeam?._id
-        if (!teamId) {
+        const teamIds = managedTeams.map((team) => team.id || team._id).filter(Boolean)
+        if (!teamIds.length) {
           setManagedTeamId('')
           setRequests([])
           return
         }
-        setManagedTeamId(teamId)
-        response = await Service.GetTeamLeaveRequests(teamId)
+        setManagedTeamId(teamIds[0])
+        const teamResponses = await Promise.all(teamIds.map(async (teamId) => ({
+          teamId,
+          response: approverRole === 'PROJECT_MANAGER'
+            ? await Service.GetTeamLeaveRequestsByManager(teamId, userId)
+            : await Service.GetTeamLeaveRequests(teamId)
+        })))
+        const requestsById = new Map()
+        teamResponses.forEach(({ teamId, response: teamResponse }) => {
+          extractList(teamResponse, ['requests', 'items']).forEach((request, index) => {
+            const requestId = getRequestId(request) || `${teamId}-${index}`
+            if (!requestsById.has(requestId)) requestsById.set(requestId, { ...request, _teamId: teamId })
+          })
+        })
+        setRequests([...requestsById.values()])
+        return
       } else {
         response = await Service.GetLeaveRequests()
       }
@@ -63,7 +103,7 @@ const LeaveRequests = ({ teamManager = false }) => {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [approverRole, teamManager])
 
   useEffect(() => {
     loadRequests()
@@ -102,8 +142,8 @@ const LeaveRequests = ({ teamManager = false }) => {
     }
     setUpdatingId(id)
     try {
-      if (teamManager && action === 'approve') await Service.ApproveTeamLeaveRequest(managedTeamId, id)
-      else if (teamManager) await Service.RejectTeamLeaveRequest(managedTeamId, id)
+      if (teamManager && action === 'approve') await Service.ApproveTeamLeaveRequest(request._teamId || managedTeamId, id)
+      else if (teamManager) await Service.RejectTeamLeaveRequest(request._teamId || managedTeamId, id)
       else if (action === 'approve') await Service.ApproveLeaveRequest(id)
       else await Service.RejectLeaveRequest(id)
       toast.success(`Leave request ${action === 'approve' ? 'approved' : 'rejected'}.`)
@@ -130,13 +170,14 @@ const LeaveRequests = ({ teamManager = false }) => {
     setUpdatingId(requestId)
     try {
       const payload = { note: decisionNote.trim() || undefined }
+      const requestTeamId = decisionRequest?._teamId || managedTeamId
       if (decisionType === 'REJECTED') {
-        if (teamManager) await Service.RejectTeamLeaveRequest(managedTeamId, requestId, payload)
+        if (teamManager) await Service.RejectTeamLeaveRequest(requestTeamId, requestId, payload)
         else await Service.RejectLeaveRequest(requestId, payload)
       } else if (decisionType === 'LOP') {
-        if (teamManager) await Service.LopTeamLeaveRequest(managedTeamId, requestId, payload)
+        if (teamManager) await Service.LopTeamLeaveRequest(requestTeamId, requestId, payload)
         else await Service.LopLeaveRequest(requestId, payload)
-      } else if (teamManager) await Service.ApproveTeamLeaveRequest(managedTeamId, requestId, payload)
+      } else if (teamManager) await Service.ApproveTeamLeaveRequest(requestTeamId, requestId, payload)
       else await Service.ApproveLeaveRequest(requestId, payload)
       toast.success(decisionType === 'REJECTED' ? 'Leave request rejected.' : decisionType === 'LOP' ? 'Leave request marked as LOP.' : 'Leave request approved.')
       setDecisionRequest(null)
@@ -234,6 +275,14 @@ const LeaveRequests = ({ teamManager = false }) => {
                   const id = getRequestId(request) ?? index
                   const status = getRequestStatus(request)
                   const isUpdating = updatingId === id
+                  const requesterRole = getRequesterRole(request)
+                  const currentUserId = String(sessionStorage.getItem('userId') || '')
+                  const requesterId = String(getRequesterId(request) || '')
+                  const isOwnRequest = Boolean(currentUserId && requesterId && requesterId === currentUserId)
+                  const isTeamManagerReview = teamManager &&
+                    ['PROJECT_MANAGER', 'TEAM_LEAD', 'DEPT_MANAGER'].includes(approverRole) &&
+                    !['HUMAN_RESOURCE', 'DEPUTY_MANAGER', 'OPERATION_EXECUTIVE', 'PROJECT_MANAGER_OFFICER'].includes(requesterRole)
+                  const canReview = !isOwnRequest && (canReviewByRole(approverRole, requesterRole) || isTeamManagerReview)
                   return (
                     <tr key={id} className="align-top hover:bg-gray-50/70">
                       <td className="px-5 py-4">
@@ -268,10 +317,10 @@ const LeaveRequests = ({ teamManager = false }) => {
                         </span>
                       </td>
                       <td className="px-5 py-4">
-                        {status === 'PENDING' ? (
+                        {status === 'PENDING' && canReview ? (
                           <button type="button" disabled={isUpdating} onClick={() => openDecision(request)} className="inline-flex items-center gap-1 rounded-lg bg-green-700 px-3 py-2 text-xs font-bold text-white hover:bg-green-800 disabled:opacity-50">Review</button>
                         ) : (
-                          <span className="text-xs text-gray-400">No action</span>
+                          <span className="text-xs text-gray-400">{status === 'PENDING' ? 'Not assigned to you' : 'No action'}</span>
                         )}
                       </td>
                     </tr>

@@ -48,7 +48,9 @@ const getUserTeam = (record) => {
   const membership = record?.teamMember?.[0] || record?.teamMembers?.[0]
   const team = record?.team || membership?.team || record?.managedTeam?.[0]
   const id = record?.teamId || team?.id || team?._id || membership?.teamId
-  return id ? { id: String(id), name: team?.name || '' } : null
+  const manager = team?.managerID || team?.managerId || team?.manager
+  const managerId = typeof manager === 'object' ? manager?.id || manager?._id : manager
+  return id ? { id: String(id), name: team?.name || '', managerId: managerId ? String(managerId) : '' } : null
 }
 
 const AddSelfTask = ({ onCancel, onSuccess }) => {
@@ -229,7 +231,8 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
 
       console.log('Sending Self-Task Payload:', payload)
 
-      const response = await SelfTaskService.addSelfTask(payload)
+      const managerId = assignedTeam?.managerId || currentUserId || sessionStorage.getItem('userId') || ''
+      const response = await SelfTaskService.addSelfTask(payload, managerId)
 
       if (
         !response ||
