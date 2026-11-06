@@ -19,11 +19,6 @@ app.disableHardwareAcceleration()
 app.commandLine.appendSwitch('gpu-disk-cache-dir', join(tmpdir(), 'taskmatrix-gpu-cache'))
 app.commandLine.appendSwitch('disk-cache-dir', join(tmpdir(), 'taskmatrix-disk-cache'))
 
-// 🔥 Force X11 instead of Wayland (Fix Linux notification crash)
-if (process.platform === 'linux') {
-  app.commandLine.appendSwitch('ozone-platform', 'x11')
-}
-
 // Windows notifications require AppUserModelID
 if (process.platform === 'win32') {
   app.setAppUserModelId('com.taskmatrix.wbt')
@@ -37,7 +32,7 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1600,
     height: 980,
-    show: false,
+    show: process.platform === 'linux',
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -48,7 +43,10 @@ function createWindow() {
     }
   })
 
-  mainWindow.on('ready-to-show', () => mainWindow.show())
+  mainWindow.on('ready-to-show', () => {
+    mainWindow.show()
+    mainWindow.focus()
+  })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
@@ -60,6 +58,25 @@ function createWindow() {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+}
+
+function focusMainWindow() {
+  const mainWindow = BrowserWindow.getAllWindows()[0]
+  if (!mainWindow) {
+    createWindow()
+    return
+  }
+
+  if (mainWindow.isMinimized()) mainWindow.restore()
+  mainWindow.show()
+  mainWindow.focus()
+}
+
+const hasSingleInstanceLock = app.requestSingleInstanceLock()
+if (!hasSingleInstanceLock) {
+  app.quit()
+} else {
+  app.on('second-instance', focusMainWindow)
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -160,6 +177,8 @@ ipcMain.handle('export-invoice-pdf', async (event, { html, filename }) => {
 // ─────────────────────────────────────────────────────────────
 
 app.whenReady().then(() => {
+  if (!hasSingleInstanceLock) return
+
   electronApp.setAppUserModelId('com.taskmatrix.wbt')
 
   app.on('browser-window-created', (_, window) => {
@@ -221,7 +240,7 @@ app.whenReady().then(() => {
   }
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    focusMainWindow()
   })
 })
 
