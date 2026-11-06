@@ -8,6 +8,184 @@ import icon from '../../resources/icon.png?asset'
 import { autoUpdater } from 'electron-updater'
 import log from 'electron-log'
 
+let mainWindow
+const updateState = {
+  status: 'idle',
+  currentVersion: app.getVersion(),
+  availableVersion: null,
+  progress: 0,
+  releaseNotes: '',
+  checkedAt: null,
+  error: null
+}
+
+autoUpdater.autoDownload = false
+autoUpdater.autoInstallOnAppQuit = false
+
+function getUpdateState() {
+  return { ...updateState }
+}
+
+function publishUpdateState(nextState) {
+  Object.assign(updateState, nextState)
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('updates:status', getUpdateState())
+  }
+}
+
+function getReleaseNotes(info) {
+  const notes = info?.releaseNotes
+  const text = Array.isArray(notes)
+    ? notes.map((entry) => entry?.note || '').filter(Boolean).join('\n\n')
+    : typeof notes === 'string'
+      ? notes
+      : ''
+
+  return text.slice(0, 8000)
+}
+
+function isUpdateSupported() {
+  return (
+    process.platform === 'win32' ||
+    process.platform === 'darwin' ||
+    (process.platform === 'linux' && Boolean(process.env.APPIMAGE))
+  )
+}
+
+function assertMainWindowSender(event) {
+  const senderWindow = BrowserWindow.fromWebContents(event.sender)
+  if (!mainWindow || mainWindow.isDestroyed() || senderWindow !== mainWindow) {
+    throw new Error('Update actions are only available to the main application window.')
+  }
+}
+
+async function checkForUpdates() {
+  if (!app.isPackaged) {
+    publishUpdateState({ status: 'unsupported', error: 'Update checks are disabled in development builds.' })
+    return getUpdateState()
+  }
+
+  if (!isUpdateSupported()) {
+    publishUpdateState({
+      status: process.platform === 'linux' ? 'manual' : 'unsupported',
+      error:
+        process.platform === 'linux'
+          ? 'Debian package updates are managed by your system package manager.'
+          : 'Automatic updates are not supported for this package.'
+    })
+    return getUpdateState()
+  }
+
+  publishUpdateState({ status: 'checking', error: null })
+  try {
+    await autoUpdater.checkForUpdates()
+  } catch (error) {
+    log.error('Update check failed:', error)
+    publishUpdateState({
+      status: 'error',
+      checkedAt: new Date().toISOString(),
+      error: 'Could not check for updates. Check your connection and try again.'
+    })
+  }
+
+  return getUpdateState()
+}
+
+async function downloadUpdate() {
+  if (!isUpdateSupported() || updateState.status !== 'available') {
+    throw new Error('There is no supported update available to download.')
+  }
+
+  publishUpdateState({ status: 'downloading', progress: 0, error: null })
+  try {
+    await autoUpdater.downloadUpdate()
+  } catch (error) {
+    log.error('Update download failed:', error)
+    publishUpdateState({
+      status: 'error',
+      error: 'The update could not be downloaded. Check your connection and try again.'
+    })
+  }
+
+  return getUpdateState()
+}
+
+ipcMain.handle('updates:get-status', (event) => {
+  assertMainWindowSender(event)
+  return getUpdateState()
+})
+
+ipcMain.handle('updates:check', (event) => {
+  assertMainWindowSender(event)
+  return checkForUpdates()
+})
+
+ipcMain.handle('updates:download', (event) => {
+  assertMainWindowSender(event)
+  return downloadUpdate()
+})
+
+ipcMain.handle('updates:install', (event) => {
+  assertMainWindowSender(event)
+  if (!isUpdateSupported() || updateState.status !== 'downloaded') {
+    throw new Error('The downloaded update is not ready to install.')
+  }
+
+  log.info('User requested application restart to install the downloaded update.')
+  autoUpdater.quitAndInstall()
+})
+
+autoUpdater.on('checking-for-update', () => {
+  publishUpdateState({ status: 'checking', error: null })
+})
+
+autoUpdater.on('update-available', (info) => {
+  log.info(`Update ${info.version} is available.`)
+  publishUpdateState({
+    status: 'available',
+    availableVersion: info.version,
+    releaseNotes: getReleaseNotes(info),
+    checkedAt: new Date().toISOString(),
+    progress: 0,
+    error: null
+  })
+})
+
+autoUpdater.on('update-not-available', (info) => {
+  log.info(`No update available; current version is ${info.version}.`)
+  publishUpdateState({
+    status: 'up-to-date',
+    availableVersion: null,
+    checkedAt: new Date().toISOString(),
+    progress: 0,
+    error: null
+  })
+})
+
+autoUpdater.on('download-progress', (progress) => {
+  publishUpdateState({ status: 'downloading', progress: Math.max(0, Math.min(100, progress.percent)) })
+})
+
+autoUpdater.on('update-downloaded', (info) => {
+  log.info(`Update ${info.version} downloaded and is ready to install.`)
+  publishUpdateState({
+    status: 'downloaded',
+    availableVersion: info.version,
+    releaseNotes: getReleaseNotes(info),
+    progress: 100,
+    error: null
+  })
+})
+
+autoUpdater.on('error', (error) => {
+  log.error('Automatic update failed:', error)
+  publishUpdateState({
+    status: 'error',
+    checkedAt: new Date().toISOString(),
+    error: 'The update service encountered an error. You can try again later.'
+  })
+})
+
 // ─────────────────────────────────────────────────────────────
 // 🛑 DO NOT disable security in production
 // ─────────────────────────────────────────────────────────────
@@ -21,7 +199,7 @@ app.commandLine.appendSwitch('disk-cache-dir', join(tmpdir(), 'taskmatrix-disk-c
 
 // Windows notifications require AppUserModelID
 if (process.platform === 'win32') {
-  app.setAppUserModelId('com.taskmatrix.wbt')
+  app.setAppUserModelId('com.whiteboard.taskmatrix')
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -29,7 +207,7 @@ if (process.platform === 'win32') {
 // ─────────────────────────────────────────────────────────────
 
 function createWindow() {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1600,
     height: 980,
     show: process.platform === 'linux',
@@ -38,7 +216,7 @@ function createWindow() {
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
-      sandbox: false,
+      sandbox: true,
       webSecurity: !is.dev
     }
   })
@@ -46,6 +224,9 @@ function createWindow() {
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
     mainWindow.focus()
+  })
+  mainWindow.on('closed', () => {
+    mainWindow = null
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -61,7 +242,6 @@ function createWindow() {
 }
 
 function focusMainWindow() {
-  const mainWindow = BrowserWindow.getAllWindows()[0]
   if (!mainWindow) {
     createWindow()
     return
@@ -179,7 +359,7 @@ ipcMain.handle('export-invoice-pdf', async (event, { html, filename }) => {
 app.whenReady().then(() => {
   if (!hasSingleInstanceLock) return
 
-  electronApp.setAppUserModelId('com.taskmatrix.wbt')
+  electronApp.setAppUserModelId('com.whiteboard.taskmatrix')
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
@@ -234,11 +414,6 @@ app.whenReady().then(() => {
 
   createWindow()
 
-  // 🔥 Only check updates in production + packaged
-  if (!is.dev && app.isPackaged) {
-    autoUpdater.checkForUpdatesAndNotify()
-  }
-
   app.on('activate', () => {
     focusMainWindow()
   })
@@ -260,26 +435,6 @@ app.on('window-all-closed', () => {
 
 log.transports.file.level = 'info'
 autoUpdater.logger = log
-
-autoUpdater.on('checking-for-update', () => {
-  log.info('Checking for update...')
-})
-
-autoUpdater.on('update-available', (info) => {
-  BrowserWindow.getAllWindows().forEach((win) => {
-    win.webContents.send('update-available', info)
-  })
-})
-
-autoUpdater.on('update-downloaded', (info) => {
-  BrowserWindow.getAllWindows().forEach((win) => {
-    win.webContents.send('update-downloaded', info)
-  })
-})
-
-ipcMain.on('restart_app', () => {
-  autoUpdater.quitAndInstall()
-})
 
 // ─────────────────────────────────────────────────────────────
 // 🛑 GLOBAL ERROR HANDLING (Prevents silent crashes)

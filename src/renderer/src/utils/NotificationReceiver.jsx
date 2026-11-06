@@ -15,11 +15,11 @@ const NotificationReceiver = () => {
     // This works even when the app is minimized or not in focus.
     const sendDesktopNotification = async (title, message) => {
         try {
-            if (window?.electron?.ipcRenderer) {
-                const result = await window.electron.ipcRenderer.invoke('show-notification', { title, body: message });
+            if (window.api?.showNotification) {
+                const result = await window.api.showNotification({ title, body: message });
                 console.log('[NotificationReceiver] Desktop notification result:', result);
             } else {
-                console.warn('[NotificationReceiver] window.electron.ipcRenderer not available');
+                console.warn('[NotificationReceiver] Desktop notifications are unavailable.');
             }
         } catch (err) {
             console.error('[NotificationReceiver] Failed to send desktop notification:', err);

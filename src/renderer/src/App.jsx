@@ -12,6 +12,7 @@ import { setProjectData } from './store/projectSlice'
 import useNotifications from './hooks/useNotifications'
 import NotificationReceiver from './utils/NotificationReceiver'
 import GlobalModalManager from './components/common/GlobalModalManager'
+import AppUpdateCenter from './components/common/AppUpdateCenter'
 
 const AppContent = () => {
   const dispatch = useDispatch()
@@ -25,39 +26,9 @@ const AppContent = () => {
     }
   }, [userDetail?.id])
 
-  // Listen for auto-update events from the main process
+  // Listen for system-lock events from the main process.
   useEffect(() => {
-    if (window?.electron?.ipcRenderer) {
-      const handleUpdateAvailable = (_, info) => {
-        toast.info(`📢 A new version (${info?.version || ''}) is available! Downloading update...`, {
-          autoClose: 8000,
-          toastId: 'update-available'
-        })
-      }
-
-      const handleUpdateDownloaded = (_, info) => {
-        toast.success(
-          <div className="flex flex-col gap-2">
-            <span>🎉 Update version ${info?.version || ''} downloaded successfully!</span>
-            <button
-              onClick={() => window.electron.ipcRenderer.send('restart_app')}
-              className="mt-1 bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded text-xs transition cursor-pointer"
-            >
-              Restart & Apply Update
-            </button>
-          </div>,
-          {
-            position: "top-right",
-            autoClose: false,
-            closeOnClick: false,
-            draggable: false,
-            closeButton: true,
-            toastId: 'update-downloaded'
-          }
-        )
-      }
-      window.electron.ipcRenderer.on('update-available', handleUpdateAvailable)
-      window.electron.ipcRenderer.on('update-downloaded', handleUpdateDownloaded)
+    if (window.api?.onSystemLocked) {
       const handleSystemLocked = async () => {
         toast.info("System Lock Detected: Checking for active tasks...", { autoClose: 10000 })
         console.log("System lock detected")
@@ -124,27 +95,9 @@ const AppContent = () => {
         }
       }
 
-      window.electron.ipcRenderer.on('system-locked', handleSystemLocked)
-
-      return () => {
-        window.electron.ipcRenderer.removeListener('update-available', handleUpdateAvailable)
-        window.electron.ipcRenderer.removeListener('update-downloaded', handleUpdateDownloaded)
-        window.electron.ipcRenderer.removeListener('system-locked', handleSystemLocked)
-      }
+      return window.api.onSystemLocked(handleSystemLocked)
     }
   }, [])
-
-  /*
-  // Electron IPC test handler
-  const ipcHandle = () => {
-    if (window?.electron?.ipcRenderer) {
-      window.electron.ipcRenderer.send('ping')
-      toast.info('📡 Sent IPC Ping to main process')
-    } else {
-      toast.warn('Electron IPC not available')
-    }
-  }
-  */
 
   // Fetch current user
   const fetchSignedinUser = async () => {
@@ -319,6 +272,7 @@ const AppContent = () => {
       {/* Main Layout */}
       <Layout />
       <GlobalModalManager />
+      <AppUpdateCenter />
 
       {/* IPC Trigger Button */}
       {/* <div className="fixed bottom-6 right-6 flex flex-col items-center z-50">

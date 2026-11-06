@@ -429,9 +429,7 @@ const GetInvoiceById = ({
       const exportOptions = { html, filename };
       const invokeExport = window.api?.exportInvoicePdf
         ? (options) => window.api.exportInvoicePdf(options)
-        : window.electron?.ipcRenderer?.invoke
-          ? (options) => window.electron.ipcRenderer.invoke("export-invoice-pdf", options)
-          : null;
+        : null;
       if (!invokeExport) {
         await downloadInvoicePdfInBrowser(html, exportOptions.filename);
         return;

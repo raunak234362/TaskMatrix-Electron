@@ -49,8 +49,8 @@ const useNotifications = () => {
         // 1. Native OS Desktop Notification via Electron IPC
         // This fires a real system notification that appears even when the app is minimized.
         try {
-          if (window?.electron?.ipcRenderer) {
-            window.electron.ipcRenderer.invoke('show-notification', {
+          if (window.api?.showNotification) {
+            window.api.showNotification({
               title,
               body: msg.content
             }).then((result) => {
@@ -59,7 +59,7 @@ const useNotifications = () => {
               console.error('[useNotifications] invoke error:', err)
             })
           } else {
-            console.warn('[useNotifications] window.electron.ipcRenderer not available')
+            console.warn('[useNotifications] Desktop notifications are unavailable.')
           }
         } catch (err) {
           console.error('[useNotifications] Failed to send desktop notification:', err)

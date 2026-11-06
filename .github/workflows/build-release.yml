@@ -1,11 +1,10 @@
-name: Build, Release and Upload Installers
+name: Build and publish desktop release
 
 on:
   push:
-    branches:
-      - main
-    paths-ignore:
-      - '**/README.md'
+    tags:
+      - 'v*.*.*'
+
 permissions:
   contents: write
 
@@ -13,20 +12,18 @@ jobs:
   build-windows:
     runs-on: windows-latest
     environment: PROD_BASE_URL
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node 20
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Create .env file
+      - name: Create renderer environment
         shell: bash
         run: |
           echo "VITE_BASE_URL=$VITE_BASE_URL" > .env
@@ -39,78 +36,53 @@ jobs:
           VITE_GITHUB_TOKEN_WBTIT: ${{ secrets.VITE_GITHUB_TOKEN_WBTIT }}
           VITE_GITHUB_TOKEN_RAUNAK: ${{ secrets.VITE_GITHUB_TOKEN_RAUNAK }}
 
-      - name: Build Windows Installer
-        run: npm run build:win
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify release tag matches package version
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          if ("v$version" -ne $env:GITHUB_REF_NAME) {
+            throw "Release tag $env:GITHUB_REF_NAME does not match package version $version"
+          }
 
-      - name: Upload Windows Artifact
-        uses: actions/upload-artifact@v4
+      - name: Build Windows installer
+        run: npm run build:windows
+        env:
+          CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
+          WINDOWS_CERT_PUBLISHER_NAME: ${{ secrets.WINDOWS_CERT_PUBLISHER_NAME }}
+
+      - name: Generate Windows checksums
+        shell: pwsh
+        run: |
+          Get-ChildItem dist -File | Where-Object { $_.Extension -in @('.exe', '.yml', '.blockmap') } |
+            Get-FileHash -Algorithm SHA256 |
+            ForEach-Object { "$($_.Hash.ToLower())  $([IO.Path]::GetFileName($_.Path))" } |
+            Set-Content dist/SHA256SUMS-windows.txt
+
+      - uses: actions/upload-artifact@v4
         with:
-          name: windows-installer
+          name: windows-release
           path: |
             dist/*.exe
+            dist/*.blockmap
             dist/latest.yml
-
-  build-mac:
-    runs-on: macos-latest
-    environment: PROD_BASE_URL
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Create .env file
-        shell: bash
-        run: |
-          echo "VITE_BASE_URL=$VITE_BASE_URL" > .env
-          echo "VITE_SOCKET_URL=$VITE_SOCKET_URL" >> .env
-          echo "VITE_GITHUB_TOKEN_WBTIT=$VITE_GITHUB_TOKEN_WBTIT" >> .env
-          echo "VITE_GITHUB_TOKEN_RAUNAK=$VITE_GITHUB_TOKEN_RAUNAK" >> .env
-        env:
-          VITE_BASE_URL: ${{ secrets.VITE_BASE_URL }}
-          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
-          VITE_GITHUB_TOKEN_WBTIT: ${{ secrets.VITE_GITHUB_TOKEN_WBTIT }}
-          VITE_GITHUB_TOKEN_RAUNAK: ${{ secrets.VITE_GITHUB_TOKEN_RAUNAK }}
-
-      - name: Build macOS App
-        run: npm run build:mac
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload macOS Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: mac-installer
-          path: |
-            dist/*.dmg
-            dist/latest-mac.yml
+            dist/SHA256SUMS-windows.txt
 
   build-linux:
     runs-on: ubuntu-latest
     environment: PROD_BASE_URL
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node 20
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Create .env file
+      - name: Create renderer environment
         shell: bash
         run: |
           echo "VITE_BASE_URL=$VITE_BASE_URL" > .env
@@ -123,45 +95,104 @@ jobs:
           VITE_GITHUB_TOKEN_WBTIT: ${{ secrets.VITE_GITHUB_TOKEN_WBTIT }}
           VITE_GITHUB_TOKEN_RAUNAK: ${{ secrets.VITE_GITHUB_TOKEN_RAUNAK }}
 
-      - name: Build Linux App
+      - name: Verify release tag matches package version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          test "v$version" = "$GITHUB_REF_NAME" || {
+            echo "Release tag $GITHUB_REF_NAME does not match package version $version" >&2
+            exit 1
+          }
+
+      - name: Build and validate Linux packages
         run: npm run build:linux
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Linux Artifact
-        uses: actions/upload-artifact@v4
+      - name: Validate Linux update metadata and checksums
+        run: |
+          test -s dist/latest-linux.yml
+          sha256sum dist/*.deb dist/*.AppImage dist/latest-linux.yml > dist/SHA256SUMS-linux.txt
+
+      - uses: actions/upload-artifact@v4
         with:
-          name: linux-installer
+          name: linux-release
           path: |
-            dist/*.AppImage
             dist/*.deb
-            dist/*.rpm
+            dist/*.AppImage
             dist/latest-linux.yml
+            dist/SHA256SUMS-linux.txt
+
+  build-mac:
+    runs-on: macos-latest
+    environment: PROD_BASE_URL
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create renderer environment
+        shell: bash
+        run: |
+          echo "VITE_BASE_URL=$VITE_BASE_URL" > .env
+          echo "VITE_SOCKET_URL=$VITE_SOCKET_URL" >> .env
+          echo "VITE_GITHUB_TOKEN_WBTIT=$VITE_GITHUB_TOKEN_WBTIT" >> .env
+          echo "VITE_GITHUB_TOKEN_RAUNAK=$VITE_GITHUB_TOKEN_RAUNAK" >> .env
+        env:
+          VITE_BASE_URL: ${{ secrets.VITE_BASE_URL }}
+          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
+          VITE_GITHUB_TOKEN_WBTIT: ${{ secrets.VITE_GITHUB_TOKEN_WBTIT }}
+          VITE_GITHUB_TOKEN_RAUNAK: ${{ secrets.VITE_GITHUB_TOKEN_RAUNAK }}
+
+      - name: Verify release tag matches package version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          test "v$version" = "$GITHUB_REF_NAME"
+
+      - name: Build macOS application
+        run: npm run build:mac
+        env:
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-release
+          path: |
+            dist/*.dmg
+            dist/latest-mac.yml
 
   release:
-    needs: [build-windows, build-mac, build-linux]
+    needs: [build-windows, build-linux, build-mac]
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Get app version
-        id: get_version
-        run: |
-          version=$(cat package.json | jq -r .version)
-          echo "version=$version" >> $GITHUB_OUTPUT
-
-      - name: Download all build artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
-          path: dist
+          path: release-assets
+          merge-multiple: true
 
-      - name: Create GitHub Release
+      - name: Validate required release artifacts
+        run: |
+          test -n "$(find release-assets -maxdepth 1 -name '*.exe' -print -quit)"
+          test -n "$(find release-assets -maxdepth 1 -name '*.deb' -print -quit)"
+          test -n "$(find release-assets -maxdepth 1 -name '*.AppImage' -print -quit)"
+          test -s release-assets/latest.yml
+          test -s release-assets/latest-linux.yml
+          test -s release-assets/SHA256SUMS-windows.txt
+          test -s release-assets/SHA256SUMS-linux.txt
+
+      - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.get_version.outputs.version }}
-          name: Release v${{ steps.get_version.outputs.version }}
-          files: dist/**/*
+          tag_name: ${{ github.ref_name }}
+          name: TaskMatrix WBT ${{ github.ref_name }}
+          generate_release_notes: true
+          files: release-assets/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
