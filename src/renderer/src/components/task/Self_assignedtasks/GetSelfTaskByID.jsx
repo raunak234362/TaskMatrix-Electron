@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { CalendarDays, CheckCircle2, Clock3, Loader2, MessageSquare, Pause, Play, Square, X } from 'lucide-react'
+import { CalendarDays, CheckCircle2, Clock3, Edit, Loader2, MessageSquare, Pause, Play, Square, X } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { useSelector } from 'react-redux'
 import SelfTaskService from '../../../api/services/selftask.service'
+import EditSelfTask from './EditSelfTask'
 
 const formatDateTime = (value) => {
   if (!value) return '—'
@@ -18,6 +19,7 @@ const GetSelfTaskByID = ({ id, onClose, refresh }) => {
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [comment, setComment] = useState('')
+  const [isEditing, setIsEditing] = useState(false)
 
   const fetchTask = useCallback(async () => {
     if (id == null) return
@@ -146,6 +148,11 @@ const GetSelfTaskByID = ({ id, onClose, refresh }) => {
                 <p className="mt-1 font-semibold text-gray-900">{totalTime}</p>
               </div>
               <div className="flex flex-wrap gap-2">
+                {canControlTask && status !== 'COMPLETED' && status !== 'CANCELLED' && (
+                  <button type="button" disabled={processing} onClick={() => setIsEditing(true)} className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                    <Edit className="h-4 w-4" /> Edit task
+                  </button>
+                )}
                 {canControlTask && status === 'ASSIGNED' && (
                   <button type="button" disabled={processing} onClick={() => runAction('start')} className="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
                     <Play className="h-4 w-4" /> Start
@@ -225,6 +232,17 @@ const GetSelfTaskByID = ({ id, onClose, refresh }) => {
           </div>
         )}
       </section>
+      {isEditing && (
+        <EditSelfTask
+          task={task}
+          onClose={() => setIsEditing(false)}
+          onSuccess={async () => {
+            setIsEditing(false)
+            await fetchTask()
+            refresh?.()
+          }}
+        />
+      )}
     </div>,
     document.body
   )

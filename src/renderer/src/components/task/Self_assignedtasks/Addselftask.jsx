@@ -192,8 +192,16 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
     }
   }, [assignedTeam, currentUserId, canAssignToOtherUser, todayDate, setValue])
 
+  const selectedCategories = String(watchedCategoryTag || '')
+    .split(',')
+    .map((category) => category.trim())
+    .filter(Boolean)
+
   const handleQuickCategory = (cat) => {
-    setValue('categoryTag', cat, { shouldValidate: true })
+    const categories = selectedCategories.includes(cat)
+      ? selectedCategories.filter((category) => category !== cat)
+      : [...selectedCategories, cat]
+    setValue('categoryTag', categories.join(', '), { shouldValidate: true })
   }
 
   const onSubmit = async (data) => {
@@ -392,7 +400,7 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
               </label>
               <input
                 type="text"
-                placeholder="e.g. Development, Code Review, Design..."
+                placeholder="Select suggestions or enter categories separated by commas..."
                 className={inputBaseClass}
                 {...register('categoryTag', {
                   required: 'Category is required',
@@ -414,8 +422,9 @@ const AddSelfTask = ({ onCancel, onSuccess }) => {
                     key={cat}
                     type="button"
                     onClick={() => handleQuickCategory(cat)}
+                    aria-pressed={selectedCategories.includes(cat)}
                     className={`px-2 py-0.5 text-[11px] rounded-md border transition cursor-pointer ${
-                      watchedCategoryTag === cat
+                      selectedCategories.includes(cat)
                         ? 'bg-green-100 text-green-800 border-green-300 font-semibold'
                         : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
                     }`}

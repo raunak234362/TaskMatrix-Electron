@@ -34,6 +34,7 @@ const TaskPage = () => {
     'department_manager',
     'dept_manager',
   ].includes(userRole)
+
   const canCreateSelfTask =
     [
       'admin',
@@ -48,10 +49,12 @@ const TaskPage = () => {
       [
         'software developer',
         'software engineer',
+        'senior system administrator',
         'software developer trainee',
         'system admin',
         'hr recruiter',
       ].includes(designation))
+
   const [isTrainingDropdownOpen, setIsTrainingDropdownOpen] = useState(false)
   const [activeTab, setActiveTab] = useState(
     userRole === 'connection_designer_engineer' ||
