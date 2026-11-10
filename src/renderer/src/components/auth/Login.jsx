@@ -218,7 +218,7 @@ const Login = () => {
                 <div>Task Matrix</div>
               </div>
                <span className="text-sm text-black font-semibold tracking-widest uppercase">
-                version: 1.3.3
+                version: 1.3.5
               </span>
               <p className="text-xs sm:text-sm text-black font-semibold uppercase mt-4 sm:mt-6">
                 {showOTP ? "Verify your identity" : "Please login to continue"}

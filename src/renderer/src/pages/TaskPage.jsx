@@ -27,18 +27,13 @@ const TaskPage = () => {
 
 
 
-  const canAddTask =
-    [
-      'admin',
-      'operation_executive',
-      'project_manager',
-      'department_manager',
-      'dept_manager',
-    ].includes(userRole) ||
-    (userRole === 'staff' &&
-      ['software developer', 'software engineer', 'software developer trainee'].includes(
-        designation
-      ))
+  const canAddTask = [
+    'admin',
+    'operation_executive',
+    'project_manager',
+    'department_manager',
+    'dept_manager',
+  ].includes(userRole)
   const canCreateSelfTask =
     [
       'admin',
@@ -51,10 +46,11 @@ const TaskPage = () => {
     ].includes(userRole) ||
     (userRole === 'staff' &&
       [
-        'software_developer',
-        'software_developer_trainee',
-        'system_admin',
-        'hr_recruiter',
+        'software developer',
+        'software engineer',
+        'software developer trainee',
+        'system admin',
+        'hr recruiter',
       ].includes(designation))
   const [isTrainingDropdownOpen, setIsTrainingDropdownOpen] = useState(false)
   const [activeTab, setActiveTab] = useState(
