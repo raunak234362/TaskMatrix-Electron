@@ -206,7 +206,6 @@ const Login = () => {
             <img src={LOGO} alt="Logo" className="w-full h-auto" />
           </div>
         </div>
-
         {/* Login form */}
         <div className="flex items-center md:bg-white/10 md:backdrop-blur-xl justify-center p-4 md:p-8">
           <div className="bg-white/95 w-full max-w-[400px] sm:max-w-[500px] min-h-[450px] sm:min-h-[500px] border border-green-900/10 p-8 sm:p-12 md:p-14 shadow-2xl shadow-green-950/20 flex flex-col justify-between">
