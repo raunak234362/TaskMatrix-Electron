@@ -5,7 +5,7 @@
 - The application uses Electron 38.x, electron-vite 4, React 19, and electron-builder 25. The main process is `src/main/index.js`; the restricted preload bridge is `src/preload/index.js`; Vite emits `out/main`, `out/preload`, and `out/renderer`.
 - The preload exposes specific notification, PDF, system-event, version, and update functions. It does not expose Electron's general-purpose `ipcRenderer` to the renderer.
 - The project has no application-owned `exec`, `spawn`, `fork`, or shell-command process launcher. Chromium starts its own subprocesses internally. Native build-time dependencies such as Lightning CSS and Tailwind Oxide are transitive; there are no direct application native Node add-ons.
-- The updater is `electron-updater` using the existing GitHub Releases provider configured for `raunak234362/TaskMatrix-Electron`. The package metadata currently says version `1.0.0`; tags must match the package version.
+- The updater is `electron-updater` using the existing GitHub Releases provider configured for `raunak234362/TaskMatrix-Electron`. The package metadata version must omit the `v` prefix; release tags use `v<version>` (for example, package version `1.3.3` uses tag `v1.3.3`).
 - The previous Linux package metadata showed two distinct installed packages, `taskmatrix` and `taskmatrix-wbt`, using different `/opt` directories, executable names, desktop entries, and icons. The WBT package name is explicitly retained as `taskmatrix-wbt`; no alternatives are shared with the separate `taskmatrix` package.
 
 ## Linux failure causes and limits
