@@ -10,11 +10,13 @@ files:
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
 asarUnpack:
   - resources/**
+  
 win:
   appId: com.electron.app.wbt
   executableName: taskmatrix-wbt
   icon: build/icon.ico
   target: nsis
+
 nsis:
   artifactName: TaskMatrix-WBT-${version}-Setup.${ext}
   shortcutName: ${productName}
@@ -25,6 +27,7 @@ nsis:
   perMachine: false
   allowToChangeInstallationDirectory: true
   deleteAppDataOnUninstall: false
+
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
@@ -33,8 +36,10 @@ mac:
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
+
 dmg:
   artifactName: ${name}-${version}.${ext}
+
 linux:
   appId: com.whiteboard.taskmatrix
   executableName: taskmatrix-wbt
@@ -49,16 +54,19 @@ linux:
   category: Utility
   synopsis: TaskMatrix WBT project management application
   vendor: Whiteboard Technologies
+
 deb:
   packageName: taskmatrix-wbt
   maintainer: Whiteboard Technologies
   afterInstall: build/linux-postinstall.sh
   afterRemove: build/linux-postremove.sh
+
 appImage:
   artifactName: ${name}-${version}.${ext}
   desktop:
     Name: TaskMatrix WBT
     StartupWMClass: taskmatrix-wbt
+
 npmRebuild: false
 publish:
   provider: github
