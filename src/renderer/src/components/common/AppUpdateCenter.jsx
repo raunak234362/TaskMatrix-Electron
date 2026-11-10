@@ -230,7 +230,7 @@ const AppUpdateCenter = () => {
                 Restart and install
               </button>
             )}
-            {['idle', 'up-to-date', 'error', 'manual', 'unsupported'].includes(status.status) && (
+            {['idle', 'up-to-date', 'error', 'unsupported'].includes(status.status) && (
               <button
                 type="button"
                 onClick={checkManually}
@@ -251,24 +251,30 @@ const AppUpdateCenter = () => {
             )}
           </div>
 
-          <div className="mt-4 border-t border-gray-100 pt-3">
-            <label className="flex items-center gap-2 text-xs text-gray-600">
-              <input
-                type="checkbox"
-                checked={settings.autoCheck}
-                onChange={(event) => saveSettings({ ...settings, autoCheck: event.target.checked })}
-              />
-              Automatically check every 6 hours
-            </label>
-            <label className="mt-2 flex items-center gap-2 text-xs text-gray-600">
-              <input
-                type="checkbox"
-                checked={settings.autoDownload}
-                onChange={(event) => saveSettings({ ...settings, autoDownload: event.target.checked })}
-              />
-              Automatically download available updates
-            </label>
-          </div>
+          {status.status !== 'manual' && (
+            <div className="mt-4 border-t border-gray-100 pt-3">
+              <label className="flex items-center gap-2 text-xs text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={settings.autoCheck}
+                  onChange={(event) =>
+                    saveSettings({ ...settings, autoCheck: event.target.checked })
+                  }
+                />
+                Automatically check every 6 hours
+              </label>
+              <label className="mt-2 flex items-center gap-2 text-xs text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={settings.autoDownload}
+                  onChange={(event) =>
+                    saveSettings({ ...settings, autoDownload: event.target.checked })
+                  }
+                />
+                Automatically download available updates
+              </label>
+            </div>
+          )}
         </section>
       )}
 
