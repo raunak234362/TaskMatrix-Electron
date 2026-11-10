@@ -41,12 +41,6 @@ const AddAssistsModal = ({ projectId, onClose, onSuccess, currentAssists = [] })
       return;
     }
 
-    const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || '';
-    if (userRole !== 'project_manager') {
-      toast.error("Only project_manager can choose the assist");
-      return;
-    }
-
     try {
       setIsSubmitting(true);
       
