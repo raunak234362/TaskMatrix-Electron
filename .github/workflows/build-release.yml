@@ -155,10 +155,24 @@ jobs:
           test "v$version" = "$GITHUB_REF_NAME"
 
       - name: Build macOS application
-        run: npm run build:mac
+        run: |
+          if [ -n "$MAC_CSC_LINK" ]; then
+            export CSC_LINK="$MAC_CSC_LINK"
+          else
+            unset CSC_LINK
+            echo "MAC_CSC_LINK is not configured; building unsigned macOS artifacts."
+          fi
+
+          if [ -n "$MAC_CSC_KEY_PASSWORD" ]; then
+            export CSC_KEY_PASSWORD="$MAC_CSC_KEY_PASSWORD"
+          else
+            unset CSC_KEY_PASSWORD
+          fi
+
+          npm run build:mac
         env:
-          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          MAC_CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          MAC_CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/upload-artifact@v4

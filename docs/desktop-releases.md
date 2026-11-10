@@ -65,6 +65,8 @@ electron-builder consumes `CSC_LINK` and `CSC_KEY_PASSWORD` for Authenticode sig
 
 Unsigned installers can be produced if signing credentials are absent, but Windows SmartScreen may show a warning and users cannot verify the publisher. Configure a trusted code-signing certificate before treating the release as production-signed.
 
+The macOS workflow uses `MAC_CSC_LINK` and `MAC_CSC_KEY_PASSWORD` only when configured. Without them, it builds unsigned macOS artifacts; configure a valid signing certificate before distributing a signed production release.
+
 ## Updates and release publishing
 
 Windows NSIS installers, macOS releases, and Linux AppImages use `electron-updater` and the existing GitHub Releases provider. Updates are checked at application startup and every six hours by default. Users can also check manually, enable/disable periodic checks, and opt into background downloads in the in-app Updates panel. Downloads show progress; installation requires an explicit **Restart and install** action. Dismissing an available version is remembered in the user's renderer profile.
