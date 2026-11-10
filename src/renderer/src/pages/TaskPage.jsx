@@ -16,17 +16,6 @@ const TaskPage = () => {
   const userRole = normalizeAccessValue(sessionStorage.getItem('userRole'))
   const designation = (sessionStorage.getItem('designation') || '').toLowerCase().trim()
 
-
-
-
-
-
-
-
-
-
-
-
   const canAddTask = [
     'admin',
     'operation_executive',
