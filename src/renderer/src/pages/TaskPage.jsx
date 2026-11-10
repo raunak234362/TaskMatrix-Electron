@@ -14,7 +14,31 @@ const TaskPage = () => {
   const normalizeAccessValue = (value) =>
     (value || '').toLowerCase().trim().replace(/[\s-]+/g, '_')
   const userRole = normalizeAccessValue(sessionStorage.getItem('userRole'))
-  const designation = normalizeAccessValue(sessionStorage.getItem('designation'))
+  const designation = (sessionStorage.getItem('designation') || '').toLowerCase().trim()
+
+
+
+
+
+
+
+
+
+
+
+
+  const canAddTask =
+    [
+      'admin',
+      'operation_executive',
+      'project_manager',
+      'department_manager',
+      'dept_manager',
+    ].includes(userRole) ||
+    (userRole === 'staff' &&
+      ['software developer', 'software engineer', 'software developer trainee'].includes(
+        designation
+      ))
   const canCreateSelfTask =
     [
       'admin',
@@ -66,11 +90,7 @@ const TaskPage = () => {
         >
           All Task
         </button>
-        {userRole === 'admin' ||
-        userRole === 'operation_executive' ||
-        userRole === 'project_manager' ||
-        userRole === 'department_manager' ||
-        userRole === 'dept_manager' ? (
+        {canAddTask ? (
           <button
             onClick={() => setActiveTab('addTask')}
             className={`px-6 py-1.5 border-2 rounded-none text-sm font-bold uppercase tracking-tight shadow-sm inline-flex items-center justify-center transition-all cursor-pointer ${
@@ -159,7 +179,7 @@ const TaskPage = () => {
             <AllTasks />
           </div>
         )}
-        {activeTab === 'addTask' && (
+        {canAddTask && activeTab === 'addTask' && (
           <div>
             <AddTask />
           </div>
