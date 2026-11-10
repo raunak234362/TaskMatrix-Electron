@@ -76,7 +76,7 @@ Debian packages do not self-update in-app. Their Updates panel explains that upd
 To publish a release:
 
 1. Update `version` in `package.json` and the matching root version in `package-lock.json` (for example, `npm version patch --no-git-tag-version`).
-2. Commit the version change and push a semantic version tag matching it, e.g. `v1.0.1`.
+2. Commit the version change and push a semantic version tag matching it, e.g. `v1.3.5`.
 3. GitHub Actions builds Windows on Windows, Linux on Ubuntu, and macOS on macOS, validates artifacts and metadata, and creates a GitHub Release only after all builds pass.
 4. The release includes Windows `latest.yml`, Linux `latest-linux.yml`, installers, AppImage, and SHA-256 checksum lists. The update provider must keep the metadata and corresponding artifacts together on the same release.
 
