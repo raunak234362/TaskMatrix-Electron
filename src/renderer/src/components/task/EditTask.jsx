@@ -236,7 +236,7 @@ const EditTask = ({ id, onClose, refresh }) => {
                     Task Name
                   </label>
                   <Input
-                    className="!text-sm !font-bold !text-black !uppercase !rounded-none !border-black !placeholder-black/50"
+                    className="!text-sm !font-bold !text-black !uppercase rounded-none! !border-black !placeholder-black/50"
                     {...register('name')}
                   />
                 </div>
