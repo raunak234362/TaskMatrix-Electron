@@ -36,6 +36,41 @@ const getAccountName = (account) =>
     account?.bankName,
   ].find((name) => typeof name === "string" && name.trim()) || "Unnamed Account";
 
+const extractRfqList = (response) => {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  if (Array.isArray(response?.data?.rfqs)) return response.data.rfqs;
+  if (Array.isArray(response?.data?.result)) return response.data.result;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.rfqs)) return response.rfqs;
+  if (Array.isArray(response?.result)) return response.result;
+  return [];
+};
+
+const normalizeId = (value) => {
+  const id = typeof value === "object" ? value?.id || value?._id : value;
+  return id == null ? "" : String(id);
+};
+
+const fetchAllRfqPages = async (fetchPage) => {
+  const pageSize = 10;
+  const rfqs = [];
+  for (let page = 1; page <= 100; page += 1) {
+    const response = await fetchPage(page, pageSize);
+    const pageRfqs = extractRfqList(response);
+    rfqs.push(...pageRfqs);
+    const pagination =
+      response?.data?.pagination ||
+      response?.data?.meta ||
+      response?.pagination ||
+      response?.meta ||
+      {};
+    const totalPages = Number(pagination.totalPages || pagination.total_pages || 0);
+    if (totalPages ? page >= totalPages : pageRfqs.length < pageSize) break;
+  }
+  return rfqs;
+};
+
 
 
 
@@ -103,7 +138,10 @@ const AddInvoice = ({
           Service.GetBankAccounts(),
           Service.GetAllFabricators(1, 100),
           Service.GetAllProjects(1, 100),
-          Service.FetchAllRFQ(),
+          Promise.all([
+            fetchAllRfqPages((page, limit) => Service.FetchAllRFQ(page, limit)),
+            fetchAllRfqPages((page, limit) => Service.RFQRecieved(page, limit))
+          ]),
           Service.GetAllInvoice()
         ]);
 
@@ -127,10 +165,11 @@ const AddInvoice = ({
         else if (projectsRes?.projects && Array.isArray(projectsRes.projects)) projectsData = projectsRes.projects;
         setAllProjects(projectsData);
 
-        let rfqsData = [];
-        if (Array.isArray(rfqsRes)) rfqsData = rfqsRes;
-        else if (rfqsRes?.data?.data && Array.isArray(rfqsRes.data.data)) rfqsData = rfqsRes.data.data;
-        else if (rfqsRes?.data && Array.isArray(rfqsRes.data)) rfqsData = rfqsRes.data;
+        const rfqLists = rfqsRes.flat();
+        const uniqueRfqs = new Map(
+          rfqLists.map((rfq, index) => [String(rfq.id || rfq._id || `rfq-${index}`), rfq])
+        );
+        const rfqsData = Array.from(uniqueRfqs.values());
         setAllRfqs(rfqsData);
 
         let invoicesData = [];
@@ -193,6 +232,7 @@ const AddInvoice = ({
   const selectFabricator = async (fabricatorId) => {
     const requestId = ++fabricatorRequestId.current;
     setSelectedFabricatorId(fabricatorId);
+    setAvailableRfqs([]);
     setValue("fabricatorId", fabricatorId);
     setSelectedProjectId("");
     setValue("projectId", "");
@@ -265,12 +305,32 @@ const AddInvoice = ({
     );
     setFilteredProjects(projects);
 
-    const raisedRfqIds = allInvoices.map(inv => inv.rfqId).filter(Boolean);
+    const raisedRfqIds = new Set(
+      allInvoices
+        .flatMap((invoice) => {
+          const value = invoice.rfqId || invoice.rfq_id || invoice.rfq;
+          return Array.isArray(value) ? value : [value];
+        })
+        .map(normalizeId)
+        .filter(Boolean)
+    );
     const fbRfqs = allRfqs.filter(rfq => {
-      const fabId = rfq.fabricatorId || (rfq.fabricator && (rfq.fabricator.id || rfq.fabricator._id)) || rfq.clientId || rfq.senderId || (rfq.sender && (rfq.sender.id || rfq.sender._id));
-      return fabId === fabricatorId;
+      const fabricatorIds = [
+        rfq.fabricatorId,
+        rfq.fabricatorID,
+        rfq.fabricator_id,
+        rfq.fabricator,
+        rfq.recipientId,
+        rfq.recipient,
+        rfq.clientId,
+        rfq.senderId,
+        rfq.sender
+      ].map(normalizeId).filter(Boolean);
+      return fabricatorIds.includes(String(fabricatorId));
     });
-    const unbilledRfqs = fbRfqs.filter(rfq => !raisedRfqIds.includes(rfq._id) && !raisedRfqIds.includes(rfq.id));
+    const unbilledRfqs = fbRfqs.filter(
+      (rfq) => !raisedRfqIds.has(normalizeId(rfq._id || rfq.id))
+    );
     setAvailableRfqs(unbilledRfqs);
 
     if (selectedFabricator?.accountId) {
@@ -542,7 +602,7 @@ const AddInvoice = ({
           </div>
 
           {/* Select RFQ */}
-          {selectedFabricatorId && availableRfqs.length > 0 && (
+          {selectedFabricatorId && (
             <div className="w-full md:w-64">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Select RFQ
@@ -560,6 +620,7 @@ const AddInvoice = ({
                       handleRfqSelect({ target: { value: val } });
                     }}
                     placeholder="-- Choose an RFQ --"
+                    noOptionsMessage={() => "No unbilled RFQs found for this fabricator"}
                     isClearable
                     isSearchable
                     styles={customSelectStyles}
