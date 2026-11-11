@@ -2,6 +2,22 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Service from "../../../api/Service";
 import {
+  appendMonthlyTaskHoursToPdf,
+  appendMonthlyTaskHoursToWorkbook,
+  buildMonthlyTaskHoursReport
+} from "./TaskHoursReport";
+import ModularEmployeeTaskDrawer from "./EmployeeTaskDrawer";
+import ModularDateRangeExportModal from "./DateRangeExportModal";
+import InfoRow from "./InfoRow";
+import {
+  allocToSec,
+  calcWorkedSec,
+  COMPLETION_LABEL,
+  secToHms,
+  STATUS_META,
+  statusMeta
+} from "./employeeTaskUtils";
+import {
   Loader2,
   AlertCircle,
   Clock,
@@ -50,23 +66,121 @@ import {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const secToHms = (seconds) => {
-  if (!seconds || isNaN(seconds) || seconds === 0) return "0 hrs 00 mins";
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  return `${h} hrs ${String(m).padStart(2, "0")} mins`;
+const getTaskDate = (task) => new Date(task.created_on || task.createdAt || task.created_at);
+
+const getTaskProjectName = (task) =>
+  String(task.project?.name || task.project?.projectName || task.projectName || "Unassigned Project");
+
+const getTaskProjectId = (task) =>
+  String(task.project_id || task.project?.id || task.project?._id || getTaskProjectName(task));
+
+const cleanReportText = (value) =>
+  String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const getTaskMilestoneId = (task) =>
+  task.mileStone_id ||
+  task.mileStoneId ||
+  task.milestoneId ||
+  task.milestone_id ||
+  task.milestone?.id ||
+  task.milestone?._id ||
+  task.mileStone?.id ||
+  task.mileStone?._id;
+
+const getMilestoneList = (response) => {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  if (Array.isArray(response?.milestones)) return response.milestones;
+  return [];
 };
 
-// Total worked seconds from workingHourTask[]
-const calcWorkedSec = (workingHourTask) => {
-  if (!Array.isArray(workingHourTask) || workingHourTask.length === 0) return 0;
-  return workingHourTask.reduce((sum, s) => sum + (Number(s.duration_seconds) || 0), 0);
+const buildHoursSummary = (taskList) => {
+  const projects = new Map();
+
+  taskList.forEach((task) => {
+    const projectId = getTaskProjectId(task);
+    const projectName = getTaskProjectName(task);
+    const assignedSec = allocToSec(task.allocatedHours || task.allocationLog?.allocatedHours);
+    const workedSec = calcWorkedSec(task.workingHourTask);
+    const project = projects.get(projectId) || {
+      projectName,
+      assignedSec: 0,
+      workedSec: 0
+    };
+    project.assignedSec += assignedSec;
+    project.workedSec += workedSec;
+    projects.set(projectId, project);
+  });
+
+  return {
+    projects: Array.from(projects.values()).sort((a, b) => a.projectName.localeCompare(b.projectName))
+  };
 };
 
-// Allocated hours (string "5") → seconds
-const allocToSec = (allocatedHours) => {
-  const h = parseFloat(allocatedHours);
-  return isNaN(h) ? 0 : h * 3600;
+const createMonthlyTaskHoursReport = (taskList, milestonesByProject) =>
+  buildMonthlyTaskHoursReport(taskList, {
+    milestonesByProject,
+    getTaskDate,
+    getTaskProjectId,
+    getTaskProjectName,
+    getTaskMilestoneId,
+    allocToSec,
+    calcWorkedSec,
+    cleanReportText
+  });
+
+const getReportPeriod = (scope, selectedMonth, selectedYear, fromDate = "", toDate = "") => {
+  const now = new Date();
+  let start = null;
+  let end = null;
+  let label = "All Time";
+
+  if (scope === "range" || scope === "custom") {
+    start = fromDate ? new Date(`${fromDate}T00:00:00`) : null;
+    end = toDate ? new Date(`${toDate}T23:59:59.999`) : null;
+    label = fromDate && toDate ? `${fromDate} to ${toDate}` : fromDate ? `From ${fromDate}` : `Until ${toDate}`;
+  } else if (["last30", "last60", "last90"].includes(scope)) {
+    const days = Number(scope.slice(4));
+    start = new Date(now);
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - days + 1);
+    end = now;
+    label = `Last ${days} Days`;
+  } else if (scope === "quarter") {
+    const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3;
+    start = new Date(now.getFullYear(), quarterStartMonth, 1);
+    end = now;
+    label = `Q${Math.floor(now.getMonth() / 3) + 1} ${now.getFullYear()}`;
+  } else if (scope === "month") {
+    start = new Date(selectedYear, selectedMonth - 1, 1);
+    end = new Date(selectedYear, selectedMonth, 0, 23, 59, 59, 999);
+    label = `${new Date(0, selectedMonth - 1).toLocaleString("default", { month: "long" })} ${selectedYear}`;
+  } else if (scope === "year") {
+    start = new Date(selectedYear, 0, 1);
+    end = new Date(selectedYear, 11, 31, 23, 59, 59, 999);
+    label = `Year ${selectedYear}`;
+  }
+
+  return { start, end, label };
+};
+
+const shouldShowMonthlyHours = (scope, start, end) => {
+  if (["last30", "last60", "last90", "quarter", "month", "year"].includes(scope)) {
+    return true;
+  }
+  if (scope !== "range" && scope !== "custom") return false;
+  if (!start && !end) return false;
+
+  const rangeStart = start || end;
+  const rangeEnd = end || new Date();
+  if (!start && end) return true;
+  return rangeEnd.getTime() - rangeStart.getTime() >= 29 * 24 * 60 * 60 * 1000;
 };
 
 // Calculate EPS Score breakdown for any list of tasks (used for custom date range reports)
@@ -153,29 +267,6 @@ const calculateEPSForTasks = (taskList) => {
     overrunScore
   };
 };
-
-const COMPLETION_LABEL = {
-  RANGE_0_10: "0–10%",
-  RANGE_11_25: "11–25%",
-  RANGE_26_50: "26–50%",
-  RANGE_51_75: "51–75%",
-  RANGE_76_90: "76–90%",
-  RANGE_91_100: "91–100%",
-};
-
-const STATUS_META = {
-  COMPLETED: { label: "Completed", color: "bg-green-100 text-green-700 border-green-200" },
-  VALIDATE_COMPLETE: { label: "Validate Complete", color: "bg-teal-100 text-teal-700 border-teal-200" },
-  IN_PROGRESS: { label: "In Progress", color: "bg-blue-100 text-blue-700 border-blue-200" },
-  PAUSED: { label: "Paused", color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
-  PENDING: { label: "Pending", color: "bg-gray-100 text-gray-600 border-gray-200" },
-  OVERRUN: { label: "Overrun", color: "bg-red-100 text-red-600 border-red-200" },
-  REJECTED: { label: "Rejected", color: "bg-rose-100 text-rose-600 border-rose-200" },
-  COMPLETE: { label: "Complete", color: "bg-green-100 text-green-700 border-green-200" },
-};
-
-const statusMeta = (s) =>
-  STATUS_META[s] || { label: s || "Unknown", color: "bg-gray-100 text-gray-500 border-gray-200" };
 
 // ─── StatCard ────────────────────────────────────────────────────────────────
 
@@ -492,7 +583,9 @@ const GetEmployeeByID = ({ id, onClose }) => {
 
     allTasks.forEach((t) => {
       if (t.project_id) projectSet.add(t.project_id);
-      if (t.project?.name) projNames.add(t.project.name);
+      if (t.project?.name || t.project?.projectName || t.projectName) {
+        projNames.add(getTaskProjectName(t));
+      }
     });
 
     const totalAssignedSec = allTasks.reduce(
@@ -558,7 +651,13 @@ const GetEmployeeByID = ({ id, onClose }) => {
     };
   };
 
-  const generatePdfReport = (dataToExport, scope, fromDate = "", toDate = "", includeTaskList = true) => {
+  const generatePdfReport = (
+    dataToExport,
+    scope,
+    fromDate = "",
+    toDate = "",
+    milestonesByProject = new Map()
+  ) => {
     try {
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const employeeName = `${employee.firstName || ""} ${employee.middleName || ""} ${employee.lastName || ""}`.trim();
@@ -570,26 +669,23 @@ const GetEmployeeByID = ({ id, onClose }) => {
         minute: "2-digit"
       });
 
-      let periodText = "All Time";
-      if (scope === "range" || scope === "custom") {
-        const fromStr = fromDate || taskDateFrom;
-        const toStr = toDate || taskDateTo;
-        if (fromStr && toStr) {
-          periodText = `${fromStr} to ${toStr}`;
-        } else if (fromStr) {
-          periodText = `From ${fromStr}`;
-        } else if (toStr) {
-          periodText = `Until ${toStr}`;
-        } else {
-          periodText = "Filtered Date Range";
-        }
-      } else if (scope === "month") {
-        periodText = `${new Date(0, selectedMonth - 1).toLocaleString("default", { month: "long" })} ${selectedYear}`;
-      } else if (scope === "year") {
-        periodText = `Year ${selectedYear}`;
-      }
+      const reportPeriod = getReportPeriod(
+        scope,
+        selectedMonth,
+        selectedYear,
+        fromDate || taskDateFrom,
+        toDate || taskDateTo
+      );
+      const periodText = reportPeriod.label;
 
       const exportStats = computeStatsForExport(dataToExport);
+      const hoursSummary = buildHoursSummary(dataToExport);
+      const monthlyTaskHoursReport = createMonthlyTaskHoursReport(dataToExport, milestonesByProject);
+      const includeMonthlyHours = shouldShowMonthlyHours(
+        scope,
+        reportPeriod.start,
+        reportPeriod.end
+      );
 
       const eps = (epsData && (scope === "month" || scope === "year"))
         ? {
@@ -614,7 +710,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
 
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      doc.text(includeTaskList ? "FULL PERFORMANCE REPORT" : "PERFORMANCE SUMMARY REPORT", 58, 14);
+      doc.text("PERFORMANCE REPORT", 58, 14);
 
       doc.setFontSize(8);
       doc.text(`Generated: ${generatedDateStr}`, 196, 14, { align: "right" });
@@ -713,66 +809,36 @@ const GetEmployeeByID = ({ id, onClose }) => {
 
       y = (doc.lastAutoTable?.finalY || y + 20) + 8;
 
-      // Section 3: Task Details Table (Only if includeTaskList is true)
-      if (includeTaskList) {
-        doc.setFontSize(10.5);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(17, 24, 39);
-        doc.text(`3. TASK DETAILS (${dataToExport.length} TASKS)`, 14, y);
-        y += 4;
+      doc.setFontSize(10.5);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(17, 24, 39);
+      doc.text("3. PROJECT HOURS SUMMARY", 14, y);
+      y += 4;
 
-        const taskHead = [["S.No", "Task Name", "Project Name", "WBS Type", "Created Date", "Est. Hours", "Worked Hours", "Overrun", "Status"]];
+      autoTable(doc, {
+        head: [["Project", "Assigned Hours", "Worked Hours"]],
+        body: hoursSummary.projects.map((project) => [
+          project.projectName,
+          secToHms(project.assignedSec),
+          secToHms(project.workedSec)
+        ]),
+        startY: y,
+        theme: "striped",
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [22, 163, 74], textColor: [255, 255, 255], fontStyle: "bold" },
+        margin: { left: 14, right: 14 }
+      });
 
-        const taskRowsData = dataToExport.map((t, idx) => {
-          const assignedSec = allocToSec(t.allocatedHours || t.allocationLog?.allocatedHours);
-          const workedSec = calcWorkedSec(t.workingHourTask);
-          const isOverrun = assignedSec > 0 && workedSec > assignedSec;
-          const statusMetaInfo = statusMeta(t.status);
+      y = (doc.lastAutoTable?.finalY || y + 20) + 8;
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
 
-          return [
-            idx + 1,
-            t.name || t.title || "—",
-            t.project?.name || "—",
-            t.wbsType || "—",
-            t.created_on ? new Date(t.created_on).toLocaleDateString("en-GB") : (t.createdAt ? new Date(t.createdAt).toLocaleDateString("en-GB") : "—"),
-            secToHms(assignedSec),
-            secToHms(workedSec),
-            isOverrun ? "Overrun" : "Normal",
-            statusMetaInfo.label,
-          ];
-        });
-
-        autoTable(doc, {
-          head: taskHead,
-          body: taskRowsData,
+      if (includeMonthlyHours && monthlyTaskHoursReport.projectHours.length > 0) {
+        y = appendMonthlyTaskHoursToPdf(doc, monthlyTaskHoursReport, {
           startY: y,
-          theme: "striped",
-          styles: { fontSize: 7.5, cellPadding: 2 },
-          headStyles: { fillColor: [22, 163, 74], textColor: [255, 255, 255], fontStyle: "bold" },
-          columnStyles: {
-            0: { cellWidth: 10, halign: "center" },
-            1: { cellWidth: 42 },
-            2: { cellWidth: 32 },
-            3: { cellWidth: 18 },
-            4: { cellWidth: 20 },
-            5: { cellWidth: 18 },
-            6: { cellWidth: 18 },
-            7: { cellWidth: 16, halign: "center" },
-            8: { cellWidth: 16, halign: "center" },
-          },
-          didParseCell: (data) => {
-            if (data.section === "body") {
-              if (data.column.index === 7) {
-                if (data.cell.raw === "Overrun") {
-                  data.cell.styles.textColor = [220, 38, 38];
-                  data.cell.styles.fontStyle = "bold";
-                } else {
-                  data.cell.styles.textColor = [37, 99, 235];
-                }
-              }
-            }
-          },
-          margin: { left: 14, right: 14 },
+          secToHms
         });
       }
 
@@ -785,17 +851,22 @@ const GetEmployeeByID = ({ id, onClose }) => {
         doc.text(`TaskMatrix Performance Report — ${employeeName}`, 14, 290);
       }
 
-      const reportPrefix = includeTaskList ? "Detailed_Report" : "Performance_Summary";
-      const fileName = `${reportPrefix}_${employeeName.replace(/\s+/g, "_")}_${periodText.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
+      const fileName = `Performance_Report_${employeeName.replace(/\s+/g, "_")}_${periodText.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
       doc.save(fileName);
-      toast.success(`${includeTaskList ? "Full Detailed" : "Performance Summary"} PDF generated successfully!`);
+      toast.success("Performance report PDF generated successfully!");
     } catch (err) {
       console.error("PDF Generation Error:", err);
       toast.error("Failed to generate PDF report");
     }
   };
 
-  const generateExcelReport = (dataToExport, scope, fromDate = "", toDate = "") => {
+  const generateExcelReport = (
+    dataToExport,
+    scope,
+    fromDate = "",
+    toDate = "",
+    milestonesByProject = new Map()
+  ) => {
     try {
       const employeeName = `${employee.firstName || ""} ${employee.middleName || ""} ${employee.lastName || ""}`.trim();
       const exportStats = computeStatsForExport(dataToExport);
@@ -812,8 +883,17 @@ const GetEmployeeByID = ({ id, onClose }) => {
         }
         : exportStats.eps;
 
-      let periodText = scope;
-      if (fromDate || toDate) periodText = `${fromDate || "Start"} to ${toDate || "End"}`;
+      const reportPeriod = getReportPeriod(
+        scope,
+        selectedMonth,
+        selectedYear,
+        fromDate || taskDateFrom,
+        toDate || taskDateTo
+      );
+      const periodText = reportPeriod.label;
+      const hoursSummary = buildHoursSummary(dataToExport);
+      const monthlyTaskHoursReport = createMonthlyTaskHoursReport(dataToExport, milestonesByProject);
+      const includeMonthlyHours = shouldShowMonthlyHours(scope, reportPeriod.start, reportPeriod.end);
 
       const summaryRows = [
         { Field: "EMPLOYEE PERFORMANCE & TASK REPORT", Value: "" },
@@ -840,29 +920,20 @@ const GetEmployeeByID = ({ id, onClose }) => {
         { Field: "Overrun Tasks", Value: exportStats.overrunCount },
       ];
 
-      const taskRows = dataToExport.map((t, idx) => {
-        const assignedSec = allocToSec(t.allocatedHours || t.allocationLog?.allocatedHours);
-        const workedSec = calcWorkedSec(t.workingHourTask);
-        const isOverrun = assignedSec > 0 && workedSec > assignedSec;
-        return {
-          "S.No": idx + 1,
-          "Project Name": t.project?.name || "—",
-          "Task Name": t.name || t.title || "—",
-          "WBS Type": t.wbsType || "—",
-          "Created Date": t.created_on ? new Date(t.created_on).toLocaleDateString("en-GB") : "—",
-          "Est. Hours": secToHms(assignedSec),
-          "Worked Hours": secToHms(workedSec),
-          "Overrun": isOverrun ? "Overrun" : "Normal",
-          "Status": statusMeta(t.status).label,
-        };
-      });
-
       const wb = XLSX.utils.book_new();
       const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
       XLSX.utils.book_append_sheet(wb, wsSummary, "Performance Summary");
 
-      const wsTasks = XLSX.utils.json_to_sheet(taskRows);
-      XLSX.utils.book_append_sheet(wb, wsTasks, "Task Details");
+      const projectRows = hoursSummary.projects.map((project) => ({
+        "Project Name": project.projectName,
+        "Assigned Hours": secToHms(project.assignedSec),
+        "Worked Hours": secToHms(project.workedSec)
+      }));
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(projectRows), "Project Hours");
+
+      if (includeMonthlyHours) {
+        appendMonthlyTaskHoursToWorkbook(wb, XLSX, monthlyTaskHoursReport, secToHms);
+      }
 
       const fileName = `Performance_Report_${employeeName.replace(/\s+/g, "_")}_${periodText.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`;
       XLSX.writeFile(wb, fileName);
@@ -873,48 +944,30 @@ const GetEmployeeByID = ({ id, onClose }) => {
     }
   };
 
-  const handleExport = (format, scope, customFrom = "", customTo = "") => {
+  const handleExport = async (format, scope, customFrom = "", customTo = "") => {
     let dataToExport = [...allTasks];
+    const fromStr = customFrom || taskDateFrom;
+    const toStr = customTo || taskDateTo;
+    const period = getReportPeriod(scope, selectedMonth, selectedYear, fromStr, toStr);
 
-    if (scope === "range" || scope === "custom") {
-      const fromStr = customFrom || taskDateFrom;
-      const toStr = customTo || taskDateTo;
-
-      if (fromStr) {
-        const from = new Date(fromStr);
-        dataToExport = listFilterFrom(dataToExport, from);
-      }
-      if (toStr) {
-        const to = new Date(toStr + "T23:59:59.999");
-        dataToExport = listFilterTo(dataToExport, to);
-      }
-
-      if (taskProjectFilter !== "ALL") {
-        dataToExport = dataToExport.filter((t) => (t.project?.name || "") === taskProjectFilter);
-      }
-      if (taskStatusFilter !== "ALL") {
-        dataToExport = dataToExport.filter((t) => t.status === taskStatusFilter);
-      }
+    dataToExport = dataToExport.filter((task) => {
+      const taskDate = getTaskDate(task);
+      if ((period.start || period.end) && Number.isNaN(taskDate.getTime())) return false;
+      if (period.start && taskDate < period.start) return false;
+      if (period.end && taskDate > period.end) return false;
+      if (taskProjectFilter !== "ALL" && getTaskProjectName(task) !== taskProjectFilter) return false;
+      if (taskStatusFilter !== "ALL" && task.status !== taskStatusFilter) return false;
       if (taskSearch.trim()) {
-        const q = taskSearch.toLowerCase();
-        dataToExport = dataToExport.filter(
-          (t) =>
-            (t.name || "").toLowerCase().includes(q) ||
-            (t.description || "").toLowerCase().includes(q) ||
-            (t.project?.name || "").toLowerCase().includes(q)
+        const query = taskSearch.toLowerCase();
+        return (
+          (task.name || "").toLowerCase().includes(query) ||
+          (task.description || "").toLowerCase().includes(query) ||
+          getTaskProjectName(task).toLowerCase().includes(query) ||
+          (task.wbsType || "").toLowerCase().includes(query)
         );
       }
-    } else if (scope === "month") {
-      dataToExport = allTasks.filter(t => {
-        const d = new Date(t.created_on || t.createdAt);
-        return d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
-      });
-    } else if (scope === "year") {
-      dataToExport = allTasks.filter(t => {
-        const d = new Date(t.created_on || t.createdAt);
-        return d.getFullYear() === selectedYear;
-      });
-    }
+      return true;
+    });
 
     if (dataToExport.length === 0) {
       toast.error("No task data found for the selected period");
@@ -922,27 +975,41 @@ const GetEmployeeByID = ({ id, onClose }) => {
       return;
     }
 
+    const projectIds = Array.from(new Set(dataToExport
+      .map((task) => task.project_id || task.project?.id || task.project?._id)
+      .filter(Boolean)
+      .map(String)));
+    const milestonesByProject = new Map();
+    let milestoneFetchFailed = false;
+    await Promise.all(projectIds.map(async (projectId) => {
+      try {
+        const response = await Service.GetProjectMilestoneById(projectId);
+        if (!response) {
+          milestoneFetchFailed = true;
+          return;
+        }
+        getMilestoneList(response).forEach((milestone) => {
+          const milestoneId = milestone.id || milestone._id || milestone.milestoneId || milestone.mileStoneId;
+          if (milestoneId) milestonesByProject.set(`${projectId}:${milestoneId}`, milestone);
+        });
+      } catch (error) {
+        milestoneFetchFailed = true;
+        console.error(`Failed to fetch milestones for project ${projectId}:`, error);
+      }
+    }));
+    if (milestoneFetchFailed) {
+      toast.warn("Report generated, but some milestone descriptions could not be loaded");
+    }
+
     if (format === "excel") {
-      generateExcelReport(dataToExport, scope, customFrom || taskDateFrom, customTo || taskDateTo);
+      generateExcelReport(dataToExport, scope, fromStr, toStr, milestonesByProject);
     } else if (format === "pdf_summary" || format === "pdf_overview") {
-      generatePdfReport(dataToExport, scope, customFrom || taskDateFrom, customTo || taskDateTo, false);
+      generatePdfReport(dataToExport, scope, fromStr, toStr, milestonesByProject);
     } else {
-      generatePdfReport(dataToExport, scope, customFrom || taskDateFrom, customTo || taskDateTo, true);
+      generatePdfReport(dataToExport, scope, fromStr, toStr, milestonesByProject);
     }
     setShowExportMenu(false);
   };
-
-  const listFilterFrom = (arr, fromDateObj) =>
-    arr.filter((t) => {
-      const d = new Date(t.created_on || t.createdAt);
-      return !isNaN(d) && d >= fromDateObj;
-    });
-
-  const listFilterTo = (arr, toDateObj) =>
-    arr.filter((t) => {
-      const d = new Date(t.created_on || t.createdAt);
-      return !isNaN(d) && d <= toDateObj;
-    });
 
   // ── Filtered tasks ───────────────────────────────────────────────────────────
 
@@ -1269,7 +1336,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
                     </button>
 
                     {showExportMenu && (
-                      <div className="absolute top-full right-0 mt-2 w-72 bg-white rounded-lg border border-black/15 shadow-xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                      <div className="absolute top-full right-0 mt-2 w-72 max-h-[75vh] overflow-y-auto bg-white rounded-lg border border-black/15 shadow-xl z-50 p-2 animate-in fade-in slide-in-from-top-2">
                         <div className="px-3 py-2 text-[10px] font-bold text-black uppercase border-b border-black/10 flex items-center justify-between">
                           Report Type & Scope
                           <X size={12} className="cursor-pointer text-black hover:text-red-600" onClick={() => setShowExportMenu(false)} />
@@ -1277,7 +1344,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
 
                         {[
                           { id: "pdf_summary", label: "PDF Summary (EPS & KPIs)", subtitle: "Overview Only (1st Image)", icon: FilePdf, color: "text-green-700" },
-                          { id: "pdf_detailed", label: "PDF Full Report", subtitle: "Summary + Detailed Task List", icon: FilePdf, color: "text-red-700" },
+                          { id: "pdf_detailed", label: "PDF Full Report", subtitle: "Summary + Hours Breakdown", icon: FilePdf, color: "text-red-700" },
                           { id: "excel", label: "Excel Spreadsheet", subtitle: "Full Data Workbook", icon: FileSpreadsheet, color: "text-emerald-700" },
                         ].map((fmtObj) => (
                           <div key={fmtObj.id} className="space-y-1 mt-2 mb-2 p-1 border-b border-black/10 last:border-0 pb-1.5">
@@ -1290,8 +1357,12 @@ const GetEmployeeByID = ({ id, onClose }) => {
                             </div>
                             {[
                               { label: "Date Range (From - To)", scope: "range" },
-                              { label: "Current Month", scope: "month" },
-                              { label: "Current Year", scope: "year" },
+                              { label: "Last 30 Days", scope: "last30" },
+                              { label: "Last 60 Days", scope: "last60" },
+                              { label: "Last 90 Days", scope: "last90" },
+                              { label: "Current Quarter", scope: "quarter" },
+                              { label: "Selected Month", scope: "month" },
+                              { label: "Selected Year", scope: "year" },
                               { label: "All Time", scope: "all" },
                             ].map((item) => (
                               <button
@@ -1580,7 +1651,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
                     )}
                     {/* ── Task Detail Drawer (with fresh fetch) ── */}
                     {selectedTask && (
-                      <EmployeeTaskDrawer 
+                      <ModularEmployeeTaskDrawer
                         taskId={selectedTask.id} 
                         onClose={() => setSelectedTask(null)} 
                       />
@@ -1607,7 +1678,7 @@ const GetEmployeeByID = ({ id, onClose }) => {
           )}
 
           {showDateRangeModal && (
-            <DateRangeExportModal
+            <ModularDateRangeExportModal
               defaultFrom={taskDateFrom}
               defaultTo={taskDateTo}
               defaultFormat={dateRangeExportFormat}
@@ -1621,21 +1692,6 @@ const GetEmployeeByID = ({ id, onClose }) => {
     document.body
   );
 };
-
-// ─── InfoRow ──────────────────────────────────────────────────────────────────
-
-const InfoRow = ({ label, value, href }) => (
-  <div className="flex justify-between items-center py-1.5 border-b border-black/5 last:border-0">
-    <span className="text-black font-bold uppercase text-xs tracking-wider">{label}</span>
-    {href ? (
-      <a href={href} className="text-black text-sm font-bold hover:underline">
-        {value}
-      </a>
-    ) : (
-      <span className="text-black text-sm font-bold">{value}</span>
-    )}
-  </div>
-);
 
 // ─── DateRangeExportModal ───────────────────────────────────────────────────
 const DateRangeExportModal = ({ defaultFrom, defaultTo, defaultFormat, onClose, onExport }) => {
@@ -1715,7 +1771,7 @@ const DateRangeExportModal = ({ defaultFrom, defaultTo, defaultFormat, onClose, 
                 <span className="flex items-center gap-2">
                   <FilePdf size={14} /> PDF Full Report
                 </span>
-                <span className="text-[9px] font-normal opacity-80">(With Task List Table)</span>
+                <span className="text-[9px] font-normal opacity-80">(Summary + Hours Breakdown)</span>
               </button>
               <button
                 type="button"
