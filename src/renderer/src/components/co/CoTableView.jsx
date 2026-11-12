@@ -1,4 +1,27 @@
 
+const ALLOWED_DESCRIPTION_TAGS = new Set(["p", "br", "strong", "b", "em", "i", "u", "ol", "ul", "li"]);
+
+const sanitizeDescriptionHtml = (value) => {
+  const parsed = new DOMParser().parseFromString(String(value ?? ""), "text/html");
+  const cleanChildren = (parent) => {
+    [...parent.children].forEach((element) => {
+      const tag = element.tagName.toLowerCase();
+      if (["script", "style", "iframe", "object", "embed"].includes(tag)) {
+        element.remove();
+        return;
+      }
+      cleanChildren(element);
+      if (!ALLOWED_DESCRIPTION_TAGS.has(tag)) {
+        element.replaceWith(...element.childNodes);
+        return;
+      }
+      [...element.attributes].forEach((attribute) => element.removeAttribute(attribute.name));
+    });
+  };
+  cleanChildren(parsed.body);
+  return parsed.body.innerHTML;
+};
+
 const getCols = (canSeeCost) => canSeeCost
   ? ["description", "referenceDoc", "elements", "QtyNo", "hours", "cost", "remarks"]
   : ["description", "referenceDoc", "elements", "QtyNo", "hours", "remarks"];
@@ -126,7 +149,14 @@ const CoTableView = ({ rows, canSeeCost = true }) => {
                       rowSpan={spanInfo.rowSpan}
                       className={`px-4 py-3 border border-gray-200 max-w-xs ${alignmentClass}`}
                     >
-                      <span className="whitespace-pre-line">{formattedVal}</span>
+                      {colName === "description" ? (
+                        <div
+                          className="prose prose-sm max-w-none [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-1"
+                          dangerouslySetInnerHTML={{ __html: sanitizeDescriptionHtml(formattedVal) }}
+                        />
+                      ) : (
+                        <span className="whitespace-pre-line">{formattedVal}</span>
+                      )}
                     </td>
                   );
                 })}

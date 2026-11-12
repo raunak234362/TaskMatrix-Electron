@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import Button from "../fields/Button";
+import RichTextEditor from "../fields/RichTextEditor";
 import Service from "../../api/Service";
 import { toast } from "react-toastify";
 import { Merge, Loader2 } from "lucide-react";
@@ -529,6 +530,18 @@ const CoTable = ({ coId, onSuccess, isDraft, onDraftSubmit, isSubmitting }) => {
                                   />
                                 );
                               } else {
+                                if (colName === "description") {
+                                  return (
+                                    <RichTextEditor
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                      placeholder="Doc desc..."
+                                      className="co-table-description-editor min-w-[250px]"
+                                      height={90}
+                                      buttons={["bold", "italic", "underline", "|", "ol"]}
+                                    />
+                                  );
+                                }
                                 return (
                                   <textarea
                                     {...field}

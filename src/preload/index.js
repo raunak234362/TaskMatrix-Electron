@@ -34,11 +34,34 @@ const api = {
   }
 }
 
+// ─── Floating Timer Widget API ───────────────────────────────────────────────
+// Exposed as window.electronAPI (separate from window.api so it's tree-shakeable
+// and the widget preload can remain independent).
+
+const electronAPI = {
+  // Main → widget
+  startTaskTimer:  (taskData) => ipcRenderer.send('timer:start',  taskData),
+  pauseTaskTimer:  ()         => ipcRenderer.send('timer:pause'),
+  resumeTaskTimer: ()         => ipcRenderer.send('timer:resume'),
+  stopTaskTimer:   ()         => ipcRenderer.send('timer:stop'),
+  updateTaskTimer: (taskData) => ipcRenderer.send('timer:update-task', taskData),
+
+  // Widget → main window relay
+  onWidgetAction: (callback) => {
+    if (typeof callback !== 'function') return () => {}
+    const listener = (_e, payload) => callback(payload)
+    ipcRenderer.on('main:widget-action', listener)
+    return () => ipcRenderer.removeListener('main:widget-action', listener)
+  }
+}
+
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
 if (process.contextIsolated) {
   contextBridge.exposeInMainWorld('api', api)
+  contextBridge.exposeInMainWorld('electronAPI', electronAPI)
 } else {
   window.api = api
+  window.electronAPI = electronAPI
 }

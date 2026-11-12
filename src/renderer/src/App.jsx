@@ -13,6 +13,7 @@ import useNotifications from './hooks/useNotifications'
 import NotificationReceiver from './utils/NotificationReceiver'
 import GlobalModalManager from './components/common/GlobalModalManager'
 import AppUpdateCenter from './components/common/AppUpdateCenter'
+import { buildTimerPayload } from './hooks/useFloatingTimer'
 
 const AppContent = () => {
   const dispatch = useDispatch()
@@ -25,6 +26,82 @@ const AppContent = () => {
       connectSocket()
     }
   }, [userDetail?.id])
+
+  // ── Restore floating timer widget on app load / refresh ───────────────────
+  useEffect(() => {
+    if (!window.electronAPI) return  // running in browser — skip
+    const restoreWidget = async () => {
+      try {
+        const response = await Service.GetNonCompletedTasks()
+        const tasks = Array.isArray(response)
+          ? response
+          : Array.isArray(response?.data)
+            ? response.data
+            : Object.values(response?.data || response || {})
+        const activeTask = tasks.find((t) => String(t.status || '').toUpperCase() === 'IN_PROGRESS') ||
+          tasks.find((t) => ['BREAK', 'PAUSED', 'PAUSE'].includes(String(t.status || '').toUpperCase()))
+        if (!activeTask) return
+
+        // Fetch full task detail for workingHourTask
+        const fullRes = await Service.GetTaskById(activeTask.id.toString())
+        const fullTask = fullRes?.data || fullRes || activeTask
+        const payload = buildTimerPayload(fullTask)
+        if (payload) window.electronAPI.startTaskTimer(payload)
+      } catch (err) {
+        console.warn('Widget restore failed:', err)
+      }
+    }
+    restoreWidget()
+  }, []) // once on mount
+
+  // Keep widget controls working while the task detail modal is closed.
+  useEffect(() => {
+    if (!window.electronAPI?.onWidgetAction) return
+
+    const unsubscribe = window.electronAPI.onWidgetAction(async ({ action } = {}) => {
+      if (!['pause', 'resume', 'stop'].includes(action)) return
+
+      try {
+        const response = await Service.GetNonCompletedTasks()
+        const tasks = Array.isArray(response)
+          ? response
+          : Array.isArray(response?.data)
+            ? response.data
+            : Object.values(response?.data || response || {})
+        const activeTask = tasks.find((task) => String(task.status || '').toUpperCase() === 'IN_PROGRESS') ||
+          tasks.find((task) => ['BREAK', 'PAUSED', 'PAUSE'].includes(String(task.status || '').toUpperCase()))
+        if (!activeTask?.id) {
+          toast.info('No active task was found for the timer widget.')
+          return
+        }
+
+        if (action === 'stop') {
+          sessionStorage.setItem('widgetPendingStopTaskId', String(activeTask.id))
+          window.dispatchEvent(new CustomEvent('taskmatrix:open-task', { detail: { taskId: activeTask.id } }))
+          return
+        }
+
+        const detailResponse = await Service.GetTaskById(String(activeTask.id))
+        const task = detailResponse?.data || detailResponse || activeTask
+        if (action === 'resume') {
+          await Service.TaskResume(String(task.id))
+        } else {
+          const activeSession = (task.workingHourTask || []).find((session) => !session.ended_at)
+          const workId = activeSession?.id || activeSession?._id
+          if (!workId) throw new Error('No active work session was found to pause.')
+          await Service.TaskPause(String(task.id), { whId: workId })
+        }
+        window.dispatchEvent(new Event('task-updated'))
+      } catch (error) {
+        console.error('Floating timer action failed:', error)
+        toast.error(error?.message || 'Could not update the active task from the timer widget.')
+      }
+    })
+
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe()
+    }
+  }, [])
 
   // Listen for system-lock events from the main process.
   useEffect(() => {

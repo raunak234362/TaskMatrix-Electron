@@ -7,6 +7,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { autoUpdater } from 'electron-updater'
 import log from 'electron-log'
+import { setMainWindow, closeTimerWidget } from './timerWidget.js'
 
 let mainWindow
 const updateState = {
@@ -225,7 +226,13 @@ function createWindow() {
     mainWindow.show()
     mainWindow.focus()
   })
+
+  // Register main window with the timer-widget module so it can relay events
+  setMainWindow(mainWindow)
+
   mainWindow.on('closed', () => {
+    // Close the floating widget whenever the main window goes away
+    closeTimerWidget()
     mainWindow = null
   })
 
@@ -250,6 +257,8 @@ function focusMainWindow() {
   if (mainWindow.isMinimized()) mainWindow.restore()
   mainWindow.show()
   mainWindow.focus()
+  // Re-register in case the reference was lost
+  setMainWindow(mainWindow)
 }
 
 const hasSingleInstanceLock = app.requestSingleInstanceLock()

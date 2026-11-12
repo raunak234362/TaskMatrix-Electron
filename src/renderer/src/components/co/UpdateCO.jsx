@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Input from "../fields/input";
@@ -857,6 +857,22 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                                   className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
                                 />
                               ) : (
+                                colName === "description" ? (
+                                  <Controller
+                                    name={`rows.${index}.description`}
+                                    control={control}
+                                    render={({ field }) => (
+                                      <RichTextEditor
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        placeholder="Doc desc..."
+                                        className="co-table-description-editor min-w-[250px]"
+                                        height={90}
+                                        buttons={["bold", "italic", "underline", "|", "ol"]}
+                                      />
+                                    )}
+                                  />
+                                ) : (
                                 <textarea
                                   {...register(`rows.${index}.${colName}`)}
                                   className="ref-table-textarea w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none text-xs resize-none overflow-hidden"
@@ -875,6 +891,7 @@ const UpdateCO = ({ coData, projectId, onClose, onSuccess }) => {
                                     e.target.style.height = e.target.scrollHeight + "px";
                                   }}
                                 />
+                                )
                               )}
                             </td>
                           );

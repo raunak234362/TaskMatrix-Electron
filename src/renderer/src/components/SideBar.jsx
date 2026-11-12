@@ -20,6 +20,10 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
 
   const fetchLogout = () => {
     try {
+      // Close the floating timer widget before clearing session
+      if (window.electronAPI?.stopTaskTimer) {
+        window.electronAPI.stopTaskTimer()
+      }
       sessionStorage.clear()
       if (socket.connected) {
         socket.disconnect()

@@ -100,6 +100,14 @@ const WBTDashboard = () => {
   const [detailTaskId, setDetailTaskId] = useState(null)
   const [selectedMilestone, setSelectedMilestone] = useState(null) // New state for wrapper
 
+  useEffect(() => {
+    const openTaskFromWidget = (event) => {
+      if (event.detail?.taskId) setDetailTaskId(event.detail.taskId)
+    }
+    window.addEventListener('taskmatrix:open-task', openTaskFromWidget)
+    return () => window.removeEventListener('taskmatrix:open-task', openTaskFromWidget)
+  }, [])
+
   const getTaskPriorityValue = (task) => {
     const priorityValue = Number(task?.priority)
     if (Number.isFinite(priorityValue)) return priorityValue
