@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import {
   Loader2,
@@ -29,6 +29,7 @@ import EditTask from './EditTask'
 import { Edit } from 'lucide-react'
 import Comment from './comments/Comment'
 import RequestTrainingModal from '../training/RequestTrainingModal'
+import { useFloatingTimer } from '../../hooks/useFloatingTimer'
 
 const FetchTaskByID = ({ id, onClose, refresh }) => {
   const [task, setTask] = useState(null)
@@ -43,7 +44,11 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
   const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
   const [isRequestingTraining, setIsRequestingTraining] = useState(false)
   const [expandedWorkingDates, setExpandedWorkingDates] = useState({})
-  
+
+  // The app-level listener handles widget controls even when this task modal
+  // is closed. This hook instance only sends timer updates from this view.
+  const timer = useFloatingTimer()
+
   const toggleWorkingDate = (date) => {
     setExpandedWorkingDates((prev) => ({ ...prev, [date]: !prev[date] }))
   }
@@ -53,7 +58,13 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
     try {
       setLoading(true)
       const response = await Service.GetTaskById(id.toString())
-      setTask(response?.data || null)
+      const loadedTask = response?.data || null
+      setTask(loadedTask)
+      if (String(sessionStorage.getItem('widgetPendingStopTaskId')) === String(loadedTask?.id)) {
+        sessionStorage.removeItem('widgetPendingStopTaskId')
+        setEndComment('')
+        setIsEndModalOpen(true)
+      }
     } catch (error) {
       console.error('Error fetching task:', error)
       toast.error('Failed to load task details')
@@ -122,6 +133,17 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
     }
     window.addEventListener('task-updated', handleTaskUpdated)
     return () => window.removeEventListener('task-updated', handleTaskUpdated)
+  }, [id])
+
+  useEffect(() => {
+    const openEndDialogFromWidget = (event) => {
+      if (String(event.detail?.taskId) !== String(id)) return
+      sessionStorage.removeItem('widgetPendingStopTaskId')
+      setEndComment('')
+      setIsEndModalOpen(true)
+    }
+    window.addEventListener('taskmatrix:open-task', openEndDialogFromWidget)
+    return () => window.removeEventListener('taskmatrix:open-task', openEndDialogFromWidget)
   }, [id])
 
   const handleAddComment = async (data) => {
@@ -211,6 +233,12 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
           console.log('FetchTaskByID handleAction start taskId:', taskId)
           await Service.TaskStart(taskId)
           toast.success('Task started')
+          // Fetch fresh task data then start the widget
+          {
+            const freshRes = await Service.GetTaskById(taskId)
+            const freshTask = freshRes?.data || null
+            if (freshTask) timer.startTask(freshTask)
+          }
           break
         case 'pause': {
           console.log('FetchTaskByID handleAction pause taskId:', taskId, 'activeWorkID:', activeWorkID)
@@ -231,12 +259,14 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
           }
           await Service.TaskPause(taskId, { whId: whIdToUse })
           toast.info('Task paused')
+          timer.pauseTask()
           break
         }
         case 'resume':
           console.log('FetchTaskByID handleAction resume taskId:', taskId)
           await Service.TaskResume(taskId)
           toast.success('Task resumed')
+          timer.resumeTask()
           break
         case 'end': {
           console.log('FetchTaskByID handleAction end taskId:', taskId, 'activeWorkID:', activeWorkID)
@@ -257,11 +287,13 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
           }
           await Service.TaskEnd(taskId, { whId: whIdToUse })
           toast.success('Task completed')
+          timer.stopTask()
           break
         }
       }
       await fetchTask()
       if (refresh) refresh()
+      window.dispatchEvent(new Event('task-updated'))
     } catch (error) {
       console.error('FetchTaskByID handleAction error:', error)
       toast.error('Action failed. Please try again.')
@@ -270,6 +302,8 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
     }
   }
 
+  // Keep a ref up-to-date so the widget action callback (registered in the hook)
+  // can call the latest handleAction without stale closures.
   const handleEndTask = async (e) => {
     if (e) e.preventDefault()
 
@@ -351,8 +385,10 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
       setIsEndModalOpen(false)
       setEndComment('')
       setCompletionPercentage('')
+      timer.stopTask()  // close the floating widget
       await fetchTask()
       if (refresh) refresh()
+      window.dispatchEvent(new Event('task-updated'))
     } catch (error) {
       console.error('FetchTaskByID handleEndTask error:', error)
       toast.error('Failed to end task. Please try again.')

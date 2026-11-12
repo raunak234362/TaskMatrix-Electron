@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Timer</title>
+  <style>
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Draggable body (entire window is drag handle) ── */
+    html, body {
+      width: 240px;
+      height: 110px;
+      overflow: hidden;
+      background: transparent;
+      -webkit-app-region: drag;
+      user-select: none;
+      font-family: Roboto, Arial, sans-serif;
+    }
+
+    /* ── Card ── */
+    .card {
+      width: 240px;
+      height: 110px;
+      border-radius: 14px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-left: 4px solid #8bcf72;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+      display: flex;
+      flex-direction: column;
+      padding: 10px 12px 8px;
+      gap: 4px;
+    }
+
+    /* ── Top row: task name + close ── */
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .task-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-close {
+      -webkit-app-region: no-drag;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: none;
+      background: #f3f4f6;
+      color: #374151;
+      font-size: 10px;
+      line-height: 16px;
+      text-align: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .btn-close:hover { background: #e5e7eb; }
+
+    /* ── Project name ── */
+    .project-name {
+      font-size: 9px;
+      color: #111827;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Timer row ── */
+    .timer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 2px;
+    }
+
+    .timer-display {
+      font-size: 22px;
+      font-weight: 800;
+      color: #6bbd45;
+      letter-spacing: 0.04em;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .timer-display.warning { color: #f59e0b; }
+    .timer-display.overdue  { color: #ef4444; animation: pulse-red 1s infinite; }
+
+    @keyframes pulse-red {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.6; }
+    }
+
+    /* ── State badge ── */
+    .state-badge {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(107, 189, 69, 0.18);
+      color: #6bbd45;
+    }
+    .state-badge.paused {
+      background: rgba(245, 158, 11, 0.18);
+      color: #f59e0b;
+    }
+    .state-badge.overdue {
+      background: rgba(239, 68, 68, 0.18);
+      color: #ef4444;
+    }
+
+    /* ── Alloc row ── */
+    .alloc-row {
+      font-size: 9px;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .alloc-row span { color: #374151; }
+
+    /* ── Buttons ── */
+    .btn-row {
+      display: flex;
+      gap: 6px;
+      -webkit-app-region: no-drag;
+      margin-top: 2px;
+    }
+
+    .btn {
+      -webkit-app-region: no-drag;
+      flex: 1;
+      height: 22px;
+      border: none;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+    .btn:active { transform: scale(0.95); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-pause  { background: #fef3c7; color: #92400e; }
+    .btn-resume { background: #e7f5e1; color: #276749; }
+    .btn-stop   { background: #f3f4f6; color: #374151; }
+
+    /* ── Allocated progress bar (optional visual) ── */
+    .progress-bar-wrap {
+      height: 2px;
+      border-radius: 1px;
+      background: #e5e7eb;
+      overflow: hidden;
+      margin-top: 1px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 1px;
+      background: #6bbd45;
+      transition: width 1s linear, background 0.3s;
+      max-width: 100%;
+    }
+    .progress-bar-fill.warning { background: #f59e0b; }
+    .progress-bar-fill.overdue  { background: #ef4444; }
+  </style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="top-row">
+    <div class="task-name" id="taskName">Loading…</div>
+    <button class="btn-close" id="btnClose" title="Hide widget">✕</button>
+  </div>
+  <div class="project-name" id="projectName">—</div>
+
+  <div class="timer-row">
+    <div class="timer-display" id="timerDisplay">00:00:00</div>
+    <div class="state-badge" id="stateBadge">Running</div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+  </div>
+
+  <div class="alloc-row">
+    Alloc: <span id="allocDisplay">—</span>
+    &nbsp;|&nbsp;
+    Worked: <span id="workedDisplay">00:00</span>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-pause"  id="btnPause">⏸ Pause</button>
+    <button class="btn btn-stop"   id="btnStop">■ Stop</button>
+  </div>
+</div>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  let taskData        = null
+  let isPaused        = false
+  let baseSeconds     = 0   // seconds already worked before this session
+  let sessionStart    = null // Date.now() when last unpaused
+  let rafId           = null
+  let allocSeconds    = 0   // 0 = no allocation set
+
+  // ── DOM refs ───────────────────────────────────────────────────────────────
+  const $taskName    = document.getElementById('taskName')
+  const $projectName = document.getElementById('projectName')
+  const $timerDisplay= document.getElementById('timerDisplay')
+  const $stateBadge  = document.getElementById('stateBadge')
+  const $progressFill= document.getElementById('progressFill')
+  const $allocDisplay= document.getElementById('allocDisplay')
+  const $workedDisplay=document.getElementById('workedDisplay')
+  const $btnPause    = document.getElementById('btnPause')
+  const $btnStop     = document.getElementById('btnStop')
+  const $btnClose    = document.getElementById('btnClose')
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  function pad(n) { return String(Math.floor(n)).padStart(2, '0') }
+
+  function formatHHMMSS(totalSec) {
+    const h = Math.floor(totalSec / 3600)
+    const m = Math.floor((totalSec % 3600) / 60)
+    const s = Math.floor(totalSec % 60)
+    return `${pad(h)}:${pad(m)}:${pad(s)}`
+  }
+
+  function formatHHMM(totalSec) {
+    const h = Math.floor(totalSec / 3600)
+    const m = Math.floor((totalSec % 3600) / 60)
+    return `${pad(h)}:${pad(m)}`
+  }
+
+  /** Parse "HH:MM" allocation string to total seconds. Returns 0 on failure. */
+  function parseAllocToSeconds(str) {
+    if (!str) return 0
+    const parts = String(str).split(/[:\s]+/)
+    const h = parseFloat(parts[0]) || 0
+    const m = parseFloat(parts[1]) || 0
+    return (h * 3600) + (m * 60)
+  }
+
+  function getElapsedSeconds() {
+    if (isPaused || !sessionStart) return baseSeconds
+    return baseSeconds + Math.floor((Date.now() - sessionStart) / 1000)
+  }
+
+  // The AllActiveTask table flags tasks that are >20 min over allocation.
+  // Mirror the same rule: warn at allocSec - 20*60, overdue at allocSec + 1.
+  function getTimingState(elapsedSec) {
+    if (allocSeconds <= 0) return 'running'
+    const buffer = 20 * 60
+    if (elapsedSec >= allocSeconds + 1)        return 'overdue'
+    if (elapsedSec >= allocSeconds - buffer)    return 'warning'
+    return 'running'
+  }
+
+  // ── Render loop ────────────────────────────────────────────────────────────
+
+  function tick() {
+    const elapsed = getElapsedSeconds()
+    const state   = isPaused ? 'paused' : getTimingState(elapsed)
+
+    // Timer text
+    $timerDisplay.textContent = formatHHMMSS(elapsed)
+    $timerDisplay.className = 'timer-display ' + (state === 'overdue' ? 'overdue' : state === 'warning' ? 'warning' : '')
+
+    // Badge
+    $stateBadge.textContent = isPaused ? 'Break' : state === 'overdue' ? 'Overdue' : state === 'warning' ? 'Near Limit' : 'Running'
+    $stateBadge.className   = 'state-badge ' + (isPaused ? 'paused' : state === 'overdue' ? 'overdue' : '')
+
+    // Progress bar
+    if (allocSeconds > 0) {
+      const pct = Math.min((elapsed / allocSeconds) * 100, 100)
+      $progressFill.style.width = pct + '%'
+      $progressFill.className   = 'progress-bar-fill ' + (state === 'overdue' ? 'overdue' : state === 'warning' ? 'warning' : '')
+    }
+
+    // Worked / alloc summary
+    $workedDisplay.textContent = formatHHMM(elapsed)
+
+    if (!isPaused) {
+      rafId = requestAnimationFrame(tick)
+    }
+  }
+
+  function startLoop() {
+    if (rafId) cancelAnimationFrame(rafId)
+    rafId = requestAnimationFrame(tick)
+  }
+
+  function stopLoop() {
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null }
+    // Still render one final frame so display is up-to-date
+    tick()
+  }
+
+  // ── Initialise from taskData ───────────────────────────────────────────────
+
+  function initTimer(data) {
+    taskData = data
+    if (!data) return
+
+    // Task metadata
+    $taskName.textContent    = data.name    || 'Unnamed Task'
+    $projectName.textContent = data.project?.name || '—'
+
+    // Allocation
+    allocSeconds = parseAllocToSeconds(data.allocationLog?.allocatedHours)
+    $allocDisplay.textContent = data.allocationLog?.allocatedHours || '—'
+
+    // Base worked seconds (sum of all completed sessions)
+    baseSeconds = (data.workingHourTask || []).reduce((acc, wh) => {
+      return acc + (Number(wh.duration_seconds) || 0)
+    }, 0)
+
+    // Determine if task is currently IN_PROGRESS or on BREAK
+    const status = (data.status || '').toUpperCase()
+    isPaused = ['BREAK', 'PAUSED', 'PAUSE'].includes(status)
+
+    // Find the open session (ended_at null) to compute live elapsed seconds
+    const openSession = (data.workingHourTask || []).find(wh => {
+      return !wh.ended_at || String(wh.ended_at).toLowerCase() === 'null'
+    })
+
+    if (openSession && openSession.started_at) {
+      // Live session: accumulate from its start time
+      sessionStart = new Date(openSession.started_at).getTime()
+      // The open session's duration_seconds is already counted in baseSeconds,
+      // so we subtract it and re-derive from the timestamp.
+      baseSeconds -= (Number(openSession.duration_seconds) || 0)
+    } else {
+      sessionStart = isPaused ? null : Date.now()
+    }
+
+    updateButtons()
+
+    if (!isPaused) {
+      startLoop()
+    } else {
+      stopLoop()
+    }
+  }
+
+  function updateButtons() {
+    if (isPaused) {
+      $btnPause.textContent = '▶ Resume'
+      $btnPause.className   = 'btn btn-resume'
+    } else {
+      $btnPause.textContent = '⏸ Pause'
+      $btnPause.className   = 'btn btn-pause'
+    }
+  }
+
+  // ── Button handlers ────────────────────────────────────────────────────────
+
+  $btnPause.addEventListener('click', () => {
+    if (isPaused) {
+      // Resume
+      window.timerAPI.sendAction('resume')
+      sessionStart = Date.now()
+      isPaused = false
+      updateButtons()
+      startLoop()
+    } else {
+      // Pause
+      window.timerAPI.sendAction('pause')
+      baseSeconds = getElapsedSeconds()
+      sessionStart = null
+      isPaused = true
+      updateButtons()
+      stopLoop()
+    }
+  })
+
+  $btnStop.addEventListener('click', () => {
+    window.timerAPI.sendAction('stop')
+  })
+
+  $btnClose.addEventListener('click', () => {
+    window.timerAPI.closeWidget()
+  })
+
+  // ── IPC listeners ──────────────────────────────────────────────────────────
+
+  window.timerAPI.onInitTimer((data) => {
+    initTimer(data)
+  })
+
+  window.timerAPI.onCommand(({ command }) => {
+    if (command === 'pause' && !isPaused) {
+      baseSeconds = getElapsedSeconds()
+      sessionStart = null
+      isPaused = true
+      updateButtons()
+      stopLoop()
+    } else if (command === 'resume' && isPaused) {
+      sessionStart = Date.now()
+      isPaused = false
+      updateButtons()
+      startLoop()
+    }
+  })
+</script>
+</body>
+</html>

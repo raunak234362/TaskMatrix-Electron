@@ -7,13 +7,14 @@ const RichTextEditor = ({
   placeholder,
   className = "",
   height,
+  buttons,
 }) => {
   const editor = useRef(null);
 
   const config = useMemo(
     () => ({
       readonly: false,
-      placeholder: "",
+      placeholder: placeholder || "",
       showPlaceholder: false,
       toolbarAdaptive: false,
       defaultColor: "", // Forces explicit color styling (e.g. #000000) instead of clearing style attribute
@@ -23,7 +24,7 @@ const RichTextEditor = ({
       askBeforePasteHTML: false,
       askBeforePasteFromWord: false,
 
-      buttons: [
+      buttons: buttons || [
         "bold",
         "italic",
         "underline",
@@ -51,8 +52,9 @@ const RichTextEditor = ({
         "hr",
       ],
       height: height || 300,
+      toolbarButtonSize: "small",
     }),
-    [placeholder, height]
+    [placeholder, height, buttons]
   );
 
   return (

@@ -13,6 +13,15 @@ export default defineConfig(({ mode }) => {
       plugins: [externalizeDepsPlugin()]
     },
     preload: {
+      // Build both the main preload and the timer-widget preload
+      build: {
+        rollupOptions: {
+          input: {
+            index: resolve('src/preload/index.js'),
+            timerPreload: resolve('src/preload/timerPreload.js')
+          }
+        }
+      },
       plugins: [externalizeDepsPlugin()]
     },
     renderer: {
