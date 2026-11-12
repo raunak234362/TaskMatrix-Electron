@@ -13,6 +13,15 @@ import Select from "../../fields/Select";
 import { toast } from "react-toastify";
 import UploadFabricatorStandard from "./UploadFabricatorStandard";
 
+const getAccountName = (account) =>
+  [
+    account?.accountName,
+    account?.account_name,
+    account?.accountHolderName,
+    account?.beneficiaryName,
+    account?.beneficiaryInfo,
+    account?.bankName,
+  ].find((name) => typeof name === "string" && name.trim()) || "Unnamed Account";
 
 const EditFabricator = ({
   fabricatorData,
@@ -451,13 +460,16 @@ const EditFabricator = ({
                     className="w-full h-[46px] border border-slate-200 bg-slate-50 rounded-2xl px-4 py-2 focus:ring-4 focus:ring-green-500/10 focus:border-green-500 focus:bg-white outline-none transition-all shadow-sm text-slate-800 font-bold"
                     disabled={fetchingAccounts}
                   >
-                    <option value="">Select Account</option>
+                    <option value="" className="text-slate-900">
+                      Select Account
+                    </option>
                     {accounts.map((account) => (
                       <option
                         key={account._id || account.id}
                         value={account._id || account.id}
+                        className="bg-white text-slate-900"
                       >
-                        {account.accountName}
+                        {getAccountName(account)}
                       </option>
                     ))}
                   </select>
