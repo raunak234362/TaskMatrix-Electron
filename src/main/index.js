@@ -401,7 +401,7 @@ app.whenReady().then(() => {
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const csp = is.dev
       ? "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
-      : "default-src 'self'; script-src 'self'; connect-src 'self' https://project-station.whiteboardtec.com:* wss://project-station.whiteboardtec.com:* http://192.168.1.157:* ws://192.168.1.157:* https://api.github.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; object-src 'none';"
+      : "default-src 'self'; script-src 'self'; connect-src 'self' https://project-station.whiteboardtec.com:* wss://project-station.whiteboardtec.com:* http://192.168.1.157:* ws://192.168.1.157:* https://api.github.com https://res.cloudinary.com; img-src 'self' data: blob: https://res.cloudinary.com; style-src 'self' 'unsafe-inline'; object-src 'none';"
 
     const responseHeaders = {
       ...details.responseHeaders,
