@@ -12,7 +12,6 @@ import { setProjectData } from './store/projectSlice'
 import useNotifications from './hooks/useNotifications'
 import NotificationReceiver from './utils/NotificationReceiver'
 import GlobalModalManager from './components/common/GlobalModalManager'
-import AppUpdateCenter from './components/common/AppUpdateCenter'
 import { buildTimerPayload } from './hooks/useFloatingTimer'
 
 const AppContent = () => {
@@ -349,7 +348,6 @@ const AppContent = () => {
       {/* Main Layout */}
       <Layout />
       <GlobalModalManager />
-      <AppUpdateCenter />
 
       {/* IPC Trigger Button */}
       {/* <div className="fixed bottom-6 right-6 flex flex-col items-center z-50">

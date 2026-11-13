@@ -151,12 +151,12 @@ const AppUpdateCenter = () => {
   }[status.status] || `Version ${status.currentVersion}`
 
   return (
-    <div className="fixed bottom-5 right-5 z-[10000]">
+    <div className="relative z-[1000]">
       {isOpen && (
         <section
           aria-label="Application updates"
           aria-live="polite"
-          className="mb-3 w-[min(24rem,calc(100vw-2.5rem))] rounded-xl border border-gray-200 bg-white p-5 text-gray-800 shadow-2xl"
+          className="absolute right-0 top-full mt-3 w-[min(24rem,calc(100vw-2.5rem))] rounded-xl border border-gray-200 bg-white p-5 text-gray-800 shadow-2xl"
         >
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -281,7 +281,7 @@ const AppUpdateCenter = () => {
       <button
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        className="rounded-full bg-green-700 px-4 py-2 text-sm font-medium text-white shadow-lg hover:bg-green-800"
+        className="rounded-xl border border-black bg-green-700 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-800"
         aria-expanded={isOpen}
       >
         {statusLabel}
