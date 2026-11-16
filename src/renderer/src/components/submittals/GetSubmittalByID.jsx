@@ -39,6 +39,17 @@ const SectionTitle = ({ title }) => (
   </div>
 )
 
+const normalizeRichText = (value) => {
+  if (typeof value === 'string') return value
+  if (value == null) return ''
+  if (Array.isArray(value)) return value.map(normalizeRichText).filter(Boolean).join('<br />')
+  if (typeof value === 'object') {
+    const textValue = value.html ?? value.content ?? value.text ?? value.notes
+    return textValue == null ? JSON.stringify(value) : normalizeRichText(textValue)
+  }
+  return String(value)
+}
+
 const getMilestoneLabel = (m) => {
   if (!m) return '—'
   const parts = []
@@ -443,7 +454,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
 
                 {/* Submittal Description */}
                 {(() => {
-                  const rawDesc = submittal.currentVersion?.description || sortedVersions[0]?.description || "";
+                  const rawDesc = normalizeRichText(submittal.currentVersion?.description || sortedVersions[0]?.description || "");
                   const plainDesc = rawDesc.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
                   if (!plainDesc) return null;
                   return (
@@ -459,7 +470,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
 
                 {/* Submittal Notes */}
                 {(() => {
-                  const rawNotes = submittal.notes || submittal.currentVersion?.notes || sortedVersions[0]?.notes || "";
+                  const rawNotes = normalizeRichText(submittal.notes || submittal.currentVersion?.notes || sortedVersions[0]?.notes || "");
                   const plainNotes = rawNotes.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
                   if (!plainNotes) return null;
                   return (

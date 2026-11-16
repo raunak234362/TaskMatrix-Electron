@@ -11,6 +11,14 @@ import {
 import FetchTaskByID from "../../../task/FetchTaskByID";
 import Service from "../../../../api/Service";
 
+const hasInactiveMemberStatus = (value, seen = new Set()) => {
+  if (!value || typeof value !== "object" || seen.has(value)) return false;
+  seen.add(value);
+  if (Object.prototype.hasOwnProperty.call(value, "isActive") && ![true, "true", 1].includes(value.isActive)) return true;
+  if ([true, 1, "true"].includes(value.is_disabled)) return true;
+  return Object.values(value).some((nested) => hasInactiveMemberStatus(nested, seen));
+};
+
 const TeamCalendar = ({
   members,
   selectedTeamName,
@@ -75,6 +83,11 @@ const TeamCalendar = ({
 
   const [allProjects, setAllProjects] = useState([]);
 
+  const activeMembers = useMemo(
+    () => (members || []).filter((member) => !hasInactiveMemberStatus(member)),
+    [members],
+  );
+
   useEffect(() => {
     Service.GetAllProjects(1, 10000).then((res) => {
       const data = Array.isArray(res) ? res : (res?.data || []);
@@ -84,7 +97,7 @@ const TeamCalendar = ({
 
   const getDayTasks = (date) => {
     const dayTasks = [];
-    members.forEach((m) => {
+    activeMembers.forEach((m) => {
       const user = m.member || {};
       const memberId = m.id || m.userId || user.id;
       if (
@@ -200,7 +213,7 @@ const TeamCalendar = ({
                 className="px-4 pr-10 py-2.5 bg-white border border-black/10 rounded-2xl text-[10px] sm:text-xs font-black text-black uppercase tracking-wider focus:outline-none focus:ring-4 focus:ring-green-500/10 transition-all cursor-pointer shadow-sm min-w-[150px] sm:min-w-[200px]"
               >
                 <option value="all">Select Team Member</option>
-                {members.map((m) => {
+                {activeMembers.map((m) => {
                   const user = m.member || {};
                   const name =
                     `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
