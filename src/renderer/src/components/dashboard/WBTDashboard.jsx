@@ -453,6 +453,12 @@ const WBTDashboard = () => {
             onClose={() => setActionModal({ ...actionModal, isOpen: false })}
             type={actionModal.type}
             data={currentActionData}
+            clientSideCount={{
+              PENDING_RFQ: adminData?.dashboardStats?.pendingRfqClient,
+              PENDING_RFI: adminData?.dashboardStats?.pendingRfiClient,
+              PENDING_SUBMITTALS: adminData?.dashboardStats?.pendingSubmittalsClient,
+              CHANGE_ORDERS: adminData?.dashboardStats?.pendingChangeOrdersClient,
+            }[actionModal.type]}
             onItemSelect={handleItemSelect}
           />
         )}

@@ -57,6 +57,7 @@ function getFilterLabel(column) {
 }
 
 function ColumnFilter({ column }) {
+  const [optionSearch, setOptionSearch] = useState("");
   const columnDef = column.columnDef;
   const { filterType, filterOptions } = columnDef;
   const cleanLabel = getFilterLabel(column);
@@ -77,6 +78,24 @@ function ColumnFilter({ column }) {
           </option>
         ))}
       </select>
+    );
+  } else if (filterType === "searchableSelect") {
+    filterElement = (
+      <div className="relative">
+        <input
+          type="text"
+          list={`filter-options-${column.id}`}
+          value={column.getFilterValue() ?? ""}
+          onChange={(event) => column.setFilterValue(event.target.value || undefined)}
+          placeholder={`All ${cleanLabel} · type to search`}
+          className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-none px-3 py-2 pr-8 outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 shadow-sm h-[38px]"
+        />
+        <datalist id={`filter-options-${column.id}`}>
+          {(filterOptions || []).map((option) => (
+            <option key={option.value} value={option.value} />
+          ))}
+        </datalist>
+      </div>
     );
   } else if (filterType === "date") {
     filterElement = (

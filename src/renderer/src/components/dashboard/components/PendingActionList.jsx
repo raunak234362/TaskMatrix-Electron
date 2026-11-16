@@ -1,12 +1,35 @@
-import { useState } from 'react'
-import { X, FileText, ClipboardList, RefreshCw, Search } from 'lucide-react'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { X, FileText, ClipboardList, RefreshCw, Search, ChevronDown } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import DataTable from '../../ui/table'
 
-const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide: [] }, onItemSelect }) => {
+const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide: [] }, clientSideCount, onItemSelect }) => {
     const [activeTab, setActiveTab] = useState('')
     const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
     const showTabs = ['admin', 'deputy_manager', 'operation_executive', 'dept_manager', 'project_manager'].includes(userRole)
+
+    // Filter and sort states
+    const [searchTerm, setSearchTerm] = useState('')
+    const [selectedFabricator, setSelectedFabricator] = useState('ALL FABRICATORS')
+    const [selectedStatus, setSelectedStatus] = useState('All Statuses')
+    const [selectedStage, setSelectedStage] = useState('All Stages')
+    const [sortBy, setSortBy] = useState('date_desc')
+
+    // Fabricator dropdown states
+    const [fabSearchQuery, setFabSearchQuery] = useState('')
+    const [isFabDropdownOpen, setIsFabDropdownOpen] = useState(false)
+    const fabDropdownRef = useRef(null)
+
+    // Close fabricator dropdown on outside click
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (fabDropdownRef.current && !fabDropdownRef.current.contains(event.target)) {
+                setIsFabDropdownOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
 
     if (!isOpen) return null
 
@@ -27,13 +50,225 @@ const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide
     // Handle both old array format and new object format
     const isWbtSegmented = showTabs && !Array.isArray(data) && (data.wbt || data.clientSide)
     const isApprovalSegmented = !Array.isArray(data) && type === 'PENDING_APPROVALS'
+    const displayedClientCount = clientSideCount != null && Number.isFinite(Number(clientSideCount))
+        ? Number(clientSideCount)
+        : (data.clientSide?.length || 0)
 
     const currentTab = activeTab || (isWbtSegmented ? 'wbt' : isApprovalSegmented ? 'RFI' : '')
-    const effectiveData = isWbtSegmented || isApprovalSegmented ? (data[currentTab] || []) : (data || [])
-    
-    const totalCount = isWbtSegmented ? ((data.wbt?.length || 0) + (data.clientSide?.length || 0)) 
-                     : isApprovalSegmented ? ((data.RFI?.length || 0) + (data.Submittals?.length || 0) + (data.ChangeOrder?.length || 0))
-                     : data.length
+    const effectiveData = useMemo(() => {
+        const raw = isWbtSegmented || isApprovalSegmented ? (data[currentTab] || []) : (data || [])
+        return Array.isArray(raw) ? raw : []
+    }, [data, currentTab, isWbtSegmented, isApprovalSegmented])
+
+    const totalCount = isWbtSegmented ? ((data.wbt?.length || 0) + displayedClientCount)
+        : isApprovalSegmented ? ((data.RFI?.length || 0) + (data.Submittals?.length || 0) + (data.ChangeOrder?.length || 0))
+            : (Array.isArray(data) ? data.length : 0)
+
+    // Helper extractors
+    const getProjectName = (item) => {
+        return (
+            item?.Project?.name ||
+            item?.project?.name ||
+            item?.projectName ||
+            (typeof item?.project === 'string' ? item.project : '') ||
+            ''
+        )
+    }
+
+    const getFabricatorName = (item) => {
+        return (
+            item?.Project?.fabricator?.fabName ||
+            item?.project?.fabricator?.fabName ||
+            item?.fabricator?.fabName ||
+            item?.Project?.fabricator?.name ||
+            item?.project?.fabricator?.name ||
+            item?.fabricator?.name ||
+            item?.fabName ||
+            item?.fabricatorName ||
+            ''
+        )
+    }
+
+    const getStageName = (item) => {
+        return item?.stage || item?.Project?.stage || item?.project?.stage || ''
+    }
+
+    const getStatusName = (item) => {
+        const rawStatus = item?.wbtStatus ?? item?.status
+        if (type === 'PENDING_SUBMITTALS') {
+            const isPending = rawStatus === false || String(rawStatus).toUpperCase() === 'PENDING'
+            return isPending ? 'PENDING' : 'SUBMITTED_TO_EOR'
+        }
+        if (type === 'PENDING_RFI') {
+            const isAnswered = rawStatus === false
+            return isAnswered ? 'ANSWERED' : 'PENDING'
+        }
+        if (typeof rawStatus === 'string') return rawStatus.toUpperCase()
+        return rawStatus ? String(rawStatus).toUpperCase() : 'PENDING'
+    }
+
+    const getDateValue = (item) => {
+        const d = item?.createdAt || item?.date || item?.created_at || item?.updatedAt
+        return d ? new Date(d).getTime() : 0
+    }
+
+    // Fabricator options
+    const fabricatorOptions = useMemo(() => {
+        const set = new Set()
+        effectiveData.forEach((item) => {
+            const fab = getFabricatorName(item)
+            if (fab && fab !== '—' && fab !== 'N/A') set.add(fab)
+        })
+        return ['ALL FABRICATORS', ...Array.from(set).sort((a, b) => a.localeCompare(b))]
+    }, [effectiveData])
+
+    const filteredFabricatorOptions = useMemo(() => {
+        if (!fabSearchQuery.trim()) return fabricatorOptions
+        const q = fabSearchQuery.toLowerCase().trim()
+        return fabricatorOptions.filter((f) => f.toLowerCase().includes(q))
+    }, [fabricatorOptions, fabSearchQuery])
+
+    // Status options
+    const statusOptions = useMemo(() => {
+        const set = new Set()
+        effectiveData.forEach((item) => {
+            const st = getStatusName(item)
+            if (st) set.add(st)
+        })
+        return ['All Statuses', ...Array.from(set).sort((a, b) => a.localeCompare(b))]
+    }, [effectiveData, type])
+
+    // Stage options
+    const stageOptions = useMemo(() => {
+        const set = new Set()
+        effectiveData.forEach((item) => {
+            const stg = getStageName(item)
+            if (stg && stg !== '—' && stg !== 'N/A') set.add(stg)
+        })
+        if (set.size === 0) return []
+        return ['All Stages', ...Array.from(set).sort((a, b) => a.localeCompare(b))]
+    }, [effectiveData])
+
+    // Filtered and sorted data
+    const filteredAndSortedData = useMemo(() => {
+        const result = effectiveData.filter((item) => {
+            // 1. Search term
+            if (searchTerm.trim()) {
+                const q = searchTerm.toLowerCase().trim()
+                const proj = getProjectName(item).toLowerCase()
+                const fab = getFabricatorName(item).toLowerCase()
+                const subj = (
+                    item.subject ||
+                    item.title ||
+                    item.name ||
+                    item.remarks ||
+                    item.remark ||
+                    ''
+                ).toLowerCase()
+                const num = (
+                    item.changeOrderNumber ||
+                    item.rfiNumber ||
+                    item.serialNo ||
+                    item.number ||
+                    ''
+                ).toLowerCase()
+
+                const senderObj = item.senders || (typeof item.sender === 'object' ? item.sender : null)
+                const senderName = (
+                    item.senderName ||
+                    item.sender_name ||
+                    (senderObj ? `${senderObj.firstName || ''} ${senderObj.lastName || ''}` : '')
+                ).toLowerCase()
+
+                if (
+                    !proj.includes(q) &&
+                    !fab.includes(q) &&
+                    !subj.includes(q) &&
+                    !num.includes(q) &&
+                    !senderName.includes(q)
+                ) {
+                    return false
+                }
+            }
+
+            // 2. Fabricator
+            if (
+                selectedFabricator &&
+                selectedFabricator !== 'ALL FABRICATORS' &&
+                selectedFabricator !== 'All Fabricators'
+            ) {
+                const fab = getFabricatorName(item).toLowerCase()
+                if (fab !== selectedFabricator.toLowerCase()) {
+                    return false
+                }
+            }
+
+            // 3. Status
+            if (
+                selectedStatus &&
+                selectedStatus !== 'All Statuses' &&
+                selectedStatus !== 'ALL STATUSES'
+            ) {
+                const st = getStatusName(item).toLowerCase()
+                if (st !== selectedStatus.toLowerCase()) {
+                    return false
+                }
+            }
+
+            // 4. Stage
+            if (
+                selectedStage &&
+                selectedStage !== 'All Stages' &&
+                selectedStage !== 'ALL STAGES'
+            ) {
+                const stg = getStageName(item).toLowerCase()
+                if (stg !== selectedStage.toLowerCase()) {
+                    return false
+                }
+            }
+
+            return true
+        })
+
+        // Sorting
+        return [...result].sort((a, b) => {
+            if (sortBy === 'date_asc') {
+                return getDateValue(a) - getDateValue(b)
+            }
+            if (sortBy === 'date_desc') {
+                return getDateValue(b) - getDateValue(a)
+            }
+            if (sortBy === 'project_asc') {
+                return getProjectName(a).localeCompare(getProjectName(b))
+            }
+            if (sortBy === 'project_desc') {
+                return getProjectName(b).localeCompare(getProjectName(a))
+            }
+            if (sortBy === 'fabricator_asc') {
+                return getFabricatorName(a).localeCompare(getFabricatorName(b))
+            }
+            if (sortBy === 'status') {
+                return getStatusName(a).localeCompare(getStatusName(b))
+            }
+            return 0
+        })
+    }, [effectiveData, searchTerm, selectedFabricator, selectedStatus, selectedStage, sortBy, type])
+
+    const hasActiveFilters =
+        Boolean(searchTerm.trim()) ||
+        (selectedFabricator !== 'ALL FABRICATORS' && selectedFabricator !== 'All Fabricators') ||
+        (selectedStatus !== 'All Statuses' && selectedStatus !== 'ALL STATUSES') ||
+        (selectedStage !== 'All Stages' && selectedStage !== 'ALL STAGES') ||
+        sortBy !== 'date_desc'
+
+    const handleClearFilters = () => {
+        setSearchTerm('')
+        setSelectedFabricator('ALL FABRICATORS')
+        setSelectedStatus('All Statuses')
+        setSelectedStage('All Stages')
+        setSortBy('date_desc')
+        setFabSearchQuery('')
+    }
 
     const changeOrderColumns = [
         {
@@ -357,7 +592,7 @@ const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide
                 if (type === 'PENDING_RFI') {
                     const isAnswered = rawStatus === false
                     return (
-                        <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider whitespace-nowrap ${isAnswered ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                        <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider whitespace-nowrap ${isAnswered ? 'Answered' : 'Pending'} ${isAnswered ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
                             {isAnswered ? 'Answered' : 'Pending'}
                         </span>
                     )
@@ -397,6 +632,7 @@ const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide
     })
 
     const columns = type === 'CHANGE_ORDERS' ? changeOrderColumns : defaultColumns
+
     return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-200">
             <div className="bg-white w-[96%] max-w-[1700px] h-[92vh] max-h-[92vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-gray-100 animate-in zoom-in-95 duration-200">
@@ -413,13 +649,18 @@ const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide
                             </h3>
                             <p className="text-sm font-medium text-gray-500">
                                 Total <span className="text-gray-800 font-bold">{totalCount}</span> items requiring attention
+                                {filteredAndSortedData.length !== effectiveData.length && (
+                                    <span className="ml-1 text-green-700 font-semibold">
+                                        (Showing {filteredAndSortedData.length} filtered)
+                                    </span>
+                                )}
                             </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
                         <button
                             onClick={onClose}
-                            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm"
+                            className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"
                         >
                             Close
                         </button>
@@ -430,8 +671,11 @@ const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide
                 {isWbtSegmented && (
                     <div className="flex px-8 pt-2 bg-white border-b border-gray-50 shrink-0">
                         <button
-                            onClick={() => setActiveTab('wbt')}
-                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${currentTab === 'wbt'
+                            onClick={() => {
+                                setActiveTab('wbt')
+                                setIsFabDropdownOpen(false)
+                            }}
+                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 cursor-pointer ${currentTab === 'wbt'
                                 ? 'border-green-600 text-green-700'
                                 : 'border-transparent text-gray-400 hover:text-gray-600'
                                 }`}
@@ -439,21 +683,27 @@ const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide
                             WBT Side ({data.wbt?.length || 0})
                         </button>
                         <button
-                            onClick={() => setActiveTab('clientSide')}
-                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${currentTab === 'clientSide'
+                            onClick={() => {
+                                setActiveTab('clientSide')
+                                setIsFabDropdownOpen(false)
+                            }}
+                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 cursor-pointer ${currentTab === 'clientSide'
                                 ? 'border-green-600 text-green-700'
                                 : 'border-transparent text-gray-400 hover:text-gray-600'
                                 }`}
                         >
-                            Client Side ({data.clientSide?.length || 0})
+                            Client Side ({displayedClientCount})
                         </button>
                     </div>
                 )}
                 {isApprovalSegmented && (
                     <div className="flex px-8 pt-2 bg-white border-b border-gray-50 shrink-0">
                         <button
-                            onClick={() => setActiveTab('RFI')}
-                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${currentTab === 'RFI'
+                            onClick={() => {
+                                setActiveTab('RFI')
+                                setIsFabDropdownOpen(false)
+                            }}
+                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 cursor-pointer ${currentTab === 'RFI'
                                 ? 'border-purple-600 text-purple-700'
                                 : 'border-transparent text-gray-400 hover:text-gray-600'
                                 }`}
@@ -461,8 +711,11 @@ const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide
                             RFI ({data.RFI?.length || 0})
                         </button>
                         <button
-                            onClick={() => setActiveTab('Submittals')}
-                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${currentTab === 'Submittals'
+                            onClick={() => {
+                                setActiveTab('Submittals')
+                                setIsFabDropdownOpen(false)
+                            }}
+                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 cursor-pointer ${currentTab === 'Submittals'
                                 ? 'border-purple-600 text-purple-700'
                                 : 'border-transparent text-gray-400 hover:text-gray-600'
                                 }`}
@@ -470,8 +723,11 @@ const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide
                             Submittals ({data.Submittals?.length || 0})
                         </button>
                         <button
-                            onClick={() => setActiveTab('ChangeOrder')}
-                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 ${currentTab === 'ChangeOrder'
+                            onClick={() => {
+                                setActiveTab('ChangeOrder')
+                                setIsFabDropdownOpen(false)
+                            }}
+                            className={`px-6 py-3 text-sm font-black uppercase tracking-widest transition-all border-b-4 cursor-pointer ${currentTab === 'ChangeOrder'
                                 ? 'border-purple-600 text-purple-700'
                                 : 'border-transparent text-gray-400 hover:text-gray-600'
                                 }`}
@@ -481,12 +737,164 @@ const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide
                     </div>
                 )}
 
+                {/* Filters Bar matching Snapshot Style */}
+                <div className="px-8 py-3.5 border-b border-gray-100 bg-white shrink-0">
+                    <div className="flex flex-wrap items-end gap-5">
+                        {/* Search Input */}
+                        <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[240px]">
+                            <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">
+                                Search
+                            </label>
+                            <div className="relative">
+                                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                                <input
+                                    type="text"
+                                    placeholder="Search by project, subject, name..."
+                                    className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md pl-9 pr-3 py-2 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all placeholder:text-gray-500 placeholder:font-normal shadow-sm"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Fabricator Filter with Search Combobox */}
+                        <div
+                            className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[220px] relative"
+                            ref={fabDropdownRef}
+                        >
+                            <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">
+                                Fabricator
+                            </label>
+                            <div
+                                onClick={() => setIsFabDropdownOpen((prev) => !prev)}
+                                className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none hover:border-gray-400 transition-all shadow-sm flex items-center justify-between"
+                            >
+                                <span className="truncate">{selectedFabricator || 'ALL FABRICATORS'}</span>
+                                <ChevronDown size={16} className="text-gray-500 shrink-0 ml-2" />
+                            </div>
+
+                            {isFabDropdownOpen && (
+                                <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50 overflow-hidden flex flex-col max-h-60 min-w-[220px]">
+                                    <div className="p-2 border-b border-gray-200 bg-gray-50 sticky top-0">
+                                        <div className="relative">
+                                            <Search
+                                                size={14}
+                                                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400"
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Search fabricator..."
+                                                className="w-full text-xs font-medium text-gray-900 bg-white border border-gray-300 rounded pl-8 pr-2 py-1.5 focus:outline-none focus:border-green-600"
+                                                value={fabSearchQuery}
+                                                onChange={(e) => setFabSearchQuery(e.target.value)}
+                                                onClick={(e) => e.stopPropagation()}
+                                                autoFocus
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="overflow-y-auto max-h-48 py-1">
+                                        {filteredFabricatorOptions.length > 0 ? (
+                                            filteredFabricatorOptions.map((f) => (
+                                                <div
+                                                    key={f}
+                                                    onClick={() => {
+                                                        setSelectedFabricator(f)
+                                                        setIsFabDropdownOpen(false)
+                                                    }}
+                                                    className={`px-3 py-1.5 text-sm cursor-pointer hover:bg-green-50 hover:text-green-700 transition-colors ${
+                                                        selectedFabricator === f
+                                                            ? 'bg-green-100 text-green-800 font-semibold'
+                                                            : 'text-gray-700'
+                                                    }`}
+                                                >
+                                                    {f}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="px-3 py-2 text-xs text-gray-400 italic">
+                                                No fabricators found
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Status Filter */}
+                        <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[170px]">
+                            <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">
+                                Status
+                            </label>
+                            <select
+                                className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm"
+                                value={selectedStatus}
+                                onChange={(e) => setSelectedStatus(e.target.value)}
+                            >
+                                {statusOptions.map((s) => (
+                                    <option key={s} value={s}>
+                                        {s.replace(/_/g, ' ')}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Stage Filter (if available) */}
+                        {stageOptions.length > 0 && (
+                            <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[160px]">
+                                <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">
+                                    Stage
+                                </label>
+                                <select
+                                    className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm"
+                                    value={selectedStage}
+                                    onChange={(e) => setSelectedStage(e.target.value)}
+                                >
+                                    {stageOptions.map((s) => (
+                                        <option key={s} value={s}>
+                                            {s}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {/* Sort By Dropdown */}
+                        <div className="flex flex-col gap-1.5 w-full sm:w-auto min-w-[170px]">
+                            <label className="text-xs font-semibold text-gray-800 uppercase tracking-normal">
+                                Sort By
+                            </label>
+                            <select
+                                className="w-full text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md px-3 py-2 cursor-pointer focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 hover:border-gray-400 transition-all shadow-sm"
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                            >
+                                <option value="date_desc">Newest First</option>
+                                <option value="date_asc">Oldest First</option>
+                                <option value="project_asc">Project (A-Z)</option>
+                                <option value="project_desc">Project (Z-A)</option>
+                                <option value="fabricator_asc">Fabricator (A-Z)</option>
+                                <option value="status">Status</option>
+                            </select>
+                        </div>
+
+                        {/* Clear Filters */}
+                        {hasActiveFilters && (
+                            <button
+                                type="button"
+                                onClick={handleClearFilters}
+                                className="px-4 py-2 bg-green-50 text-black border border-green-700/80 rounded-md hover:bg-green-100 transition-all font-semibold text-xs uppercase tracking-normal shadow-sm flex items-center gap-1.5 h-[38px] cursor-pointer"
+                            >
+                                <X className="w-3.5 h-3.5" /> Clear Filters
+                            </button>
+                        )}
+                    </div>
+                </div>
+
                 {/* Modal Content */}
                 <div className="flex-1 overflow-y-auto p-6 bg-[#fcfcfc]">
                     <DataTable
                         columns={columns}
-                        data={effectiveData}
-                        searchPlaceholder={`Filter ${headerInfo.title.toLowerCase()}...`}
+                        data={filteredAndSortedData}
                         onRowClick={(row) => {
                             if (onItemSelect) onItemSelect(row);
                         }}

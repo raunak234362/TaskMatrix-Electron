@@ -16,13 +16,22 @@ const TaskPage = () => {
   const userRole = normalizeAccessValue(sessionStorage.getItem('userRole'))
   const designation = (sessionStorage.getItem('designation') || '').toLowerCase().trim()
 
-  const canAddTask = [
-    'admin',
-    'operation_executive',
-    'project_manager',
-    'department_manager',
-    'dept_manager',
-  ].includes(userRole)
+  const canAddTask =
+    [
+      'admin',
+      'operation_executive',
+      'project_manager',
+      'department_manager',
+      'dept_manager',
+    ].includes(userRole) ||
+    [
+      'software developer',
+      'software_developer',
+      'software engineer',
+      'software_engineer',
+      'software developer trainee',
+      'software_developer_trainee',
+    ].includes(designation)
 
   const canCreateSelfTask =
     [
