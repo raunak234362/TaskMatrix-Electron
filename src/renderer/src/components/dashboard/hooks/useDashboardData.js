@@ -1,11 +1,13 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import Service from '../../../api/Service'
+import SelfTaskService from '../../../api/services/selftask.service'
 
 export const useDashboardData = () => {
   const user = useSelector((state) => state.userInfo?.userDetail)
   const [loading, setLoading] = useState(true)
   const [tasks, setTasks] = useState([])
+  const [selfTasks, setSelfTasks] = useState([])
   const [projectNotes, setProjectNotes] = useState([])
   const [unreadComments, setUnreadComments] = useState([])
   const [unapprovedListsCount, setUnapprovedListsCount] = useState(0)
@@ -583,7 +585,23 @@ export const useDashboardData = () => {
         }
       } else {
         // Fetch Staff Data
-        const response = await Service.GetMyTask()
+        const [response, selfTaskResponse] = await Promise.all([
+          Service.GetMyTask(),
+          SelfTaskService.getSelfAssignedNotCompletedTasks().catch((error) => {
+            console.error('Failed to load dashboard self tasks:', error)
+            return []
+          })
+        ])
+        const selfTaskPayload = selfTaskResponse?.data ?? selfTaskResponse
+        const selfTaskList = Array.isArray(selfTaskPayload)
+          ? selfTaskPayload
+          : Array.isArray(selfTaskPayload?.tasks)
+            ? selfTaskPayload.tasks
+            : Array.isArray(selfTaskPayload?.result)
+              ? selfTaskPayload.result
+              : []
+        setSelfTasks(selfTaskList
+          .map((task) => ({ ...task, taskType: 'SELF_TASK' })))
 
         if (response?.data) {
           const fetchedTasks = Array.isArray(response.data)
@@ -649,6 +667,7 @@ export const useDashboardData = () => {
     user,
     loading,
     tasks,
+    selfTasks,
     projectNotes,
     userRole,
     isAdminRole,

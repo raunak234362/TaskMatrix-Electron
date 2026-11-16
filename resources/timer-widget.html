@@ -23,7 +23,7 @@
     .card {
       width: 240px;
       height: 110px;
-      border-radius: 14px;
+      border-radius: 0;
       background: #ffffff;
       border: 1px solid #e5e7eb;
       border-left: 4px solid #8bcf72;
@@ -52,26 +52,6 @@
       max-width: 180px;
       letter-spacing: 0.01em;
     }
-
-    .btn-close {
-      -webkit-app-region: no-drag;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      border: none;
-      background: #f3f4f6;
-      color: #374151;
-      font-size: 10px;
-      line-height: 16px;
-      text-align: center;
-      cursor: pointer;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s;
-    }
-    .btn-close:hover { background: #e5e7eb; }
 
     /* ── Project name ── */
     .project-name {
@@ -116,7 +96,7 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
       padding: 2px 6px;
-      border-radius: 4px;
+      border-radius: 0;
       background: rgba(107, 189, 69, 0.18);
       color: #6bbd45;
     }
@@ -152,7 +132,7 @@
       flex: 1;
       height: 22px;
       border: none;
-      border-radius: 6px;
+      border-radius: 0;
       font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
@@ -174,14 +154,14 @@
     /* ── Allocated progress bar (optional visual) ── */
     .progress-bar-wrap {
       height: 2px;
-      border-radius: 1px;
+      border-radius: 0;
       background: #e5e7eb;
       overflow: hidden;
       margin-top: 1px;
     }
     .progress-bar-fill {
       height: 100%;
-      border-radius: 1px;
+      border-radius: 0;
       background: #6bbd45;
       transition: width 1s linear, background 0.3s;
       max-width: 100%;
@@ -194,7 +174,6 @@
 <div class="card" id="card">
   <div class="top-row">
     <div class="task-name" id="taskName">Loading…</div>
-    <button class="btn-close" id="btnClose" title="Hide widget">✕</button>
   </div>
   <div class="project-name" id="projectName">—</div>
 
@@ -238,7 +217,6 @@
   const $workedDisplay=document.getElementById('workedDisplay')
   const $btnPause    = document.getElementById('btnPause')
   const $btnStop     = document.getElementById('btnStop')
-  const $btnClose    = document.getElementById('btnClose')
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -401,10 +379,6 @@
 
   $btnStop.addEventListener('click', () => {
     window.timerAPI.sendAction('stop')
-  })
-
-  $btnClose.addEventListener('click', () => {
-    window.timerAPI.closeWidget()
   })
 
   // ── IPC listeners ──────────────────────────────────────────────────────────

@@ -42,7 +42,8 @@ const ipc = (() => {
 export function buildTimerPayload(task) {
   if (!task) return null
   return {
-    id:      task.id,
+    id:      task.id ?? task._id,
+    taskType: task.taskType || 'TASK',
     name:    task.name,
     status:  task.status,
     project: task.project ? { name: task.project.name } : null,

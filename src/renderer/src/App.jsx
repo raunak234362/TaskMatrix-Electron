@@ -13,6 +13,7 @@ import useNotifications from './hooks/useNotifications'
 import NotificationReceiver from './utils/NotificationReceiver'
 import GlobalModalManager from './components/common/GlobalModalManager'
 import { buildTimerPayload } from './hooks/useFloatingTimer'
+import SelfTaskService from './api/services/selftask.service'
 
 const AppContent = () => {
   const dispatch = useDispatch()
@@ -39,7 +40,21 @@ const AppContent = () => {
             : Object.values(response?.data || response || {})
         const activeTask = tasks.find((t) => String(t.status || '').toUpperCase() === 'IN_PROGRESS') ||
           tasks.find((t) => ['BREAK', 'PAUSED', 'PAUSE'].includes(String(t.status || '').toUpperCase()))
-        if (!activeTask) return
+        if (!activeTask) {
+          const selfResponse = await SelfTaskService.getSelfAssignedNotCompletedTasks()
+          const selfPayload = selfResponse?.data ?? selfResponse
+          const selfTasks = Array.isArray(selfPayload)
+            ? selfPayload
+            : Array.isArray(selfPayload?.tasks)
+              ? selfPayload.tasks
+              : Array.isArray(selfPayload?.result)
+                ? selfPayload.result
+                : []
+          const activeSelfTask = selfTasks
+            .find((task) => ['IN_PROGRESS', 'BREAK', 'ON_HOLD'].includes(String(task.status || '').toUpperCase()))
+          if (activeSelfTask) window.electronAPI.startTaskTimer(buildTimerPayload({ ...activeSelfTask, taskType: 'SELF_TASK' }))
+          return
+        }
 
         // Fetch full task detail for workingHourTask
         const fullRes = await Service.GetTaskById(activeTask.id.toString())
@@ -57,10 +72,21 @@ const AppContent = () => {
   useEffect(() => {
     if (!window.electronAPI?.onWidgetAction) return
 
-    const unsubscribe = window.electronAPI.onWidgetAction(async ({ action } = {}) => {
+    const unsubscribe = window.electronAPI.onWidgetAction(async ({ action, taskId, taskType } = {}) => {
       if (!['pause', 'resume', 'stop'].includes(action)) return
 
       try {
+        if (taskType === 'SELF_TASK' && taskId != null) {
+          if (action === 'stop') {
+            sessionStorage.setItem('widgetPendingStopSelfTaskId', String(taskId))
+            window.dispatchEvent(new CustomEvent('taskmatrix:open-task', { detail: { taskId, taskType: 'SELF_TASK' } }))
+            return
+          }
+          if (action === 'resume') await SelfTaskService.resumeSelfTask(taskId)
+          else await SelfTaskService.pauseSelfTask(taskId)
+          window.dispatchEvent(new Event('task-updated'))
+          return
+        }
         const response = await Service.GetNonCompletedTasks()
         const tasks = Array.isArray(response)
           ? response

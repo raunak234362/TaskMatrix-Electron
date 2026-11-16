@@ -38,15 +38,11 @@ contextBridge.exposeInMainWorld('timerAPI', {
   /**
    * Widget buttons call this to tell the main process / main window
    * that the user took an action.
-   * action: 'pause' | 'resume' | 'stop' | 'close'
+   * action: 'pause' | 'resume' | 'stop'
    */
   sendAction: (action) => {
     ipcRenderer.send('widget:action', { action })
   },
 
-  /** Hide this widget window (main process decides whether to close or hide). */
-  closeWidget: () => {
-    ipcRenderer.send('widget:action', { action: 'close' })
-  }
 })
 

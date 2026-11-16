@@ -17,6 +17,7 @@ import UpcomingSubmittals from './components/UpcomingSubmittals'
 import UpcomingDeadlinesWidget from './components/UpcomingDeadlinesWidget'
 import PersonalNotesWidget from './components/PersonalNotesWidget'
 import UnreadCommentsWidget from './components/UnreadCommentsWidget'
+import GetSelfTaskByID from '../task/Self_assignedtasks/GetSelfTaskByID'
 
 // Lazy load components
 const FetchTaskByID = lazy(() => import('../task/FetchTaskByID'))
@@ -73,6 +74,7 @@ const WBTDashboard = () => {
   const {
     loading,
     tasks,
+    selfTasks,
     projectNotes,
     userRole,
     isAdminRole,
@@ -98,11 +100,15 @@ const WBTDashboard = () => {
   })
 
   const [detailTaskId, setDetailTaskId] = useState(null)
+  const [detailSelfTaskId, setDetailSelfTaskId] = useState(null)
   const [selectedMilestone, setSelectedMilestone] = useState(null) // New state for wrapper
 
   useEffect(() => {
     const openTaskFromWidget = (event) => {
-      if (event.detail?.taskId) setDetailTaskId(event.detail.taskId)
+      if (event.detail?.taskId) {
+        if (event.detail?.taskType === 'SELF_TASK') setDetailSelfTaskId(event.detail.taskId)
+        else setDetailTaskId(event.detail.taskId)
+      }
     }
     window.addEventListener('taskmatrix:open-task', openTaskFromWidget)
     return () => window.removeEventListener('taskmatrix:open-task', openTaskFromWidget)
@@ -141,6 +147,7 @@ const WBTDashboard = () => {
       actionModal.isOpen ||
       detailModal.isOpen ||
       detailTaskId !== null ||
+      detailSelfTaskId !== null ||
       selectedProject !== null ||
       showSubmittalsPopup ||
       showDeadlinesPopup ||
@@ -152,6 +159,7 @@ const WBTDashboard = () => {
     actionModal.isOpen,
     detailModal.isOpen,
     detailTaskId,
+    detailSelfTaskId,
     selectedProject,
     showSubmittalsPopup,
     showDeadlinesPopup,
@@ -371,6 +379,7 @@ const WBTDashboard = () => {
             userStats={userStats}
             loading={loading}
             tasks={tasks}
+            selfTasks={selfTasks}
             projectNotes={projectNotes}
             userRole={userRole}
             currentTask={currentTask}
@@ -381,6 +390,7 @@ const WBTDashboard = () => {
               handleProjectStatClick,
               handleActionClick,
               setDetailTaskId,
+              setDetailSelfTaskId,
               setShowSubmittalsPopup,
               setShowDeadlinesPopup,
               setShowNotesPopup,
@@ -394,10 +404,12 @@ const WBTDashboard = () => {
             userStats={userStats}
             loading={loading}
             tasks={tasks}
+            selfTasks={selfTasks}
             projectNotes={projectNotes}
             unreadComments={unreadComments}
             handlers={{
               setDetailTaskId,
+              setDetailSelfTaskId,
               setShowDeadlinesPopup,
               setShowNotesPopup,
               setShowUnreadCommentsPopup
@@ -412,6 +424,13 @@ const WBTDashboard = () => {
           <FetchTaskByID
             id={detailTaskId}
             onClose={() => setDetailTaskId(null)}
+            refresh={fetchData}
+          />
+        )}
+        {detailSelfTaskId && (
+          <GetSelfTaskByID
+            id={detailSelfTaskId}
+            onClose={() => setDetailSelfTaskId(null)}
             refresh={fetchData}
           />
         )}

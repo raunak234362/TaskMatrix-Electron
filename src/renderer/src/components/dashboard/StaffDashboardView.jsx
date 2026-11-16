@@ -12,12 +12,14 @@ const StaffDashboardView = ({
     userStats,
     loading,
     tasks,
+    selfTasks = [],
     projectNotes,
     unreadComments,
     handlers
 }) => {
     const {
         setDetailTaskId,
+        setDetailSelfTaskId,
         setShowDeadlinesPopup,
         setShowNotesPopup
     } = handlers
@@ -39,7 +41,10 @@ const StaffDashboardView = ({
         String(status || '').trim().toUpperCase().replace(/[\s-]+/g, '_')
 
     const displayTask = useMemo(() => {
-        const normalizedTasks = Array.isArray(tasks) ? tasks : []
+        const normalizedTasks = [
+            ...(Array.isArray(tasks) ? tasks : []),
+            ...(Array.isArray(selfTasks) ? selfTasks : [])
+        ]
         const actionableStatuses = new Set(['IN_PROGRESS', 'BREAK', 'ASSIGNED', 'REWORK'])
         const actionableTasks = normalizedTasks.filter((task) =>
             actionableStatuses.has(normalizeTaskStatus(task?.status))
@@ -89,7 +94,7 @@ const StaffDashboardView = ({
             ['ASSIGNED', 'REWORK'].includes(normalizeTaskStatus(task?.status))
         )
         return assigned || null
-    }, [tasks])
+    }, [tasks, selfTasks])
 
     return (
         <div className="flex flex-col gap-8 lg:gap-10 transition-all duration-300 ease-in-out">
@@ -99,7 +104,11 @@ const StaffDashboardView = ({
                     {/* 1. Priority Focus */}
                     <div
                         className="bg-green-50/60 p-4 rounded-lg border border-black shadow-sm flex flex-col justify-between hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group"
-                        onClick={() => displayTask && setDetailTaskId(displayTask.id)}
+                        onClick={() => {
+                            if (!displayTask) return
+                            if (displayTask.taskType === 'SELF_TASK') setDetailSelfTaskId(displayTask.id ?? displayTask._id)
+                            else setDetailTaskId(displayTask.id)
+                        }}
                     >
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
@@ -119,7 +128,9 @@ const StaffDashboardView = ({
                         </div>
                         <div className="flex-1 mt-auto">
                             <h3 className="text-sm font-semibold text-primary line-clamp-1 group-hover:text-primary transition-colors">
-                                {displayTask?.project?.name || 'No Active Task'}
+                                {displayTask
+                                    ? displayTask.project?.name || (displayTask.taskType === 'SELF_TASK' ? 'Self Task' : 'Active Task')
+                                    : 'No Active Task'}
                             </h3>
                             <p className="text-xs font-semibold  tracking-normal mt-1">
                                 {displayTask?.name || 'Ready to start'}

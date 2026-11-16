@@ -5,6 +5,7 @@ import { toast } from 'react-toastify'
 import { useSelector } from 'react-redux'
 import SelfTaskService from '../../../api/services/selftask.service'
 import EditSelfTask from './EditSelfTask'
+import { useFloatingTimer } from '../../../hooks/useFloatingTimer'
 
 const formatDateTime = (value) => {
   if (!value) return '—'
@@ -20,6 +21,7 @@ const GetSelfTaskByID = ({ id, onClose, refresh }) => {
   const [processing, setProcessing] = useState(false)
   const [comment, setComment] = useState('')
   const [isEditing, setIsEditing] = useState(false)
+  const timer = useFloatingTimer()
 
   const fetchTask = useCallback(async () => {
     if (id == null) return
@@ -39,6 +41,20 @@ const GetSelfTaskByID = ({ id, onClose, refresh }) => {
   useEffect(() => {
     fetchTask()
   }, [fetchTask])
+
+  useEffect(() => {
+    const openFromWidget = (event) => {
+      if (String(event.detail?.taskId) !== String(id)) return
+      sessionStorage.removeItem('widgetPendingStopSelfTaskId')
+      runAction('end')
+    }
+    if (String(sessionStorage.getItem('widgetPendingStopSelfTaskId')) === String(id) && task) {
+      sessionStorage.removeItem('widgetPendingStopSelfTaskId')
+      runAction('end')
+    }
+    window.addEventListener('taskmatrix:open-task', openFromWidget)
+    return () => window.removeEventListener('taskmatrix:open-task', openFromWidget)
+  }, [id, task])
 
   const activeSession = useMemo(
     () => task?.workingHourTask?.find((session) => !session.ended_at),
@@ -76,6 +92,15 @@ const GetSelfTaskByID = ({ id, onClose, refresh }) => {
     try {
       setProcessing(true)
       await actionMap[action](taskId)
+      if (action === 'start' || action === 'resume') {
+        const response = await SelfTaskService.getSelfTaskById(taskId)
+        const freshTask = response?.data?.data ?? response?.data ?? response
+        timer.startTask({ ...freshTask, id: freshTask?.id ?? freshTask?._id ?? taskId, taskType: 'SELF_TASK' })
+      } else if (action === 'pause') {
+        timer.pauseTask()
+      } else if (action === 'end') {
+        timer.stopTask()
+      }
       const successMessage = {
         start: 'Task started',
         pause: 'Task paused',

@@ -207,16 +207,12 @@ ipcMain.on('timer:update-task', (_event, taskData) => {
  * We relay them to the main renderer so it can call the backend.
  */
 ipcMain.on('widget:action', (_event, payload) => {
-  // payload: { action: 'pause' | 'resume' | 'stop' | 'close' }
-  if (payload?.action === 'close') {
-    // User dismissed the widget — hide it without closing so the timer state
-    // in the main app is preserved. The widget will re-show on the next task start.
-    if (timerWindow && !timerWindow.isDestroyed()) {
-      timerWindow.hide()
-    }
-    return  // Don't relay to main window; main app state unaffected
-  }
-  sendToMain('main:widget-action', payload)
+  // payload: { action: 'pause' | 'resume' | 'stop' }
+  sendToMain('main:widget-action', {
+    ...payload,
+    taskId: currentTaskData?.id,
+    taskType: currentTaskData?.taskType || 'TASK'
+  })
 })
 
 // ─── Close widget when the app quits ─────────────────────────────────────────
