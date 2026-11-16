@@ -509,7 +509,7 @@ const CoTable = ({ coId, onSuccess, isDraft, onDraftSubmit, isSubmitting }) => {
                         }}
                       >
                         {cellMergeMode ? (
-                          <div className="text-xs p-1.5 select-none min-h-[2rem] flex items-center">
+                          <div className="text-xs p-1.5 select-none min-h-2rem flex items-center">
                             {cellVal === "_MERGED_LEFT_" || cellVal === "_MERGED_UP_" ? (
                               ""
                             ) : (
