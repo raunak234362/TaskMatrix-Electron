@@ -329,61 +329,58 @@ const TeamCalendar = ({
                         {dayTasks.map((t, tIdx) => (
                           <div
                             key={tIdx}
-                            className={`px-2 py-1.5 rounded-lg border flex flex-col gap-0.5 shadow-sm transition-colors ${
-                              (userTotalHoursMapDay[t.userName || "Unknown"]?.worked || 0) > 8.5
+                            className={`px-2 py-1.5 rounded-lg border flex flex-col gap-0.5 shadow-sm transition-colors ${(userTotalHoursMapDay[t.userName || "Unknown"]?.worked || 0) > 8.5
                                 ? "bg-blue-50 border-blue-200 hover:bg-blue-100"
                                 : t.status === "ABSENT" ||
                                   (t.name || t.title || "")
                                     .toUpperCase()
                                     .includes("ABSENT")
-                                ? "bg-red-50 border-red-200 hover:bg-red-100"
-                                : (userTotalHoursMapDay[t.userName || "Unknown"]?.worked || 0) === 0 &&
-                                  (t.name || t.title || "")
-                                    .toUpperCase()
-                                    .includes("NOT ASSIGNED")
-                                  ? "bg-orange-50 border-orange-200 hover:bg-orange-100"
-                                  : "bg-green-50 border-green-200 hover:bg-green-100"
+                                  ? "bg-red-50 border-red-200 hover:bg-red-100"
+                                  : (userTotalHoursMapDay[t.userName || "Unknown"]?.worked || 0) === 0 &&
+                                    (t.name || t.title || "")
+                                      .toUpperCase()
+                                      .includes("NOT ASSIGNED")
+                                    ? "bg-orange-50 border-orange-200 hover:bg-orange-100"
+                                    : "bg-green-50 border-green-200 hover:bg-green-100"
                               }`}
                             title={t.name || t.title}
                           >
                             <span
-                              className={`text-[11px] font-semibold truncate tracking-tight ${
-                                (userTotalHoursMapDay[t.userName || "Unknown"]?.worked || 0) > 8.5
-                                ? "text-blue-900"
-                                : t.status === "ABSENT" ||
-                                  (t.name || t.title || "")
-                                    .toUpperCase()
-                                    .includes("ABSENT")
-                                  ? "text-red-900"
-                                   : (userTotalHoursMapDay[
-                                    t.userName || "Unknown"
-                                  ]?.worked || 0) === 0 &&
+                              className={`text-[11px] font-semibold truncate tracking-tight ${(userTotalHoursMapDay[t.userName || "Unknown"]?.worked || 0) > 8.5
+                                  ? "text-blue-900"
+                                  : t.status === "ABSENT" ||
                                     (t.name || t.title || "")
                                       .toUpperCase()
-                                      .includes("NOT ASSIGNED")
-                                    ? "text-orange-900"
-                                    : "text-green-900"
+                                      .includes("ABSENT")
+                                    ? "text-red-900"
+                                    : (userTotalHoursMapDay[
+                                      t.userName || "Unknown"
+                                    ]?.worked || 0) === 0 &&
+                                      (t.name || t.title || "")
+                                        .toUpperCase()
+                                        .includes("NOT ASSIGNED")
+                                      ? "text-orange-900"
+                                      : "text-green-900"
                                 }`}
                             >
                               {t.name || t.title || "Task"}
                             </span>
                             <span
-                              className={`text-[10px] font-bold truncate tracking-wider uppercase ${
-                                (userTotalHoursMapDay[t.userName || "Unknown"]?.worked || 0) > 8.5
-                                ? "text-blue-800"
-                                : t.status === "ABSENT" ||
-                                  (t.name || t.title || "")
-                                    .toUpperCase()
-                                    .includes("ABSENT")
-                                  ? "text-red-700/80"
-                                  : (userTotalHoursMapDay[
-                                    t.userName || "Unknown"
-                                  ]?.worked || 0) === 0 &&
+                              className={`text-[10px] font-bold truncate tracking-wider uppercase ${(userTotalHoursMapDay[t.userName || "Unknown"]?.worked || 0) > 8.5
+                                  ? "text-blue-800"
+                                  : t.status === "ABSENT" ||
                                     (t.name || t.title || "")
                                       .toUpperCase()
-                                      .includes("NOT ASSIGNED")
-                                    ? "text-orange-700/80"
-                                    : "text-green-700/80"
+                                      .includes("ABSENT")
+                                    ? "text-red-700/80"
+                                    : (userTotalHoursMapDay[
+                                      t.userName || "Unknown"
+                                    ]?.worked || 0) === 0 &&
+                                      (t.name || t.title || "")
+                                        .toUpperCase()
+                                        .includes("NOT ASSIGNED")
+                                      ? "text-orange-700/80"
+                                      : "text-green-700/80"
                                 }`}
                             >
                               {t.userName}
@@ -448,37 +445,34 @@ const TeamCalendar = ({
                 ).map((userGroup, idx) => (
                   <div key={idx} className="bg-white rounded-[1.5rem] border border-black/5 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300" style={{ animationDelay: `${idx * 50}ms` }}>
                     {/* User Header */}
-                    <div className={`p-4 sm:p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-black/5 transition-colors ${
-                       userGroup.worked > 8.5 
+                    <div className={`p-4 sm:p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-black/5 transition-colors ${userGroup.worked > 8.5
                         ? "bg-blue-50/50"
                         : userGroup.tasks.some(t => t.status === "ABSENT" || (t.name || t.title || "").toUpperCase().includes("ABSENT"))
-                        ? "bg-red-50/50"
-                        : userGroup.worked === 0 && userGroup.tasks.some(t => (t.name || t.title || "").toUpperCase().includes("NOT ASSIGNED"))
-                        ? "bg-orange-50/50"
-                        : "bg-green-50/30"
-                    }`}>
+                          ? "bg-red-50/50"
+                          : userGroup.worked === 0 && userGroup.tasks.some(t => (t.name || t.title || "").toUpperCase().includes("NOT ASSIGNED"))
+                            ? "bg-orange-50/50"
+                            : "bg-green-50/30"
+                      }`}>
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border flex flex-col items-center justify-center shadow-sm shrink-0 ${
-                          userGroup.worked > 8.5 
-                           ? "bg-white border-blue-200 text-blue-600"
-                           : userGroup.tasks.some(t => t.status === "ABSENT" || (t.name || t.title || "").toUpperCase().includes("ABSENT"))
-                           ? "bg-white border-red-200 text-red-600"
-                           : userGroup.worked === 0 && userGroup.tasks.some(t => (t.name || t.title || "").toUpperCase().includes("NOT ASSIGNED"))
-                           ? "bg-white border-orange-200 text-orange-600"
-                           : "bg-white border-green-200 text-green-600"
-                        }`}>
+                        <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border flex flex-col items-center justify-center shadow-sm shrink-0 ${userGroup.worked > 8.5
+                            ? "bg-white border-blue-200 text-blue-600"
+                            : userGroup.tasks.some(t => t.status === "ABSENT" || (t.name || t.title || "").toUpperCase().includes("ABSENT"))
+                              ? "bg-white border-red-200 text-red-600"
+                              : userGroup.worked === 0 && userGroup.tasks.some(t => (t.name || t.title || "").toUpperCase().includes("NOT ASSIGNED"))
+                                ? "bg-white border-orange-200 text-orange-600"
+                                : "bg-white border-green-200 text-green-600"
+                          }`}>
                           <User size={24} strokeWidth={2.5} />
                         </div>
                         <div>
-                          <h4 className={`text-base font-black uppercase tracking-wider ${
-                             userGroup.worked > 8.5 
-                               ? "text-blue-900"
-                               : userGroup.tasks.some(t => t.status === "ABSENT" || (t.name || t.title || "").toUpperCase().includes("ABSENT"))
-                               ? "text-red-900"
-                               : userGroup.worked === 0 && userGroup.tasks.some(t => (t.name || t.title || "").toUpperCase().includes("NOT ASSIGNED"))
-                               ? "text-orange-900"
-                               : "text-green-900"
-                          }`}>
+                          <h4 className={`text-base font-black uppercase tracking-wider ${userGroup.worked > 8.5
+                              ? "text-blue-900"
+                              : userGroup.tasks.some(t => t.status === "ABSENT" || (t.name || t.title || "").toUpperCase().includes("ABSENT"))
+                                ? "text-red-900"
+                                : userGroup.worked === 0 && userGroup.tasks.some(t => (t.name || t.title || "").toUpperCase().includes("NOT ASSIGNED"))
+                                  ? "text-orange-900"
+                                  : "text-green-900"
+                            }`}>
                             {userGroup.userName}
                           </h4>
                           <div className="flex flex-wrap items-center gap-2 mt-1.5">
@@ -491,24 +485,24 @@ const TeamCalendar = ({
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 sm:gap-1.5 w-full sm:w-auto">
                         <div className="flex gap-2">
-                            {userGroup.worked > 8.5 && (
-                              <span className="px-3 py-1.5 bg-blue-100 text-blue-700 text-[10px] font-black uppercase tracking-widest rounded-xl border border-blue-200 animate-pulse shadow-sm">
-                                Stretching
-                              </span>
-                            )}
-                            {userGroup.tasks.some(t => t.status === "ABSENT" || (t.name || t.title || "").toUpperCase().includes("ABSENT")) && (
-                              <span className="px-3 py-1.5 bg-red-100 text-red-700 text-[10px] font-black uppercase tracking-widest rounded-xl border border-red-200 shadow-sm">
-                                Absent
-                              </span>
-                            )}
-                            {userGroup.worked === 0 && userGroup.tasks.some(t => (t.name || t.title || "").toUpperCase().includes("NOT ASSIGNED")) && (
-                              <span className="px-3 py-1.5 bg-orange-100 text-orange-700 text-[10px] font-black uppercase tracking-widest rounded-xl border border-orange-200 shadow-sm">
-                                Not Assigned
-                              </span>
-                            )}
+                          {userGroup.worked > 8.5 && (
+                            <span className="px-3 py-1.5 bg-blue-100 text-blue-700 text-[10px] font-black uppercase tracking-widest rounded-xl border border-blue-200 animate-pulse shadow-sm">
+                              Stretching
+                            </span>
+                          )}
+                          {userGroup.tasks.some(t => t.status === "ABSENT" || (t.name || t.title || "").toUpperCase().includes("ABSENT")) && (
+                            <span className="px-3 py-1.5 bg-red-100 text-red-700 text-[10px] font-black uppercase tracking-widest rounded-xl border border-red-200 shadow-sm">
+                              Absent
+                            </span>
+                          )}
+                          {userGroup.worked === 0 && userGroup.tasks.some(t => (t.name || t.title || "").toUpperCase().includes("NOT ASSIGNED")) && (
+                            <span className="px-3 py-1.5 bg-orange-100 text-orange-700 text-[10px] font-black uppercase tracking-widest rounded-xl border border-orange-200 shadow-sm">
+                              Not Assigned
+                            </span>
+                          )}
                         </div>
                         <span className="text-[10px] font-black text-black/40 uppercase tracking-widest">
                           {userGroup.tasks.length} {userGroup.tasks.length === 1 ? "Task" : "Tasks"}
@@ -532,7 +526,7 @@ const TeamCalendar = ({
                               <h5 className="text-sm font-semibold text-black leading-tight mb-1 group-hover:text-primary transition-colors">
                                 {task.name || task.title || "Untitled Task"}
                               </h5>
-                              <p className="text-[10px] font-bold text-black/40 uppercase tracking-widest flex items-center gap-1.5">
+                              <p className="text-sm font-bold text-black/80 uppercase tracking-widest flex items-center gap-1.5">
                                 <Layout size={10} />
                                 {task.project?.name || task.projectName || `Project ${task.project_id || ""}` || "Project"}
                               </p>
@@ -541,28 +535,27 @@ const TeamCalendar = ({
 
                           <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-black/5">
                             <div className="flex flex-col gap-1.5">
-                               <div className="flex items-center gap-2">
-                                  <span className="text-sm font-bold text-black/50 uppercase tracking-widest bg-white border border-black/5 px-2 py-0.5 rounded shadow-sm">
-                                    A: {formatHours(getTaskHours(task).assigned)}
-                                  </span>
-                                  <span className="text-sm font-bold text-black/50 uppercase tracking-widest bg-white border border-black/5 px-2 py-0.5 rounded shadow-sm">
-                                    W: {formatHours(getTaskHours(task).worked)}
-                                  </span>
-                               </div>
-                               <div className="flex items-center gap-1.5 text-[12px] font-bold text-black/40 uppercase tracking-widest">
-                                  <CalendarIcon size={10} />
-                                  <span>
-                                    {new Date(task.start_date || new Date()).toLocaleDateString(undefined, { month: "short", day: "numeric" })} - {new Date(task.due_date || new Date()).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                                  </span>
-                               </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-bold text-black/50 uppercase tracking-widest bg-white border border-black/5 px-2 py-0.5 rounded shadow-sm">
+                                  A: {formatHours(getTaskHours(task).assigned)}
+                                </span>
+                                <span className="text-sm font-bold text-black/50 uppercase tracking-widest bg-white border border-black/5 px-2 py-0.5 rounded shadow-sm">
+                                  W: {formatHours(getTaskHours(task).worked)}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[12px] font-bold text-black/40 uppercase tracking-widest">
+                                <CalendarIcon size={10} />
+                                <span>
+                                  {new Date(task.start_date || new Date()).toLocaleDateString(undefined, { month: "short", day: "numeric" })} - {new Date(task.due_date || new Date()).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                                </span>
+                              </div>
                             </div>
                             <span
-                              className={`px-3 py-1.5 text-[12px] font-black uppercase tracking-widest rounded-xl border shrink-0 ${
-                                task.status === "COMPLETE" || task.status === "COMPLETED"
-                                ? "bg-green-50 text-green-700 border-green-200"
-                                : task.status === "IN_PROGRESS"
-                                  ? "bg-primary/10 text-primary border-primary/30"
-                                  : "bg-gray-100 text-gray-600 border-gray-200"
+                              className={`px-3 py-1.5 text-[12px] font-black uppercase tracking-widest rounded-xl border shrink-0 ${task.status === "COMPLETE" || task.status === "COMPLETED"
+                                  ? "bg-green-50 text-green-700 border-green-200"
+                                  : task.status === "IN_PROGRESS"
+                                    ? "bg-primary/10 text-primary border-primary/30"
+                                    : "bg-gray-100 text-gray-600 border-gray-200"
                                 }`}
                             >
                               {task.status || "Pending"}
@@ -583,6 +576,7 @@ const TeamCalendar = ({
         <FetchTaskByID
           id={selectedTaskId}
           onClose={() => setSelectedTaskId(null)}
+          readOnly
         />
       )}
     </>

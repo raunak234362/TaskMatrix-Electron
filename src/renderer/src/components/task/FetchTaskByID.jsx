@@ -31,7 +31,7 @@ import Comment from './comments/Comment'
 import RequestTrainingModal from '../training/RequestTrainingModal'
 import { useFloatingTimer } from '../../hooks/useFloatingTimer'
 
-const FetchTaskByID = ({ id, onClose, refresh }) => {
+const FetchTaskByID = ({ id, onClose, refresh, readOnly = false }) => {
   const [task, setTask] = useState(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
@@ -42,6 +42,10 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
   const [endComment, setEndComment] = useState('')
   const [completionPercentage, setCompletionPercentage] = useState('')
   const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
+  const currentUserId = sessionStorage.getItem('userId')
+  const assignedUserId = task?.user_id || task?.userId || task?.assignedToId || task?.user?.id
+  const isAssignedUser = currentUserId != null && assignedUserId != null && String(currentUserId) === String(assignedUserId)
+  const canControlTask = !readOnly && isAssignedUser
   const [isRequestingTraining, setIsRequestingTraining] = useState(false)
   const [expandedWorkingDates, setExpandedWorkingDates] = useState({})
 
@@ -224,6 +228,10 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
 
   const handleAction = async (action) => {
     console.log('FetchTaskByID handleAction action:', action, 'task?.id:', task?.id, 'activeWorkID:', activeWorkID)
+    if (!isAssignedUser) {
+      toast.error('Only the assigned user can control this task')
+      return
+    }
     if (!task?.id) return
     try {
       setProcessing(true)
@@ -305,6 +313,10 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
   // Keep a ref up-to-date so the widget action callback (registered in the hook)
   // can call the latest handleAction without stale closures.
   const handleEndTask = async (e) => {
+    if (!isAssignedUser) {
+      toast.error('Only the assigned user can end this task')
+      return
+    }
     if (e) e.preventDefault()
 
     const cleanComment = endComment.replace(/[.,]/g, '').trim()
@@ -680,7 +692,7 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
               )}
 
               {/* Actions */}
-              <div className="mt-8 pt-6">
+              {canControlTask && <div className="mt-8 pt-6">
                 <div className="flex flex-wrap items-center gap-4">
                   {(task.status === 'ASSIGNED' || task.status === 'REWORK') && (
                     <ActionButton
@@ -732,7 +744,7 @@ const FetchTaskByID = ({ id, onClose, refresh }) => {
                     </div>
                   )}
                 </div>
-              </div>
+              </div>}
             </div>
 
             {/* Work Summary */}

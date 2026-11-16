@@ -18,6 +18,7 @@ import InvoiceTrends from './components/InvoiceTrends'
 import LiveTaskTimer from './components/LiveTaskTimer'
 import AdminInvoiceGraph from './components/AdminInvoiceGraph'
 import WorkloadAlerts from './components/WorkloadAlerts'
+import DashboardTeamCalendar from './components/DashboardTeamCalendar'
 
 // ─── StatCard ────────────────────────────────────────────────────────────────
 const StatCard = ({ label, value, icon: Icon, onClick, iconPadding = 'p-3', valueSize = 'text-2xl' }) => (
@@ -245,7 +246,7 @@ const AdminDashboardView = ({
         handleInvoiceClick
     } = handlers
 
-    const showWorkloadAlerts = ['dept_manager', 'project_manager', 'deputy_manager'].includes(userRole?.toLowerCase())
+    const showWorkloadAlerts = ['dept_manager', 'project_manager'].includes(userRole?.toLowerCase())
 
     return (
         <div className="flex flex-col gap-8 lg:gap-10 transition-all duration-300 ease-in-out">
@@ -256,6 +257,8 @@ const AdminDashboardView = ({
                 )}
                 <PendingActions dashboardStats={adminData.dashboardStats} onActionClick={handleActionClick} />
             </div>
+
+
 
             {/* Operation Executive — MTO & Detailing RFQ Overview */}
             {userRole === 'operation_executive' && (
@@ -279,155 +282,157 @@ const AdminDashboardView = ({
             {/* Row 2: Priority Header Row */}
             <div className="relative">
                 <div className={`grid grid-cols-1 sm:grid-cols-2 ${userRole === 'project_manager_officer' || userRole === 'operation_executive' ? 'lg:grid-cols-3' : 'lg:grid-cols-2 2xl:grid-cols-5'} gap-4 lg:gap-6 relative z-10`}>
-                        {/* 1. Priority Focus - Hidden for PMO, OE, and Admin */}
-                        {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && userRole !== 'admin' && (
-                            <div
-                                className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-between hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group"
-                                onClick={() => currentTask && setDetailTaskId(currentTask.id)}
-                            >
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2.5 bg-green-100 rounded-xl border border-primary/20 shadow-sm transition-transform group-hover:scale-110">
-                                            <Clock className="w-5 h-5 text-primary" strokeWidth={2.5} />
-                                        </div>
-                                        <span className="text-[15px] font-black text-primary uppercase tracking-widest">Priority Focus</span>
+                    {/* 1. Priority Focus - Hidden for PMO, OE, and Admin */}
+                    {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && userRole !== 'admin' && userRole !=='deputy_manager' && (
+                        <div
+                            className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-between hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group"
+                            onClick={() => currentTask && setDetailTaskId(currentTask.id)}
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2.5 bg-green-100 rounded-xl border border-primary/20 shadow-sm transition-transform group-hover:scale-110">
+                                        <Clock className="w-5 h-5 text-primary" strokeWidth={2.5} />
                                     </div>
-                                    {currentTask && (
-                                        <div className="flex items-center gap-2">
-                                            <LiveTaskTimer task={currentTask} />
-                                            <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-primary/50"></span>
-                                        </div>
-                                    )}
+                                    <span className="text-[15px] font-black text-primary uppercase tracking-widest">Priority Focus</span>
                                 </div>
-                                <div className="flex-1 mt-auto">
-                                    <h3 className="text-base font-black text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">
-                                        {currentTask?.project?.name || 'No Active Task'}
-                                    </h3>
-                                    <p className="text-[12px] text-gray-500 font-bold uppercase mt-1">
-                                        {currentTask?.name || 'Ready to start'}
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 2. Upcoming Deadlines Trigger - Hidden for PMO, OE, and Admin */}
-                        {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && userRole !== 'admin' && (
-                            <div
-                                className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
-                                onClick={() => setShowDeadlinesPopup(true)}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2.5 bg-blue-100/60 rounded-xl border border-blue-200 shadow-sm group-hover:scale-110 transition-transform">
-                                            <Calendar className="w-5 h-5 text-blue-600" strokeWidth={2.5} />
-                                        </div>
-                                        <span className="text-sm font-black text-gray-700 uppercase tracking-wide">Upcoming Assigned Task Deadlines</span>
+                                {currentTask && (
+                                    <div className="flex items-center gap-2">
+                                        <LiveTaskTimer task={currentTask} />
+                                        <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-primary/50"></span>
                                     </div>
-                                    <span className="text-2xl font-black text-blue-600 tracking-tighter">
-                                        {tasks.filter(t => t.status === 'ASSIGNED' || t.status === 'REWORK').length}
-                                    </span>
-                                </div>
+                                )}
                             </div>
-                        )}
+                            <div className="flex-1 mt-auto">
+                                <h3 className="text-base font-black text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">
+                                    {currentTask?.project?.name || 'No Active Task'}
+                                </h3>
+                                <p className="text-[12px] text-gray-500 font-bold uppercase mt-1">
+                                    {currentTask?.name || 'Ready to start'}
+                                </p>
+                            </div>
+                        </div>
+                    )}
 
-                        {/* 3. Upcoming Submittals Trigger */}
+                    {/* 2. Upcoming Deadlines Trigger - Hidden for PMO, OE, and Admin */}
+                    {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && userRole !== 'admin' && userRole !=='deputy_manager' && (
                         <div
                             className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
-                            onClick={() => setShowSubmittalsPopup(true)}
+                            onClick={() => setShowDeadlinesPopup(true)}
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2.5 bg-indigo-100/60 rounded-xl border border-indigo-200 shadow-sm group-hover:scale-110 transition-transform">
-                                        <Briefcase className="w-5 h-5 text-indigo-600" strokeWidth={2.5} />
+                                    <div className="p-2.5 bg-blue-100/60 rounded-xl border border-blue-200 shadow-sm group-hover:scale-110 transition-transform">
+                                        <Calendar className="w-5 h-5 text-blue-600" strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-sm font-semibold
-                                     text-black uppercase tracking-normal">Upcoming Submittal</span>
+                                    <span className="text-sm font-black text-gray-700 uppercase tracking-wide">Upcoming Assigned Task Deadlines</span>
                                 </div>
-                                <span className="text-2xl font-black text-indigo-600 tracking-tighter">
-                                    {adminData?.upcomingMilestones?.length || 0}
+                                <span className="text-2xl font-black text-blue-600 tracking-tighter">
+                                    {tasks.filter(t => t.status === 'ASSIGNED' || t.status === 'REWORK').length}
                                 </span>
                             </div>
                         </div>
+                    )}
 
-                        {/* 4. Notes & Updates Trigger */}
+                    {/* 3. Upcoming Submittals Trigger */}
+                    <div
+                        className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                        onClick={() => setShowSubmittalsPopup(true)}
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-indigo-100/60 rounded-xl border border-indigo-200 shadow-sm group-hover:scale-110 transition-transform">
+                                    <Briefcase className="w-5 h-5 text-indigo-600" strokeWidth={2.5} />
+                                </div>
+                                <span className="text-sm font-semibold
+                                     text-black uppercase tracking-normal">Upcoming Submittal</span>
+                            </div>
+                            <span className="text-2xl font-black text-indigo-600 tracking-tighter">
+                                {adminData?.upcomingMilestones?.length || 0}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* 4. Notes & Updates Trigger */}
+                    <div
+                        className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                        onClick={() => setShowNotesPopup(true)}
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-amber-100/60 rounded-xl border border-amber-200 shadow-sm group-hover:scale-110 transition-transform">
+                                    <Bell className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
+                                </div>
+                                <span className="text-sm font-semibold
+                                     text-black uppercase tracking-normal">Notes & Updates</span>
+                            </div>
+                            <span className="text-2xl font-black text-amber-600 tracking-tighter">
+                                {projectNotes.length}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Unread Comments Trigger */}
+                    <div
+                        className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                        onClick={() => handlers.setShowUnreadCommentsPopup?.(true)}
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-red-100/60 rounded-xl border border-red-200 shadow-sm group-hover:scale-110 transition-transform">
+                                    <MessageCircleWarning className="w-5 h-5 text-red-600" strokeWidth={2.5} />
+                                </div>
+                                <span className="text-sm font-semibold
+                                     text-black uppercase tracking-normal">Unread Comments</span>
+                            </div>
+                            <span className="text-2xl font-black text-red-600 tracking-tighter">
+                                {unreadComments?.length || 0}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* 5. Unapproved Change Orders */}
+                    {['admin', 'deputy_manager', 'operation_executive', 'project_manager_officer', 'project_manager', 'dept_manager'].includes(userRole?.toLowerCase()) && (
                         <div
                             className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
-                            onClick={() => setShowNotesPopup(true)}
+                            onClick={() => handlers.handleActionClick && handlers.handleActionClick('UNAPPROVED_CHANGE_ORDERS')}
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2.5 bg-amber-100/60 rounded-xl border border-amber-200 shadow-sm group-hover:scale-110 transition-transform">
-                                        <Bell className="w-5 h-5 text-amber-600" strokeWidth={2.5} />
+                                    <div className="p-2.5 bg-red-100/60 rounded-xl border border-red-200 shadow-sm group-hover:scale-110 transition-transform">
+                                        <RefreshCw className="w-5 h-5 text-red-600" strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-sm font-semibold
-                                     text-black uppercase tracking-normal">Notes & Updates</span>
-                                </div>
-                                    <span className="text-2xl font-black text-amber-600 tracking-tighter">
-                                        {projectNotes.length}
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            {/* Unread Comments Trigger */}
-                            <div
-                                className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
-                                onClick={() => handlers.setShowUnreadCommentsPopup?.(true)}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2.5 bg-red-100/60 rounded-xl border border-red-200 shadow-sm group-hover:scale-110 transition-transform">
-                                            <MessageCircleWarning className="w-5 h-5 text-red-600" strokeWidth={2.5} />
-                                        </div>
-                                        <span className="text-sm font-semibold
-                                     text-black uppercase tracking-normal">Unread Comments</span>
-                                    </div>
-                                    <span className="text-2xl font-black text-red-600 tracking-tighter">
-                                        {unreadComments?.length || 0}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* 5. Unapproved Change Orders */}
-                            {['admin', 'deputy_manager', 'operation_executive', 'project_manager_officer', 'project_manager', 'dept_manager'].includes(userRole?.toLowerCase()) && (
-                                <div
-                                    className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
-                                    onClick={() => handlers.handleActionClick && handlers.handleActionClick('UNAPPROVED_CHANGE_ORDERS')}
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2.5 bg-red-100/60 rounded-xl border border-red-200 shadow-sm group-hover:scale-110 transition-transform">
-                                                <RefreshCw className="w-5 h-5 text-red-600" strokeWidth={2.5} />
-                                            </div>
-                                            <span className="text-[14px] font-semibold
+                                    <span className="text-[14px] font-semibold
                                      text-black uppercase tracking-normal">Unapproved Change Orders</span>
-                                        </div>
-                                        <span className="text-2xl font-black text-red-600 tracking-tighter">
-                                            {adminData?.dashboardStats?.unapprovedChangeOrders || 0}
-                                        </span>
-                                    </div>
                                 </div>
-                            )}
-
-                            {/* 6. Pending Approvals */}
-                            <div
-                                className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
-                                onClick={() => handlers.handleActionClick && handlers.handleActionClick('PENDING_APPROVALS')}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2.5 bg-purple-100/60 rounded-xl border border-purple-200 shadow-sm group-hover:scale-110 transition-transform">
-                                            <Bell className="w-5 h-5 text-purple-600" strokeWidth={2.5} />
-                                        </div>
-                                        <span className="text-sm font-semibold text-black uppercase tracking-normal">Pending Approvals</span>
-                                    </div>
-                                    <span className="text-2xl font-black text-purple-600 tracking-tighter">
-                                        {unapprovedListsCount || 0}
-                                    </span>
-                                </div>
+                                <span className="text-2xl font-black text-red-600 tracking-tighter">
+                                    {adminData?.dashboardStats?.unapprovedChangeOrders || 0}
+                                </span>
                             </div>
                         </div>
+                    )}
+
+                    {/* 6. Pending Approvals */}
+                    <div
+                        className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
+                        onClick={() => handlers.handleActionClick && handlers.handleActionClick('PENDING_APPROVALS')}
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-purple-100/60 rounded-xl border border-purple-200 shadow-sm group-hover:scale-110 transition-transform">
+                                    <Bell className="w-5 h-5 text-purple-600" strokeWidth={2.5} />
+                                </div>
+                                <span className="text-sm font-semibold text-black uppercase tracking-normal">Pending Approvals</span>
+                            </div>
+                            <span className="text-2xl font-black text-purple-600 tracking-tighter">
+                                {unapprovedListsCount || 0}
+                            </span>
+                        </div>
                     </div>
-            {(userRole === 'admin' || userRole === 'project_manager_officer' || userRole === 'deputy_manager') && (
+                </div>
+            </div>
+            {userRole?.toLowerCase() === 'deputy_manager' && <DashboardTeamCalendar />}
+
+            {(userRole === 'admin' || userRole === 'project_manager_officer') && (
                 <div className="w-full">
                     <AdminInvoiceGraph
                         invoices={adminData.invoices}
@@ -440,7 +445,7 @@ const AdminDashboardView = ({
 
 
             {/* Row 3: User Stats (Compressed) - Hidden for OE */}
-            {userRole !== 'operation_executive' && (
+            {userRole !== 'operation_executive' && userRole !=='deputy_manager' && userRole !== 'admin' && (
                 <UserStatsWidget stats={userStats} loading={loading} userRole={userRole} />
             )}
 
@@ -479,7 +484,7 @@ const AdminDashboardView = ({
                 </div>
             )}
 
-            {(userRole === 'project_manager_officer' || userRole === 'admin' || userRole === 'deputy_manager') && (
+            {(userRole === 'project_manager_officer' || userRole === 'admin') && (
                 <div className="grid grid-cols-1 gap-6">
                     <InvoiceTrends invoices={adminData.invoices} />
                 </div>
