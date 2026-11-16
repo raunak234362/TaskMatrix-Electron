@@ -7,6 +7,7 @@ import Service from '../api/Service'
 import { toast } from 'react-toastify'
 import { setActiveDetail } from '../store/uiSlice'
 import { setModalOpen } from '../store/userSlice'
+import AppUpdateCenter from './common/AppUpdateCenter'
 
 const Header = ({ isMinimized, toggleSidebar, isMobileOpen }) => {
   const location = useLocation()
@@ -232,8 +233,9 @@ const Header = ({ isMinimized, toggleSidebar, isMobileOpen }) => {
         </div>
       </div>
 
-      {/* Right Area: Notifications Area Only */}
-      <div className="flex items-center gap-6" ref={dropdownRef}>
+      {/* Right Area: Application updates and notifications */}
+      <div className="flex items-center gap-4" ref={dropdownRef}>
+        <AppUpdateCenter />
         <div className="relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}

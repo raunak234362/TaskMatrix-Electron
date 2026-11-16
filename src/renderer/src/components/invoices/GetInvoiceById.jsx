@@ -185,7 +185,16 @@ const GetInvoiceById = ({
 
     setIsDownloading(true);
     try {
-      const logoDataUrl = await loadImageAsDataUrl(logo);
+      const signatureImage = componentRef.current?.querySelector(
+        'img[alt="Raj signature"]',
+      );
+      if (!signatureImage?.src) {
+        throw new Error("Unable to find the invoice signature image");
+      }
+      const [logoDataUrl, signatureDataUrl] = await Promise.all([
+        loadImageAsDataUrl(logo),
+        loadImageAsDataUrl(signatureImage.src),
+      ]);
       const html = `
       <html>
         <head>
@@ -238,7 +247,8 @@ const GetInvoiceById = ({
             .signature-area { margin-top: auto; padding-bottom: 20px; display: flex; flex-direction: column; align-items: flex-end; }
             .thank-you { color: #6bbd45; font-weight: bold; font-size: 13px; font-style: italic; margin-bottom: 15px; align-self: center; }
             .sig-box { text-align: center; width: 220px; }
-            .sig-company { font-size: 12px; font-weight: bold; margin-bottom: 50px; }
+            .sig-company { font-size: 12px; font-weight: bold; margin-bottom: 5px; }
+            .sig-image { display: block; height: 60px; max-width: 100%; object-fit: contain; margin: 0 auto 5px; }
             .sig-line { border-top: 1px solid #000; padding-top: 5px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
 
             .footer { border-top: 1px solid #eee; padding-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 11px; color: #000; }
@@ -347,7 +357,7 @@ const GetInvoiceById = ({
               <div class="thank-you">Thank you for your business!</div>
               <div class="sig-box">
                 <div class="sig-company">For Whiteboard Technologies Pvt Ltd</div>
-                <div style="height: 60px;"></div>
+                <img src="${signatureDataUrl}" class="sig-image" alt="Authorised signatory" />
                 <div class="sig-line">Authorised signatory</div>
               </div>
             </div>
