@@ -426,7 +426,7 @@ const CoTable = ({ coId, onSuccess, isDraft, onDraftSubmit, isSubmitting }) => {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="w-full text-sm text-left">
+          <table className="w-full min-w-[1100px] text-sm text-left">
             <thead className="bg-gray-50 text-gray-700 border-b">
               <tr>
                 <th className="p-3 w-10 text-center">
@@ -526,7 +526,11 @@ const CoTable = ({ coId, onSuccess, isDraft, onDraftSubmit, isSubmitting }) => {
                                   <input
                                     {...field}
                                     type="number"
-                                    className="w-full p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
+                                    style={{
+                                      width: `${Math.max(String(field.value ?? "").length, 2) + 2}ch`,
+                                      minWidth: "3.5rem",
+                                    }}
+                                    className="max-w-none p-1.5 border border-gray-200 rounded focus:ring-1 focus:ring-green-500 outline-none h-8 text-xs"
                                   />
                                 );
                               } else {
