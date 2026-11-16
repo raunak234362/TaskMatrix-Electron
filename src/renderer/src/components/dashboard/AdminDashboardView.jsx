@@ -283,7 +283,7 @@ const AdminDashboardView = ({
             <div className="relative">
                 <div className={`grid grid-cols-1 sm:grid-cols-2 ${userRole === 'project_manager_officer' || userRole === 'operation_executive' ? 'lg:grid-cols-3' : 'lg:grid-cols-2 2xl:grid-cols-5'} gap-4 lg:gap-6 relative z-10`}>
                     {/* 1. Priority Focus - Hidden for PMO, OE, and Admin */}
-                    {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && userRole !== 'admin' && (
+                    {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && userRole !== 'admin' && userRole !=='deputy_manager' && (
                         <div
                             className="bg-green-50/60 p-4 rounded-lg border border-gray-300 shadow-sm flex flex-col justify-between hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group"
                             onClick={() => currentTask && setDetailTaskId(currentTask.id)}
@@ -314,7 +314,7 @@ const AdminDashboardView = ({
                     )}
 
                     {/* 2. Upcoming Deadlines Trigger - Hidden for PMO, OE, and Admin */}
-                    {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && userRole !== 'admin' && (
+                    {userRole !== 'project_manager_officer' && userRole !== 'operation_executive' && userRole !== 'admin' && userRole !=='deputy_manager' && (
                         <div
                             className="bg-green-50/60 p-4 rounded-lg border border-gray-500 shadow-sm flex flex-col justify-center hover:shadow-md transition-all cursor-pointer hover:-translate-y-1 group min-h-[100px]"
                             onClick={() => setShowDeadlinesPopup(true)}
