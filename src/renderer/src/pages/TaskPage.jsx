@@ -39,6 +39,7 @@ const TaskPage = () => {
       'dept_manager',
       'deputy_manager',
       'operation_executive',
+      'operation_executive_trainee',
       'project_manager_officer',
       'human_resource',
       'project_manager',
