@@ -656,11 +656,24 @@ export const useDashboardData = () => {
   useEffect(() => {
     fetchData()
 
-    const handleTaskUpdated = () => {
+    const handleRefresh = () => {
       fetchData()
     }
-    window.addEventListener('task-updated', handleTaskUpdated)
-    return () => window.removeEventListener('task-updated', handleTaskUpdated)
+    window.addEventListener('task-updated', handleRefresh)
+    window.addEventListener('dashboard-refresh', handleRefresh)
+    window.addEventListener('rfq-updated', handleRefresh)
+    window.addEventListener('rfi-updated', handleRefresh)
+    window.addEventListener('submittal-updated', handleRefresh)
+    window.addEventListener('co-updated', handleRefresh)
+
+    return () => {
+      window.removeEventListener('task-updated', handleRefresh)
+      window.removeEventListener('dashboard-refresh', handleRefresh)
+      window.removeEventListener('rfq-updated', handleRefresh)
+      window.removeEventListener('rfi-updated', handleRefresh)
+      window.removeEventListener('submittal-updated', handleRefresh)
+      window.removeEventListener('co-updated', handleRefresh)
+    }
   }, [fetchData])
 
   return {

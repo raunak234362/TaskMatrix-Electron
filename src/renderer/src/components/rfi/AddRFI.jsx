@@ -212,6 +212,8 @@ const AddRFI = ({
         return;
       }
       toast.success("RFI Submitted Successfully");
+      window.dispatchEvent(new Event('dashboard-refresh'));
+      window.dispatchEvent(new Event('rfi-updated'));
       setDescription("");
       setFiles([]);
       onSuccess?.();

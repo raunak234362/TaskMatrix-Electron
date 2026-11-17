@@ -121,6 +121,8 @@ const ResponseDetailsModal = ({
       if (currentResponseId) {
         await fetchResponseDetails(currentResponseId);
       }
+      window.dispatchEvent(new Event("dashboard-refresh"));
+      window.dispatchEvent(new Event("rfq-updated"));
       if (onSuccess) onSuccess();
     } catch (err) {
       console.error("Reply failed:", err);

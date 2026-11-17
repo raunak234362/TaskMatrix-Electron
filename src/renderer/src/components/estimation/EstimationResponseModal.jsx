@@ -51,6 +51,7 @@ const EstimationResponseModal = ({ estimationId, onClose, onSuccess, parentRespo
             await Service.AddEstimationResponse(formData, estimationId)
 
             toast.success('Response added successfully')
+            window.dispatchEvent(new Event('dashboard-refresh'))
             reset()
             setFiles([])
             onSuccess?.()

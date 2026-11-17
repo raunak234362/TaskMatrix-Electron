@@ -270,6 +270,10 @@ const RFIResponseDetailsModal = ({ response, project, onClose }) => {
 
     await Service.addRFIResponse(formData, targetRfiId, fabricatorName, projectName);
 
+    // Notify dashboard to refresh
+    window.dispatchEvent(new Event("dashboard-refresh"));
+    window.dispatchEvent(new Event("rfi-updated"));
+
     // Reset Form UI
     setReplyMode(false);
     setReplyMessage("");

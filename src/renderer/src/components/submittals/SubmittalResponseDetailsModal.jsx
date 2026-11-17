@@ -103,6 +103,8 @@ const SubmittalResponseDetailsModal = ({
         projectName = p?.projectName || p?.name || "";
       }
       await Service.addSubmittalResponse(formData, fabricatorName, projectName);
+      window.dispatchEvent(new Event("dashboard-refresh"));
+      window.dispatchEvent(new Event("submittal-updated"));
       onClose();
     } catch (err) {
       console.error("Failed to send submittal reply:", err);

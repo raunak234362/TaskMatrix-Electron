@@ -413,6 +413,8 @@ const AddRFQ = ({ onSuccess }) => {
             : userDetail,
         };
         dispatch(addRFQ(enrichedRFQ));
+        window.dispatchEvent(new Event('dashboard-refresh'));
+        window.dispatchEvent(new Event('rfq-updated'));
         toast.success("RFQ Created Successfully");
         setDescription("");
         reset();

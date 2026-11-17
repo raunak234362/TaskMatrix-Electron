@@ -109,6 +109,8 @@ const SubmittalResponseModal = ({
       }
       await Service.addSubmittalResponse(formData, fabricatorName, projectName);
       toast.success("Response submitted successfully");
+      window.dispatchEvent(new Event("dashboard-refresh"));
+      window.dispatchEvent(new Event("submittal-updated"));
       if (onSuccess) onSuccess();
       if (onClose) onClose();
     } catch (err) {

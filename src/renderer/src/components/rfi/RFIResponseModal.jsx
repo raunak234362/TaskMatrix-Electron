@@ -91,6 +91,8 @@ const RFIResponseModal = ({
 
       await Service.addRFIResponse(formData, rfiId, fabricatorName, projectName);
       toast.success("Response submitted successfully!");
+      window.dispatchEvent(new Event("dashboard-refresh"));
+      window.dispatchEvent(new Event("rfi-updated"));
       reset();
       setFiles([]);
       onSuccess();

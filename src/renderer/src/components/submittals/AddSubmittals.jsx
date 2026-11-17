@@ -335,6 +335,8 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
         return;
       }
       toast.success("Submittal Created Successfully!");
+      window.dispatchEvent(new Event('dashboard-refresh'));
+      window.dispatchEvent(new Event('submittal-updated'));
 
       reset();
       await fetchMileStone();

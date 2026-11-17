@@ -94,7 +94,10 @@ const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide
     }
 
     const getStatusName = (item) => {
-        const rawStatus = item?.wbtStatus ?? item?.status
+        const isClientSide = currentTab === 'clientSide'
+        const rawStatus = isClientSide
+            ? (item?.status || item?.wbtStatus)
+            : (item?.wbtStatus || item?.status)
         if (type === 'PENDING_SUBMITTALS') {
             const isPending = rawStatus === false || String(rawStatus).toUpperCase() === 'PENDING'
             return isPending ? 'PENDING' : 'SUBMITTED_TO_EOR'
@@ -136,7 +139,7 @@ const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide
             if (st) set.add(st)
         })
         return ['All Statuses', ...Array.from(set).sort((a, b) => a.localeCompare(b))]
-    }, [effectiveData, type])
+    }, [effectiveData, type, currentTab])
 
     // Stage options
     const stageOptions = useMemo(() => {
@@ -252,7 +255,7 @@ const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide
             }
             return 0
         })
-    }, [effectiveData, searchTerm, selectedFabricator, selectedStatus, selectedStage, sortBy, type])
+    }, [effectiveData, searchTerm, selectedFabricator, selectedStatus, selectedStage, sortBy, type, currentTab])
 
     const hasActiveFilters =
         Boolean(searchTerm.trim()) ||
@@ -576,7 +579,10 @@ const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide
             accessorKey: 'status',
             header: 'Status',
             cell: ({ row }) => {
-                const rawStatus = row.original.wbtStatus || row.original.status
+                const isClientSide = currentTab === 'clientSide'
+                const rawStatus = isClientSide
+                    ? (row.original.status || row.original.wbtStatus)
+                    : (row.original.wbtStatus || row.original.status)
 
                 if (type === 'PENDING_SUBMITTALS') {
                     const isPending = rawStatus === false || String(rawStatus).toUpperCase() === 'PENDING'
@@ -657,7 +663,16 @@ const PendingActionList = ({ isOpen, onClose, type, data = { wbt: [], clientSide
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={() => window.dispatchEvent(new Event('dashboard-refresh'))}
+                            className="px-4 py-1.5 bg-green-50 text-green-700 border border-green-600 rounded-lg hover:bg-green-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer flex items-center gap-2"
+                            title="Refresh Dashboard & List"
+                        >
+                            <RefreshCw className="w-4 h-4" />
+                            Refresh
+                        </button>
                         <button
                             onClick={onClose}
                             className="px-6 py-1.5 bg-red-50 text-black border-2 border-red-700/80 rounded-lg hover:bg-red-100 transition-all font-bold text-sm uppercase tracking-tight shadow-sm cursor-pointer"

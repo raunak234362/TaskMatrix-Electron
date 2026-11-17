@@ -122,6 +122,8 @@ const EditRFQByID = ({ id, onSuccess, onDelete, onCancel }) => {
 
             await Service.UpdateRFQById(id, payload, fabricatorName, data.projectName || '')
             toast.success('RFQ updated successfully')
+            window.dispatchEvent(new Event('dashboard-refresh'))
+            window.dispatchEvent(new Event('rfq-updated'))
             onSuccess?.()
         } catch (error) {
             console.error('Update RFQ error:', error)
@@ -135,6 +137,8 @@ const EditRFQByID = ({ id, onSuccess, onDelete, onCancel }) => {
             await Service.DeleteRFQById(id)
             dispatch(deleteRFQ(id))
             toast.success('RFQ deleted successfully')
+            window.dispatchEvent(new Event('dashboard-refresh'))
+            window.dispatchEvent(new Event('rfq-updated'))
             if (onDelete) {
                 onDelete()
             } else {

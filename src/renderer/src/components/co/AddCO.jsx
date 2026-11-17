@@ -211,6 +211,8 @@ const AddCO = ({ project, onSuccess, changeOrderData }) => {
       }
 
       toast.success("Change Order & Table created successfully!");
+      window.dispatchEvent(new Event('dashboard-refresh'));
+      window.dispatchEvent(new Event('co-updated'));
 
       reset();
       setDescription("");

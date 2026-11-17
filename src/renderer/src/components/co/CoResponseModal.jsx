@@ -154,6 +154,8 @@ const CoResponseModal = ({
       await Service.addCOResponse(formData, CoId, fabricatorName, projectName);
 
       toast.success("CO response added successfully");
+      window.dispatchEvent(new Event("dashboard-refresh"));
+      window.dispatchEvent(new Event("co-updated"));
       if (onSuccess) onSuccess();
       if (onClose) onClose();
     } catch (error) {

@@ -487,6 +487,8 @@ const ResponseModal = ({
 
     if (success) {
       toast.success("Response added successfully!");
+      window.dispatchEvent(new Event("dashboard-refresh"));
+      window.dispatchEvent(new Event("rfq-updated"));
       onSuccess();
       onClose();
     }

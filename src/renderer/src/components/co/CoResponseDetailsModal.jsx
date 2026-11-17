@@ -321,6 +321,8 @@ const COResponseDetailsModal = ({
       await Service.addCOResponse(formData, response.id || response._id, fabricatorName, projectName);
 
       toast.success("Reply submitted successfully");
+      window.dispatchEvent(new Event("dashboard-refresh"));
+      window.dispatchEvent(new Event("co-updated"));
       setReplyMode(false);
       setReplyMessage("");
       setReplyFiles([]);
