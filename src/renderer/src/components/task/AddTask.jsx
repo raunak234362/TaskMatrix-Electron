@@ -63,15 +63,29 @@ const normType = (s) =>
 
 const COMPLETED_TASK_STATUSES = new Set([
   "ABSENT",
+  "APPROVED",
   "CANCELED",
   "CANCELLED",
+  "CHECKED",
+  "CLOSED",
   "COMPLETE",
   "COMPLETED",
   "COMPLETE_OTHER",
   "DONE",
-  "VALIDATE_COMPLETE",
-  "VALIDATED_COMPLETE",
+  "FINISHED",
+  "IN_REVIEW",
+  "RESOLVED",
+  "REVIEW",
+  "REVIEWED",
+  "REVIEWED_COMPLETE",
+  "REVIEWED_COMPLETED",
+  "REVIEW_COMPLETE",
+  "REVIEW_COMPLETED",
   "USER_FAULT",
+  "VALIDATE_COMPLETE",
+  "VALIDATE_COMPLETED",
+  "VALIDATED_COMPLETE",
+  "VERIFIED",
   "WRONG_ALLOCATION",
 ]);
 
@@ -86,6 +100,7 @@ const getTasksFromResponse = (response) => {
   if (Array.isArray(response?.data)) return response.data;
   if (Array.isArray(response?.data?.data)) return response.data.data;
   if (Array.isArray(response?.tasks)) return response.tasks;
+  if (response?.data && typeof response.data === "object") return Object.values(response.data);
   return [];
 };
 
@@ -110,22 +125,184 @@ const getWorkingHoursSince = (dateValue, now = new Date()) => {
   return totalMs / (1000 * 60 * 60);
 };
 
+const getTaskEndTime = (task) => {
+  if (!task) return null;
+
+  // 1. Direct end/completion timestamp fields
+  const directEnd =
+    task.ended_at ||
+    task.endedAt ||
+    task.end_date ||
+    task.endDate ||
+    task.completed_at ||
+    task.completedAt ||
+    task.reviewed_at ||
+    task.reviewedAt;
+  if (directEnd && !Number.isNaN(new Date(directEnd).getTime())) {
+    return directEnd;
+  }
+
+  // 2. Latest ended_at from workingHourTask sessions
+  if (Array.isArray(task.workingHourTask) && task.workingHourTask.length > 0) {
+    let latestSessionEnd = null;
+    let latestMs = 0;
+    for (const session of task.workingHourTask) {
+      if (session?.ended_at) {
+        const ms = new Date(session.ended_at).getTime();
+        if (!Number.isNaN(ms) && ms > latestMs) {
+          latestMs = ms;
+          latestSessionEnd = session.ended_at;
+        }
+      }
+    }
+    if (latestSessionEnd) {
+      return latestSessionEnd;
+    }
+  }
+
+  // 3. Fallback to updatedAt / updated_at
+  return task.updatedAt || task.updated_at || null;
+};
+
+const isTaskCompletedOrReviewed = (task) => {
+  if (!task) return false;
+
+  // 1. Deleted tasks
+  if (task.isDeleted || task.is_deleted || task.deletedAt || task.deleted_at) {
+    return true;
+  }
+
+  // 2. Status check (including IN_REVIEW, REVIEW, and all complete/terminal statuses)
+  const status = normalizeTaskStatus(task.status);
+  if (
+    COMPLETED_TASK_STATUSES.has(status) ||
+    status.includes("COMPLETE") ||
+    status.includes("REVIEW") ||
+    status.includes("APPROVED") ||
+    status.includes("CLOSED") ||
+    status.includes("RESOLVED") ||
+    status.includes("VERIFIED")
+  ) {
+    return true;
+  }
+
+  // 3. Explicit completion / review flags
+  if (
+    task.isCompleted ||
+    task.is_completed ||
+    task.completed ||
+    task.isReviewed ||
+    task.is_reviewed ||
+    task.reviewed
+  ) {
+    return true;
+  }
+
+  // 4. Timestamps indicating completion, end, or review
+  if (
+    task.completedAt ||
+    task.completed_at ||
+    task.completed_on ||
+    task.completedOn ||
+    task.ended_at ||
+    task.endedAt ||
+    task.reviewedAt ||
+    task.reviewed_at ||
+    task.reviewed_on ||
+    task.reviewedOn
+  ) {
+    return true;
+  }
+
+  // 5. Reviewer identity exists
+  if (
+    task.reviewedById ||
+    task.reviewed_by_id ||
+    task.reviewedBy ||
+    task.reviewed_by
+  ) {
+    return true;
+  }
+
+  // 6. Review status
+  const revStatus = normalizeTaskStatus(
+    task.reviewStatus || task.review_status || task.review_state
+  );
+  if (
+    revStatus &&
+    (COMPLETED_TASK_STATUSES.has(revStatus) ||
+      revStatus.includes("COMPLETE") ||
+      revStatus.includes("REVIEW") ||
+      revStatus.includes("APPROV") ||
+      revStatus.includes("DONE") ||
+      revStatus.includes("PASS") ||
+      revStatus.includes("RESOLV"))
+  ) {
+    return true;
+  }
+
+  // 7. Line item completion is 91-100% or 100%
+  const completion = String(
+    task.lineItemCompletion || task.completionPercentage || ""
+  )
+    .trim()
+    .toUpperCase();
+  const isCompletionHigh =
+    completion === "100%" ||
+    completion === "100" ||
+    completion === "91-100" ||
+    completion === "91-100%" ||
+    completion === "RANGE_91_100" ||
+    completion === "RANGE_100" ||
+    completion === "RANGE_91-100" ||
+    parseFloat(completion) >= 91;
+
+  // If completion is 91-100% and task has ended (no active session)
+  const hasActiveSession =
+    Array.isArray(task.workingHourTask) &&
+    task.workingHourTask.some(
+      (wh) => !wh.ended_at || String(wh.ended_at).toLowerCase() === "null"
+    );
+  if (isCompletionHigh && !hasActiveSession) {
+    return true;
+  }
+
+  // 8. If task has working sessions and all of them have ended
+  if (
+    Array.isArray(task.workingHourTask) &&
+    task.workingHourTask.length > 0 &&
+    !hasActiveSession
+  ) {
+    return true;
+  }
+
+  // 9. If task is in review, or all comments on it are acknowledged
+  if (
+    status === "IN_REVIEW" ||
+    (Array.isArray(task.taskcomment) &&
+      task.taskcomment.length > 0 &&
+      task.taskcomment.every((c) => c.acknowledged === true))
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
 const getEmployeeTaskBlocker = (tasks, now = new Date()) => {
   for (const task of tasks) {
+    // Once a task is completed, ended, or in review, no need to check 24hrs again
+    if (isTaskCompletedOrReviewed(task)) continue;
+
     const status = normalizeTaskStatus(task.status);
     if (!status || COMPLETED_TASK_STATUSES.has(status)) continue;
+    if (status === "IN_REVIEW" || status.includes("REVIEW")) continue;
 
-    const isReview = status === "IN_REVIEW";
-    const referenceDate =
-      isReview
-        ? task.updatedAt ||
-          task.updated_at ||
-          task.created_at ||
-          task.createdAt
-        : task.created_at || task.createdAt;
+    // Only check incomplete, open tasks (e.g. ASSIGNED, IN_PROGRESS, BREAK, PENDING, REWORK)
+    const referenceDate = task.created_on || task.created_at || task.createdAt;
 
     if (referenceDate && getWorkingHoursSince(referenceDate, now) > 24) {
-      return isReview ? "REVIEW_OVERDUE" : "OVERDUE";
+      return "OVERDUE";
     }
   }
 
@@ -649,9 +826,7 @@ const AddTask = () => {
 
           if (overdueType) {
             const empName = employees.find(e => e.id === assignment.employeeId)?.firstName || "This employee";
-            const msg = overdueType === "REVIEW_OVERDUE"
-              ? `${empName} has tasks in review for more than 24 working hours. Cannot assign new tasks.`
-              : `${empName} has incomplete tasks older than 24 working hours. Cannot assign new tasks.`;
+            const msg = `${empName} has incomplete tasks older than 24 working hours. Cannot assign new tasks.`;
             toast.error(msg);
             setOverdueEmployees((prev) => ({
               ...prev,
@@ -1416,18 +1591,6 @@ const AddTask = () => {
                                           <div className="flex items-center gap-1 text-[10px] text-red-600 uppercase">
                                             <AlertCircle className="w-3 h-3" />
                                             Has overdue tasks ({">"}24h)
-                                          </div>
-                                        )}
-                                        {employeeError === "REVIEW_OVERDUE" && (
-                                          <div className="flex items-center gap-1 text-[10px] text-red-600 uppercase">
-                                            <AlertCircle className="w-3 h-3" />
-                                            Has tasks in review {">"}24h
-                                          </div>
-                                        )}
-                                        {employeeError === "IN_REVIEW" && (
-                                          <div className="flex items-center gap-1 text-[10px] text-red-600 uppercase">
-                                            <AlertCircle className="w-3 h-3" />
-                                            Has tasks currently in review
                                           </div>
                                         )}
                                       </div>
