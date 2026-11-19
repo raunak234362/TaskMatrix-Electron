@@ -61,254 +61,6 @@ const normType = (s) =>
     .replace(/[\s_-]+/g, "")
     .replace(/modelling/g, "modeling");
 
-const COMPLETED_TASK_STATUSES = new Set([
-  "ABSENT",
-  "APPROVED",
-  "CANCELED",
-  "CANCELLED",
-  "CHECKED",
-  "CLOSED",
-  "COMPLETE",
-  "COMPLETED",
-  "COMPLETE_OTHER",
-  "DONE",
-  "FINISHED",
-  "IN_REVIEW",
-  "RESOLVED",
-  "REVIEW",
-  "REVIEWED",
-  "REVIEWED_COMPLETE",
-  "REVIEWED_COMPLETED",
-  "REVIEW_COMPLETE",
-  "REVIEW_COMPLETED",
-  "USER_FAULT",
-  "VALIDATE_COMPLETE",
-  "VALIDATE_COMPLETED",
-  "VALIDATED_COMPLETE",
-  "VERIFIED",
-  "WRONG_ALLOCATION",
-]);
-
-const normalizeTaskStatus = (status) =>
-  String(status || "")
-    .trim()
-    .toUpperCase()
-    .replace(/[\s-]+/g, "_");
-
-const getTasksFromResponse = (response) => {
-  if (Array.isArray(response)) return response;
-  if (Array.isArray(response?.data)) return response.data;
-  if (Array.isArray(response?.data?.data)) return response.data.data;
-  if (Array.isArray(response?.tasks)) return response.tasks;
-  if (response?.data && typeof response.data === "object") return Object.values(response.data);
-  return [];
-};
-
-const getWorkingHoursSince = (dateValue, now = new Date()) => {
-  const start = new Date(dateValue);
-  if (Number.isNaN(start.getTime()) || start >= now) return 0;
-
-  let current = start;
-  let totalMs = 0;
-  while (current < now) {
-    const nextDay = new Date(current);
-    nextDay.setDate(nextDay.getDate() + 1);
-    nextDay.setHours(0, 0, 0, 0);
-    const stepEnd = nextDay < now ? nextDay : now;
-
-    if (current.getDay() !== 0 && current.getDay() !== 6) {
-      totalMs += stepEnd - current;
-    }
-    current = stepEnd;
-  }
-
-  return totalMs / (1000 * 60 * 60);
-};
-
-const getTaskEndTime = (task) => {
-  if (!task) return null;
-
-  // 1. Direct end/completion timestamp fields
-  const directEnd =
-    task.ended_at ||
-    task.endedAt ||
-    task.end_date ||
-    task.endDate ||
-    task.completed_at ||
-    task.completedAt ||
-    task.reviewed_at ||
-    task.reviewedAt;
-  if (directEnd && !Number.isNaN(new Date(directEnd).getTime())) {
-    return directEnd;
-  }
-
-  // 2. Latest ended_at from workingHourTask sessions
-  if (Array.isArray(task.workingHourTask) && task.workingHourTask.length > 0) {
-    let latestSessionEnd = null;
-    let latestMs = 0;
-    for (const session of task.workingHourTask) {
-      if (session?.ended_at) {
-        const ms = new Date(session.ended_at).getTime();
-        if (!Number.isNaN(ms) && ms > latestMs) {
-          latestMs = ms;
-          latestSessionEnd = session.ended_at;
-        }
-      }
-    }
-    if (latestSessionEnd) {
-      return latestSessionEnd;
-    }
-  }
-
-  // 3. Fallback to updatedAt / updated_at
-  return task.updatedAt || task.updated_at || null;
-};
-
-const isTaskCompletedOrReviewed = (task) => {
-  if (!task) return false;
-
-  // 1. Deleted tasks
-  if (task.isDeleted || task.is_deleted || task.deletedAt || task.deleted_at) {
-    return true;
-  }
-
-  // 2. Status check (including IN_REVIEW, REVIEW, and all complete/terminal statuses)
-  const status = normalizeTaskStatus(task.status);
-  if (
-    COMPLETED_TASK_STATUSES.has(status) ||
-    status.includes("COMPLETE") ||
-    status.includes("REVIEW") ||
-    status.includes("APPROVED") ||
-    status.includes("CLOSED") ||
-    status.includes("RESOLVED") ||
-    status.includes("VERIFIED")
-  ) {
-    return true;
-  }
-
-  // 3. Explicit completion / review flags
-  if (
-    task.isCompleted ||
-    task.is_completed ||
-    task.completed ||
-    task.isReviewed ||
-    task.is_reviewed ||
-    task.reviewed
-  ) {
-    return true;
-  }
-
-  // 4. Timestamps indicating completion, end, or review
-  if (
-    task.completedAt ||
-    task.completed_at ||
-    task.completed_on ||
-    task.completedOn ||
-    task.ended_at ||
-    task.endedAt ||
-    task.reviewedAt ||
-    task.reviewed_at ||
-    task.reviewed_on ||
-    task.reviewedOn
-  ) {
-    return true;
-  }
-
-  // 5. Reviewer identity exists
-  if (
-    task.reviewedById ||
-    task.reviewed_by_id ||
-    task.reviewedBy ||
-    task.reviewed_by
-  ) {
-    return true;
-  }
-
-  // 6. Review status
-  const revStatus = normalizeTaskStatus(
-    task.reviewStatus || task.review_status || task.review_state
-  );
-  if (
-    revStatus &&
-    (COMPLETED_TASK_STATUSES.has(revStatus) ||
-      revStatus.includes("COMPLETE") ||
-      revStatus.includes("REVIEW") ||
-      revStatus.includes("APPROV") ||
-      revStatus.includes("DONE") ||
-      revStatus.includes("PASS") ||
-      revStatus.includes("RESOLV"))
-  ) {
-    return true;
-  }
-
-  // 7. Line item completion is 91-100% or 100%
-  const completion = String(
-    task.lineItemCompletion || task.completionPercentage || ""
-  )
-    .trim()
-    .toUpperCase();
-  const isCompletionHigh =
-    completion === "100%" ||
-    completion === "100" ||
-    completion === "91-100" ||
-    completion === "91-100%" ||
-    completion === "RANGE_91_100" ||
-    completion === "RANGE_100" ||
-    completion === "RANGE_91-100" ||
-    parseFloat(completion) >= 91;
-
-  // If completion is 91-100% and task has ended (no active session)
-  const hasActiveSession =
-    Array.isArray(task.workingHourTask) &&
-    task.workingHourTask.some(
-      (wh) => !wh.ended_at || String(wh.ended_at).toLowerCase() === "null"
-    );
-  if (isCompletionHigh && !hasActiveSession) {
-    return true;
-  }
-
-  // 8. If task has working sessions and all of them have ended
-  if (
-    Array.isArray(task.workingHourTask) &&
-    task.workingHourTask.length > 0 &&
-    !hasActiveSession
-  ) {
-    return true;
-  }
-
-  // 9. If task is in review, or all comments on it are acknowledged
-  if (
-    status === "IN_REVIEW" ||
-    (Array.isArray(task.taskcomment) &&
-      task.taskcomment.length > 0 &&
-      task.taskcomment.every((c) => c.acknowledged === true))
-  ) {
-    return true;
-  }
-
-  return false;
-};
-
-const getEmployeeTaskBlocker = (tasks, now = new Date()) => {
-  for (const task of tasks) {
-    // Once a task is completed, ended, or in review, no need to check 24hrs again
-    if (isTaskCompletedOrReviewed(task)) continue;
-
-    const status = normalizeTaskStatus(task.status);
-    if (!status || COMPLETED_TASK_STATUSES.has(status)) continue;
-    if (status === "IN_REVIEW" || status.includes("REVIEW")) continue;
-
-    // Only check incomplete, open tasks (e.g. ASSIGNED, IN_PROGRESS, BREAK, PENDING, REWORK)
-    const referenceDate = task.created_on || task.created_at || task.createdAt;
-
-    if (referenceDate && getWorkingHoursSince(referenceDate, now) > 24) {
-      return "OVERDUE";
-    }
-  }
-
-  return false;
-};
-
 const getBundleCategory = (w) => {
   if (!w) return "";
 
@@ -397,7 +149,6 @@ const AddTask = () => {
   const [existingWbsHours, setExistingWbsHours] = useState(0);
   const [bundles, setBundles] = useState([]);
   const [projectSubmittals, setProjectSubmittals] = useState([]);
-  const [overdueEmployees, setOverdueEmployees] = useState({});
   const [projectTeamMemberIds, setProjectTeamMemberIds] = useState([]);
   const dispatch = useDispatch();
   const [projects, setProjects] = useState([]);
@@ -792,23 +543,6 @@ const AddTask = () => {
   const availableHours = isOtherWbs ? Infinity : (totalWbsHours - existingWbsHours);
   const remainingHours = isOtherWbs ? Infinity : (availableHours - totalAssignedHours);
 
-  // Show a warning for blockers, but check again at submit time before creating tasks.
-  useEffect(() => {
-    assignments.forEach(async (assignment) => {
-      const empId = assignment.employeeId;
-      if (empId && overdueEmployees[empId] === undefined) {
-        setOverdueEmployees((prev) => ({ ...prev, [empId]: false })); // Prevent multiple calls
-        try {
-          const res = await Service.GetAllTaskByUserID(empId);
-          const overdueType = getEmployeeTaskBlocker(getTasksFromResponse(res));
-          setOverdueEmployees((prev) => ({ ...prev, [empId]: overdueType }));
-        } catch (err) {
-          console.error("Error checking employee tasks:", err);
-        }
-      }
-    });
-  }, [assignments, overdueEmployees]);
-
   const onSubmit = async (data) => {
     console.log("Form Data Submitted:", data);
 
@@ -816,37 +550,6 @@ const AddTask = () => {
 
     try {
       setIsSubmitting(true);
-
-      // Recheck current task statuses before assignment; weekends do not count toward 24 hours.
-      for (const assignment of data.assignments) {
-        if (!assignment.employeeId) continue;
-        try {
-          const res = await Service.GetAllTaskByUserID(assignment.employeeId);
-          const overdueType = getEmployeeTaskBlocker(getTasksFromResponse(res));
-
-          if (overdueType) {
-            const empName = employees.find(e => e.id === assignment.employeeId)?.firstName || "This employee";
-            const msg = `${empName} has incomplete tasks older than 24 working hours. Cannot assign new tasks.`;
-            toast.error(msg);
-            setOverdueEmployees((prev) => ({
-              ...prev,
-              [assignment.employeeId]: overdueType,
-            }));
-            setIsSubmitting(false);
-            return;
-          }
-
-          setOverdueEmployees((prev) => ({
-            ...prev,
-            [assignment.employeeId]: false,
-          }));
-        } catch (err) {
-          console.error("Error checking employee tasks:", err);
-          toast.error("Could not verify the employee's task status. Please try again.");
-          setIsSubmitting(false);
-          return;
-        }
-      }
 
       // Create a task for each assignment
       const promises = data.assignments.map((assignment) => {
@@ -1574,25 +1277,16 @@ const AddTask = () => {
                                   const isOverLimitValue =
                                     !isOtherWbs && (existingWbsHours + totalAssignedHours >
                                       totalWbsHours);
-                                  const employeeError = overdueEmployees[field.value];
 
-                                  if (isDuplicate || isOverLimitValue || employeeError) {
+                                  if (isDuplicate || isOverLimitValue) {
                                     return (
                                       <div className="flex flex-col gap-1 mt-1">
-                                        {(isDuplicate || isOverLimitValue) && (
-                                          <div className="flex items-center gap-1 text-[10px] text-amber-600 uppercase">
-                                            <AlertCircle className="w-3 h-3" />
-                                            Will be marked
-                                            {isDuplicate && " (Duplicate User)"}
-                                            {isOverLimitValue && " (Hours Exceeded)"}
-                                          </div>
-                                        )}
-                                        {employeeError === "OVERDUE" && (
-                                          <div className="flex items-center gap-1 text-[10px] text-red-600 uppercase">
-                                            <AlertCircle className="w-3 h-3" />
-                                            Has overdue tasks ({">"}24h)
-                                          </div>
-                                        )}
+                                        <div className="flex items-center gap-1 text-[10px] text-amber-600 uppercase">
+                                          <AlertCircle className="w-3 h-3" />
+                                          Will be marked
+                                          {isDuplicate && " (Duplicate User)"}
+                                          {isOverLimitValue && " (Hours Exceeded)"}
+                                        </div>
                                       </div>
                                     );
                                   }

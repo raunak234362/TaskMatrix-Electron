@@ -204,7 +204,7 @@
   let isPaused        = false
   let baseSeconds     = 0   // seconds already worked before this session
   let sessionStart    = null // Date.now() when last unpaused
-  let rafId           = null
+  let tickIntervalId  = null
   let allocSeconds    = 0   // 0 = no allocation set
 
   // ── DOM refs ───────────────────────────────────────────────────────────────
@@ -283,18 +283,16 @@
     // Worked / alloc summary
     $workedDisplay.textContent = formatHHMM(elapsed)
 
-    if (!isPaused) {
-      rafId = requestAnimationFrame(tick)
-    }
   }
 
   function startLoop() {
-    if (rafId) cancelAnimationFrame(rafId)
-    rafId = requestAnimationFrame(tick)
+    if (tickIntervalId) clearInterval(tickIntervalId)
+    tick()
+    tickIntervalId = setInterval(tick, 1000)
   }
 
   function stopLoop() {
-    if (rafId) { cancelAnimationFrame(rafId); rafId = null }
+    if (tickIntervalId) { clearInterval(tickIntervalId); tickIntervalId = null }
     // Still render one final frame so display is up-to-date
     tick()
   }

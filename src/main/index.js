@@ -218,7 +218,8 @@ function createWindow() {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
       sandbox: true,
-      webSecurity: !is.dev
+      webSecurity: !is.dev,
+      backgroundThrottling: true
     }
   })
 

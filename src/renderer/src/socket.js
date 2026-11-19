@@ -23,9 +23,9 @@ export function connectSocket() {
   socket.auth = { token }
   console.log('Socket Auth Set with Token')
 
-  // Avoid multiple connects or reconnect with new token
+  // Do not recreate an established connection when user details refresh.
   if (socket.connected) {
-    socket.disconnect()
+    return
   }
   socket.connect()
 
