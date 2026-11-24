@@ -7,6 +7,7 @@ import logo from "../../assets/logo.png";
 import { useDispatch } from "react-redux";
 import { incrementModalCount, decrementModalCount } from "../../store/uiSlice";
 import UpdateInvoice from "./UpdateInvoice";
+import { numberToWords } from "../../utils/numberToWords";
 
 const getContacts = (response) => {
   if (Array.isArray(response)) return response;
@@ -38,6 +39,29 @@ const resolveInvoiceContactName = (data) => {
       data.contactName ||
       "—",
   };
+};
+
+const getInvoiceValueInWords = (inv) => {
+  if (!inv) return "—";
+  const curr = (inv.currencyType || "USD").toUpperCase();
+  let words = inv.totalInvoiceValueInWords;
+
+  if (!words && (inv.totalInvoiceValue || inv.totalInvoiceValue === 0)) {
+    words = numberToWords(inv.totalInvoiceValue, curr);
+  }
+  if (!words) return "—";
+
+  if (curr === "CAD") {
+    let cleaned = words.trim();
+    cleaned = cleaned.replace(/^CAD\s+/i, "");
+    cleaned = cleaned.replace(/\s+ONLY\.?$/i, "");
+    if (!/Dollars|Cents/i.test(cleaned)) {
+      cleaned = `${cleaned} Dollars`;
+    }
+    return `CAD ${cleaned} ONLY`;
+  }
+
+  return words;
 };
 
 const loadImageAsDataUrl = async (imageUrl) => {
@@ -343,7 +367,7 @@ const GetInvoiceById = ({
                 </tr>
                 <tr>
                   <td colspan="7" style="padding: 8px; border-bottom: 1.5px solid #6bbd45; font-weight: bold;">
-                    Total Invoice Value (in Words): <span style="text-transform: uppercase; margin-left: 10px;">${invoice.totalInvoiceValueInWords || "—"}</span>
+                    Total Invoice Value (in Words): <span style="text-transform: uppercase; margin-left: 10px;">${getInvoiceValueInWords(invoice)}</span>
                   </td>
                 </tr>
               </tbody>
@@ -770,7 +794,7 @@ const GetInvoiceById = ({
                           Total Invoice Value (in Words):
                         </span>
                         <span className=" uppercase tracking-tight text-gray-700">
-                          {invoice.totalInvoiceValueInWords || "—"}
+                          {getInvoiceValueInWords(invoice)}
                         </span>
                       </div>
                     </td>

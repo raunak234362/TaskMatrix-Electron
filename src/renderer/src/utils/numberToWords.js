@@ -2,7 +2,12 @@ export const numberToWords = (
   num,
   currency = "USD"
 ) => {
-  if (num === 0) return "Zero";
+  const upperCurrency = String(currency || "USD").toUpperCase();
+
+  if (num === 0) {
+    if (upperCurrency === "CAD") return "CAD Zero Dollars Only";
+    return "Zero";
+  }
 
   const units = [
     "",
@@ -88,10 +93,10 @@ export const numberToWords = (
   let mainUnit = "Dollars";
   let subUnit = "Cents";
 
-  if (currency === "INR") {
+  if (upperCurrency === "INR") {
     mainUnit = "Rupees";
     subUnit = "Paise";
-  } else if (currency === "CAD") {
+  } else if (upperCurrency === "CAD") {
     mainUnit = "Dollars";
     subUnit = "Cents";
   }
@@ -99,6 +104,10 @@ export const numberToWords = (
   let finalResult = `${convertToWords(integerPart)} ${mainUnit}`;
   if (decimalPart > 0) {
     finalResult += ` and ${convertToWords(decimalPart)} ${subUnit}`;
+  }
+
+  if (upperCurrency === "CAD") {
+    return `CAD ${finalResult} Only`;
   }
 
   return finalResult;
