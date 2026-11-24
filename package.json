@@ -1,6 +1,6 @@
 {
   "name": "taskmatrix-wbt",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "An Electron application with React",
   "main": "./out/main/index.js",
   "author": "whiteboard technologies",
