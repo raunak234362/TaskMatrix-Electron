@@ -5,7 +5,7 @@ export const numberToWords = (
   const upperCurrency = String(currency || "USD").toUpperCase();
 
   if (num === 0) {
-    if (upperCurrency === "CAD") return "CAD Zero Dollars Only";
+    if (upperCurrency === "CAD") return "CAD Zero Only";
     return "Zero";
   }
 
@@ -107,7 +107,11 @@ export const numberToWords = (
   }
 
   if (upperCurrency === "CAD") {
-    return `CAD ${finalResult} Only`;
+    let cadResult = convertToWords(integerPart);
+    if (decimalPart > 0) {
+      cadResult += ` and ${convertToWords(decimalPart)} Cents`;
+    }
+    return `CAD ${cadResult} Only`;
   }
 
   return finalResult;
