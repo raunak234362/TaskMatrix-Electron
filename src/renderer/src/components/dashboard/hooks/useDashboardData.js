@@ -422,16 +422,28 @@ export const useDashboardData = () => {
           ...computedPMStats
         }
 
-        // Upcoming milestones from GetPendingSubmittal API
-        let finalPendingSubmittals = Array.isArray(pendingSubmittals) 
-            ? pendingSubmittals.map(m => ({
-                ...m,
-                isPlaceholderSubmittal: true,
-                subject: m.subject || m.name || 'Unknown Milestone',
-                approvalDate: m.approvalDate || m.date,
-                project: m.project || projects.find(p => String(p.id) === String(m.project_id || m.projectId))
-              })) 
-            : [];
+        // Upcoming milestones from GetPendingSubmittal API with deduplication by milestone ID
+        const seenUpcomingMilestoneIds = new Set();
+        let finalPendingSubmittals = [];
+        if (Array.isArray(pendingSubmittals)) {
+          pendingSubmittals.forEach((m) => {
+            if (!m) return;
+            const mId = String(m.id || m._id || m.milestoneId || m.mileStoneId || '');
+            if (mId) {
+              if (seenUpcomingMilestoneIds.has(mId)) return;
+              seenUpcomingMilestoneIds.add(mId);
+            }
+            finalPendingSubmittals.push({
+              ...m,
+              id: m.id || m._id || m.milestoneId || m.mileStoneId,
+              isPlaceholderSubmittal: true,
+              subject: m.subject || m.name || 'Unknown Milestone',
+              subSubject: (m.subSubject && m.subSubject !== 'string') ? m.subSubject : '',
+              approvalDate: m.approvalDate || m.date,
+              project: m.project || projects.find(p => String(p.id) === String(m.project_id || m.projectId))
+            });
+          });
+        }
 
         const basePendingSubmittalsArray = (userRole === 'admin' || userRole === 'deputy_manager' || userRole === 'project_manager_officer') ? submittals : submittals;
 

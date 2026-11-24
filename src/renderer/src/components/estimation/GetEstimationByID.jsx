@@ -656,7 +656,7 @@ const GetEstimationByID = ({ id, onRefresh, onClose }) => {
 
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-black uppercase tracking-normal shrink-0">
-                        Created At:
+                        Created On:
                       </span>
                       <span className="text-black font-semibold uppercase whitespace-nowrap">
                         {new Date(selectedResponse.createdAt).toLocaleString("en-IN")}

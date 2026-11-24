@@ -130,10 +130,10 @@ const WprScheduleTable = ({
             <tr className="bg-slate-100 border-b border-black">
               <th className="px-2 py-1.5 font-bold uppercase tracking-wider text-black border-r border-black/10 w-56">Phase / Subject</th>
               <th className="px-2 py-1.5 font-bold uppercase tracking-wider text-black border-r border-black/10 w-28">Start Date</th>
-              <th className="px-2 py-1.5 font-bold uppercase tracking-wider text-black border-r border-black/10 min-w-[15rem]">IFA - Submission Date</th>
+              <th className="px-2 py-1.5 font-bold uppercase tracking-wider text-black border-r border-black/10 min-w-[15rem]">IFA - Submittal Date</th>
               <th className="px-2 py-1.5 font-bold uppercase tracking-wider text-black border-r border-black/10 min-w-[8rem]">BFA - Recd Date</th>
               <th className="px-2 py-1.5 font-bold uppercase tracking-wider text-black border-r border-black/10 min-w-[10rem]">IFC - Sub Date</th>
-              <th className="px-2 py-1.5 font-bold uppercase tracking-wider text-black border-r border-black/10 min-w-[16rem]">COR Drawing Submission Date</th>
+              <th className="px-2 py-1.5 font-bold uppercase tracking-wider text-black border-r border-black/10 min-w-[16rem]">COR Drawing Submittal Date</th>
               <th className="px-2 py-1.5 font-bold uppercase tracking-wider text-black min-w-[16rem]">Status & Comment</th>
             </tr>
           </thead>
@@ -210,7 +210,7 @@ const WprScheduleTable = ({
                         </td>
                       )}
 
-                      {/* IFA submission date */}
+                      {/* IFA Submittal Date */}
                       <td className="px-2 py-1.5 border-r border-black/10 align-top">
                         {entry.ifaDate !== "—" ? (
                           <div className="flex flex-col">

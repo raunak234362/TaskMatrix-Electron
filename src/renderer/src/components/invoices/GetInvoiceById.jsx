@@ -55,7 +55,7 @@ const getInvoiceValueInWords = (inv) => {
     let cleaned = words.trim();
     cleaned = cleaned.replace(/^CAD\s+/i, "");
     cleaned = cleaned.replace(/\s+ONLY\.?$/i, "");
-    cleaned = cleaned.replace(/\s+DOLLARS?\b/i, "");
+    cleaned = cleaned.replace(/\s+DOLLARS?\b/gi, "");
     return `CAD ${cleaned.trim()} ONLY`;
   }
 

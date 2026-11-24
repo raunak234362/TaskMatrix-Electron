@@ -228,7 +228,7 @@ const AllRFI = ({ rfiData, onUpdate }) => {
     },
     {
       accessorKey: 'createdAt',
-      header: 'Created At',
+      header: 'Created On',
       cell: ({ row }) =>
         row.original.createdAt
           ? new Date(row.original.createdAt).toLocaleDateString('en-IN', {

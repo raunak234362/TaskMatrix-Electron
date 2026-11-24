@@ -12,44 +12,106 @@ const ProjectMilestoneMetrics = ({
   projectName,
   onUpdate,
   milestones: milestonesProp,
+  submittalData: submittalDataProp,
 }) => {
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const dispatch = useDispatch();
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedMilestoneId, setSelectedMilestoneId] = useState(null);
   const [selectedMilestoneToView, setSelectedMilestoneToView] = useState(null);
+  const [submittalList, setSubmittalList] = useState(submittalDataProp || []);
 
   const milestonesByProject = useSelector(
     (state) => state.milestoneInfo?.milestonesByProject || {},
   );
   const milestones = milestonesProp || milestonesByProject[projectId] || [];
 
-  useEffect(() => {
-    const fetchMileStone = async () => {
-      try {
-        const response = await Service.GetProjectMilestoneById(projectId);
-        if (response && response.data) {
-          dispatch(
-            setMilestonesForProject({
-              projectId,
-              milestones: response.data,
-            }),
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching milestones:", error);
+  const fetchMileStone = async () => {
+    try {
+      const response = await Service.GetProjectMilestoneById(projectId);
+      if (response && response.data) {
+        dispatch(
+          setMilestonesForProject({
+            projectId,
+            milestones: response.data,
+          }),
+        );
       }
-    };
+    } catch (error) {
+      console.error("Error fetching milestones:", error);
+    }
+  };
 
+  useEffect(() => {
     if (!milestonesByProject[projectId]) {
       fetchMileStone();
     }
   }, [projectId, milestonesByProject, dispatch]);
 
+  useEffect(() => {
+    if (submittalDataProp && submittalDataProp.length > 0) {
+      setSubmittalList(submittalDataProp);
+      return;
+    }
+    if (projectId) {
+      Service.GetSubmittalByProjectId(projectId)
+        .then((res) => {
+          const list = Array.isArray(res) ? res : (res?.data || []);
+          setSubmittalList(list);
+        })
+        .catch((err) => console.error("Error fetching submittals for milestone metrics:", err));
+    }
+  }, [projectId, submittalDataProp]);
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      fetchMileStone();
+    };
+    window.addEventListener("milestone-updated", handleRefresh);
+    window.addEventListener("dashboard-refresh", handleRefresh);
+    return () => {
+      window.removeEventListener("milestone-updated", handleRefresh);
+      window.removeEventListener("dashboard-refresh", handleRefresh);
+    };
+  }, [projectId]);
+
+  const isSubmittalCompletedForMilestone = (milestoneId) => {
+    const mId = String(milestoneId);
+    return (submittalList || []).some((sub) => {
+      if (sub.isAproovedByAdmin === false) return false;
+      let matches = false;
+      if (String(sub.mileStoneId || sub.milestoneId || sub.milestone?.id) === mId) matches = true;
+      if (Array.isArray(sub.mileStoneIds) && sub.mileStoneIds.some((link) => {
+        const linkId = typeof link === "string" ? link : (link?.id || link?.mileStoneId || link?.milestoneId);
+        return String(linkId) === mId;
+      })) matches = true;
+      if (Array.isArray(sub.mileStones) && sub.mileStones.some((m) => String(m.id || m._id) === mId)) matches = true;
+      if (sub.mileStoneBelongsTo && String(sub.mileStoneBelongsTo.id || sub.mileStoneBelongsTo._id) === mId) matches = true;
+
+      if (!matches) return false;
+
+      const subStatus = String(sub.wbtStatus || sub.status || "").toUpperCase().replace(/\s+/g, "_");
+      return [
+        "RELEASE_FOR_FABRICATION",
+        "BFA_RECEIVED",
+        "SUBMITTED_TO_EOR",
+        "WAITING_FOR_BFA",
+        "BFA_SENT",
+        "COMPLETED",
+        "COMPLETE",
+        "CLOSED"
+      ].includes(subStatus);
+    });
+  };
+
   const milestoneStats = useMemo(() => {
     return milestones.map((ms) => {
       const msTasks = ms.Tasks || ms.tasks || [];
-      const totalTasks = msTasks.length;
+      const validTasks = msTasks.filter((t) => {
+        const s = String(t.status || "").trim().toUpperCase().replace(/\s+/g, "_");
+        return s !== "WRONG_ALLOCATION" && s !== "ABSENT" && s !== "LEAVE";
+      });
+      const totalTasks = validTasks.length;
       let taskProgress = 0;
       if (totalTasks > 0) {
         const completedStatuses = [
@@ -58,10 +120,12 @@ const ProjectMilestoneMetrics = ({
           "COMPLETE_OTHER",
           "USER_FAULT",
           "COMPLETED",
+          "VALIDATE_COMPLETED",
         ];
-        const completedCount = msTasks.filter((t) =>
-          completedStatuses.includes(t.status),
-        ).length;
+        const completedCount = validTasks.filter((t) => {
+          const s = String(t.status || "").trim().toUpperCase().replace(/\s+/g, "_");
+          return completedStatuses.includes(s) || completedStatuses.includes(String(t.status || "").trim().toUpperCase());
+        }).length;
         taskProgress = Math.round((completedCount / totalTasks) * 100);
       }
 
@@ -93,11 +157,24 @@ const ProjectMilestoneMetrics = ({
         manualProgress = Number(ms.percentage);
       }
 
-      let finalProgress = manualProgress > 0 ? manualProgress : taskProgress;
+      const rawStatus = (ms.status || "").toUpperCase();
+      const isCompleteStatus = ["COMPLETED", "COMPLETE", "APPROVED"].includes(rawStatus);
+      const isSubmissionCompleted = isCompleteStatus || isSubmittalCompletedForMilestone(ms.id || ms._id);
 
-      // Force 100% if status is COMPLETED
-      if ((ms.status || "").toUpperCase() === "COMPLETED") {
+      // Rule: Until submittal is done, percentage counts between 0-80% (20% is reserved for submission).
+      // Once submission is completed, it reaches 100%.
+      let finalProgress = 0;
+      if (isSubmissionCompleted) {
         finalProgress = 100;
+      } else {
+        if (totalTasks > 0) {
+          const rawProgress = manualProgress > 0 ? manualProgress : taskProgress;
+          finalProgress = Math.round((rawProgress * 80) / 100);
+        } else if (manualProgress > 0) {
+          finalProgress = manualProgress > 80 ? 80 : manualProgress;
+        } else {
+          finalProgress = 0;
+        }
       }
 
       return {
@@ -237,7 +314,7 @@ const ProjectMilestoneMetrics = ({
 
                           <div className="flex justify-between items-center text-sm">
                             <span className="text-black uppercase text-sm font-semibold tracking-normal">
-                              Approval Date
+                              Submittal Date
                             </span>
                             <span className="font-semibold text-black text-sm">
                               {formatDate(ms.approvalDate)}
@@ -247,7 +324,7 @@ const ProjectMilestoneMetrics = ({
                           {userRole !== "client" && userRole !== "client_admin" && ms.isConnectionDesign && (
                             <div className="flex justify-between items-center text-sm">
                               <span className="text-black uppercase text-sm font-semibold tracking-normal">
-                                CD Approval Date
+                                CD Submittal Date
                               </span>
                               <span className="font-semibold text-black text-sm">
                                 {formatDate(ms.CDApprovalDate)}

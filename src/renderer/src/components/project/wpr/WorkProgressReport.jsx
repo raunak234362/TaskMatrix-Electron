@@ -1173,7 +1173,7 @@ const WorkProgressReport = ({
           approvalDate: row.ifaSubDate !== "—" ? new Date(row.ifaSubDate).toISOString() : undefined,
           CDApprovalDate: row.ifcSubDate !== "—" ? new Date(row.ifcSubDate).toISOString() : undefined,
           types: row.types || "ANCHOR_BOLT",
-          subSubject: row.subSubject || "string",
+          subSubject: (row.subSubject && row.subSubject !== "string") ? row.subSubject : "",
         };
         if (row.id && !String(row.id).startsWith("temp-")) {
           await Service.EditMilestoneById(row.id, payload);
@@ -1283,7 +1283,7 @@ const WorkProgressReport = ({
         corSubDate: "—",
         comments: "—",
         types: "ANCHOR_BOLT",
-        subSubject: "string"
+        subSubject: ""
       }]);
     } else if (table === "co") {
       setRawCoRows([...rawCoRows, {
@@ -1323,10 +1323,10 @@ const WorkProgressReport = ({
     const schedWS = XLSX.utils.json_to_sheet(filteredScheduleRows.map(s => ({
       "Phase": s.phase,
       "Start Date": s.startDate,
-      "IFA Submission Date": s.ifaSubDate,
+      "IFA Submittal Date": s.ifaSubDate,
       "BFA Received Date": s.bfaRecdDate,
-      "IFC Submission Date": s.ifcSubDate,
-      "COR Drawing Submission Date": s.corSubDate,
+      "IFC Submittal Date": s.ifcSubDate,
+      "COR Drawing Submittal Date": s.corSubDate,
       "Comments": (() => {
         const statusPrefix = s.submittalStatus && s.submittalStatus !== "—" ? `[${s.submittalStatus}]` : "";
         const commentText = s.comments && s.comments !== "—" ? s.comments : "";

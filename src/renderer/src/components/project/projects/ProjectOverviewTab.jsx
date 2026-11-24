@@ -14,6 +14,7 @@ const ProjectOverviewTab = ({
   projectStats,
   rfiCount,
   submittalCount,
+  submittalData,
   changeOrderCount,
   milestones,
   filesCount,
@@ -63,6 +64,7 @@ const ProjectOverviewTab = ({
             milestones={milestones}
             projectId={projectId}
             onUpdate={fetchProject}
+            submittalData={submittalData}
           />
         </div>
       </div>

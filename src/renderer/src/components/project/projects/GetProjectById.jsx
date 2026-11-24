@@ -510,6 +510,7 @@ const GetProjectById = ({ id, onClose, onProjectUpdated }) => {
                 projectStats={projectStats}
                 rfiCount={rfiData.length}
                 submittalCount={submittalData.length}
+                submittalData={submittalData}
                 changeOrderCount={changeOrderData.length}
                 milestones={milestones}
                 filesCount={project.files?.length || project.documents?.length || 0}

@@ -364,7 +364,7 @@ const GetCOByID = ({ id, projectId, onClose }) => {
                     />
 
                     <Info
-                      label="Created At"
+                      label="Created On"
                       value={co.createdAt ? new Date(co.createdAt).toLocaleString() : "—"}
                       noBorder={true}
                     />

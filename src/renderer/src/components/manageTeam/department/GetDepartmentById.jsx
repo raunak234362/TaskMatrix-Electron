@@ -95,7 +95,7 @@ const GetDepartmentById = ({ id, onClose }) => {
 
             {/* Timeline */}
             <div className="space-y-6">
-              <InfoRow label="Created At" value={formatDate(department?.createdAt)} />
+              <InfoRow label="Created On" value={formatDate(department?.createdAt)} />
               <InfoRow label="Last Updated" value={formatDate(department?.updatedAt)} />
             </div>
 

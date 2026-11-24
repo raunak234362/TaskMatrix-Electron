@@ -46,7 +46,11 @@ const ProjectMilestoneMetrics = ({
     const milestoneStats = useMemo(() => {
         return milestones.map((ms) => {
             const msTasks = ms.Tasks || ms.tasks || [];
-            const totalTasks = msTasks.length;
+            const validTasks = msTasks.filter((t) => {
+                const s = String(t.status || "").trim().toUpperCase().replace(/\s+/g, "_");
+                return s !== "WRONG_ALLOCATION" && s !== "ABSENT" && s !== "LEAVE";
+            });
+            const totalTasks = validTasks.length;
             let taskProgress = 0;
             if (totalTasks > 0) {
                 const completedStatuses = [
@@ -55,10 +59,12 @@ const ProjectMilestoneMetrics = ({
                     "COMPLETE_OTHER",
                     "USER_FAULT",
                     "COMPLETED",
+                    "VALIDATE_COMPLETED",
                 ];
-                const completedCount = msTasks.filter((t) =>
-                    completedStatuses.includes(t.status),
-                ).length;
+                const completedCount = validTasks.filter((t) => {
+                    const s = String(t.status || "").trim().toUpperCase().replace(/\s+/g, "_");
+                    return completedStatuses.includes(s) || completedStatuses.includes(String(t.status || "").trim().toUpperCase());
+                }).length;
                 taskProgress = Math.round((completedCount / totalTasks) * 100);
             }
 
@@ -81,12 +87,45 @@ const ProjectMilestoneMetrics = ({
                 }
             }
 
-            const finalProgress =
+            let manualProgress = 0;
+            if (
                 ms.percentage !== undefined &&
-                    ms.percentage !== null &&
-                    ms.percentage !== ""
-                    ? Number(ms.percentage)
-                    : taskProgress;
+                ms.percentage !== null &&
+                ms.percentage !== ""
+            ) {
+                manualProgress = Number(ms.percentage);
+            } else if (
+                ms.completionPercentage !== undefined &&
+                ms.completionPercentage !== null &&
+                ms.completionPercentage !== ""
+            ) {
+                manualProgress = Number(ms.completionPercentage);
+            } else if (
+                ms.completeionPercentage !== undefined &&
+                ms.completeionPercentage !== null &&
+                ms.completeionPercentage !== ""
+            ) {
+                manualProgress = Number(ms.completeionPercentage);
+            }
+
+            const rawStatus = (ms.status || "").toUpperCase();
+            const isCompleteStatus = ["COMPLETED", "COMPLETE", "APPROVED"].includes(rawStatus);
+
+            // Rule: Until submittal is done, percentage counts between 0-80% (20% is reserved for submission).
+            // Once submission is completed, it reaches 100%.
+            let finalProgress = 0;
+            if (isCompleteStatus) {
+                finalProgress = 100;
+            } else {
+                if (totalTasks > 0) {
+                    const rawProgress = manualProgress > 0 ? manualProgress : taskProgress;
+                    finalProgress = Math.round((rawProgress * 80) / 100);
+                } else if (manualProgress > 0) {
+                    finalProgress = manualProgress > 80 ? 80 : manualProgress;
+                } else {
+                    finalProgress = 0;
+                }
+            }
 
             return {
                 ...ms,
@@ -204,7 +243,7 @@ console.log(milestoneStats,"------------------");
                                 <div className="border-t border-gray-100 pt-2 mt-2">
                                     <div className="flex justify-between items-center text-sm">
                                         <span className="text-gray-500 uppercase text-xs font-semibold">
-                                            Approval Date
+                                            Submittal Date
                                         </span>
                                         <span className="font-bold text-gray-700">
                                             {formatDate(ms.approvalDate)}

@@ -60,7 +60,7 @@ const WireTransferDetails = ({ id }) => {
           </p>
         </div>
         <div>
-          <p className="text-sm text-gray-500">Created At</p>
+          <p className="text-sm text-gray-500">Created On</p>
           <p className="font-medium text-gray-800">
             {data.createdAt ? new Date(data.createdAt).toLocaleString() : "N/A"}
           </p>

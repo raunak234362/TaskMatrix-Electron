@@ -335,8 +335,28 @@ const AddSubmittal = ({ project, initialData, onSuccess, submittalData = [] }) =
         return;
       }
       toast.success("Submittal Created Successfully!");
+
+      // Update linked milestones to 100% now that submission is completed
+      const rawMilestoneIds = data.mileStoneIds || [];
+      const linkedMilestoneIds = Array.isArray(rawMilestoneIds)
+        ? rawMilestoneIds
+        : [rawMilestoneIds];
+      for (const mId of linkedMilestoneIds) {
+        const idStr = typeof mId === "string" ? mId : (mId?.id || mId?.mileStoneId || mId?.milestoneId);
+        if (idStr) {
+          try {
+            await Service.UpdateCompletionPercentById(idStr, {
+              completeionPercentage: 100,
+            });
+          } catch (e) {
+            console.warn("Could not update milestone completion to 100%:", e);
+          }
+        }
+      }
+
       window.dispatchEvent(new Event('dashboard-refresh'));
       window.dispatchEvent(new Event('submittal-updated'));
+      window.dispatchEvent(new Event('milestone-updated'));
 
       reset();
       await fetchMileStone();

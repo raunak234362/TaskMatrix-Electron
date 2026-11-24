@@ -19,8 +19,27 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
+const extractList = (res) => {
+  if (!res) return [];
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res.data)) return res.data;
+  if (res.data && typeof res.data === "object") {
+    const keys = Object.keys(res.data);
+    for (const key of keys) {
+      if (Array.isArray(res.data[key])) return res.data[key];
+    }
+  }
+  if (typeof res === "object") {
+    const keys = Object.keys(res);
+    for (const key of keys) {
+      if (Array.isArray(res[key])) return res[key];
+    }
+  }
+  return [];
+};
+
 const UpcomingSubmittals = ({
-  pendingSubmittals = [],
+  pendingSubmittals: initialPendingSubmittals = [],
   invoices = [],
   onSubmittalClick,
   onClose,
@@ -30,6 +49,7 @@ const UpcomingSubmittals = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("ALL"); // ALL, OVERDUE, DUE_2_DAYS, DUE_SOON
   const [collapsedProjects, setCollapsedProjects] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const userRole = sessionStorage.getItem("userRole")?.toLowerCase() || "";
   const isPMO = userRole === "project_manager_officer";
@@ -40,6 +60,67 @@ const UpcomingSubmittals = ({
   const milestonesByProject = useSelector(
     (state) => state.milestoneInfo?.milestonesByProject || {}
   );
+
+  const mapAndDeduplicate = (rawList) => {
+    const list = extractList(rawList);
+    const seenIds = new Set();
+    const result = [];
+
+    list.forEach((m) => {
+      if (!m) return;
+      const mId = String(m.id || m._id || m.milestoneId || m.mileStoneId || "");
+      if (mId) {
+        if (seenIds.has(mId)) return; // Skip duplicate milestone
+        seenIds.add(mId);
+      }
+      result.push({
+        ...m,
+        id: m.id || m._id || m.milestoneId || m.mileStoneId,
+        isPlaceholderSubmittal: true,
+        subject: m.subject || m.name || "Unknown Milestone",
+        subSubject: (m.subSubject && m.subSubject !== "string") ? m.subSubject : "",
+        approvalDate: m.approvalDate || m.date,
+        project: m.project || projectList.find((p) => String(p.id || p._id) === String(m.project_id || m.projectId)),
+      });
+    });
+
+    return result;
+  };
+
+  const [submittalsData, setSubmittalsData] = useState(() =>
+    mapAndDeduplicate(initialPendingSubmittals)
+  );
+
+  const fetchPendingSubmittals = async () => {
+    try {
+      setLoading(true);
+      const res = await Service.GetPendingSubmittal();
+      const mapped = mapAndDeduplicate(res);
+      setSubmittalsData(mapped);
+    } catch (err) {
+      console.error("Error fetching pending submittals via GetPendingSubmittal:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPendingSubmittals();
+  }, []);
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      fetchPendingSubmittals();
+    };
+    window.addEventListener("dashboard-refresh", handleRefresh);
+    window.addEventListener("submittal-updated", handleRefresh);
+    window.addEventListener("milestone-updated", handleRefresh);
+    return () => {
+      window.removeEventListener("dashboard-refresh", handleRefresh);
+      window.removeEventListener("submittal-updated", handleRefresh);
+      window.removeEventListener("milestone-updated", handleRefresh);
+    };
+  }, []);
 
   // Calculate date information and urgency
   const getDateInfo = (dateString) => {
@@ -203,14 +284,14 @@ const UpcomingSubmittals = ({
   // Collect unique project IDs across all pending submittals
   const projectIds = useMemo(() => {
     const ids = new Set();
-    pendingSubmittals.forEach((item) => {
+    submittalsData.forEach((item) => {
       const pid = getProjectId(item);
       if (pid) {
         ids.add(pid);
       }
     });
     return Array.from(ids);
-  }, [pendingSubmittals, projectList]);
+  }, [submittalsData, projectList]);
 
   // Track in-flight project milestone requests to avoid duplicate fetches
   const fetchingProjectsRef = useRef(new Set());
@@ -254,25 +335,18 @@ const UpcomingSubmittals = ({
       item.id || item._id || item.milestone_id || item.milestoneId || ""
     );
 
-    const matched = projectMilestones.find((m) => {
-      const mId = String(m.id || m._id || "");
-      if (itemId && mId && mId === itemId) return true;
-      const mSubj = (m.subject || m.name || "").trim().toLowerCase();
-      const itemSubj = (item.subject || item.name || "").trim().toLowerCase();
-      const mStage = (m.stage || "").trim().toLowerCase();
-      const itemStage = (item.stage || "").trim().toLowerCase();
-      return (
-        mSubj &&
-        itemSubj &&
-        mSubj === itemSubj &&
-        (!mStage || !itemStage || mStage === itemStage)
-      );
-    });
+    // Strictly match by exact milestone ID only so different milestones with same subject don't clobber each other
+    const matched = itemId
+      ? projectMilestones.find((m) => {
+          const mId = String(m.id || m._id || m.milestoneId || m.mileStoneId || "");
+          return mId && mId === itemId;
+        })
+      : null;
 
     if (matched) {
       return {
-        ...item,
         ...matched,
+        ...item, // Preserve item's own ID, approvalDate, subSubject!
         Tasks:
           matched.Tasks && matched.Tasks.length > 0
             ? matched.Tasks
@@ -310,7 +384,11 @@ const UpcomingSubmittals = ({
     }
 
     const msTasks = item.Tasks || item.tasks || [];
-    const totalTasks = msTasks.length;
+    const validTasks = msTasks.filter((t) => {
+      const s = String(t.status || "").trim().toUpperCase().replace(/\s+/g, "_");
+      return s !== "WRONG_ALLOCATION" && s !== "ABSENT" && s !== "LEAVE";
+    });
+    const totalTasks = validTasks.length;
     let taskProgress = 0;
     if (totalTasks > 0) {
       const completedStatuses = [
@@ -321,9 +399,10 @@ const UpcomingSubmittals = ({
         "COMPLETED",
         "VALIDATE_COMPLETED",
       ];
-      const completedCount = msTasks.filter((t) =>
-        completedStatuses.includes((t.status || "").trim().toUpperCase())
-      ).length;
+      const completedCount = validTasks.filter((t) => {
+        const s = String(t.status || "").trim().toUpperCase().replace(/\s+/g, "_");
+        return completedStatuses.includes(s) || completedStatuses.includes(String(t.status || "").trim().toUpperCase());
+      }).length;
       taskProgress = Math.round((completedCount / totalTasks) * 100);
     }
 
@@ -336,13 +415,23 @@ const UpcomingSubmittals = ({
       manualProgress = Number(item.percentage);
     }
 
-    let finalProgress = manualProgress > 0 ? manualProgress : taskProgress;
-
+    const itemStatus = (item.status || "").toUpperCase();
+    let finalProgress = 0;
     if (
-      (item.status || "").toUpperCase() === "COMPLETED" ||
-      (item.status || "").toUpperCase() === "APPROVED"
+      itemStatus === "COMPLETED" ||
+      itemStatus === "APPROVED" ||
+      itemStatus === "COMPLETE"
     ) {
       finalProgress = 100;
+    } else {
+      if (totalTasks > 0) {
+        const rawProgress = manualProgress > 0 ? manualProgress : taskProgress;
+        finalProgress = Math.round((rawProgress * 80) / 100);
+      } else if (manualProgress > 0) {
+        finalProgress = manualProgress > 80 ? 80 : manualProgress;
+      } else {
+        finalProgress = 0;
+      }
     }
 
     return {
@@ -357,7 +446,7 @@ const UpcomingSubmittals = ({
     let dueIn2Days = 0;
     let dueSoon = 0;
 
-    pendingSubmittals.forEach((submittal) => {
+    submittalsData.forEach((submittal) => {
       const dateVal =
         submittal.approvalDate || submittal.dueDate || submittal.date;
       const info = getDateInfo(dateVal);
@@ -367,23 +456,23 @@ const UpcomingSubmittals = ({
     });
 
     const uniqueProjects = new Set(
-      pendingSubmittals.map((s) => getProjectName(s))
+      submittalsData.map((s) => getProjectName(s))
     );
 
     return {
-      total: pendingSubmittals.length,
+      total: submittalsData.length,
       overdue,
       dueIn2Days,
       dueSoon,
       projectsCount: uniqueProjects.size,
     };
-  }, [pendingSubmittals]);
+  }, [submittalsData]);
 
   // Filtered submittals
   const filteredSubmittals = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
-    return pendingSubmittals.filter((submittal) => {
+    return submittalsData.filter((submittal) => {
       const dateVal =
         submittal.approvalDate || submittal.dueDate || submittal.date;
       const dateInfo = getDateInfo(dateVal);
@@ -415,7 +504,7 @@ const UpcomingSubmittals = ({
 
       return true;
     });
-  }, [pendingSubmittals, searchQuery, filterType]);
+  }, [submittalsData, searchQuery, filterType]);
 
   // Grouped submittals sorted by due date
   const groupedSubmittals = useMemo(() => {

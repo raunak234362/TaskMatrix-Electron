@@ -196,7 +196,7 @@ const ProjectAnalyticsDashboard = ({ projectId }) => {
   const COLORS = ["#6bbd45", "#374151", "#FFBB28", "#FF8042", "#8884d8"];
 
   const handleDownload = () => {
-    const headers = ["Task Name", "Type", "Assigned To", "Assigned Hours", "Worked Hours", "Status", "Created At"];
+    const headers = ["Task Name", "Type", "Assigned To", "Assigned Hours", "Worked Hours", "Status", "Created On"];
     const rows = filteredTasks.map((t) => [
       t.name,
       t.wbsType || "Task",

@@ -42,10 +42,10 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
   const id = row?.id;
   const userRole = sessionStorage.getItem("userRole");
 
-  const fetchMilestone = async () => {
+  const fetchMilestone = async (isBackground = false) => {
     if (!id) return;
     try {
-      setLoading(true);
+      if (!isBackground && !milestone) setLoading(true);
       const response = await Service.GetMilestoneById(id.toString());
       setMilestone(response?.data || null);
     } catch (error) {
@@ -78,7 +78,7 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
   };
 
   const handleSuccess = async () => {
-    await fetchMilestone();
+    await fetchMilestone(true);
     const projId = milestone?.project_id || milestone?.project?.id || row?.project_id;
     if (projId) {
       await refreshReduxStore(projId);
@@ -303,15 +303,15 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
           {/* Info Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <InfoCard
-              label="Approval Date"
+              label="Submittal Date"
               value={formatDate(milestone.approvalDate)}
             />
             <InfoCard
-              label="CD Approval Date"
+              label="CD Submittal Date"
               value={formatDate(milestone.CDApprovalDate)}
             />
             <InfoCard
-              label="Created At"
+              label="Created On"
               value={formatDate(milestone.date)}
             />
             <InfoCard
@@ -330,6 +330,16 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
               label="Sub Subject"
               value={milestone.subSubject || "—"}
             />
+            <InfoCard
+              label="Package Percentage"
+              value={
+                milestone.packagePercentage !== undefined &&
+                milestone.packagePercentage !== null &&
+                milestone.packagePercentage !== ""
+                  ? `${milestone.packagePercentage}%`
+                  : "—"
+              }
+            />
             
             {/* Progress Card */}
             <div
@@ -343,7 +353,11 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
                 <div className="mt-1 w-full">
                   {(() => {
                     const msTasks = milestone.Tasks || milestone.tasks || [];
-                    const totalTasks = msTasks.length;
+                    const validTasks = msTasks.filter((t) => {
+                      const s = String(t.status || "").trim().toUpperCase().replace(/\s+/g, "_");
+                      return s !== "WRONG_ALLOCATION" && s !== "ABSENT" && s !== "LEAVE";
+                    });
+                    const totalTasks = validTasks.length;
                     let taskProgress = 0;
 
                     if (totalTasks > 0) {
@@ -353,27 +367,56 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
                         "COMPLETE_OTHER",
                         "USER_FAULT",
                         "COMPLETED",
+                        "VALIDATE_COMPLETED",
                       ];
-                      const completedCount = msTasks.filter((t) =>
-                        completedStatuses.includes(t.status),
-                      ).length;
+                      const completedCount = validTasks.filter((t) => {
+                        const s = String(t.status || "").trim().toUpperCase().replace(/\s+/g, "_");
+                        return completedStatuses.includes(s) || completedStatuses.includes(String(t.status || "").trim().toUpperCase());
+                      }).length;
                       taskProgress = Math.round(
                         (completedCount / totalTasks) * 100,
                       );
                     }
 
-                    const finalProgress =
+                    let manualProgress = 0;
+                    if (
                       milestone.percentage !== undefined &&
-                        milestone.percentage !== null &&
-                        milestone.percentage !== ""
-                        ? Number(milestone.percentage)
-                        : milestone.completionPercentage !== undefined &&
-                          milestone.completionPercentage !== null
-                          ? Number(milestone.completionPercentage)
-                          : milestone.completeionPercentage !== undefined &&
-                            milestone.completeionPercentage !== null
-                            ? Number(milestone.completeionPercentage)
-                            : taskProgress;
+                      milestone.percentage !== null &&
+                      milestone.percentage !== ""
+                    ) {
+                      manualProgress = Number(milestone.percentage);
+                    } else if (
+                      milestone.completionPercentage !== undefined &&
+                      milestone.completionPercentage !== null &&
+                      milestone.completionPercentage !== ""
+                    ) {
+                      manualProgress = Number(milestone.completionPercentage);
+                    } else if (
+                      milestone.completeionPercentage !== undefined &&
+                      milestone.completeionPercentage !== null &&
+                      milestone.completeionPercentage !== ""
+                    ) {
+                      manualProgress = Number(milestone.completeionPercentage);
+                    }
+
+                    const mStatus = (milestone.status || "").toUpperCase();
+                    const isSubmissionCompleted = ["COMPLETE", "COMPLETED", "APPROVED"].includes(mStatus);
+
+                    // Rule: Until submittal is done, percentage counts between 0-80% (20% is reserved for submission).
+                    // Once submission is completed, it reaches 100%.
+                    let finalProgress = 0;
+                    if (isSubmissionCompleted) {
+                      finalProgress = 100;
+                    } else {
+                      if (totalTasks > 0) {
+                        const rawProgress = manualProgress > 0 ? manualProgress : taskProgress;
+                        finalProgress = Math.round((rawProgress * 80) / 100);
+                      } else if (manualProgress > 0) {
+                        finalProgress = manualProgress > 80 ? 80 : manualProgress;
+                      } else {
+                        finalProgress = 0;
+                      }
+                    }
 
                     return (
                       <div className="flex flex-col gap-1">
@@ -452,21 +495,21 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
                         {/* Dropdown Content */}
                         {isExpanded && (
                           <div className="px-4 pb-4 pt-2 border-t bg-white">
-                            {v.description && (
+                            {(v.description || v.reason) && (
                               <div className="space-y-2">
                                 <p className="text-xs font-bold text-black uppercase">
-                                  Description
+                                  Reason
                                 </p>
                                 <div
                                   className="text-sm text-black prose prose-sm max-w-none font-medium"
                                   dangerouslySetInnerHTML={{
-                                    __html: v.description,
+                                    __html: v.reaason || v.reason,
                                   }}
                                 />
                                 <div className="grid grid-cols-2 gap-4 pt-2">
                                   <div>
                                     <p className="text-[10px] font-bold text-black uppercase tracking-wider">
-                                      Approval Date
+                                      Submittal Date
                                     </p>
                                     <p className="text-sm text-black font-semibold">
                                       {formatDate(v.approvalDate)}
@@ -474,7 +517,7 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
                                   </div>
                                   <div>
                                     <p className="text-[10px] font-bold text-black uppercase tracking-wider">
-                                      CD Approval Date
+                                      CD Submittal Date
                                     </p>
                                     <p className="text-sm text-black font-semibold">
                                       {formatDate(v.CDApprovalDate)}
@@ -492,14 +535,47 @@ const GetMilestoneByID = ({ row, close, onUpdate }) => {
             </section>
           )}
 
+          {/* Reason Section */}
           {milestone.reason && (
-            <div className="bg-red-50/50 rounded-2xl p-6 border border-red-100 shadow-sm">
-              <h3 className="text-sm font-bold text-red-700 mb-2 flex items-center gap-2 uppercase tracking-widest">
-                Reason of Delay
+            <div className="bg-amber-50/50 rounded-2xl p-6 border border-amber-200/80 shadow-sm">
+              <h3 className="text-sm font-bold text-amber-900 mb-2 flex items-center gap-2 uppercase tracking-widest">
+                Reason
               </h3>
-              <p className="text-sm text-red-700 font-medium">
-                {milestone.reason}
-              </p>
+              {(() => {
+                const content = milestone.reason;
+                return typeof content === "string" && content.includes("<") ? (
+                  <div
+                    className="text-sm text-amber-950 font-medium prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: content }}
+                  />
+                ) : (
+                  <p className="text-sm text-amber-950 font-medium whitespace-pre-wrap">
+                    {content}
+                  </p>
+                );
+              })()}
+            </div>
+          )}
+
+          {/* Internal Description Section */}
+          {milestone.description && (
+            <div className="bg-gray-50/70 rounded-2xl p-6 border border-gray-200 shadow-sm">
+              <h3 className="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2 uppercase tracking-widest">
+                Description
+              </h3>
+              {(() => {
+                const content = milestone.description;
+                return typeof content === "string" && content.includes("<") ? (
+                  <div
+                    className="text-sm text-gray-800 font-medium prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: content }}
+                  />
+                ) : (
+                  <p className="text-sm text-gray-800 font-medium whitespace-pre-wrap">
+                    {content}
+                  </p>
+                );
+              })()}
             </div>
           )}
 

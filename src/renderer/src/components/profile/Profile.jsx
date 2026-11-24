@@ -172,7 +172,7 @@ const Profile = () => {
             </div> */}
 
             <div>
-              <p className="text-gray-700 text-sm">Created At</p>
+              <p className="text-gray-700 text-sm">Created On</p>
               <p className="text-gray-700 font-medium">
                 {new Date(user.createdAt).toLocaleString()}
               </p>

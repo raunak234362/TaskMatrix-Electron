@@ -445,7 +445,7 @@ const GetSubmittalByID = ({ id, onClose }) => {
                     />
 
                     <Info
-                      label="Created At"
+                      label="Created On"
                       value={new Date(submittal.date).toLocaleString()}
                       noBorder
                     />

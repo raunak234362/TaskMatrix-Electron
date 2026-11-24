@@ -32,23 +32,37 @@ const EditMileStone = ({
       description: "",
       status: "ACTIVE",
       percentage: 0,
+      packagePercentage: 0,
       approvalDate: "",
       CDApprovalDate: "",
       stage: "",
       reason: "",
       types: "ANCHOR_BOLT",
-      subSubject: "string",
+      subSubject: "",
       isConnectionDesign: false,
     },
   });
 
   const selectedSubject = watch("subject");
+  const selectedStatus = watch("status");
+  const selectedApprovalDate = watch("approvalDate");
+  const selectedCDApprovalDate = watch("CDApprovalDate");
 
   useEffect(() => {
     if (selectedSubject && dirtyFields.subject) {
       setValue("types", selectedSubject.toUpperCase().replace(/\s+/g, "_"));
     }
   }, [selectedSubject, setValue, dirtyFields.subject]);
+
+  // When date changes and status is ACTIVE, cap percentage to 80% if it was 100%
+  useEffect(() => {
+    if ((dirtyFields.approvalDate || dirtyFields.CDApprovalDate) && selectedStatus === "ACTIVE") {
+      const cur = Number(watch("percentage") || 0);
+      if (cur >= 100) {
+        setValue("percentage", 80, { shouldDirty: true });
+      }
+    }
+  }, [selectedApprovalDate, selectedCDApprovalDate, selectedStatus, dirtyFields.approvalDate, dirtyFields.CDApprovalDate, setValue, watch]);
 
   const statusOptions = [
     { label: "In Progress", value: "ACTIVE" },
@@ -99,12 +113,27 @@ const EditMileStone = ({
       }
 
       if (data) {
+        const rawStatus = (data.status || "ACTIVE").toUpperCase();
+        let initPercentage =
+          data.percentage !== undefined && data.percentage !== null && data.percentage !== ""
+            ? Number(data.percentage)
+            : (data.completionPercentage || data.completeionPercentage || 0);
+
+        if (rawStatus === "ACTIVE" && initPercentage >= 100) {
+          initPercentage = 80;
+        } else if (rawStatus === "COMPLETE" || rawStatus === "COMPLETED") {
+          initPercentage = 100;
+        }
+
         reset({
           subject: data.subject || "",
           description: data.description || "",
-          status: data.status || "PENDING",
-          percentage:
-            data.percentage !== undefined ? Number(data.percentage) : 0,
+          status: data.status || "ACTIVE",
+          percentage: initPercentage,
+          packagePercentage:
+            data.packagePercentage !== undefined && data.packagePercentage !== null && data.packagePercentage !== ""
+              ? Number(data.packagePercentage)
+              : 0,
           approvalDate: data.approvalDate
             ? new Date(data.approvalDate).toISOString().split("T")[0]
             : "",
@@ -114,7 +143,7 @@ const EditMileStone = ({
           stage: data.stage || "",
           reason: data.reason || "",
           types: data.types || "ANCHOR_BOLT",
-          subSubject: data.subSubject || "string",
+          subSubject: (data.subSubject && data.subSubject !== "string") ? data.subSubject : "",
           isConnectionDesign: data.isConnectionDesign || false,
         });
       }
@@ -175,11 +204,42 @@ const EditMileStone = ({
 
   const onSubmit = async (data) => {
     try {
+      if (!data.reason || !data.reason.trim()) {
+        toast.error("Reason is required");
+        return;
+      }
+
       const computedTypes = data.subject ? data.subject.toUpperCase().replace(/\s+/g, "_") : "ANCHOR_BOLT";
+      const statusUpper = (data.status || "").toUpperCase();
+      let finalPercentage = Number(data.percentage);
+
+      // Rule: While active / date changed, milestone cannot be 100% -> set to 80% (or cap at 80%).
+      // Once submission is completed (COMPLETE / COMPLETED), set to 100%.
+      if (statusUpper === "ACTIVE") {
+        if (finalPercentage >= 100) {
+          finalPercentage = 80;
+        } else if (isNaN(finalPercentage)) {
+          finalPercentage = 0;
+        } else {
+          finalPercentage = Math.min(80, Math.max(0, finalPercentage));
+        }
+      } else if (statusUpper === "COMPLETE" || statusUpper === "COMPLETED") {
+        finalPercentage = 100;
+      } else if (isNaN(finalPercentage)) {
+        finalPercentage = 0;
+      }
+
       const payload = {
         ...data,
+        subSubject: (data.subSubject && data.subSubject !== "string") ? data.subSubject : "",
         types: computedTypes,
-        percentage: Number(data.percentage),
+        percentage: finalPercentage,
+        completeionPercentage: finalPercentage,
+        completionPercentage: finalPercentage,
+        packagePercentage:
+          data.packagePercentage !== undefined && data.packagePercentage !== ""
+            ? Number(data.packagePercentage)
+            : 0,
         approvalDate: data.approvalDate
           ? new Date(data.approvalDate).toISOString()
           : "",
@@ -193,7 +253,18 @@ const EditMileStone = ({
       } else {
         await Service.EditExistingMilestoneByID(milestoneId, payload);
       }
+
+      try {
+        await Service.UpdateCompletionPercentById(milestoneId, {
+          completeionPercentage: finalPercentage,
+        });
+      } catch (err) {
+        console.warn("Could not sync completion percentage endpoint:", err);
+      }
+
       toast.success("Milestone updated successfully!");
+      window.dispatchEvent(new Event("dashboard-refresh"));
+      window.dispatchEvent(new Event("milestone-updated"));
       if (onSuccess) onSuccess();
       onClose();
     } catch (error) {
@@ -270,7 +341,7 @@ const EditMileStone = ({
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Description
+              Internal Description
             </label>
             <Controller
               name="description"
@@ -284,7 +355,19 @@ const EditMileStone = ({
               )}
             />
           </div>
-          <Input label="Reason" {...register("reason")} />
+
+          <div>
+            <Input
+              label="Reason *"
+              {...register("reason", {
+                required: "Reason is required",
+                validate: (val) =>
+                  (val && val.trim().length > 0) || "Reason is required",
+              })}
+              error={errors.reason?.message}
+              placeholder="Please enter the reason"
+            />
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Controller
@@ -321,12 +404,12 @@ const EditMileStone = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
-              label="Approval Date"
+              label="Submittal Date"
               type="date"
               {...register("approvalDate")}
             />
             <Input
-              label="CD Approval Date"
+              label="CD Submittal Date"
               type="date"
               {...register("CDApprovalDate")}
             />
@@ -334,7 +417,7 @@ const EditMileStone = ({
             <Input
               label="Sub Subject"
               {...register("subSubject")}
-              placeholder="e.g. string"
+              placeholder="Please write the sub subject"
             />
 
             <div className="flex flex-col gap-2">
@@ -348,7 +431,18 @@ const EditMileStone = ({
                   <Select
                     options={statusOptions}
                     value={statusOptions.find((c) => c.value === field.value)}
-                    onChange={(val) => field.onChange(val?.value)}
+                    onChange={(val) => {
+                      const nextStatus = val?.value || "";
+                      field.onChange(nextStatus);
+                      if (nextStatus === "ACTIVE") {
+                        const cur = Number(watch("percentage") || 0);
+                        if (cur >= 100) {
+                          setValue("percentage", 80, { shouldDirty: true });
+                        }
+                      } else if (nextStatus === "COMPLETE") {
+                        setValue("percentage", 100, { shouldDirty: true });
+                      }
+                    }}
                     className="text-sm"
                     styles={{
                       control: (base) => ({
@@ -366,6 +460,32 @@ const EditMileStone = ({
                 )}
               />
             </div>
+
+            <Input
+              label="Completion Percentage (%)"
+              type="number"
+              min={0}
+              max={100}
+              {...register("percentage", {
+                min: { value: 0, message: "Minimum 0%" },
+                max: { value: 100, message: "Maximum 100%" },
+              })}
+              error={errors.percentage?.message}
+            />
+
+            <Input
+              label="Package Percentage (%)"
+              type="number"
+              min={0}
+              max={100}
+              step="any"
+              {...register("packagePercentage", {
+                min: { value: 0, message: "Minimum 0%" },
+                max: { value: 100, message: "Maximum 100%" },
+              })}
+              error={errors.packagePercentage?.message}
+              placeholder="Enter package percentage"
+            />
 
             <div className="flex items-center gap-2 mt-2">
               <input

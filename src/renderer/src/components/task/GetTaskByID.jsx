@@ -382,7 +382,7 @@ const GetTaskByID = ({ id, onClose, refresh }) => {
                     }
                   />
                   <InfoItem label="Due Date" value={formatDate(task.due_date)} />
-                  <InfoItem label="Created At" value={toIST(task.created_on)} />
+                  <InfoItem label="Created On" value={toIST(task.created_on)} />
                   <InfoItem
                     label="Allocated Time"
                     value={formatHours(parseDurationToHours(task?.allocationLog?.allocatedHours))}

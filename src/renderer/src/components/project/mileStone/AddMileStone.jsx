@@ -29,6 +29,7 @@ const AddMileStone = ({
       types: "ANCHOR_BOLT",
       subSubject: "",
       isConnectionDesigner: false,
+      packagePercentage: 0,
     },
   });
 
@@ -80,6 +81,10 @@ const AddMileStone = ({
         subject: finalSubject,
         types: computedTypes,
         stage: data.stage || "IFA",
+        packagePercentage:
+          data.packagePercentage !== undefined && data.packagePercentage !== ""
+            ? Number(data.packagePercentage)
+            : 0,
         isConnectionDesign: !!data.isConnectionDesigner,
         date: data.date ? new Date(data.date).toISOString() : undefined,
         approvalDate: (!data.isConnectionDesigner && data.approvalDate)
@@ -177,7 +182,7 @@ const AddMileStone = ({
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Description
+                Internal Description
               </label>
               <Controller
                 name="description"
@@ -195,7 +200,7 @@ const AddMileStone = ({
             {isConnectionDesigner ? (
               <div className="grid grid-cols-2 gap-4">
                 <Input
-                  label="CD Submission Date By WBT"
+                  label="CD Submittal Date By WBT"
                   type="date"
                   {...register("CDApprovalDate")}
                 />
@@ -208,7 +213,7 @@ const AddMileStone = ({
             ) : (
               <div>
                 <Input
-                  label="Approval Date/Reapproved Date/Fabrication Date"
+                  label="Submittal Date"
                   type="date"
                   {...register("approvalDate")}
                 />
@@ -252,6 +257,22 @@ const AddMileStone = ({
                     padding: "2px",
                   }),
                 }}
+              />
+            </div>
+
+            <div>
+              <Input
+                label="Package Percentage (%)"
+                type="number"
+                min={0}
+                max={100}
+                step="any"
+                {...register("packagePercentage", {
+                  min: { value: 0, message: "Minimum 0%" },
+                  max: { value: 100, message: "Maximum 100%" },
+                })}
+                error={errors.packagePercentage?.message}
+                placeholder="Enter package percentage"
               />
             </div>
           </div>

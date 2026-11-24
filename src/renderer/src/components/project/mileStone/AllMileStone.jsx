@@ -65,13 +65,23 @@ const AllMileStone = ({ project, onUpdate }) => {
     { accessorKey: "subSubject", header: "Subject" },
     { accessorKey: "stage", header: "Stage" },
     {
+      accessorKey: "packagePercentage",
+      header: "Package %",
+      cell: ({ row }) =>
+        row.original.packagePercentage !== undefined &&
+        row.original.packagePercentage !== null &&
+        row.original.packagePercentage !== ""
+          ? `${row.original.packagePercentage}%`
+          : "—",
+    },
+    {
       accessorKey: "approvalDate",
-      header: "Approval Date",
+      header: "Submittal Date",
       cell: ({ row }) => formatDate(row.original.approvalDate),
     },
     {
       accessorKey: "CDApprovalDate",
-      header: "CD Approval Date",
+      header: "CD Submittal Date",
       cell: ({ row }) => formatDate(row.original.CDApprovalDate),
     },
     {
@@ -105,6 +115,7 @@ const AllMileStone = ({ project, onUpdate }) => {
         <DataTable
           columns={columns}
           data={milestones}
+          getRowId={(row) => String(row.id || row._id || row.milestoneId || "")}
           onRowClick={handleRowClick}
           detailComponent={(props) => (
             <GetMilestoneByID {...props} onUpdate={fetchMileStone} />

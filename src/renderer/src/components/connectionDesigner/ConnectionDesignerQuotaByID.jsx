@@ -311,8 +311,8 @@ const ConnectionDesignerQuotaByID = ({ id, onClose }) => {
                             <Info label="Main Steel Price" value={quota.mainSteelPrice ? `$${quota.mainSteelPrice}` : "—"} />
                             <Info label="Misc Steel Price" value={quota.miscSteelPrice ? `$${quota.miscSteelPrice}` : "—"} />
 
-                            <Info label="Approval Date" value={quota.approvalDate ? new Date(quota.approvalDate).toLocaleDateString() : "—"} />
-                            <Info label="Created At" value={quota.createdAt ? new Date(quota.createdAt).toLocaleDateString() : "—"} />
+                            <Info label="Submissio Date" value={quota.approvalDate ? new Date(quota.approvalDate).toLocaleDateString() : "—"} />
+                            <Info label="Created On" value={quota.createdAt ? new Date(quota.createdAt).toLocaleDateString() : "—"} />
                         </div>
 
                         {quota.files && quota.files.length > 0 && (
