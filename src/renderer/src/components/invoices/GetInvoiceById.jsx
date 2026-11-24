@@ -155,6 +155,12 @@ const GetInvoiceById = ({
   const handleHtmlPrint = async () => {
     if (!invoice) return;
 
+    const currencyType = (invoice?.currencyType || "USD").toUpperCase();
+    const isCAD = currencyType === "CAD";
+    const isINR = currencyType === "INR";
+    const currencySymbol = isCAD ? "CA$" : isINR ? "₹" : "$";
+    const currencyLabel = isCAD ? "CAD" : isINR ? "INR" : "USD";
+
     const formatDateStr = (date) => {
       if (!date) return "—";
       return new Date(date).toLocaleDateString("en-US", {
@@ -173,9 +179,9 @@ const GetInvoiceById = ({
         <td style="padding: 8px; text-align: left;">${item.description}</td>
         <td style="padding: 8px; text-align: center;">${item.sacCode || "998333"}</td>
         <td style="padding: 8px; text-align: center;">${item.unit}</td>
-        <td style="padding: 8px; text-align: center;">${item.rateUSD?.toFixed(0) || "000"}</td>
-        <td style="padding: 8px; text-align: center;">${item.totalUSD?.toFixed(0) || "000"}</td>
-        <td style="padding: 8px; text-align: center;">${item.totalUSD?.toFixed(0) || "000"}</td>
+        <td style="padding: 8px; text-align: center;">${(item.rateCAD ?? item.rateUSD ?? item.rate)?.toFixed(0) || "000"}</td>
+        <td style="padding: 8px; text-align: center;">${(item.totalCAD ?? item.totalUSD ?? item.total)?.toFixed(0) || "000"}</td>
+        <td style="padding: 8px; text-align: center;">${(item.totalCAD ?? item.totalUSD ?? item.total)?.toFixed(0) || "000"}</td>
       </tr>
     `,
         )
@@ -303,16 +309,16 @@ const GetInvoiceById = ({
                   <th style="text-align: left;">DESCRIPTION OF ENGINEERING SERVICES</th>
                   <th style="width: 70px;">SAC</th>
                   <th style="width: 50px;">UNIT</th>
-                  <th style="width: 90px;">RATE (USD)</th>
+                  <th style="width: 90px;">RATE (${currencyLabel})</th>
                   <th style="width: 80px;">TOTAL</th>
-                  <th style="width: 100px;">TOTAL (USD)</th>
+                  <th style="width: 100px;">TOTAL (${currencyLabel})</th>
                 </tr>
               </thead>
               <tbody>
                 ${itemsHtml}
                 <tr class="total-row">
                   <td colspan="5" style="padding: 10px 15px; text-transform: bold; text-align: left;">Total</td>
-                  <td colspan="2" style="padding: 10px; text-align: right; font-size: 15px;">$ ${invoice.totalInvoiceValue?.toFixed(0) || "0"}</td>
+                  <td colspan="2" style="padding: 10px; text-align: right; font-size: 15px;">${currencySymbol} ${invoice.totalInvoiceValue?.toFixed(0) || "0"}</td>
                 </tr>
                 <tr class="gst-row">
                   <td colspan="4" style="border: none;"></td>
@@ -333,7 +339,7 @@ const GetInvoiceById = ({
                 </tr>
                 <tr class="value-row">
                   <td colspan="6" style="padding: 8px; text-align: left;">Total Invoice Value (in Figures)</td>
-                  <td style="padding: 8px; text-align: right;">$ ${invoice.totalInvoiceValue?.toFixed(2) || "0.00"}</td>
+                  <td style="padding: 8px; text-align: right;">${currencySymbol} ${invoice.totalInvoiceValue?.toFixed(2) || "0.00"}</td>
                 </tr>
                 <tr>
                   <td colspan="7" style="padding: 8px; border-bottom: 1.5px solid #6bbd45; font-weight: bold;">
@@ -349,7 +355,7 @@ const GetInvoiceById = ({
                 Consulting Proforma Invoice for Steel Detailing of ${invoice.jobName} - ${invoice.fabricator?.fabName} P.O. #${invoice.project?.projectNumber || invoice.project?.projectCode || ""}
               </div>
               <div class="instr-text">
-                All payments to be made to <span style="font-weight: bold; text-transform: uppercase;">Whiteboard Technologies LLC</span> in US Dollars via Wire Transfers within 15 days.
+                All payments to be made to <span style="font-weight: bold; text-transform: uppercase;">Whiteboard Technologies LLC</span> in ${isCAD ? "Canadian" : isINR ? "Indian" : "US"} Dollars via Wire Transfers within 15 days.
               </div>
             </div>
 
@@ -485,6 +491,12 @@ const GetInvoiceById = ({
       day: "numeric",
     });
   };
+
+  const currencyType = (invoice?.currencyType || "USD").toUpperCase();
+  const isCAD = currencyType === "CAD";
+  const isINR = currencyType === "INR";
+  const currencySymbol = isCAD ? "CA$" : isINR ? "₹" : "$";
+  const currencyLabel = isCAD ? "CAD" : isINR ? "INR" : "USD";
 
   return (
     <>
@@ -656,13 +668,13 @@ const GetInvoiceById = ({
                       Unit
                     </th>
                     <th className="py-2 px-3 border-r border-gray-300 text-center w-[90px]  text-[11px] uppercase whitespace-nowrap">
-                      Rate (USD)
+                      Rate ({currencyLabel})
                     </th>
                     <th className="py-2 px-3 border-r border-gray-300 text-center w-[90px]  text-[11px] uppercase whitespace-nowrap">
                       Total
                     </th>
                     <th className="py-2 px-3 text-center w-[110px]  text-[11px] uppercase whitespace-nowrap">
-                      Total (USD)
+                      Total ({currencyLabel})
                     </th>
                   </tr>
                 </thead>
@@ -687,13 +699,13 @@ const GetInvoiceById = ({
                         {item.unit}
                       </td>
                       <td className="py-1 px-3 text-center align-top">
-                        {item.rateUSD?.toFixed(0) || "000"}
+                        {(item.rateCAD ?? item.rateUSD ?? item.rate)?.toFixed(0) || "000"}
                       </td>
                       <td className="py-1 px-3 text-center align-top">
-                        {item.totalUSD?.toFixed(0) || "000"}
+                        {(item.totalCAD ?? item.totalUSD ?? item.total)?.toFixed(0) || "000"}
                       </td>
                       <td className="py-1 px-3 text-center align-top">
-                        {item.totalUSD?.toFixed(0) || "000"}
+                        {(item.totalCAD ?? item.totalUSD ?? item.total)?.toFixed(0) || "000"}
                       </td>
                     </tr>
                   ))}
@@ -717,7 +729,7 @@ const GetInvoiceById = ({
                       Total
                     </td>
                     <td colSpan={2} className="px-3 text-right font-semibold">
-                      $ {invoice.totalInvoiceValue?.toFixed(0) || "0000"}
+                      {currencySymbol} {invoice.totalInvoiceValue?.toFixed(0) || "0000"}
                     </td>
                   </tr>
 
@@ -747,7 +759,7 @@ const GetInvoiceById = ({
                       Total Invoice Value (in Figures)
                     </td>
                     <td className="px-3 text-right text-sm">
-                      $ {invoice.totalInvoiceValue?.toFixed(2) || "0000.00"}
+                      {currencySymbol} {invoice.totalInvoiceValue?.toFixed(2) || "0000.00"}
                     </td>
                   </tr>
 
@@ -780,7 +792,7 @@ const GetInvoiceById = ({
               <p className="text-xs text-black">
                 All payments to be made to{" "}
                 <span className=" uppercase">Whiteboard Technologies LLC</span>{" "}
-                in {invoice?.currencyType} Dollars via Wire Transfers within 15 days.
+                in {isCAD ? "Canadian" : isINR ? "Indian" : invoice?.currencyType || "US"} Dollars via Wire Transfers within 15 days.
               </p>
             </div>
 
