@@ -6,8 +6,8 @@ import Service from "../../api/Service";
 import { X, Printer } from "lucide-react";
 
 import mainLogo from "../../assets/logo.png";
-const Logo = "";  // Asset not found
-const ASCI = "";  // Asset not found
+import tandSLogo from "../../assets/TAndS.png";
+import aiscLogo from "../../assets/AISC.png";
 import Button from "../fields/Button";
 import RichTextEditor from "../fields/RichTextEditor";
 import Select from "../fields/Select";
@@ -93,14 +93,14 @@ const ResponseModal = ({
     const headerHtml = `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 5mm 10mm; margin-bottom: 15px; margin-top:15px; width: 100%; box-sizing: border-box;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <img src="${mainLogo}" alt="Whiteboard Technologies" style="height: 60px; width: auto;" />
+          <img src="${mainLogo}" alt="Whiteboard Technologies" style="height: 80px; width: auto;" />
         </div>
         <div style="display: flex; align-items: center; gap: 5px;">
            <div style="display: flex; align-items: center; gap: 5px;">
-              <img src="${Logo}" alt="Whiteboard Technologies" style="height: 60px; width: auto;" />
+              <img src="${tandSLogo}" alt="TandS" style="height: 60px; width: auto;" />
            </div>
            <div style="text-align: center;">
-               <img src="${ASCI}" alt="Whiteboard Technologies" style="height: 70px; width: auto;" />
+               <img src="${aiscLogo}" alt="AISC" style="height: 70px; width: auto;" />
            </div>
         </div>
       </div>
@@ -188,7 +188,7 @@ const ResponseModal = ({
                 WHITEBOARD TECHNOLOGIES <span style="color: #6bbd45; font-weight: 900;">PROPOSAL FOR</span>
               </h1>
               <h1 style="font-size: 16px; margin: 5px 0 0 0; color: #6bbd45; text-transform: uppercase; font-weight: 900; line-height: 1.2;">
-                DETAILING <span>${est.projectName || "Project Name"}</span> JOB
+                DETAILING ${est.projectName || "Project Name"} JOB
               </h1>
               <div style="margin-top: 5px;">
                 <span style="font-weight: bold; font-size: 12px; color: #0056b3;">For ${est.fabricators?.fabName || "Fabricator Name"
