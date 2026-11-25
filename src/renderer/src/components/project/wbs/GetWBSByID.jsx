@@ -176,13 +176,13 @@ const GetWBSByID = ({
 
   if (loading && !wbs && !wbsData)
     return (
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50">
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 border border-white/20">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white/95 rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 border border-gray-200">
           <div className="relative">
             <div className="w-12 h-12 border-4 border-green-100 border-t-green-600 rounded-full animate-spin"></div>
-            <Loader2 className="w-6 h-6 text-green-600 absolute inset-0 m-auto animate-pulse" />
+            <Loader2 className="w-6 h-6 text-green-600 absolute inset-0 m-auto" />
           </div>
-          <p className="text-green-900 font-medium animate-pulse">
+          <p className="text-green-900 font-medium">
             Fetching WBS details...
           </p>
         </div>
@@ -191,7 +191,7 @@ const GetWBSByID = ({
 
   if ((error || (!wbs && !wbsData)) && !initialData)
     return (
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
         <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 max-w-md text-center border border-red-100">
           <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center">
             <AlertCircle className="w-8 h-8 text-red-600" />

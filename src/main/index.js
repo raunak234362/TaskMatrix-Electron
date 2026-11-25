@@ -163,8 +163,16 @@ autoUpdater.on('update-not-available', (info) => {
   })
 })
 
+let lastDownloadProgressEmitAt = 0
+
 autoUpdater.on('download-progress', (progress) => {
-  publishUpdateState({ status: 'downloading', progress: Math.max(0, Math.min(100, progress.percent)) })
+  const now = Date.now()
+  const percent = Math.max(0, Math.min(100, progress.percent))
+  if (percent < 100 && now - lastDownloadProgressEmitAt < 250) {
+    return
+  }
+  lastDownloadProgressEmitAt = now
+  publishUpdateState({ status: 'downloading', progress: percent })
 })
 
 autoUpdater.on('update-downloaded', (info) => {
@@ -191,8 +199,10 @@ autoUpdater.on('error', (error) => {
 // 🛑 DO NOT disable security in production
 // ─────────────────────────────────────────────────────────────
 
-// Disable hardware acceleration (more stable on Linux/VMs)
-app.disableHardwareAcceleration()
+// Disable hardware acceleration only on Linux/VMs or when explicitly requested via --disable-gpu
+if (process.platform === 'linux' || process.argv.includes('--disable-gpu') || app.commandLine.hasSwitch('disable-gpu')) {
+  app.disableHardwareAcceleration()
+}
 
 // Fix GPU cache permission issues
 app.commandLine.appendSwitch('gpu-disk-cache-dir', join(tmpdir(), 'taskmatrix-gpu-cache'))
@@ -374,14 +384,16 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
 
-    window.webContents.on('before-input-event', (_, input) => {
-      if (
-        input.key === 'F12' ||
-        (input.control && input.shift && input.key.toLowerCase() === 'i')
-      ) {
-        window.webContents.toggleDevTools()
-      }
-    })
+    if (is.dev || !app.isPackaged) {
+      window.webContents.on('before-input-event', (_, input) => {
+        if (
+          input.key === 'F12' ||
+          (input.control && input.shift && input.key.toLowerCase() === 'i')
+        ) {
+          window.webContents.toggleDevTools()
+        }
+      })
+    }
   })
 
   // Listen for system lock to pause tasks

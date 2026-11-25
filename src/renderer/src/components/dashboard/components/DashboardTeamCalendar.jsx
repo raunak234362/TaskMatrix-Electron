@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { CalendarDays } from 'lucide-react'
 import Service from '../../../api/Service'
 import TeamCalendar from '../../manageTeam/teamDashboard/components/TeamCalendar'
 import WorkloadAlerts from './WorkloadAlerts'
+import { setTeamCalendarData } from '../../../store/dashboardSlice'
 
 const unwrap = (response) => response?.data ?? response
 const isInactive = (value) => value !== undefined && value !== null && ![true, 'true', 1].includes(value)
@@ -16,10 +18,20 @@ const hasInactiveStatus = (value, seen = new Set()) => {
 const isActiveMember = (member) => !hasInactiveStatus(member)
 
 const DashboardTeamCalendar = () => {
-  const [teams, setTeams] = useState([])
-  const [selectedTeamId, setSelectedTeamId] = useState('')
-  const [members, setMembers] = useState([])
-  const [loading, setLoading] = useState(true)
+  const dispatch = useDispatch()
+  const calendarCache = useSelector((state) => state.dashboardInfo?.teamCalendar)
+  const cacheKey = `${sessionStorage.getItem('userId') || ''}:${sessionStorage.getItem('userRole') || ''}`
+  const isCacheValid = Boolean(calendarCache?.initialized && calendarCache?.cacheKey === cacheKey)
+
+  const teams = isCacheValid ? calendarCache.teams : []
+  const selectedTeamId = isCacheValid ? calendarCache.selectedTeamId : ''
+  const members = isCacheValid && selectedTeamId ? (calendarCache.membersByTeamId?.[selectedTeamId] || []) : []
+  const hasCachedMembers = Boolean(isCacheValid && selectedTeamId && calendarCache.membersByTeamId?.[selectedTeamId])
+  const [loading, setLoading] = useState(!hasCachedMembers)
+
+  const setSelectedTeamId = (nextId) => {
+    dispatch(setTeamCalendarData({ cacheKey, selectedTeamId: nextId }))
+  }
   const selectedTeam = useMemo(() => teams.find((team) => String(team.id) === String(selectedTeamId)), [teams, selectedTeamId])
   const workloadMembers = useMemo(() => {
     const today = new Date()
@@ -55,27 +67,36 @@ const DashboardTeamCalendar = () => {
   }, [members])
 
   useEffect(() => {
+    if (isCacheValid && teams.length > 0 && !calendarCache?.stale) {
+      return undefined
+    }
     let active = true
     Service.AllTeam().then((response) => {
       const result = unwrap(response)
       const list = Array.isArray(result) ? result : (result?.teams || [])
       const availableTeams = list.filter((team) => !team.isDeleted)
       if (active) {
-        setTeams(availableTeams)
-        setSelectedTeamId((current) => current || String(availableTeams[0]?.id || ''))
+        dispatch(setTeamCalendarData({
+          cacheKey,
+          teams: availableTeams,
+          selectedTeamId: selectedTeamId || String(availableTeams[0]?.id || '')
+        }))
       }
     }).catch((error) => console.error('Failed to load dashboard teams', error))
       .finally(() => active && setLoading(false))
     return () => { active = false }
-  }, [])
+  }, [cacheKey, calendarCache?.stale, dispatch, isCacheValid, selectedTeamId, teams.length])
 
   useEffect(() => {
     if (!selectedTeamId) {
-      setMembers([])
-      return
+      return undefined
+    }
+    if (hasCachedMembers && !calendarCache?.stale) {
+      setLoading(false)
+      return undefined
     }
     let active = true
-    setLoading(true)
+    if (!hasCachedMembers) setLoading(true)
     Promise.all([Service.GetTeamByID(selectedTeamId), Service.GetAllTask(), Service.FetchAllEmployee()])
       .then(([teamResponse, taskResponse, employeeResponse]) => {
         const team = unwrap(teamResponse)
@@ -107,12 +128,17 @@ const DashboardTeamCalendar = () => {
             tasks: tasks.filter((task) => String(task.user_id || task.user?.id || task.userId || task.assignedToId) === String(id)),
           }
         })
-        if (active) setMembers(memberStats)
+        if (active) {
+          dispatch(setTeamCalendarData({
+            cacheKey,
+            membersByTeamId: { [selectedTeamId]: memberStats }
+          }))
+        }
       })
       .catch((error) => console.error('Failed to load dashboard team calendar', error))
       .finally(() => active && setLoading(false))
     return () => { active = false }
-  }, [selectedTeamId])
+  }, [cacheKey, calendarCache?.stale, dispatch, hasCachedMembers, selectedTeamId])
 
   return (
     <section className="rounded-2xl border border-green-200 bg-linear-to-br from-green-50/70 via-white to-white p-4 sm:p-6 shadow-sm">

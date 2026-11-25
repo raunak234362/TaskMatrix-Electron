@@ -10,39 +10,44 @@ import { useState, useEffect } from 'react'
 export const useLiveTimer = (task) => {
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
 
+  const hasTask = Boolean(task)
+  const taskId = task?.id ?? task?._id ?? null
+  const taskStatus = task?.status ?? null
+  const taskStartTime = task?.startTime ?? null
+  const workingHours = task?.workingHourTask || []
+
+  const totalFinishedSeconds = workingHours
+    .filter((wh) => wh.ended_at)
+    .reduce((acc, wh) => acc + (Number(wh.duration_seconds) || 0), 0)
+
+  const activeSession = workingHours.find((wh) => !wh.ended_at)
+  const activeSessionStartedAt = activeSession?.started_at ?? taskStartTime ?? null
+
   useEffect(() => {
-    if (!task) {
+    if (!hasTask) {
       setElapsedSeconds(0)
       return
     }
 
-    // Calculate total duration of all finished sessions
-    const totalFinishedSeconds = (task.workingHourTask || [])
-      .filter((wh) => wh.ended_at)
-      .reduce((acc, wh) => acc + (Number(wh.duration_seconds) || 0), 0)
-
     // If task is not in progress, just show the finished seconds
-    if (task.status?.toUpperCase() !== 'IN_PROGRESS') {
+    if (String(taskStatus || '').toUpperCase() !== 'IN_PROGRESS') {
       setElapsedSeconds(totalFinishedSeconds)
       return
     }
 
-    // Find the currently active session (no ended_at)
-    const activeSession = (task.workingHourTask || []).find((wh) => !wh.ended_at)
-
-    if (!activeSession) {
+    if (!activeSessionStartedAt) {
       setElapsedSeconds(totalFinishedSeconds)
       return
     }
 
-    const startTime = new Date(activeSession.started_at).getTime()
+    const startTime = new Date(activeSessionStartedAt).getTime()
     if (isNaN(startTime)) {
       setElapsedSeconds(totalFinishedSeconds)
       return
     }
 
     const updateTimer = () => {
-      const now = new Date().getTime()
+      const now = Date.now()
       const currentSessionSeconds = Math.max(0, Math.floor((now - startTime) / 1000))
       setElapsedSeconds(totalFinishedSeconds + currentSessionSeconds)
     }
@@ -52,7 +57,7 @@ export const useLiveTimer = (task) => {
     const interval = setInterval(updateTimer, 1000)
 
     return () => clearInterval(interval)
-  }, [task])
+  }, [hasTask, taskId, taskStatus, taskStartTime, totalFinishedSeconds, activeSessionStartedAt])
 
   const formatTime = (totalSeconds) => {
     const hours = Math.floor(totalSeconds / 3600)
@@ -66,6 +71,6 @@ export const useLiveTimer = (task) => {
   return {
     elapsedSeconds,
     formattedTime: formatTime(elapsedSeconds),
-    isActive: !!task && task.status?.toUpperCase() === 'IN_PROGRESS'
+    isActive: hasTask && String(taskStatus || '').toUpperCase() === 'IN_PROGRESS'
   }
 }

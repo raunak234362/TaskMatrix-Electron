@@ -192,22 +192,22 @@ const Login = () => {
 
   return (
     <div className="relative min-h-screen">
-      {/* Background with blur */}
+      {/* Background */}
       <img
         src={Background}
         alt="background"
-        className="absolute inset-0 h-full w-full object-cover blur-sm z-0"
+        className="absolute inset-0 h-full w-full object-cover z-0"
       />
 
       <div className="relative z-10 grid w-screen min-h-screen grid-cols-1 md:grid-cols-2 overflow-x-hidden">
         {/* Logo section */}
         <div className="flex items-center justify-center p-4 md:p-6">
-          <div className="flex items-center justify-center p-6 md:p-12 shadow-2xl shadow-green-950/20 bg-white/90 backdrop-blur-sm border-2 border-white w-full max-w-lg">
+          <div className="flex items-center justify-center p-6 md:p-12 shadow-2xl shadow-green-950/20 bg-white/95 border-2 border-white w-full max-w-lg">
             <img src={LOGO} alt="Logo" className="w-full h-auto" />
           </div>
         </div>
         {/* Login form */}
-        <div className="flex items-center md:bg-white/10 md:backdrop-blur-xl justify-center p-4 md:p-8">
+        <div className="flex items-center md:bg-white/20 justify-center p-4 md:p-8">
           <div className="bg-white/95 w-full max-w-[400px] sm:max-w-[500px] min-h-[450px] sm:min-h-[500px] border border-green-900/10 p-8 sm:p-12 md:p-14 shadow-2xl shadow-green-950/20 flex flex-col justify-between">
             {/* Welcome Message */}
             <div className="mb-6 sm:mb-8 text-center">

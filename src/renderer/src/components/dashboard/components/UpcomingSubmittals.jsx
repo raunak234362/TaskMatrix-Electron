@@ -91,9 +91,15 @@ const UpcomingSubmittals = ({
     mapAndDeduplicate(initialPendingSubmittals)
   );
 
-  const fetchPendingSubmittals = async () => {
+  useEffect(() => {
+    if (Array.isArray(initialPendingSubmittals) && initialPendingSubmittals.length > 0) {
+      setSubmittalsData(mapAndDeduplicate(initialPendingSubmittals));
+    }
+  }, [initialPendingSubmittals]);
+
+  const fetchPendingSubmittals = async ({ background = false } = {}) => {
     try {
-      setLoading(true);
+      if (!background) setLoading(true);
       const res = await Service.GetPendingSubmittal();
       const mapped = mapAndDeduplicate(res);
       setSubmittalsData(mapped);
@@ -105,12 +111,14 @@ const UpcomingSubmittals = ({
   };
 
   useEffect(() => {
-    fetchPendingSubmittals();
+    if (!Array.isArray(initialPendingSubmittals) || initialPendingSubmittals.length === 0) {
+      fetchPendingSubmittals();
+    }
   }, []);
 
   useEffect(() => {
     const handleRefresh = () => {
-      fetchPendingSubmittals();
+      fetchPendingSubmittals({ background: true });
     };
     window.addEventListener("dashboard-refresh", handleRefresh);
     window.addEventListener("submittal-updated", handleRefresh);
@@ -592,7 +600,7 @@ const UpcomingSubmittals = ({
                   {stats.total}
                 </span>
                 {stats.overdue > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-600 border border-red-200 flex items-center gap-1 animate-pulse">
+                  <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-600 border border-red-200 flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
                     {stats.overdue} Overdue
                   </span>

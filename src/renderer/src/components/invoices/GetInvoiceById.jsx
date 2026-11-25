@@ -553,7 +553,7 @@ const GetInvoiceById = ({
         }}
       />
 
-      <div className="modal-root fixed inset-0 z-[10001] flex items-start justify-center overflow-auto bg-black/80 backdrop-blur-xl pt-0 pb-0">
+      <div className="modal-root fixed inset-0 z-[10001] flex items-start justify-center overflow-auto bg-black/75 pt-0 pb-0">
         {/* Action Header */}
         <div className="fixed top-6 right-10 z-[10002] flex gap-4 no-print">
           <button

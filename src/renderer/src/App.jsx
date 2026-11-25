@@ -3,6 +3,7 @@ import store from './store/store'
 import Layout from './layout/DashboardLayout'
 import Service from './api/Service'
 import { setUserData, showStaff } from './store/userSlice'
+import { markDashboardStale } from './store/dashboardSlice'
 import { useEffect } from 'react'
 import { toast } from 'react-toastify'
 import socket, { connectSocket } from './socket'
@@ -26,6 +27,22 @@ const AppContent = () => {
       connectSocket()
     }
   }, [userDetail?.id])
+
+  // Mark cached dashboard data stale if any module mutates entities while Dashboard is unmounted
+  useEffect(() => {
+    const markStale = () => dispatch(markDashboardStale())
+    const events = [
+      'task-updated',
+      'dashboard-refresh',
+      'rfq-updated',
+      'rfi-updated',
+      'submittal-updated',
+      'co-updated',
+      'milestone-updated'
+    ]
+    events.forEach((evt) => window.addEventListener(evt, markStale))
+    return () => events.forEach((evt) => window.removeEventListener(evt, markStale))
+  }, [dispatch])
 
   // ── Restore floating timer widget on app load / refresh ───────────────────
   useEffect(() => {

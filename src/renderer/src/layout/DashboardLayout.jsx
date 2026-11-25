@@ -52,7 +52,7 @@ const Layout = () => {
       {/* Mobile Sidebar Overlay */}
       {isMobileOpen && !isAnyModalOpen && (
         <div
-          className="fixed inset-0 z-60 bg-black/50 md:hidden backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 z-60 bg-black/50 md:hidden transition-opacity"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
@@ -72,7 +72,7 @@ const Layout = () => {
       <div className="flex flex-col flex-1 min-w-0 min-h-0 relative z-50 bg-white">
         {/* Header - Sticky top with border */}
         {!isAnyModalOpen && (
-          <div className="sticky top-0 z-20 w-full border-b border-gray-200 bg-white/95 backdrop-blur-sm">
+          <div className="sticky top-0 z-20 w-full border-b border-gray-200 bg-white/95">
             <Header isMinimized={isMinimized} toggleSidebar={toggleSidebar} isMobileOpen={isMobileOpen} />
           </div>
         )}

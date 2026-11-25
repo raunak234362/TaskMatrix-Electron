@@ -70,7 +70,7 @@ const TeamPage = () => {
     <div className="h-full w-full overflow-y-auto overflow-x-hidden">
       <div className="flex flex-col w-full h-full">
         {/* ---------- TOP TABS ---------- */}
-        <div className="px-6 py-4  backdrop-blur-xl border-b border-gray-100 flex flex-wrap items-center justify-center md:justify-end gap-3">
+        <div className="px-6 py-4 bg-white/95 border-b border-gray-100 flex flex-wrap items-center justify-center md:justify-end gap-3">
           <button
             onClick={() => setActiveTab("teamDashboard")}
             className={`px-6 py-2.5 rounded-none text-[13px] font-bold uppercase transition-all shadow-lg border-2 cursor-pointer ${activeTab === "teamDashboard"

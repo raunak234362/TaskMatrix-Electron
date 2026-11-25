@@ -122,7 +122,7 @@ const StaffDashboardView = ({
                             {displayTask && (
                                 <div className="flex items-center gap-2">
                                     <LiveTaskTimer task={displayTask} />
-                                    <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(22,163,74,0.5)]"></span>
+                                    <span className="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(22,163,74,0.5)]"></span>
                                 </div>
                             )}
                         </div>

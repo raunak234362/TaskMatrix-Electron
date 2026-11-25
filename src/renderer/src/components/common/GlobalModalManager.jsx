@@ -64,7 +64,7 @@ const GlobalModalManager = () => {
       case 'project':
       case 'projects':
         return (
-          <div className="fixed inset-0 z-1000 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 md:p-8 animate-in fade-in duration-200">
+          <div className="fixed inset-0 z-1000 flex items-center justify-center bg-black/50 p-4 md:p-8 animate-in fade-in duration-200">
             <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden w-full h-full flex flex-col relative p-6 custom-scrollbar overflow-y-auto">
                <GetProjectById id={id} onClose={handleClose} />
             </div>

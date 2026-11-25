@@ -28,7 +28,7 @@ const AccountPage = ({ hideHeader = false }) => {
   return (
     <div className="h-full w-full flex flex-col min-h-0">
       {!hideHeader && (
-        <div className="px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 rounded-t-2xl flex flex-wrap items-center justify-center md:justify-end gap-3 shrink-0">
+        <div className="px-3 py-2 bg-white/95 rounded-t-2xl flex flex-wrap items-center justify-center md:justify-end gap-3 shrink-0">
           <button
             onClick={() => setActiveTab("allAccounts")}
             className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wider transition-all border ${

@@ -8,7 +8,7 @@ const InvoiceLayout = () => {
   return (
     <div className="w-full overflow-y-hidden overflow-x-hidden">
       <div className="flex flex-col w-full h-full">
-        <div className="px-3 py-2 backdrop-blur-2xl bg-linear-to-t from-white/60 to-white/80 rounded-t-2xl flex flex-wrap items-center justify-center md:justify-end gap-3">
+        <div className="px-3 py-2 bg-white/95 rounded-t-2xl flex flex-wrap items-center justify-center md:justify-end gap-3">
           <button
             onClick={() => setActiveTab("dashboard")}
             className={`flex items-center gap-2 px-6 py-1.5 rounded-lg text-sm font-bold uppercase tracking-tight transition-all border-2 shadow-sm ${activeTab === "dashboard"

@@ -1,20 +1,128 @@
-import { useState, useCallback, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useState, useCallback, useEffect, useRef } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import Service from '../../../api/Service'
 import SelfTaskService from '../../../api/services/selftask.service'
+import {
+  initialAdminData,
+  initialUserStats,
+  patchWbtAdminData,
+  patchWbtDashboard,
+  setWbtDashboardData
+} from '../../../store/dashboardSlice'
+
+const extractDataList = (res) => {
+  if (!res) return []
+  if (Array.isArray(res)) return res
+  if (res?.data) {
+    if (Array.isArray(res.data)) return res.data
+    const keys = Object.keys(res.data)
+    for (const key of keys) {
+      if (Array.isArray(res.data[key])) return res.data[key]
+    }
+  }
+  const keys = Object.keys(res)
+  for (const key of keys) {
+    if (Array.isArray(res[key])) return res[key]
+  }
+  return []
+}
+
+const parseDurationToHours = (duration) => {
+  if (!duration) return 0
+  if (typeof duration === 'number') return duration
+
+  const parts = String(duration).split(/[:\s]+/)
+  let hours = 0
+  let minutes = 0
+
+  if (parts.length >= 1) {
+    hours = parseFloat(parts[0].replace(/[^\d.]/g, '')) || 0
+  }
+  if (parts.length >= 2) {
+    minutes = parseFloat(parts[1].replace(/[^\d.]/g, '')) || 0
+  }
+
+  return hours + minutes / 60
+}
+
+const calculateHours = (task) => {
+  let allocated = 0
+  if (task.allocationLog?.allocatedHours) {
+    allocated = parseDurationToHours(task.allocationLog.allocatedHours)
+  } else if (task.duration) {
+    allocated = parseDurationToHours(task.duration)
+  } else if (task.hours) {
+    allocated = Number(task.hours) || 0
+  }
+
+  const worked =
+    (task.workingHourTask || []).reduce(
+      (acc, wh) => acc + (Number(wh.duration_seconds) || 0),
+      0
+    ) / 3600
+  return { allocated, worked }
+}
+
+const buildPersonalTaskMetrics = async (rawTasksData) => {
+  if (!rawTasksData) {
+    return {
+      tasks: [],
+      userStats: { ...initialUserStats },
+      projectNotes: []
+    }
+  }
+
+  const fetchedTasks = Array.isArray(rawTasksData)
+    ? rawTasksData
+    : typeof rawTasksData === 'object'
+      ? Object.values(rawTasksData || {})
+      : []
+
+  let totalAllocated = 0
+  let totalWorked = 0
+  const completed = fetchedTasks.filter((t) => t.status === 'COMPLETED').length
+  const projectIds = new Set()
+
+  fetchedTasks.forEach((t) => {
+    const { allocated, worked } = calculateHours(t)
+    totalAllocated += allocated
+    totalWorked += worked
+    if (t.project?.id) projectIds.add(t.project.id)
+  })
+
+  const stats = {
+    totalTasks: fetchedTasks.length,
+    completedTasks: completed,
+    pendingTasks: fetchedTasks.length - completed,
+    allocatedHours: totalAllocated,
+    workedHours: totalWorked,
+    projectsCount: projectIds.size,
+    efficiency: totalWorked > 0 ? Math.round((totalAllocated / totalWorked) * 100) : 0
+  }
+
+  const notesPromises = Array.from(projectIds).map((id) =>
+    Service.GetProjectNotes(id).catch(() => [])
+  )
+  const allNotesResponses = await Promise.all(notesPromises)
+  const flattenedNotes = allNotesResponses.flat().filter(Boolean)
+
+  return {
+    tasks: fetchedTasks,
+    userStats: stats,
+    projectNotes: flattenedNotes
+  }
+}
 
 export const useDashboardData = () => {
+  const dispatch = useDispatch()
   const user = useSelector((state) => state.userInfo?.userDetail)
-  const [loading, setLoading] = useState(true)
-  const [tasks, setTasks] = useState([])
-  const [selfTasks, setSelfTasks] = useState([])
-  const [projectNotes, setProjectNotes] = useState([])
-  const [unreadComments, setUnreadComments] = useState([])
-  const [unapprovedListsCount, setUnapprovedListsCount] = useState(0)
+  const cachedDashboard = useSelector((state) => state.dashboardInfo?.wbtDashboard)
 
   // Role Based Logic
   const userRoleRaw = sessionStorage.getItem('userRole')
   const userRole = (userRoleRaw || '').toLowerCase().trim().replace(/[\s-]+/g, '_')
+  const userId = sessionStorage.getItem('userId') || user?.id || ''
+  const cacheKey = `${userId}:${userRole}`
   const isAdminRole = [
     'admin',
     'dept_manager',
@@ -25,137 +133,84 @@ export const useDashboardData = () => {
     'human_resource'
   ].includes(userRole)
 
-  console.log('🏁 useDashboardData Hook Init:', { userRoleRaw, userRole, isAdminRole })
+  const isCacheValid = Boolean(
+    cachedDashboard?.initialized && cachedDashboard?.cacheKey === cacheKey
+  )
+  const isStale = Boolean(cachedDashboard?.stale)
 
-  const [userStats, setUserStats] = useState({
-    totalTasks: 0,
-    completedTasks: 0,
-    pendingTasks: 0,
-    allocatedHours: 0,
-    workedHours: 0,
-    projectsCount: 0,
-    efficiency: 0
-  })
-
-  // Admin Dashboard State
-  const [adminData, setAdminData] = useState({
-    projects: [],
-    rfis: [],
-    submittals: [],
-    pendingSubmittals: [],
-    pendingChangeOrders: [],
-    pendingRFI: [],
-    pendingRFQ: [],
-    clientSidePendingSubmittals: [],
-    clientSidePendingRFI: [],
-    clientSidePendingRFQ: [],
-    clientSidePendingCO: [],
-    pmDashboard: {},
-    projectStats: {
-      totalProjects: 0,
-      activeProjects: 0,
-      completedProjects: 0,
-      onHoldProjects: 0
-    },
-    dashboardStats: {
-      pendingRFI: 0,
-      newRFI: 0,
-      pendingSubmittals: 0,
-      pendingChangeOrders: 0,
-      newChangeOrders: 0,
-      pendingRFQ: 0,
-      newRFQ: 0
-    },
-    invoices: []
-  })
-
-  const parseDurationToHours = (duration) => {
-    if (!duration) return 0
-    if (typeof duration === 'number') return duration
-
-    // Handle formats like "10:30", "10h 30m", "10"
-    const parts = String(duration).split(/[:\s]+/)
-    let hours = 0
-    let minutes = 0
-
-    if (parts.length >= 1) {
-      hours = parseFloat(parts[0].replace(/[^\d.]/g, '')) || 0
-    }
-    if (parts.length >= 2) {
-      minutes = parseFloat(parts[1].replace(/[^\d.]/g, '')) || 0
-    }
-
-    return hours + minutes / 60
-  }
-
-  const calculateHours = (task) => {
-    // Try allocationLog first as it's the source for planned hours
-    let allocated = 0
-    if (task.allocationLog?.allocatedHours) {
-      allocated = parseDurationToHours(task.allocationLog.allocatedHours)
-    } else if (task.duration) {
-      allocated = parseDurationToHours(task.duration)
-    } else if (task.hours) {
-      allocated = Number(task.hours) || 0
-    }
-
-    const worked =
-      (task.workingHourTask || []).reduce(
-        (acc, wh) => acc + (Number(wh.duration_seconds) || 0),
-        0
-      ) / 3600
-    return { allocated, worked }
-  }
-
-  const [memberStats, setMemberStats] = useState([])
+  const [loading, setLoading] = useState(!isCacheValid)
   const [memberLoading, setMemberLoading] = useState(false)
 
-  const fetchData = useCallback(async () => {
-    console.log('🔍 fetchData called:', { userRole, isAdminRole })
-    setLoading(true)
-    
+  const isCacheValidRef = useRef(isCacheValid)
+  isCacheValidRef.current = isCacheValid
+  const inFlightRef = useRef(false)
+  const queuedRefreshRef = useRef(false)
+
+  const tasks = isCacheValid ? cachedDashboard.tasks : []
+  const selfTasks = isCacheValid ? cachedDashboard.selfTasks : []
+  const projectNotes = isCacheValid ? cachedDashboard.projectNotes : []
+  const unreadComments = isCacheValid ? cachedDashboard.unreadComments : []
+  const unapprovedListsCount = isCacheValid ? cachedDashboard.unapprovedListsCount : 0
+  const userStats = isCacheValid ? cachedDashboard.userStats : initialUserStats
+  const adminData = isCacheValid ? cachedDashboard.adminData : initialAdminData
+  const memberStats = isCacheValid ? cachedDashboard.memberStats : []
+
+  const fetchData = useCallback(async (options) => {
+    const isBackground = Boolean(options?.background) || isCacheValidRef.current
+
+    if (inFlightRef.current) {
+      queuedRefreshRef.current = true
+      return
+    }
+
+    inFlightRef.current = true
+    if (!isBackground) {
+      setLoading(true)
+    }
+
     // Fetch Unread Comments async without blocking other data
     const fetchUnread = ['admin', 'deputy_manager', 'dept_manager', 'project_manager'].includes(userRole)
       ? Service.FetchUnreadCommentsMyTeam()
-      : Service.FetchUnreadCommentsMyTasks();
+      : Service.FetchUnreadCommentsMyTasks()
 
     fetchUnread
-      .then(res => {
-        const comments = res?.data || res || [];
-        setUnreadComments(comments);
+      .then((res) => {
+        const comments = res?.data || res || []
+        dispatch(patchWbtDashboard({ unreadComments: comments }))
       })
+      .catch((err) => console.error('Failed to fetch unread comments', err))
+
     try {
       if (isAdminRole) {
+        let resolvedUnapprovedCount = 0
+
         // Fetch Dashboard Number for Pending Approvals
         Service.GetDashboardNumber()
-          .then(res => {
-            const data = res?.data ?? res ?? {};
-            let finalCount = 0;
+          .then((res) => {
+            const data = res?.data ?? res ?? {}
+            let finalCount = 0
             if (typeof data === 'number') {
-              finalCount = data;
+              finalCount = data
             } else if (typeof data === 'object' && data !== null) {
               if (data.total !== undefined) {
-                finalCount = data.total;
+                finalCount = data.total
               } else {
                 finalCount = Object.values(data).reduce((acc, val) => {
-                  if (Array.isArray(val)) return acc + val.length;
-                  if (typeof val === 'number') return acc + val;
-                  return acc;
-                }, 0);
+                  if (Array.isArray(val)) return acc + val.length
+                  if (typeof val === 'number') return acc + val
+                  return acc
+                }, 0)
               }
             }
-            setUnapprovedListsCount(finalCount);
-            
-            // Store raw unapproved lists in adminData asynchronously
-            setAdminData(prev => ({
-              ...prev,
+            resolvedUnapprovedCount = finalCount
+            dispatch(patchWbtDashboard({ unapprovedListsCount: finalCount }))
+            dispatch(patchWbtAdminData({
               unapprovedListsData: typeof data === 'object' ? data : {}
-            }));
+            }))
           })
-          .catch(err => console.error('Failed to fetch unapproved lists count', err));
+          .catch((err) => console.error('Failed to fetch unapproved lists count', err))
 
         // Fetch Admin Data
-        let pmDashboardFromAPI = {}
         let computedPMStats = {}
         let projectsRes, rfiRes, subRes, coRes, rfqRes, pmDashboardRes, myTasksRes, invoicesRes, allRfqsRes
         let clientRfiRes, clientSubRes, clientCoRes, clientRfqRes, pendingSubRes
@@ -214,36 +269,43 @@ export const useDashboardData = () => {
             Service.GetPendingSubmittal(),
             Service.GetPendingChangeOrders(),
             Service.GetPendingRfq(),
-
-            // Skip client-side APIs for PMO
             userRole === 'project_manager_officer' ? Promise.resolve(null) : Service.GetPendingRfiClientSide(),
             userRole === 'project_manager_officer' ? Promise.resolve(null) : Service.GetPendingSubmittalClientSide(),
             userRole === 'project_manager_officer' ? Promise.resolve(null) : Service.GetPendingChangeOrdersClientSide(),
             userRole === 'project_manager_officer' ? Promise.resolve(null) : Service.GetPendingRfqClientSide(),
-
             Service.GetDashboardData()
           )
         }
 
-        const fetchUnapprovedCO = ['admin', 'deputy_manager', 'operation_executive', 'project_manager_officer', 'project_manager', 'dept_manager'].includes(userRole);
+        const fetchUnapprovedCO = [
+          'admin',
+          'deputy_manager',
+          'operation_executive',
+          'project_manager_officer',
+          'project_manager',
+          'dept_manager'
+        ].includes(userRole)
         if (fetchUnapprovedCO) {
-          requests.push(Service.GetUnapprovedChangeOrders().catch(e => { console.error('Failed to fetch unapproved COs', e); return [] }));
+          requests.push(
+            Service.GetUnapprovedChangeOrders().catch((e) => {
+              console.error('Failed to fetch unapproved COs', e)
+              return []
+            })
+          )
         }
 
         const responses = await Promise.all(requests)
-        console.log('✅ Responses received:', responses.length)
 
-        // Map responses based on the order they were added
         projectsRes = responses[0]
         allRfqsRes = responses[1]
         invoicesRes = responses[2]
         myTasksRes = responses[3]
 
-        if (userRole === 'project_manager' || userRole === 'assistant_project_manager' || userRole === 'dept_manager' || userRole === 'operation_executive') {
-          rfiRes = responses[4]
-          subRes = responses[5]
-          pendingSubRes = responses[6] // Extra submittal for PM/Dept
-          coRes = responses[7]
+        rfiRes = responses[4]
+        subRes = responses[5]
+        pendingSubRes = responses[6]
+        coRes = responses[7]
+        if (['project_manager', 'assistant_project_manager', 'dept_manager', 'operation_executive'].includes(userRole)) {
           clientRfiRes = responses[8]
           clientSubRes = responses[9]
           clientCoRes = responses[10]
@@ -251,11 +313,6 @@ export const useDashboardData = () => {
           rfqRes = responses[12]
           pmDashboardRes = responses[13]
         } else {
-          // Admin, PMO, Deputy Manager mapping (indices 4-13)
-          rfiRes = responses[4]
-          subRes = responses[5]
-          pendingSubRes = responses[6]
-          coRes = responses[7]
           rfqRes = responses[8]
           clientRfiRes = responses[9]
           clientSubRes = responses[10]
@@ -264,53 +321,65 @@ export const useDashboardData = () => {
           pmDashboardRes = responses[13]
         }
 
+        let nextMemberStats
+
         // Fetch member workload if needed
         if (['dept_manager', 'project_manager', 'deputy_manager', 'admin', 'project_manager_officer'].includes(userRole)) {
-          setMemberLoading(true)
+          if (!isBackground) setMemberLoading(true)
           try {
             const [employeesRes, allTasksRes] = await Promise.all([
               Service.FetchAllEmployee(),
               Service.GetAllTask()
             ])
 
-            // Robust data extraction for nested structures
-            const employees = employeesRes?.data?.employees || employeesRes?.employees || employeesRes?.data || employeesRes || []
-            const allGlobalTasks = allTasksRes?.data?.tasks || allTasksRes?.tasks || allTasksRes?.data || allTasksRes || []
+            const employees =
+              employeesRes?.data?.employees || employeesRes?.employees || employeesRes?.data || employeesRes || []
+            const allGlobalTasks =
+              allTasksRes?.data?.tasks || allTasksRes?.tasks || allTasksRes?.data || allTasksRes || []
 
-            // Filter employees based on role (exclude admins and management roles from workload alerts)
-            const excludedRoles = ['admin', 'operation_executive', 'project_manager_officer', 'dept_manager', 'deputy_manager']
+            const excludedRoles = [
+              'admin',
+              'operation_executive',
+              'project_manager_officer',
+              'dept_manager',
+              'deputy_manager'
+            ]
             let filteredEmployees = Array.isArray(employees)
-              ? employees.filter(e => e && e.isActive === true && !e.is_disabled && !excludedRoles.includes((e.role || '').toLowerCase()))
+              ? employees.filter(
+                  (e) =>
+                    e &&
+                    e.isActive === true &&
+                    !e.is_disabled &&
+                    !excludedRoles.includes((e.role || '').toLowerCase())
+                )
               : []
 
             if (userRole === 'project_manager') {
               const myTeamName = (user?.team?.name || sessionStorage.getItem('teamName') || '').toLowerCase().trim()
               if (myTeamName) {
-                filteredEmployees = filteredEmployees.filter(e =>
-                  (e.team?.name || '').toLowerCase().trim() === myTeamName
+                filteredEmployees = filteredEmployees.filter(
+                  (e) => (e.team?.name || '').toLowerCase().trim() === myTeamName
                 )
               }
             } else if (userRole === 'dept_manager') {
               const myDeptName = (user?.department?.name || sessionStorage.getItem('deptName') || '').toLowerCase().trim()
               if (myDeptName) {
-                filteredEmployees = filteredEmployees.filter(e =>
-                  (e.department?.name || '').toLowerCase().trim() === myDeptName
+                filteredEmployees = filteredEmployees.filter(
+                  (e) => (e.department?.name || '').toLowerCase().trim() === myDeptName
                 )
               }
             }
-            // deputy_manager and admin see all
 
             const today = new Date()
             today.setHours(0, 0, 0, 0)
             const tomorrow = new Date(today)
             tomorrow.setDate(today.getDate() + 1)
 
-            const stats = filteredEmployees.map(emp => {
-              const empTasks = allGlobalTasks.filter(t => {
+            nextMemberStats = filteredEmployees.map((emp) => {
+              const empTasks = allGlobalTasks.filter((t) => {
                 const tUserId = t.user_id || t.user?.id || t.userId || t.assignedToId
                 if (String(tUserId) !== String(emp.id)) return false
 
-                // Filter for today
                 const tDateStr = t.start_date || t.startDate || t.date
                 if (!tDateStr) return false
                 const tDate = new Date(tDateStr)
@@ -330,21 +399,18 @@ export const useDashboardData = () => {
               }
             })
 
-            setMemberStats(stats)
-
-            // Compute aggregate team stats for the dashboard overview
             if (['dept_manager', 'project_manager'].includes(userRole)) {
-              const teamMemberIds = new Set(filteredEmployees.map(e => String(e.id)))
-              const teamTasks = allGlobalTasks.filter(t => {
+              const teamMemberIds = new Set(filteredEmployees.map((e) => String(e.id)))
+              const teamTasks = allGlobalTasks.filter((t) => {
                 const tUserId = t.user_id || t.user?.id || t.userId || t.assignedToId
                 return teamMemberIds.has(String(tUserId))
               })
 
-              const completed = teamTasks.filter(t =>
+              const completed = teamTasks.filter((t) =>
                 ['COMPLETED', 'VALIDATE_COMPLETED'].includes((t.status || '').toUpperCase())
               ).length
 
-              const overdue = teamTasks.filter(t => {
+              const overdue = teamTasks.filter((t) => {
                 if (['COMPLETED', 'VALIDATE_COMPLETED'].includes((t.status || '').toUpperCase())) return false
                 const endDate = new Date(t.end_date || t.endDate || t.deadline)
                 return endDate < today
@@ -370,49 +436,24 @@ export const useDashboardData = () => {
           }
         }
 
-        // Robust data extraction helper
-        const extractData = (res) => {
-          if (!res) return []
-          if (Array.isArray(res)) return res
-          if (res?.data) {
-            if (Array.isArray(res.data)) return res.data
-            // Handle { data: { someKey: [...] } }
-            const keys = Object.keys(res.data)
-            for (const key of keys) {
-              if (Array.isArray(res.data[key])) return res.data[key]
-            }
-          }
-          // Handle { someKey: [...] }
-          const keys = Object.keys(res)
-          for (const key of keys) {
-            if (Array.isArray(res[key])) return res[key]
-          }
-          return []
-        }
+        const projects = extractDataList(projectsRes)
+        const rfis = extractDataList(rfiRes)
+        const submittals = extractDataList(subRes)
+        const pendingSubmittals = extractDataList(pendingSubRes)
+        const coList = extractDataList(coRes)
+        const rfqList = extractDataList(rfqRes)
+        const invoices = extractDataList(invoicesRes)
+        const allRfqs = extractDataList(allRfqsRes)
 
-        const projects = extractData(projectsRes)
-        const rfis = extractData(rfiRes)
-        const submittals = extractData(subRes)
-        const pendingSubmittals = extractData(pendingSubRes) // Extra for PM/Dept
-        const coList = extractData(coRes)
-        const rfqList = extractData(rfqRes)
-        const invoices = extractData(invoicesRes)
-        const allRfqs = extractData(allRfqsRes)
+        const clientRfis = extractDataList(clientRfiRes)
+        const clientSubmittals = extractDataList(clientSubRes)
+        const clientCos = extractDataList(clientCoRes)
+        const clientRfqs = extractDataList(clientRfqRes)
 
-        // Client Side
-        const clientRfis = extractData(clientRfiRes)
-        const clientSubmittals = extractData(clientSubRes)
-        const clientCos = extractData(clientCoRes)
-        const clientRfqs = extractData(clientRfqRes)
-
-        // Merge pmDashboard root stats with nested .data stats
-        let unapprovedCOList = [];
-        if (fetchUnapprovedCO) {
-          unapprovedCOList = extractData(responses[responses.length - 1]);
-        }
+        const unapprovedCOList = fetchUnapprovedCO ? extractDataList(responses[responses.length - 1]) : []
 
         const pmDataObj = pmDashboardRes?.data || pmDashboardRes || {}
-        pmDashboardFromAPI = {
+        const pmDashboardFromAPI = {
           ...(typeof pmDataObj === 'object' ? pmDataObj : {}),
           ...(typeof pmDataObj.data === 'object' ? pmDataObj.data : {})
         }
@@ -422,46 +463,38 @@ export const useDashboardData = () => {
           ...computedPMStats
         }
 
-        // Upcoming milestones from GetPendingSubmittal API with deduplication by milestone ID
-        const seenUpcomingMilestoneIds = new Set();
-        let finalPendingSubmittals = [];
+        const seenUpcomingMilestoneIds = new Set()
+        const finalPendingSubmittals = []
         if (Array.isArray(pendingSubmittals)) {
           pendingSubmittals.forEach((m) => {
-            if (!m) return;
-            const mId = String(m.id || m._id || m.milestoneId || m.mileStoneId || '');
+            if (!m) return
+            const mId = String(m.id || m._id || m.milestoneId || m.mileStoneId || '')
             if (mId) {
-              if (seenUpcomingMilestoneIds.has(mId)) return;
-              seenUpcomingMilestoneIds.add(mId);
+              if (seenUpcomingMilestoneIds.has(mId)) return
+              seenUpcomingMilestoneIds.add(mId)
             }
             finalPendingSubmittals.push({
               ...m,
               id: m.id || m._id || m.milestoneId || m.mileStoneId,
               isPlaceholderSubmittal: true,
               subject: m.subject || m.name || 'Unknown Milestone',
-              subSubject: (m.subSubject && m.subSubject !== 'string') ? m.subSubject : '',
+              subSubject: m.subSubject && m.subSubject !== 'string' ? m.subSubject : '',
               approvalDate: m.approvalDate || m.date,
-              project: m.project || projects.find(p => String(p.id) === String(m.project_id || m.projectId))
-            });
-          });
+              project: m.project || projects.find((p) => String(p.id) === String(m.project_id || m.projectId))
+            })
+          })
         }
-
-        const basePendingSubmittalsArray = (userRole === 'admin' || userRole === 'deputy_manager' || userRole === 'project_manager_officer') ? submittals : submittals;
 
         const opExecPendingApprovals =
           (pmDashboard?.unapprovedRFIsCount || 0) +
           (pmDashboard?.unapprovedSubmittalsCount || 0) +
           (pmDashboard?.unapprovedChangeOrdersCount || 0)
 
-        if (opExecPendingApprovals > 0) {
-          setUnapprovedListsCount((prev) => prev || opExecPendingApprovals)
-        }
-
-        setAdminData(prev => ({
-          ...prev,
+        const nextAdminData = {
           projects,
           rfis,
           submittals,
-          pendingSubmittals: basePendingSubmittalsArray,
+          pendingSubmittals: submittals,
           upcomingMilestones: finalPendingSubmittals,
           pendingChangeOrders: coList,
           rfqs: rfqList,
@@ -486,115 +519,62 @@ export const useDashboardData = () => {
               pmDashboard?.projectStats?.ACTIVE ||
               pmDashboard?.projectStats?.activeProjects ||
               pmDashboard?.totalActiveProjects ||
-              projects.filter((p) => p.status?.toUpperCase() === 'ACTIVE' || p.status?.toUpperCase() === 'IN_PROGRESS').length,
+              projects.filter(
+                (p) => p.status?.toUpperCase() === 'ACTIVE' || p.status?.toUpperCase() === 'IN_PROGRESS'
+              ).length,
             completedProjects:
               pmDashboard?.projectStats?.COMPLETE ||
               pmDashboard?.projectStats?.completedProjects ||
               pmDashboard?.totalCompleteProject ||
-              projects.filter((p) => p.status?.toUpperCase() === 'COMPLETED' || p.status?.toUpperCase() === 'COMPLETE').length,
+              projects.filter(
+                (p) => p.status?.toUpperCase() === 'COMPLETED' || p.status?.toUpperCase() === 'COMPLETE'
+              ).length,
             onHoldProjects:
               pmDashboard?.projectStats?.ONHOLD ||
               pmDashboard?.projectStats?.onHoldProjects ||
               pmDashboard?.totalOnHoldProject ||
-              projects.filter((p) => p.status?.toUpperCase() === 'ON_HOLD' || p.status?.toUpperCase() === 'ON-HOLD').length
+              projects.filter(
+                (p) => p.status?.toUpperCase() === 'ON_HOLD' || p.status?.toUpperCase() === 'ON-HOLD'
+              ).length
           },
           dashboardStats: {
             pendingRFI: (pmDashboard?.pendingRFI ?? rfis.length) + (pmDashboard?.clientSidePendingActions?.rfi ?? clientRfis.length),
             pendingRfiWbt: pmDashboard?.pendingRFI ?? rfis.length,
             pendingRfiClient: pmDashboard?.clientSidePendingActions?.rfi ?? clientRfis.length,
             newRFI: pmDashboard?.newRFI ?? 0,
-            
-            pendingSubmittals: (pmDashboard?.pendingSubmittals ?? basePendingSubmittalsArray.length) + (pmDashboard?.clientSidePendingActions?.submittals ?? clientSubmittals.length),
-            pendingSubmittalsWbt: pmDashboard?.pendingSubmittals ?? basePendingSubmittalsArray.length,
+            pendingSubmittals:
+              (pmDashboard?.pendingSubmittals ?? submittals.length) +
+              (pmDashboard?.clientSidePendingActions?.submittals ?? clientSubmittals.length),
+            pendingSubmittalsWbt: pmDashboard?.pendingSubmittals ?? submittals.length,
             pendingSubmittalsClient: pmDashboard?.clientSidePendingActions?.submittals ?? clientSubmittals.length,
-            
-            pendingChangeOrders: (pmDashboard?.pendingChangeOrders ?? coList.length) + (pmDashboard?.clientSidePendingActions?.changeOrders ?? clientCos.length),
+            pendingChangeOrders:
+              (pmDashboard?.pendingChangeOrders ?? coList.length) +
+              (pmDashboard?.clientSidePendingActions?.changeOrders ?? clientCos.length),
             pendingChangeOrdersWbt: pmDashboard?.pendingChangeOrders ?? coList.length,
             pendingChangeOrdersClient: pmDashboard?.clientSidePendingActions?.changeOrders ?? clientCos.length,
             newChangeOrders: pmDashboard?.newChangeOrders ?? 0,
             unapprovedChangeOrders: pmDashboard?.unapprovedChangeOrdersCount ?? unapprovedCOList.length,
-            
             pendingRFQ: (pmDashboard?.pendingRFQ ?? rfqList.length) + (pmDashboard?.clientSidePendingActions?.rfq ?? clientRfqs.length),
             pendingRfqWbt: pmDashboard?.pendingRFQ ?? rfqList.length,
             pendingRfqClient: pmDashboard?.clientSidePendingActions?.rfq ?? clientRfqs.length,
             newRFQ: pmDashboard?.newRFQ ?? 0
           },
-          invoices: invoices
-        }))
-
-        if (['dept_manager', 'operation_executive', 'admin', 'deputy_manager', 'project_manager_officer'].includes(userRole)) {
-          console.log(`📊 ${userRole.toUpperCase()} Dashboard Data:`, {
-            pmDashboard,
-            projectStats: {
-              totalProjects:
-                pmDashboard?.projectStats?.totalProjects ??
-                pmDashboard?.totalProjects ??
-                projects.length,
-              activeProjects:
-                pmDashboard?.projectStats?.ACTIVE ??
-                pmDashboard?.projectStats?.activeProjects ??
-                pmDashboard?.totalActiveProjects ??
-                projects.filter((p) => p.status?.toUpperCase() === 'ACTIVE' || p.status?.toUpperCase() === 'IN_PROGRESS').length,
-              completedProjects:
-                pmDashboard?.projectStats?.COMPLETE ??
-                pmDashboard?.projectStats?.completedProjects ??
-                pmDashboard?.totalCompleteProject ??
-                projects.filter((p) => p.status?.toUpperCase() === 'COMPLETED' || p.status?.toUpperCase() === 'COMPLETE').length,
-              onHoldProjects:
-                pmDashboard?.projectStats?.ONHOLD ??
-                pmDashboard?.projectStats?.onHoldProjects ??
-                pmDashboard?.totalOnHoldProject ??
-                projects.filter((p) => p.status?.toUpperCase() === 'ON_HOLD' || p.status?.toUpperCase() === 'ON-HOLD').length
-            },
-            dashboardStats: {
-              pendingRFI: pmDashboard?.pendingRFI ?? rfis.length,
-              pendingSubmittals: pmDashboard?.pendingSubmittals ?? pendingSubmittals.length,
-              pendingChangeOrders: pmDashboard?.pendingChangeOrders ?? coList.length,
-              pendingRFQ: pmDashboard?.pendingRFQ ?? rfqList.length
-            }
-          })
+          invoices
         }
 
-        // Process Personal Tasks for Admin
-        const myTasksData = myTasksRes?.data ?? myTasksRes
-        if (myTasksData) {
-          const fetchedTasks = Array.isArray(myTasksData)
-            ? myTasksData
-            : typeof myTasksData === 'object'
-              ? Object.values(myTasksData || {})
-              : []
+        const personalTaskState = await buildPersonalTaskMetrics(myTasksRes?.data ?? myTasksRes)
 
-          setTasks(fetchedTasks)
-
-          // Calculate Stats
-          let totalAllocated = 0
-          let totalWorked = 0
-          const completed = fetchedTasks.filter((t) => t.status === 'COMPLETED').length
-          const projectIds = new Set()
-
-          fetchedTasks.forEach((t) => {
-            const { allocated, worked } = calculateHours(t)
-            totalAllocated += allocated
-            totalWorked += worked
-            if (t.project?.id) projectIds.add(t.project.id)
+        dispatch(
+          setWbtDashboardData({
+            cacheKey,
+            adminData: nextAdminData,
+            ...(nextMemberStats !== undefined ? { memberStats: nextMemberStats } : {}),
+            ...(opExecPendingApprovals > 0 && !resolvedUnapprovedCount
+              ? { unapprovedListsCount: opExecPendingApprovals }
+              : {}),
+            ...personalTaskState
           })
-
-          setUserStats({
-            totalTasks: fetchedTasks.length,
-            completedTasks: completed,
-            pendingTasks: fetchedTasks.length - completed,
-            allocatedHours: totalAllocated,
-            workedHours: totalWorked,
-            projectsCount: projectIds.size,
-            efficiency: totalWorked > 0 ? Math.round((totalAllocated / totalWorked) * 100) : 0
-          })
-
-          // Fetch Notes for unique projects
-          const notesPromises = Array.from(projectIds).map((id) => Service.GetProjectNotes(id))
-          const allNotesResponses = await Promise.all(notesPromises)
-          const flattenedNotes = allNotesResponses.flat().filter(Boolean)
-          setProjectNotes(flattenedNotes)
-        }
+        )
       } else {
         // Fetch Staff Data
         const [response, selfTaskResponse] = await Promise.all([
@@ -612,45 +592,17 @@ export const useDashboardData = () => {
             : Array.isArray(selfTaskPayload?.result)
               ? selfTaskPayload.result
               : []
-        setSelfTasks(selfTaskList
-          .map((task) => ({ ...task, taskType: 'SELF_TASK' })))
+        const mappedSelfTasks = selfTaskList.map((task) => ({ ...task, taskType: 'SELF_TASK' }))
 
-        if (response?.data) {
-          const fetchedTasks = Array.isArray(response.data)
-            ? response.data
-            : Object.values(response.data || {})
+        const personalTaskState = await buildPersonalTaskMetrics(response?.data)
 
-          setTasks(fetchedTasks)
-
-          // Calculate Stats
-          let totalAllocated = 0
-          let totalWorked = 0
-          const completed = fetchedTasks.filter((t) => t.status === 'COMPLETED').length
-          const projectIds = new Set()
-
-          fetchedTasks.forEach((t) => {
-            const { allocated, worked } = calculateHours(t)
-            totalAllocated += allocated
-            totalWorked += worked
-            if (t.project?.id) projectIds.add(t.project.id)
+        dispatch(
+          setWbtDashboardData({
+            cacheKey,
+            selfTasks: mappedSelfTasks,
+            ...personalTaskState
           })
-
-          setUserStats({
-            totalTasks: fetchedTasks.length,
-            completedTasks: completed,
-            pendingTasks: fetchedTasks.length - completed,
-            allocatedHours: totalAllocated,
-            workedHours: totalWorked,
-            projectsCount: projectIds.size,
-            efficiency: totalWorked > 0 ? Math.round((totalAllocated / totalWorked) * 100) : 0
-          })
-
-          // Fetch Notes for unique projects
-          const notesPromises = Array.from(projectIds).map((id) => Service.GetProjectNotes(id))
-          const allNotesResponses = await Promise.all(notesPromises)
-          const flattenedNotes = allNotesResponses.flat().filter(Boolean)
-          setProjectNotes(flattenedNotes)
-        }
+        )
       }
     } catch (error) {
       console.error('❌ Failed to fetch dashboard data:', error)
@@ -659,17 +611,30 @@ export const useDashboardData = () => {
         response: error.response?.data,
         status: error.response?.status
       })
-      setLoading(false)
     } finally {
+      inFlightRef.current = false
       setLoading(false)
+      if (queuedRefreshRef.current) {
+        queuedRefreshRef.current = false
+        fetchData({ background: true })
+      }
     }
-  }, [isAdminRole, user?.team?.name, user?.department?.name, userRole])
+  }, [cacheKey, dispatch, isAdminRole, user?.department?.name, user?.team?.name, userRole])
 
   useEffect(() => {
-    fetchData()
-
-    const handleRefresh = () => {
+    if (!isCacheValid) {
       fetchData()
+    } else {
+      setLoading(false)
+      if (isStale) {
+        fetchData({ background: true })
+      }
+    }
+  }, [isCacheValid, isStale, fetchData])
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      fetchData({ background: true })
     }
     window.addEventListener('task-updated', handleRefresh)
     window.addEventListener('dashboard-refresh', handleRefresh)

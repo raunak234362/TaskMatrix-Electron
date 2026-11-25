@@ -122,21 +122,9 @@ const NotificationReceiver = () => {
             // update your chat UI with this message
         });
 
-        socket.on("receiveGroupMessage", (msg) => {
-            console.log("👥 Group message received:", msg);
-
-            const title = "👥 Group Message";
-            const message = msg?.content || "New group message.";
-
-            sendDesktopNotification(title, message);
-            toast.info(message, { position: "top-right" });
-            // update your group chat UI
-        });
-
         return () => {
             socket.off("customNotification");
             socket.off("receivePrivateMessage");
-            socket.off("receiveGroupMessage");
         };
     }, []);
 

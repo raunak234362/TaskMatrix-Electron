@@ -3,10 +3,13 @@ import LOGO from '../assets/logo.png'
 import ICON from '../assets/icon.png'
 import { LogOut, X, RefreshCw } from 'lucide-react'
 import { navItems } from '../constants/navigation'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { logout } from '../store/userSlice'
+import { clearDashboardData } from '../store/dashboardSlice'
 import socket from '../socket'
 
 const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
+  const dispatch = useDispatch()
   const userData = useSelector((state) => state?.userdata?.userDetail)
   const navigate = useNavigate()
   const userRole = sessionStorage.getItem('userRole')?.toLowerCase() || ''
@@ -24,6 +27,8 @@ const Sidebar = ({ isMinimized, toggleSidebar, isMobile = false }) => {
       if (window.electronAPI?.stopTaskTimer) {
         window.electronAPI.stopTaskTimer()
       }
+      dispatch(clearDashboardData())
+      dispatch(logout())
       sessionStorage.clear()
       if (socket.connected) {
         socket.disconnect()

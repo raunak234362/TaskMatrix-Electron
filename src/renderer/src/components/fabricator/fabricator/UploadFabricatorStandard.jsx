@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   UploadCloud,
   Loader2,
@@ -62,6 +62,16 @@ const UploadFabricatorStandard = ({
 
   // Ingestion progress state
   const [isProcessing, setIsProcessing] = useState(false)
+  const pollIntervalRef = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current)
+        pollIntervalRef.current = null
+      }
+    }
+  }, [])
   const [progressData, setProgressData] = useState({
     percent: 0,
     status: '',
@@ -228,7 +238,11 @@ const UploadFabricatorStandard = ({
   }
 
   const pollProgress = (docId) => {
-    const interval = setInterval(async () => {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current)
+      pollIntervalRef.current = null
+    }
+    pollIntervalRef.current = setInterval(async () => {
       try {
         const progRes = await Service.GetDocumentProgress(docId)
         console.log('Document progress poll:', progRes)
@@ -267,13 +281,19 @@ const UploadFabricatorStandard = ({
         })
 
         if (status === 'COMPLETED' || status === 'SUCCESS' || calcPercent >= 100 || isPageComplete) {
-          clearInterval(interval)
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current)
+            pollIntervalRef.current = null
+          }
           toast.success('Fabricator standard ingested and indexed successfully!')
           setTimeout(() => {
             onSuccess?.()
           }, 800)
         } else if (failureReason || status === 'FAILED') {
-          clearInterval(interval)
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current)
+            pollIntervalRef.current = null
+          }
           toast.error(`Ingestion failed: ${failureReason || 'Unknown error'}`)
         }
       } catch (err) {

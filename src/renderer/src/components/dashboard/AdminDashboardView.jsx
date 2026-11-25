@@ -170,7 +170,7 @@ const OperationExecutiveMTOSection = ({ allRfqs = [], invoices = [], onRFQClick 
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center py-8 text-center">
-                        <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center border border-primary/20 mb-2 animate-pulse">
+                        <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center border border-primary/20 mb-2">
                             <Clock className="w-5 h-5 text-primary" />
                         </div>
                         <p className="text-xs font-black text-gray-500 uppercase tracking-widest">No Upcoming MTOs</p>
@@ -298,7 +298,7 @@ const AdminDashboardView = ({
                                 {currentTask && (
                                     <div className="flex items-center gap-2">
                                         <LiveTaskTimer task={currentTask} />
-                                        <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-primary/50"></span>
+                                        <span className="w-2.5 h-2.5 rounded-full bg-primary shadow-primary/50"></span>
                                     </div>
                                 )}
                             </div>

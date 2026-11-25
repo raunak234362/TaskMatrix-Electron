@@ -12,12 +12,14 @@
 
 import { BrowserWindow, ipcMain, screen, app } from 'electron'
 import { join } from 'path'
-import { readFileSync, writeFileSync, existsSync } from 'fs'
+import { readFileSync, existsSync } from 'fs'
+import { writeFile } from 'fs/promises'
 import { is } from '@electron-toolkit/utils'
 
 // ─── Position persistence ───────────────────────────────────────────────────
 
 const POS_FILE = join(app.getPath('userData'), 'timer-widget-pos.json')
+let savePosTimer = null
 
 function loadSavedPosition() {
   try {
@@ -28,10 +30,18 @@ function loadSavedPosition() {
   return null
 }
 
-function savePosition(x, y) {
+async function savePosition(x, y) {
   try {
-    writeFileSync(POS_FILE, JSON.stringify({ x, y }), 'utf8')
+    await writeFile(POS_FILE, JSON.stringify({ x, y }), 'utf8')
   } catch (_) { /* ignore */ }
+}
+
+function scheduleSavePosition(x, y) {
+  if (savePosTimer) clearTimeout(savePosTimer)
+  savePosTimer = setTimeout(() => {
+    savePosTimer = null
+    savePosition(x, y)
+  }, 300)
 }
 
 /** Clamp {x,y} so the widget is fully inside one of the available displays. */
@@ -111,13 +121,12 @@ function createTimerWidget() {
     x,
     y,
     frame: false,
-    transparent: true,
+    backgroundColor: '#ffffff',
     resizable: false,
     skipTaskbar: true,
     alwaysOnTop: true,
     hasShadow: false,
-    // Allow the widget to stay on top of full-screen apps (e.g. Tekla)
-    // 'screen-saver' is the highest level on Windows/macOS
+    // Keep above normal windows without using 'screen-saver' level so OS compositor DirectFlip/MPO stays intact
     webPreferences: {
       preload: join(__dirname, '../preload/timerPreload.js'),
       contextIsolation: true,
@@ -126,8 +135,8 @@ function createTimerWidget() {
     }
   })
 
-  // Windows: keep above maximised windows (Tekla, etc.)
-  timerWindow.setAlwaysOnTop(true, 'screen-saver')
+  // Keep widget above normal windows (e.g. Tekla) without breaking DWM hardware scanout
+  timerWindow.setAlwaysOnTop(true, 'floating')
   // macOS: visible on every Space, including full-screen spaces
   timerWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
 
@@ -145,14 +154,18 @@ function createTimerWidget() {
     }
   })
 
-  // Persist position when the user drags the widget
+  // Persist position when the user drags the widget (debounced)
   timerWindow.on('moved', () => {
     if (!timerWindow || timerWindow.isDestroyed()) return
     const [wx, wy] = timerWindow.getPosition()
-    savePosition(wx, wy)
+    scheduleSavePosition(wx, wy)
   })
 
   timerWindow.on('closed', () => {
+    if (savePosTimer) {
+      clearTimeout(savePosTimer)
+      savePosTimer = null
+    }
     timerWindow = null
     widgetReady = false
   })

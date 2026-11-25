@@ -67,7 +67,7 @@ export const TaskScheduleProgress = ({
     }
     if (isOverdue) {
       return {
-        pillClass: 'bg-rose-50 text-rose-700 border-rose-300 animate-pulse',
+        pillClass: 'bg-rose-50 text-rose-700 border-rose-300',
         barClass: 'bg-gradient-to-r from-amber-500 to-rose-500',
         textClass: 'text-rose-700',
         icon: <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />,

@@ -141,7 +141,25 @@ const Header = ({ isMinimized, toggleSidebar, isMobileOpen }) => {
           new Date(b.createdAt) - new Date(a.createdAt)
         )
 
-        setNotifications(currentNotifications)
+        const previous = prevNotifications.current || []
+        const hasChanged =
+          isFirstLoad.current ||
+          previous.length !== currentNotifications.length ||
+          currentNotifications.some((item, index) => {
+            const prevItem = previous[index]
+            return (
+              !prevItem ||
+              prevItem.id !== item.id ||
+              prevItem.read !== item.read ||
+              prevItem.createdAt !== item.createdAt ||
+              prevItem.updatedAt !== item.updatedAt
+            )
+          })
+
+        if (hasChanged) {
+          isFirstLoad.current = false
+          setNotifications(currentNotifications)
+        }
       }
     } catch (error) {
       console.error('Error fetching notifications:', error)
@@ -150,7 +168,10 @@ const Header = ({ isMinimized, toggleSidebar, isMobileOpen }) => {
 
   useEffect(() => {
     fetchNotifications()
-    const interval = setInterval(fetchNotifications, 30000) // Poll every 30s
+    const interval = setInterval(() => {
+      if (document.hidden) return
+      fetchNotifications()
+    }, 30000) // Poll every 30s while visible
     return () => clearInterval(interval)
   }, [])
 

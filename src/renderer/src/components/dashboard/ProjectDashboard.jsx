@@ -1,9 +1,10 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Service from "../../api/Service";
 import { Calendar, Loader2, ChevronLeft } from "lucide-react";
 import { setProjectData, updateProject } from "../../store/projectSlice";
+import { setProjectDashboardData } from "../../store/dashboardSlice";
 import Modal from "../ui/Modal";
 import GetProjectById from "../project/projects/GetProjectById";
 import MonthlyProjectStats from "./components/MonthlyProjectStats";
@@ -17,14 +18,23 @@ const ProjectDashboard = () => {
   const projects = useSelector(
     (state) => state.projectInfo?.projectData || [],
   );
+  const projectDashboardCache = useSelector(
+    (state) => state.dashboardInfo?.projectDashboard,
+  );
+  const cacheKey = `${sessionStorage.getItem("userId") || ""}:${sessionStorage.getItem("userRole") || ""}`;
+  const isCacheValid = Boolean(
+    projectDashboardCache?.initialized && projectDashboardCache?.cacheKey === cacheKey,
+  );
+  const isStale = Boolean(projectDashboardCache?.stale);
 
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [allTasks, setAllTasks] = useState([]);
+  const [loading, setLoading] = useState(!isCacheValid);
   const [selectedProjectForModal, setSelectedProjectForModal] =
     useState(null);
-  const [allTeams, setAllTeams] = useState([]);
+
+  const allTasks = isCacheValid ? projectDashboardCache.allTasks : [];
+  const allTeams = isCacheValid ? projectDashboardCache.allTeams : [];
 
   // List Modal State
   const [isListModalOpen, setIsListModalOpen] = useState(false);
@@ -64,22 +74,26 @@ const ProjectDashboard = () => {
     return Array.from({ length: 5 }, (_, i) => currentYear - i);
   }, []);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async ({ background = false } = {}) => {
     try {
-      setLoading(true);
+      if (!background && !isCacheValid) {
+        setLoading(true);
+      }
       const [projectsRes, tasksRes, teamsRes] = await Promise.all([
         Service.GetAllProjects(),
         Service.GetAllTask(),
         Service.AllTeam(),
       ]);
 
+      const payload = { cacheKey };
       if (teamsRes) {
-        setAllTeams(Array.isArray(teamsRes) ? teamsRes : teamsRes.data || []);
+        payload.allTeams = Array.isArray(teamsRes) ? teamsRes : teamsRes.data || [];
+      }
+      if (tasksRes?.data) {
+        payload.allTasks = Array.isArray(tasksRes.data) ? tasksRes.data : [];
       }
 
-      if (tasksRes?.data) {
-        setAllTasks(Array.isArray(tasksRes.data) ? tasksRes.data : []);
-      }
+      dispatch(setProjectDashboardData(payload));
 
       if (projectsRes?.data) {
         dispatch(setProjectData(projectsRes.data));
@@ -89,11 +103,18 @@ const ProjectDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [cacheKey, dispatch, isCacheValid]);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if (!isCacheValid) {
+      fetchDashboardData();
+    } else {
+      setLoading(false);
+      if (isStale) {
+        fetchDashboardData({ background: true });
+      }
+    }
+  }, [isCacheValid, isStale, fetchDashboardData]);
 
   const projectsWithStats = useMemo(() => {
     return projects.map((project) => {

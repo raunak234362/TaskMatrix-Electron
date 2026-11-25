@@ -13,7 +13,7 @@
       width: 240px;
       height: 110px;
       overflow: hidden;
-      background: transparent;
+      background: #ffffff;
       -webkit-app-region: drag;
       user-select: none;
       font-family: Roboto, Arial, sans-serif;
@@ -82,11 +82,11 @@
       line-height: 1;
     }
     .timer-display.warning { color: #f59e0b; }
-    .timer-display.overdue  { color: #ef4444; animation: pulse-red 1s infinite; }
-
-    @keyframes pulse-red {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.6; }
+    .timer-display.overdue  {
+      color: #dc2626;
+      background: #fef2f2;
+      padding: 1px 4px;
+      border-left: 2px solid #dc2626;
     }
 
     /* ── State badge ── */
@@ -163,7 +163,7 @@
       height: 100%;
       border-radius: 0;
       background: #6bbd45;
-      transition: width 1s linear, background 0.3s;
+      transition: background 0.3s;
       max-width: 100%;
     }
     .progress-bar-fill.warning { background: #f59e0b; }
